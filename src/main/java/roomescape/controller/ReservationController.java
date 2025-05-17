@@ -17,6 +17,7 @@ import roomescape.controller.request.CreateReservationRequest;
 import roomescape.controller.request.LoginMemberInfo;
 import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
+import roomescape.service.ReservationCreationService;
 import roomescape.service.ReservationService;
 import roomescape.service.result.ReservationResult;
 
@@ -24,9 +25,11 @@ import roomescape.service.result.ReservationResult;
 @RequestMapping("/reservations")
 public class ReservationController {
 
+    private final ReservationCreationService reservationCreationService;
     private final ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationCreationService reservationCreationService, ReservationService reservationService) {
+        this.reservationCreationService = reservationCreationService;
         this.reservationService = reservationService;
     }
 
@@ -47,7 +50,16 @@ public class ReservationController {
             @RequestBody CreateReservationRequest createReservationRequest,
             @LoginMember LoginMemberInfo loginMemberInfo) {
 
-        ReservationResult reservationResult = reservationService.create(createReservationRequest.toServiceParam(loginMemberInfo.id()));
+        ReservationResult reservationResult = reservationCreationService.create(createReservationRequest.toServiceParam(loginMemberInfo.id()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse.from(reservationResult));
+    }
+
+    @PostMapping("/waitings")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(
+            @RequestBody CreateReservationRequest createReservationRequest,
+            @LoginMember LoginMemberInfo loginMemberInfo) {
+
+        ReservationResult reservationResult = reservationCreationService.createWaiting(createReservationRequest.toServiceParam(loginMemberInfo.id()));
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse.from(reservationResult));
     }
 

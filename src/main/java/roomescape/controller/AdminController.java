@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.request.CreateReservationAdminRequest;
 import roomescape.controller.response.ReservationResponse;
-import roomescape.service.ReservationService;
+import roomescape.service.ReservationCreationService;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
 
@@ -16,11 +16,12 @@ import roomescape.service.result.ReservationResult;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final ReservationService reservationService;
-
-    public AdminController(final ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public AdminController(ReservationCreationService reservationCreationService) {
+        this.reservationCreationService = reservationCreationService;
     }
+
+    private final ReservationCreationService reservationCreationService;
+
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations")
@@ -31,7 +32,7 @@ public class AdminController {
                 reservationRequest.timeId(),
                 reservationRequest.themeId()
         );
-        ReservationResult reservationResult = reservationService.create(createReservationParam);
+        ReservationResult reservationResult = reservationCreationService.create(createReservationParam);
         return ReservationResponse.from(reservationResult);
     }
 }

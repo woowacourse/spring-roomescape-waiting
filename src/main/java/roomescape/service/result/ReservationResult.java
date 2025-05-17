@@ -12,7 +12,8 @@ public record ReservationResult(
         LocalDate date,
         ReservationTimeResult time,
         ThemeResult theme,
-        ReservationStatus status
+        ReservationStatus status,
+        int waitingOrder
 ) {
     public static ReservationResult from(Reservation reservation) {
         return new ReservationResult(
@@ -21,7 +22,8 @@ public record ReservationResult(
                 reservation.getDate(),
                 ReservationTimeResult.from(reservation.getTime()),
                 ThemeResult.from(reservation.getTheme()),
-                reservation.getStatus());
+                reservation.getStatus(),
+                reservation.getWaitingOrder());
     }
 
     public static List<ReservationResult> from(List<Reservation> reservations) {

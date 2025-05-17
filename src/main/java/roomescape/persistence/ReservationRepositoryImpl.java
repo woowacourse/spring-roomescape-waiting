@@ -56,4 +56,9 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     public List<Reservation> findReservationsInConditions(final Long memberId, final Long themeId, final LocalDate dateFrom, final LocalDate dateTo) {
         return jpaReservationRepository.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
     }
+
+    @Override
+    public int countWaitingReservations(LocalDate date, Long timeId, Long themeId) {
+        return jpaReservationRepository.countWaitingReservations(date, timeId, themeId);
+    }
 }
