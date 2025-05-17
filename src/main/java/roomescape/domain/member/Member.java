@@ -35,8 +35,8 @@ public class Member {
         this.name = name;
     }
 
-    public static Member of(long id, Member member) {
-        return new Member(id, member.username, member.password, member.name, member.role);
+    public Member toEntity(long id) {
+        return new Member(id, username, password, name, role);
     }
 
     public boolean isSameUsername(String username) {

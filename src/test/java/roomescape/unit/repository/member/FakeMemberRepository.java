@@ -16,7 +16,7 @@ public class FakeMemberRepository implements MemberRepository {
     @Override
     public long add(Member member) {
         long id = index.getAndIncrement();
-        members.add(Member.of(id, member));
+        members.add(member.toEntity(id));
         return id;
     }
 
