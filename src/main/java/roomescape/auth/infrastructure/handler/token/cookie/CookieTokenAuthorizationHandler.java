@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.auth.infrastructure.handler.token.TokenAuthorizationHandler;
 
@@ -11,6 +12,13 @@ import roomescape.auth.infrastructure.handler.token.TokenAuthorizationHandler;
 public class CookieTokenAuthorizationHandler extends TokenAuthorizationHandler {
 
     private static final String TOKEN_NAME = "token";
+    private final int maxAge;
+
+    public CookieTokenAuthorizationHandler(
+        @Value("${jwt.validity-in-milliseconds}") int maxAge
+    ) {
+        this.maxAge = maxAge;
+    }
 
     @Override
     public String getToken(HttpServletRequest request) {
@@ -28,6 +36,7 @@ public class CookieTokenAuthorizationHandler extends TokenAuthorizationHandler {
     public void setToken(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie(TOKEN_NAME, token);
         cookie.setHttpOnly(true);
+        cookie.setMaxAge(maxAge);
         cookie.setPath("/");
         response.addCookie(cookie);
     }
