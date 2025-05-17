@@ -8,13 +8,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.SignupRequest;
 import roomescape.member.repository.MemberRepository;
 
 @DataJpaTest
+@Import({MyPasswordEncoder.class})
 @TestPropertySource(properties = {
         "spring.sql.init.data-locations="
 })
@@ -25,9 +28,12 @@ public class MemberServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private MyPasswordEncoder myPasswordEncoder;
+
     @BeforeEach
     void setUp() {
-        memberService = new MemberService(memberRepository);
+        memberService = new MemberService(memberRepository, myPasswordEncoder);
     }
 
     @Test

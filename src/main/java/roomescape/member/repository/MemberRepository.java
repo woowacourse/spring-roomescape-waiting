@@ -3,7 +3,6 @@ package roomescape.member.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
@@ -18,5 +17,7 @@ public interface MemberRepository extends ListCrudRepository<Member, Long> {
 
     boolean existsByEmailAndPassword(final String email, final String password);
 
-    Optional<Member> findByEmailAndPassword(final String email, final String password);
+    Optional<Member> findByEmail(final String email);
+
+    boolean existsByEmail(String email);
 }

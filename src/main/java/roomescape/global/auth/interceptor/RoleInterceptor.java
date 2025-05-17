@@ -14,7 +14,7 @@ import roomescape.member.domain.MemberRole;
 public class RoleInterceptor implements HandlerInterceptor {
 
     private static final String ADMIN = "/admin";
-    
+
     private final AuthorizationExtractor authorizationExtractor;
     private final JwtProvider jwtProvider;
 

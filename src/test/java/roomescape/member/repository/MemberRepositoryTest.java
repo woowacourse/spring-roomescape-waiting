@@ -1,7 +1,6 @@
 package roomescape.member.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,9 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRole;
 import roomescape.reservation.fixture.TestFixture;
 
 @DataJpaTest
@@ -38,8 +35,8 @@ class MemberRepositoryTest {
     }
 
     @Test
-    void findMemberByEmailAndPassword() {
-        Optional<Member> member = memberRepository.findByEmailAndPassword(EMAIL, PASSWORD);
+    void findMemberByEmail() {
+        Optional<Member> member = memberRepository.findByEmail(EMAIL);
 
         assertThat(member.get().getEmail()).isEqualTo(EMAIL);
     }

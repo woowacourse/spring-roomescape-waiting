@@ -11,7 +11,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.SignupRequest;
 import roomescape.member.repository.MemberRepository;
@@ -30,6 +32,7 @@ import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
+@Import({MyPasswordEncoder.class})
 @TestPropertySource(properties = {
         "spring.sql.init.data-locations="
 })
@@ -44,6 +47,12 @@ class ThemeServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
+    @Autowired
+    private MyPasswordEncoder myPasswordEncoder;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
     private ThemeService themeService;
 
     private MemberService memberService;
@@ -52,14 +61,10 @@ class ThemeServiceTest {
 
     private ReservationTimeService reservationTimeService;
 
-    @Autowired
-    private MemberRepository memberRepository;
-
-
     @BeforeEach
     void setUp() {
         themeService = new ThemeService(themeRepository, reservationRepository);
-        memberService = new MemberService(memberRepository);
+        memberService = new MemberService(memberRepository, myPasswordEncoder);
         reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
         reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
                 memberRepository);
@@ -175,6 +180,4 @@ class ThemeServiceTest {
         return new Theme(themeResponse.id(), themeResponse.name(), themeResponse.description(),
                 themeResponse.thumbnail());
     }
-
-
 }
