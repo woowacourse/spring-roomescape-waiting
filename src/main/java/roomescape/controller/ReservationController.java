@@ -73,12 +73,6 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{reservationId}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId) {
-        reservationService.deleteById(reservationId);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/mine")
     public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
         List<ReservationWithWaitingResult> results = reservationService.getMemberReservationsById(
