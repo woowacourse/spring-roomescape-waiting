@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.application.dto.ReservationCreateDto;
-import roomescape.presentation.controller.dto.UserReservationRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -14,6 +13,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.presentation.controller.dto.UserReservationRequest;
 
 public class Fixture {
 
@@ -22,7 +22,7 @@ public class Fixture {
     public static final ReservationTime RESERVATION_TIME_2 = ReservationTime.of(2L, LocalTime.of(11, 0));
     public static final ReservationTime RESERVATION_TIME_3 = ReservationTime.of(3L, LocalTime.of(12, 0));
     public static final Member MEMBER1_ADMIN = Member.of(1L, "어드민", "admin@email.com", "password", Role.ADMIN);
-    public static final Member MEMBER2_USER = Member.of(2L, "브라운", "brown@email.com", "brown");
+    public static final Member MEMBER2_USER = Member.ofUser(2L, "브라운", "brown@email.com", "brown");
     public static final Reservation RESERVATION_1 = Reservation.of(
             1L,
             MEMBER1_ADMIN,

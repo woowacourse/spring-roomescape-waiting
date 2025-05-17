@@ -34,12 +34,12 @@ public class Member {
         return new Member(id, name, email, password, role);
     }
 
-    public static Member of(Long id, String name, String email, String password) {
-        return of(id, name, email, password, Role.USER);
+    public static Member ofUser(Long id, String name, String email, String password) {
+        return new Member(id, name, email, password, Role.USER);
     }
 
     public static Member withoutId(String name, String email, String password, Role role) {
-        return of(null, name, email, password, role);
+        return new Member(null, name, email, password, role);
     }
 
     public Long getId() {
