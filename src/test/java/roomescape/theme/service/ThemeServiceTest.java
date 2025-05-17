@@ -15,7 +15,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
-import roomescape.member.dto.SignupRequest;
+import roomescape.member.dto.request.SignupRequest;
+import roomescape.member.dto.response.SignUpResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.fixture.TestFixture;
@@ -89,7 +90,11 @@ class ThemeServiceTest {
 
     @Test
     void getPopularThemes() {
-        Member member = memberService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
+        String email = "user2@gmail.com";
+        String password = "password";
+        String name = "user2";
+        SignUpResponse signUpResponse = memberService.signup(new SignupRequest(email, password, name));
+        Member member = memberRepository.findById(signUpResponse.id()).get();
 
         ThemeResponse themeResponse1 = themeService.create(
                 new ThemeCreateRequest("추리", "셜록 홈즈: 실종된 보석의 비밀", "sherlock_jewel.png"));
