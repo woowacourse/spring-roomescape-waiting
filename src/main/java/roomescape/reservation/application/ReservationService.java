@@ -39,42 +39,54 @@ public class ReservationService {
     private final ThemeQueryRepository themeQueryRepository;
     private final MemberQueryRepository memberQueryRepository;
 
-    public ReservationResponse create(final CreateReservationRequest request) {
-        final ReservationTime reservationTime = getReservationTime(request.date(), request.timeId());
-        validateNoDuplicateReservation(request.date(), request.timeId(), request.themeId());
-
-        final Theme theme = themeQueryRepository.findById(request.themeId())
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-        final Member member = memberQueryRepository.findById(request.memberId())
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
-                request.status());
-
-        final Reservation found = reservationCommandRepository.save(reservation);
-
-        return ReservationResponse.from(found);
+    public ReservationResponse create(
+            final CreateReservationRequest request
+    ) {
+        return ReservationResponse.from(
+                createReservation(
+                        request.date(),
+                        request.timeId(),
+                        request.themeId(),
+                        request.memberId(),
+                        request.status()
+                ));
     }
 
     public ReservationResponse create(
             final CreateReservationRequest.ForMember request,
             final Long memberId
     ) {
-        final ReservationTime reservationTime = getReservationTime(request.date(), request.timeId());
-        validateNoDuplicateReservation(request.date(), request.timeId(), request.themeId());
 
-        final Theme theme = themeQueryRepository.findById(request.themeId())
+        return ReservationResponse.from(
+                createReservation(
+                        request.date(),
+                        request.timeId(),
+                        request.themeId(),
+                        memberId,
+                        ReservationStatus.CONFIRMED
+                )
+        );
+    }
+
+    private Reservation createReservation(
+            final LocalDate date,
+            final Long timeId,
+            final Long themeId,
+            final Long memberId,
+            final ReservationStatus status
+    ) {
+        final ReservationTime reservationTime = getReservationTime(date, timeId);
+        validateNoDuplicateReservation(date, timeId, themeId);
+
+        final Theme theme = themeQueryRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
         final Member member = memberQueryRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-        // TODO: 예약 대기 기능 추가 후 분기 처리
-        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
-                ReservationStatus.CONFIRMED);
 
-        final Reservation found = reservationCommandRepository.save(reservation);
+        final Reservation reservation = new Reservation(date, reservationTime, theme, member, status);
 
-        return ReservationResponse.from(found);
+        return reservationCommandRepository.save(reservation);
     }
-
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
         final ReservationTime reservationTime = reservationTimeQueryRepository.findById(timeId)
