@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public final class Member {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

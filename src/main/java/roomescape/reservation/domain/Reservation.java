@@ -14,7 +14,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
-public final class Reservation {
+public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 import java.util.Objects;
 
 @Entity
-public final class Theme {
+public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
