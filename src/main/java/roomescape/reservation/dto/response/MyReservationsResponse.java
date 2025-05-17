@@ -16,7 +16,7 @@ public record MyReservationsResponse(
         String status
 ) {
 
-    public static MyReservationsResponse from(Reservation reservation) {
+    public static MyReservationsResponse from(final Reservation reservation) {
         return new MyReservationsResponse(
                 reservation.getId(),
                 reservation.themeName(),

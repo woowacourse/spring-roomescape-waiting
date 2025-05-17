@@ -30,8 +30,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public LoginMember resolveArgument(
-            final MethodParameter parameter, final ModelAndViewContainer mavContainer,
-            final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory
+            final MethodParameter parameter,
+            final ModelAndViewContainer mavContainer,
+            final NativeWebRequest webRequest,
+            final WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String token = jwtTokenHandler.extractTokenValue(request);

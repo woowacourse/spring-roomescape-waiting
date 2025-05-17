@@ -38,7 +38,7 @@ public class JwtTokenHandler {
                 .build();
     }
 
-    public String createToken(Member member) {
+    public String createToken(final Member member) {
         Claims claims = Jwts.claims()
                 .subject(member.getId().toString())
                 .add(CLAIM_ROLE, member.getRole().name())

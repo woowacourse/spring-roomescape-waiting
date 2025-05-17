@@ -17,7 +17,7 @@ public record LoginMember(
         Role role
 ) {
 
-    public static LoginMember of(Member member) {
+    public static LoginMember of(final Member member) {
         return new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole());
     }
 }
