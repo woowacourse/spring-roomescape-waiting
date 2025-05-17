@@ -44,7 +44,7 @@ public class MemberApiFixture {
 
     public static List<ValidatableResponse> signUpMembers(final int count) {
         if (SIGN_UP_REQUESTS.size() < count) {
-            throw new IllegalStateException("회원 픽스처 개수가 부족합니다.");
+            throw new IllegalStateException("회원 픽스처의 개수는 최대 " + SIGN_UP_REQUESTS.size() + "개만 가능합니다.");
         }
 
         return SIGN_UP_REQUESTS.stream()

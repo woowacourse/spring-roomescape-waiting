@@ -40,7 +40,7 @@ public class ThemeApiFixture {
             final int count
     ) {
         if (THEME_REQUESTS.size() < count) {
-            throw new IllegalStateException("테마 픽스처의 개수가 부족합니다.");
+            throw new IllegalStateException("테마 픽스처의 개수는 최대 " + THEME_REQUESTS.size() + "개만 가능합니다.");
         }
 
         return THEME_REQUESTS.stream()

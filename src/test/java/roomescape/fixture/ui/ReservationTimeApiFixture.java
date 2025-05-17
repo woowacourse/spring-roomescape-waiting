@@ -49,7 +49,7 @@ public class ReservationTimeApiFixture {
             final int count
     ) {
         if (count > RESERVATIONS_TIME_REQUESTS.size()) {
-            throw new IllegalStateException("예약 픽스처의 개수는 최대 " + RESERVATIONS_TIME_REQUESTS.size() + "개 입니다.");
+            throw new IllegalStateException("예약 픽스처의 개수는 최대 " + RESERVATIONS_TIME_REQUESTS.size() + "개만 가능합니다.");
         }
 
         return RESERVATIONS_TIME_REQUESTS.stream()
