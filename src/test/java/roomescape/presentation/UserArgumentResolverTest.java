@@ -18,7 +18,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import roomescape.application.AuthenticationService;
+import roomescape.domain.user.Email;
+import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
+import roomescape.domain.user.UserName;
 import roomescape.domain.user.UserRole;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.AuthorizationException;
@@ -44,7 +47,7 @@ class UserArgumentResolverTest {
     @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 유효한 토큰이 있으면 바인딩된다.")
     void bindUserWhenRequestWithValidToken() throws Exception {
         var cookie = AuthenticationTokenCookie.forResponse("validToken");
-        var user = new User(1L, "유저1", UserRole.USER, "email@email.com", "password");
+        var user = new User(1L, new UserName("유저1"), UserRole.USER, new Email("email@email.com"), new Password("password"));
         Mockito.when(authenticationService.getUserByToken("validToken")).thenReturn(user);
 
         mockMvc.perform(get("/authenticatedUser").cookie(cookie))
@@ -85,10 +88,10 @@ class UserArgumentResolverTest {
         public ResponseEntity<UserResponseForTest> test(@Authenticated User user) {
             var response = new UserResponseForTest(
                     user.id(),
-                    user.name(),
+                    user.name().value(),
                     user.role(),
-                    user.email(),
-                    user.password()
+                    user.email().value(),
+                    user.password().value()
             );
             return ResponseEntity.ok(response);
         }

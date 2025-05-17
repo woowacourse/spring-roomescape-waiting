@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.domain.user.Email;
+import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
+import roomescape.domain.user.UserName;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AuthenticationException;
 
@@ -28,7 +31,7 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
-        var user = User.createUser("라젤", "razel@email.com", "password");
+        var user = User.createUser(new UserName("라젤"), new Email("razel@email.com"), new Password("password"));
         userRepository.save(user);
     }
 
@@ -76,7 +79,7 @@ class AuthenticationServiceTest {
         User foundUser = service.getUserByToken(issuedToken);
 
         // then
-        assertThat(foundUser.email()).isEqualTo(email);
+        assertThat(foundUser.email()).isEqualTo(new Email(email));
     }
 
     @Test

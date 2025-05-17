@@ -11,7 +11,7 @@ public record UserResponse(
     public static UserResponse from(final User user) {
         return new UserResponse(
                 user.id(),
-                user.name()
+                user.name().value()
         );
     }
 

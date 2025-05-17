@@ -38,14 +38,16 @@ class UserServiceTest {
     @DisplayName("사용자를 추가할 수 있다.")
     void registerUser() {
         // given
-        var user = JUNK_USER;
+        var email = "user@email.com";
+        var password = "password";
+        var name = "user";
 
         // when
-        var created = service.register(user.email(), user.password(), user.name());
+        var registeredUser = service.register(email, password, name);
 
         // then
         var users = service.findAllUsers();
-        assertThat(users).contains(created);
+        assertThat(users).contains(registeredUser);
     }
 
     @Test
@@ -54,7 +56,7 @@ class UserServiceTest {
         // given
         var savedTimeSlot = timeSlotRepository.save(JUNK_TIME_SLOT);
         var savedTheme = themeRepository.save(JUNK_THEME);
-        var createdUser = service.register(JUNK_USER.email(), JUNK_USER.password(), JUNK_USER.name());
+        var createdUser = service.register(JUNK_USER.email().value(), JUNK_USER.password().value(), JUNK_USER.name().value());
         var savedReservation = reservationRepository.save(
                 Reservation.reserveNewly(createdUser, tomorrow(), savedTimeSlot, savedTheme));
 

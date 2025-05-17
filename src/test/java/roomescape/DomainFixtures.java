@@ -3,12 +3,21 @@ package roomescape;
 import java.time.LocalTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.user.Email;
+import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
+import roomescape.domain.user.UserName;
 import roomescape.domain.user.UserRole;
 
 public class DomainFixtures {
 
-    public static final User JUNK_USER = new User(1L, "라젤", UserRole.USER, "razel@email.com", "password");
+    public static final User JUNK_USER = new User(
+        1L,
+        new UserName("라젤"),
+        UserRole.USER,
+        new Email("razel@email.com"),
+        new Password("password")
+    );
     public static final TimeSlot JUNK_TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));
     public static final Theme JUNK_THEME = new Theme(
             1L,
