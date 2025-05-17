@@ -2,10 +2,8 @@ package roomescape.reservationtime.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponseWithBookedStatus;
@@ -39,13 +37,5 @@ public class ReservationTimeServiceFacade {
         Long themeId
     ) {
         return reservationTimeService.findAvailableReservationTimesByDateAndThemeId(date, themeId);
-    }
-
-    public Optional<ReservationTime> findById(Long id) {
-        return reservationTimeService.findById(id);
-    }
-
-    public List<ReservationTime> findByReservationDateAndThemeId(LocalDate date, Long themeId) {
-        return reservationTimeService.findByReservationDateAndThemeId(date, themeId);
     }
 }
