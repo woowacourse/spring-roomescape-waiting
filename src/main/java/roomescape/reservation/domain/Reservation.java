@@ -19,11 +19,15 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalDate date;
+
     @ManyToOne
     private ReservationTime time;
+
     @ManyToOne
     private Member member;
+    
     @ManyToOne
     private Theme theme;
 

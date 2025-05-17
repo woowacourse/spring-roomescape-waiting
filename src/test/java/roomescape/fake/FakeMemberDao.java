@@ -15,7 +15,7 @@ public class FakeMemberDao implements MemberRepository {
 
     @Override
     public Member save(final Member member) {
-        Member savedMember = new Member(++index, member.getName(), member.getEmail(), member.getPassword(),
+        Member savedMember = new Member(++index, member.getName(), member.getEmail(), member.getPassword2(),
                 member.getRole());
         members.add(savedMember);
         return savedMember;
@@ -31,7 +31,7 @@ public class FakeMemberDao implements MemberRepository {
     @Override
     public Optional<Member> findByEmailAndPassword(final MemberEmail email, final String password) {
         return members.stream()
-                .filter(member -> member.getEmail().equals(email) && member.getPassword().equals(password))
+                .filter(member -> member.getEmail().equals(email) && member.getPassword2().getValue().equals(password))
                 .findFirst();
     }
 

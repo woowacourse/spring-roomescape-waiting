@@ -6,6 +6,7 @@ import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Password;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.SignupRequest;
 import roomescape.member.repository.MemberRepository;
@@ -28,8 +29,8 @@ public class MemberService {
         if (memberRepository.existsByEmail(email)) {
             throw new BadRequestException("이미 사용중인 이메일입니다.");
         }
-        final Member savedMember = memberRepository.save(
-                Member.register(name, email, member.password()));
+        final Password password = new Password(member.password());
+        final Member savedMember = memberRepository.save(Member.register(name, email, password));
         return new MemberResponse(savedMember);
     }
 

@@ -1,5 +1,6 @@
 package roomescape.theme.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,8 +13,14 @@ public class Theme {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Embedded
     private ThemeName name;
+
+    @Embedded
     private ThemeDescription description;
+
+    @Embedded
     private ThemeThumbnail thumbnail;
 
     public Theme(final Long id, final ThemeName name,

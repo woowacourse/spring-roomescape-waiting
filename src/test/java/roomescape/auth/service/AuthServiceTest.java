@@ -17,6 +17,7 @@ import roomescape.global.exception.custom.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 
 class AuthServiceTest {
@@ -28,7 +29,7 @@ class AuthServiceTest {
     private final static long USER_ID = 1L;
     private final static MemberName USER_NAME = new MemberName("사용자");
     private final static MemberEmail USER_EMAIL = new MemberEmail("aaa@gmail.com");
-    private final static String USER_PASSWORD = "1234";
+    private final static Password USER_PASSWORD = new Password("1234");
 
     @BeforeEach
     void setUp() {
@@ -44,7 +45,8 @@ class AuthServiceTest {
         @Test
         void testCreateToken() {
             // when
-            TokenResponse token = authService.createToken(new LoginRequest(USER_EMAIL.getValue(), USER_PASSWORD));
+            TokenResponse token = authService.createToken(
+                    new LoginRequest(USER_EMAIL.getValue(), USER_PASSWORD.getValue()));
             // then
             long id = jwtTokenProvider.getId(token.accessToken());
             assertThat(Long.valueOf(id)).isEqualTo(USER_ID);
@@ -54,7 +56,7 @@ class AuthServiceTest {
         @Test
         void testInvalidEmail() {
             // given
-            LoginRequest request = new LoginRequest("bbbb@email.com", USER_PASSWORD);
+            LoginRequest request = new LoginRequest("bbbb@email.com", USER_PASSWORD.getValue());
             // when
             // then
             assertThatThrownBy(() -> authService.createToken(request))
@@ -110,7 +112,7 @@ class AuthServiceTest {
         private final static long ADMIN_ID = 2L;
         private final static MemberName ADMIN_NAME = new MemberName("관리자");
         private final static MemberEmail ADMIN_EMAIL = new MemberEmail("admin@gmail.com");
-        private final static String ADMIN_PASSWORD = "1234";
+        private final static Password ADMIN_PASSWORD = new Password("1234");
 
         @BeforeEach
         void setUp() {
