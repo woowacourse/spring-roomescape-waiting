@@ -31,7 +31,7 @@ import roomescape.reservation.presentation.dto.ThemeResponse;
 @ActiveProfiles("test")
 @DataJpaTest
 @Import({ReservationTimeConfig.class, ReservationConfig.class, ThemeConfig.class})
-public class ReservationTimeServiceTest {
+class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeService reservationTimeService;

@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class JdbcConnectionTest {
+class JdbcConnectionTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

@@ -29,7 +29,7 @@ import roomescape.reservation.presentation.dto.ReservationResponse;
 @ActiveProfiles("test")
 @DataJpaTest
 @Import(ReservationConfig.class)
-public class ReservationServiceTest {
+class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
     @Autowired

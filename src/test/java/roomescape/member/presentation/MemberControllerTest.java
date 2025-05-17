@@ -16,7 +16,7 @@ import roomescape.member.presentation.fixture.MemberFixture;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class MemberControllerTest {
+class MemberControllerTest {
     private final MemberFixture memberFixture = new MemberFixture();
 
     @Test
@@ -52,7 +52,7 @@ public class MemberControllerTest {
 
     @Test
     @DisplayName("비관리자 사용자는 전체 회원 조회가 불가능")
-    void getMembersWithNonAdminTest(){
+    void getMembersWithNonAdminTest() {
         // given
         final Map<String, String> cookies = memberFixture.loginUser();
 

@@ -21,7 +21,7 @@ import roomescape.member.presentation.dto.TokenRequest;
 @ActiveProfiles("test")
 @DataJpaTest
 @Import(MemberConfig.class)
-public class MemberServiceTest {
+class MemberServiceTest {
 
     @Autowired
     private MemberService memberService;

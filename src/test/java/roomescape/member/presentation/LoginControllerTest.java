@@ -16,7 +16,7 @@ import roomescape.member.presentation.fixture.MemberFixture;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class LoginControllerTest {
+class LoginControllerTest {
     private final MemberFixture memberFixture = new MemberFixture();
 
     @Test
