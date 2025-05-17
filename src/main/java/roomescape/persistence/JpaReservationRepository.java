@@ -1,11 +1,11 @@
 package roomescape.persistence;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Reservation;
-
-import java.time.LocalDate;
-import java.util.List;
+import roomescape.service.result.WaitingWithRank;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -32,6 +32,23 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         WHERE r.member.id = :memberId
     """)
     List<Reservation> findByMemberIdWithDetails(Long memberId);
+
+    @Query("""
+        SELECT new roomescape.service.result.WaitingWithRank(
+        r.id,
+        r.status,
+        (SELECT COUNT(r2) FROM Reservation r2
+          WHERE r2.status = 'WAITING'
+            AND r2.theme = r.theme
+            AND r2.date = r.date
+            AND r2.time = r.time
+            AND r2.id < r.id)
+     )
+        FROM Reservation r
+        WHERE r.status = 'WAITING'
+          AND r.member.id = :memberId
+    """)
+    List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
     @Query("""
     SELECT COUNT(r)

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.service.result.WaitingWithRank;
 
 
 public interface ReservationRepository {
@@ -15,6 +16,8 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long reservationId);
 
     List<Reservation> findByMemberId(Long memberId);
+
+    List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
     boolean existsByTimeId(Long reservationTimeId);
 

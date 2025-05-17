@@ -26,7 +26,7 @@ public record MemberReservationResponse(
 
     private static String formatStatus(WaitingWithRank waitingWithRank) {
         ReservationStatus status = waitingWithRank.reservationStatus();
-        int rank = waitingWithRank.rank();
+        long rank = waitingWithRank.rank();
 
         StringBuilder sb = new StringBuilder();
         if(status == ReservationStatus.WAITING) {

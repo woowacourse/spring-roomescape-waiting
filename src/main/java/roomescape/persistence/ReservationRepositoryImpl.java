@@ -7,6 +7,7 @@ import roomescape.domain.repository.ReservationRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.service.result.WaitingWithRank;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -35,6 +36,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public List<Reservation> findByMemberId(final Long memberId) {
         return jpaReservationRepository.findByMemberIdWithDetails(memberId);
+    }
+
+    @Override
+    public List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId) {
+        return jpaReservationRepository.findWaitingsWithRankByMemberId(memberId);
     }
 
     @Override

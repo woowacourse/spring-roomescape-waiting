@@ -6,10 +6,10 @@ public record ReservationWithWaitingResult(
         ReservationResult reservationResult,
         WaitingWithRank waitingWithRank
 ) {
-    public static ReservationWithWaitingResult from(Reservation reservation, int rank) {
+    public static ReservationWithWaitingResult from(Reservation reservation, long rank) {
         return new ReservationWithWaitingResult(
                 ReservationResult.from(reservation),
-                new WaitingWithRank(reservation.getStatus(), rank)
+                new WaitingWithRank(reservation.getId(), reservation.getStatus(), rank)
         );
     }
-} 
+}
