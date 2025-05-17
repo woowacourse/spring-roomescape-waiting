@@ -9,17 +9,8 @@ import roomescape.presentation.dto.response.AvailableReservationTimeResponse;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
-
-    List<ReservationTime> findAll();
-
-    ReservationTime save(ReservationTime time);
-
-    void deleteById(Long id);
-
-    Optional<ReservationTime> findById(Long id);
 
     boolean existsByStartAt(LocalTime startAt);
 

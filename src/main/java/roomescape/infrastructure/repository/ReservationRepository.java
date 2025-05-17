@@ -9,17 +9,8 @@ import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-
-    List<Reservation> findAll();
-
-    Reservation save(Reservation reservation);
-
-    void deleteById(Long id);
-
-    Optional<Reservation> findById(Long id);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
