@@ -1,9 +1,11 @@
 package roomescape.theme;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query(nativeQuery = true,
@@ -11,10 +13,10 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                             SELECT t.id, t.name, t.description, t.thumbnail
                             FROM theme t INNER JOIN reservation r
                                 ON t.id=r.theme_id
-                            WHERE r.date BETWEEN ?1 AND ?2
+                            WHERE r.date BETWEEN :from AND :to
                             GROUP BY t.id, t.name, t.description, t.thumbnail
                             ORDER BY COUNT(*) DESC
-                            LIMIT ?3
+                            LIMIT :size
                     """)
-    List<Theme> findAllOrderByRank(LocalDate from, LocalDate to, int size);
+    List<Theme> findAllOrderByRank(@Param("from") LocalDate from, @Param("to") LocalDate to, @Param("size") int size);
 }
