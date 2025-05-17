@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.SearchCondition;
 import roomescape.common.exception.BusinessException;
@@ -49,6 +50,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
             .orElseThrow(() -> new ReservationTimeException("예약 시간을 찾을 수 없습니다."));
@@ -82,12 +84,14 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getReservations() {
         return reservationRepository.findAll().stream()
             .map(ReservationResponse::from)
             .toList();
     }
 
+    @Transactional
     public void deleteReservationById(final Long id) {
         reservationRepository.findById(id)
             .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
@@ -95,6 +99,7 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {
         List<Reservation> reservations = reservationRepository.findBy(
             condition.memberId(), condition.themeId(),
@@ -113,6 +118,7 @@ public class ReservationService {
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
         Member member = memberRepository.findById(loginMemberInfo.id())
             .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));

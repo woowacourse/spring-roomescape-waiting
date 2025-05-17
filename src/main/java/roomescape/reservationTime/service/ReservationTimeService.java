@@ -2,6 +2,7 @@ package roomescape.reservationTime.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -24,6 +25,7 @@ public class ReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse createReservationTime(final ReservationTimeRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.save(
             ReservationTime.createWithoutId(request.startAt()));
@@ -31,6 +33,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTime);
     }
 
+    @Transactional
     public void deleteReservationTimeById(final Long id) {
         validateExistIdToDelete(id);
 
@@ -44,10 +47,12 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getReservationTimes() {
         return reservationTimeRepository.findAll().stream().map(ReservationTimeResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<TimeConditionResponse> getTimesWithCondition(final TimeConditionRequest request) {
         List<Reservation> reservations = reservationRepository.findBy(request.date(), request.themeId());
         List<ReservationTime> times = reservationTimeRepository.findAll();
