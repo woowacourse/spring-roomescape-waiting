@@ -20,10 +20,13 @@ public class Reservation {
 
     @ManyToOne
     private Member member;
+
     @ManyToOne
     private ReservationTime reservationTime;
+
     @ManyToOne
     private Theme theme;
+
     @Column(nullable = false)
     private LocalDate date;
 
@@ -70,10 +73,6 @@ public class Reservation {
         if (LocalDateTime.now().isAfter(dateTime)) {
             throw new PastDateTimeReservationException();
         }
-    }
-
-    public Reservation withId(Long id) {
-        return new Reservation(id, member, date, reservationTime, theme);
     }
 
     public Long getId() {

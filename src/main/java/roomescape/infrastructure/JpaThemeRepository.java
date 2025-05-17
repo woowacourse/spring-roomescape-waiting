@@ -6,5 +6,4 @@ import roomescape.domain.Theme;
 
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
     Optional<Theme> findByName(String name);
-
 }
