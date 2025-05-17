@@ -7,9 +7,7 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.LoginResponse;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.LoginFailException;
-import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -25,7 +23,7 @@ public class AuthService {
 
     public LoginResponse login(final LoginRequest request) {
         Member member = memberRepository.findByEmailAndPassword(
-                new Email(request.email()), new Password(request.password())
+                request.email(), request.password()
         ).orElseThrow(() -> new LoginFailException("이메일 또는 비밀번호가 잘못 되었습니다."));
 
         String tokenValue = jwtTokenHandler.createToken(member);
