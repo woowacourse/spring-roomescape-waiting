@@ -15,6 +15,7 @@ public class User {
 
     @EmbeddedId
     private final Id id;
+    @Enumerated(EnumType.STRING)
     private UserRole userRole;
     @Embedded
     private UserName name;
