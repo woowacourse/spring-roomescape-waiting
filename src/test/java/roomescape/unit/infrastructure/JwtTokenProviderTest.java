@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
-import roomescape.auth.Role;
+import roomescape.domain.Role;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.InvalidTokenException;
 import roomescape.infrastructure.JwtTokenProvider;

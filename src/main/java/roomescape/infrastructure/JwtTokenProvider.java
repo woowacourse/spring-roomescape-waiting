@@ -10,7 +10,7 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.auth.Role;
+import roomescape.domain.Role;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.InvalidTokenException;
 

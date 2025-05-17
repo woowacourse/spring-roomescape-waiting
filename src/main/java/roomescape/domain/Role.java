@@ -1,4 +1,4 @@
-package roomescape.auth;
+package roomescape.domain;
 
 import roomescape.exception.InvalidRoleException;
 
