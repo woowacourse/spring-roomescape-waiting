@@ -19,18 +19,18 @@ public abstract class BaseEntity {
     protected Long id;
 
     protected BaseEntity(final Long id) {
+        requireAssigned(id);
         this.id = id;
-        requireAssigned();
     }
 
-    private void requireAssigned() {
-        if (isAssigned()) {
+    private void requireAssigned(final Long id) {
+        if (isAssigned(id)) {
             return;
         }
         throw new IllegalStateException("식별자가 할당되지 않았습니다.");
     }
 
-    private boolean isAssigned() {
+    private boolean isAssigned(final Long id) {
         return id != null;
     }
 
