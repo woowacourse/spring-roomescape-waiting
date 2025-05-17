@@ -45,7 +45,7 @@ public class AdminReservationRestController {
             @PathVariable final Long id,
             final MemberAuthInfo memberAuthInfo
     ) {
-        reservationService.delete(id, memberAuthInfo);
+        reservationService.deleteReservationAsAdmin(id, memberAuthInfo);
 
         return ResponseEntity.noContent().build();
     }

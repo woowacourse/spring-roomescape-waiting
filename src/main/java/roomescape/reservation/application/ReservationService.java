@@ -7,7 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
@@ -105,17 +107,16 @@ public class ReservationService {
         }
     }
 
-    public void delete(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
-        final Member member = memberQueryRepository.findById(memberAuthInfo.id())
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-
-        if (!member.isAdmin()) {
-            throw new AuthorizationException("삭제할 권한이 없습니다.");
+    public void deleteReservationAsAdmin(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
+        if (memberAuthInfo.authRole() != AuthRole.ADMIN) {
+            throw new AuthorizationException("관리자만 삭제할 권한이 있습니다.");
         }
 
-        reservationQueryRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
-        reservationCommandRepository.deleteById(reservationId);
+        try {
+            reservationCommandRepository.deleteById(reservationId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
+        }
     }
 
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
