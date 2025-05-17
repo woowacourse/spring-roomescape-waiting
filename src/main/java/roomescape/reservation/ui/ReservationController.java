@@ -49,10 +49,8 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> create(
             @RequestBody final CreateReservationWebRequest request,
             @UserSession final Session session) {
-        final ReservationResponse reservationResponse =
-                reservationFacade.create(
-                        request.toRequestWithUserId(session.id().getValue()),
-                        session);
+        final ReservationResponse reservationResponse = reservationFacade.create(
+                request.toRequestWithUserId(session.id().getValue()));
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.reservationId()));
         return ResponseEntity.created(location)
                 .body(reservationResponse);
