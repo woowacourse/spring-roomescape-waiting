@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.application.dto.ReservationCreateDto;
-import roomescape.application.dto.UserReservationCreateDto;
+import roomescape.presentation.controller.dto.UserReservationRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -32,10 +32,10 @@ public class Fixture {
             new Waiting(ReservationStatus.RESERVED)
     );
 
-    public static final UserReservationCreateDto RESERVATION_BODY = createUserReservationBody();
+    public static final UserReservationRequest RESERVATION_BODY = createUserReservationBody();
 
-    public static UserReservationCreateDto createUserReservationBody() {
-        return new UserReservationCreateDto(1L, LocalDate.now().plusDays(1), 1L);
+    public static UserReservationRequest createUserReservationBody() {
+        return new UserReservationRequest(1L, LocalDate.now().plusDays(1), 1L);
     }
 
     public static ReservationCreateDto createReservationBody(Long memberId) {

@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
-import roomescape.application.dto.UserReservationCreateDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -36,11 +35,6 @@ public class ReservationService {
         this.timeService = timeService;
         this.themeService = themeService;
         this.memberService = memberService;
-    }
-
-    @Transactional
-    public ReservationDto registerReservationByUser(UserReservationCreateDto request, Long memberId) {
-        return registerReservation(ReservationCreateDto.of(request, memberId));
     }
 
     @Transactional
