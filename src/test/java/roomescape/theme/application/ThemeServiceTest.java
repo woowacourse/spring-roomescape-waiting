@@ -50,12 +50,11 @@ class ThemeServiceTest {
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
         final Theme theme = new Theme(name, description, thumbnail);
-        final Long id = themeCommandRepository.save(theme);
+        final Long id = themeCommandRepository.save(theme).getId();
 
         // when & then
-        Assertions.assertThatCode(() -> {
-            themeService.delete(id);
-        }).doesNotThrowAnyException();
+        Assertions.assertThatCode(() -> themeService.delete(id))
+                .doesNotThrowAnyException();
     }
 
     @Test

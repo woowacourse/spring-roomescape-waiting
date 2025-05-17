@@ -16,8 +16,8 @@ public class ThemeRepositoryImpl implements ThemeCommandRepository, ThemeQueryRe
     private final JpaThemeRepository jpaThemeRepository;
 
     @Override
-    public Long save(final Theme theme) {
-        return jpaThemeRepository.save(theme).getId();
+    public Theme save(final Theme theme) {
+        return jpaThemeRepository.save(theme);
     }
 
     @Override

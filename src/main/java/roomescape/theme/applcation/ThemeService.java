@@ -27,11 +27,8 @@ public class ThemeService {
         }
 
         final Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
-        final Long id = themeCommandRepository.save(theme);
-        final Theme found = themeQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
 
-        return ThemeResponse.from(found);
+        return ThemeResponse.from(themeCommandRepository.save(theme));
     }
 
     public void delete(final Long id) {
