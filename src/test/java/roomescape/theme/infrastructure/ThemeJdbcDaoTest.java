@@ -1,4 +1,4 @@
-package roomescape.theme.dao;
+package roomescape.theme.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,22 +13,16 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import roomescape.reservation.dao.ReservationDaoImpl;
-import roomescape.reservationTime.dao.ReservationTimeDaoImpl;
 import roomescape.theme.domain.Theme;
 
 @JdbcTest(properties = "spring.sql.init.mode=never")
-@Import({ThemeDaoImpl.class, ReservationTimeDaoImpl.class, ReservationDaoImpl.class})
-class ThemeDaoImplTest {
+@Import(ThemeJdbcDao.class)
+class ThemeJdbcDaoTest {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
-    private ThemeDaoImpl themeDaoImpl;
-    @Autowired
-    private ReservationTimeDaoImpl reservationTimeDaoImpl;
-    @Autowired
-    private ReservationDaoImpl reservationDaoImpl;
+    private ThemeJdbcDao themeJdbcDao;
 
     @BeforeEach
     void setUp() {
@@ -110,7 +104,7 @@ class ThemeDaoImplTest {
     @DisplayName("테마 내역을 조회하는 기능을 구현한다")
     @Test
     void findAll() {
-        List<Theme> themes = themeDaoImpl.findAll();
+        List<Theme> themes = themeJdbcDao.findAll();
 
         assertThat(themes).hasSize(2);
     }
@@ -118,7 +112,7 @@ class ThemeDaoImplTest {
     @DisplayName("테마 내역을 아이디로 조회하는 기능을 구현한다")
     @Test
     void findById() {
-        Theme theme = themeDaoImpl.findById(1L).get();
+        Theme theme = themeJdbcDao.findById(1L).get();
 
         assertThat(theme.getId()).isEqualTo(1L);
     }
@@ -129,7 +123,7 @@ class ThemeDaoImplTest {
         LocalDate startDate = LocalDate.now().minusDays(7);
         LocalDate endDate = LocalDate.now().minusDays(1);
 
-        List<Theme> rankedThemes = themeDaoImpl.findRankedByPeriod(startDate, endDate, 10);
+        List<Theme> rankedThemes = themeJdbcDao.findRankedByPeriod(startDate, endDate, 10);
 
         assertThat(rankedThemes).hasSize(1);
     }
@@ -137,13 +131,13 @@ class ThemeDaoImplTest {
     @DisplayName("테마 이름으로 테마 내역이 존재하는지 확인하는 기능을 구현한다")
     @Test
     void existsByName() {
-        assertThat(themeDaoImpl.existsByName("방 탈출1")).isTrue();
+        assertThat(themeJdbcDao.existsByName("방 탈출1")).isTrue();
     }
 
     @DisplayName("해당 테마 아이디로 예약 내역이 존재하는지 확인하는 기능을 구현한다")
     @Test
     void existsByReservationThemeId() {
-        assertThat(themeDaoImpl.existsByReservationThemeId(1L)).isTrue();
+        assertThat(themeJdbcDao.existsByReservationThemeId(1L)).isTrue();
     }
 
     @DisplayName("새로운 테마 내역을 추가하는 기능을 구현한다")
@@ -151,16 +145,16 @@ class ThemeDaoImplTest {
     void add() {
         Theme theme = new Theme(1L, "name1", "description1", "thumbnail1");
 
-        themeDaoImpl.add(theme);
+        themeJdbcDao.add(theme);
 
-        assertThat(themeDaoImpl.findAll()).hasSize(3);
+        assertThat(themeJdbcDao.findAll()).hasSize(3);
     }
 
     @DisplayName("기존의 테마 내역을 삭제하는 기능을 구현한다")
     @Test
     void deleteById() {
-        themeDaoImpl.deleteById(2L);
+        themeJdbcDao.deleteById(2L);
 
-        assertThat(themeDaoImpl.findAll()).hasSize(1);
+        assertThat(themeJdbcDao.findAll()).hasSize(1);
     }
 }

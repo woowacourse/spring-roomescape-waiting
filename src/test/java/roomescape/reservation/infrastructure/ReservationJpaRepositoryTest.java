@@ -1,4 +1,4 @@
-package roomescape.reservation.domain.repository;
+package roomescape.reservation.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -20,12 +20,12 @@ import roomescape.theme.domain.Theme;
 
 @ActiveProfiles("test")
 @DataJpaTest
-class ReservationRepositoryTest {
+class ReservationJpaRepositoryTest {
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationJpaRepository reservationJpaRepository;
 
     @DisplayName("예약을 저장한다")
     @Test
@@ -42,8 +42,8 @@ class ReservationRepositoryTest {
         Reservation reservation = new Reservation(member, date, reservationTime, theme);
 
         // when
-        reservationRepository.save(reservation);
-        Iterable<Reservation> reservations = reservationRepository.findAll();
+        reservationJpaRepository.save(reservation);
+        Iterable<Reservation> reservations = reservationJpaRepository.findAll();
 
         // then
         assertThat(reservations).extracting(Reservation::getDate, Reservation::getMember, Reservation::getTime,
@@ -108,7 +108,7 @@ class ReservationRepositoryTest {
         entityManager.persist(r12);
 
         // when
-        Collection<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+        Collection<Reservation> reservations = reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 member1.getId(), null, null, null);
 
         // then
@@ -171,7 +171,7 @@ class ReservationRepositoryTest {
         entityManager.persist(r12);
 
         // when
-        Collection<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+        Collection<Reservation> reservations = reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 member1.getId(), theme2.getId(), null, null);
 
         // then
@@ -236,7 +236,7 @@ class ReservationRepositoryTest {
         // when
         LocalDate from = LocalDate.now().plusDays(1);
         LocalDate to = LocalDate.now().plusDays(3);
-        Collection<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+        Collection<Reservation> reservations = reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(
                 member2.getId(), theme2.getId(), from, to);
 
         // then

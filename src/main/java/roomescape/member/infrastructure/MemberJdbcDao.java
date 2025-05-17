@@ -1,4 +1,4 @@
-package roomescape.member.dao;
+package roomescape.member.infrastructure;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,25 +15,23 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
 @Repository
-public class MemberDaoImpl implements MemberDao {
+public class MemberJdbcDao {
 
     private final SimpleJdbcInsert simpleJdbcInsert;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public MemberDaoImpl(DataSource dataSource) {
+    public MemberJdbcDao(DataSource dataSource) {
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("member")
                 .usingGeneratedKeyColumns("id");
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-    @Override
     public List<Member> findAll() {
         String sql = "SELECT * FROM member";
         return namedParameterJdbcTemplate.query(sql, (resultSet, rowNum) -> createMember(resultSet));
     }
 
-    @Override
     public Optional<Member> findById(final Long id) {
         String sql = "SELECT * from member where id = :id";
         Map<String, Object> parameter = Map.of("id", id);
@@ -46,7 +44,6 @@ public class MemberDaoImpl implements MemberDao {
         }
     }
 
-    @Override
     public Optional<Member> findByEmail(final String email) {
         String sql = "SELECT * from member where email = :email";
         Map<String, Object> parameter = Map.of("email", email);
@@ -59,7 +56,6 @@ public class MemberDaoImpl implements MemberDao {
         }
     }
 
-    @Override
     public Boolean existsByEmail(final String email) {
         String sql = "SELECT COUNT(*) FROM member WHERE email = :email";
         Map<String, Object> parameter = Map.of("email", email);
@@ -68,7 +64,6 @@ public class MemberDaoImpl implements MemberDao {
         return count != 0;
     }
 
-    @Override
     public Member add(final Member member) {
         Map<String, Object> parameters = new HashMap<>(3);
         parameters.put("name", member.getName());
@@ -86,7 +81,6 @@ public class MemberDaoImpl implements MemberDao {
         );
     }
 
-    @Override
     public void deleteById(final Long id) {
         String sql = "DELETE FROM member WHERE id = :id";
         Map<String, Object> parameter = Map.of("id", id);

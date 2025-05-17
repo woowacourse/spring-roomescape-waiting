@@ -18,8 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
-import roomescape.theme.dao.ThemeDao;
-import roomescape.theme.dao.ThemeDaoImpl;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.ThemeRequest;
@@ -27,16 +25,14 @@ import roomescape.theme.dto.ThemeRequest;
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
-    private ThemeDao themeDao;
     private ThemeRepository themeRepository;
     private ThemeService themeService;
 
     @BeforeEach
     void setUp() {
-        themeDao = mock(ThemeDaoImpl.class);
         themeRepository = mock(ThemeRepository.class);
 
-        themeService = new ThemeService(themeRepository, themeDao);
+        themeService = new ThemeService(themeRepository);
     }
 
     @DisplayName("테마 내역을 조회하는 기능을 구현한다")
@@ -55,10 +51,10 @@ class ThemeServiceTest {
         Theme theme = new Theme(1L, "name1", "description1", "thumbnail1");
         LocalDate startDate = LocalDate.now().minusDays(7);
         LocalDate endDate = LocalDate.now().minusDays(1);
-        when(themeDao.findRankedByPeriod(startDate, endDate, 10)).thenReturn(List.of(theme));
+        when(themeRepository.findRankedByPeriod(startDate, endDate, 10)).thenReturn(List.of(theme));
 
         assertThat(themeService.findRankedByPeriod()).hasSize(1);
-        verify(themeDao, times(1)).findRankedByPeriod(startDate, endDate, 10);
+        verify(themeRepository, times(1)).findRankedByPeriod(startDate, endDate, 10);
     }
 
     @DisplayName("이미 존재하는 테마를 다시 추가하려는 경우 예외를 발생시킨다")

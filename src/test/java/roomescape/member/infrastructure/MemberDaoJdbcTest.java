@@ -1,4 +1,4 @@
-package roomescape.member.dao;
+package roomescape.member.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,14 +15,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.member.domain.Member;
 
 @JdbcTest(properties = "spring.sql.init.mode=never")
-@Import(MemberDaoImpl.class)
-class MemberDaoImplTest {
+@Import(MemberJdbcDao.class)
+class MemberDaoJdbcTest {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
-    private MemberDaoImpl memberDaoImpl;
+    private MemberJdbcDao memberJdbcDao;
 
     @BeforeEach
     void setUp() {
@@ -65,13 +65,13 @@ class MemberDaoImplTest {
     @DisplayName("회원 목록을 조회하는 기능을 구현한다")
     @Test
     void findAll() {
-        assertThat(memberDaoImpl.findAll()).hasSize(2);
+        assertThat(memberJdbcDao.findAll()).hasSize(2);
     }
 
     @DisplayName("회원을 아이디로 조회하는 기능을 구현한다")
     @Test
     void findById() {
-        Member member = memberDaoImpl.findById(1L).get();
+        Member member = memberJdbcDao.findById(1L).get();
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(member.getId()).isEqualTo(1L);
@@ -83,7 +83,7 @@ class MemberDaoImplTest {
     @DisplayName("회원을 이메일로 조회하는 기능을 구현한다")
     @Test
     void findByEmail() {
-        Member member = memberDaoImpl.findByEmail("user@email.com").get();
+        Member member = memberJdbcDao.findByEmail("user@email.com").get();
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(member.getId()).isEqualTo(2L);
@@ -96,8 +96,8 @@ class MemberDaoImplTest {
     @Test
     void existsByEmail() {
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(memberDaoImpl.existsByEmail("admin@email.com")).isTrue();
-        softly.assertThat(memberDaoImpl.existsByEmail("nonexistent@email.com")).isFalse();
+        softly.assertThat(memberJdbcDao.existsByEmail("admin@email.com")).isTrue();
+        softly.assertThat(memberJdbcDao.existsByEmail("nonexistent@email.com")).isFalse();
         softly.assertAll();
     }
 
@@ -105,24 +105,24 @@ class MemberDaoImplTest {
     @Test
     void add() {
         Member newMember = new Member("new-user", "newuser@email.com", "password789");
-        Member addedMember = memberDaoImpl.add(newMember);
+        Member addedMember = memberJdbcDao.add(newMember);
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(addedMember.getId()).isNotNull();
         softly.assertThat(addedMember.getName()).isEqualTo("new-user");
         softly.assertThat(addedMember.getEmail()).isEqualTo("newuser@email.com");
-        softly.assertThat(memberDaoImpl.findAll()).hasSize(3);
+        softly.assertThat(memberJdbcDao.findAll()).hasSize(3);
         softly.assertAll();
     }
 
     @DisplayName("회원을 삭제하는 기능을 구현한다")
     @Test
     void deleteById() {
-        memberDaoImpl.deleteById(1L);
+        memberJdbcDao.deleteById(1L);
 
         SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(memberDaoImpl.findAll()).hasSize(1);
-        softly.assertThat(memberDaoImpl.findById(1L)).isEmpty();
+        softly.assertThat(memberJdbcDao.findAll()).hasSize(1);
+        softly.assertThat(memberJdbcDao.findById(1L)).isEmpty();
         softly.assertAll();
     }
 }

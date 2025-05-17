@@ -1,4 +1,4 @@
-package roomescape.reservationTime.dao;
+package roomescape.reservationTime.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,22 +12,16 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import roomescape.reservation.dao.ReservationDaoImpl;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.theme.dao.ThemeDaoImpl;
 
 @JdbcTest(properties = "spring.sql.init.mode=never")
-@Import({ReservationTimeDaoImpl.class, ReservationDaoImpl.class, ThemeDaoImpl.class})
-class ReservationTimeDaoImplTest {
+@Import(ReservationTimeJdbcDao.class)
+class ReservationTimeJdbcDaoTest {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
-    private ReservationTimeDaoImpl reservationTimeDaoImpl;
-    @Autowired
-    private ReservationDaoImpl reservationDaoImpl;
-    @Autowired
-    private ThemeDaoImpl themeDaoImpl;
+    private ReservationTimeJdbcDao reservationTimeDaoImpl;
 
     @BeforeEach
     void setUp() {

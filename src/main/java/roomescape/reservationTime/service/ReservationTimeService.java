@@ -48,8 +48,7 @@ public class ReservationTimeService {
         List<ReservationTime> reservedTimes = findReservedTimes(availableReservationTimeRequest);
         Set<Long> reservedIds = findReservedTimeIds(reservedTimes);
 
-        List<ReservationTime> availableReservationTimes = timeRepository.findAll();
-        return availableReservationTimes.stream()
+        return timeRepository.findAll().stream()
                 .map(reservationTime -> new AvailableReservationTimeResponse(
                         reservationTime.getId(),
                         reservationTime.getStartAt(),

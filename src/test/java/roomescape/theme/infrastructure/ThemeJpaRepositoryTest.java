@@ -1,4 +1,4 @@
-package roomescape.member.domain.repository;
+package roomescape.theme.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
@@ -10,33 +10,32 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.member.domain.Member;
+import roomescape.theme.domain.Theme;
 
 @ActiveProfiles("test")
 @DataJpaTest
-class MemberRepositoryTest {
-
+class ThemeJpaRepositoryTest {
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private ThemeJpaRepository themeJpaRepository;
 
-    @DisplayName("회원을 저장한다")
+    @DisplayName("테마를 저장한다")
     @Test
     void save() {
         // given
-        String name = "kim";
-        String email = "kim@gmail.com";
-        String password = "1234";
-        Member member = new Member(name, email, password);
+        String name = "무서운방";
+        String description = "덜덜";
+        String thumbnail = "무서운 사진";
+        Theme theme = new Theme(name, description, thumbnail);
 
         // when
-        memberRepository.save(member);
-        Iterable<Member> members = memberRepository.findAll();
+        themeJpaRepository.save(theme);
+        Iterable<Theme> themes = themeJpaRepository.findAll();
 
         // then
-        assertThat(members).extracting(Member::getName, Member::getEmail, Member::getPassword)
-                .containsExactlyInAnyOrder(tuple(name, email, password));
+        assertThat(themes).extracting(Theme::getName, Theme::getDescription, Theme::getThumbnail)
+                .containsExactlyInAnyOrder(tuple(name, description, thumbnail));
     }
 }

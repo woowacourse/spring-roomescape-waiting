@@ -1,4 +1,4 @@
-package roomescape.theme.dao;
+package roomescape.theme.infrastructure;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,25 +15,23 @@ import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 
 @Repository
-public class ThemeDaoImpl implements ThemeDao {
+public class ThemeJdbcDao {
     private final SimpleJdbcInsert simpleJdbcInsert;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public ThemeDaoImpl(DataSource dataSource) {
+    public ThemeJdbcDao(DataSource dataSource) {
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("theme")
                 .usingGeneratedKeyColumns("id");
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-    @Override
     public List<Theme> findAll() {
         String sql = "SELECT id, name, description, thumbnail FROM theme";
         return namedParameterJdbcTemplate.query(sql,
                 (resultSet, rowNum) -> createTheme(resultSet));
     }
 
-    @Override
     public Optional<Theme> findById(final Long id) {
         String sql = "SELECT id, name, description, thumbnail from theme where id = :id";
         Map<String, Object> parameter = Map.of("id", id);
@@ -46,24 +44,22 @@ public class ThemeDaoImpl implements ThemeDao {
         }
     }
 
-    @Override
-    public List<Theme> findRankedByPeriod(final LocalDate startDate, final LocalDate endDate, int count) {
+    public List<Theme> findRankedByPeriod(final LocalDate from, final LocalDate to, int limit) {
         String sql = """
                 SELECT t.id, t.name, t.description, t.thumbnail 
                 FROM theme AS t 
                 INNER JOIN reservation AS r ON r.theme_id = t.id 
-                WHERE r.date BETWEEN :startDate AND :endDate 
+                WHERE r.date BETWEEN :from AND :to 
                 GROUP BY t.id, t.name, t.description, t.thumbnail 
                 ORDER BY COUNT(r.id) DESC 
-                LIMIT :count
+                LIMIT :limit
                 """;
-        Map<String, Object> parameters = Map.of("startDate", startDate, "endDate", endDate, "count", count);
+        Map<String, Object> parameters = Map.of("from", from, "to", to, "limit", limit);
 
         return namedParameterJdbcTemplate.query(sql, parameters,
                 (resultSet, rowNum) -> createTheme(resultSet));
     }
 
-    @Override
     public Boolean existsByName(final String name) {
         String sql = "SELECT COUNT(*) FROM theme WHERE name = :name";
         Map<String, Object> parameters = Map.of("name", name);
@@ -72,7 +68,6 @@ public class ThemeDaoImpl implements ThemeDao {
         return count != 0;
     }
 
-    @Override
     public Boolean existsByReservationThemeId(final Long themeId) {
         String sql = """
                 SELECT COUNT(*) FROM theme AS e 
@@ -86,7 +81,6 @@ public class ThemeDaoImpl implements ThemeDao {
         return count != 0;
     }
 
-    @Override
     public Theme add(final Theme theme) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", theme.getName());
@@ -96,7 +90,6 @@ public class ThemeDaoImpl implements ThemeDao {
         return new Theme(id, theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 
-    @Override
     public void deleteById(final Long id) {
         String sql = "DELETE FROM theme WHERE id = :id";
         Map<String, Object> parameter = Map.of("id", id);

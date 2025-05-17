@@ -8,7 +8,6 @@ import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ThemeExceptionMessage;
-import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.RankedThemeResponse;
@@ -19,11 +18,9 @@ import roomescape.theme.dto.ThemeResponse;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ThemeDao themeDao;
 
-    public ThemeService(ThemeRepository themeRepository, ThemeDao themeDao) {
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
-        this.themeDao = themeDao;
     }
 
     public List<ThemeResponse> findAll() {
@@ -37,7 +34,7 @@ public class ThemeService {
     }
 
     public List<RankedThemeResponse> findRankedByPeriod() {
-        List<Theme> topRankedThemes = themeDao.findRankedByPeriod(
+        List<Theme> topRankedThemes = themeRepository.findRankedByPeriod(
                 LocalDate.now().minusDays(7),
                 LocalDate.now().minusDays(1),
                 10

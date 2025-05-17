@@ -1,4 +1,4 @@
-package roomescape.reservation.dao;
+package roomescape.reservation.infrastructure;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,19 +19,18 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Repository
-public class ReservationDaoImpl implements ReservationDao {
+public class ReservationJdbcDao {
 
     private final SimpleJdbcInsert simpleJdbcInsert;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public ReservationDaoImpl(DataSource dataSource) {
+    public ReservationJdbcDao(DataSource dataSource) {
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("reservation")
                 .usingGeneratedKeyColumns("id");
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
-    @Override
     public List<Reservation> findAll() {
         String sql = """
                 SELECT r.id AS reservation_id, r.name, r.date, 
@@ -53,7 +52,6 @@ public class ReservationDaoImpl implements ReservationDao {
         return namedParameterJdbcTemplate.query(sql, (resultSet, rowNum) -> createReservation(resultSet));
     }
 
-    @Override
     public List<Reservation> findAllByMemberId(Long memberId) {
         String sql = """
                 SELECT r.id AS reservation_id, r.name, r.date, 
@@ -77,7 +75,6 @@ public class ReservationDaoImpl implements ReservationDao {
         return namedParameterJdbcTemplate.query(sql, parameter, (resultSet, rowNum) -> createReservation(resultSet));
     }
 
-    @Override
     public List<Reservation> findAllByMemberAndThemeAndDate(
             Long memberId,
             Long themeId,
@@ -114,7 +111,6 @@ public class ReservationDaoImpl implements ReservationDao {
         return namedParameterJdbcTemplate.query(sql, parameter, (resultSet, rowNum) -> createReservation(resultSet));
     }
 
-    @Override
     public Optional<Reservation> findById(final Long id) {
         String sql = """
                 SELECT r.id AS reservation_id, r.name, r.date, 
@@ -144,7 +140,6 @@ public class ReservationDaoImpl implements ReservationDao {
         }
     }
 
-    @Override
     public Boolean existsByDateAndTimeId(final LocalDate date, final Long timeId) {
         String sql = "SELECT COUNT(*) FROM reservation WHERE date = :date AND time_id = :timeId";
         Map<String, Object> parameter = Map.of("date", date, "timeId", timeId);
@@ -153,7 +148,6 @@ public class ReservationDaoImpl implements ReservationDao {
         return count != 0;
     }
 
-    @Override
     public Reservation add(final Reservation reservation) {
         Map<String, Object> parameters = new HashMap<>(5);
         parameters.put("name", reservation.getMember().getName());
@@ -172,7 +166,6 @@ public class ReservationDaoImpl implements ReservationDao {
         );
     }
 
-    @Override
     public void deleteById(final Long id) {
         String sql = "DELETE FROM reservation WHERE id = :id";
         Map<String, Object> parameter = Map.of("id", id);

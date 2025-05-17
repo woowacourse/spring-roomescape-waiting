@@ -1,4 +1,4 @@
-package roomescape.reservation.dao;
+package roomescape.reservation.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,23 +18,17 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationTime.dao.ReservationTimeDaoImpl;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.theme.dao.ThemeDaoImpl;
 import roomescape.theme.domain.Theme;
 
 @JdbcTest(properties = "spring.sql.init.mode=never")
-@Import({ReservationDaoImpl.class, ReservationTimeDaoImpl.class, ThemeDaoImpl.class})
-class ReservationDaoImplTest {
+@Import(ReservationJdbcDao.class)
+class ReservationJdbcDaoTest {
 
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     @Autowired
-    private ReservationDaoImpl reservationDaoImpl;
-    @Autowired
-    private ReservationTimeDaoImpl reservationTimeDaoImpl;
-    @Autowired
-    private ThemeDaoImpl themeDaoImpl;
+    private ReservationJdbcDao reservationJdbcDao;
 
     @BeforeEach
     void setUp() {
@@ -140,7 +134,7 @@ class ReservationDaoImplTest {
     @DisplayName("예약 내역을 조회하는 기능을 구현한다")
     @Test
     void findAll() {
-        List<Reservation> reservations = reservationDaoImpl.findAll();
+        List<Reservation> reservations = reservationJdbcDao.findAll();
 
         assertThat(reservations).hasSize(1);
     }
@@ -148,7 +142,7 @@ class ReservationDaoImplTest {
     @DisplayName("예약 내역을 아이디로 조회하는 기능을 구현한다")
     @Test
     void findById() {
-        Reservation reservation = reservationDaoImpl.findById(1L).get();
+        Reservation reservation = reservationJdbcDao.findById(1L).get();
 
         assertThat(reservation.getId()).isEqualTo(1L);
     }
@@ -156,7 +150,7 @@ class ReservationDaoImplTest {
     @DisplayName("회원 아이디로 예약 내역을 조회하는 기능을 구현한다")
     @Test
     void findAllByMemberId() {
-        List<Reservation> reservations = reservationDaoImpl.findAllByMemberId(1L);
+        List<Reservation> reservations = reservationJdbcDao.findAllByMemberId(1L);
 
         SoftAssertions softly = new SoftAssertions();
         softly.assertThat(reservations).hasSize(1);
@@ -167,7 +161,7 @@ class ReservationDaoImplTest {
     @DisplayName("회원 아이디, 테마 아이디, 날짜 범위로 예약 내역을 조회하는 기능을 구현한다")
     @Test
     void findAllByMemberAndThemeAndDate() {
-        List<Reservation> reservations = reservationDaoImpl.findAllByMemberAndThemeAndDate(
+        List<Reservation> reservations = reservationJdbcDao.findAllByMemberAndThemeAndDate(
                 1L,
                 1L,
                 LocalDate.parse("2025-05-01"),
@@ -188,7 +182,7 @@ class ReservationDaoImplTest {
     @DisplayName("회원 아이디, 테마 아이디, 날짜 범위로 예약 내역을 조회할 때 조건에 맞는 예약이 없으면 빈 리스트를 반환한다")
     @Test
     void findAllByMemberAndThemeAndDate_WhenNoMatchingReservations() {
-        List<Reservation> reservations = reservationDaoImpl.findAllByMemberAndThemeAndDate(
+        List<Reservation> reservations = reservationJdbcDao.findAllByMemberAndThemeAndDate(
                 1L,
                 1L,
                 LocalDate.parse("2025-06-01"),
@@ -201,7 +195,7 @@ class ReservationDaoImplTest {
     @DisplayName("날짜와 시간 아이디로 예약 내역이 존재하는지 확인하는 기능을 구현한다")
     @Test
     void existsByDateAndTimeId() {
-        assertThat(reservationDaoImpl.existsByDateAndTimeId(LocalDate.of(2025, 5, 1), 1L)).isTrue();
+        assertThat(reservationJdbcDao.existsByDateAndTimeId(LocalDate.of(2025, 5, 1), 1L)).isTrue();
     }
 
     @DisplayName("예약 내역을 추가하는 기능을 구현한다")
@@ -217,16 +211,16 @@ class ReservationDaoImplTest {
                 theme
         );
 
-        reservationDaoImpl.add(reservation);
+        reservationJdbcDao.add(reservation);
 
-        assertThat(reservationDaoImpl.findAll()).hasSize(2);
+        assertThat(reservationJdbcDao.findAll()).hasSize(2);
     }
 
     @DisplayName("예약 내역을 삭제하는 기능을 구현한다")
     @Test
     void deleteById() {
-        reservationDaoImpl.deleteById(1L);
+        reservationJdbcDao.deleteById(1L);
 
-        assertThat(reservationDaoImpl.findAll()).hasSize(0);
+        assertThat(reservationJdbcDao.findAll()).hasSize(0);
     }
 }
