@@ -116,6 +116,5 @@ class ReservationRepositoryTest {
                 futureDate, theme.getId());
 
         assertThat(bookedTimesByDateAndThemeId.size()).isEqualTo(3);
-
     }
 }
