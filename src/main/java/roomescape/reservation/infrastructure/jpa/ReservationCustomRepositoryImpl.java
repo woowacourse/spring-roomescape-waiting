@@ -25,19 +25,6 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
         return typedQuery.getResultList();
     }
 
-    @Override
-    public List<Reservation> findByMemberId(Long id) {
-        return em.createQuery("""
-                             SELECT r FROM Reservation r
-                             JOIN FETCH r.member
-                             JOIN FETCH r.theme
-                             JOIN FETCH r.time
-                             WHERE r.member.id = :memberId
-                        """)
-                .setParameter("memberId", id)
-                .getResultList();
-    }
-
     private StringBuilder createQuery(Long memberId, Long themeId, LocalDate from, LocalDate to) {
         StringBuilder query = new StringBuilder("SELECT r FROM Reservation r WHERE 1=1");
 

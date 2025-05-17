@@ -6,5 +6,4 @@ import roomescape.reservation.domain.Reservation;
 
 public interface ReservationCustomRepository {
     List<Reservation> findByMemberIdAndThemeIdAndDate(Long memberId, Long themeId, LocalDate from, LocalDate to);
-    List<Reservation> findByMemberId(Long id);
 }
