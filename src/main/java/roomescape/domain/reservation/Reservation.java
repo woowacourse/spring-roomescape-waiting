@@ -42,7 +42,7 @@ public class Reservation {
         }
     }
 
-    public Reservation() {
+    protected Reservation() {
 
     }
 

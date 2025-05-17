@@ -25,7 +25,7 @@ public class ReserveTicket {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public ReserveTicket() {
+    protected ReserveTicket() {
 
     }
 

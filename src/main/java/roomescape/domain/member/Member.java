@@ -19,7 +19,7 @@ public class Member {
     private Role role;
     private String name;
 
-    public Member() {
+    protected Member() {
 
     }
 
