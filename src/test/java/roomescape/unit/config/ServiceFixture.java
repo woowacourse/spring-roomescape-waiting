@@ -4,7 +4,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import roomescape.infrastructure.auth.jwt.JwtTokenProvider;
 import roomescape.unit.repository.member.FakeMemberRepository;
 import roomescape.unit.repository.reservation.FakeReservationRepository;
-import roomescape.unit.repository.reservation.FakeReservationTimeRepository;
+import roomescape.unit.repository.reservationtime.FakeReservationTimeRepository;
 import roomescape.unit.repository.reservation.FakeThemeRepository;
 import roomescape.unit.repository.reserveticket.FakeReserveTicketRepository;
 

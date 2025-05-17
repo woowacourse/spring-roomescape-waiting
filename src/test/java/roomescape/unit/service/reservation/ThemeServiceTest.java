@@ -16,7 +16,7 @@ import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 import roomescape.unit.repository.reservation.FakeReservationRepository;
-import roomescape.unit.repository.reservation.FakeReservationTimeRepository;
+import roomescape.unit.repository.reservationtime.FakeReservationTimeRepository;
 import roomescape.unit.repository.reservation.FakeThemeRepository;
 
 class ThemeServiceTest {
