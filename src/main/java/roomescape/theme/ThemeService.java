@@ -37,9 +37,8 @@ public class ThemeService {
                 request.thumbnail()
         );
 
-        final long id = themeRepository.save(notSavedTheme);
-        final Theme savedTheme = themeRepository.findById(id);
-        return ThemeResponse.from(savedTheme);
+        final Theme theme = themeRepository.save(notSavedTheme);
+        return ThemeResponse.from(theme);
     }
 
     public List<ThemeResponse> findAll() {

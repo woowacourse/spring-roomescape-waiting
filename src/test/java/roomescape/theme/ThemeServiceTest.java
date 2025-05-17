@@ -2,6 +2,11 @@ package roomescape.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.anyInt;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
 import roomescape.reservation.FakeReservationRepository;
@@ -16,22 +23,21 @@ import roomescape.reservation.Reservation;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
+@ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
-
+    private final ThemeRepository themeRepository;
     private final ThemeService themeService;
-    private final FakeThemeRepository fakeThemeRepository;
     private final FakeReservationRepository fakeReservationRepository;
 
     public ThemeServiceTest() {
-        fakeThemeRepository = new FakeThemeRepository();
+        themeRepository = mock(ThemeRepository.class);
         fakeReservationRepository = new FakeReservationRepository();
-        themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository);
+        themeService = new ThemeService(themeRepository, fakeReservationRepository);
     }
 
     @BeforeEach
     void setUp() {
-        fakeThemeRepository.clear();
         fakeReservationRepository.clear();
     }
 
@@ -45,6 +51,8 @@ class ThemeServiceTest {
             // given
             final ThemeRequest themeRequest = new ThemeRequest("로키", "로키로키", "http://www.google.com");
             final ThemeResponse expect = new ThemeResponse(1L, "로키", "로키로키", "http://www.google.com");
+            given(themeRepository.save(any()))
+                    .willReturn(new Theme(1L, "로키", "로키로키", "http://www.google.com"));
 
             // when
             final ThemeResponse actual = themeService.create(themeRequest);
@@ -62,9 +70,13 @@ class ThemeServiceTest {
         @Test
         void findAll1() {
             // given
-            fakeThemeRepository.save(new Theme("로키1", "로키로키1", "http://www.google.com/1"));
-            fakeThemeRepository.save(new Theme("로키2", "로키로키2", "http://www.google.com/2"));
-            fakeThemeRepository.save(new Theme("로키3", "로키로키3", "http://www.google.com/3"));
+            final List<Theme> themes = List.of(
+                    new Theme(1L, "로키1", "로키로키1", "http://www.google.com/1"),
+                    new Theme(2L, "로키2", "로키로키2", "http://www.google.com/2"),
+                    new Theme(3L, "로키3", "로키로키3", "http://www.google.com/3")
+            );
+            given(themeRepository.findAll())
+                    .willReturn(themes);
 
             // when
             final List<ThemeResponse> actual = themeService.findAll();
@@ -99,7 +111,8 @@ class ThemeServiceTest {
                     new Theme(4L, "1", "2", "3"),
                     new Theme(5L, "1", "2", "3")
             );
-            fakeThemeRepository.stubFindAllOrderByRank(themes);
+            given(themeRepository.findAllOrderByRank(any(), any(), anyInt()))
+                    .willReturn(themes);
 
             // when
             final List<ThemeResponse> actual = themeService.findTopRankThemes(5);
@@ -118,14 +131,15 @@ class ThemeServiceTest {
         @Test
         void deleteById1() {
             // given
-            fakeThemeRepository.save(new Theme("로키1", "로키로키1", "http://www.google.com/1"));
+            given(themeRepository.existsById(any()))
+                    .willReturn(true);
             final Long id = 1L;
 
             // when
             themeService.deleteById(id);
 
             // then
-            assertThat(fakeThemeRepository.isInvokeDeleteId(id)).isTrue();
+            then(themeRepository).should().deleteById(id);
         }
 
         @DisplayName("주어진 id에 해당하는 테마가 존재하지 않는다면 예외가 발생한다.")
@@ -145,7 +159,8 @@ class ThemeServiceTest {
         void deleteById3() {
             // given
             final Long id = 1L;
-            fakeThemeRepository.save(new Theme("로키1", "로키로키1", "http://www.google.com/1"));
+            given(themeRepository.existsById(1L))
+                    .willReturn(true);
             fakeReservationRepository.save(new Reservation(LocalDate.of(2026, 12, 1)), 1L, id, 1L);
 
             // when & then
