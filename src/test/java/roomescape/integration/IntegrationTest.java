@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class ReservationTest extends BaseTest {
+class IntegrationTest extends BaseTest {
 
     @LocalServerPort
     private int port;
