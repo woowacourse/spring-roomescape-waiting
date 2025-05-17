@@ -1,8 +1,18 @@
 package roomescape.domain;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 
@@ -47,6 +57,19 @@ public class Reservation {
 
     public static Reservation createNew(Member member, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
+    }
+
+    public boolean isPast(Clock clock) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        return reservationDateTime.isBefore(now);
+    }
+
+    public long calculateMinutesUntilStart(Clock clock) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+
+        return Duration.between(now, reservationDateTime).toMinutes();
     }
 
     public Long getId() {

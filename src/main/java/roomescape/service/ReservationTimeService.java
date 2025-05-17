@@ -31,7 +31,7 @@ public class ReservationTimeService {
 
     public ReservationTimeResult create(CreateReservationTimeParam createReservationTimeParam) {
         LocalTime startAt = createReservationTimeParam.startAt();
-        reservationTimePolicy.canCreate(startAt);
+        reservationTimePolicy.validate(startAt);
 
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.createNew(startAt));
         return ReservationTimeResult.from(reservationTime);

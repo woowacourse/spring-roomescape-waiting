@@ -10,9 +10,7 @@ import roomescape.exception.*;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,28 +20,38 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationPolicy reservationPolicy;
 
-    public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository, final ThemeRepository themeRepository, final ReservationTimeRepository reservationTimeRepository) {
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final MemberRepository memberRepository, final ThemeRepository themeRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
+                              ReservationPolicy reservationPolicy) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationPolicy = reservationPolicy;
     }
 
-    public ReservationResult create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(createReservationParam.timeId()).orElseThrow(
-                () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
-        Theme theme = themeRepository.findById(createReservationParam.themeId()).orElseThrow(
-                () -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
-        Member member = memberRepository.findById(createReservationParam.memberId()).orElseThrow(
-                () -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
-
-        validateUniqueReservation(createReservationParam, reservationTime, theme);
-        validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
+    public ReservationResult create(CreateReservationParam createReservationParam) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(createReservationParam.timeId())
+                .orElseThrow(() -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
+        Theme theme = themeRepository.findById(createReservationParam.themeId())
+                .orElseThrow(() -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
+        Member member = memberRepository.findById(createReservationParam.memberId())
+                .orElseThrow(() -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
 
         Reservation reservation = Reservation.createNew(member, createReservationParam.date(), reservationTime, theme);
+        validateCanReservation(createReservationParam, reservation);
+
         reservationRepository.save(reservation);
         return ReservationResult.from(reservation);
+    }
+
+    private void validateCanReservation(CreateReservationParam param, Reservation reservation) {
+        boolean existsDuplicateReservation = reservationRepository.existsDuplicateReservation(
+                reservation.getDate(), param.timeId(), param.themeId());
+        reservationPolicy.validateReservationAvailable(reservation, existsDuplicateReservation);
     }
 
     public void deleteById(Long reservationId) {
@@ -57,7 +65,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResult findById(Long reservationId) {
+    public ReservationResult getById(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundReservationException(reservationId + "에 해당하는 reservation 튜플이 없습니다."));
         return ReservationResult.from(reservation);
@@ -75,20 +83,4 @@ public class ReservationService {
         return ReservationResult.from(reservations);
     }
 
-    private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsDuplicateReservation(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
-            throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
-        }
-    }
-
-    private void validateReservationDateTime(final CreateReservationParam createReservationParam, final LocalDateTime currentDateTime, final ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(createReservationParam.date(), reservationTime.getStartAt());
-        if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new UnAvailableReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
-        }
-        Duration duration = Duration.between(currentDateTime, reservationDateTime);
-        if (duration.toMinutes() < 10) {
-            throw new UnAvailableReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
-        }
-    }
 }

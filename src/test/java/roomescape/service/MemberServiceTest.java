@@ -1,5 +1,8 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,16 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
-import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.MemberRole;
+import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.NotFoundMemberException;
 import roomescape.exception.UnAuthorizedException;
 import roomescape.service.param.LoginMemberParam;
 import roomescape.service.param.RegisterMemberParam;
 import roomescape.service.result.MemberResult;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -74,7 +74,7 @@ class MemberServiceTest {
         Member member = memberRepository.save(TestFixture.createDefaultMember());
 
         //when & then
-        assertThat(memberService.getById(1L)).isEqualTo(new MemberResult(1L, member.getName(), MemberRole.USER, member.getEmail()));
+        assertThat(memberService.getById(member.getId())).isEqualTo(new MemberResult(1L, member.getName(), MemberRole.USER, member.getEmail()));
     }
 
     @Test

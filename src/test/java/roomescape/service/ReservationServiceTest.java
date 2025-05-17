@@ -1,14 +1,23 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.TestFixture.DEFAULT_DATE;
+
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestFixture;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
@@ -18,15 +27,6 @@ import roomescape.exception.NotFoundReservationTimeException;
 import roomescape.exception.UnAvailableReservationException;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DEFAULT_DATE;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -59,7 +59,7 @@ class ReservationServiceTest {
         CreateReservationParam createReservationParam = new CreateReservationParam(member.getId(), RESERVATION_DATE, reservationTime.getId(), theme.getId());
 
         //when
-        ReservationResult reservationResult = reservationService.create(createReservationParam, LocalDateTime.now());
+        ReservationResult reservationResult = reservationService.create(createReservationParam);
 
         //then
         Reservation reservation = reservationRepository.findById(reservationResult.id()).get();
@@ -74,7 +74,7 @@ class ReservationServiceTest {
         CreateReservationParam createReservationParam = new CreateReservationParam(member.getId(), RESERVATION_DATE, 1L, theme.getId());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.create(createReservationParam, LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.create(createReservationParam))
                 .isInstanceOf(NotFoundReservationTimeException.class)
                 .hasMessage("1에 해당하는 정보가 없습니다.");
     }
@@ -124,7 +124,7 @@ class ReservationServiceTest {
         Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme));
 
         //when
-        ReservationResult reservationResult = reservationService.findById(reservation.getId());
+        ReservationResult reservationResult = reservationService.getById(reservation.getId());
 
         //then
         assertThat(reservationResult).isEqualTo(ReservationResult.from(reservation));
@@ -134,7 +134,7 @@ class ReservationServiceTest {
     void id에_해당하는_예약이_없는경우_예외가_발생한다() {
         Long noId = 99L;
 
-        assertThatThrownBy(() -> reservationService.findById(noId))
+        assertThatThrownBy(() -> reservationService.getById(noId))
                 .isInstanceOf(NotFoundReservationException.class)
                 .hasMessage(noId + "에 해당하는 reservation 튜플이 없습니다.");
     }
@@ -148,36 +148,37 @@ class ReservationServiceTest {
         Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme));
 
         //when & then
-        assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(member.getId(), reservation.getDate(), reservationTime.getId(), theme.getId()), LocalDateTime.now()))
+        assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(member.getId(), reservation.getDate(), reservationTime.getId(), theme.getId())))
                 .isInstanceOf(UnAvailableReservationException.class)
                 .hasMessage("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
     }
 
-    @ParameterizedTest
-    @CsvSource({"2025-04-23T12:30, 2025-04-22T12:30",
-            "2025-04-23T12:30, 2025-04-23T12:00"})
-    void 지난_날짜에_대한_예약이라면_예외가_발생한다(LocalDateTime currentDateTime, LocalDateTime reservationDateTime) {
+    @Test
+    void 지난_날짜에_대한_예약이라면_예외가_발생한다() {
         //given
+        LocalDateTime reservationDateTime = LocalDateTime.now().minusDays(1);
+
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(reservationDateTime.toLocalTime()));
         Member member = memberRepository.save(TestFixture.createDefaultMember());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(member.getId(), reservationDateTime.toLocalDate(), reservationTime.getId(), theme.getId()), currentDateTime))
+        assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(member.getId(), reservationDateTime.toLocalDate(), reservationTime.getId(), theme.getId())))
                 .isInstanceOf(UnAvailableReservationException.class)
                 .hasMessage("지난 날짜와 시간에 대한 예약은 불가능합니다.");
     }
 
-    @ParameterizedTest
-    @CsvSource({"2025-04-23T12:30, 2025-04-23T12:30", "2025-04-23T12:30, 2025-04-23T12:39"})
-    void 예약일이_오늘인_경우_예약_시간까지_10분도_남지_않았다면_예외가_발생한다(LocalDateTime currentDateTime, LocalDateTime reservationDateTime) {
+    @Test
+    void 예약일이_오늘인_경우_예약_시간까지_10분도_남지_않았다면_예외가_발생한다() {
         //given
+        LocalDateTime reservationDateTime = LocalDateTime.now().plusMinutes(10);
+
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(reservationDateTime.toLocalTime()));
         Member member = memberRepository.save(TestFixture.createDefaultMember());
 
         //when & then
-        assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(member.getId(), reservationDateTime.toLocalDate(), reservationTime.getId(), theme.getId()), currentDateTime))
+        assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(member.getId(), reservationDateTime.toLocalDate(), reservationTime.getId(), theme.getId())))
                 .isInstanceOf(UnAvailableReservationException.class)
                 .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
     }

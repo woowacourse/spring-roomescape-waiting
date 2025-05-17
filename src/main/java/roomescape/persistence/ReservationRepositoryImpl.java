@@ -58,11 +58,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate reservationDate) {
-        return jpaReservationRepository.findByThemeIdAndDate(themeId, reservationDate);
-    }
-
-    @Override
     public List<Reservation> findReservationsInConditions(final Long memberId, final Long themeId, final LocalDate dateFrom, final LocalDate dateTo) {
         return jpaReservationRepository.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
     }
