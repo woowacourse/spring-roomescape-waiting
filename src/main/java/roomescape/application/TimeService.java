@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.TimeCreateDto;
 import roomescape.application.dto.TimeDto;
 import roomescape.domain.ReservationTime;
@@ -13,6 +14,7 @@ import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
 import roomescape.exception.NotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeService {
 
     private final TimeRepository repository;
@@ -21,25 +23,16 @@ public class TimeService {
         this.repository = repository;
     }
 
-    public List<TimeDto> getAllTimes() {
-        List<ReservationTime> reservationTimes = repository.findAll();
-        return TimeDto.from(reservationTimes);
-    }
-
+    @Transactional
     public TimeDto registerNewTime(TimeCreateDto request) {
         ReservationTime newReservationTime = ReservationTime.withoutId(request.startAt());
         ReservationTime savedReservationTime = repository.save(newReservationTime);
         return TimeDto.from(savedReservationTime);
     }
 
-    public void deleteTime(Long id) {
-        try {
-            repository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("예약이 존재하는 시간은 삭제할 수 없습니다.");
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("삭제하려는 id가 존재하지 않습니다. id: " + id);
-        }
+    public List<TimeDto> getAllTimes() {
+        List<ReservationTime> reservationTimes = repository.findAll();
+        return TimeDto.from(reservationTimes);
     }
 
     public TimeDto getTimeById(Long id) {
@@ -59,5 +52,16 @@ public class TimeService {
                         )
                 )
                 .toList();
+    }
+
+    @Transactional
+    public void deleteTime(Long id) {
+        try {
+            repository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("예약이 존재하는 시간은 삭제할 수 없습니다.");
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("삭제하려는 id가 존재하지 않습니다. id: " + id);
+        }
     }
 }

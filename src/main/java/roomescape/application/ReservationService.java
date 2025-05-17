@@ -18,6 +18,7 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.NotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -109,6 +110,7 @@ public class ReservationService {
         return ReservationDto.from(reservations);
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         try {
             reservationRepository.deleteById(id);
