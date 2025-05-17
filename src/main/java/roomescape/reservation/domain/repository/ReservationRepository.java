@@ -51,8 +51,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.member.id = :memberId
             """)
     List<Reservation> findByMemberIdWithAssociations(@Param("memberId") Long memberId);
-
+    
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
+
+    boolean existsByIdAndMemberId(Long reservationId, Long memberId);
 }

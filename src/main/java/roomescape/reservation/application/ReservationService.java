@@ -94,6 +94,14 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional
+    public void deleteById(final Long reservationId, final Long memberId) {
+        if (!reservationRepository.existsByIdAndMemberId(reservationId, memberId)) {
+            throw new BadRequestException("사용자 본인의 예약이 아닙니다.");
+        }
+        deleteById(reservationId);
+    }
+
     @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId, final String date) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();

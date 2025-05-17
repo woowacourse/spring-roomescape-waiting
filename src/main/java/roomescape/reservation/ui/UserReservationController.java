@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,5 +50,14 @@ public class UserReservationController {
             @PathVariable final Long themeId,
             @RequestParam final String date) {
         return ResponseEntity.ok(reservationService.findAvailableReservationTime(themeId, date));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable("id") final Long id,
+            final LoginCheckRequest request
+    ) {
+        reservationService.deleteById(id, request.id());
+        return ResponseEntity.noContent().build();
     }
 }
