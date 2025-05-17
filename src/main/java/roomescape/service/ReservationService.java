@@ -30,7 +30,9 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationTimeRepository reservationTImeRepository, ReservationRepository reservationRepository, ThemeRepository themeRepository,  MemberRepository memberRepository) {
+    public ReservationService(ReservationTimeRepository reservationTImeRepository,
+                              ReservationRepository reservationRepository, ThemeRepository themeRepository,
+                              MemberRepository memberRepository) {
         this.reservationTImeRepository = reservationTImeRepository;
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
@@ -38,8 +40,10 @@ public class ReservationService {
     }
 
     public Long create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
-        ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId()).orElseThrow(
-                () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
+        ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId())
+                .orElseThrow(
+                        () -> new NotFoundReservationTimeException(
+                                createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
         Theme theme = themeRepository.findById(createReservationParam.themeId()).orElseThrow(
                 () -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
         Member member = memberRepository.findById(createReservationParam.memberId()).orElseThrow(
@@ -49,7 +53,6 @@ public class ReservationService {
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
 
         Reservation reservation = new Reservation(
-                null,
                 member,
                 createReservationParam.date(),
                 reservationTime,
@@ -85,21 +88,28 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResult> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
+    public List<ReservationResult> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom,
+                                                                LocalDate dateTo) {
+        List<Reservation> reservations = reservationRepository.findReservationsInConditions(memberId, themeId, dateFrom,
+                dateTo);
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();
     }
 
-    private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
+    private void validateUniqueReservation(final CreateReservationParam createReservationParam,
+                                           final ReservationTime reservationTime, final Theme theme) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(),
+                reservationTime.getId(), theme.getId())) {
             throw new UnableCreateReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
     }
 
-    private void validateReservationDateTime(final CreateReservationParam createReservationParam, final LocalDateTime currentDateTime, final ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(createReservationParam.date(), reservationTime.getStartAt());
+    private void validateReservationDateTime(final CreateReservationParam createReservationParam,
+                                             final LocalDateTime currentDateTime,
+                                             final ReservationTime reservationTime) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(createReservationParam.date(),
+                reservationTime.getStartAt());
         if (reservationDateTime.isBefore(currentDateTime)) {
             throw new UnableCreateReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
         }

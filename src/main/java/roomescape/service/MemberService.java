@@ -1,18 +1,16 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.exception.UnableCreateMemberException;
-import roomescape.persistence.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.exception.NotFoundMemberException;
+import roomescape.exception.UnableCreateMemberException;
 import roomescape.exception.UnauthorizedException;
+import roomescape.persistence.MemberRepository;
 import roomescape.service.param.LoginMemberParam;
 import roomescape.service.param.RegisterMemberParam;
 import roomescape.service.result.MemberResult;
-
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class MemberService {
@@ -27,7 +25,7 @@ public class MemberService {
         Member member = memberRepository.findByEmail(loginMemberParam.email())
                 .orElseThrow(() -> new NotFoundMemberException(loginMemberParam.email() + "에 해당하는 유저가 없습니다."));
 
-        if (!Objects.equals(member.getPassword(), loginMemberParam.password())) {
+        if (member.isPasswordNotMatched(loginMemberParam.password())) {
             throw new UnauthorizedException("비밀 번호가 일치하지 않습니다.");
         }
 
@@ -36,7 +34,6 @@ public class MemberService {
 
     public MemberResult create(final RegisterMemberParam registerMemberParam) {
         Member member = new Member(
-                null,
                 registerMemberParam.name(),
                 MemberRole.USER,
                 registerMemberParam.email(),

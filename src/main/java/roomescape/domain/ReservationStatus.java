@@ -1,6 +1,10 @@
 package roomescape.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum ReservationStatus {
+
     RESERVED("예약"),
     CANCELED("취소됨"),
     COMPLETED("완료됨");
@@ -9,9 +13,5 @@ public enum ReservationStatus {
 
     ReservationStatus(String description) {
         this.description = description;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }
