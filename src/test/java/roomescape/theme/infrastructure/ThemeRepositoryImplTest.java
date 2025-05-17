@@ -43,9 +43,9 @@ class ThemeRepositoryImplTest {
 
     @Autowired
     private MemberCommandRepository memberCommandRepository;
-    
+
     @Test
-    void 특정_기간_사이에_예약이_많은_n개의_테마_목록을_내림차순으로_반환한다() {
+    void 특정_기간_사이에_예약이_많은_n개의_테마_목록을_내림차순으로_정렬하여_반환한다() {
         // given
         final LocalDate now = LocalDate.now();
         final LocalDate weekAgo = now.minusDays(7);
