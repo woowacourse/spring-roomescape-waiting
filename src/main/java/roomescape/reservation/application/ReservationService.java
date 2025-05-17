@@ -1,7 +1,6 @@
 package roomescape.reservation.application;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
@@ -40,7 +39,7 @@ public class ReservationService {
     private final MemberQueryRepository memberQueryRepository;
 
     public ReservationResponse createForAdmin(final CreateReservationRequest.ForAdmin request) {
-        return createReservation(request.date(), request.timeId(), request.themeId(), request.memberId(),
+        return registerReservation(request.date(), request.timeId(), request.themeId(), request.memberId(),
                 request.status());
     }
 
@@ -48,36 +47,26 @@ public class ReservationService {
             final CreateReservationRequest.ForMember request,
             final Long memberId
     ) {
-        return createReservation(request.date(), request.timeId(), request.themeId(), memberId,
+        return registerReservation(request.date(), request.timeId(), request.themeId(), memberId,
                 DEFAULT_MEMBER_RESERVATION_STATUS);
     }
 
-    private ReservationResponse createReservation(final LocalDate date, final Long timeId, final Long themeId,
-                                                  final Long memberId, final BookingState state) {
+    private ReservationResponse registerReservation(final LocalDate date, final Long timeId, final Long themeId,
+                                                    final Long memberId, final BookingState state) {
         validateNoDuplicateReservation(date, timeId, themeId);
         final ReservationTime time = reservationTimeQueryRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
-        validateNotPreviousReservation(date, time);
-
         final Theme theme = themeQueryRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
         final Member member = memberQueryRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-        final Reservation reservation = new Reservation(date, time, theme, member, state);
+        final Reservation reservation = Reservation.createForRegister(date, time, theme, member, state);
 
         final Long id = reservationCommandRepository.save(reservation);
         final Reservation found = reservationQueryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
 
         return ReservationResponse.from(found);
-    }
-
-    private void validateNotPreviousReservation(final LocalDate date, final ReservationTime time) {
-        final LocalDateTime now = LocalDateTime.now();
-        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (reservationDateTime.isBefore(now)) {
-            throw new IllegalArgumentException("예약 시간은 현재 시간보다 이후여야 합니다.");
-        }
     }
 
     private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {

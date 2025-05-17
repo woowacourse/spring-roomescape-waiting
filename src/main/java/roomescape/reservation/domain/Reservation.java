@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -61,9 +62,19 @@ public class Reservation {
         this.state = state;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
-                       final BookingState state) {
-        this(null, date, time, theme, member, state);
+    public static Reservation createForRegister(final LocalDate date, final ReservationTime time, final Theme theme,
+                                                final Member member,
+                                                final BookingState state) {
+        validateFutureReservation(date, time);
+        return new Reservation(null, date, time, theme, member, state);
+    }
+
+    private static void validateFutureReservation(final LocalDate date, final ReservationTime time) {
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        if (reservationDateTime.isBefore(now)) {
+            throw new IllegalArgumentException("예약 시간은 현재 시간보다 이후여야 합니다.");
+        }
     }
 
     private void validateMember(final Member member) {
