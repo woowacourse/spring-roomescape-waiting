@@ -4,11 +4,7 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 
@@ -32,7 +28,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    public Reservation() {
+    protected Reservation() {
         id = Id.issue();
     }
 

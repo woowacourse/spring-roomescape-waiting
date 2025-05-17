@@ -4,16 +4,8 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import roomescape.business.model.vo.Email;
-import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.Password;
-import roomescape.business.model.vo.UserName;
-import roomescape.business.model.vo.UserRole;
+import lombok.*;
+import roomescape.business.model.vo.*;
 
 @ToString(exclude = "password")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -33,7 +25,7 @@ public class User {
     @Embedded
     private Password password;
 
-    public User() {
+    protected User() {
         id = Id.issue();
     }
 

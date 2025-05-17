@@ -3,11 +3,7 @@ package roomescape.business.model.entity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ThemeName;
 
@@ -25,7 +21,7 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
         id = Id.issue();
     }
 
