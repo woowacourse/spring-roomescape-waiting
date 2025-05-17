@@ -8,12 +8,14 @@ import static roomescape.constant.TestData.RESERVATION_COUNT;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
@@ -26,7 +28,7 @@ import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
 @Sql("/data.sql")
-class JdbcReservationRepositoryTest {
+class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository repository;
