@@ -28,7 +28,7 @@ class ReservationStatusRestControllerTest {
                 RestAssured.given().log().all()
                         .contentType(ContentType.JSON)
                         .cookies(adminCookies)
-                        .when().get("/statuses")
+                        .when().get("/reservation-statuses")
                         .then().log().all()
                         .extract().jsonPath()
                         .getList(".", ReservationStatusResponse.class);

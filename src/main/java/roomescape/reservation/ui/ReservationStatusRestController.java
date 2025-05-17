@@ -18,7 +18,7 @@ public class ReservationStatusRestController {
 
     private final ReservationStatusService reservationStatusService;
 
-    @GetMapping("/statuses")
+    @GetMapping("/reservation-statuses")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
     public ResponseEntity<List<ReservationStatusResponse>> findAll() {
         return ResponseEntity.ok()
