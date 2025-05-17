@@ -10,10 +10,11 @@ public class AuthorizationExtractor {
 
     private static final String COOKIE = "Cookie";
     private static final String AUTHORIZATION_KEY = "token=";
+    private static final String SEMICOLON = ";";
 
     public String extract(final NativeWebRequest webRequest) {
         String cookie = webRequest.getHeader(COOKIE);
-        if (cookie != null && cookie.toLowerCase().startsWith(AUTHORIZATION_KEY.toLowerCase())) {
+        if (cookie != null && cookie.startsWith(AUTHORIZATION_KEY)) {
             return extractToken(cookie);
         }
         return null;
@@ -23,7 +24,7 @@ public class AuthorizationExtractor {
         Enumeration<String> headers = httpServletRequest.getHeaders(COOKIE);
         while (headers.hasMoreElements()) {
             String cookie = headers.nextElement();
-            if (cookie.toLowerCase().startsWith(AUTHORIZATION_KEY.toLowerCase())) {
+            if (cookie.startsWith(AUTHORIZATION_KEY)) {
                 return extractToken(cookie);
             }
         }
@@ -32,7 +33,7 @@ public class AuthorizationExtractor {
 
     private String extractToken(final String cookie) {
         String authHeaderValue = cookie.substring(AUTHORIZATION_KEY.length()).trim();
-        int semicolonIndex = authHeaderValue.indexOf(";");
+        int semicolonIndex = authHeaderValue.indexOf(SEMICOLON);
         if (semicolonIndex > 0) {
             authHeaderValue = authHeaderValue.substring(0, semicolonIndex);
         }
