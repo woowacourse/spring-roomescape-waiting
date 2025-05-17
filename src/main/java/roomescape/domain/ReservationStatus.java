@@ -2,7 +2,7 @@ package roomescape.domain;
 
 public enum ReservationStatus {
 
-    RESERVED("에약"),
+    RESERVED("예약"),
     NOT_RESERVED("미예약")
     ;
 
