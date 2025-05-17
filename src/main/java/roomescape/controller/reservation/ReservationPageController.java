@@ -18,4 +18,3 @@ public class ReservationPageController {
         return "reservation-mine";
     }
 }
-

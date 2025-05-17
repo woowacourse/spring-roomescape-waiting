@@ -155,4 +155,3 @@ class AdminControllerTest {
                 .statusCode(201);
     }
 }
-

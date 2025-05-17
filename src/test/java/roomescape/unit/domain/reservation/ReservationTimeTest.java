@@ -15,4 +15,3 @@ class ReservationTimeTest {
         assertThatThrownBy(() -> new ReservationTime(1L, null)).isInstanceOf(IllegalArgumentException.class);
     }
 }
-

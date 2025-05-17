@@ -132,4 +132,3 @@ class AuthenticationControllerTest {
                 .statusCode(400);
     }
 }
-

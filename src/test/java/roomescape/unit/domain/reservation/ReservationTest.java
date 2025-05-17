@@ -77,4 +77,3 @@ class ReservationTest {
         assertThat(result).isFalse();
     }
 }
-

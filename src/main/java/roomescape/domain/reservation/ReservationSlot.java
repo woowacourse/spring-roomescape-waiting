@@ -42,4 +42,3 @@ public class ReservationSlot {
         return Objects.hash(reservationId, time, reserved);
     }
 }
-

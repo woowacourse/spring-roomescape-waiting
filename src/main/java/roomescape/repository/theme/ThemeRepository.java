@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.domain.theme.Theme;
 
-
 public interface ThemeRepository {
 
     long save(Theme theme);

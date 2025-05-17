@@ -19,7 +19,6 @@ import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.unit.config.ServiceFixture;
 
-
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class ReservationTimeServiceTest {
 
