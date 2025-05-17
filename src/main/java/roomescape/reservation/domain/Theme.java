@@ -9,18 +9,27 @@ import jakarta.persistence.Id;
 @Entity
 public class Theme {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false)
     private String description;
+
     @Column(nullable = false)
     private String thumbnail;
 
     protected Theme() {}
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
+    public Theme(
+            final Long id,
+            final String name,
+            final String description,
+            final String thumbnail
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -28,7 +37,11 @@ public class Theme {
         validateTheme();
     }
 
-    public Theme(final String name, final String description, final String thumbnail) {
+    public Theme(
+            final String name,
+            final String description,
+            final String thumbnail
+    ) {
         this(null, name, description, thumbnail);
     }
 

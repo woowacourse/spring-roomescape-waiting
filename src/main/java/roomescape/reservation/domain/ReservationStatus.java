@@ -6,7 +6,7 @@ public enum ReservationStatus {
 
     private final String description;
 
-    ReservationStatus(String description) {
+    ReservationStatus(final String description) {
         this.description = description;
     }
 

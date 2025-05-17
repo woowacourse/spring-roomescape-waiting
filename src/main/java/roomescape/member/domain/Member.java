@@ -15,20 +15,34 @@ import jakarta.persistence.Id;
 @Entity
 public class Member {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Embedded @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private MemberName name;
-    @Embedded @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
     private Email email;
-    @Embedded @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
     private Password password;
+
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
     protected Member() {}
 
-    public Member(final Long id, final String name, final String email, final String password, final Role role) {
+    public Member(
+            final Long id,
+            final String name,
+            final String email,
+            final String password,
+            final Role role
+    ) {
         this.id = id;
         this.name = new MemberName(name);
         this.email = new Email(email);
@@ -36,7 +50,12 @@ public class Member {
         this.role = role;
     }
 
-    public Member(final String name, final String email, final String password, final Role role) {
+    public Member(
+            final String name,
+            final String email,
+            final String password,
+            final Role role
+    ) {
         this(null, name, email, password, role);
     }
 
@@ -45,15 +64,15 @@ public class Member {
     }
 
     public String getName() {
-        return name.name();
+        return name.value();
     }
 
     public String getEmail() {
-        return email.email();
+        return email.value();
     }
 
     public String getPassword() {
-        return password.password();
+        return password.value();
     }
 
     public Role getRole() {
