@@ -7,7 +7,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceInUseException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeCommandRepository;
 import roomescape.theme.domain.ThemeQueryRepository;
@@ -28,15 +27,13 @@ public class ThemeService {
 
         final Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
         final Long id = themeCommandRepository.save(theme);
-        final Theme found = themeQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
+        final Theme found = themeQueryRepository.getByIdOrThrow(id);
 
         return ThemeResponse.from(found);
     }
 
     public void delete(final Long id) {
-        themeQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다. id = " + id));
+        themeQueryRepository.getByIdOrThrow(id);
 
         try {
             themeCommandRepository.deleteById(id);

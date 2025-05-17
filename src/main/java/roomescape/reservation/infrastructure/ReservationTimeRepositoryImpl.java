@@ -2,9 +2,9 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
@@ -14,30 +14,31 @@ import roomescape.reservation.domain.ReservationTimeQueryRepository;
 @RequiredArgsConstructor
 public class ReservationTimeRepositoryImpl implements ReservationTimeCommandRepository, ReservationTimeQueryRepository {
 
-    private final JpaReservationTimeRepository jpaRepository;
+    private final JpaReservationTimeRepository jpaReservationTimeRepository;
 
     @Override
     public Long save(final ReservationTime reservationTime) {
-        return jpaRepository.save(reservationTime).getId();
+        return jpaReservationTimeRepository.save(reservationTime).getId();
     }
 
     @Override
     public void deleteById(final Long id) {
-        jpaRepository.deleteById(id);
+        jpaReservationTimeRepository.deleteById(id);
     }
 
     @Override
-    public Optional<ReservationTime> findById(final Long id) {
-        return jpaRepository.findById(id);
+    public ReservationTime getByIdOrThrow(Long id) {
+        return jpaReservationTimeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
     }
 
     @Override
     public List<ReservationTime> findAllByStartAt(final LocalTime startAt) {
-        return jpaRepository.findAllByStartAt(startAt);
+        return jpaReservationTimeRepository.findAllByStartAt(startAt);
     }
 
     @Override
     public List<ReservationTime> findAll() {
-        return jpaRepository.findAll();
+        return jpaReservationTimeRepository.findAll();
     }
 }

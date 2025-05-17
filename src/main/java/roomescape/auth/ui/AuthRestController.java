@@ -45,7 +45,8 @@ public class AuthRestController {
     public ResponseEntity<MemberResponse.Name> checkAccessToken(
             final MemberAuthInfo memberAuthInfo
     ) {
-        final MemberResponse.Name response = new MemberResponse.Name(authService.getMemberById(memberAuthInfo.id()));
+        final MemberResponse.Name response = new MemberResponse.Name(
+                authService.getMemberNameById(memberAuthInfo.id()));
 
         return ResponseEntity.ok(response);
     }

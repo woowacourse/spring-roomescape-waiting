@@ -7,7 +7,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceInUseException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.reservation.domain.ReservationTimeQueryRepository;
@@ -29,15 +28,13 @@ public class ReservationTimeService {
         }
 
         final Long id = reservationTimeCommandRepository.save(new ReservationTime(startAt));
-        final ReservationTime found = reservationTimeQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다. id = " + id));
+        final ReservationTime found = reservationTimeQueryRepository.getByIdOrThrow(id);
 
         return ReservationTimeResponse.from(found);
     }
 
     public void deleteById(final Long id) {
-        reservationTimeQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다. id = " + id));
+        reservationTimeQueryRepository.getByIdOrThrow(id);
 
         try {
             reservationTimeCommandRepository.deleteById(id);

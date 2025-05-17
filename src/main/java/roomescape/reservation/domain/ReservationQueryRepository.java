@@ -2,13 +2,12 @@ package roomescape.reservation.domain;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface ReservationQueryRepository {
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    Optional<Reservation> findById(Long id);
+    Reservation getByIdOrThrow(Long id);
 
     List<Reservation> findAll();
 

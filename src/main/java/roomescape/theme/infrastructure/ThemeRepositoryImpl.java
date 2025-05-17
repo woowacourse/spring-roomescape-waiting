@@ -2,9 +2,9 @@ package roomescape.theme.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeCommandRepository;
 import roomescape.theme.domain.ThemeQueryRepository;
@@ -31,8 +31,9 @@ public class ThemeRepositoryImpl implements ThemeCommandRepository, ThemeQueryRe
     }
 
     @Override
-    public Optional<Theme> findById(final Long id) {
-        return jpaThemeRepository.findById(id);
+    public Theme getByIdOrThrow(Long id) {
+        return jpaThemeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
     }
 
     @Override

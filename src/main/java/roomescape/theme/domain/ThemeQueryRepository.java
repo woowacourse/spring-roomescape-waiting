@@ -2,13 +2,12 @@ package roomescape.theme.domain;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface ThemeQueryRepository {
 
     boolean existsByName(String name);
 
-    Optional<Theme> findById(Long id);
+    Theme getByIdOrThrow(Long id);
 
     List<Theme> findAll();
 

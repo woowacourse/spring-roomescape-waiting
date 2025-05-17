@@ -5,9 +5,9 @@ import java.util.Optional;
 
 public interface MemberQueryRepository {
 
-    Optional<Member> findByEmail(String email);
+    Member getByIdOrThrow(Long id);
 
-    Optional<Member> findById(Long id);
+    Optional<Member> findByEmail(String email);
 
     List<Member> findAll();
 }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberQueryRepository;
 import roomescape.reservation.domain.BookingState;
@@ -54,17 +53,13 @@ public class ReservationService {
     private ReservationResponse registerReservation(final LocalDate date, final Long timeId, final Long themeId,
                                                     final Long memberId, final BookingState state) {
         validateNoDuplicateReservation(date, timeId, themeId);
-        final ReservationTime time = reservationTimeQueryRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
-        final Theme theme = themeQueryRepository.findById(themeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-        final Member member = memberQueryRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+        final ReservationTime time = reservationTimeQueryRepository.getByIdOrThrow(timeId);
+        final Theme theme = themeQueryRepository.getByIdOrThrow(themeId);
+        final Member member = memberQueryRepository.getByIdOrThrow(memberId);
         final Reservation reservation = Reservation.createForRegister(date, time, theme, member, state);
 
         final Long id = reservationCommandRepository.save(reservation);
-        final Reservation found = reservationQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+        final Reservation found = reservationQueryRepository.getByIdOrThrow(id);
 
         return ReservationResponse.from(found);
     }
@@ -76,10 +71,8 @@ public class ReservationService {
     }
 
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
-        final Reservation reservation = reservationQueryRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
-        final Member member = memberQueryRepository.findById(memberAuthInfo.id())
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+        final Reservation reservation = reservationQueryRepository.getByIdOrThrow(reservationId);
+        final Member member = memberQueryRepository.getByIdOrThrow(memberAuthInfo.id());
 
         if (member.isAdmin()) {
             reservationCommandRepository.deleteById(reservationId);

@@ -27,9 +27,8 @@ public class AuthService {
         return authTokenProvider.createAccessToken(member.getId().toString(), member.getRole());
     }
 
-    public String getMemberById(final Long id) {
-        return memberQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원이 존재하지 않습니다."))
+    public String getMemberNameById(final Long id) {
+        return memberQueryRepository.getByIdOrThrow(id)
                 .getName();
     }
 }

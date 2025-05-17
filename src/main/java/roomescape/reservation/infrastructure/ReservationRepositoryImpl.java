@@ -2,9 +2,9 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
@@ -35,8 +35,9 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     }
 
     @Override
-    public Optional<Reservation> findById(final Long id) {
-        return jpaReservationRepository.findById(id);
+    public Reservation getByIdOrThrow(Long id) {
+        return jpaReservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
     }
 
     @Override
