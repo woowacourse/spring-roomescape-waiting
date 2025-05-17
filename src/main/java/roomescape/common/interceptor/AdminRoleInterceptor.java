@@ -9,7 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.common.exception.MissingLoginException;
 import roomescape.common.exception.NoPermissionException;
 import roomescape.member.service.AuthService;
-import roomescape.member.service.dto.LoginMemberInfo;
+import roomescape.member.service.dto.TokenInfo;
 
 public class AdminRoleInterceptor implements HandlerInterceptor {
 
@@ -27,8 +27,8 @@ public class AdminRoleInterceptor implements HandlerInterceptor {
                 .findAny()
                 .orElseThrow(MissingLoginException::new)
                 .getValue();
-        LoginMemberInfo loginMember = authService.getLoginMemberInfoByToken(token);
-        if (loginMember.isNotAdmin()) {
+        TokenInfo tokenInfo = authService.getTokenInfo(token);
+        if (tokenInfo.isNotAdmin()) {
             throw new NoPermissionException();
         }
         return true;

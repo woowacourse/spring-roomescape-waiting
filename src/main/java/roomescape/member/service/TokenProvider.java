@@ -1,8 +1,11 @@
 package roomescape.member.service;
 
+import roomescape.member.domain.Member;
+import roomescape.member.service.dto.TokenInfo;
+
 public interface TokenProvider {
 
-    String createToken(String payload);
+    String createToken(Member member);
 
-    String parsePayload(String token);
+    TokenInfo parsePayload(String token);
 }
