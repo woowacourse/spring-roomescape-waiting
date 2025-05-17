@@ -12,10 +12,11 @@ public record ReservationWithStatusResponse(
         String status
 ) {
     public static ReservationWithStatusResponse from(Reservation reservation) {
-        ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getReservationTime());
-        return new ReservationWithStatusResponse(reservation.getId(), reservation.getMember().getName(),
+        return new ReservationWithStatusResponse(
+                reservation.getId(),
+                reservation.getMember().getName(),
                 reservation.getDate(),
-                dto,
+                ReservationTimeResponse.from(reservation.getReservationTime()),
                 reservation.getTheme().getName(),
                 "예약"
         );
