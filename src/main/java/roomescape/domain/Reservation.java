@@ -52,6 +52,17 @@ public class Reservation {
         this.status = status;
     }
 
+    public static Reservation makeTransientReserve(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(
+                null,
+                member,
+                date,
+                time,
+                theme,
+                ReservationStatus.RESERVED
+        );
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) {

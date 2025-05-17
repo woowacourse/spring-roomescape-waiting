@@ -48,14 +48,7 @@ public class ReservationService {
         validateUniqueReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
 
-        Reservation reservation = new Reservation(
-                null,
-                member,
-                createReservationParam.date(),
-                reservationTime,
-                theme,
-                ReservationStatus.RESERVED
-        );
+        Reservation reservation = Reservation.makeTransientReserve(member, createReservationParam.date(), reservationTime, theme);
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return savedReservation.getId();
