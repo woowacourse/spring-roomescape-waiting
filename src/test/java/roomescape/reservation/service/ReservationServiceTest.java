@@ -54,7 +54,7 @@ public class ReservationServiceTest {
         ReservationTime savedReservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme savedTheme = new Theme(1L, "test", "test", "test");
         Reservation savedReservation = new Reservation(1L, 예약날짜_내일.getDate(), savedReservationTime, savedTheme,
-                savedMember, ReservationStatus.예약);
+                savedMember, ReservationStatus.RESERVATION);
         when(reservationRepository.existsByReservationDateAndReservationTimeId(any(), any())).thenReturn(false);
         when(memberService.findById(any(Long.class))).thenReturn(savedMember);
         when(reservationTimeService.getReservationTime(any(Long.class))).thenReturn(savedReservationTime);

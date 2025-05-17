@@ -79,12 +79,15 @@ public class ThemeServiceTest {
         Member member = new Member(1L, new Name("테스터"), new Email("test@test.com"), new Password("1234"), Role.MEMBER);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
 
-        Reservation r1 = Reservation.create(now.minusDays(1), time, themeRecentMost, member, ReservationStatus.예약);
-        Reservation r2 = Reservation.create(now.minusDays(2), time, themeRecentMost, member, ReservationStatus.예약);
-        Reservation r3 = Reservation.create(now.minusDays(3), time, themeRecentMost, member, ReservationStatus.예약);
+        Reservation r1 = Reservation.create(now.minusDays(1), time, themeRecentMost, member,
+                ReservationStatus.RESERVATION);
+        Reservation r2 = Reservation.create(now.minusDays(2), time, themeRecentMost, member,
+                ReservationStatus.RESERVATION);
+        Reservation r3 = Reservation.create(now.minusDays(3), time, themeRecentMost, member,
+                ReservationStatus.RESERVATION);
 
-        Reservation r4 = Reservation.create(now.minusDays(5), time, themeMedium, member, ReservationStatus.예약);
-        Reservation r5 = Reservation.create(now.minusDays(6), time, themeMedium, member, ReservationStatus.예약);
+        Reservation r4 = Reservation.create(now.minusDays(5), time, themeMedium, member, ReservationStatus.RESERVATION);
+        Reservation r5 = Reservation.create(now.minusDays(6), time, themeMedium, member, ReservationStatus.RESERVATION);
 
         List<Reservation> recentReservations = List.of(
                 r1, r2, r3, r4, r5

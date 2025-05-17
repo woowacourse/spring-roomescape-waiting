@@ -50,7 +50,7 @@ class ReservationTimeRepositoryTest {
 
         time1 = new ReservationTime(null, LocalTime.of(10, 0));
         time2 = new ReservationTime(null, LocalTime.of(11, 0));
-        reservationStatus = ReservationStatus.예약;
+        reservationStatus = ReservationStatus.RESERVATION;
 
         em.persist(theme);
         em.persist(member);

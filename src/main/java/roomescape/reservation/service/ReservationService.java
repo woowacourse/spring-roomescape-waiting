@@ -54,7 +54,7 @@ public class ReservationService {
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.getTheme(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member, ReservationStatus.예약));
+                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
 
         return ReservationResponse.from(created);
     }
@@ -72,7 +72,7 @@ public class ReservationService {
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.getTheme(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member, ReservationStatus.예약));
+                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
 
         return ReservationResponse.from(created);
     }

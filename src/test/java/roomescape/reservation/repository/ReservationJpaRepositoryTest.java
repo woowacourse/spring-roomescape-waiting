@@ -52,10 +52,10 @@ class ReservationJpaRepositoryTest {
         );
         theme = themeRepository.save(new Theme("공포", "ss", "ss"));
         reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.예약));
+                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
         reservationRepository.save(
                 Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member,
-                        ReservationStatus.예약));
+                        ReservationStatus.RESERVATION));
     }
 
     @Test
@@ -73,27 +73,27 @@ class ReservationJpaRepositoryTest {
     void 최근_일주일_예약을_가져온다() {
         //given
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(2L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(3L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(4L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(5L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(6L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(7L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(8L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(9L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(10L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(11L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(12L), reservationTime, theme, member,
-                ReservationStatus.예약));
+                ReservationStatus.RESERVATION));
 
         LocalDate endDate = LocalDate.now().minusDays(1L);
         LocalDate startDate = LocalDate.now().minusDays(7L);

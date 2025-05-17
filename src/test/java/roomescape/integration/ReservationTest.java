@@ -184,7 +184,7 @@ public class ReservationTest extends BaseTest {
 
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
         reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.예약));
+                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
 
         List<ReservationResponse> response = RestAssured.given().log().all()
                 .when().get("/reservations")
