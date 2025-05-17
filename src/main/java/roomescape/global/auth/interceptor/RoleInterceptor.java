@@ -2,6 +2,7 @@ package roomescape.global.auth.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.global.auth.annotation.RequireRole;
@@ -28,16 +29,16 @@ public class RoleInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        Class<?> declaringClass = handlerMethod.getMethod().getDeclaringClass();
-        if (!declaringClass.isAnnotationPresent(RequireRole.class)) {
+        Method method = handlerMethod.getMethod();
+        if (!method.isAnnotationPresent(RequireRole.class)) {
             return true;
         }
 
-        MemberRole memberRole = declaringClass.getAnnotation(RequireRole.class).value();
-        return validateAdminToken(request, memberRole);
+        MemberRole memberRole = method.getAnnotation(RequireRole.class).value();
+        return validateToken(request, memberRole);
     }
 
-    private boolean validateAdminToken(final HttpServletRequest request, final MemberRole memberRole) {
+    private boolean validateToken(final HttpServletRequest request, final MemberRole memberRole) {
         String token = authorizationExtractor.extract(request);
         if (token == null) {
             throw new UnAuthorizedException("토큰이 존재하지 않습니다.");
