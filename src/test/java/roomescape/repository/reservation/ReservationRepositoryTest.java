@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,58 +32,58 @@ class ReservationRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
-    private Theme theme1;
-    private Theme theme2;
-    private Theme theme3;
     private Member member;
-    private ReservationTime time1;
-    private ReservationTime time2;
 
     @BeforeEach
     void setUp() {
-        theme1 = new Theme("bestTheme1", "description", "thumbnail1");
-        theme2 = new Theme("bestTheme2", "description", "thumbnail2");
-        theme3 = new Theme("bestTheme3", "description", "thumbnail3");
-        entityManager.persist(theme1);
-        entityManager.persist(theme2);
-        entityManager.persist(theme3);
-
         member = new Member(null, "name", "email@email.com", "password", Role.USER);
         memberRepository.save(member);
-
-        time1 = new ReservationTime(LocalTime.of(10, 0));
-        time2 = new ReservationTime(LocalTime.of(12, 0));
-        entityManager.persist(time1);
-        entityManager.persist(time2);
-
-        createReservations(theme1, 3);
-        createReservations(theme2, 2);
-        createReservations(theme3, 1);
-
-        entityManager.flush();
-        entityManager.clear();
     }
-    
+
     @Test
     @DisplayName("특정 기간 동안 가장 많이 예약된 상위 테마들을 조회할 수 있다")
     void findTopThemesByReservationCountBetweenTest() {
         // given
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = LocalDate.now().plusDays(5);
+        LocalDate startDate = LocalDate.of(2025, 5, 1);
+        LocalDate endDate = LocalDate.of(2025, 5, 31);
+        LocalDate outOfRangeDate = LocalDate.of(2025, 6, 1);
+
+        Theme[] themes = new Theme[12];
+        for (int i = 0; i < 12; i++) {
+            themes[i] = new Theme("theme" + i, "description", "thumbnail");
+            entityManager.persist(themes[i]);
+        }
+
+        for (int i = 0; i < 12; i++) {
+            createReservationsInRange(themes[i], 15 - i, startDate);
+        }
+
+        createReservationsInRange(themes[10], 20, outOfRangeDate);
+        createReservationsInRange(themes[11], 30, outOfRangeDate);
+
+        entityManager.flush();
+        entityManager.clear();
 
         // when
         List<Long> topThemeIds = reservationRepository.findTopThemesByReservationCountBetween(startDate, endDate);
 
         // then
-        assertThat(topThemeIds).hasSize(3);
-        assertThat(topThemeIds.get(0)).isEqualTo(theme1.getId());
-        assertThat(topThemeIds.get(1)).isEqualTo(theme2.getId());
-        assertThat(topThemeIds.get(2)).isEqualTo(theme3.getId());
+        Assertions.assertAll(
+                () -> {
+                    assertThat(topThemeIds).hasSize(10);
+                    for (int i = 0; i < 10; i++) {
+                        assertThat(topThemeIds.get(i)).isEqualTo(themes[i].getId());
+                    }
+                }
+        );
     }
 
-    private void createReservations(Theme theme, int count) {
+    private void createReservationsInRange(Theme theme, int count, LocalDate startDate) {
         for (int i = 0; i < count; i++) {
-            Reservation reservation = new Reservation(LocalDate.now().plusDays(i), time1, theme, member);
+            ReservationTime time = new ReservationTime(LocalTime.of(10, 0).plusHours(i % 8));
+            entityManager.persist(time);
+
+            Reservation reservation = new Reservation(startDate.plusDays(i % 7), time, theme, member);
             entityManager.persist(reservation);
         }
     }
