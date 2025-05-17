@@ -1,5 +1,6 @@
 package roomescape.reservation.presentation.controller;
 
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
@@ -33,7 +34,7 @@ public class ReservationTimeController {
     @Auth(Role.ADMIN)
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> createTime(
-            final @RequestBody ReservationTimeRequest reservationTimeRequest
+            final @RequestBody @Valid ReservationTimeRequest reservationTimeRequest
     ) {
         ReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(reservationTimeRequest);
 
