@@ -44,6 +44,6 @@ public class Reservation {
             ReservationTime time,
             Theme theme
     ) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.NOT_RESERVED);
+        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
     }
 }
