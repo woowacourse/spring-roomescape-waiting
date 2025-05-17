@@ -10,9 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.auth.ui.dto.LoginRequest;
 import roomescape.fixture.ui.LoginApiFixture;
 import roomescape.fixture.ui.MemberApiFixture;
 import roomescape.fixture.ui.ThemeApiFixture;
+import roomescape.member.ui.dto.SignUpRequest;
+import roomescape.theme.ui.dto.CreateThemeRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -23,11 +26,11 @@ class ThemeRestControllerTest {
     void 관리자_권한으로_테마를_추가한다() {
         final Map<String, String> cookies = LoginApiFixture.adminLoginAndGetCookies();
 
-        final Map<String, String> themeParams = ThemeApiFixture.themeParams1();
+        final CreateThemeRequest themeRequest = ThemeApiFixture.themeRequest1();
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(themeParams)
+                .body(themeRequest)
                 .when().post("/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -35,11 +38,12 @@ class ThemeRestControllerTest {
 
     @Test
     void 회원_권한으로_테마_추가를_시도하면_UNATHORIZED_응답을_받는다() {
-        final Map<String, String> signUpParams = MemberApiFixture.signUpParams1();
-        MemberApiFixture.signUp(signUpParams);
+        final SignUpRequest signUpRequest = MemberApiFixture.signUpRequest1();
+        MemberApiFixture.signUp(signUpRequest);
 
-        final Map<String, String> cookies = LoginApiFixture.memberLoginAndGetCookies(signUpParams);
-        final Map<String, String> themeParams = ThemeApiFixture.themeParams1();
+        final Map<String, String> cookies = LoginApiFixture.memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
+        final CreateThemeRequest themeParams = ThemeApiFixture.themeRequest1();
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
@@ -53,7 +57,7 @@ class ThemeRestControllerTest {
     @Test
     void 이미_존재하는_테마_이름으로_테마_생성을_요청하면_CONFLICT_응답을_받는다() {
         final Map<String, String> cookies = LoginApiFixture.adminLoginAndGetCookies();
-        final Map<String, String> themeParams = ThemeApiFixture.themeParams1();
+        final CreateThemeRequest themeParams = ThemeApiFixture.themeRequest1();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -76,7 +80,7 @@ class ThemeRestControllerTest {
     void 권리자_권한으로_테마를_삭제한다() {
         final Map<String, String> cookies = LoginApiFixture.adminLoginAndGetCookies();
 
-        final Map<String, String> themeParams = ThemeApiFixture.themeParams1();
+        final CreateThemeRequest themeParams = ThemeApiFixture.themeRequest1();
         final Integer themeId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
@@ -119,7 +123,7 @@ class ThemeRestControllerTest {
                 .statusCode(HttpStatus.OK.value())
                 .extract().path("size()");
 
-        final Map<String, String> themeParams = ThemeApiFixture.themeParams1();
+        final CreateThemeRequest themeParams = ThemeApiFixture.themeRequest1();
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)

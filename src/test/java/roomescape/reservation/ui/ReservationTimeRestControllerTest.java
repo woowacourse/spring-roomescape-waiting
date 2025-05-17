@@ -11,9 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.auth.ui.dto.LoginRequest;
 import roomescape.fixture.ui.LoginApiFixture;
 import roomescape.fixture.ui.MemberApiFixture;
 import roomescape.fixture.ui.ReservationTimeApiFixture;
+import roomescape.member.ui.dto.SignUpRequest;
+import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -24,12 +27,12 @@ class ReservationTimeRestControllerTest {
     void 관리자_권한으로_예약_시간을_추가한다() {
         final Map<String, String> cookies = LoginApiFixture.adminLoginAndGetCookies();
 
-        final Map<String, String> reservationTimeParams = ReservationTimeApiFixture.reservationTimeParams1();
+        final CreateReservationTimeRequest reservationTimeRequest = ReservationTimeApiFixture.reservationTimeRequest1();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(reservationTimeParams)
+                .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -37,16 +40,17 @@ class ReservationTimeRestControllerTest {
 
     @Test
     void 회원_권한으로_예약_시간을_추가할_수_없다() {
-        final Map<String, String> singUpParams = MemberApiFixture.signUpParams1();
-        MemberApiFixture.signUp(singUpParams);
-        final Map<String, String> cookies = LoginApiFixture.memberLoginAndGetCookies(singUpParams);
+        final SignUpRequest signUpRequest = MemberApiFixture.signUpRequest1();
+        MemberApiFixture.signUp(signUpRequest);
+        final Map<String, String> cookies = LoginApiFixture.memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
 
-        final Map<String, String> reservationTimeParams = ReservationTimeApiFixture.reservationTimeParams1();
+        final CreateReservationTimeRequest reservationTimeRequest = ReservationTimeApiFixture.reservationTimeRequest1();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(reservationTimeParams)
+                .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -56,13 +60,13 @@ class ReservationTimeRestControllerTest {
     void 전체_예약_시간을_조회한다() {
         final Map<String, String> cookies = LoginApiFixture.adminLoginAndGetCookies();
 
-        final Map<String, String> reservationTimeParams = ReservationTimeApiFixture.reservationTimeParams1();
-        final Map<String, String> reservationTimeParams2 = ReservationTimeApiFixture.reservationTimeParams2();
+        final CreateReservationTimeRequest reservationTimeRequest1 = ReservationTimeApiFixture.reservationTimeRequest1();
+        final CreateReservationTimeRequest reservationTimeRequest2 = ReservationTimeApiFixture.reservationTimeRequest2();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(reservationTimeParams)
+                .body(reservationTimeRequest1)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -70,7 +74,7 @@ class ReservationTimeRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(reservationTimeParams2)
+                .body(reservationTimeRequest2)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -87,12 +91,12 @@ class ReservationTimeRestControllerTest {
     void 관리자_권한으로_예약_시간을_삭제한다() {
         final Map<String, String> cookies = LoginApiFixture.adminLoginAndGetCookies();
 
-        final Map<String, String> reservationTimeParams = ReservationTimeApiFixture.reservationTimeParams1();
+        final CreateReservationTimeRequest reservationTimeRequest = ReservationTimeApiFixture.reservationTimeRequest1();
 
         final Integer id = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(reservationTimeParams)
+                .body(reservationTimeRequest)
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())

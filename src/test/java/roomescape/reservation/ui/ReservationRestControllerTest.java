@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.ui.LoginApiFixture.adminLoginAndGetCookies;
 import static roomescape.fixture.ui.LoginApiFixture.memberLoginAndGetCookies;
 import static roomescape.fixture.ui.MemberApiFixture.signUpMembers;
-import static roomescape.fixture.ui.MemberApiFixture.signUpParams1;
-import static roomescape.fixture.ui.MemberApiFixture.signUpParams2;
+import static roomescape.fixture.ui.MemberApiFixture.signUpRequest1;
+import static roomescape.fixture.ui.MemberApiFixture.signUpRequest2;
 import static roomescape.fixture.ui.ReservationTimeApiFixture.createReservationTimes;
 import static roomescape.fixture.ui.ThemeApiFixture.createThemes;
 
@@ -26,6 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.auth.ui.dto.LoginRequest;
+import roomescape.member.ui.dto.SignUpRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -52,7 +54,9 @@ class ReservationRestControllerTest {
 
     @Test
     void 예약을_추가한다() {
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> reservationParams = reservationParams1();
 
         RestAssured.given().log().all()
@@ -66,7 +70,9 @@ class ReservationRestControllerTest {
 
     @Test
     void 과거_시간으로_예약을_추가할_수_없다() {
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> reservationParams = pastReservationParams();
 
         RestAssured.given().log().all()
@@ -93,7 +99,9 @@ class ReservationRestControllerTest {
     @Test
     void 예약을_삭제한다() {
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> reservationParams = reservationParams1();
 
         // member가 예약 추가
@@ -132,7 +140,9 @@ class ReservationRestControllerTest {
 
     @Test
     void 삭제할_예약이_없는_경우_not_found를_반환한다() {
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -145,7 +155,9 @@ class ReservationRestControllerTest {
     @Test
     void 나의_예약_목록을_조회한다() {
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> reservationParams = reservationParams1();
 
         final int sizeBeforeCreate = RestAssured.given().log().all()
@@ -178,8 +190,13 @@ class ReservationRestControllerTest {
 
     @Test
     void 예약_가능한_시간_목록을_조회한다() {
-        final Map<String, String> member1Cookies = memberLoginAndGetCookies(signUpParams1());
-        final Map<String, String> member2Cookies = memberLoginAndGetCookies(signUpParams2());
+        final SignUpRequest signUpRequest1 = signUpRequest1();
+        final Map<String, String> member1Cookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest1.email(), signUpRequest1.password()));
+        final SignUpRequest signUpRequest2 = signUpRequest2();
+        final Map<String, String> member2Cookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest2.email(), signUpRequest2.password()));
+
         final Map<String, String> reservationParams1 = reservationParams1();
         final Map<String, String> reservationParams2 = reservationParams2();
 
@@ -221,7 +238,9 @@ class ReservationRestControllerTest {
 
     @Test
     void 특정_회원의_예약_목록을_조회한다() {
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> reservationParams1 = reservationParams1();
 
         RestAssured.given().log().all()

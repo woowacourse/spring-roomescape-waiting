@@ -4,7 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.ui.LoginApiFixture.adminLoginAndGetCookies;
 import static roomescape.fixture.ui.LoginApiFixture.memberLoginAndGetCookies;
 import static roomescape.fixture.ui.MemberApiFixture.signUpMembers;
-import static roomescape.fixture.ui.MemberApiFixture.signUpParams1;
+import static roomescape.fixture.ui.MemberApiFixture.signUpRequest1;
 import static roomescape.fixture.ui.ReservationTimeApiFixture.createReservationTimes;
 import static roomescape.fixture.ui.ThemeApiFixture.createThemes;
 
@@ -23,6 +23,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.auth.ui.dto.LoginRequest;
+import roomescape.member.ui.dto.SignUpRequest;
 import roomescape.reservation.domain.ReservationStatus;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -74,7 +76,9 @@ class AdminReservationRestControllerTest {
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
 
         // 회원 권한
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(memberCookies)
@@ -86,7 +90,9 @@ class AdminReservationRestControllerTest {
 
     @Test
     void 예약을_삭제한다() {
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
         final Map<String, String> reservationParams = confirmedReservationParams();
 
@@ -130,7 +136,9 @@ class AdminReservationRestControllerTest {
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
 
         // 회원 권한
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        final SignUpRequest signUpRequest = signUpRequest1();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(
+                new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(memberCookies)

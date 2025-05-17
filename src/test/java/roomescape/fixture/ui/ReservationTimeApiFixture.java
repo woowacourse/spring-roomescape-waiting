@@ -3,54 +3,56 @@ package roomescape.fixture.ui;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
+import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 
 public class ReservationTimeApiFixture {
-    
-    public static final List<Map<String, String>> RESERVATIONS_TIME_PARAMS_LIST = List.of(
-            Map.of("startAt", "10:00"),
-            Map.of("startAt", "11:00"),
-            Map.of("startAt", "12:00"),
-            Map.of("startAt", "13:00"),
-            Map.of("startAt", "14:00"),
-            Map.of("startAt", "15:00"),
-            Map.of("startAt", "16:00"),
-            Map.of("startAt", "17:00"),
-            Map.of("startAt", "18:00"),
-            Map.of("startAt", "19:00"),
-            Map.of("startAt", "20:00"),
-            Map.of("startAt", "21:00"),
-            Map.of("startAt", "22:00")
+
+    public static final List<CreateReservationTimeRequest> RESERVATIONS_TIME_REQUESTS = List.of(
+            new CreateReservationTimeRequest(LocalTime.of(10, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(11, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(12, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(13, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(14, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(15, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(16, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(17, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(18, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(19, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(20, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(21, 0)),
+            new CreateReservationTimeRequest(LocalTime.of(22, 0))
     );
 
     private ReservationTimeApiFixture() {
     }
 
-    public static Map<String, String> reservationTimeParams1() {
-        if (RESERVATIONS_TIME_PARAMS_LIST.isEmpty()) {
+    public static CreateReservationTimeRequest reservationTimeRequest1() {
+        if (RESERVATIONS_TIME_REQUESTS.isEmpty()) {
             throw new IllegalStateException("예약 픽스처의 개수가 부족합니다.");
         }
-        return RESERVATIONS_TIME_PARAMS_LIST.get(0);
+        return RESERVATIONS_TIME_REQUESTS.get(0);
     }
 
-    public static Map<String, String> reservationTimeParams2() {
-        if (RESERVATIONS_TIME_PARAMS_LIST.size() < 2) {
+    public static CreateReservationTimeRequest reservationTimeRequest2() {
+        if (RESERVATIONS_TIME_REQUESTS.size() < 2) {
             throw new IllegalStateException("예약 픽스처의 개수가 부족합니다.");
         }
-        return RESERVATIONS_TIME_PARAMS_LIST.get(1);
+        return RESERVATIONS_TIME_REQUESTS.get(1);
     }
 
     public static List<ValidatableResponse> createReservationTimes(
             final Map<String, String> cookies,
             final int count
     ) {
-        if (count > RESERVATIONS_TIME_PARAMS_LIST.size()) {
-            throw new IllegalStateException("예약 픽스처의 개수는 최대 " + RESERVATIONS_TIME_PARAMS_LIST.size() + "개 입니다.");
+        if (count > RESERVATIONS_TIME_REQUESTS.size()) {
+            throw new IllegalStateException("예약 픽스처의 개수는 최대 " + RESERVATIONS_TIME_REQUESTS.size() + "개 입니다.");
         }
 
-        return RESERVATIONS_TIME_PARAMS_LIST.stream()
+        return RESERVATIONS_TIME_REQUESTS.stream()
                 .limit(count)
                 .map(reservationTimeParams -> {
                     return RestAssured.given().log().all()
