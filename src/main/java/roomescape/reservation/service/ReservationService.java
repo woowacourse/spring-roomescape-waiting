@@ -30,7 +30,7 @@ public class ReservationService {
             final DateTime dateTime, final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository,
             final MemberRepository memberRepository
-            ) {
+    ) {
         this.dateTime = dateTime;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;

@@ -30,7 +30,8 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    protected Theme() {}
+    protected Theme() {
+    }
 
     public static Theme createWithoutId(final String name, final String description, final String thumbnail) {
         validate(name, description, thumbnail);
