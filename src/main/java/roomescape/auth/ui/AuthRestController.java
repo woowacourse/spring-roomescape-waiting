@@ -15,7 +15,7 @@ import roomescape.auth.application.AuthService;
 import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
-import roomescape.auth.ui.dto.CreateAccessTokenRequest;
+import roomescape.auth.ui.dto.LoginRequest;
 import roomescape.member.ui.dto.MemberResponse;
 
 @RestController
@@ -27,7 +27,7 @@ public class AuthRestController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> createAccessToken(
-            @RequestBody @Valid final CreateAccessTokenRequest request
+            @RequestBody @Valid final LoginRequest request
     ) {
         final String authToken = authService.createAccessToken(request);
 

@@ -2,7 +2,7 @@ package roomescape.auth.ui.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record CreateAccessTokenRequest(
+public record LoginRequest(
         @NotBlank
         String email,
         @NotBlank
