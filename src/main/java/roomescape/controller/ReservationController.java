@@ -35,10 +35,10 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findReservations(@RequestParam(required = false) Long memberId,
-                                                                      @RequestParam(required = false) Long themeId,
-                                                                      @RequestParam(required = false) LocalDate dateFrom,
-                                                                      @RequestParam(required = false) LocalDate dateTo) {
+    public ResponseEntity<List<ReservationResponse>> getReservations(@RequestParam(required = false) Long memberId,
+                                                                     @RequestParam(required = false) Long themeId,
+                                                                     @RequestParam(required = false) LocalDate dateFrom,
+                                                                     @RequestParam(required = false) LocalDate dateTo) {
         List<ReservationResult> reservationResults = reservationService.getReservationsInConditions(memberId, themeId, dateFrom, dateTo);
         List<ReservationResponse> reservationResponses = reservationResults.stream()
                 .map(ReservationResponse::from)
