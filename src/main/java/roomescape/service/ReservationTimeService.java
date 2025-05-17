@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DeletionNotAllowedException;
@@ -16,6 +17,7 @@ import roomescape.service.result.AvailableReservationTimeResult;
 import roomescape.service.result.ReservationTimeResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -27,11 +29,20 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public Long create(CreateReservationTimeParam createReservationTimeParam) {
         ReservationTime reservationTime = new ReservationTime(createReservationTimeParam.startAt());
 
         ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         return savedReservationTime.getId();
+    }
+
+    @Transactional
+    public void deleteById(Long reservationTimeId) {
+        if (reservationRepository.existsByTimeId(reservationTimeId)) {
+            throw new DeletionNotAllowedException("해당 예약 시간에 예약이 존재합니다.");
+        }
+        reservationTimeRepository.deleteById(reservationTimeId);
     }
 
     public ReservationTimeResult findById(Long reservationTimeId) {
@@ -65,13 +76,6 @@ public class ReservationTimeService {
                         )
                 )
                 .toList();
-    }
-
-    public void deleteById(Long reservationTimeId) {
-        if (reservationRepository.existsByTimeId(reservationTimeId)) {
-            throw new DeletionNotAllowedException("해당 예약 시간에 예약이 존재합니다.");
-        }
-        reservationTimeRepository.deleteById(reservationTimeId);
     }
 
     private ReservationTimeResult toReservationResult(ReservationTime reservationTime) {

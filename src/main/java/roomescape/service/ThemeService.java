@@ -1,18 +1,19 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.persistence.ReservationRepository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.persistence.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundThemeException;
+import roomescape.persistence.ReservationRepository;
+import roomescape.persistence.ThemeRepository;
 import roomescape.service.param.CreateThemeParam;
 import roomescape.service.result.ThemeResult;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int RANK_LIMIT = 10;
@@ -25,13 +26,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ThemeResult> findAll() {
-        List<Theme> themes = themeRepository.findAll();
-        return themes.stream()
-                .map(ThemeResult::from)
-                .toList();
-    }
-
+    @Transactional
     public Long create(CreateThemeParam createThemeParam) {
         Theme theme = new Theme(createThemeParam.name(), createThemeParam.description(), createThemeParam.thumbnail());
         Theme savedTheme = themeRepository.save(theme);
@@ -39,18 +34,26 @@ public class ThemeService {
         return savedTheme.getId();
     }
 
-    public ThemeResult findById(Long id) {
-        Theme theme = themeRepository.findById(id).orElseThrow(
-                () -> new NotFoundThemeException("id에 해당하는 Theme이 없습니다."));
-
-        return ThemeResult.from(theme);
-    }
-
+    @Transactional
     public void deleteById(final Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
             throw new DeletionNotAllowedException("해당 테마에 예약이 존재합니다.");
         }
         themeRepository.deleteById(themeId);
+    }
+
+    public List<ThemeResult> findAll() {
+        List<Theme> themes = themeRepository.findAll();
+        return themes.stream()
+                .map(ThemeResult::from)
+                .toList();
+    }
+
+    public ThemeResult findById(Long id) {
+        Theme theme = themeRepository.findById(id).orElseThrow(
+                () -> new NotFoundThemeException("id에 해당하는 Theme이 없습니다."));
+
+        return ThemeResult.from(theme);
     }
 
     public List<ThemeResult> findRankByTheme() {

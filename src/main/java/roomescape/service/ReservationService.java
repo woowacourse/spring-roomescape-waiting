@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -23,6 +24,7 @@ import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationTimeRepository reservationTImeRepository;
@@ -39,6 +41,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public Long create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId())
                 .orElseThrow(
@@ -64,6 +67,7 @@ public class ReservationService {
         return savedReservation.getId();
     }
 
+    @Transactional
     public void deleteById(Long reservationId) {
         reservationRepository.deleteById(reservationId);
     }
