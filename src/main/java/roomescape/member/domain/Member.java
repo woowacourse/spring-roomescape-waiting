@@ -42,10 +42,6 @@ public class Member {
         return new Member(null, new Name(name), new Email(email), new Password(password));
     }
 
-    public void addReservation(final Reservation reservation) {
-        reservations.add(reservation);
-    }
-
     public boolean isSamePassword(final String password) {
         return this.password.getPassword().equals(password);
     }

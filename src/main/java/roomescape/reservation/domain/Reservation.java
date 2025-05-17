@@ -58,7 +58,12 @@ public class Reservation {
         this.theme = theme;
         this.member = member;
         this.status = status;
-        this.member.addReservation(this);
+        setMember(member);
+    }
+
+    private void setMember(Member member) {
+        this.member = member;
+        member.getReservations().add(this);
     }
 
     private void validateIsNonNull(final Object object) {
