@@ -35,7 +35,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Reservation() {
+    protected Reservation() {
 
     }
 
