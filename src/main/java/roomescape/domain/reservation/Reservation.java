@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
@@ -25,9 +26,11 @@ public class Reservation {
     private String name;
     private LocalDate date;
 
+    @JoinColumn(name = "time_id")
     @ManyToOne
     private ReservationTime time;
 
+    @JoinColumn(name = "theme_id")
     @ManyToOne
     private Theme theme;
 
