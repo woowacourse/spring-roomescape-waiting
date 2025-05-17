@@ -50,13 +50,7 @@ public class ReservationService {
         }
 
         Member member = memberService.findById(memberId);
-        ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
-        ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
-        Theme theme = themeService.getTheme(request.themeId());
-        Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
-
-        return ReservationResponse.from(created);
+        return createReservation(request, reservationDate, member);
     }
 
     public ReservationResponse createByName(String name, ReservationRequest request) {
@@ -68,13 +62,7 @@ public class ReservationService {
         }
 
         Member member = memberService.findByName(name);
-        ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
-        ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
-        Theme theme = themeService.getTheme(request.themeId());
-        Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
-
-        return ReservationResponse.from(created);
+        return createReservation(request, reservationDate, member);
     }
 
     public void deleteById(Long id) {
@@ -99,5 +87,16 @@ public class ReservationService {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
+    }
+
+    private ReservationResponse createReservation(ReservationRequest request, ReservationDate reservationDate,
+                                                  Member member) {
+        ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
+        ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
+        Theme theme = themeService.getTheme(request.themeId());
+        Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
+                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
+
+        return ReservationResponse.from(created);
     }
 }
