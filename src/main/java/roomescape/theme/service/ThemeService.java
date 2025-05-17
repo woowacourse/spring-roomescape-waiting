@@ -49,27 +49,28 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getPopularThemes() {
-        LocalDate now = LocalDate.now();
+        LocalDate endDate = LocalDate.now().minusDays(1L);
+        LocalDate startDate = LocalDate.now().minusDays(7L);
 
-        List<Reservation> reservations = reservationRepository.findAll();
+        List<Reservation> recentReservations = reservationRepository.findAllByReservationDateBetween(startDate,
+                endDate);
 
-        List<Reservation> recentReservations = reservations.stream()
-                .filter(reservation -> reservation.getDate().isBefore(now))
-                .filter(reservation -> reservation.getDate().isAfter(now.minusDays(8)))
-                .toList();
+        List<Theme> themesSortedByPopularity = sortThemesByReservationCount(recentReservations);
 
+        return ThemeResponse.from(themesSortedByPopularity);
+    }
+
+    private List<Theme> sortThemesByReservationCount(List<Reservation> recentReservations) {
         Map<Theme, Integer> themeCount = new HashMap<>();
 
         recentReservations
                 .forEach(reservation -> themeCount.put(reservation.getTheme(),
                         themeCount.getOrDefault(reservation.getTheme(), 0) + 1));
 
-        List<Theme> themesSortedByPopularity = themeCount.entrySet().stream()
+        return themeCount.entrySet().stream()
                 .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
-
-        return ThemeResponse.from(themesSortedByPopularity);
     }
 
 }

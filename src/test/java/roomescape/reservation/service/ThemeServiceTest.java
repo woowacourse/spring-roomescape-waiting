@@ -71,8 +71,9 @@ public class ThemeServiceTest {
 
         // given
         LocalDate now = LocalDate.now();
+        LocalDate endDate = now.minusDays(1L);
+        LocalDate startDate = now.minusDays(7L);
         Theme themeRecentMost = new Theme(1L, "최근인기", "desc", "img");
-        Theme themeOldMost = new Theme(2L, "예전인기", "desc", "img");
         Theme themeMedium = new Theme(3L, "보통", "desc", "img");
 
         Member member = new Member(1L, new Name("테스터"), new Email("test@test.com"), new Password("1234"), Role.MEMBER);
@@ -85,15 +86,12 @@ public class ThemeServiceTest {
         Reservation r4 = Reservation.create(now.minusDays(5), time, themeMedium, member, ReservationStatus.예약);
         Reservation r5 = Reservation.create(now.minusDays(6), time, themeMedium, member, ReservationStatus.예약);
 
-        Reservation o1 = Reservation.create(now.minusDays(10), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o2 = Reservation.create(now.minusDays(11), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o3 = Reservation.create(now.minusDays(12), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o4 = Reservation.create(now.minusDays(13), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o5 = Reservation.create(now.minusDays(14), time, themeOldMost, member, ReservationStatus.예약);
+        List<Reservation> recentReservations = List.of(
+                r1, r2, r3, r4, r5
+        );
 
-        List<Reservation> allReservations = List.of(r1, r2, r3, r4, r5, o1, o2, o3, o4, o5);
-
-        when(reservationRepository.findAll()).thenReturn(allReservations);
+        when(reservationRepository.findAllByReservationDateBetween(startDate, endDate))
+                .thenReturn(recentReservations);
 
         // when
         List<ThemeResponse> responses = themeService.getPopularThemes();

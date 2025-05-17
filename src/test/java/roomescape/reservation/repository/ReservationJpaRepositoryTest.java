@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.member.role.Role.ADMIN;
 import static roomescape.reservation.fixture.ReservationDateFixture.예약날짜_내일;
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -40,21 +39,23 @@ class ReservationJpaRepositoryTest {
     @Autowired
     ThemeRepository themeRepository;
 
-    @Autowired
-    EntityManager em;
+    private Member member;
+    private ReservationTime reservationTime;
+    private Theme theme;
 
     @BeforeEach
     void setUp() {
-        Member member = memberRepository.save(
+        member = memberRepository.save(
                 new Member(new Name("매트"), new Email("matt@kakao.com"), new Password("1234"), ADMIN));
-        ReservationTime time = reservationTimeRepository.save(
+        reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.of(10, 0))
         );
-        Theme theme = themeRepository.save(new Theme("공포", "ss", "ss"));
+        theme = themeRepository.save(new Theme("공포", "ss", "ss"));
         reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), time, theme, member, ReservationStatus.예약));
+                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.예약));
         reservationRepository.save(
-                Reservation.create(LocalDate.of(2002, 5, 1), time, theme, member, ReservationStatus.예약));
+                Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member,
+                        ReservationStatus.예약));
     }
 
     @Test
@@ -66,6 +67,42 @@ class ReservationJpaRepositoryTest {
         //then
         assertThat(reservations.size()).isEqualTo(1);
 
+    }
+
+    @Test
+    void 최근_일주일_예약을_가져온다() {
+        //given
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(2L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(3L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(4L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(5L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(6L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(7L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(8L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(9L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(10L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(11L), reservationTime, theme, member,
+                ReservationStatus.예약));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(12L), reservationTime, theme, member,
+                ReservationStatus.예약));
+
+        LocalDate endDate = LocalDate.now().minusDays(1L);
+        LocalDate startDate = LocalDate.now().minusDays(7L);
+
+        //when
+        List<Reservation> reservations = reservationRepository.findAllByReservationDateBetween(startDate, endDate);
+
+        //then
+        assertThat(reservations.size()).isEqualTo(7);
     }
 
 }
