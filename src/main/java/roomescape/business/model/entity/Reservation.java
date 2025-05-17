@@ -1,9 +1,6 @@
 package roomescape.business.model.entity;
 
-import jakarta.persistence.Embedded;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
@@ -15,6 +12,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = "id")
 @Getter
 @Entity
+@Table(name = "reservation")
 public class Reservation {
 
     @EmbeddedId

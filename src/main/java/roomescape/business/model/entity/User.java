@@ -1,11 +1,9 @@
 package roomescape.business.model.entity;
 
-import jakarta.persistence.Embedded;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import roomescape.business.model.vo.*;
+import roomescape.business.model.vo.Id;
 
 @ToString(exclude = "password")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

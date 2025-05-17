@@ -3,6 +3,7 @@ package roomescape.business.model.entity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ThemeName;
@@ -12,6 +13,7 @@ import roomescape.business.model.vo.ThemeName;
 @EqualsAndHashCode(of = "id")
 @Getter
 @Entity
+@Table(name = "theme")
 public class Theme {
 
     @EmbeddedId
