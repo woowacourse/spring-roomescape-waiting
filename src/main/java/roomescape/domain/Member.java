@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.util.Objects;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -19,13 +20,18 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
+
+    @Column(nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
     private MemberRole role;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
 
     public Member(final Long id, final String name, final MemberRole role, final String email, final String password) {
