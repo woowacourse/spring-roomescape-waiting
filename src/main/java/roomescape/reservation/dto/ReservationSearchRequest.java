@@ -9,8 +9,4 @@ public record ReservationSearchRequest(
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
 ) {
-
-    public boolean isEmpty() {
-        return themeId == null && memberId == null && dateFrom == null && dateTo == null;
-    }
 }

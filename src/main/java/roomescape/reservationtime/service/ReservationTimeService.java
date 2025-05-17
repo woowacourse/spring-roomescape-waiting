@@ -33,12 +33,6 @@ public class ReservationTimeService {
         if (reservationRepository.existsByTimeId(id)) {
             throw new ReservationException("해당 시간으로 예약된 건이 존재합니다.");
         }
-
-        /*final int deletedCount = */
         reservationTimeRepository.deleteById(id);
-//        if (deletedCount == 0) {
-//            throw new NotFoundException("존재하지 않는 예약 시간입니다. id=" + id);
-//        }
     }
 }
-
