@@ -8,7 +8,6 @@ import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ThemeExceptionMessage;
-import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.RankedThemeResponse;
@@ -18,12 +17,14 @@ import roomescape.theme.dto.ThemeResponse;
 @Service
 public class ThemeService {
 
-    private final ThemeRepository themeRepository;
-    private final ThemeDao themeDao;
+    private static final int SUBTRACT_BEGIN = 7;
+    private static final int SUBTRACT_END = 1;
+    private static final int LIMIT_COUNT = 10;
 
-    public ThemeService(ThemeRepository themeRepository, ThemeDao themeDao) {
+    private final ThemeRepository themeRepository;
+
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
-        this.themeDao = themeDao;
     }
 
     public List<ThemeResponse> findAll() {
@@ -37,11 +38,12 @@ public class ThemeService {
     }
 
     public List<RankedThemeResponse> findRankedByPeriod() {
-        List<Theme> topRankedThemes = themeDao.findRankedByPeriod(
-                LocalDate.now().minusDays(7),
-                LocalDate.now().minusDays(1),
-                10
-        );
+        List<Theme> topRankedThemes = themeRepository.findRankedByPeriod(
+                LocalDate.now().minusDays(SUBTRACT_BEGIN),
+                LocalDate.now().minusDays(SUBTRACT_END),
+                LIMIT_COUNT
+        ).stream().toList();
+
         return topRankedThemes.stream()
                 .map(theme -> new RankedThemeResponse(
                         theme.getName(),
