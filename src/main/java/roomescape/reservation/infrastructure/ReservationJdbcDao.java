@@ -33,7 +33,7 @@ public class ReservationJdbcDao {
 
     public List<Reservation> findAll() {
         String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, 
+                SELECT r.id AS reservation_id, r.date, 
                        m.id AS member_id, m.name AS member_name,
                        m.email, m.password, m.role, 
                        t.id AS time_id, t.start_at AS time_value, 
@@ -48,13 +48,14 @@ public class ReservationJdbcDao {
                 INNER JOIN member AS m
                 ON r.member_id = m.id
                 """;
+        System.out.println("?????????????????1111111111");
 
         return namedParameterJdbcTemplate.query(sql, (resultSet, rowNum) -> createReservation(resultSet));
     }
 
     public List<Reservation> findAllByMemberId(Long memberId) {
         String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, 
+                SELECT r.id AS reservation_id, r.date, 
                        m.id AS member_id, m.name AS member_name,
                        m.email, m.password, m.role, 
                        t.id AS time_id, t.start_at AS time_value, 
@@ -82,7 +83,7 @@ public class ReservationJdbcDao {
             LocalDate dateTo
     ) {
         String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, 
+                SELECT r.id AS reservation_id, r.date, 
                        m.id AS member_id, 
                        m.name AS member_name,
                        m.email, m.password, m.role, 
@@ -113,7 +114,7 @@ public class ReservationJdbcDao {
 
     public Optional<Reservation> findById(final Long id) {
         String sql = """
-                SELECT r.id AS reservation_id, r.name, r.date, 
+                SELECT r.id AS reservation_id, r.date, 
                        m.id AS member_id, 
                        m.name AS member_name, 
                        m.email, m.password, m.role, 
@@ -150,7 +151,6 @@ public class ReservationJdbcDao {
 
     public Reservation add(final Reservation reservation) {
         Map<String, Object> parameters = new HashMap<>(5);
-        parameters.put("name", reservation.getMember().getName());
         parameters.put("date", reservation.getDate());
         parameters.put("time_id", reservation.getTime().getId());
         parameters.put("theme_id", reservation.getTheme().getId());
