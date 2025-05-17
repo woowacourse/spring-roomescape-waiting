@@ -2,15 +2,15 @@ package roomescape.repository.theme;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import roomescape.domain.theme.Theme;
 
-@Repository
-public class ThemeRepositoryImpl implements ThemeRepository {
+@Component
+public class JpaThemeRepositoryAdapter implements ThemeRepository {
 
     private final JpaThemeRepository jpaThemeRepository;
 
-    public ThemeRepositoryImpl(JpaThemeRepository jpaThemeRepository) {
+    public JpaThemeRepositoryAdapter(JpaThemeRepository jpaThemeRepository) {
         this.jpaThemeRepository = jpaThemeRepository;
     }
 

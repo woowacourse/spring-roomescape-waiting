@@ -3,15 +3,15 @@ package roomescape.repository.reservationtime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import roomescape.domain.reservationtime.ReservationTime;
 
-@Repository
-public class ReservationTimeRepositoryImpl implements ReservationTimeRepository {
+@Component
+public class JpaReservationTimeRepositoryAdapter implements ReservationTimeRepository {
 
     private final JpaReservationTimeRepository jpaReservationTimeRepository;
 
-    public ReservationTimeRepositoryImpl(JpaReservationTimeRepository jpaReservationTimeRepository) {
+    public JpaReservationTimeRepositoryAdapter(JpaReservationTimeRepository jpaReservationTimeRepository) {
         this.jpaReservationTimeRepository = jpaReservationTimeRepository;
     }
 

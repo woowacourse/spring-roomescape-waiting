@@ -1,17 +1,17 @@
 package roomescape.repository.reserveticket;
 
 import java.util.List;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reserveticket.ReserveTicket;
 
-@Repository
-public class ReserveTicketRepositoryImpl implements ReserveTicketRepository {
+@Component
+public class JpaReserveTicketRepositoryAdapter implements ReserveTicketRepository {
 
     private final JpaReserveTicketRepository jpaReserveTicketRepository;
 
-    public ReserveTicketRepositoryImpl(JpaReserveTicketRepository jpaReserveTicketRepository) {
+    public JpaReserveTicketRepositoryAdapter(JpaReserveTicketRepository jpaReserveTicketRepository) {
         this.jpaReserveTicketRepository = jpaReserveTicketRepository;
     }
 

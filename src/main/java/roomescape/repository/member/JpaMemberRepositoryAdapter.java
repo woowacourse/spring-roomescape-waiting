@@ -2,15 +2,17 @@ package roomescape.repository.member;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Repository;
+
+import org.springframework.stereotype.Component;
+
 import roomescape.domain.member.Member;
 
-@Repository
-public class MemberRepositoryImpl implements MemberRepository {
+@Component
+public class JpaMemberRepositoryAdapter implements MemberRepository {
 
     private final JpaMemberRepository jpaMemberRepository;
 
-    public MemberRepositoryImpl(JpaMemberRepository jpaMemberRepository) {
+    public JpaMemberRepositoryAdapter(JpaMemberRepository jpaMemberRepository) {
         this.jpaMemberRepository = jpaMemberRepository;
     }
 
