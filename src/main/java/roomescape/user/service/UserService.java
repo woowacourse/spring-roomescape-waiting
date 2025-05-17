@@ -13,7 +13,7 @@ import roomescape.user.exception.NotFoundUserException;
 import roomescape.user.repository.UserRepository;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
@@ -31,6 +31,7 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public User add(UserRequestDto userRequestDto) {
         User user = userRequestDto.toEntity();
         return userRepository.save(user);

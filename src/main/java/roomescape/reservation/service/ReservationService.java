@@ -23,7 +23,7 @@ import roomescape.user.domain.User;
 import roomescape.user.domain.dto.UserResponseDto;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository repository;
@@ -44,6 +44,7 @@ public class ReservationService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ReservationResponseDto add(ReservationRequestDto requestDto, User user) {
         Reservation reservation = convertReservation(requestDto, user);
         validateDuplicateDateTime(reservation);
@@ -51,6 +52,7 @@ public class ReservationService {
         return convertReservationResponseDto(savedReservation);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         findByIdOrThrow(id);
         repository.deleteById(id);

@@ -11,7 +11,7 @@ import roomescape.theme.domain.dto.ThemeResponseDto;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository repository;
@@ -33,12 +33,14 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponseDto add(ThemeRequestDto dto) {
         Theme notSavedTheme = dto.toEntity();
         Theme savedTheme = repository.save(notSavedTheme);
         return ThemeResponseDto.of(savedTheme);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         repository.deleteById(id);
     }

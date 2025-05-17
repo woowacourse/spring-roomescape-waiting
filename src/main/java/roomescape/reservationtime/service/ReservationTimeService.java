@@ -22,7 +22,7 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.user.domain.User;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository repository;
@@ -68,6 +68,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         ReservationTime reservationTime = findByIdOrThrow(id);
         if (reservationRepository.existsByReservationTime(reservationTime)) {
@@ -76,6 +77,7 @@ public class ReservationTimeService {
         repository.deleteById(id);
     }
 
+    @Transactional
     public ReservationTimeResponseDto add(ReservationTimeRequestDto requestDto) {
         ReservationTime reservationTime = convertToReservationTimeRequestDto(requestDto);
         validateDuplicateTime(reservationTime);

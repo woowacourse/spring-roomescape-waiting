@@ -13,7 +13,7 @@ import roomescape.user.domain.User;
 import roomescape.user.service.UserService;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class AdminService {
 
     private final ReservationService reservationService;
@@ -24,6 +24,7 @@ public class AdminService {
         this.userService = userService;
     }
 
+    @Transactional
     public ReservationResponseDto createReservation(AdminReservationRequestDto adminReservationRequestDto) {
         User member = getUser(adminReservationRequestDto.memberId());
         ReservationRequestDto reservationRequestDto = convertAdminReservationRequestDtoToReservationRequestDto(
