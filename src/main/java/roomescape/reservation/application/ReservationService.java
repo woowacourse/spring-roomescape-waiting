@@ -67,7 +67,7 @@ public class ReservationService {
     public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId, final String date) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         final Theme selectedTheme = getTheme(themeId);
-        final List<Reservation> bookedReservations = reservationRepository.findByDateAndTheme_Id(
+        final List<Reservation> bookedReservations = reservationRepository.findByDateAndThemeId(
                 LocalDate.parse(date),
                 themeId);
         return getAvailableReservationTimeResponses(reservationTimes, bookedReservations, selectedTheme);
@@ -80,14 +80,14 @@ public class ReservationService {
             final LocalDate end
     ) {
         final List<Reservation> reservations = reservationRepository
-                .findByTheme_IdAndMember_IdAndDateBetween(themeId, memberId, start, end);
+                .findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, start, end);
         return reservations.stream()
                 .map(ReservationResponse::of)
                 .toList();
     }
 
     public List<MyReservation> findByMemberId(final Long memberId) {
-        final List<Reservation> reservations = reservationRepository.findByMember_Id(memberId);
+        final List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         return reservations.stream()
                 .map(MyReservation::from)
                 .toList();
@@ -99,7 +99,7 @@ public class ReservationService {
         final Theme theme = getTheme(themeId);
         final Member member = getMember(memberId);
 
-        final List<Reservation> sameTimeReservations = reservationRepository.findByDateAndTheme_Id(date,
+        final List<Reservation> sameTimeReservations = reservationRepository.findByDateAndThemeId(date,
                 themeId);
 
         validateIsBooked(sameTimeReservations, reservationTime, theme);
