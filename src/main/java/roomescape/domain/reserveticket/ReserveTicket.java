@@ -18,7 +18,7 @@ public class ReserveTicket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "reservation_id")
+    @JoinColumn(name = "reservation_id", unique = true)
     @ManyToOne
     private Reservation reservation;
 
