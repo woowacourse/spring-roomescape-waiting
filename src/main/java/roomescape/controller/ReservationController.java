@@ -69,7 +69,7 @@ public class ReservationController {
             @PathVariable("reservationId") Long reservationId,
             @LoginMember LoginMemberInfo loginMemberInfo) {
 
-        reservationService.deleteWaitingById(reservationId, loginMemberInfo);
+        reservationService.cancelWaitingById(reservationId, loginMemberInfo);
         return ResponseEntity.noContent().build();
     }
 

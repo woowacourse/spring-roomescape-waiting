@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.controller.request.LoginMemberInfo;
@@ -23,11 +24,18 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ReservationResult> getReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
+    public List<ReservationResult> getReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom,
+                                                               LocalDate dateTo) {
+        List<Reservation> reservations = reservationRepository.findReservationsInConditions(memberId, themeId, dateFrom,
+                dateTo);
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();
+    }
+
+    public List<ReservationResult> getWaitingReservations() {
+        List<Reservation> reservations = reservationRepository.findWaitingsReservation();
+        return ReservationResult.from(reservations);
     }
 
     public List<ReservationWithWaitingResult> getMemberReservationsById(Long memberId) {
@@ -52,22 +60,40 @@ public class ReservationService {
     }
 
     public void deleteById(Long reservationId) {
-        reservationRepository.deleteById(reservationId);
-    }
-
-    public void deleteWaitingById(Long reservationId, LoginMemberInfo loginMemberInfo) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundReservationException("해당 id의 예약이 존재하지 않습니다."));
 
+        reservationRepository.deleteById(reservationId);
+
+        boolean alreadyExistsReserved = reservationRepository.existsAlreadyReserved(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        if(!alreadyExistsReserved) {
+            autoReserveNextWaiting(reservation);
+        }
+    }
+
+    public void cancelWaitingById(Long reservationId, LoginMemberInfo loginMemberInfo) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundReservationException("해당 id의 예약이 존재하지 않습니다."));
+        validateCancelPermission(loginMemberInfo, reservation);
+
+        reservationRepository.deleteById(reservationId);
+        autoReserveNextWaiting(reservation);
+    }
+
+    private void validateCancelPermission(LoginMemberInfo loginMemberInfo, Reservation reservation) {
         if (!loginMemberInfo.id().equals(reservation.getMember().getId())) {
             throw new DeletionNotAllowedException("자신의 예약만 삭제할 수 있습니다.");
         }
-
-        reservationRepository.deleteById(reservationId);
     }
 
-    public List<ReservationResult> getWaitingReservations() {
-        List<Reservation> reservations = reservationRepository.findWaitingsReservation();
-        return ReservationResult.from(reservations);
+    private void autoReserveNextWaiting(Reservation canceled) {
+        Optional<Reservation> firstWaiting = reservationRepository.findFirstWaiting(
+                canceled.getDate(), canceled.getTheme().getId(), canceled.getTime().getId());
+
+        firstWaiting.ifPresent(waiting -> {
+            waiting.changeStatusToReserved();
+            reservationRepository.save(waiting);
+        });
     }
 }

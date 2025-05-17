@@ -2,6 +2,7 @@ package roomescape.persistence;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Reservation;
@@ -50,17 +51,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     """)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
-    @Query("""
-    SELECT COUNT(r)
-    FROM Reservation r
-    WHERE r.status = 'WAITING'
-      AND r.date = :date
-      AND r.theme.id = :themeId
-      AND r.time.id = :timeId
-      AND r.id < :reservationId
-""")
-    int countBeforeWaitings(LocalDate date, Long themeId, Long timeId, Long reservationId);
-
     boolean existsByTimeId(Long reservationTimeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
@@ -76,4 +66,38 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         WHERE r.status = 'WAITING'
     """)
     List<Reservation> findWaitingReservations();
+
+    @Query("""
+        SELECT r FROM Reservation r
+        WHERE r.status = 'WAITING'
+          AND r.theme.id = :themeId
+          AND r.time.id = :timeId
+          AND r.date = :date
+        ORDER BY r.id ASC
+        LIMIT 1
+    """)
+    Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId);
+
+    @Query("""
+    SELECT CASE WHEN COUNT(r) = 0 THEN TRUE ELSE FALSE END
+    FROM Reservation r
+    WHERE r.status = 'WAITING'
+      AND r.theme.id = :themeId
+      AND r.time.id = :timeId
+      AND r.date = :date
+      AND r.id < :reservationId
+    """)
+    boolean isFirstWaiting(Long reservationId, LocalDate date, Long themeId, Long timeId);
+
+    @Query("""
+    SELECT EXISTS (
+        SELECT 1
+        FROM Reservation r
+        WHERE r.status = 'RESERVED'
+          AND r.theme.id = :themeId
+          AND r.time.id = :timeId
+          AND r.date = :date
+        )
+    """)
+    boolean existsAlreadyReserved(LocalDate date, Long timeId, Long themeId);
 }

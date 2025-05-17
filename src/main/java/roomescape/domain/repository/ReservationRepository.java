@@ -23,11 +23,15 @@ public interface ReservationRepository {
 
     boolean existsDuplicateReservation(LocalDate reservationDate, Long timeId, Long themeId);
 
+    boolean existsAlreadyReserved(LocalDate reservationDate, Long timeId, Long themeId);
+
     boolean existsByThemeId(Long themeId);
 
     List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
-    int countBeforeWaitings(LocalDate date, Long themeId, Long timeId, Long reservationId);
-
     List<Reservation> findWaitingsReservation();
+
+    Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId);
+
+    boolean isFirstWaiting(Long reservationId, LocalDate date, Long themeId, Long timeId);
 }

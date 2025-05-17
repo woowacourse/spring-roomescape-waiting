@@ -77,6 +77,13 @@ public class Reservation {
         return Duration.between(now, reservationDateTime).toMinutes();
     }
 
+    public void changeStatusToReserved() {
+        if (this.status != ReservationStatus.WAITING) {
+            throw new IllegalStateException("대기 상태가 아닌 예약은 예약으로 전환할 수 없습니다.");
+        }
+        this.status = ReservationStatus.RESERVED;
+    }
+
     public Long getId() {
         return id;
     }

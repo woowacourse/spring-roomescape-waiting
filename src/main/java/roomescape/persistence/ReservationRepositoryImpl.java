@@ -54,6 +54,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
+    public boolean existsAlreadyReserved(LocalDate reservationDate, Long timeId, Long themeId) {
+        return jpaReservationRepository.existsAlreadyReserved(reservationDate, timeId, themeId);
+    }
+
+    @Override
     public boolean existsByThemeId(final Long themeId) {
         return jpaReservationRepository.existsByThemeId(themeId);
     }
@@ -64,13 +69,17 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public int countBeforeWaitings(LocalDate date, Long themeId, Long timeId, Long reservationId) {
-        return jpaReservationRepository.countBeforeWaitings(date, timeId, themeId, reservationId);
-
+    public List<Reservation> findWaitingsReservation() {
+        return jpaReservationRepository.findWaitingReservations();
     }
 
     @Override
-    public List<Reservation> findWaitingsReservation() {
-        return jpaReservationRepository.findWaitingReservations();
+    public Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId) {
+        return jpaReservationRepository.findFirstWaiting(date, themeId, timeId);
+    }
+
+    @Override
+    public boolean isFirstWaiting(Long reservationId, LocalDate date, Long themeId, Long timeId) {
+        return jpaReservationRepository.isFirstWaiting(reservationId, date, themeId, timeId);
     }
 }
