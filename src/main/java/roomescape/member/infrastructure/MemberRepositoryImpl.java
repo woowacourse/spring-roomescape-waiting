@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
@@ -25,16 +26,19 @@ public class MemberRepositoryImpl implements MemberCommandRepository, MemberQuer
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Member> findByEmail(final String email) {
         return jpaMemberRepository.findByEmail(email);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Member> findById(final Long id) {
         return jpaMemberRepository.findById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Member> findAll() {
         return jpaMemberRepository.findAll();
     }

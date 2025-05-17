@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
@@ -35,16 +36,19 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Reservation> findById(final Long id) {
         return jpaReservationRepository.findById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Reservation> findAll() {
         return jpaReservationRepository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(
             final Long themeId,
             final Long memberId,
@@ -55,6 +59,7 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByDateAndThemeId(
             final LocalDate date,
             final Long themeId
@@ -63,6 +68,7 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByMemberId(final Long memberId) {
         return jpaReservationRepository.findAllByMemberId(memberId);
     }
