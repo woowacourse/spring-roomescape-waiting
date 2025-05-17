@@ -45,7 +45,7 @@ class ReservationServiceTest {
     @Test
     void 예약을_추가하고_조회할_수_있다() {
         Long reservationTimeId = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)).toEntity());
         Long themeId = themeRepository.save(new AddThemeDto("공포의 숲", "무서운 테마", "image.png").toEntity());
 
         AddReservationDto request = new AddReservationDto("praisebak", LocalDate.now().plusDays(1L), reservationTimeId,
@@ -59,7 +59,7 @@ class ReservationServiceTest {
     @Test
     void 이전_날짜에_예약할_수_없다() {
         Long reservationTimeId = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)).toEntity());
         Long themeId = themeRepository.save(new AddThemeDto("과거의 방", "옛날 테마", "past.png").toEntity());
 
         assertThatThrownBy(() -> reservationService.addReservation(
@@ -70,7 +70,7 @@ class ReservationServiceTest {
     @Test
     void 같은날짜일시_이전_시간에_예약할_수_없다() {
         Long reservationTimeId = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().minusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.now().minusMinutes(1L)).toEntity());
         Long themeId = themeRepository.save(new AddThemeDto("지각의 방", "지각 금지", "late.png").toEntity());
 
         assertThatThrownBy(() -> reservationService.addReservation(
@@ -81,7 +81,7 @@ class ReservationServiceTest {
     @Test
     void 이후_날짜에_예약할_수_있다() {
         Long reservationTimeId = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)).toEntity());
         Long themeId = themeRepository.save(new AddThemeDto("미래의 방", "SF 컨셉", "future.png").toEntity());
 
         assertThatCode(() -> reservationService.addReservation(

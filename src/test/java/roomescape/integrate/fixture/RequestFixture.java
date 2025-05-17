@@ -63,14 +63,13 @@ public class RequestFixture {
         return themeResponseDto.id();
     }
 
-    public long requestAddReservation(String name, String date, long timeId, long themeId,
+    public long requestAddReservation(String name, String date, long themeId, long timeId,
                                       Map<String, String> cookies) {
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", name);
         reservation.put("date", date);
         reservation.put("timeId", timeId);
         reservation.put("themeId", themeId);
-
         ReservationResponseDto reservationResponseDto = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)

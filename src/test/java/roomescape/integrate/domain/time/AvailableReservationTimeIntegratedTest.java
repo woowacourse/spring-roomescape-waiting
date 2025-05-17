@@ -40,7 +40,7 @@ class AvailableReservationTimeIntegratedTest {
         requestFixture.requestAddTime(LocalTime.now().plusHours(2).toString());
         long timeId = requestFixture.requestAddTime(LocalTime.now().plusHours(3).toString());
         long themeId = requestFixture.requestAddTheme("테마 명", "description", "thumbnail");
-        requestFixture.requestAddReservation("브라운", todayDateString, timeId, themeId, cookies);
+        requestFixture.requestAddReservation("브라운", todayDateString, themeId, timeId, cookies);
     }
 
     @Test
