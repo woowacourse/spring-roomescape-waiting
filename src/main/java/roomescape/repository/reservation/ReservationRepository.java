@@ -14,8 +14,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndTime(LocalDate date, ReservationTime time);
 
-    @Query(value = "SELECT time.id FROM Reservation WHERE date = :date AND theme.id = :themeId")
-    List<Long> findAllTimeIdByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query(value = "SELECT theme.id FROM Reservation WHERE date BETWEEN :startDate AND :endDate GROUP BY theme ORDER BY COUNT(*) DESC LIMIT 10")
     List<Long> findTopThemesByReservationCountBetween(LocalDate startDate, LocalDate endDate);

@@ -14,11 +14,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.enums.Role;
 import roomescape.dto.reservationtime.AvailableTimeResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.exception.reservationtime.ReservationTimeAlreadyExistsException;
-import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.reservationtime.UsingReservationTimeException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
@@ -40,10 +43,9 @@ class ReservationTimeServiceImplTest {
         // given
         LocalTime time = LocalTime.now();
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(time);
-        // when
         when(timeRepository.existsByStartAt(time)).thenReturn(true);
 
-        // then
+        // when, then
         assertThatThrownBy(() -> reservationTimeService.create(reservationTimeRequest))
                 .isInstanceOf(ReservationTimeAlreadyExistsException.class);
     }
@@ -53,9 +55,9 @@ class ReservationTimeServiceImplTest {
     void deleteReservedTimeTest() {
         // given
         Long id = 1L;
-        // when
         when(reservationRepository.existsByTimeId(id)).thenReturn(true);
-        // then
+
+        // when, then
         assertThatThrownBy(() -> reservationTimeService.deleteById(id))
                 .isInstanceOf(UsingReservationTimeException.class);
     }
@@ -64,10 +66,9 @@ class ReservationTimeServiceImplTest {
     @Test
     void deleteNotFoundReservationTime() {
         // given
-
-        // when
         when(reservationRepository.existsByTimeId(anyLong())).thenReturn(true);
-        // then
+
+        // when, then
         assertThatThrownBy(() -> reservationTimeService.deleteById(anyLong()))
                 .isInstanceOf(UsingReservationTimeException.class);
     }
@@ -79,10 +80,14 @@ class ReservationTimeServiceImplTest {
         LocalDate date = LocalDate.now();
         Long themeId = 1L;
 
-        // when
-        when(reservationRepository.findAllTimeIdByDateAndThemeId(date, themeId)).thenReturn(List.of(1L));
+        Member member = new Member(10L, "name", "email@email.com", "pw", Role.USER);
+        Theme theme = new Theme(themeId, "theme", "description", "thumbnail");
+        Reservation reservation = new Reservation(1L, date, new ReservationTime(1L, LocalTime.now()), theme, member);
+        when(reservationRepository.findAllByDateAndThemeId(date, themeId)).thenReturn(List.of(reservation));
         when(timeRepository.findAll()).thenReturn(List.of(new ReservationTime(1L, LocalTime.now()),
                 new ReservationTime(2L, LocalTime.now())));
+
+        // when
         List<AvailableTimeResponse> actual = reservationTimeService.getAvailableTimes(date, themeId);
 
         // then
