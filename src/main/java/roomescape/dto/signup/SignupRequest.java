@@ -1,5 +1,10 @@
 package roomescape.dto.signup;
 
-public record SignupRequest(String email, String password, String name) {
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+public record SignupRequest(@NotBlank @Email String email,
+                            @NotBlank String password,
+                            @NotBlank String name) {
 
 }
