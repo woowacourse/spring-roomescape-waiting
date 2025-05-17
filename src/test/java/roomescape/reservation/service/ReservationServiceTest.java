@@ -7,18 +7,21 @@ import static roomescape.constant.TestData.RESERVATION_COUNT;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -72,7 +75,7 @@ class ReservationServiceTest {
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
         theme2 = Theme.of("테마2", "설명2", "썸네일2");
 
-        member = Member.withoutRole("member", "member@naver.com", "1234");
+        member = Member.withoutRole("member", "mem@naver.com", "1234");
 
         r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member);
         r2 = Reservation.booked(LocalDate.of(2999, 6, 11), time2, theme2, member);
@@ -179,5 +182,25 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> service.deleteReservation(999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 예약입니다. id=999");
+    }
+
+    @Test
+    void 내_모든_예약을_조회한다() {
+        // given
+        memberRepo.save(member);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,1), time1, theme1, member));
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,2), time1, theme1, member));
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,3), time1, theme1, member));
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,4), time1, theme1, member));
+        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
+
+        // when
+        List<MyReservationResponse> myReservations = service.findMyReservations(loginMember);
+
+        // then
+        assertThat(myReservations).hasSize(4);
     }
 }
