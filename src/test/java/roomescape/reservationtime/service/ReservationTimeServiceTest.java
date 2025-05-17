@@ -21,7 +21,7 @@ import roomescape.reservationtime.ReservationTimeTestDataConfig;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationtime.exception.AlreadyReservedTimeException;
-import roomescape.reservationtime.exception.DuplicateReservationException;
+import roomescape.reservationtime.exception.DuplicateReservationTimeException;
 import roomescape.reservationtime.fixture.ReservationTimeFixture;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -136,7 +136,7 @@ class ReservationTimeServiceTest {
             // then
             Assertions.assertThatThrownBy(
                     () -> service.add(ReservationTimeFixture.createRequestDto(dummyTime1))
-            ).isInstanceOf(DuplicateReservationException.class);
+            ).isInstanceOf(DuplicateReservationTimeException.class);
         }
     }
 

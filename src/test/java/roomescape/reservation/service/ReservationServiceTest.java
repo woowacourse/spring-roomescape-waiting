@@ -75,10 +75,10 @@ class ReservationServiceTest {
         @Test
         void add_failure_byDuplicateDateTime() {
             // given
-            ReservationTime reservationTime1 = createAndSaveReservationTime(LocalTime.of(11, 33));
+            ReservationTime reservationTime1 = createAndSaveReservationTime(LocalTime.of(17, 33));
             Reservation reservation1 = createReservation(1, reservationTime1);
 
-            ReservationTime reservationTime2 = createAndSaveReservationTime(LocalTime.of(22, 44));
+            ReservationTime reservationTime2 = createAndSaveReservationTime(LocalTime.of(21, 37));
             Reservation reservation2 = createReservation(2, reservationTime2);
 
             reservationRepository.save(reservation1);

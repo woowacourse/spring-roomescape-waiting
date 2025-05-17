@@ -9,26 +9,6 @@ import roomescape.reservationtime.fixture.ReservationTimeFixture;
 
 class ReservationTimeTest {
 
-    @Test
-    @DisplayName("예약 시간이 같으면 true를 반환한다")
-    void isSameTime_true() {
-        // given
-        int dummyHour = 11;
-        int dummyMinute = 13;
-
-        LocalTime inputStartAt = LocalTime.of(dummyHour, dummyMinute);
-        LocalTime reservationStartAt = LocalTime.of(dummyHour, dummyMinute);
-
-        ReservationTime inputReservationTime = ReservationTimeFixture.create(inputStartAt);
-        ReservationTime reservationTime = ReservationTimeFixture.create(reservationStartAt);
-
-        // when
-        boolean actual = reservationTime.isSameTime(inputReservationTime);
-
-        // then
-        Assertions.assertThat(actual).isTrue();
-    }
-
     @Nested
     @DisplayName("재정의한 equals 기능")
     class equals {

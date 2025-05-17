@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
@@ -13,7 +14,7 @@ import roomescape.reservationtime.domain.dto.AvailableReservationTimeResponseDto
 import roomescape.reservationtime.domain.dto.ReservationTimeRequestDto;
 import roomescape.reservationtime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationtime.exception.AlreadyReservedTimeException;
-import roomescape.reservationtime.exception.DuplicateReservationException;
+import roomescape.reservationtime.exception.DuplicateReservationTimeException;
 import roomescape.reservationtime.exception.NotFoundReservationTimeException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -80,19 +81,13 @@ public class ReservationTimeService {
     @Transactional
     public ReservationTimeResponseDto add(ReservationTimeRequestDto requestDto) {
         ReservationTime reservationTime = convertToReservationTimeRequestDto(requestDto);
-        validateDuplicateTime(reservationTime);
-        ReservationTime savedReservationTime = repository.save(reservationTime);
-        return convertToReservationTimeResponseDto(savedReservationTime);
-    }
-
-    private void validateDuplicateTime(ReservationTime inputReservationTime) {
-        boolean exists = repository.existsByStartAt(inputReservationTime.getStartAt());
-
-        if (exists) {
-            throw new DuplicateReservationException();
+        try {
+            ReservationTime savedReservationTime = repository.save(reservationTime);
+            return convertToReservationTimeResponseDto(savedReservationTime);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateReservationTimeException();
         }
     }
-
     private ReservationTime convertToReservationTimeRequestDto(ReservationTimeRequestDto requestDto) {
         return requestDto.toEntity();
     }

@@ -2,15 +2,15 @@ package roomescape.reservationtime.exception;
 
 import roomescape.global.exception.ConflictException;
 
-public class DuplicateReservationException extends ConflictException {
+public class DuplicateReservationTimeException extends ConflictException {
 
     private static final String DEFAULT_MESSAGE = "이미 등록되어 있는 예약 시간입니다.";
 
-    public DuplicateReservationException(String message) {
+    public DuplicateReservationTimeException(String message) {
         super(message);
     }
 
-    public DuplicateReservationException() {
+    public DuplicateReservationTimeException() {
         this(DEFAULT_MESSAGE);
     }
 }
