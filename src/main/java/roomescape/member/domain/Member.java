@@ -35,11 +35,6 @@ public class Member {
     public Member() {
     }
 
-    public static Member withUnassignedId(final String name, final String email, final String password,
-                                          final MemberRole memberRole) {
-        return new Member(name, email, password, memberRole);
-    }
-
     private void validate(final String name) {
         if (name.length() > MAX_NAME_LENGTH) {
             throw new InvalidMemberException("name은 10글자 이하이어야합니다.");

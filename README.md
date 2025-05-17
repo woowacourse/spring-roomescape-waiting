@@ -550,7 +550,9 @@ HTTP/1.1 201 OK
 Content-Type: application/json
 Keep-Alive: timeout=60
 
-{id}
+{
+"id": 3
+}
 ```
 
 ## 로그아웃
