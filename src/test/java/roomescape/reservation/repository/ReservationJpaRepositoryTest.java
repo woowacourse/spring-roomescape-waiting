@@ -42,6 +42,7 @@ class ReservationJpaRepositoryTest {
     private Member member;
     private ReservationTime reservationTime;
     private Theme theme;
+    private Reservation reservation;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +52,7 @@ class ReservationJpaRepositoryTest {
                 ReservationTime.create(LocalTime.of(10, 0))
         );
         theme = themeRepository.save(new Theme("공포", "ss", "ss"));
-        reservationRepository.save(
+        reservation = reservationRepository.save(
                 Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
         reservationRepository.save(
                 Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member,
@@ -61,7 +62,8 @@ class ReservationJpaRepositoryTest {
     @Test
     void 선택한_옵션별_예약을_조회한다() {
         //when
-        List<Reservation> reservations = reservationRepository.findByFilter(1L, 1L, LocalDate.now(),
+        List<Reservation> reservations = reservationRepository.findByFilter(member.getId(), theme.getId(),
+                LocalDate.now(),
                 LocalDate.now().plusDays(2));
 
         //then
@@ -103,6 +105,15 @@ class ReservationJpaRepositoryTest {
 
         //then
         assertThat(reservations.size()).isEqualTo(7);
+    }
+
+    @Test
+    void 멤버별_예약을_조회한다() {
+        //when
+        List<Reservation> allByMemberId = reservationRepository.findAllByMemberId(member.getId());
+
+        //then
+        assertThat(allByMemberId.contains(reservation)).isTrue();
     }
 
 }
