@@ -2,10 +2,14 @@ package roomescape.member.domain;
 
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import roomescape.global.exception.custom.BadRequestException;
 
 @Embeddable
 public final class MemberEmail {
+
+    private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
     private String email;
 
@@ -19,8 +23,7 @@ public final class MemberEmail {
     }
 
     private void validateEmail(final String email) {
-        final String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        if (email == null || email.isBlank() || !email.matches(emailRegex)) {
+        if (email == null || email.isBlank() || !EMAIL_PATTERN.matcher(email.trim()).matches()) {
             throw new BadRequestException("이메일 형식으로 입력해야 합니다.");
         }
     }
