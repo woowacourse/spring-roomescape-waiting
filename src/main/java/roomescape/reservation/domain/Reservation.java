@@ -22,7 +22,7 @@ import roomescape.time.domain.ReservationTime;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")

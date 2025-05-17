@@ -12,13 +12,13 @@ import roomescape.common.utils.Validator;
 
 @Embeddable
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public class ThemeThumbnail {
 
-    @Column(name = "thumbnail")
+    @Column(name = "thumbnail", nullable = false)
     private String value;
 
     public static ThemeThumbnail from(final String url) {

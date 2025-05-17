@@ -12,13 +12,13 @@ import roomescape.common.utils.Validator;
 
 @Embeddable
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public class MemberEmail {
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String value;
 
     public static MemberEmail from(final String value) {

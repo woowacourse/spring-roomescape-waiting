@@ -13,13 +13,13 @@ import roomescape.common.utils.Validator;
 
 @Embeddable
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public final class ReservationDate {
 
-    @Column(name = "reservation_date")
+    @Column(name = "reservation_date", nullable = false)
     private LocalDate value;
 
     public static ReservationDate from(final LocalDate date) {

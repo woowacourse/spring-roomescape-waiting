@@ -12,13 +12,13 @@ import roomescape.common.utils.Validator;
 
 @Embeddable
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public class ThemeDescription {
 
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
     private String value;
 
     public static ThemeDescription from(final String description) {

@@ -13,13 +13,13 @@ import roomescape.common.utils.Validator;
 
 @Embeddable
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 public class Password {
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String value;
 
     public static Password from(final String password) {
