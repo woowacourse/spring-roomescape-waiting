@@ -22,7 +22,6 @@ public final class Member {
 
     public Member(final Long id, final MemberName name,
                   final MemberEmail email, final String password, final Role role) {
-        validateNotNull(name, email, password, role);
         this.id = id;
         this.name = name;
         this.email = email;
@@ -30,32 +29,16 @@ public final class Member {
         this.role = role;
     }
 
-    public Member() {
-
-    }
-
     public static Member register(final MemberName name, final MemberEmail email, final String password) {
         return new Member(null, name, email, password, Role.USER);
     }
 
-    public boolean hasRole(final Role other) {
-        return this.role == other;
+    protected Member() {
+
     }
 
-    private void validateNotNull(final MemberName name, final MemberEmail email,
-                                 final String password, final Role role) {
-        if (name == null) {
-            throw new IllegalArgumentException("이름을 입력해야 합니다.");
-        }
-        if (email == null) {
-            throw new IllegalArgumentException("이메일을 입력해야 합니다.");
-        }
-        if (password == null) {
-            throw new IllegalArgumentException("비밀번호를 입력해야 합니다.");
-        }
-        if (role == null) {
-            throw new IllegalArgumentException("권한을 입력해야 합니다.");
-        }
+    public boolean hasRole(final Role other) {
+        return this.role == other;
     }
 
     public Long getId() {

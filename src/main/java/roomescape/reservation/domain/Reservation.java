@@ -29,16 +29,11 @@ public final class Reservation {
 
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme) {
-        validateNotNull(member, date, time, theme);
         this.id = id;
         this.date = date;
         this.time = time;
         this.member = member;
         this.theme = theme;
-    }
-
-    public Reservation() {
-
     }
 
     public static Reservation register(final Member member, final LocalDate date,
@@ -57,20 +52,8 @@ public final class Reservation {
         return new Reservation(null, member, date, time, theme);
     }
 
-    private void validateNotNull(final Member member, final LocalDate date, final ReservationTime time,
-                                 final Theme theme) {
-        if (member == null) {
-            throw new IllegalArgumentException("사용자를 입력해야 합니다.");
-        }
-        if (date == null) {
-            throw new IllegalArgumentException("날짜를 입력해야 합니다.");
-        }
-        if (time == null) {
-            throw new IllegalArgumentException("시간을 입력해야 합니다.");
-        }
-        if (theme == null) {
-            throw new IllegalArgumentException("테마를 입력해야 합니다.");
-        }
+    protected Reservation() {
+
     }
 
     public Long getId() {

@@ -29,11 +29,7 @@ public final class Theme {
         this(id, new ThemeName(name), new ThemeDescription(description), new ThemeThumbnail(thumbnail));
     }
 
-    public Theme(final String name, final String description, final String thumbnail) {
-        this(null, new ThemeName(name), new ThemeDescription(description), new ThemeThumbnail(thumbnail));
-    }
-
-    public Theme() {
+    protected Theme() {
     }
 
     public Long getId() {
