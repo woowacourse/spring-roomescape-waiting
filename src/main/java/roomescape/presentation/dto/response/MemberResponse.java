@@ -5,7 +5,11 @@ import roomescape.presentation.dto.request.LoginMember;
 
 import java.util.List;
 
-public record MemberResponse(Long id, String name, String email) {
+public record MemberResponse(
+        Long id,
+        String name,
+        String email
+) {
 
     public static MemberResponse from(LoginMember loginMember) {
         return new MemberResponse(loginMember.id(), loginMember.name(), loginMember.email());
