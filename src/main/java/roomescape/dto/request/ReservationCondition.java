@@ -1,12 +1,12 @@
 package roomescape.dto.request;
 
+import jakarta.annotation.Nullable;
 import java.time.LocalDate;
-import java.util.Optional;
 
 public record ReservationCondition(
-        Optional<Long> themeId,
-        Optional<Long> memberId,
-        Optional<LocalDate> dateFrom,
-        Optional<LocalDate> dateTo
+        @Nullable Long themeId,
+        @Nullable Long memberId,
+        @Nullable LocalDate dateFrom,
+        @Nullable LocalDate dateTo
 ) {
 }

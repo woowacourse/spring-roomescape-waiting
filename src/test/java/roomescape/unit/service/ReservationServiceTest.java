@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,10 +65,11 @@ class ReservationServiceTest {
         // when
         List<ReservationResponse> all = reservationService.findReservations(
                 new ReservationCondition(
-                        Optional.of(theme1.getId()),
-                        Optional.of(member1.getId()),
-                        Optional.of(LocalDate.of(2025, 7, 25)),
-                        Optional.of(LocalDate.of(2025, 7, 25)))
+                        theme1.getId(),
+                        member1.getId(),
+                        LocalDate.of(2025, 7, 25),
+                        LocalDate.of(2025, 7, 25)
+                )
         );
 
         // then
@@ -114,10 +114,10 @@ class ReservationServiceTest {
         // then
         List<ReservationResponse> all = reservationService.findReservations(
                 new ReservationCondition(
-                        Optional.of(theme1.getId()),
-                        Optional.of(member1.getId()),
-                        Optional.of(LocalDate.of(2025, 7, 25)),
-                        Optional.of(LocalDate.of(2025, 7, 25))
+                        theme1.getId(),
+                        member1.getId(),
+                        LocalDate.of(2025, 7, 25),
+                        LocalDate.of(2025, 7, 25)
                 )
         );
         assertThat(all.size()).isEqualTo(1);
@@ -141,7 +141,7 @@ class ReservationServiceTest {
 
         // then
         List<ReservationResponse> all = reservationService.findReservations(
-                new ReservationCondition(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+                new ReservationCondition(null, null, null, null));
         assertThat(all.size()).isEqualTo(0);
     }
 

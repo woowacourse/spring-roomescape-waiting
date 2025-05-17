@@ -1,5 +1,10 @@
 package roomescape.infrastructure;
 
+import static roomescape.infrastructure.ReservationSpecification.dateEqualOrAfter;
+import static roomescape.infrastructure.ReservationSpecification.dateEqualOrBefore;
+import static roomescape.infrastructure.ReservationSpecification.memberIdEqual;
+import static roomescape.infrastructure.ReservationSpecification.themeIdEqual;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -62,10 +67,12 @@ public class ReservationRepositoryAdaptor implements ReservationRepository {
 
     @Override
     public List<Reservation> findByCondition(ReservationCondition condition) {
-        Specification<Reservation> spec = Specification.where(
-                        ReservationSpecification.themeIdEqual(condition.themeId()))
-                .and(ReservationSpecification.memberIdEqual(condition.memberId())
-                        .and(ReservationSpecification.dateBetween(condition.dateFrom(), condition.dateTo())));
+        Specification<Reservation> spec =
+                Specification.where(themeIdEqual(condition.themeId()))
+                        .and(memberIdEqual(condition.memberId())
+                                .and(dateEqualOrAfter(condition.dateFrom())))
+                        .and(dateEqualOrBefore(condition.dateTo()));
+
         return jpaReservationRepository.findAll(spec);
     }
 
