@@ -12,6 +12,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.common.BaseTest;
+import roomescape.domain.ReservationStatus;
 import roomescape.presentation.dto.response.ReservationResponse;
 
 import java.sql.Connection;
@@ -356,8 +357,8 @@ class ReservationTest extends BaseTest {
                     "테마1", "설명1", "썸네일1");
             jdbcTemplate.update("INSERT INTO member (name, role, email, password) VALUES (?, ?, ?, ?)",
                     "브라운", "USER", "test@email.com", "pass1");
-            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                    "2025-08-05", 1, 1, 1);
+            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (?, ?, ?, ?, ?)",
+                    "2025-08-05", 1, 1, 1, ReservationStatus.RESERVED.name());
 
             List<ReservationResponse> response = RestAssured.given().log().all()
                     .when().get("/reservations")
