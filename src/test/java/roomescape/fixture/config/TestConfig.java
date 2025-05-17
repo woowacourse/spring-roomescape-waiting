@@ -42,6 +42,13 @@ public class TestConfig {
     }
 
     @Bean
+    public ThemeRepositoryImpl themeRepositoryImpl(
+            final JpaThemeRepository jpaThemeRepository
+    ) {
+        return new ThemeRepositoryImpl(jpaThemeRepository);
+    }
+
+    @Bean
     public ThemeCommandRepository themeCommandRepository(
             final JpaThemeRepository jpaThemeRepository
     ) {
