@@ -1,0 +1,18 @@
+INSERT INTO reservation_time (time_id, start_at)
+VALUES (100, '12:00');
+
+INSERT INTO theme (name, description, thumbnail) VALUES
+  ('테마 1', '설명', '썸네일'),
+  ('테마 2', '설명', '썸네일'),
+  ('테마 3', '설명', '썸네일');
+
+INSERT INTO member (member_id, name, email, password, role) VALUES
+  (1000, '테스트', 'test_user@test.com', 'test', 'USER');
+
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES
+  (1000, DATEADD('DAY', -1, CURRENT_DATE), 100, 1),
+  (1000, DATEADD('DAY', -2, CURRENT_DATE), 100, 2),
+  (1000, DATEADD('DAY', -3, CURRENT_DATE), 100, 2),
+  (1000, DATEADD('DAY', -4, CURRENT_DATE), 100, 3),
+  (1000, DATEADD('DAY', -5, CURRENT_DATE), 100, 3),
+  (1000, DATEADD('DAY', -6, CURRENT_DATE), 100, 3);
