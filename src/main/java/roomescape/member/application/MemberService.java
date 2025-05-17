@@ -28,10 +28,8 @@ public class MemberService {
                 AuthRole.MEMBER
         );
 
-        final Long id = memberCommandRepository.save(member);
-        final Member found = memberQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-        return new MemberResponse.IdName(found.getId(), found.getName());
+        final Member saved = memberCommandRepository.save(member);
+        return new MemberResponse.IdName(saved.getId(), saved.getName());
     }
 
     public void delete(final Long id) {

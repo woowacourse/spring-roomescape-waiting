@@ -15,8 +15,8 @@ public class MemberRepositoryImpl implements MemberCommandRepository, MemberQuer
     private final JpaMemberRepository jpaMemberRepository;
 
     @Override
-    public Long save(final Member member) {
-        return jpaMemberRepository.save(member).getId();
+    public Member save(final Member member) {
+        return jpaMemberRepository.save(member);
     }
 
     @Override

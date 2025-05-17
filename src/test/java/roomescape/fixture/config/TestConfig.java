@@ -3,6 +3,7 @@ package roomescape.fixture.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import roomescape.member.application.MemberService;
 import roomescape.member.domain.MemberCommandRepository;
 import roomescape.member.domain.MemberQueryRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
@@ -114,6 +115,14 @@ public class TestConfig {
                 themeQueryRepository,
                 memberQueryRepository
         );
+    }
+
+    @Bean
+    public MemberService memberService(
+            final MemberCommandRepository memberCommandRepository,
+            final MemberQueryRepository memberQueryRepository
+    ) {
+        return new MemberService(memberCommandRepository, memberQueryRepository);
     }
 
     @Bean
