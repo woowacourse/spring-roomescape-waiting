@@ -60,6 +60,7 @@ public class ReservationService {
         Member member = memberService.findMemberByEmail(loginMember.email());
         ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
         Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
+        reservation.reserve();
         Reservation created = reservationRepository.save(reservation);
 
         return ReservationResponse.from(created);
@@ -78,6 +79,7 @@ public class ReservationService {
         Member member = memberService.findMemberById(request.memberId());
         ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
         Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
+        reservation.reserve();
         Reservation created = reservationRepository.save(reservation);
 
         return ReservationResponse.from(created);

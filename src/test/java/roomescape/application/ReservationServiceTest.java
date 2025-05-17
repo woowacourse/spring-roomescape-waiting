@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.BaseTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -206,11 +207,16 @@ class ReservationServiceTest extends BaseTest {
         Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
-        List<MyReservationResponse> myReservations = reservationService.getMyReservations(loginMember);
+        List<MyReservationResponse> responses = reservationService.getMyReservations(loginMember);
+        MyReservationResponse response = responses.getFirst();
 
         assertAll(
-                () -> assertThat(myReservations).hasSize(1),
-                () -> assertThat(myReservations.getFirst().reservationId()).isEqualTo(reservation.getId())
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(response.reservationId()).isEqualTo(reservation.getId()),
+                () -> assertThat(response.date()).isEqualTo(reservation.getDate()),
+                () -> assertThat(response.time()).isEqualTo(reservationTime.getStartAt()),
+                () -> assertThat(response.theme()).isEqualTo(theme.getName()),
+                () -> assertThat(response.status()).isEqualTo(ReservationStatus.RESERVED.getName())
         );
     }
 }

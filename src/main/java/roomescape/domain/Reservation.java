@@ -49,6 +49,10 @@ public class Reservation {
         return new Reservation(null, member, date, time, theme, ReservationStatus.NOT_RESERVED);
     }
 
+    public void reserve() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) return false;
