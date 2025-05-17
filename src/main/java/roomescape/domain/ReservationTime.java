@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.exception.UnableCreateReservationException;
@@ -12,7 +13,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ReservationTime {
     private static final LocalTime RESERVATION_START_TIME = LocalTime.of(12, 0);
