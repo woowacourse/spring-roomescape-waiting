@@ -29,6 +29,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
         SELECT r FROM Reservation r
+        JOIN FETCH r.theme
         JOIN FETCH r.time
         WHERE r.theme.id =:themeId
         AND r.member.id =:memberId
@@ -37,4 +38,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByThemeAndMemberAndDate(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
+
+    List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 }
