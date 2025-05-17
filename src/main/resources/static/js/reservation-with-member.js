@@ -1,5 +1,5 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
+const RESERVATION_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const USER_API_ENDPOINT = '/users';
@@ -59,13 +59,17 @@ function fetchMembers() {
     requestRead(USER_API_ENDPOINT)
         .then(data => {
             membersOptions.push(...data);
-            populateSelect('member', membersOptions, 'name');
+            populateSelect('user', membersOptions, 'name');
         })
         .catch(error => console.error('Error fetching member:', error));
 }
 
 function populateSelect(selectId, options, textProperty) {
     const select = document.getElementById(selectId);
+    if (!select) {
+        console.error(`Element with ID "${selectId}" not found`);
+        return; // 함수 실행 중단
+    }
     options.forEach(optionData => {
         const option = document.createElement('option');
         option.value = optionData.id;
