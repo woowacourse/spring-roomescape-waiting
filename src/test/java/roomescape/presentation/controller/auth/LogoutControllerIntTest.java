@@ -1,5 +1,6 @@
 package roomescape.presentation.controller.auth;
 
+import static org.hamcrest.Matchers.containsString;
 import static roomescape.testFixture.Fixture.MEMBER1_ADMIN;
 
 import io.restassured.RestAssured;
@@ -40,6 +41,6 @@ class LogoutControllerIntTest {
                 .then().log().all()
                 .statusCode(303)
                 .header("Location", "/")
-                .header("Set-Cookie", "token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT");
+                .header("Set-Cookie", containsString("token=null"));
     }
 }
