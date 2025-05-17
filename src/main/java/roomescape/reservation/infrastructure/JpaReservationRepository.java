@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
@@ -11,7 +12,7 @@ import roomescape.user.domain.UserId;
 
 import java.util.List;
 
-public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
+public interface JpaReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
     boolean existsByTimeId(Long timeId);
 

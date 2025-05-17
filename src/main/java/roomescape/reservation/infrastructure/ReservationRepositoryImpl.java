@@ -3,6 +3,7 @@ package roomescape.reservation.infrastructure;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -21,7 +22,6 @@ import java.util.Optional;
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
 
-    private final JdbcTemplateReservationRepository jdbcTemplateReservationRepository;
     private final JpaReservationRepository jpaReservationRepository;
 
     @Override
@@ -80,6 +80,9 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllByParams(final UserId userId, final ThemeId themeId, final ReservationDate from, final ReservationDate to) {
-        return jdbcTemplateReservationRepository.findAllByParams(userId, themeId, from, to);
+        Specification<Reservation> spec = Specification.where(ReservationSpecs.isMemberReservation(userId))
+                .and(ReservationSpecs.isThemeReservation(themeId))
+                .and(ReservationSpecs.isReservationByPeriod(from, to));
+        return jpaReservationRepository.findAll(spec);
     }
 }
