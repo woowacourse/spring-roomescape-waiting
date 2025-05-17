@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.infrastructure.jpa.JpaMemberRepository;
 
 @DataJpaTest
 public class JpaMemberRepositoryTest {

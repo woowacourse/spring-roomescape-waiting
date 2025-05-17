@@ -1,4 +1,4 @@
-package roomescape.member.infrastructure;
+package roomescape.member.infrastructure.jpa;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

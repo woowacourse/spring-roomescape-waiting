@@ -3,18 +3,18 @@ package roomescape.member.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.request.SignupRequest;
 import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.dto.response.SignupResponse;
-import roomescape.member.infrastructure.JpaMemberRepository;
 
 @Service
 public class MemberService {
 
-    private final JpaMemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
-    public MemberService(JpaMemberRepository memberRepository) {
+    public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 

@@ -4,12 +4,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.util.DateTime;
 import roomescape.reservation.domain.ReservationPeriod;
-import roomescape.reservation.infrastructure.JpaReservationRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.dto.request.ThemeRequest;
 import roomescape.theme.dto.response.PopularThemeResponse;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.infrastructure.JpaThemeRepository;
 
 @Service
 public class ThemeService {
@@ -19,12 +19,12 @@ public class ThemeService {
     private static final int END_OFFSET_DAYS = 1;
 
     private final DateTime dateTime;
-    private final JpaThemeRepository themeRepository;
-    private final JpaReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     public ThemeService(final DateTime dateTime,
-                        final JpaThemeRepository themeRepository,
-                        final JpaReservationRepository reservationRepository) {
+                        final ThemeRepository themeRepository,
+                        final ReservationRepository reservationRepository) {
         this.dateTime = dateTime;
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
@@ -38,7 +38,7 @@ public class ThemeService {
     }
 
     public void deleteThemeById(final Long id) {
-        if (reservationRepository.existsByTheme_Id(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("예약한 기록이 존재하여 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);

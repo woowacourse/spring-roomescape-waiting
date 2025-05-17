@@ -20,6 +20,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.infrastructure.jpa.JpaThemeRepository;
 
 @DataJpaTest
 class ThemeCustomRepositoryImplTest {
@@ -66,10 +67,10 @@ class ThemeCustomRepositoryImplTest {
                 .map(Theme::getName)
                 .toList();
         List<String> descriptions = reservations.stream()
-                .map(Theme::getName)
+                .map(Theme::getDescription)
                 .toList();
         List<String> thumbnails = reservations.stream()
-                .map(Theme::getName)
+                .map(Theme::getThumbnail)
                 .toList();
         assertAll(
                 () -> assertThat(reservations).hasSize(3),

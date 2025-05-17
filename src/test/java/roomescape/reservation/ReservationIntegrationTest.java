@@ -32,7 +32,7 @@ public class ReservationIntegrationTest {
 
     @DisplayName("날짜가 null인 상태로 생성 요청 시 400 응답을 준다.")
     @Test
-    void when_given_null_date() {
+    void when_given_null_getDate() {
         // given
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
@@ -56,7 +56,7 @@ public class ReservationIntegrationTest {
     @DisplayName("잘못된 날짜로 생성 요청 시 400 응답을 준다.")
     @ParameterizedTest
     @ValueSource(strings = {"a", "ab", "123", "2월 5일", "2014년 2월 5일", "2023:12:03", "2024-15-10"})
-    void when_given_wrong_date(final String date) {
+    void when_given_wrong_getDate(final String date) {
         // given
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
@@ -79,7 +79,7 @@ public class ReservationIntegrationTest {
 
     @DisplayName("잘못된 예약 시간 번호로 생성 요청 시 400 응답을 준다.")
     @Test
-    void when_given_wrong_time_id() {
+    void when_given_wrong_time_get_id() {
         // given
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
@@ -102,7 +102,7 @@ public class ReservationIntegrationTest {
 
     @DisplayName("예약 시간 번호가 null인 상태로 생성 요청 시 400 응답을 준다.")
     @Test
-    void when_given_null_time_id() {
+    void when_given_null_time_get_id() {
         // given
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");

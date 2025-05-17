@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationTime.infrastructure.jpa.JpaReservationTimeRepository;
 
 @DataJpaTest
 public class JpaReservationTimeRepositoryTest {
@@ -64,7 +65,7 @@ public class JpaReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("아이디로 조회 테스트")
-    void find_by_id() {
+    void find_by_get_id() {
         // given
         ReservationTime reservationTime = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         ReservationTime save = repository.save(reservationTime);

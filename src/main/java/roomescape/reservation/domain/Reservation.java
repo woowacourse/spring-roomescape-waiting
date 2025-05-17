@@ -79,44 +79,56 @@ public class Reservation {
         return this.time.isSameTime(time);
     }
 
+    public String name() {
+        return member.getName();
+    }
+
+    public Long timeId() {
+        return time.getId();
+    }
+
+    public Long memberId() {
+        return member.getId();
+    }
+
+    public LocalTime reservationTime() {
+        return time.getStartAt();
+    }
+
+    public Long themeId() {
+        return theme.getId();
+    }
+
+    public String themeDescription() {
+        return theme.getDescription();
+    }
+
+    public String themeName() {
+        return theme.getName();
+    }
+
+    public String themeThumbnail() {
+        return theme.getThumbnail();
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public ReservationTime getTime() {
+        return time;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
     public Long getId() {
         return id;
     }
 
-    public String getName() {
-        return member.getName();
-    }
-
     public LocalDate getDate() {
         return date;
-    }
-
-    public Long getTimeId() {
-        return time.getId();
-    }
-
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public LocalTime getReservationTime() {
-        return time.getStartAt();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
-
-    public String getThemeDescription() {
-        return theme.getDescription();
-    }
-
-    public String getThemeName() {
-        return theme.getName();
-    }
-
-    public String getThemeThumbnail() {
-        return theme.getThumbnail();
     }
 
     @Override

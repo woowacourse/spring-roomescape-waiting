@@ -23,7 +23,7 @@ class ReservationTimeTest {
 
     @Test
     @DisplayName("Id 할당 테스트")
-    void assignId_Test() {
+    void assignGetId_Test() {
         // given
         ReservationTime withoutId = ReservationTime.createWithoutId(LocalTime.of(10, 10));
         // when

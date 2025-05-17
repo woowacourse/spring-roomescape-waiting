@@ -1,4 +1,4 @@
-package roomescape.theme.infrastructure;
+package roomescape.theme.infrastructure.jpa;
 
 import java.util.List;
 import roomescape.reservation.domain.ReservationPeriod;

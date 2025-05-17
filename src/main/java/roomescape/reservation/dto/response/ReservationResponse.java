@@ -12,16 +12,16 @@ public record ReservationResponse(Long id, ReservationMemberResponse member, Loc
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                new ReservationMemberResponse(reservation.getName()),
+                new ReservationMemberResponse(reservation.name()),
                 reservation.getDate(),
                 new ReservationTimeResponse(
-                        reservation.getTimeId(),
-                        reservation.getReservationTime()
+                        reservation.timeId(),
+                        reservation.reservationTime()
                 ),
-                new ThemeResponse(reservation.getThemeId(),
-                        reservation.getThemeName(),
-                        reservation.getThemeDescription(),
-                        reservation.getThemeThumbnail())
+                new ThemeResponse(reservation.themeId(),
+                        reservation.themeName(),
+                        reservation.themeDescription(),
+                        reservation.themeThumbnail())
         );
     }
 }

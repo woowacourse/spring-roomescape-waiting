@@ -12,9 +12,9 @@ public record MyReservationResponse(
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
                 reservation.getId(),
-                reservation.getThemeName(),
+                reservation.themeName(),
                 reservation.getDate().toString(),
-                reservation.getReservationTime().toString(),
+                reservation.reservationTime().toString(),
                 "예약"
         );
     }

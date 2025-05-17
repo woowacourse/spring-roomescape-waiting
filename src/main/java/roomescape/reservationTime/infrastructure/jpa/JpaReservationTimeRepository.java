@@ -1,4 +1,4 @@
-package roomescape.reservationTime.infrastructure;
+package roomescape.reservationTime.infrastructure.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.reservationTime.domain.ReservationTime;

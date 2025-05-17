@@ -48,7 +48,7 @@ class ReservationTest {
 
     @Test
     @DisplayName("Id 할당 테스트")
-    void assignId_Test() {
+    void assignGetId_Test() {
         // given
         ReservationTime reservationTime1 = ReservationTime.createWithId(1L, LocalTime.of(20, 10));
         Theme theme = Theme.createWithId(1L, "a", "a", "a");
@@ -60,7 +60,7 @@ class ReservationTest {
         // then
         assertAll(
                 () -> assertThat(reservation.getId()).isEqualTo(1L),
-                () -> assertThat(reservation.getName()).isEqualTo("a")
+                () -> assertThat(reservation.name()).isEqualTo("a")
         );
     }
 

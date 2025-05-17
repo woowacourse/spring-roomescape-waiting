@@ -11,7 +11,7 @@ class ReservationPeriodTest {
 
     @Test
     @DisplayName("시작 날짜 계산 테스트")
-    void find_start_date_test() {
+    void find_start_getDate_test() {
         // given
         ReservationPeriod reservationPeriod = new ReservationPeriod(LocalDate.of(2000, 11, 5), 3, 1);
         // when
@@ -22,7 +22,7 @@ class ReservationPeriodTest {
 
     @Test
     @DisplayName("끝 날짜 계산 테스트")
-    void find_end_date_test() {
+    void find_end_getDate_test() {
         // given
         ReservationPeriod reservationPeriod = new ReservationPeriod(LocalDate.of(2000, 11, 5), 3, 1);
         // when

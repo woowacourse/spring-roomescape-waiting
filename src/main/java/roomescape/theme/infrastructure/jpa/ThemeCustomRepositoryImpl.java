@@ -1,4 +1,4 @@
-package roomescape.theme.infrastructure;
+package roomescape.theme.infrastructure.jpa;
 
 import jakarta.persistence.EntityManager;
 import java.util.List;

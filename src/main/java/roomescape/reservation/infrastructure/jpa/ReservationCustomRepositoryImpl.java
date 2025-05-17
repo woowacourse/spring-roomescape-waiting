@@ -1,4 +1,4 @@
-package roomescape.reservation.infrastructure;
+package roomescape.reservation.infrastructure.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -23,6 +23,19 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
                 memberId, themeId, from, to, query);
 
         return typedQuery.getResultList();
+    }
+
+    @Override
+    public List<Reservation> findByMemberId(Long id) {
+        return em.createQuery("""
+                             SELECT r FROM Reservation r
+                             JOIN FETCH r.member
+                             JOIN FETCH r.theme
+                             JOIN FETCH r.time
+                             WHERE r.member.id = :memberId
+                        """)
+                .setParameter("memberId", id)
+                .getResultList();
     }
 
     private StringBuilder createQuery(Long memberId, Long themeId, LocalDate from, LocalDate to) {
