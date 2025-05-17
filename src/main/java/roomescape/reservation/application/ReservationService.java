@@ -15,7 +15,7 @@ import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.dto.AdminReservationRequest;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
-import roomescape.reservation.application.dto.MyReservation;
+import roomescape.reservation.application.dto.MyReservationResponse;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
@@ -55,12 +55,35 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse addMemberReservation(final MemberReservationRequest request, final Long memberId) {
-        return addReservation(request.timeId(), request.themeId(), memberId, request.date());
+        final ReservationTime reservationTime = getReservationTime(request.timeId());
+        final Theme theme = getTheme(request.themeId());
+        final Member member = getMember(memberId);
+
+        validatePastDateTime(request.date(), reservationTime.getStartAt());
+
+        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
+                request.status());
+        final Reservation saved = reservationRepository.save(reservation);
+        return ReservationResponse.from(saved);
     }
 
     @Transactional
     public ReservationResponse addAdminReservation(final AdminReservationRequest request) {
-        return addReservation(request.timeId(), request.themeId(), request.memberId(), request.date());
+        final ReservationTime reservationTime = getReservationTime(request.timeId());
+        final Theme theme = getTheme(request.themeId());
+        final Member member = getMember(request.memberId());
+
+        final List<Reservation> sameDateAndThemeReservations = reservationRepository.findByDateAndThemeIdWithAssociations(
+                request.date(),
+                request.themeId());
+
+        validateIsBooked(sameDateAndThemeReservations, reservationTime, theme);
+        validatePastDateTime(request.date(), reservationTime.getStartAt());
+
+        final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
+                BookingStatus.RESERVED);
+        final Reservation saved = reservationRepository.save(reservation);
+        return ReservationResponse.from(saved);
     }
 
     @Transactional
@@ -96,10 +119,10 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<MyReservation> findByMemberId(final Long memberId) {
+    public List<MyReservationResponse> findByMemberId(final Long memberId) {
         final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
         return reservations.stream()
-                .map(MyReservation::from)
+                .map(MyReservationResponse::from)
                 .toList();
     }
 
@@ -117,7 +140,7 @@ public class ReservationService {
         validatePastDateTime(date, reservationTime.getStartAt());
 
         final Reservation reservation = new Reservation(date, reservationTime, theme, member,
-                BookingStatus.CONFIRMATION);
+                BookingStatus.RESERVED);
         final Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);
     }

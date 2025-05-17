@@ -14,7 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.application.dto.MemberResponse;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
-import roomescape.reservation.application.dto.MyReservation;
+import roomescape.reservation.application.dto.MyReservationResponse;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.application.dto.ReservationTimeResponse;
 import roomescape.theme.application.dto.ThemeResponse;
@@ -105,7 +105,7 @@ class ReservationServiceTest {
         final long memberId = 1L;
 
         // when
-        final List<MyReservation> responses = reservationService.findByMemberId(memberId);
+        final List<MyReservationResponse> responses = reservationService.findByMemberId(memberId);
 
         // then
         assertThat(responses).hasSize(2);

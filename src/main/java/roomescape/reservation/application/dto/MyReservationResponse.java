@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
-public record MyReservation(
+public record MyReservationResponse(
         Long id,
         String theme,
         LocalDate date,
@@ -14,8 +14,8 @@ public record MyReservation(
         String status
 ) {
 
-    public static MyReservation from(Reservation reservation) {
-        return new MyReservation(
+    public static MyReservationResponse from(Reservation reservation) {
+        return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getThemeName(),
                 reservation.getDate(),

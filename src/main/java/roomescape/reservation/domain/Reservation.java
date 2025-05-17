@@ -12,7 +12,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
-import org.hibernate.annotations.ColumnDefault;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.theme.domain.Theme;
@@ -37,15 +36,20 @@ public class Reservation {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    @ColumnDefault(value = "'CONFIRMATION'")
     private BookingStatus bookingStatus;
 
     protected Reservation() {
 
     }
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
-                       final Member member, final BookingStatus bookingStatus) {
+    public Reservation(
+            final Long id,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final Member member,
+            final BookingStatus bookingStatus
+    ) {
         this.id = id;
         this.date = date;
         this.time = time;
