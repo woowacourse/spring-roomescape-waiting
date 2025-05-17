@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.controller.dto.request.TimeRequest;
 import roomescape.entity.ReservationTime;
+import roomescape.exception.ErrorCode;
 import roomescape.exception.custom.DuplicatedException;
+import roomescape.exception.custom.NotFoundException;
 import roomescape.repository.JpaReservationTimeRepository;
 
 @Service
@@ -37,6 +39,9 @@ public class TimeService {
     }
 
     public void removeReservationTime(Long id) {
+        if (!reservationTimeRepository.existsById(id)) {
+            throw new NotFoundException("reservationTime");
+        }
         reservationTimeRepository.deleteById(id);
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.controller.dto.request.ThemeRequest;
 import roomescape.entity.Theme;
 import roomescape.exception.custom.DuplicatedException;
+import roomescape.exception.custom.NotFoundException;
 import roomescape.repository.JpaThemeRepository;
 
 @Service
@@ -42,7 +43,10 @@ public class ThemeService {
         }
     }
 
-    public void removeTheme(Long id) {
+    public void removeTheme(long id) {
+        if (!themeRepository.existsById(id)) {
+            throw new NotFoundException("theme");
+        }
         themeRepository.deleteById(id);
     }
 }

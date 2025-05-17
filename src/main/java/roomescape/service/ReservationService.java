@@ -109,6 +109,9 @@ public class ReservationService {
     }
 
     public void removeReservation(long id) {
+        if (reservationRepository.existsById(id)) {
+            throw new NotFoundException("reservation");
+        }
         reservationRepository.deleteById(id);
     }
 }
