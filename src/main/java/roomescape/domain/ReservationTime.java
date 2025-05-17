@@ -4,19 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import roomescape.exception.UnableCreateReservationException;
-
 import java.time.LocalTime;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationTime {
-    private static final LocalTime RESERVATION_START_TIME = LocalTime.of(12, 0);
-    private static final LocalTime RESERVATION_END_TIME = LocalTime.of(22, 0);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,28 +21,26 @@ public class ReservationTime {
 
     private LocalTime startAt;
 
-    public ReservationTime(Long id, LocalTime startAt) {
-        if (startAt.isBefore(RESERVATION_START_TIME) || startAt.isAfter(RESERVATION_END_TIME)) {
-            throw new UnableCreateReservationException("해당 시간은 예약 가능 시간이 아닙니다.");
-        }
+    public ReservationTime(final Long id, final LocalTime startAt) {
         this.id = id;
-        this.startAt = startAt;
+        this.startAt = Objects.requireNonNull(startAt, "예약 시작 시간은 null일 수 없습니다.");
+    }
+
+    public ReservationTime(final LocalTime startAt) {
+        this(null, startAt);
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
+    public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         ReservationTime that = (ReservationTime) o;
-        return Objects.equals(getStartAt(), that.getStartAt());
+        return id != null & Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getStartAt());
+        return Objects.hashCode(id);
     }
 }

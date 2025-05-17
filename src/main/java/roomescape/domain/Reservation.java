@@ -1,7 +1,5 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
-import java.util.Objects;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -9,13 +7,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
+import java.util.Objects;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,14 +36,18 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
+    public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time, final Theme theme,
+                       final ReservationStatus status) {
         this.id = id;
-        this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.status = status;
+        this.member = Objects.requireNonNull(member, "예약 회원은 null일 수 없습니다.");
+        this.date = Objects.requireNonNull(date, "예약 날짜는 null일 수 없습니다.");
+        this.time = Objects.requireNonNull(time, "예약 시간은 null일 수 없습니다.");
+        this.theme = Objects.requireNonNull(theme, "예약 테마는 null일 수 없습니다.");
+        this.status = Objects.requireNonNull(status, "예약 상태는 null일 수 없습니다.");
+    }
+
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, final ReservationStatus status) {
+        this(null, member, date, time, theme, status);
     }
 
     @Override
@@ -50,23 +56,11 @@ public class Reservation {
             return false;
         }
         Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date)
-               && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
-    }
-
-    @Override
-    public String toString() {
-        return "Reservation{" +
-               "id=" + id +
-               ", member=" + member +
-               ", date=" + date +
-               ", time=" + time +
-               ", theme=" + theme +
-               '}';
+        return Objects.hashCode(id);
     }
 }
