@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,6 +21,7 @@ import roomescape.member.ui.dto.SignUpRequest;
 
 @DataJpaTest
 @Import(TestConfig.class)
+@DisplayNameGeneration(ReplaceUnderscores.class)
 class MemberServiceTest {
 
     @Autowired

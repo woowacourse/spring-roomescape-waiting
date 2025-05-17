@@ -5,6 +5,8 @@ import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_1;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -24,6 +26,7 @@ import roomescape.theme.domain.ThemeQueryRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
+@DisplayNameGeneration(ReplaceUnderscores.class)
 class ThemeRepositoryImplTest {
 
     @Autowired
@@ -37,10 +40,10 @@ class ThemeRepositoryImplTest {
 
     @Autowired
     private ReservationTimeCommandRepository reservationTimeCommandRepository;
+
     @Autowired
     private MemberCommandRepository memberCommandRepository;
-
-
+    
     @Test
     void 특정_기간_사이에_예약이_많은_n개의_테마_목록을_내림차순으로_반환한다() {
         // given
