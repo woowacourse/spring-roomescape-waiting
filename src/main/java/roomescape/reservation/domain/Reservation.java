@@ -17,17 +17,26 @@ import roomescape.member.domain.Member;
 @Entity
 public class Reservation {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne @JoinColumn(name = "member_id", nullable = false)
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
+
     @Column(nullable = false)
     private LocalDate date;
-    @ManyToOne @JoinColumn(name = "time_id", nullable = false)
+
+    @ManyToOne
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
-    @ManyToOne @JoinColumn(name = "theme_id", nullable = false)
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
     protected Reservation() {
@@ -49,7 +58,12 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(
+            final Member member,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
         this(null, member, ReservationStatus.CONFIRMED, date, time, theme);
     }
 
