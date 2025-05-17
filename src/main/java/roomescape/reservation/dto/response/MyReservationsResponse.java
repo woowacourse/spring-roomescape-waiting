@@ -19,10 +19,10 @@ public record MyReservationsResponse(
     public static MyReservationsResponse from(Reservation reservation) {
         return new MyReservationsResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
+                reservation.themeName(),
                 reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                reservation.getStatus().getDescription()
+                reservation.startTime(),
+                reservation.statusDescription()
         );
     }
 }
