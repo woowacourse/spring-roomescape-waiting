@@ -2,6 +2,7 @@ package roomescape.member.domain;
 
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import roomescape.global.exception.custom.BadRequestException;
 
 @Embeddable
 public final class MemberName {
@@ -13,13 +14,13 @@ public final class MemberName {
         this.name = name;
     }
 
-    public MemberName() {
+    protected MemberName() {
 
     }
 
     private void validateName(final String name) {
         if (name == null || name.isBlank() || name.length() > 5) {
-            throw new IllegalArgumentException("사용자명은 최소 1글자, 최대 5글자여야합니다.");
+            throw new BadRequestException("사용자명은 최소 1글자, 최대 5글자여야합니다.");
         }
     }
 
