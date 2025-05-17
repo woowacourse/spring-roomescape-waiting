@@ -12,21 +12,24 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
 
     @Query("SELECT r                           "
             + "FROM Reservation r                "
-            + "JOIN r.time t "
-            + "JOIN r.theme th                   "
-            + "JOIN r.member m                   "
+            + "JOIN FETCH r.time t "
+            + "JOIN FETCH r.theme th                   "
+            + "JOIN FETCH r.member m                   "
             + "WHERE th.id        = :themeId     "
             + "  AND m.id         = :memberId    "
             + "  AND r.date BETWEEN :startDate AND :endDate ")
-    List<Reservation> findFilteredReservations(@Param("themeId") final Long themeId,
-                                               @Param("memberId") final Long memberId,
-                                               @Param("startDate") final LocalDate startDate,
-                                               @Param("endDate") final LocalDate endDate);
+    List<Reservation> findFilteredReservations(final Long themeId,
+                                               final Long memberId,
+                                               final LocalDate startDate,
+                                               final LocalDate endDate);
 
-    boolean existsByTimeId(Long id);
+    @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.time.id = :timeId) ")
+    boolean existsByTimeId(Long timeId);
 
-    boolean existsByThemeId(Long id);
+    @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.theme.id = :themeId) ")
+    boolean existsByThemeId(Long themeId);
 
+    @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE (r.date, r.time.id, r.theme.id) = (:date, :timeId, :themeId)) ")
     boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
 
     @Query("SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(rt.id, rt.startAt, "
@@ -37,5 +40,10 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(@Param("date") LocalDate date,
                                                                            @Param("themeId") Long themeId);
 
-    List<Reservation> findByMemberId(Long id);
+    @Query("SELECT  r "
+            + "FROM Reservation r "
+            + "JOIN FETCH r.member m "
+            + "WHERE m.id = :memberId "
+    )
+    List<Reservation> findByMemberId(Long memberId);
 }

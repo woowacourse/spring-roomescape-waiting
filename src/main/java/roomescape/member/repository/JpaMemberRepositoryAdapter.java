@@ -16,8 +16,8 @@ public class JpaMemberRepositoryAdapter implements MemberRepository {
     }
 
     @Override
-    public List<Member> findAllByMemberRole(final MemberRole memberRole) {
-        return jpaMemberRepository.findAllByMemberRole(memberRole);
+    public List<Member> findByMemberRole(final MemberRole memberRole) {
+        return jpaMemberRepository.findByMemberRole(memberRole);
     }
 
     @Override
