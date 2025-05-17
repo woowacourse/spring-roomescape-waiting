@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.config.TestConfig;
 import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.request.SignupRequest;
@@ -18,7 +19,7 @@ import roomescape.member.dto.response.SignUpResponse;
 import roomescape.member.repository.MemberRepository;
 
 @DataJpaTest
-@Import({MyPasswordEncoder.class})
+@Import(TestConfig.class)
 @TestPropertySource(properties = {
         "spring.sql.init.data-locations="
 })
