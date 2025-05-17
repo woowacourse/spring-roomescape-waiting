@@ -1,5 +1,8 @@
 package roomescape.auth.ui;
 
+import static roomescape.auth.domain.AuthRole.ADMIN;
+import static roomescape.auth.domain.AuthRole.MEMBER;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.application.AuthService;
-import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.auth.ui.dto.LoginRequest;
@@ -51,7 +53,7 @@ public class AuthRestController {
     }
 
     @PostMapping("/logout")
-    @RequiresRole(authRoles = {AuthRole.ADMIN, AuthRole.MEMBER})
+    @RequiresRole(authRoles = {ADMIN, MEMBER})
     public ResponseEntity<Void> logout() {
         final ResponseCookie cookie = ResponseCookie.from("token", "")
                 .path("/")

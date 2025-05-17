@@ -1,5 +1,7 @@
 package roomescape.theme.ui;
 
+import static roomescape.auth.domain.AuthRole.ADMIN;
+
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.theme.applcation.ThemeService;
 import roomescape.theme.ui.dto.CreateThemeRequest;
@@ -26,7 +27,7 @@ public class ThemeRestController {
     private final ThemeService themeService;
 
     @PostMapping
-    @RequiresRole(authRoles = {AuthRole.ADMIN})
+    @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<ThemeResponse> create(
             @RequestBody @Valid final CreateThemeRequest request
     ) {
@@ -37,7 +38,7 @@ public class ThemeRestController {
     }
 
     @DeleteMapping({"/{id}"})
-    @RequiresRole(authRoles = {AuthRole.ADMIN})
+    @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<Void> delete(
             @PathVariable final Long id
     ) {

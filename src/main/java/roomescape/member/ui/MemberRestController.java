@@ -1,5 +1,8 @@
 package roomescape.member.ui;
 
+import static roomescape.auth.domain.AuthRole.ADMIN;
+import static roomescape.auth.domain.AuthRole.MEMBER;
+
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.member.application.MemberService;
 import roomescape.member.domain.Member;
@@ -38,7 +40,7 @@ public class MemberRestController {
     }
 
     @DeleteMapping("/{id}")
-    @RequiresRole(authRoles = {AuthRole.ADMIN, AuthRole.MEMBER})
+    @RequiresRole(authRoles = {ADMIN, MEMBER})
     public ResponseEntity<Void> delete(
             @PathVariable final Long id,
             final Member member
@@ -58,7 +60,7 @@ public class MemberRestController {
     }
 
     @GetMapping
-    @RequiresRole(authRoles = {AuthRole.ADMIN})
+    @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<List<IdName>> findAll() {
         final List<IdName> responses = memberService.findAllNames();
 
