@@ -45,7 +45,7 @@ class ReservationTimeServiceTest {
     void 예약_시간을_삭제한다() {
         // given
         final LocalTime startAt = LocalTime.of(20, 28);
-        final Long id = reservationTimeCommandRepository.save(new ReservationTime(startAt));
+        final Long id = reservationTimeCommandRepository.save(new ReservationTime(startAt)).getId();
 
         // when & then
         Assertions.assertThatCode(() -> reservationTimeService.deleteById(id))

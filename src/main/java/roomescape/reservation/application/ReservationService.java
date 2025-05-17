@@ -48,9 +48,7 @@ public class ReservationService {
         final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
                 request.status());
 
-        final Long id = reservationCommandRepository.save(reservation);
-        final Reservation found = reservationQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+        final Reservation found = reservationCommandRepository.save(reservation);
 
         return ReservationResponse.from(found);
     }
@@ -70,9 +68,7 @@ public class ReservationService {
         final Reservation reservation = new Reservation(request.date(), reservationTime, theme, member,
                 ReservationStatus.CONFIRMED);
 
-        final Long id = reservationCommandRepository.save(reservation);
-        final Reservation found = reservationQueryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+        final Reservation found = reservationCommandRepository.save(reservation);
 
         return ReservationResponse.from(found);
     }

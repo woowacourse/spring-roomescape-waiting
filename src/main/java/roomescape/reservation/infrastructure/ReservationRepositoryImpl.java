@@ -16,8 +16,8 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     private final JpaReservationRepository jpaReservationRepository;
 
     @Override
-    public Long save(final Reservation reservation) {
-        return jpaReservationRepository.save(reservation).getId();
+    public Reservation save(final Reservation reservation) {
+        return jpaReservationRepository.save(reservation);
     }
 
     @Override

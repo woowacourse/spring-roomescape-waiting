@@ -17,8 +17,8 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeCommandRepo
     private final JpaReservationTimeRepository jpaRepository;
 
     @Override
-    public Long save(final ReservationTime reservationTime) {
-        return jpaRepository.save(reservationTime).getId();
+    public ReservationTime save(final ReservationTime reservationTime) {
+        return jpaRepository.save(reservationTime);
     }
 
     @Override

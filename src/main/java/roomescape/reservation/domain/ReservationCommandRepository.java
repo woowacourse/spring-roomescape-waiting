@@ -2,7 +2,7 @@ package roomescape.reservation.domain;
 
 public interface ReservationCommandRepository {
 
-    Long save(Reservation reservation);
+    Reservation save(Reservation reservation);
 
     void deleteById(Long id);
 }

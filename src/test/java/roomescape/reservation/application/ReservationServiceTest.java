@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Import;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberCommandRepository;
@@ -29,7 +28,6 @@ import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
-import roomescape.reservation.domain.ReservationTimeQueryRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
@@ -49,9 +47,6 @@ class ReservationServiceTest {
     private ReservationTimeCommandRepository reservationTimeCommandRepository;
 
     @Autowired
-    private ReservationTimeQueryRepository reservationTimeQueryRepository;
-
-    @Autowired
     private ThemeCommandRepository themeCommandRepository;
 
     @Autowired
@@ -64,7 +59,7 @@ class ReservationServiceTest {
     void 예약을_추가한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final Long timeId = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Long timeId = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1()).getId();
         final Long themeId = themeCommandRepository.save(NOT_SAVED_THEME_1()).getId();
         final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
         final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, timeId,
@@ -80,10 +75,7 @@ class ReservationServiceTest {
     void 예약을_추가할_때_이미_예약된_시간이면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-
-        final Long timeId = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final ReservationTime reservationTime = reservationTimeQueryRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime reservationTime = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeCommandRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
 
@@ -91,7 +83,7 @@ class ReservationServiceTest {
                 new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
 
         final CreateReservationRequest.ForMember request =
-                new CreateReservationRequest.ForMember(date, timeId, theme.getId());
+                new CreateReservationRequest.ForMember(date, reservationTime.getId(), theme.getId());
         final MemberAuthInfo memberAuthInfo =
                 new MemberAuthInfo(member.getId(), member.getRole());
 
@@ -104,7 +96,7 @@ class ReservationServiceTest {
     void 과거_시간으로_예약을_추가하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().minusDays(5);
-        final Long timeId = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Long timeId = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1()).getId();
         final Long themeId = themeCommandRepository.save(NOT_SAVED_THEME_1()).getId();
         final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
 
@@ -122,14 +114,12 @@ class ReservationServiceTest {
     void 한_테마의_날짜와_시간이_중복되는_예약을_추가할_수_없다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final Long timeId = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final ReservationTime reservationTime = reservationTimeQueryRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime reservationTime = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeCommandRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
 
         final CreateReservationRequest.ForMember request =
-                new CreateReservationRequest.ForMember(date, timeId, theme.getId());
+                new CreateReservationRequest.ForMember(date, reservationTime.getId(), theme.getId());
         final MemberAuthInfo memberAuthInfo =
                 new MemberAuthInfo(member.getId(), member.getRole());
 
@@ -145,15 +135,13 @@ class ReservationServiceTest {
     void 예약을_삭제한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final Long timeId1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final ReservationTime reservationTime1 = reservationTimeQueryRepository.findById(timeId1)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime reservationTime1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeCommandRepository.save(NOT_SAVED_THEME_1());
         final Member member1 = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
                 ReservationStatus.CONFIRMED);
-        final Long reservationId = reservationCommandRepository.save(reservation);
+        final Long reservationId = reservationCommandRepository.save(reservation).getId();
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
         // when & then
@@ -165,9 +153,7 @@ class ReservationServiceTest {
     void 본인의_예약이_아니면_삭제할_수_없다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final Long timeId1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final ReservationTime reservationTime1 = reservationTimeQueryRepository.findById(timeId1)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime reservationTime1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeCommandRepository.save(NOT_SAVED_THEME_1());
 
         final Member member1 = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
@@ -175,7 +161,7 @@ class ReservationServiceTest {
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
                 ReservationStatus.CONFIRMED);
-        final Long reservationId = reservationCommandRepository.save(reservation);
+        final Long reservationId = reservationCommandRepository.save(reservation).getId();
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
         // when & then
@@ -189,16 +175,12 @@ class ReservationServiceTest {
         final int beforeCount = reservationService.findAll().size();
 
         final LocalDate date1 = LocalDate.now().plusDays(1);
-        final ReservationTime time1 = reservationTimeQueryRepository.findById(
-                        reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1()))
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime time1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeCommandRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
 
         final LocalDate date2 = LocalDate.now().plusDays(2);
-        final ReservationTime time2 = reservationTimeQueryRepository.findById(
-                        reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_2()))
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime time2 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final Theme theme2 = themeCommandRepository.save(NOT_SAVED_THEME_2());
 
         reservationCommandRepository.save(
@@ -220,9 +202,7 @@ class ReservationServiceTest {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final Theme theme = themeCommandRepository.save(NOT_SAVED_THEME_1());
-        final Long timeId1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final ReservationTime reservationTime1 = reservationTimeQueryRepository.findById(timeId1)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime reservationTime1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_2());
 
         final AvailableReservationTimeRequest request = new AvailableReservationTimeRequest(date, theme.getId());
@@ -249,16 +229,12 @@ class ReservationServiceTest {
     void 특정_회원의_예약_목록을_조회한다() {
         // given
         final LocalDate date1 = LocalDate.now().plusDays(1);
-        final ReservationTime time1 = reservationTimeQueryRepository.findById(
-                        reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1()))
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime time1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeCommandRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
 
         final LocalDate date2 = LocalDate.now().plusDays(2);
-        final ReservationTime time2 = reservationTimeQueryRepository.findById(
-                        reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_2()))
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime time2 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final Theme theme2 = themeCommandRepository.save(NOT_SAVED_THEME_2());
 
         reservationCommandRepository.save(
