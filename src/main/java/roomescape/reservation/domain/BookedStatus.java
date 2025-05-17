@@ -16,7 +16,7 @@ import lombok.experimental.FieldNameConstants;
 @EqualsAndHashCode
 @ToString
 @Embeddable
-public final class BookedStatus {
+public class BookedStatus {
 
     private int sequence;
 

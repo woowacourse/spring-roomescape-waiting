@@ -63,9 +63,9 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
                                                             final ReservationDate endDate,
                                                             final int bookCount) {
 
-        return reservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, bookCount)
-                .entrySet().stream()
-                .map(entry -> new ThemeToBookCountServiceResponse(entry.getKey(), BookedCount.from(entry.getValue())))
+        return reservationRepository.findThemesToBookedCount(startDate, endDate, bookCount)
+                .stream()
+                .map(current -> new ThemeToBookCountServiceResponse(current.theme(), BookedCount.from(current.bookedCount())))
                 .toList();
     }
 

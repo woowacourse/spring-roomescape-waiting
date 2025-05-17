@@ -20,7 +20,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode
 @ToString
 @Embeddable
-public final class ReservationDate {
+public class ReservationDate {
 
     private LocalDate value;
 

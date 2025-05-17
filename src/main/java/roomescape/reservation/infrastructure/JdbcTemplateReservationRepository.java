@@ -3,10 +3,8 @@ package roomescape.reservation.infrastructure;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import roomescape.common.jdbc.JdbcUtils;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.infrastructure.mapper.BookedThemeRowMapper;
 import roomescape.reservation.infrastructure.mapper.ReservationRowMapper;
 import roomescape.theme.domain.Theme;
@@ -17,7 +15,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Map.Entry;
@@ -27,29 +24,6 @@ import static java.util.Map.Entry;
 public class JdbcTemplateReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public Optional<Reservation> findById(final ReservationId id) {
-        final String sql = """
-                select
-                    r.id,
-                    r.user_id,
-                    r.date,
-                    rt.id as time_id,
-                    rt.start_at as start_at,
-                    t.id as theme_id,
-                    t.name as theme_name,
-                    t.description as description,
-                    t.thumbnail as thumbnail
-                from reservations r
-                join reservation_times rt
-                    on r.time_id = rt.id
-                join themes t
-                    on r.theme_id = t.id
-                where r.id = ?
-                """;
-
-        return JdbcUtils.queryForOptional(jdbcTemplate, sql, ReservationRowMapper.INSTANCE, id.getValue());
-    }
 
     public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate,
                                                                                  final ReservationDate endDate,

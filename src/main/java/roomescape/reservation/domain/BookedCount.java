@@ -12,14 +12,14 @@ import lombok.ToString;
 @ToString
 public class BookedCount {
 
-    private final int value;
+    private final long value;
 
-    public static BookedCount from(final int value) {
+    public static BookedCount from(final long value) {
         validateNegative(value);
         return new BookedCount(value);
     }
 
-    private static void validateNegative(final int value) {
+    private static void validateNegative(final long value) {
         if (value < 0) {
             throw new IllegalArgumentException("BookedCount must not be negative: " + value);
         }

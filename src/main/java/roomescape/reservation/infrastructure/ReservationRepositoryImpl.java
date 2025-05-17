@@ -1,19 +1,20 @@
 package roomescape.reservation.infrastructure;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.theme.domain.Theme;
+import roomescape.reservation.infrastructure.vo.ThemBookingCount;
 import roomescape.theme.domain.ThemeId;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -72,8 +73,9 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
-        return jdbcTemplateReservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, count);
+    public List<ThemBookingCount> findThemesToBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
+        Pageable topN = PageRequest.of(0, count);
+        return jpaReservationRepository.findThemesWithBookedCount(startDate, endDate, topN);
     }
 
     @Override
