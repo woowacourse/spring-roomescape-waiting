@@ -69,28 +69,4 @@ class ThemeRepositoryTest {
         // then
         assertThat(themeRepository.findById(savedTheme.getId())).isEmpty();
     }
-
-    @Test
-    void 테마를_수정한다() {
-        // given
-        Theme theme = Theme.create("공포", "공포 테마입니다.", "horror.jpg");
-        Theme savedTheme = themeRepository.save(theme);
-
-        // when
-        Theme updatedTheme = Theme.builder()
-                .id(savedTheme.getId())
-                .name("수정된 공포")
-                .description("수정된 공포 테마입니다.")
-                .thumbnail("updated-horror.jpg")
-                .build();
-        Theme result = themeRepository.save(updatedTheme);
-
-        // then
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(result.getId()).isEqualTo(savedTheme.getId());
-        softly.assertThat(result.getName()).isEqualTo("수정된 공포");
-        softly.assertThat(result.getDescription()).isEqualTo("수정된 공포 테마입니다.");
-        softly.assertThat(result.getThumbnail()).isEqualTo("updated-horror.jpg");
-        softly.assertAll();
-    }
 } 

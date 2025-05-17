@@ -40,13 +40,11 @@ public class Reservation {
 
     @Builder
     private Reservation(
-            final Long id,
             final Member reserver,
             final ReservationDateTime reservationDateTime,
             final Theme theme,
             final ReservationStatus status
     ) {
-        this.id = id;
         this.reserver = reserver;
         this.reservationDatetime = reservationDateTime;
         this.theme = theme;

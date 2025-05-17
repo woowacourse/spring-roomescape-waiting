@@ -21,12 +21,11 @@ public class ReservationTime {
     @Column(name = "start_at")
     private LocalTime startAt;
 
-    private ReservationTime(Long id, LocalTime time) {
-        this.id = id;
+    private ReservationTime(LocalTime time) {
         this.startAt = time;
     }
 
     public static ReservationTime open(LocalTime time) {
-        return new ReservationTime(null, time);
+        return new ReservationTime(time);
     }
 }

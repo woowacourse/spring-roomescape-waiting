@@ -22,8 +22,7 @@ public class Theme {
     private String thumbnail;
 
     @Builder
-    private Theme(Long id, String name, String description, String thumbnail) {
-        this.id = id;
+    private Theme(String name, String description, String thumbnail) {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
