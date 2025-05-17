@@ -34,7 +34,7 @@ public class MemberService {
     }
 
     public List<MemberResponse> findAllUsers() {
-        return memberRepository.findAllByMemberRole(MemberRole.USER).stream()
+        return memberRepository.findByMemberRole(MemberRole.USER).stream()
                 .map(member -> new MemberResponse(member.getId(), member.getName()))
                 .toList();
     }

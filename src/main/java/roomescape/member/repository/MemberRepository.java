@@ -7,7 +7,7 @@ import roomescape.member.domain.MemberRole;
 
 public interface MemberRepository {
 
-    List<Member> findAllByMemberRole(final MemberRole memberRole);
+    List<Member> findByMemberRole(final MemberRole memberRole);
 
     boolean existsByEmail(String email);
 

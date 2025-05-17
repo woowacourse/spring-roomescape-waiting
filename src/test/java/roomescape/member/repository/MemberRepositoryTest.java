@@ -38,10 +38,10 @@ class MemberRepositoryTest {
     }
 
     @Test
-    void findAllByMemberRole() {
+    void findByMemberRole() {
         memberRepository.save(new Member("Vector", "vector@gmail.com", "password", MemberRole.USER));
 
-        List<Member> users = memberRepository.findAllByMemberRole(MemberRole.USER);
+        List<Member> users = memberRepository.findByMemberRole(MemberRole.USER);
 
         assertThat(users.size()).isEqualTo(2);
     }
