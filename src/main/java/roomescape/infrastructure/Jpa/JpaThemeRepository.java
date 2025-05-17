@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.infrastructure.Jpa;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;

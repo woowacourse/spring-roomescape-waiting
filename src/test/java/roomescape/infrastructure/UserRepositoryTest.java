@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.Jpa.JpaUserRepository;
 import roomescape.test_util.JpaTestUtil;
 
 import java.util.List;

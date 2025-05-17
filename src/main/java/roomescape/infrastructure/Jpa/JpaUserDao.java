@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.infrastructure.Jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.business.model.entity.User;
