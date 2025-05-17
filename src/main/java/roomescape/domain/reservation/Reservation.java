@@ -33,15 +33,8 @@ public class Reservation {
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(255) default 'RESERVATION'")
-    private ReservationStatus reservationStatus = ReservationStatus.RESERVATION;
-
-    @PrePersist
-    public void prePersist() {
-        if (reservationStatus == null) {
-            this.reservationStatus = ReservationStatus.RESERVATION;
-        }
-    }
+    @Column(length = 15)
+    private ReservationStatus reservationStatus;
 
     protected Reservation() {
 
@@ -54,6 +47,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.reservationStatus = ReservationStatus.RESERVATION;
     }
 
     private void validate(String name, LocalDate date, ReservationTime time) {
