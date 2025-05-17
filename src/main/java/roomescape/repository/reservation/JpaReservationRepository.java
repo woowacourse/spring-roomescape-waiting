@@ -14,10 +14,9 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByDateBetween(LocalDate dateAfter, LocalDate dateBefore);
+    List<Reservation> findAllByDateBetween(LocalDate dateBefore, LocalDate dateAfter);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    @Query("select count(r) > 0 from Reservation r where r.theme.id = :#{#themeId}")
     boolean existsByThemeId(long themeId);
 }
