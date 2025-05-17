@@ -84,17 +84,14 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Member member = (Member) o;
-        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email)
-                && Objects.equals(role, member.role) && Objects.equals(password, member.password);
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member1 = (Member) o;
+        return Objects.equals(id, member1.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, role, password);
+        return Objects.hashCode(id);
     }
 
     public Long getId() {

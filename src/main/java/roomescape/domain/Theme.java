@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.util.Objects;
+
 @Entity
 public class Theme {
     @Id
@@ -50,6 +52,18 @@ public class Theme {
         if (thumbnail == null) {
             throw new IllegalArgumentException("[ERROR] 테마 이미지가 없습니다.");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Theme theme = (Theme) o;
+        return Objects.equals(id, theme.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public Long getId() {
