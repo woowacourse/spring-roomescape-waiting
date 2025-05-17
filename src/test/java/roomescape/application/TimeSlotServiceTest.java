@@ -17,7 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.DateUtils;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.exception.InUseException;
 
@@ -72,7 +71,8 @@ class TimeSlotServiceTest {
     void deleteTimeSlotWithReservation() {
         // given
         var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
-        var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, DateUtils.tomorrow(), timeSlotToBeRemoved, JUNK_THEME);
+        var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, DateUtils.tomorrow(),
+                timeSlotToBeRemoved, JUNK_THEME);
         reservationRepository.save(reservationWithTheTimeSlot);
 
         // when & then
