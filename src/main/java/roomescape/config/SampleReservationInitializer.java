@@ -58,6 +58,12 @@ public class SampleReservationInitializer implements CommandLineRunner {
         save(8L, baseDate.plusDays(1), 9L, 3L);
         save(4L, baseDate.plusDays(5), 7L, 7L);
         save(10L, baseDate.plusDays(4), 11L, 13L);
+
+        saveWaiting(1L, baseDate, 1L, 1L);
+        saveWaiting(2L, baseDate, 1L, 1L);
+        saveWaiting(3L, baseDate, 1L, 1L);
+        saveWaiting(4L, baseDate, 1L, 1L);
+        saveWaiting(5L, baseDate, 1L, 1L);
     }
 
     private void save(Long memberId, LocalDate date, Long timeId, Long themeId) {
@@ -66,6 +72,15 @@ public class SampleReservationInitializer implements CommandLineRunner {
         Theme theme = themeRepository.findById(themeId).orElseThrow();
 
         Reservation reservation = Reservation.createNew(member, date, time, theme);
+        reservationRepository.save(reservation);
+    }
+
+    private void saveWaiting(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        Member member = memberRepository.findById(memberId).orElseThrow();
+        ReservationTime time = timeRepository.findById(timeId).orElseThrow();
+        Theme theme = themeRepository.findById(themeId).orElseThrow();
+
+        Reservation reservation = Reservation.createWaiting(member, date, time, theme);
         reservationRepository.save(reservation);
     }
 }

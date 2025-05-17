@@ -29,4 +29,5 @@ public interface ReservationRepository {
 
     int countBeforeWaitings(LocalDate date, Long themeId, Long timeId, Long reservationId);
 
+    List<Reservation> findWaitingsReservation();
 }

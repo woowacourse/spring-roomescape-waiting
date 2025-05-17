@@ -65,4 +65,9 @@ public class ReservationService {
 
         reservationRepository.deleteById(reservationId);
     }
+
+    public List<ReservationResult> getWaitingReservations() {
+        List<Reservation> reservations = reservationRepository.findWaitingsReservation();
+        return ReservationResult.from(reservations);
+    }
 }

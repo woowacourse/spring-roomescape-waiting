@@ -1,8 +1,10 @@
 package roomescape.controller;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,12 @@ public class AdminReservationController {
     public AdminReservationController(ReservationCreationService reservationCreationService, ReservationService reservationService) {
         this.reservationCreationService = reservationCreationService;
         this.reservationService = reservationService;
+    }
+
+    @GetMapping("/waitings")
+    public List<ReservationResponse> getWaitingReservations() {
+        List<ReservationResult> reservationResults = reservationService.getWaitingReservations();
+        return ReservationResponse.from(reservationResults);
     }
 
     @ResponseStatus(HttpStatus.CREATED)

@@ -66,4 +66,14 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean existsByThemeId(Long themeId);
+
+    @Query("""
+        SELECT r
+        FROM Reservation r
+        JOIN FETCH r.time
+        JOIN FETCH r.theme
+        JOIN FETCH r.member
+        WHERE r.status = 'WAITING'
+    """)
+    List<Reservation> findWaitingReservations();
 }
