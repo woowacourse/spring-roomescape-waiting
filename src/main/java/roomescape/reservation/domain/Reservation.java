@@ -19,13 +19,18 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private ReservationDate reservationDate;
+
     @ManyToOne
     private ReservationTime reservationTime;
+
     @ManyToOne
     private Theme theme;
+
     @ManyToOne
     private Member member;
+
     @Enumerated(EnumType.STRING)
     private ReservationStatus reservationStatus;
 
