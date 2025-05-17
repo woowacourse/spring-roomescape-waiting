@@ -19,8 +19,8 @@ import roomescape.exception.ExistedThemeException;
 @Service
 public class ThemeService {
 
-    public static final int TOP_THEMES_COUNT = 10;
-    public static final int THEME_TRACKING_PERIOD = 7;
+    private static final int TOP_THEMES_COUNT = 10;
+    private static final int THEME_TRACKING_PERIOD = 7;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -57,7 +57,7 @@ public class ThemeService {
 
     public void deleteThemeById(long id) {
         List<Reservation> reservations = reservationRepository.findByThemeId(id);
-        if (reservations.size() > 0) {
+        if (!reservations.isEmpty()) {
             throw new ExistedReservationException();
         }
         themeRepository.deleteById(id);
