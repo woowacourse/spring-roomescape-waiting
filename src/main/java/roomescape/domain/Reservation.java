@@ -24,7 +24,7 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "reservation_time_id", nullable = false)
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
