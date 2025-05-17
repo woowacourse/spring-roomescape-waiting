@@ -19,7 +19,7 @@ import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
-import roomescape.reservation.ui.dto.request.ReservationsByfilterRequest;
+import roomescape.reservation.ui.dto.request.ReservationsByFilterRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 
 @RestController
@@ -59,7 +59,7 @@ public class AdminReservationRestController {
 
     @GetMapping("/reservations/filtered")
     public ResponseEntity<List<ReservationResponse>> findAllByFilter(
-            @ModelAttribute @Valid final ReservationsByfilterRequest request
+            @ModelAttribute @Valid final ReservationsByFilterRequest request
     ) {
         final List<ReservationResponse> reservationResponses = reservationService.findAllByFilter(request);
 
