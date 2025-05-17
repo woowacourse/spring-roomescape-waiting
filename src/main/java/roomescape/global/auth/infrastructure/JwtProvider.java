@@ -27,7 +27,6 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(userInfo.id().toString())
-                .claim(NAME, userInfo.name())
                 .claim(ROLE, userInfo.memberRole().name())
                 .setIssuedAt(now)
                 .setExpiration(validity)
