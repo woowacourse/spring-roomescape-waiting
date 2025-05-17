@@ -9,9 +9,15 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.reservation.application.ReservationServiceTest.ReservationConfig;
+import roomescape.reservation.application.ReservationTimeServiceTest.ReservationTimeConfig;
+import roomescape.reservation.application.ThemeServiceTest.ThemeConfig;
+import roomescape.reservation.application.repository.ReservationRepository;
+import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.ReservationTimeService;
 import roomescape.reservation.application.service.ThemeService;
@@ -23,8 +29,8 @@ import roomescape.reservation.presentation.dto.ThemeRequest;
 import roomescape.reservation.presentation.dto.ThemeResponse;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJpaTest
+@Import({ReservationTimeConfig.class, ReservationConfig.class, ThemeConfig.class})
 public class ReservationTimeServiceTest {
 
     @Autowired
@@ -156,5 +162,17 @@ public class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 삭제되어 있는 리소스입니다.");
+    }
+
+    static class ReservationTimeConfig {
+        @Bean
+        public ReservationTimeService reservationTimeService(
+                ReservationTimeRepository reservationTimeRepository,
+                ReservationRepository reservationRepository
+        ) {
+            return new ReservationTimeService(
+                    reservationTimeRepository, reservationRepository
+            );
+        }
     }
 }

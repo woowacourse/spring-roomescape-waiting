@@ -11,9 +11,13 @@ import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.member.application.repository.MemberRepository;
+import roomescape.reservation.application.ReservationServiceTest.ReservationConfig;
+import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.service.ReservationService;
@@ -23,8 +27,8 @@ import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJpaTest
+@Import(ReservationConfig.class)
 public class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
@@ -50,7 +54,8 @@ public class ReservationServiceTest {
         );
 
         // when - then
-        assertThatCode(() -> reservationService.createAdminReservation(adminReservationRequest)).doesNotThrowAnyException();
+        assertThatCode(
+                () -> reservationService.createAdminReservation(adminReservationRequest)).doesNotThrowAnyException();
     }
 
     @Test
@@ -167,5 +172,19 @@ public class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteReservation(1L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 삭제되어 있는 리소스입니다.");
+    }
+
+    static class ReservationConfig {
+        @Bean
+        public ReservationService reservationService(
+                ReservationRepository reservationRepository,
+                ReservationTimeRepository reservationTimeRepository,
+                ThemeRepository themeRepository,
+                MemberRepository memberRepository
+        ) {
+            return new ReservationService(
+                    reservationRepository, reservationTimeRepository, themeRepository, memberRepository
+            );
+        }
     }
 }

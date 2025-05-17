@@ -5,9 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.global.jwt.JwtTokenProvider;
+import roomescape.member.application.MemberServiceTest.MemberConfig;
+import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.application.service.MemberService;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.SignUpRequest;
@@ -15,8 +19,8 @@ import roomescape.member.presentation.dto.SignUpResponse;
 import roomescape.member.presentation.dto.TokenRequest;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJpaTest
+@Import(MemberConfig.class)
 public class MemberServiceTest {
 
     @Autowired
@@ -73,5 +77,16 @@ public class MemberServiceTest {
     @DisplayName("유저 조회 테스트")
     void getMembersTest() {
         assertThat(memberService.getMembers().size()).isEqualTo(2);
+    }
+
+    static class MemberConfig {
+        @Bean
+        public MemberService memberService(
+                MemberRepository memberRepository
+        ) {
+            return new MemberService(
+                    memberRepository, new JwtTokenProvider()
+            );
+        }
     }
 }

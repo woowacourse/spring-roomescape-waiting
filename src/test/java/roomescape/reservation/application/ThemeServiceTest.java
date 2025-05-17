@@ -9,12 +9,16 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.reservation.application.ReservationTimeServiceTest.ReservationTimeConfig;
+import roomescape.reservation.application.ThemeServiceTest.ThemeConfig;
 import roomescape.reservation.application.repository.ReservationRepository;
+import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.service.ReservationTimeService;
 import roomescape.reservation.application.service.ThemeService;
 import roomescape.reservation.domain.Reservation;
@@ -25,8 +29,8 @@ import roomescape.reservation.presentation.dto.ThemeRequest;
 import roomescape.reservation.presentation.dto.ThemeResponse;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJpaTest
+@Import({ReservationTimeConfig.class, ThemeConfig.class})
 public class ThemeServiceTest {
 
     @Autowired
@@ -137,5 +141,17 @@ public class ThemeServiceTest {
                 .map(ThemeResponse::getId)
                 .toList()
         ).isEqualTo(List.of(theme.getId()));
+    }
+
+    static class ThemeConfig {
+        @Bean
+        public ThemeService themeService(
+                ReservationRepository reservationRepository,
+                ThemeRepository themeRepository
+        ) {
+            return new ThemeService(
+                    reservationRepository, themeRepository
+            );
+        }
     }
 }
