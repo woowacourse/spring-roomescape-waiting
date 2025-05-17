@@ -1,7 +1,5 @@
 package roomescape.presentation.api;
 
-import java.util.List;
-
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +16,8 @@ import roomescape.presentation.dto.request.AvailableReservationTimeRequest;
 import roomescape.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.presentation.dto.response.ReservationTimeResponse;
-import roomescape.application.ReservationTimeServiceImpl;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/times")
