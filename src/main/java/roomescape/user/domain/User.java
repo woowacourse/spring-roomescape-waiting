@@ -24,9 +24,6 @@ public class User {
     private String email;
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    private Set<Reservation> reservations;
-
     protected User() {
     }
 
@@ -36,7 +33,6 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.reservations = new HashSet<>();
     }
 
     public User(String roleName, String name, String email, String password) {
