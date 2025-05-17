@@ -48,7 +48,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate reservationDate, final Long timeId, final Long themeId) {
+    public boolean existsDuplicateReservation(final LocalDate reservationDate, final Long timeId, final Long themeId) {
         return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(reservationDate, timeId, themeId);
     }
 

@@ -74,12 +74,12 @@ class MemberServiceTest {
         Member member = memberRepository.save(TestFixture.createDefaultMember());
 
         //when & then
-        assertThat(memberService.findById(1L)).isEqualTo(new MemberResult(1L, member.getName(), MemberRole.USER, member.getEmail()));
+        assertThat(memberService.getById(1L)).isEqualTo(new MemberResult(1L, member.getName(), MemberRole.USER, member.getEmail()));
     }
 
     @Test
     void id를_통해_멤버를_찾으려_할_때_해당하는_id의_멤버가_존재하지_않으면_예외() {
-        assertThatThrownBy(() -> memberService.findById(1L))
+        assertThatThrownBy(() -> memberService.getById(1L))
                 .isInstanceOf(NotFoundMemberException.class)
                 .hasMessage(1L + "에 해당하는 유저가 없습니다.");
     }

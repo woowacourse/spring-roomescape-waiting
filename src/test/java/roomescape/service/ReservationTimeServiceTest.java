@@ -67,7 +67,7 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
 
         //when
-        ReservationTimeResult reservationTimeResult = reservationTimeService.findById(reservationTime.getId());
+        ReservationTimeResult reservationTimeResult = reservationTimeService.getById(reservationTime.getId());
 
         //then
         assertThat(reservationTimeResult).isEqualTo(new ReservationTimeResult(reservationTimeResult.id(), reservationTimeResult.startAt()));
@@ -76,7 +76,7 @@ class ReservationTimeServiceTest {
     @Test
     void id에_해당하는_예약_시간이_없는경우_예외가_발생한다() {
         //given & when & then
-        assertThatThrownBy(() -> reservationTimeService.findById(1L))
+        assertThatThrownBy(() -> reservationTimeService.getById(1L))
                 .isInstanceOf(NotFoundReservationTimeException.class)
                 .hasMessage("1에 해당하는 reservation_time 튜플이 없습니다.");
     }

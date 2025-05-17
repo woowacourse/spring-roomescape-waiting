@@ -43,7 +43,7 @@ public class AuthController {
     public ResponseEntity<CheckLoginUserResponse> loginCheck(@CookieValue("token") Cookie cookie) {
         String token = cookieProvider.extractTokenFromCookie(cookie);
         Long id = jwtTokenProvider.extractIdFromToken(token);
-        return ResponseEntity.ok().body(CheckLoginUserResponse.from(memberService.findById(id)));
+        return ResponseEntity.ok().body(CheckLoginUserResponse.from(memberService.getById(id)));
     }
 
     @PostMapping("/logout")

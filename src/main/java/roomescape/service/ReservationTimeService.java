@@ -37,7 +37,7 @@ public class ReservationTimeService {
         return ReservationTimeResult.from(reservationTime);
     }
 
-    public ReservationTimeResult findById(Long reservationTimeId) {
+    public ReservationTimeResult getById(Long reservationTimeId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationTimeId).orElseThrow(
                 () -> new NotFoundReservationTimeException(reservationTimeId + "에 해당하는 reservation_time 튜플이 없습니다."));
         return toReservationResult(reservationTime);

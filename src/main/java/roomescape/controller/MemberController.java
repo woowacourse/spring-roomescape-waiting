@@ -30,7 +30,7 @@ public class MemberController {
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> findMembers() {
-        List<MemberResponse> members = memberService.findAll().stream()
+        List<MemberResponse> members = memberService.getAll().stream()
                 .map(MemberResponse::from)
                 .toList();
         

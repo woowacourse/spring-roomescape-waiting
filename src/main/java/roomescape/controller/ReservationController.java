@@ -30,7 +30,7 @@ public class ReservationController {
                                                                       @RequestParam(required = false) Long themeId,
                                                                       @RequestParam(required = false) LocalDate dateFrom,
                                                                       @RequestParam(required = false) LocalDate dateTo) {
-        List<ReservationResult> reservationResults = reservationService.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
+        List<ReservationResult> reservationResults = reservationService.getReservationsInConditions(memberId, themeId, dateFrom, dateTo);
         List<ReservationResponse> reservationResponses = reservationResults.stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -54,7 +54,7 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
-        List<ReservationResult> reservationResults = reservationService.findMemberReservationsById(loginMemberInfo.id());
+        List<ReservationResult> reservationResults = reservationService.getMemberReservationsById(loginMemberInfo.id());
         return ResponseEntity.ok(MemberReservationResponse.from(reservationResults));
     }
 }

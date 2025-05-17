@@ -49,7 +49,7 @@ class ThemeServiceTest {
         Theme theme2 = themeRepository.save(TestFixture.createThemeByName("theme2"));
 
         //when
-        List<ThemeResult> themeResults = themeService.findAll();
+        List<ThemeResult> themeResults = themeService.getAll();
 
         //then
         assertThat(themeResults).isEqualTo(List.of(
@@ -77,7 +77,7 @@ class ThemeServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
 
         //when
-        ThemeResult themeResult = themeService.findById(theme.getId());
+        ThemeResult themeResult = themeService.getById(theme.getId());
 
         //then
         assertThat(themeResult).isEqualTo(ThemeResult.from(theme));
@@ -86,7 +86,7 @@ class ThemeServiceTest {
     @Test
     void id값으로_테마를_찾을때_없다면_예외가_발생한다() {
         // given & when & then
-        assertThatThrownBy(() -> themeService.findById(1L))
+        assertThatThrownBy(() -> themeService.getById(1L))
                 .isInstanceOf(NotFoundThemeException.class)
                 .hasMessage("id에 해당하는 Theme이 없습니다.");
     }

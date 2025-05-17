@@ -20,11 +20,9 @@ public interface ReservationRepository {
 
     boolean existsByTimeId(Long reservationTimeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
+    boolean existsDuplicateReservation(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean existsByThemeId(Long themeId);
-
-    List<Reservation> findByThemeIdAndDate(Long themeId, LocalDate reservationDate);
 
     List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 }

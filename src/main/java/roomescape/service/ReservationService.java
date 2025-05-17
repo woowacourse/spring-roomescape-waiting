@@ -50,7 +50,7 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    public List<ReservationResult> findAll() {
+    public List<ReservationResult> getAll() {
         List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
                 .map(ReservationResult::from)
@@ -63,20 +63,20 @@ public class ReservationService {
         return ReservationResult.from(reservation);
     }
 
-    public List<ReservationResult> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<ReservationResult> getReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo) {
         List<Reservation> reservations = reservationRepository.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();
     }
 
-    public List<ReservationResult> findMemberReservationsById(Long memberId) {
+    public List<ReservationResult> getMemberReservationsById(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         return ReservationResult.from(reservations);
     }
 
     private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
+        if (reservationRepository.existsDuplicateReservation(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
             throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
     }

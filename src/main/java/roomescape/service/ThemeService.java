@@ -25,7 +25,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ThemeResult> findAll() {
+    public List<ThemeResult> getAll() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
                 .map(ThemeResult::from)
@@ -37,7 +37,7 @@ public class ThemeService {
         return ThemeResult.from(theme);
     }
 
-    public ThemeResult findById(Long id) {
+    public ThemeResult getById(Long id) {
         Theme theme = themeRepository.findById(id).orElseThrow(
                 () -> new NotFoundThemeException("id에 해당하는 Theme이 없습니다."));
 

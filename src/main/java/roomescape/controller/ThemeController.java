@@ -22,7 +22,7 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> findAll() {
-        List<ThemeResult> themeResults = themeService.findAll();
+        List<ThemeResult> themeResults = themeService.getAll();
         List<ThemeResponse> themeResponses = themeResults.stream()
                 .map(ThemeResponse::from)
                 .toList();

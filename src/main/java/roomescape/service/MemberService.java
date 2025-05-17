@@ -39,13 +39,13 @@ public class MemberService {
         return MemberResult.from(member);
     }
 
-    public MemberResult findById(final Long id) {
+    public MemberResult getById(final Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundMemberException(id + "에 해당하는 유저가 없습니다."));
         return MemberResult.from(member);
     }
 
-    public List<MemberResult> findAll() {
+    public List<MemberResult> getAll() {
         return memberRepository.findAll().stream()
                 .map(MemberResult::from)
                 .toList();
