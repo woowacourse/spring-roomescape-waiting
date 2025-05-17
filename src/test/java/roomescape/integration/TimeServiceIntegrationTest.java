@@ -7,30 +7,38 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
+import roomescape.reservation.repository.jpa.ReservationTimeRepositoryImpl;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.dto.AvailableTimeInfo;
 import roomescape.reservation.service.dto.ReservationTimeCreateCommand;
 import roomescape.reservation.service.dto.ReservationTimeInfo;
 
-@SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJpaTest
+@Import(value = {ReservationTimeRepositoryImpl.class, ReservationRepositoryImpl.class,})
 @Sql({"/schema.sql", "/test-data.sql"})
 public class TimeServiceIntegrationTest {
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
-
     @Autowired
+    ReservationRepository reservationRepository;
     ReservationTimeService reservationTimeService;
+
+    @BeforeEach
+    void init() {
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+    }
 
     @DisplayName("이미 존재하는 예약시간을 추가하면 예외가 발생한다")
     @Test

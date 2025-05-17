@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,38 +13,49 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.CurrentDateTime;
+import roomescape.fake.TestCurrentDateTime;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.jpa.MemberRepositoryImpl;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
+import roomescape.reservation.repository.jpa.ReservationTimeRepositoryImpl;
+import roomescape.reservation.repository.jpa.ThemeRepositoryImpl;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationSearchCondition;
 
-@SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJpaTest
+@Import(value = {ReservationRepositoryImpl.class, ReservationTimeRepositoryImpl.class,
+        ThemeRepositoryImpl.class, MemberRepositoryImpl.class})
 @Sql({"/schema.sql", "/test-data.sql"})
 public class ReservationServiceIntegrationTest {
 
     @Autowired
     ReservationRepository reservationRepository;
-
-    @MockBean
-    CurrentDateTime currentDateTime;
-
     @Autowired
+    ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    ThemeRepository themeRepository;
+    @Autowired
+    MemberRepository memberRepository;
+    @MockitoBean
+    CurrentDateTime currentDateTime;
     ReservationService reservationService;
 
     @BeforeEach
     void init() {
-        when(currentDateTime.getDateTime()).thenReturn(LocalDateTime.of(2025, 5, 1, 10, 00));
-        when(currentDateTime.getDate()).thenReturn(LocalDate.of(2025, 5, 1));
-        when(currentDateTime.getTime()).thenReturn(LocalTime.of(10, 00));
+        currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
+        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
+                memberRepository, currentDateTime);
     }
 
     @DisplayName("새로운 예약을 추가할 수 있다")
@@ -54,8 +64,10 @@ public class ReservationServiceIntegrationTest {
         // given
         LocalDate date = currentDateTime.getDate().plusDays(1);
         ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 1L);
+
         // when
         ReservationInfo result = reservationService.createReservation(request);
+
         // then
         assertAll(
                 () -> assertThat(result.id()).isNotNull(),
@@ -72,6 +84,7 @@ public class ReservationServiceIntegrationTest {
         // given
         ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 1L, 11L);
         reservationService.createReservation(request);
+
         // when
         // then
         assertThatThrownBy(() -> reservationService.createReservation(request))
@@ -87,6 +100,7 @@ public class ReservationServiceIntegrationTest {
         ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 11L);
         reservationService.createReservation(request);
         ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 1L, 10L);
+
         // when
         // then
         assertThatCode(() -> reservationService.createReservation(request2))
@@ -99,6 +113,7 @@ public class ReservationServiceIntegrationTest {
         // given
         LocalDate date = currentDateTime.getDate().minusDays(1);
         ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 3L);
+
         // when
         // then
         assertThatThrownBy(() -> reservationService.createReservation(request))
@@ -124,6 +139,7 @@ public class ReservationServiceIntegrationTest {
     void cancelReservationById() {
         // when
         reservationService.cancelReservationById(1L);
+
         // then
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).hasSize(12);

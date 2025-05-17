@@ -10,35 +10,37 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.CurrentDateTime;
 import roomescape.fake.TestCurrentDateTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
+import roomescape.reservation.repository.jpa.ThemeRepositoryImpl;
+import roomescape.reservation.service.ThemeService;
 import roomescape.reservation.service.dto.ThemeCreateCommand;
 import roomescape.reservation.service.dto.ThemeInfo;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.repository.ThemeRepository;
-import roomescape.reservation.service.ThemeService;
 
-@SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DataJpaTest
+@Import(value = {ThemeRepositoryImpl.class, ReservationRepositoryImpl.class})
 @Sql(scripts = {"/schema.sql", "/test-data.sql"})
 public class ThemeServiceIntegrationTest {
 
     @Autowired
     ThemeRepository themeRepository;
-
     @Autowired
     ReservationRepository reservationRepository;
-    ThemeService themeService;
+    @MockitoBean
     TestCurrentDateTime currentDateTime;
+    ThemeService themeService;
 
     @BeforeEach
     void init() {
-        LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
-        currentDateTime = new TestCurrentDateTime(now);
+        currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
         themeService = new ThemeService(themeRepository, reservationRepository, currentDateTime);
     }
 
@@ -47,8 +49,10 @@ public class ThemeServiceIntegrationTest {
     void createTheme() {
         // given
         ThemeCreateCommand request = new ThemeCreateCommand("우테코방탈출", "우테코를 탈출해라", "www.naver.com");
+
         // when
         ThemeInfo result = themeService.createTheme(request);
+
         // then
         Theme savedTheme = themeRepository.findById(result.id()).get();
         assertAll(
@@ -68,6 +72,7 @@ public class ThemeServiceIntegrationTest {
     void should_ThrowException_WhenDuplicateThemeName() {
         // given
         ThemeCreateCommand request = new ThemeCreateCommand("테마1", "우테코를 탈출해라", "www.naver.com");
+
         // when
         // then
         assertThatThrownBy(() -> themeService.createTheme(request))
@@ -80,6 +85,7 @@ public class ThemeServiceIntegrationTest {
     void findAll() {
         // when
         List<ThemeInfo> result = themeService.findAll();
+
         // then
         assertThat(result).hasSize(11);
     }
@@ -89,6 +95,7 @@ public class ThemeServiceIntegrationTest {
     void deleteThemeById() {
         // when
         themeService.deleteThemeById(10L);
+
         // then
         List<ThemeInfo> responses = themeService.findAll();
         assertThat(responses).hasSize(10);
@@ -109,6 +116,7 @@ public class ThemeServiceIntegrationTest {
     void findPopularThemes() {
         // when
         List<ThemeInfo> result = themeService.findPopularThemes();
+
         // then
         assertThat(result).hasSize(10);
         assertThat(result.getFirst().name()).isEqualTo("테마11");
@@ -120,9 +128,14 @@ public class ThemeServiceIntegrationTest {
     void findPopularThemes2() {
         // given
         currentDateTime.changeDateTime(LocalDateTime.of(2025, 4, 12, 10, 0));
+
         // when
         List<ThemeInfo> result = themeService.findPopularThemes();
+
         // then
         assertThat(result).isEmpty();
     }
 }
+
+
+
