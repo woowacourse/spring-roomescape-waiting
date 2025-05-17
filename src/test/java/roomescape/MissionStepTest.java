@@ -116,7 +116,6 @@ public class MissionStepTest {
         void step5_getReservationWithDatabase() {
             createReservationTime();
             createTheme("추리");
-            signup();
 
             jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
                     futureDate, "1", "1", "1");
@@ -268,7 +267,14 @@ public class MissionStepTest {
 
         @Test
         void step4_signup() {
-            signup();
+            RestAssured.given().log().all()
+                    .body(new SignupRequest("testuser@gmail.com", PASSWORD, "testUser"))
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .when().post("/members")
+                    .then().log().all()
+                    .statusCode(201);
+
+            loginAndGetAuthToken("testuser@gmail.com", PASSWORD);
         }
 
         @Test
@@ -413,15 +419,6 @@ public class MissionStepTest {
                 .statusCode(200)
                 .extract()
                 .cookie(TOKEN);
-    }
-
-    private void signup() {
-        RestAssured.given().log().all()
-                .body(new SignupRequest("testuser@gmail.com", PASSWORD, "testUser"))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/members")
-                .then().log().all()
-                .statusCode(201);
     }
 
     private void createUserReservation(final Long themeId) {

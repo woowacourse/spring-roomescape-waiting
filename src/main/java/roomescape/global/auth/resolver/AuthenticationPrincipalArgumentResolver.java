@@ -7,6 +7,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.global.auth.dto.UserInfo;
+import roomescape.global.auth.exception.UnAuthorizedException;
 import roomescape.global.auth.infrastructure.AuthorizationExtractor;
 import roomescape.global.auth.service.AuthService;
 
@@ -31,7 +32,7 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
     public Object resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer,
                                   final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory)
             throws Exception {
-        String accessToken = authorizationExtractor.extract(webRequest);
-        return authService.makeUserInfo(accessToken);
+        String token = authorizationExtractor.extract(webRequest);
+        return authService.makeUserInfo(token);
     }
 }

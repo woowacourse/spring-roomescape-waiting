@@ -18,20 +18,23 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final AuthorizationExtractor authorizationExtractor;
     private final JwtProvider jwtProvider;
 
-    public WebMvcConfig(final AuthService authService, final AuthorizationExtractor authorizationExtractor,
-                        final JwtProvider jwtProvider) {
+    public WebMvcConfig(
+            AuthService authService,
+            AuthorizationExtractor authorizationExtractor,
+            JwtProvider jwtProvider
+    ) {
         this.authService = authService;
         this.authorizationExtractor = authorizationExtractor;
         this.jwtProvider = jwtProvider;
     }
 
     @Override
-    public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new AuthenticationPrincipalArgumentResolver(authService, authorizationExtractor));
     }
 
     @Override
-    public void addInterceptors(final InterceptorRegistry registry) {
+    public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new RoleInterceptor(authorizationExtractor, jwtProvider));
     }
 }

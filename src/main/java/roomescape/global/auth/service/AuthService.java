@@ -14,16 +14,25 @@ public class AuthService {
 
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
+    private final MyPasswordEncoder myPasswordEncoder;
 
-    public AuthService(final JwtProvider jwtProvider, final MemberRepository memberRepository) {
+    public AuthService(final JwtProvider jwtProvider, final MemberRepository memberRepository,
+                       final MyPasswordEncoder myPasswordEncoder) {
         this.jwtProvider = jwtProvider;
         this.memberRepository = memberRepository;
+        this.myPasswordEncoder = myPasswordEncoder;
     }
 
-    public LoginResponse createToken(final LoginRequest loginRequest) {
-        Member member = getUserInfoByEmailAndPassword(loginRequest.email(), loginRequest.password());
+    public LoginResponse login(final LoginRequest loginRequest) {
+        Member member = findValidMember(loginRequest.email(), loginRequest.password());
         String accessToken = jwtProvider.createToken(UserInfo.from(member));
         return new LoginResponse(accessToken);
+    }
+
+    private Member findValidMember(final String email, final String password) {
+        Member member = findMemberByEmail(email);
+        checkPassword(password, member);
+        return member;
     }
 
     public UserInfo makeUserInfo(final String token) {
@@ -32,14 +41,20 @@ public class AuthService {
         return new UserInfo(memberId, jwtProvider.getRole(token));
     }
 
+    private Member findMemberByEmail(final String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new UnAuthorizedException("존재하지 않은 사용자입니다."));
+    }
+
     private void validateToken(final String token) {
         if (jwtProvider.isInvalidToken(token)) {
             throw new UnAuthorizedException("유효하지 않은 토큰입니다.");
         }
     }
 
-    private Member getUserInfoByEmailAndPassword(final String email, final String password) {
-        return memberRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new UnAuthorizedException("존재하지 않은 사용자입니다."));
+    private void checkPassword(final String password, final Member member) {
+        if (!myPasswordEncoder.matches(password, member.getPassword())) {
+            throw new UnAuthorizedException("로그인에 실패하였습니다.");
+        }
     }
 }
