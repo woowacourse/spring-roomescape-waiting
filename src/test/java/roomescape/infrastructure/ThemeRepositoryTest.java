@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.Jpa.JpaThemeRepository;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;
@@ -16,7 +15,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DataJpaTest
 @Import({JpaThemeRepository.class, JpaTestUtil.class})

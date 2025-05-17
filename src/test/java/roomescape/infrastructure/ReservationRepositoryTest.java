@@ -14,10 +14,6 @@ import roomescape.business.model.repository.ReservationTimeRepository;
 import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.Jpa.JpaReservationRepository;
-import roomescape.infrastructure.Jpa.JpaReservationTimeRepository;
-import roomescape.infrastructure.Jpa.JpaThemeRepository;
-import roomescape.infrastructure.Jpa.JpaUserRepository;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;
@@ -26,7 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DataJpaTest
 @Import({JpaReservationRepository.class, JpaTestUtil.class, JpaReservationTimeRepository.class, JpaThemeRepository.class, JpaUserRepository.class})

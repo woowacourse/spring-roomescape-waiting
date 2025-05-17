@@ -1,4 +1,4 @@
-package roomescape.infrastructure.Jpa;
+package roomescape.infrastructure;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;

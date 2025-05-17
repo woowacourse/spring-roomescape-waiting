@@ -7,10 +7,10 @@ import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.Jpa.JpaReservationDao;
-import roomescape.infrastructure.Jpa.JpaReservationTimeDao;
-import roomescape.infrastructure.Jpa.JpaThemeDao;
-import roomescape.infrastructure.Jpa.JpaUserDao;
+import roomescape.infrastructure.JpaReservationDao;
+import roomescape.infrastructure.JpaReservationTimeDao;
+import roomescape.infrastructure.JpaThemeDao;
+import roomescape.infrastructure.JpaUserDao;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

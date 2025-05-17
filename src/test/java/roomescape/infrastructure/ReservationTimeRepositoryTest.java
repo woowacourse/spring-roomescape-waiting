@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimeRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.Jpa.JpaReservationTimeRepository;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;
@@ -19,7 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DataJpaTest
 @Import({JpaReservationTimeRepository.class, JpaTestUtil.class})
