@@ -45,25 +45,3 @@ INSERT INTO member (name, role, email, password) VALUES ('Grace', 'USER', 'grace
 INSERT INTO member (name, role, email, password) VALUES ('Heidi', 'USER', 'heidi@example.com', 'password');
 INSERT INTO member (name, role, email, password) VALUES ('Ivan', 'USER', 'ivan@example.com', 'password');
 INSERT INTO member (name, role, email, password) VALUES ('Judy', 'USER', 'judy@example.com', 'password');
-
--- reservation 테이블에 대한 INSERT
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (3, '2025-05-04', 3, 9, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (7, '2025-05-04', 9, 7, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (2, '2025-05-03', 2, 16, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (9, '2025-05-07', 3, 19, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (5, '2025-05-06', 10, 5, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (1, '2025-05-04', 9, 16, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (6, '2025-05-03', 7, 20, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (4, '2025-05-06', 7, 11, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (8, '2025-05-07', 7, 13, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (10, '2025-05-04', 5, 4, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (2, '2025-05-05', 4, 2, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (5, '2025-05-08', 8, 15, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (9, '2025-05-09', 1, 7, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (7, '2025-05-03', 6, 11, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (1, '2025-05-08', 2, 5, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (3, '2025-05-07', 10, 18, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (6, '2025-05-06', 5, 20, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (8, '2025-05-05', 9, 3, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (4, '2025-05-09', 7, 7, 'RESERVED');
-INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (10, '2025-05-08', 11, 13, 'RESERVED');
