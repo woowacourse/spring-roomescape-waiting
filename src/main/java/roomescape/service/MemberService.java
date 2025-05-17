@@ -42,10 +42,10 @@ public class MemberService {
                 registerMemberParam.email(),
                 registerMemberParam.password()
         );
-        memberRepository.findByEmail(registerMemberParam.email())
-                .ifPresent(m -> {
-                    throw new UnableCreateMemberException("이미 존재하는 이메일입니다.");
-                });
+
+        if (memberRepository.existsByEmail(registerMemberParam.email())) {
+            throw new UnableCreateMemberException("이미 존재하는 이메일입니다.");
+        }
 
         Member savedMember = memberRepository.save(member);
         return MemberResult.from(savedMember);
