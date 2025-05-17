@@ -87,7 +87,7 @@ public class JwtTokenProvider implements AuthTokenProvider {
         return AuthRole.valueOf(role);
     }
 
-    public boolean validateToken(final String token) {
+    public boolean isValidToken(final String token) {
         if (token == null || token.isEmpty()) {
             return false;
         }

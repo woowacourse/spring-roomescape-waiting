@@ -12,5 +12,5 @@ public interface AuthTokenProvider {
 
     AuthRole getRole(String token);
 
-    boolean validateToken(String token);
+    boolean isValidToken(String token);
 }

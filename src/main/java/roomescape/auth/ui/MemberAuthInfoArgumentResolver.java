@@ -30,7 +30,7 @@ public class MemberAuthInfoArgumentResolver implements HandlerMethodArgumentReso
 
         final HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         final String token = authTokenExtractor.extract(request);
-        if (!authTokenProvider.validateToken(token)) {
+        if (!authTokenProvider.isValidToken(token)) {
             throw new AuthenticationException("유효하지 않은 토큰입니다.");
         }
         final Long id = Long.parseLong(authTokenProvider.getPrincipal(token));
