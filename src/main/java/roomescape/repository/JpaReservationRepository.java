@@ -7,7 +7,7 @@ import roomescape.entity.Reservation;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByMemberId(Long memberId);
+    List<Reservation> findByMemberId(long memberId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 }

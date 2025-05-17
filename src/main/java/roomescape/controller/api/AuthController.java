@@ -28,7 +28,6 @@ public class AuthController {
             HttpServletResponse response
     ) {
         String token = authService.createToken(request);
-
         Cookie cookie = new Cookie("token", token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");

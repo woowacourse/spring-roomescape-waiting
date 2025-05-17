@@ -45,8 +45,12 @@ public class ReservationService {
         return reservationRepository.findByMemberId(member.getId());
     }
 
-    public List<Reservation> findReservationsByFilters(Long themeId, Long memberId,
-        LocalDate dateFrom, LocalDate dateTo) {
+    public List<Reservation> findReservationsByFilters(
+            long themeId,
+            long memberId,
+            LocalDate dateFrom,
+            LocalDate dateTo
+    ) {
         return reservationRepository.findAll().stream()
             .filter(r -> r.getTheme().getId().equals(themeId))
             .filter(r -> r.getMember().getId().equals(memberId))
@@ -104,7 +108,7 @@ public class ReservationService {
         }
     }
 
-    public void removeReservation(Long id) {
+    public void removeReservation(long id) {
         reservationRepository.deleteById(id);
     }
 

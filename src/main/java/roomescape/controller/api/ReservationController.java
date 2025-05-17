@@ -38,8 +38,8 @@ public class ReservationController {
 
     @GetMapping("/filter")
     public List<ReservationResponse> readReservationsByFilter(
-        @RequestParam Long memberId,
-        @RequestParam Long themeId,
+        @RequestParam long memberId,
+        @RequestParam long themeId,
         @RequestParam LocalDate dateFrom,
         @RequestParam LocalDate dateTo
     ) {
@@ -60,13 +60,14 @@ public class ReservationController {
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse createReservation(
         @AuthMember Member member,
-        @RequestBody ReservationRequest request) {
+        @RequestBody ReservationRequest request
+    ) {
         return ReservationResponse.from(reservationService.addReservationAfterNow(member, request));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteReservation(@PathVariable("id") Long id) {
+    public void deleteReservation(@PathVariable("id") long id) {
         reservationService.removeReservation(id);
     }
 }

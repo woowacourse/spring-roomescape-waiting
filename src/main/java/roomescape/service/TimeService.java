@@ -21,7 +21,7 @@ public class TimeService {
         return reservationTimeRepository.findAll();
     }
 
-    public List<ReservationTime> findAllTimesWithBooked(LocalDate date, Long themeId) {
+    public List<ReservationTime> findAllTimesWithBooked(LocalDate date, long themeId) {
         return reservationTimeRepository.findAllTimesWithBooked(date, themeId);
     }
 
