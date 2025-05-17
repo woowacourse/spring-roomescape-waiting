@@ -41,11 +41,11 @@ public class AdminReservationRestController {
     }
 
     @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<Void> deleteAsAdmin(
             @PathVariable final Long id,
             final MemberAuthInfo memberAuthInfo
     ) {
-        reservationService.deleteReservationAsAdmin(id, memberAuthInfo);
+        reservationService.deleteAsAdmin(id, memberAuthInfo);
 
         return ResponseEntity.noContent().build();
     }

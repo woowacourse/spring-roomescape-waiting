@@ -107,7 +107,7 @@ public class ReservationService {
         }
     }
 
-    public void deleteReservationAsAdmin(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
+    public void deleteAsAdmin(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
         if (memberAuthInfo.authRole() != AuthRole.ADMIN) {
             throw new AuthorizationException("관리자만 삭제할 권한이 있습니다.");
         }
