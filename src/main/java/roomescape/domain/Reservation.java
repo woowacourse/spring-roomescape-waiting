@@ -35,7 +35,7 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
