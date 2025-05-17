@@ -14,11 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -28,10 +26,6 @@ class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
 
     @DisplayName("예약을 저장한다")
     @Test
