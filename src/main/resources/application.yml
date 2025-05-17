@@ -1,0 +1,24 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  # DB connection setting
+  datasource:
+    url: jdbc:h2:mem:database
+    username: sa
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+security:
+  jwt:
+    access-token:
+      secret-key: since-jjwt-api-0.11-secret-key-must-be-longer-than-32-bytes
+      validity-in-milliseconds: 900000 # 15 minutes
