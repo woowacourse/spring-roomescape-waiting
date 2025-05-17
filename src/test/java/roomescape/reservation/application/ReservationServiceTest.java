@@ -32,6 +32,7 @@ import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse.ForMember;
+import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeCommandRepository;
 
@@ -250,5 +251,14 @@ class ReservationServiceTest {
 
         // then
         assertThat(founds).hasSize(2);
+    }
+
+    @Test
+    void 예약_상태_목록을_조회한다() {
+        // when
+        final List<ReservationStatusResponse> responses = reservationService.findAllReservationStatuses();
+
+        // then
+        assertThat(responses).hasSize(ReservationStatus.values().length);
     }
 }
