@@ -10,13 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.JpaMemberRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.fixture.TestFixture;
-import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -50,7 +49,7 @@ class ThemeRepositoryTest {
     }
 
     @Test
-    void findTop10PopularThemesWithinLastWeek() {
+    void findPopularThemes() {
         Member member = TestFixture.makeMember();
         memberRepository.save(member);
 
@@ -109,7 +108,8 @@ class ThemeRepositoryTest {
         reservationRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(6), reservationTime2, member, theme11));
 
-        List<Theme> themes = themeRepository.findTop10PopularThemesWithinLastWeek(futureDate.minusDays(7), futureDate.minusDays(1));
+        List<Theme> themes = themeRepository.findPopularThemes(futureDate.minusDays(7), futureDate.minusDays(1),
+                PageRequest.of(0, 10)).getContent();
 
         Assertions.assertAll(
                 () -> assertThat(themes.size()).isEqualTo(10),

@@ -90,7 +90,7 @@ class ThemeServiceTest {
     }
 
     @Test
-    void getPopularThemes() {
+    void getTop10PopularThemesLastWeek() {
         String email = "user2@gmail.com";
         String password = "password";
         String name = "user2";
@@ -169,7 +169,7 @@ class ThemeServiceTest {
                 TestFixture.makeReservation(nowDate.minusDays(6), makeReservationTime(reservationTime2), member,
                         makeTheme(themeResponse11)));
 
-        List<ThemeResponse> popularThemes = themeService.getPopularThemes();
+        List<ThemeResponse> popularThemes = themeService.getTop10PopularThemesLastWeek();
 
         Assertions.assertAll(
                 () -> assertThat(popularThemes.size()).isEqualTo(10),

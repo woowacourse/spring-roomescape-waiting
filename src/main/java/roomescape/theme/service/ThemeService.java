@@ -2,14 +2,14 @@ package roomescape.theme.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.repository.JpaThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
@@ -41,9 +41,14 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
-    public List<ThemeResponse> getPopularThemes() {
+    public List<ThemeResponse> getTop10PopularThemesLastWeek() {
         final LocalDate date = LocalDate.now();
-        return themeRepository.findTop10PopularThemesWithinLastWeek(date.minusDays(7), date.minusDays(1)).stream()
+        Page<Theme> popularThemes = themeRepository.findPopularThemes(
+                date.minusDays(7),
+                date.minusDays(1),
+                PageRequest.of(0, 10)
+        );
+        return popularThemes.getContent().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }

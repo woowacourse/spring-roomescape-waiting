@@ -33,7 +33,7 @@ public class ThemeController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
-        return ResponseEntity.ok(themeService.getPopularThemes());
+        return ResponseEntity.ok(themeService.getTop10PopularThemesLastWeek());
     }
 
     @RequireRole(MemberRole.ADMIN)

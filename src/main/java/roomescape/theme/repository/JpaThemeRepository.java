@@ -1,22 +1,22 @@
 package roomescape.theme.repository;
 
 import java.time.LocalDate;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.ListCrudRepository;
 import roomescape.theme.domain.Theme;
 
-public interface JpaThemeRepository extends ListCrudRepository<Theme, Long> {
+public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
             SELECT th FROM Theme th 
             left join Reservation as r 
             on th.id = r.theme.id 
-            and r.date between ?1 and ?2 
+            and r.date between :fromDate and :toDate 
             group by th.id 
             order by count(r.id) desc, 
             th.name asc 
-            limit 10
             """)
-    List<Theme> findTop10PopularThemesWithinLastWeek(LocalDate fromDate, LocalDate toDate);
+    Page<Theme> findPopularThemes(LocalDate fromDate, LocalDate toDate, Pageable pageable);
 }
