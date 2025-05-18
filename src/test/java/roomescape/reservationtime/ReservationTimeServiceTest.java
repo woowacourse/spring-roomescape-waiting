@@ -28,6 +28,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.reservationTimeWithId;
+import static roomescape.util.TestFactory.themeWithId;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
@@ -133,7 +134,7 @@ public class ReservationTimeServiceTest {
         void findAllAvailableTimes() {
             // given
             final Long dummyThemeId = 1L;
-            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
+            final Theme theme = themeWithId(dummyThemeId, new Theme("메이", "테마", "asd"));
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             given(reservationTimeRepository.findAll())
                     .willReturn(List.of(
@@ -159,7 +160,7 @@ public class ReservationTimeServiceTest {
         void findAllAvailableTimes1() {
             // given
             final Long dummyThemeId = 1L;
-            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
+            final Theme theme = themeWithId(dummyThemeId, new Theme("메이", "테마", "asd"));
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             final ReservationTime savedTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 0)));
             given(reservationTimeRepository.findAll())
@@ -186,7 +187,7 @@ public class ReservationTimeServiceTest {
         void findAllAvailableTimes2() {
             // given
             final Long dummyThemeId = 1L;
-            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
+            final Theme theme = themeWithId(dummyThemeId, new Theme("메이", "테마", "asd"));
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             given(reservationTimeRepository.findAll())
                     .willReturn(List.of(reservationTimeWithId(1L,

@@ -1,15 +1,5 @@
 package roomescape.theme;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.anyInt;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -20,6 +10,15 @@ import roomescape.exception.custom.reason.theme.ThemeUsedException;
 import roomescape.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
+import static roomescape.util.TestFactory.themeWithId;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -44,7 +43,7 @@ class ThemeServiceTest {
             // given
             final ThemeRequest themeRequest = new ThemeRequest("로키", "로키로키", "http://www.google.com");
             final Theme theme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
-            final Theme savedTheme = new Theme(1L, theme.getName(), theme.getDescription(), theme.getThumbnail());
+            final Theme savedTheme = themeWithId(1L, new Theme(theme.getName(), theme.getDescription(), theme.getThumbnail()));
             given(themeRepository.save(theme))
                     .willReturn(savedTheme);
 
@@ -65,9 +64,9 @@ class ThemeServiceTest {
         void findAll1() {
             // given
             final List<Theme> themes = List.of(
-                    new Theme(1L, "로키1", "로키로키1", "http://www.google.com/1"),
-                    new Theme(2L, "로키2", "로키로키2", "http://www.google.com/2"),
-                    new Theme(3L, "로키3", "로키로키3", "http://www.google.com/3")
+                    themeWithId(1L, new Theme("로키1", "로키로키1", "http://www.google.com/1")),
+                    themeWithId(2L, new Theme("로키2", "로키로키2", "http://www.google.com/2")),
+                    themeWithId(3L, new Theme("로키3", "로키로키3", "http://www.google.com/3"))
             );
             given(themeRepository.findAll())
                     .willReturn(themes);
@@ -99,11 +98,11 @@ class ThemeServiceTest {
         void findTopRankThemes() {
             // given
             final List<Theme> themes = List.of(
-                    new Theme(1L, "1", "2", "3"),
-                    new Theme(2L, "1", "2", "3"),
-                    new Theme(3L, "1", "2", "3"),
-                    new Theme(4L, "1", "2", "3"),
-                    new Theme(5L, "1", "2", "3")
+                    themeWithId(1L, new Theme("1", "2", "3")),
+                    themeWithId(2L, new Theme("1", "2", "3")),
+                    themeWithId(3L, new Theme("1", "2", "3")),
+                    themeWithId(4L, new Theme("1", "2", "3")),
+                    themeWithId(5L, new Theme("1", "2", "3"))
             );
             given(themeRepository.findAllOrderByRank(any(), any(), anyInt()))
                     .willReturn(themes);
@@ -126,7 +125,7 @@ class ThemeServiceTest {
         void deleteById1() {
             // given
             final Long id = 1L;
-            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
+            final Theme theme = themeWithId(1L, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
             given(reservationRepository.existsByTheme(theme))
@@ -144,7 +143,7 @@ class ThemeServiceTest {
         void deleteById2() {
             // given
             final Long id = 1L;
-            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
+            final Theme theme = themeWithId(id, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.empty());
             given(reservationRepository.existsByTheme(theme))
@@ -161,7 +160,7 @@ class ThemeServiceTest {
         void deleteById3() {
             // given
             final Long id = 1L;
-            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
+            final Theme theme = themeWithId(id, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
             given(reservationRepository.existsByTheme(theme))

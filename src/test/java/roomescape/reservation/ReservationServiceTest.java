@@ -30,8 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
-import static roomescape.util.TestFactory.reservationTimeWithId;
-import static roomescape.util.TestFactory.reservationWithId;
+import static roomescape.util.TestFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
@@ -66,7 +65,7 @@ public class ReservationServiceTest {
         private static final Optional<ReservationTime> TIME_BY_ID = Optional.of(
                 reservationTimeWithId(REQUEST.themeId(), new ReservationTime(LocalTime.of(12, 40))));
         private static final Optional<Theme> THEME_BY_ID = Optional.of(
-                new Theme(REQUEST.themeId(), "야당", "야당당", "123"));
+                themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
         private static final Optional<Member> MEMBER_BY_EMAIL = Optional.of(
                 new Member(1L, LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER));
         private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
@@ -197,7 +196,7 @@ public class ReservationServiceTest {
         private static final Optional<ReservationTime> TIME_BY_ID = Optional.of(
                 reservationTimeWithId(REQUEST.timeId(), new ReservationTime(LocalTime.of(12, 40))));
         private static final Optional<Theme> THEME_BY_ID = Optional.of(
-                new Theme(REQUEST.themeId(), "야당", "야당당", "123"));
+                themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
         private static final Optional<Member> MEMBER_BY_ID = Optional.of(
                 new Member(REQUEST.memberId(), "asd@naver.com", "password", "boogie", MemberRole.MEMBER));
         private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
@@ -344,7 +343,7 @@ public class ReservationServiceTest {
                     LocalDate.of(2024, 1, 1),
                     new Member(1L, "boogie", "password", "boogie", MemberRole.MEMBER),
                     reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))),
-                    new Theme(1L, "야당", "야당당", "123"),
+                    themeWithId(1L, new Theme("야당", "야당당", "123")),
                     ReservationStatus.PENDING
             );
             given(reservationRepository.findAll())
@@ -373,7 +372,7 @@ public class ReservationServiceTest {
                     LocalDate.of(2024, 12, 31)
             );
             Member member = new Member(request.memberId(), "boogie", "password", "boogie", MemberRole.MEMBER);
-            Theme theme = new Theme(request.themeId(), "야당", "야당당", "123");
+            Theme theme = themeWithId(request.themeId(), new Theme("야당", "야당당", "123"));
             given(memberRepository.findById(request.memberId()))
                     .willReturn(Optional.of(member));
             given(themeRepository.findById(request.themeId()))
@@ -397,7 +396,7 @@ public class ReservationServiceTest {
                     LocalDate.of(2024, 12, 31)
             );
             Member member = new Member(request.memberId(), "boogie", "password", "boogie", MemberRole.MEMBER);
-            Theme theme = new Theme(request.themeId(), "야당", "야당당", "123");
+            Theme theme = themeWithId(request.themeId(), new Theme("야당", "야당당", "123"));
             given(memberRepository.findById(request.memberId()))
                     .willReturn(Optional.of(member));
             given(themeRepository.findById(request.themeId()))
