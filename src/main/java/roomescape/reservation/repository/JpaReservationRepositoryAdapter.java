@@ -45,7 +45,7 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
 
     @Override
     public List<Reservation> findByMemberId(final Long id) {
-        return jpaReservationRepository.findByMemberId(id);
+        return jpaReservationRepository.findAllByMemberId(id);
     }
 
     @Override

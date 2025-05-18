@@ -10,40 +10,74 @@ import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 
 public interface JpaReservationRepository extends ListCrudRepository<Reservation, Long> {
 
-    @Query("SELECT r                           "
-            + "FROM Reservation r                "
-            + "JOIN FETCH r.time t "
-            + "JOIN FETCH r.theme th                   "
-            + "JOIN FETCH r.member m                   "
-            + "WHERE th.id        = :themeId     "
-            + "  AND m.id         = :memberId    "
-            + "  AND r.date BETWEEN :startDate AND :endDate ")
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.time t
+            JOIN FETCH r.theme th
+            JOIN FETCH r.member m
+            WHERE th.id        = :themeId
+            AND m.id         = :memberId
+            AND r.date BETWEEN :startDate AND :endDate
+            """)
     List<Reservation> findFilteredReservations(final Long themeId,
                                                final Long memberId,
                                                final LocalDate startDate,
                                                final LocalDate endDate);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.time.id = :timeId) ")
+    @Query("""
+            SELECT EXISTS (
+              SELECT 1
+              FROM Reservation r
+              WHERE r.time.id = :timeId)
+            """)
     boolean existsByTimeId(Long timeId);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.theme.id = :themeId) ")
-    boolean existsByThemeId(Long themeId);
+    @Query("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM Reservation r
+                WHERE r.theme.id = :themeId
+            )
+            """)
+    boolean existsByThemeId(@Param("themeId") Long themeId);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE (r.date, r.time.id, r.theme.id) = (:date, :timeId, :themeId)) ")
-    boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
+    @Query("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM Reservation r
+                WHERE (r.date, r.time.id, r.theme.id) = (:date, :timeId, :themeId)
+            )
+            """)
+    boolean existsByDateAndTimeIdAndThemeId(
+            @Param("date") LocalDate date,
+            @Param("timeId") Long timeId,
+            @Param("themeId") Long themeId
+    );
 
-    @Query("SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(rt.id, rt.startAt, "
-            + "CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked) "
-            + "FROM ReservationTime AS rt "
-            + "LEFT JOIN Reservation r ON rt.id = r.time.id AND r.date = :date AND r.theme.id = :themeId "
-            + "ORDER BY rt.startAt")
-    List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(@Param("date") LocalDate date,
-                                                                           @Param("themeId") Long themeId);
+    @Query("""
+            SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(
+                rt.id,
+                rt.startAt,
+                CASE WHEN r.id IS NOT NULL THEN TRUE ELSE FALSE END AS already_booked
+            )
+            FROM ReservationTime AS rt
+            LEFT JOIN Reservation r
+              ON rt.id = r.time.id
+             AND r.date = :date
+             AND r.theme.id = :themeId
+            ORDER BY rt.startAt
+            """)
+    List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(
+            @Param("date") LocalDate date,
+            @Param("themeId") Long themeId
+    );
 
-    @Query("SELECT  r "
-            + "FROM Reservation r "
-            + "JOIN FETCH r.member m "
-            + "WHERE m.id = :memberId "
-    )
-    List<Reservation> findByMemberId(Long memberId);
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member m
+            WHERE m.id = :memberId
+            """)
+    List<Reservation> findAllByMemberId(@Param("memberId") Long memberId);
 }

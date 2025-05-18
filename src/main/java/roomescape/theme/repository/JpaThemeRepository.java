@@ -8,13 +8,15 @@ import roomescape.theme.domain.Theme;
 
 public interface JpaThemeRepository extends ListCrudRepository<Theme, Long> {
 
-    @Query("SELECT th FROM Theme th "
-            + "left join Reservation as r "
-            + "on th.id = r.theme.id "
-            + "and r.date between ?1 and ?2 "
-            + "group by th.id "
-            + "order by count(r.id) desc, "
-            + "th.name asc "
-            + "limit 10")
+    @Query("""
+            SELECT th
+            FROM Theme th
+            LEFT JOIN Reservation r
+              ON th.id = r.theme.id
+             AND r.date BETWEEN ?1 AND ?2
+            GROUP BY th.id
+            ORDER BY COUNT(r.id) DESC, th.name ASC
+            LIMIT 10
+            """)
     List<Theme> findTop10PopularThemesWithinLastWeek(LocalDate fromDate, LocalDate toDate);
 }
