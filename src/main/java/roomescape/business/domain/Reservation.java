@@ -49,10 +49,6 @@ public class Reservation {
 
     }
 
-    public boolean isSameReservationTime(final ReservationTime reservationTime) {
-        return this.reservationTime.isSameReservationTime(reservationTime);
-    }
-
     public Long getId() {
         return id;
     }
@@ -71,6 +67,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isSameReservationTime(final ReservationTime reservationTime) {
+        return this.reservationTime.isSameReservationTime(reservationTime);
     }
 
     private void validateDate(final LocalDate date) {

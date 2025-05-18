@@ -37,16 +37,16 @@ public class ReservationTime {
     public ReservationTime() {
     }
 
-    public boolean isSameReservationTime(final ReservationTime reservationTime) {
-        return id.equals(reservationTime.getId());
-    }
-
     public Long getId() {
         return id;
     }
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    public boolean isSameReservationTime(final ReservationTime reservationTime) {
+        return id.equals(reservationTime.getId());
     }
 
     private void validateStartAt(final LocalTime startAt) {
