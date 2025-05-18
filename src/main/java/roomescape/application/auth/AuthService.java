@@ -2,6 +2,7 @@ package roomescape.application.auth;
 
 import jakarta.servlet.http.Cookie;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.MemberService;
 import roomescape.application.auth.dto.LoginRequest;
 import roomescape.application.auth.dto.MemberIdDto;
@@ -12,6 +13,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.jwt.JwtTokenProvider;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final MemberService memberService;

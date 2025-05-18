@@ -20,6 +20,7 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.NotFoundException;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -42,7 +43,6 @@ public class ReservationService {
         this.clockProvider = clockProvider;
     }
 
-    @Transactional
     public ReservationDto registerReservationByUser(
             UserReservationCreateDto request,
             Long memberId
@@ -50,7 +50,6 @@ public class ReservationService {
         return registerReservation(ReservationCreateDto.of(request, memberId));
     }
 
-    @Transactional
     public ReservationDto registerReservation(ReservationCreateDto request) {
         validateNotDuplicate(request);
         Theme theme = themeService.getThemeById(request.themeId()).toEntity();
@@ -87,11 +86,13 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationDto> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
         return ReservationDto.from(reservations);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWaitingDto> getReservationsByMember(Long memberId) {
         Member member = memberService.getMemberById(memberId).toEntity();
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
@@ -107,6 +108,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationDto> searchReservationsWith(
             Long themeId,
             Long memberId,
