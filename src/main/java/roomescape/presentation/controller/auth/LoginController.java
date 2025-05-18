@@ -29,10 +29,7 @@ public class LoginController {
     @PostMapping
     public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         Cookie cookie = authService.createCookie(loginRequest);
-
-        response.addCookie(cookie);
-        response.setHeader("Set-Cookie", cookie.getAttribute("token"));
-
+        response.setHeader("Set-Cookie", cookie.toString() + "; HttpOnly; Secure; SameSite=Strict");
         return ResponseEntity.ok().build();
     }
 
