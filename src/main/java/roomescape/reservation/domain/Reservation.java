@@ -35,6 +35,18 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
+    public Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
+                       final ReservationTime time) {
+        validateDate(date);
+        validateTime(time);
+        validateTheme(theme);
+        this.id = id;
+        this.member = member;
+        this.theme = theme;
+        this.date = date;
+        this.time = time;
+    }
+
     public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
         validateDate(date);
         validateTime(time);

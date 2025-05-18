@@ -7,11 +7,11 @@ import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import roomescape.common.exception.DataExistException;
+import roomescape.fake.FakeMemberRepository;
+import roomescape.fake.FakeReservationRepository;
+import roomescape.fake.FakeReservationTimeRepository;
+import roomescape.fake.FakeThemeRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
@@ -22,23 +22,13 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
-@DataJpaTest
 class ThemeServiceTest {
 
-    @Autowired
-    private ThemeService themeService;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository = new FakeMemberRepository();
+    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    private final ThemeRepository themeRepository = new FakeThemeRepository();
+    private final ReservationRepository reservationRepository = new FakeReservationRepository();
+    private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
 
     @Test
     void 테마를_저장한다() {
@@ -121,7 +111,7 @@ class ThemeServiceTest {
         final Theme theme2 = new Theme("name2", "description", "thumbnail");
         themeRepository.save(theme1);
         themeRepository.save(theme2);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member("name", "email@email.com", "password", Role.USER);
         memberRepository.save(member);
 
         final Reservation inlineReservation = new Reservation(member, LocalDate.now().minusDays(7), reservationTime,
@@ -148,17 +138,5 @@ class ThemeServiceTest {
 
         // then
         Assertions.assertThat(popularThemes.getFirst().getId()).isEqualTo(theme2.getId());
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public ThemeService themeService(
-                final ThemeRepository themeRepository,
-                final ReservationRepository reservationRepository
-        ) {
-            return new ThemeService(themeRepository, reservationRepository);
-        }
     }
 }
