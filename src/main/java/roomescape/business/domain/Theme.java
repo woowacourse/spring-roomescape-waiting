@@ -4,17 +4,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "themes")
 public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String description;
-    private String thumbnail;
 
+    private String description;
+
+    private String thumbnail;
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateName(name);
         validateDescription(description);
@@ -40,6 +43,22 @@ public class Theme {
     public Theme() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
     private void validateName(final String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name 필드가 비어있습니다.");
@@ -56,21 +75,5 @@ public class Theme {
         if (thumbnail == null) {
             throw new IllegalArgumentException("thumbnail 필드가 null 입니다.");
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
     }
 }
