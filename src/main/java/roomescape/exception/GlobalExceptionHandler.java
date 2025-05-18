@@ -1,5 +1,6 @@
 package roomescape.exception;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.exception.auth.AuthenticationException;
 import roomescape.exception.auth.AuthorizationException;
+
+import java.io.IOException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,9 +24,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handle(AuthenticationException e) {
+    public void handle(AuthenticationException e, HttpServletResponse response) throws IOException {
         logger.warn("Handled AuthenticatedException: {}", e.detailMessage(), e);
-        return ErrorResponse.securedResponse(HttpStatus.UNAUTHORIZED, e.clientMessage()).toResponseEntity();
+        response.sendRedirect("/login");
     }
 
     @ExceptionHandler(AuthorizationException.class)
