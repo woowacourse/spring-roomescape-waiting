@@ -262,11 +262,11 @@ class ReservationServiceTest {
 
         final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
 
-        reservationCommandRepository.save(
+        final Reservation saved1 = reservationCommandRepository.save(
                 Reservation.createForRegister(date1, time1, theme1, member, BookingState.WAITING)
         );
 
-        reservationCommandRepository.save(
+        final Reservation saved2 = reservationCommandRepository.save(
                 Reservation.createForRegister(date2, time2, theme2, member, BookingState.WAITING)
         );
 
@@ -278,8 +278,10 @@ class ReservationServiceTest {
                 () -> assertThat(founds).hasSize(2),
                 () -> assertThat(founds)
                         .containsExactlyInAnyOrder(
-                                new ForMember(1L, "테마1", LocalDate.now().plusDays(1), LocalTime.of(10, 0), "대기"),
-                                new ForMember(2L, "테마2", LocalDate.now().plusDays(2), LocalTime.of(11, 0), "대기")
+                                new ForMember(saved1.getId(), "테마1", LocalDate.now().plusDays(1), LocalTime.of(10, 0),
+                                        "대기"),
+                                new ForMember(saved2.getId(), "테마2", LocalDate.now().plusDays(2), LocalTime.of(11, 0),
+                                        "대기")
                         )
         );
     }
