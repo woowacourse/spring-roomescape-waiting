@@ -23,18 +23,18 @@ public class ThemeService {
     @Transactional
     public long addTheme(AddThemeDto addThemeDto) {
         Theme theme = addThemeDto.toEntity();
-        return themeRepository.save(theme);
+        return themeRepository.save(theme).getId();
     }
 
     @Transactional
-    public void deleteThemeById(long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+    public void deleteThemeById(Long id) {
+        if (reservationRepository.existsByTheme_id(id)) {
             throw new InvalidThemeException("예약이 존재하는 테마는 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);
     }
 
-    public Theme getThemeById(long id) {
+    public Theme getThemeById(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마입니다."));
     }
