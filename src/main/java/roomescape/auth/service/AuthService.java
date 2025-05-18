@@ -8,6 +8,7 @@ import roomescape.auth.dto.LoginResponse;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.LoginFailException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -37,5 +38,13 @@ public class AuthService {
 
     public LoginMember findLoginMemberById(final Long id) {
         return LoginMember.of(findById(id));
+    }
+
+    public LoginMember createLoginMemberByToken(final String token) {
+        Long memberId = Long.parseLong(jwtTokenHandler.getMemberId(token));
+        String name = jwtTokenHandler.getName(token);
+        Role role = jwtTokenHandler.getRole(token);
+
+        return new LoginMember(memberId, name, role);
     }
 }

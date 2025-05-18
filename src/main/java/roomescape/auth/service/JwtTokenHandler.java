@@ -23,6 +23,7 @@ public class JwtTokenHandler {
 
     private static final String TOKEN_NAME = "token";
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_NAME = "name";
 
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
@@ -42,6 +43,7 @@ public class JwtTokenHandler {
         Claims claims = Jwts.claims()
                 .subject(member.getId().toString())
                 .add(CLAIM_ROLE, member.getRole().name())
+                .add(CLAIM_NAME, member.getName())
                 .build();
 
         Date now = new Date();
@@ -66,7 +68,7 @@ public class JwtTokenHandler {
                 .orElseThrow(() -> new AuthenticationException("토큰이 존재하지 않습니다."));
     }
 
-    public String getMemberIdFromToken(final String token) {
+    public String getMemberId(final String token) {
         return getBodyWithValidation(token).getSubject();
     }
 
@@ -74,6 +76,11 @@ public class JwtTokenHandler {
         String role = getBodyWithValidation(token)
                 .get(CLAIM_ROLE, String.class);
         return Role.from(role);
+    }
+
+    public String getName(final String token) {
+        return getBodyWithValidation(token)
+                .get(CLAIM_NAME, String.class);
     }
 
     private Claims getBodyWithValidation(final String token) {

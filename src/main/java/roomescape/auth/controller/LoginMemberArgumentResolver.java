@@ -37,7 +37,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         String token = jwtTokenHandler.extractTokenValue(request);
-        final long memberId = Long.parseLong(jwtTokenHandler.getMemberIdFromToken(token));
-        return authService.findLoginMemberById(memberId);
+
+        return authService.createLoginMemberByToken(token);
     }
 }

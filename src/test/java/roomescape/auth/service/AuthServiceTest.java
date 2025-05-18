@@ -2,8 +2,8 @@ package roomescape.auth.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import roomescape.auth.dto.LoginMember;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.LoginResponse;
 import roomescape.common.exception.EntityNotFoundException;
@@ -30,10 +31,6 @@ class AuthServiceTest {
     private JwtTokenHandler jwtTokenHandler;
     @Autowired
     private AuthService authService;
-
-    @AfterEach
-    void tearDown() {
-    }
 
     @DisplayName("존재하는 사용자의 로그인 요청이 들어오면 로그인을 허용한다.")
     @Test
@@ -74,5 +71,19 @@ class AuthServiceTest {
     void findMemberByNonExistsId() {
         assertThatThrownBy(() -> authService.findById(0L))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @DisplayName("토큰값을 사용해 로그인 사용자를 생성할 수 있다.")
+    @Test
+    void createLoginMemberByToken() {
+        Member member = new Member(1L, "로키", "roky@miso.com", "rokimiso", Role.ADMIN);
+        String token = jwtTokenHandler.createToken(member);
+
+        LoginMember loginMember = authService.createLoginMemberByToken(token);
+
+        assertAll(
+                () -> assertThat(loginMember.name()).isEqualTo("로키"),
+                () -> assertThat(loginMember.role()).isEqualTo(Role.ADMIN)
+        );
     }
 }

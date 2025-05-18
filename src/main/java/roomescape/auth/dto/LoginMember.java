@@ -1,6 +1,5 @@
 package roomescape.auth.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import roomescape.member.domain.Member;
@@ -11,13 +10,11 @@ public record LoginMember(
         Long id,
         @NotBlank
         String name,
-        @Email
-        String email,
         @NotNull
         Role role
 ) {
 
     public static LoginMember of(final Member member) {
-        return new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole());
+        return new LoginMember(member.getId(), member.getName(), member.getRole());
     }
 }
