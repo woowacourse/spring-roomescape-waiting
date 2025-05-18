@@ -23,7 +23,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(
                         new AuthRoleCheckInterceptor(authTokenExtractor, authTokenProvider)
                 )
-                .addPathPatterns("/**");
+                .addPathPatterns("/**")
+                .excludePathPatterns("/css/**", "/js/**", "/image/**", "/login", "/signup", "/");
     }
 
     @Override
