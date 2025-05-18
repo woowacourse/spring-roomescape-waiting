@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -64,8 +63,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("회원가입을 통해 회원 정보를 저장하고, 이메일과 비밀번호를 통해 로그인한다")
-    void signup() {
+    void 회원가입을_통해_회원_정보를_저장하고_이메일과_비밀번호를_통해_로그인한다() {
         final Map<String, String> params = new HashMap<>();
         params.put("name", "gangsan");
         params.put("email", "gangsan@gmail.com");
@@ -88,8 +86,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("로그인 상태라면 로그인 정보를 확인할 수 있고, 로그아웃 할 수 있다")
-    void login() {
+    void 로그인_상태라면_로그인_정보를_확인할_수_있고_로그아웃_할_수_있다() {
         RestAssured.given().log().all()
                 .cookie("token", memberToken)
                 .when().get("/login/check")
@@ -110,8 +107,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("권한이 없다면 어드민 페이지에 접속할 수 없다")
-    void first() {
+    void 권한이_없다면_어드민_페이지에_접속할_수_없다() {
         RestAssured.given().log().all()
                 .when().get("/admin")
                 .then().log().all()
@@ -131,8 +127,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("권한이 없다면 예약들을 조회할 수 없다")
-    void second() {
+    void 권한이_없다면_예약들을_조회할_수_없다() {
         RestAssured.given().log().all()
                 .cookie("token", memberToken)
                 .when().get("/admin/reservation")
@@ -164,8 +159,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("3단계: localhost:8080/reservations 에 POST 요청 시 예약이 추가되고, DELETE 요청 시 각각 예약이 취소된다")
-    void third() {
+    void reservations에_POST_요청_시_예약이_추가되고_DELETE_요청_시_각각_예약이_취소된다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
 
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)",
@@ -216,22 +210,18 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("JdbcTemplate로 DataSource객체에 접근할 수 있다" +
-                 "DataSource로 Connection 확인할 수 있다" +
-                 "Connection로 데이터베이스, 테이블 이름 검증할 수 있다")
-    void fourth() {
-        try (final Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+    void JdbcTemplate로_DataSource와_Connection_확인_및_테이블_검증한다() {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.getCatalog()).isEqualTo("DATABASE");
             assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    @DisplayName("데이터베이스에 예약 하나 추가 후 예약 조회 API를 통해 조회한 예약 수와 데이터베이스 쿼리를 통해 조회한 예약 수가 같은지 비교할 수 있다")
-    void fifth() {
+    void 데이터베이스에_예약_하나_추가_후_예약_조회_API를_통해_조회한_예약_수와_데이터베이스_쿼리를_통해_조회한_예약_수가_같은지_비교할_수_있다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
 
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)",
@@ -254,8 +244,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("예약 추가/삭제 API를 활용하고, 조회로 확인할 수 있다")
-    void sixth() {
+    void 예약_추가_삭제_API를_활용하고_조회로_확인할_수_있다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)",
                 "10:00");
 
@@ -289,8 +278,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("시간으로 API를 관리할 수 있다")
-    void seventh() {
+    void 시간으로_API를_관리할_수_있다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)",
                 "10:00");
 
@@ -315,8 +303,7 @@ public class MissionStepTest {
     }
 
     @Test
-    @DisplayName("컨트롤러에 jdbcTemplate가 존재하지 않는다")
-    void ninth() {
+    void 컨트롤러에_jdbcTemplate가_존재하지_않는다() {
         boolean isJdbcTemplateInjected = false;
 
         for (final Field field : reservationController.getClass().getDeclaredFields()) {
