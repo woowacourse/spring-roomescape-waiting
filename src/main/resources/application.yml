@@ -1,0 +1,20 @@
+spring:
+  h2:
+    console:
+      enabled: true
+
+  sql:
+    init:
+      data-locations: classpath:init_data.sql
+
+  datasource:
+    url: jdbc:h2:mem:database
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create
+    defer-datasource-initialization: true
