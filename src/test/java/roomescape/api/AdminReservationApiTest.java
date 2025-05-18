@@ -22,9 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.auth.PasswordEncoder;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class AdminReservationApiTest {
+class AdminReservationApiTest {
 
     private static final Map<String, String> RESERVATION_BODY = new HashMap<>();
     private static final Map<String, String> TIME_BODY = new HashMap<>();
@@ -70,7 +71,7 @@ public class AdminReservationApiTest {
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("INSERT INTO member (email, password, name, role) VALUES (?, ?, ?, ?)",
-                "admin@email.com", "password", "name", "ADMIN");
+                "admin@email.com", new PasswordEncoder().encode("password"), "name", "ADMIN");
     }
 
     @Nested

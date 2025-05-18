@@ -24,11 +24,13 @@ public class AuthServiceTest {
     private final AuthService authService;
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthServiceTest() {
         memberRepository = mock(MemberRepository.class);
         jwtProvider = new JwtProvider();
-        authService = new AuthService(memberRepository, jwtProvider);
+        passwordEncoder = new PasswordEncoder();
+        authService = new AuthService(memberRepository, jwtProvider, passwordEncoder);
     }
 
     @Nested
@@ -40,7 +42,7 @@ public class AuthServiceTest {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "pw1234");
             given(memberRepository.findByEmail(request.email()))
-                    .willReturn(Optional.of(new Member(1L, request.email(), request.password(), "부기", MemberRole.MEMBER)));
+                    .willReturn(Optional.of(new Member(1L, request.email(), passwordEncoder.encode(request.password()), "부기", MemberRole.MEMBER)));
 
             // when
             final String actual = authService.generateToken(request);

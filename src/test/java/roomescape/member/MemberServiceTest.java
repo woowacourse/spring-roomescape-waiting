@@ -15,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.auth.PasswordEncoder;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.exception.custom.reason.member.MemberNotFoundException;
@@ -27,14 +28,16 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 @ExtendWith(MockitoExtension.class)
-public class MemberServiceTest {
+class MemberServiceTest {
 
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public MemberServiceTest() {
         memberRepository = mock(MemberRepository.class);
-        memberService = new MemberService(memberRepository);
+        passwordEncoder = new PasswordEncoder();
+        memberService = new MemberService(memberRepository, passwordEncoder);
     }
 
     @DisplayName("member를 생성하여 저장한다.")

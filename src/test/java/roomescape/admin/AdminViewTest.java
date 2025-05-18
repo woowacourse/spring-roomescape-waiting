@@ -14,10 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.auth.PasswordEncoder;
 
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class AdminViewTest {
+class AdminViewTest {
 
     private static final Map<String, Object> AUTH_BODY = new HashMap<>();
 
@@ -44,7 +45,7 @@ public class AdminViewTest {
         jdbcTemplate.update("DELETE FROM member");
         jdbcTemplate.update("ALTER TABLE member ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("INSERT INTO member (email, password, name, role) VALUES (?, ?, ?, ?)",
-                "admin@email.com", "password", "name", "ADMIN");
+                "admin@email.com", new PasswordEncoder().encode("password"), "name", "ADMIN");
     }
 
     @DisplayName("/admin으로 요청이 들어오면 어드민 페이지를 응답한다.")
