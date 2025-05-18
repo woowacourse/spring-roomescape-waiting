@@ -37,7 +37,7 @@ public class ReservationDbFixture {
 
         ).longValue();
 
-        return new Reservation(id, date, reservationTime, theme, MATT, ReservationStatus.예약);
+        return new Reservation(id, date, reservationTime, theme, MATT, ReservationStatus.RESERVE);
     }
 
     public Reservation 예약_생성_한스(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
@@ -55,7 +55,7 @@ public class ReservationDbFixture {
                 .addValue("user_id", MATT.getId())
         ).longValue();
 
-        return new Reservation(id, date, reservationTime, theme, MATT, ReservationStatus.예약);
+        return new Reservation(id, date, reservationTime, theme, MATT, ReservationStatus.RESERVE);
     }
 
 

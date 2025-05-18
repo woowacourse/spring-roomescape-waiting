@@ -78,18 +78,18 @@ public class ThemeServiceTest {
         Member member = new Member(1L, new Name("테스터"), new Email("test@test.com"), new Password("1234"), Role.MEMBER);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
 
-        Reservation r1 = Reservation.create(now.minusDays(1), time, themeRecentMost, member, ReservationStatus.예약);
-        Reservation r2 = Reservation.create(now.minusDays(2), time, themeRecentMost, member, ReservationStatus.예약);
-        Reservation r3 = Reservation.create(now.minusDays(3), time, themeRecentMost, member, ReservationStatus.예약);
+        Reservation r1 = Reservation.create(now.minusDays(1), time, themeRecentMost, member, ReservationStatus.RESERVE);
+        Reservation r2 = Reservation.create(now.minusDays(2), time, themeRecentMost, member, ReservationStatus.RESERVE);
+        Reservation r3 = Reservation.create(now.minusDays(3), time, themeRecentMost, member, ReservationStatus.RESERVE);
 
-        Reservation r4 = Reservation.create(now.minusDays(5), time, themeMedium, member, ReservationStatus.예약);
-        Reservation r5 = Reservation.create(now.minusDays(6), time, themeMedium, member, ReservationStatus.예약);
+        Reservation r4 = Reservation.create(now.minusDays(5), time, themeMedium, member, ReservationStatus.RESERVE);
+        Reservation r5 = Reservation.create(now.minusDays(6), time, themeMedium, member, ReservationStatus.RESERVE);
 
-        Reservation o1 = Reservation.create(now.minusDays(10), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o2 = Reservation.create(now.minusDays(11), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o3 = Reservation.create(now.minusDays(12), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o4 = Reservation.create(now.minusDays(13), time, themeOldMost, member, ReservationStatus.예약);
-        Reservation o5 = Reservation.create(now.minusDays(14), time, themeOldMost, member, ReservationStatus.예약);
+        Reservation o1 = Reservation.create(now.minusDays(10), time, themeOldMost, member, ReservationStatus.RESERVE);
+        Reservation o2 = Reservation.create(now.minusDays(11), time, themeOldMost, member, ReservationStatus.RESERVE);
+        Reservation o3 = Reservation.create(now.minusDays(12), time, themeOldMost, member, ReservationStatus.RESERVE);
+        Reservation o4 = Reservation.create(now.minusDays(13), time, themeOldMost, member, ReservationStatus.RESERVE);
+        Reservation o5 = Reservation.create(now.minusDays(14), time, themeOldMost, member, ReservationStatus.RESERVE);
 
         List<Reservation> allReservations = List.of(r1, r2, r3, r4, r5, o1, o2, o3, o4, o5);
 
