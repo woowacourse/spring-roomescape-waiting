@@ -47,8 +47,11 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public MemberDto getMemberDtoBy(String email, String password) {
-        Member member = memberRepository.findByEmailAndPassword(email, password)
-                .orElseThrow(() -> new NotFoundException("이메일과 비밀번호가 일치하는 사용자가 없습니다."));
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("이메일이 일치하는 사용자가 없습니다."));
+        if (!member.matchPassword(password)) {
+            throw new NotFoundException("비밀번호가 일치하지 않습니다.");
+        }
         return MemberDto.from(member);
     }
 
