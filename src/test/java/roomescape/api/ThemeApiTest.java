@@ -114,7 +114,6 @@ public class ThemeApiTest {
     void 인기테마_상위10개_조회_테스트() {
         // given
         Member member1 = memberRepository.findById(1L).get();
-        Member member2 = memberRepository.findById(2L).get();
         ReservationTime time1 = timeRepository.findById(1L).get();
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
