@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.AuthenticationService;
 import roomescape.application.UserService;
 import roomescape.domain.auth.AuthenticationInfo;
-import roomescape.presentation.auth.Authenticated;
 import roomescape.presentation.auth.AuthenticationTokenCookie;
 import roomescape.presentation.request.LoginRequest;
 import roomescape.presentation.response.UserResponse;
@@ -40,7 +39,7 @@ public class LoginController {
     }
 
     @GetMapping("/login/check")
-    public UserResponse getUser(@Authenticated final AuthenticationInfo authenticationInfo) {
+    public UserResponse getUser(final AuthenticationInfo authenticationInfo) {
         var user = userService.getById(authenticationInfo.id());
         return UserResponse.from(user);
     }

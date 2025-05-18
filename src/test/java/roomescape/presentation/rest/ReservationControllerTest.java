@@ -19,27 +19,26 @@ import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import roomescape.TestFixtures;
 import roomescape.application.ReservationService;
-import roomescape.domain.user.User;
+import roomescape.domain.auth.AuthenticationInfo;
+import roomescape.domain.user.UserRole;
 import roomescape.exception.NotFoundException;
 import roomescape.presentation.GlobalExceptionHandler;
-import roomescape.presentation.StubUserArgumentResolver;
+import roomescape.presentation.StubAuthInfoArgumentResolver;
 
 class ReservationControllerTest {
 
     private final ReservationService reservationService = Mockito.mock(ReservationService.class);
-    private final User user = TestFixtures.anyUserWithId();
     private final MockMvc mockMvc = MockMvcBuilders
         .standaloneSetup(new ReservationController(reservationService))
-        .setCustomArgumentResolvers(new StubUserArgumentResolver(user))
+        .setCustomArgumentResolvers(new StubAuthInfoArgumentResolver(new AuthenticationInfo(99L, UserRole.USER)))
         .setControllerAdvice(new GlobalExceptionHandler())
         .build();
 
     @Test
     @DisplayName("예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다.")
     void reserve() throws Exception {
-        Mockito.when(reservationService.reserve(eq(user.id()), any(), anyLong(), anyLong()))
+        Mockito.when(reservationService.reserve(anyLong(), any(), anyLong(), anyLong()))
             .thenReturn(anyReservationWithId());
 
         mockMvc.perform(post("/reservations")

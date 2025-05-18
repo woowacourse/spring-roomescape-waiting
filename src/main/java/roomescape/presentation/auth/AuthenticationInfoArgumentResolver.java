@@ -6,20 +6,21 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.exception.AuthenticationException;
 
-public class UserArgumentResolver implements HandlerMethodArgumentResolver {
+public class AuthenticationInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthenticationTokenHandler tokenHandler;
 
-    public UserArgumentResolver(final AuthenticationTokenHandler tokenHandler) {
+    public AuthenticationInfoArgumentResolver(final AuthenticationTokenHandler tokenHandler) {
         this.tokenHandler = tokenHandler;
     }
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(Authenticated.class);
+        return AuthenticationInfo.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override

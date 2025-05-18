@@ -5,20 +5,19 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.domain.user.User;
-import roomescape.presentation.auth.Authenticated;
+import roomescape.domain.auth.AuthenticationInfo;
 
-public class StubUserArgumentResolver implements HandlerMethodArgumentResolver {
+public class StubAuthInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final User stubbingUser;
+    private final AuthenticationInfo stub;
 
-    public StubUserArgumentResolver(final User stubbingUser) {
-        this.stubbingUser = stubbingUser;
+    public StubAuthInfoArgumentResolver(final AuthenticationInfo stub) {
+        this.stub = stub;
     }
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(Authenticated.class);
+        return parameter.getParameterType().isAssignableFrom(AuthenticationInfo.class);
     }
 
     @Override
@@ -28,6 +27,6 @@ public class StubUserArgumentResolver implements HandlerMethodArgumentResolver {
         final NativeWebRequest webRequest,
         final WebDataBinderFactory binderFactory
     ) {
-        return stubbingUser;
+        return stub;
     }
 }

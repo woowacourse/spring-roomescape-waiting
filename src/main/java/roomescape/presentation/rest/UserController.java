@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.UserService;
 import roomescape.domain.auth.AuthenticationInfo;
-import roomescape.presentation.auth.Authenticated;
 import roomescape.presentation.request.SignupRequest;
 import roomescape.presentation.response.UserReservationResponse;
 import roomescape.presentation.response.UserResponse;
@@ -35,7 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/reservations")
-    public List<UserReservationResponse> getAllReservationsByUser(@Authenticated final AuthenticationInfo authenticationInfo) {
+    public List<UserReservationResponse> getAllReservationsByUser(final AuthenticationInfo authenticationInfo) {
         var reservations = userService.getReservations(authenticationInfo.id());
         return UserReservationResponse.from(reservations);
     }

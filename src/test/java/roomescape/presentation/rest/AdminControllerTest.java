@@ -18,7 +18,6 @@ import roomescape.TestFixtures;
 import roomescape.application.ReservationService;
 import roomescape.application.UserService;
 import roomescape.domain.user.User;
-import roomescape.presentation.StubUserArgumentResolver;
 
 class AdminControllerTest {
 
@@ -27,14 +26,13 @@ class AdminControllerTest {
     private final User admin = TestFixtures.anyAdminWithId();
     private final MockMvc mockMvc = MockMvcBuilders
         .standaloneSetup(new AdminController(reservationService, userService))
-        .setCustomArgumentResolvers(new StubUserArgumentResolver(admin))
         .build();
 
     @Test
     @DisplayName("어드민 페이지에서 예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다.")
     void reserve() throws Exception {
         var reservation = TestFixtures.anyReservationWithId();
-        Mockito.when(reservationService.reserve(any(), any(), anyLong(), anyLong())).thenReturn(reservation);
+        Mockito.when(reservationService.reserve(anyLong(), any(), anyLong(), anyLong())).thenReturn(reservation);
 
         mockMvc.perform(post("/admin/reservations")
                 .contentType(MediaType.APPLICATION_JSON)

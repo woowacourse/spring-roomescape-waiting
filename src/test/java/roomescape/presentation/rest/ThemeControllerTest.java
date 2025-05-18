@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static roomescape.TestFixtures.anyThemeWithId;
-import static roomescape.TestFixtures.anyUserWithId;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -23,14 +22,12 @@ import roomescape.application.ThemeService;
 import roomescape.exception.InUseException;
 import roomescape.exception.NotFoundException;
 import roomescape.presentation.GlobalExceptionHandler;
-import roomescape.presentation.StubUserArgumentResolver;
 
 class ThemeControllerTest {
 
     private final ThemeService themeService = Mockito.mock(ThemeService.class);
     private final MockMvc mockMvc = MockMvcBuilders
         .standaloneSetup(new ThemeController(themeService))
-        .setCustomArgumentResolvers(new StubUserArgumentResolver(anyUserWithId()))
         .setControllerAdvice(new GlobalExceptionHandler())
         .build();
 

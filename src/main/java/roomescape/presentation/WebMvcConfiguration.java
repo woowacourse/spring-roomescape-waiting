@@ -6,8 +6,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.domain.auth.AuthenticationTokenHandler;
+import roomescape.presentation.auth.AuthenticationInfoArgumentResolver;
 import roomescape.presentation.auth.CheckAdminInterceptor;
-import roomescape.presentation.auth.UserArgumentResolver;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
@@ -20,7 +20,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new UserArgumentResolver(authenticationTokenHandler));
+        resolvers.add(new AuthenticationInfoArgumentResolver(authenticationTokenHandler));
     }
 
     @Override
