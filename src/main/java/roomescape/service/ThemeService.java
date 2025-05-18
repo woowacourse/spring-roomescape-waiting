@@ -3,10 +3,8 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
-import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Reservation;
@@ -56,12 +54,8 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
-        try {
-            clearThemeInReservations(id);
-            themeRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceInUseException("삭제하고자 하는 테마에 예약된 정보가 있습니다.");
-        }
+        clearThemeInReservations(id);
+        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponseDto> findPopularThemes(String date) {

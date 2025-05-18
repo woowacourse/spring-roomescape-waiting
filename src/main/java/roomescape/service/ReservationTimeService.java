@@ -5,10 +5,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
-import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
@@ -45,12 +43,8 @@ public class ReservationTimeService {
     }
 
     public void deleteTime(Long id) {
-        try {
-            clearReservationTimeInReservations(id);
-            reservationTimeRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new ResourceInUseException("삭제하고자 하는 시각에 예약된 정보가 있습니다.");
-        }
+        clearReservationTimeInReservations(id);
+        reservationTimeRepository.deleteById(id);
     }
 
     public List<AvailableReservationTimeResponseDto> getAvailableTimes(String date, Long themeId) {
