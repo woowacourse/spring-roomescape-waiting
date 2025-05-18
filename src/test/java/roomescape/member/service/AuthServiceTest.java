@@ -36,7 +36,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("토큰 활용하여 로그인한다.")
-    void tokenLoginTest() {
+    void loginByTokenTest() {
 
         //given
         TokenLoginCreateRequest tokenLoginCreateRequest = new TokenLoginCreateRequest("matt.kakao", "1234");
@@ -45,7 +45,7 @@ class AuthServiceTest {
         when(jwtTokenProvider.createToken(tokenLoginCreateRequest.email())).thenReturn("token");
 
         //when
-        TokenLoginResponse tokenLoginResponse = authService.tokenLogin(tokenLoginCreateRequest);
+        TokenLoginResponse tokenLoginResponse = authService.loginByToken(tokenLoginCreateRequest);
 
         //then
         assertThat(tokenLoginResponse.tokenResponse()).isNotBlank();
@@ -53,20 +53,20 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("등록되지 않은 회원은 로그인할 수 없다.")
-    void tokenLoginFailTest() {
+    void loginByTokenFailTest() {
         //when - then
         assertThatThrownBy(() ->
-                authService.tokenLogin(new TokenLoginCreateRequest("matt.kakao", "123")))
+                authService.loginByToken(new TokenLoginCreateRequest("matt.kakao", "123")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("[ERROR] 아이디 또는 비밀번호를 올바르게 입력해주세요.");
 
         assertThatThrownBy(() ->
-                authService.tokenLogin(new TokenLoginCreateRequest("matt.kaka", "1234")))
+                authService.loginByToken(new TokenLoginCreateRequest("matt.kaka", "1234")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("[ERROR] 아이디 또는 비밀번호를 올바르게 입력해주세요.");
 
         assertThatThrownBy(() ->
-                authService.tokenLogin(new TokenLoginCreateRequest("matt.kaka", "123")))
+                authService.loginByToken(new TokenLoginCreateRequest("matt.kaka", "123")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("[ERROR] 아이디 또는 비밀번호를 올바르게 입력해주세요.");
     }

@@ -78,7 +78,7 @@ public class ReservationTest extends BaseTest {
 
         reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
 
-        token = authService.tokenLogin(new TokenLoginCreateRequest("matt@kakao.com", "1234")).tokenResponse();
+        token = authService.loginByToken(new TokenLoginCreateRequest("matt@kakao.com", "1234")).tokenResponse();
 
         reservation = new HashMap<>();
         reservation.put("date", "2025-08-05");

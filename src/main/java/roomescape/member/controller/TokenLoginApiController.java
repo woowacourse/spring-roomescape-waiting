@@ -30,7 +30,7 @@ public class TokenLoginApiController {
             @RequestBody @Valid TokenLoginCreateRequest tokenLoginCreateRequest,
             HttpServletResponse response
     ) {
-        TokenLoginResponse tokenLoginResponse = authService.tokenLogin(tokenLoginCreateRequest);
+        TokenLoginResponse tokenLoginResponse = authService.loginByToken(tokenLoginCreateRequest);
         Cookie cookie = new Cookie("token", tokenLoginResponse.tokenResponse());
         cookie.setHttpOnly(true);
         cookie.setPath("/");

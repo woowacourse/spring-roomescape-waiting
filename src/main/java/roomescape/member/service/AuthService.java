@@ -26,7 +26,7 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
-    public TokenLoginResponse tokenLogin(TokenLoginCreateRequest tokenLoginCreateRequest) {
+    public TokenLoginResponse loginByToken(TokenLoginCreateRequest tokenLoginCreateRequest) {
         Email email = new Email(tokenLoginCreateRequest.email());
         Password password = new Password(tokenLoginCreateRequest.password());
 
