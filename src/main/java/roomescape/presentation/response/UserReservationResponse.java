@@ -18,8 +18,8 @@ public record UserReservationResponse(
         return new UserReservationResponse(
                 reservation.id(),
                 ThemeResponse.from(reservation.theme()),
-                reservation.date(),
-                TimeSlotResponse.from(reservation.timeSlot()),
+                reservation.dateTime().date(),
+                TimeSlotResponse.from(reservation.dateTime().timeSlot()),
                 reservation.status()
         );
     }

@@ -22,13 +22,13 @@ public class TimeSlot {
     private Long id;
     private LocalTime startAt;
 
-    public TimeSlot(final LocalTime startAt) {
-        this(null, startAt);
-    }
-
     public TimeSlot(final Long id, final LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
+    }
+
+    public TimeSlot(final LocalTime startAt) {
+        this(null, startAt);
     }
 
     protected TimeSlot() {

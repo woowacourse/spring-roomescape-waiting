@@ -1,15 +1,14 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -17,7 +16,6 @@ import lombok.experimental.Accessors;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.User;
-import roomescape.exception.BusinessRuleViolationException;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
@@ -31,51 +29,26 @@ public class Reservation {
     private Long id;
     @ManyToOne
     private User user;
-    private LocalDate date;
-    @ManyToOne
-    @JoinColumn(name = "time_id")
-    private TimeSlot timeSlot;
+    @Embedded
+    private ReservationDateTime dateTime;
     @ManyToOne
     private Theme theme;
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status = ReservationStatus.RESERVED;
+    private ReservationStatus status;
 
-    private Reservation(final Long id, final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
+    public Reservation(final Long id, final User user, final ReservationDateTime dateTime, final Theme theme, final ReservationStatus status) {
         this.id = id;
         this.user = user;
-        this.date = date;
-        this.timeSlot = timeSlot;
+        this.dateTime = dateTime;
         this.theme = theme;
+        this.status = status;
+    }
+
+    public Reservation(final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
+        this(null, user, ReservationDateTime.forReserve(date, timeSlot), theme, ReservationStatus.RESERVED);
     }
 
     protected Reservation() {
-    }
-
-    public static Reservation ofExisting(final long id, final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        return new Reservation(id, user, date, timeSlot, theme);
-    }
-
-    public static Reservation reserveNewly(final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        if (isBeforeNow(date, timeSlot)) {
-            throw new BusinessRuleViolationException("이전 날짜로 예약할 수 없습니다.");
-        }
-        return new Reservation(null, user, date, timeSlot, theme);
-    }
-
-    private static boolean isBeforeNow(final LocalDate date, final TimeSlot timeSlot) {
-        var now = LocalDateTime.now();
-        var today = now.toLocalDate();
-        var timeNow = now.toLocalTime();
-        return date.isBefore(today)
-                || (date.isEqual(today) && timeSlot.isTimeBefore(timeNow));
-    }
-
-    public boolean isDateEquals(final LocalDate date) {
-        return this.date.isEqual(date);
-    }
-
-    public boolean isTimeSlotEquals(final TimeSlot timeSlot) {
-        return this.timeSlot.isSameAs(timeSlot);
     }
 }
 

@@ -1,7 +1,13 @@
 package roomescape.application;
 
+import static roomescape.infrastructure.ReservationSpecs.byDate;
+import static roomescape.infrastructure.ReservationSpecs.byFilter;
+import static roomescape.infrastructure.ReservationSpecs.byThemeId;
+import static roomescape.infrastructure.ReservationSpecs.byTimeSlotId;
+
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
@@ -13,7 +19,6 @@ import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.User;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.ReservationSpecifications;
 
 @Service
 public class ReservationService {
@@ -37,12 +42,12 @@ public class ReservationService {
         var theme = getThemeById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
 
-        var reservation = Reservation.reserveNewly(user, date, timeSlot, theme);
+        var reservation = new Reservation(user, date, timeSlot, theme);
         return reservationRepository.save(reservation);
     }
 
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
-        return reservationRepository.findAll(ReservationSpecifications.byFilter(filter));
+        return reservationRepository.findAll(byFilter(filter));
     }
 
     public void removeById(final long id) {
@@ -62,8 +67,9 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        var reservation = reservationRepository.findByDateAndTimeSlotIdAndThemeId(date, timeSlot.id(), theme.id());
-        if (reservation.isPresent()) {
+        var byDateTimeAndThemeId = Specification.allOf(byDate(date), byTimeSlotId(timeSlot.id()), byThemeId(theme.id()));
+        var reservation = reservationRepository.findAll(byDateTimeAndThemeId);
+        if (!reservation.isEmpty()) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
     }

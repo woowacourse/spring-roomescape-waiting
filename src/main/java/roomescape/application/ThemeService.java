@@ -3,12 +3,12 @@ package roomescape.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.InUseException;
 import roomescape.exception.NotFoundException;
+import roomescape.infrastructure.ReservationSpecs;
 
 @Service
 public class ThemeService {
@@ -35,7 +35,7 @@ public class ThemeService {
     }
 
     public void removeById(final long id) {
-        var reservations = reservationRepository.findByThemeId(id);
+        var reservations = reservationRepository.findAll(ReservationSpecs.byThemeId(id));
         if (!reservations.isEmpty()) {
             throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
         }

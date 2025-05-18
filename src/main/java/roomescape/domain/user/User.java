@@ -44,11 +44,11 @@ public class User {
         this.password = password;
     }
 
-    protected User() {
+    public User(final UserName name, final Email email, final Password password) {
+        this(null, name, UserRole.USER, email, password);
     }
 
-    public static User createUser(final UserName name, final Email email, final Password password) {
-        return new User(null, name, UserRole.USER, email, password);
+    protected User() {
     }
 
     public boolean matchesPassword(final Password passwordToCompare) {

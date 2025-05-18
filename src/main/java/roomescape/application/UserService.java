@@ -27,7 +27,7 @@ public class UserService {
             throw new AlreadyExistedException("이미 해당 이메일로 가입된 사용자가 있습니다.");
         }
 
-        var user = User.createUser(new UserName(name), new Email(email), new Password(password));
+        var user = new User(new UserName(name), new Email(email), new Password(password));
         return repository.save(user);
     }
 
@@ -40,7 +40,7 @@ public class UserService {
     public List<Reservation> getReservations(final long id) {
         var user = getById(id);
         return user.reservations().stream()
-                .map(r -> Reservation.ofExisting(r.id(), r.user(), r.date(), r.timeSlot(), r.theme()))
+                .map(r -> new Reservation(r.id(), r.user(), r.dateTime(), r.theme(), r.status()))
                 .toList();
     }
 
