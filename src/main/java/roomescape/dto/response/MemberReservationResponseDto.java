@@ -3,6 +3,7 @@ package roomescape.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.model.Reservation;
+import roomescape.model.ReservationStatus;
 
 public record MemberReservationResponseDto(
         Long reservationId,
@@ -17,7 +18,7 @@ public record MemberReservationResponseDto(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt(),
-                "예약중"
+                ReservationStatus.RESERVED.getValue()
         );
     }
 }
