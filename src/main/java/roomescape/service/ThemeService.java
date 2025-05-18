@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
@@ -12,6 +13,7 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private static final int POPULAR_THEMES_COUNT = 10;
@@ -35,9 +37,21 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponseDto> findAllThemes() {
         List<Theme> allTheme = themeRepository.findAll();
         return allTheme.stream()
+                .map(ThemeResponseDto::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ThemeResponseDto> findPopularThemes() {
+        LocalDate end = LocalDate.now();
+        LocalDate start = end.minusDays(7);
+        List<Theme> popularThemes = themeRepository.findMostReservedThemesBetween(start, end)
+                .subList(0, POPULAR_THEMES_COUNT);
+        return popularThemes.stream()
                 .map(ThemeResponseDto::from)
                 .toList();
     }
@@ -52,15 +66,5 @@ public class ThemeService {
         }
 
         themeRepository.deleteById(id);
-    }
-
-    public List<ThemeResponseDto> findPopularThemes() {
-        LocalDate end = LocalDate.now();
-        LocalDate start = end.minusDays(7);
-        List<Theme> popularThemes = themeRepository.findMostReservedThemesBetween(start, end)
-                .subList(0, POPULAR_THEMES_COUNT);
-        return popularThemes.stream()
-                .map(ThemeResponseDto::from)
-                .toList();
     }
 }

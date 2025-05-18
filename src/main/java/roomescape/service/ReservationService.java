@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -19,6 +20,7 @@ import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.ReservationCreateDto;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final JpaReservationRepository reservationRepository;
@@ -63,6 +65,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponseDto> findAllReservationResponses() {
         List<Reservation> allReservations = reservationRepository.findAll();
 
@@ -72,6 +75,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from,
                                                                LocalDate to) {
         List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(
@@ -82,15 +86,16 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
+        List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
+        return reservations.stream().map(MyReservationResponseDto::new).toList();
+    }
+
     public void deleteReservation(Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
         reservationRepository.deleteById(id);
-    }
-
-    public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
-        List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
-        return reservations.stream().map(reservation -> new MyReservationResponseDto(reservation)).toList();
     }
 }
