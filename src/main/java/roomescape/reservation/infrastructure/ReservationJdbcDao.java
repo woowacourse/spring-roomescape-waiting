@@ -48,7 +48,6 @@ public class ReservationJdbcDao {
                 INNER JOIN member AS m
                 ON r.member_id = m.id
                 """;
-        System.out.println("?????????????????1111111111");
 
         return namedParameterJdbcTemplate.query(sql, (resultSet, rowNum) -> createReservation(resultSet));
     }

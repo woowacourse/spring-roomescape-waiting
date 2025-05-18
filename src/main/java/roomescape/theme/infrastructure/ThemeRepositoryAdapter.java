@@ -9,11 +9,11 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 @Repository
-public class ThemeRepositoryAdaptor implements ThemeRepository {
+public class ThemeRepositoryAdapter implements ThemeRepository {
     private final ThemeJpaRepository themeJpaRepository;
     private final ThemeJdbcDao themeJdbcDao;
 
-    public ThemeRepositoryAdaptor(ThemeJpaRepository themeJpaRepository, ThemeJdbcDao themeJdbcDao) {
+    public ThemeRepositoryAdapter(ThemeJpaRepository themeJpaRepository, ThemeJdbcDao themeJdbcDao) {
         this.themeJpaRepository = themeJpaRepository;
         this.themeJdbcDao = themeJdbcDao;
     }

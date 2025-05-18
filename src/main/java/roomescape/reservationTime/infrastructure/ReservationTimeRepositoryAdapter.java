@@ -8,11 +8,11 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 
 @Repository
-public class ReservationTimeRepositoryAdaptor implements ReservationTimeRepository {
+public class ReservationTimeRepositoryAdapter implements ReservationTimeRepository {
     private final ReservationTimeJpaRepository reservationTimeJpaRepository;
     private final ReservationTimeJdbcDao reservationTimeJdbcDao;
 
-    public ReservationTimeRepositoryAdaptor(ReservationTimeJpaRepository reservationTimeJpaRepository,
+    public ReservationTimeRepositoryAdapter(ReservationTimeJpaRepository reservationTimeJpaRepository,
                                             ReservationTimeJdbcDao reservationTimeJdbcDao) {
         this.reservationTimeJpaRepository = reservationTimeJpaRepository;
         this.reservationTimeJdbcDao = reservationTimeJdbcDao;

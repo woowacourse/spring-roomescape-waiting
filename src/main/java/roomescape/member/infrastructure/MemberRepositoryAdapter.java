@@ -7,11 +7,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 
 @Repository
-public class MemberRepositoryAdaptor implements MemberRepository {
+public class MemberRepositoryAdapter implements MemberRepository {
     private final MemberJpaRepository memberJpaRepository;
     private final MemberJdbcDao memberJdbcDao;
 
-    public MemberRepositoryAdaptor(MemberJpaRepository memberJpaRepository, MemberJdbcDao memberJdbcDao) {
+    public MemberRepositoryAdapter(MemberJpaRepository memberJpaRepository, MemberJdbcDao memberJdbcDao) {
         this.memberJpaRepository = memberJpaRepository;
         this.memberJdbcDao = memberJdbcDao;
     }

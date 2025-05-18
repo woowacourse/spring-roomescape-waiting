@@ -71,7 +71,6 @@ class ReservationJdbcDaoTest {
         jdbcTemplate.execute("""
                     CREATE TABLE reservation (
                         id BIGINT NOT NULL AUTO_INCREMENT,
-                        name VARCHAR(255) NOT NULL,
                         date DATE NOT NULL,
                         time_id BIGINT, 
                         theme_id BIGINT, 
@@ -118,11 +117,10 @@ class ReservationJdbcDaoTest {
                 )
         );
 
-        String insertSqlReservation = "INSERT INTO reservation(name, date, time_id, theme_id, member_id) VALUES (:name, :date, :time_id, :theme_id, :member_id)";
+        String insertSqlReservation = "INSERT INTO reservation(date, time_id, theme_id, member_id) VALUES (:date, :time_id, :theme_id, :member_id)";
         namedParameterJdbcTemplate.update(
                 insertSqlReservation,
                 Map.of(
-                        "name", "홍길동",
                         "date", "2025-05-01",
                         "time_id", 1L,
                         "theme_id", 1L,
