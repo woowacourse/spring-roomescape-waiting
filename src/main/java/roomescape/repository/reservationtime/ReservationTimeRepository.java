@@ -3,17 +3,19 @@ package roomescape.repository.reservationtime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.Repository;
 import roomescape.domain.reservationtime.ReservationTime;
 
-public interface ReservationTimeRepository {
+@org.springframework.stereotype.Repository
+public interface ReservationTimeRepository extends Repository<ReservationTime, Long> {
 
-    long save(ReservationTime reservationTime);
+    boolean existsByTime(LocalTime time);
+
+    Optional<ReservationTime> findById(Long aLong);
 
     List<ReservationTime> findAll();
 
+    ReservationTime save(ReservationTime reservationTime);
+
     void deleteById(Long id);
-
-    Optional<ReservationTime> findById(Long id);
-
-    boolean existsByTime(LocalTime time);
 }

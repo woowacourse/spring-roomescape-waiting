@@ -28,7 +28,7 @@ public class ReservationTimeService {
         if (reservationTimeRepository.existsByTime(reservationTime.getTime())) {
             throw new InvalidReservationTimeException("중복된 예약시간입니다");
         }
-        return reservationTimeRepository.save(reservationTime);
+        return reservationTimeRepository.save(reservationTime).getId();
     }
 
     @Transactional
@@ -39,7 +39,7 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
-    public ReservationTime getReservationTimeById(long id) {
+    public ReservationTime getReservationTimeById(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new InvalidReservationTimeException("존재하지 않는 예약 시간입니다."));
     }
