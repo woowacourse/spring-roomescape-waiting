@@ -6,7 +6,7 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class Email {
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     public Email(String email) {

@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Embeddable
 public class ReservationDate {
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private LocalDate reservationDate;
 
     public ReservationDate() {

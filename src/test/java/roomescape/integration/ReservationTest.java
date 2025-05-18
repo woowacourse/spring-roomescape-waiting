@@ -66,6 +66,8 @@ public class ReservationTest extends BaseTest {
 
     private String token;
 
+    private ReservationTime reservationTime;
+
     @BeforeEach
     void setUp() {
 
@@ -76,7 +78,7 @@ public class ReservationTest extends BaseTest {
         member = memberRepository.save(
                 new Member(new Name("매트"), new Email("matt@kakao.com"), new Password("1234"), Role.ADMIN));
 
-        reservationTimeJpaRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        reservationTime = reservationTimeJpaRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
 
         token = authService.tokenLogin(new TokenLoginCreateRequest("matt@kakao.com", "1234")).tokenResponse();
 
@@ -182,8 +184,6 @@ public class ReservationTest extends BaseTest {
     @Test
     void 방탈출_예약_목록을_조회한다() {
 
-        ReservationTime reservationTime = reservationTimeJpaRepository.save(
-                ReservationTime.create(LocalTime.of(10, 0)));
         reservationRepository.save(
                 Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
 
