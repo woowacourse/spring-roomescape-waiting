@@ -37,7 +37,7 @@ public class Theme {
         this.thumbnail = Objects.requireNonNull(thumbnail, "thumbnail은 null일 수 없습니다.");
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Long getId() {

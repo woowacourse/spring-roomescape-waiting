@@ -25,7 +25,7 @@ public class ReservationTime {
         this.startAt = Objects.requireNonNull(time, "startAt은 null일 수 없습니다.");
     }
 
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public Long getId() {
