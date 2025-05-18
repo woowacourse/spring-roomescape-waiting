@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import roomescape.global.exception.custom.BadRequestException;
 
 class ThemeDescriptionTest {
 
@@ -19,7 +20,7 @@ class ThemeDescriptionTest {
         // when
         // then
         assertThatThrownBy(() -> new ThemeDescription(description))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("테마 소개는 최소 5글자, 최대 200글자여야합니다.");
     }
 

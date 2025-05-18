@@ -6,6 +6,7 @@ import java.util.Optional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 
 public class FakeMemberDao implements MemberRepository {
@@ -29,9 +30,9 @@ public class FakeMemberDao implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findByEmailAndPassword(final MemberEmail email, final String password) {
+    public Optional<Member> findByEmailAndPassword(final MemberEmail email, final Password password) {
         return members.stream()
-                .filter(member -> member.getEmail().equals(email) && member.getPassword().getValue().equals(password))
+                .filter(member -> member.getEmail().equals(email) && member.getPassword().equals(password))
                 .findFirst();
     }
 

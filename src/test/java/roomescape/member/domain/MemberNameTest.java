@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.global.exception.custom.BadRequestException;
 
 class MemberNameTest {
 
@@ -15,7 +16,7 @@ class MemberNameTest {
     @NullAndEmptySource
     void testValidateName(String name) {
         assertThatThrownBy(() -> new MemberName(name))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("사용자명은 최소 1글자, 최대 5글자여야합니다.");
     }
 
@@ -25,7 +26,7 @@ class MemberNameTest {
     @NullAndEmptySource
     void testValidateNameBlank(String name) {
         assertThatThrownBy(() -> new MemberName(name))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("사용자명은 최소 1글자, 최대 5글자여야합니다.");
     }
 }

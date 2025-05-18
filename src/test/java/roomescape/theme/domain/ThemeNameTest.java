@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.global.exception.custom.BadRequestException;
 
 class ThemeNameTest {
 
@@ -17,7 +18,7 @@ class ThemeNameTest {
         // when
         // then
         assertThatThrownBy(() -> new ThemeName(name))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("테마 이름은 최소 1글자, 최대 20글자여야합니다.");
     }
 }

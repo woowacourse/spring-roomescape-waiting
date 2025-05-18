@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+import roomescape.global.exception.custom.BadRequestException;
 
 class MemberEmailTest {
 
@@ -14,7 +15,7 @@ class MemberEmailTest {
     @ValueSource(strings = {"abcdef", "aa@123", "email.com"})
     void testValidation(String email) {
         assertThatThrownBy(() -> new MemberEmail(email))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("이메일 형식으로 입력해야 합니다.");
     }
 
@@ -24,7 +25,7 @@ class MemberEmailTest {
     @ValueSource(strings = {" ", "   "})
     void testValidationBlank(String email) {
         assertThatThrownBy(() -> new MemberEmail(email))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("이메일 형식으로 입력해야 합니다.");
     }
 }

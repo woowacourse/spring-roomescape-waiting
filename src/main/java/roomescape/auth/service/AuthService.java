@@ -9,6 +9,7 @@ import roomescape.global.exception.custom.ForbiddenException;
 import roomescape.global.exception.custom.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
@@ -25,7 +26,7 @@ public class AuthService {
 
     public TokenResponse createToken(final LoginRequest loginRequest) {
         final MemberEmail email = new MemberEmail(loginRequest.email());
-        final String password = loginRequest.password();
+        final Password password = new Password(loginRequest.password());
         final Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new UnauthorizedException("올바르지 않은 로그인 정보입니다."));
         final Long id = member.getId();
