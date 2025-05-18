@@ -5,21 +5,23 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
-import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Reservation;
+import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
 import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -36,6 +38,7 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId,
                                       final Long themeId
     ) {
@@ -51,6 +54,13 @@ public class ReservationService {
         final Reservation reservation = new Reservation(date, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
+    }
+
+    public List<ReservationResponse> findAll() {
+        return reservationRepository.findAll()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     private void validateMemberIdExists(final Long memberId) {
@@ -86,13 +96,6 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
     public List<ReservationResponse> findAllFilter(final Long memberId, final Long themeId, final LocalDate startDate,
                                                    final LocalDate endDate) {
         return reservationRepository.findAllByFilter(memberId, themeId, startDate, endDate)
@@ -101,6 +104,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(id));

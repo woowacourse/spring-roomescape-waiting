@@ -7,6 +7,7 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
 import roomescape.exception.UnauthorizedException;
 import roomescape.persistence.repository.MemberRepository;
@@ -27,6 +28,7 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public String login(final String email, final String password) {
         final Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new UnauthorizedException("해당하는 사용자를 찾을 수 없습니다. email: %s".formatted(email)));

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
@@ -16,6 +17,7 @@ import roomescape.presentation.dto.ThemeResponse;
 import roomescape.util.CurrentUtil;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -28,6 +30,7 @@ public class ThemeService {
         this.currentUtil = currentUtil;
     }
 
+    @Transactional
     public ThemeResponse insert(final ThemeRequest themeRequest) {
         validateNameIsNotDuplicate(themeRequest.name());
         final Theme theme = themeRequest.toDomain();
@@ -55,6 +58,7 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         if (!themeRepository.existsById(id)) {
             throw new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(id));
