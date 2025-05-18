@@ -18,7 +18,7 @@ import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservation.infrastructure.ReservationRepositoryImpl;
 import roomescape.reservation.infrastructure.ReservationTimeRepositoryImpl;
-import roomescape.theme.applcation.ThemeService;
+import roomescape.theme.application.ThemeService;
 import roomescape.theme.domain.ThemeCommandRepository;
 import roomescape.theme.domain.ThemeQueryRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
