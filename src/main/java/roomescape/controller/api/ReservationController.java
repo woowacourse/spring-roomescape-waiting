@@ -38,10 +38,10 @@ public class ReservationController {
 
     @GetMapping("/filter")
     public List<ReservationResponse> readReservationsByFilter(
-        @RequestParam Long memberId,
-        @RequestParam Long themeId,
-        @RequestParam LocalDate dateFrom,
-        @RequestParam LocalDate dateTo) {
+        @RequestParam(required = false) Long memberId,
+        @RequestParam(required = false) Long themeId,
+        @RequestParam(required = false) LocalDate dateFrom,
+        @RequestParam(required = false) LocalDate dateTo) {
         return reservationService.findReservationsByFilters(themeId, memberId, dateFrom, dateTo)
             .stream()
             .map(ReservationResponse::from)

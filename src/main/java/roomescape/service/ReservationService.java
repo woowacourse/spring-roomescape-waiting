@@ -45,10 +45,10 @@ public class ReservationService {
     public List<Reservation> findReservationsByFilters(Long themeId, Long memberId,
         LocalDate dateFrom, LocalDate dateTo) {
         return reservationRepository.findAll().stream()
-            .filter(r -> r.getTheme().getId().equals(themeId))
-            .filter(r -> r.getMember().getId().equals(memberId))
-            .filter(r -> r.getDate().isAfter(dateFrom))
-            .filter(r -> r.getDate().isBefore(dateTo))
+            .filter(r -> themeId  == null || r.getTheme().getId().equals(themeId))
+            .filter(r -> memberId == null || r.getMember().getId().equals(memberId))
+            .filter(r -> dateFrom == null || !r.getDate().isBefore(dateFrom))
+            .filter(r -> dateTo   == null || !r.getDate().isAfter(dateTo))
             .toList();
     }
 
