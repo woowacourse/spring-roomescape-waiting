@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ThemeRegisterDto;
@@ -24,12 +25,14 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponseDto> getAllThemes() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponseDto::from)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ThemeResponseDto saveTheme(ThemeRegisterDto themeRegisterDto) {
         validateTheme(themeRegisterDto);
 
@@ -51,6 +54,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional
     public void deleteTheme(Long id) {
         try {
             themeRepository.deleteById(id);
@@ -59,6 +63,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponseDto> findPopularThemes(String date) {
         LocalDate parsedDate = LocalDate.parse(date);
 

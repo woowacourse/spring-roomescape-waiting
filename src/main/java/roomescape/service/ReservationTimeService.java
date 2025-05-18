@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ReservationTimeRegisterDto;
@@ -35,6 +36,7 @@ public class ReservationTimeService {
         return reservationTimes.stream().map(ReservationTimeResponseDto::from).toList();
     }
 
+    @Transactional
     public ReservationTimeResponseDto saveTime(ReservationTimeRegisterDto reservationTimeRegisterDto) {
         validateReservationTime(reservationTimeRegisterDto);
 
@@ -44,6 +46,7 @@ public class ReservationTimeService {
         return new ReservationTimeResponseDto(savedReservationTime.getId(), savedReservationTime.getStartAt());
     }
 
+    @Transactional
     public void deleteTime(Long id) {
         try {
             reservationTimeRepository.deleteById(id);
@@ -52,6 +55,7 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponseDto> getAvailableTimes(String date, Long themeId) {
         List<Reservation> reservations = getReservationsBy(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();

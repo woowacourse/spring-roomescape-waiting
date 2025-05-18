@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dto.LoginMember;
@@ -19,6 +20,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
+@Transactional(readOnly = true)
 @Service
 public class ReservationService {
 
@@ -37,6 +39,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
                                                   LoginMember loginMember) {
         Reservation reservation = createReservation(reservationRegisterDto, loginMember);
@@ -67,6 +70,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void cancelReservation(Long id) {
         reservationRepository.deleteById(id);
     }

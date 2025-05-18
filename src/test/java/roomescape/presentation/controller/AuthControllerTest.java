@@ -1,5 +1,9 @@
 package roomescape.presentation.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,9 +13,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.response.TokenResponseDto;
 import roomescape.presentation.support.CookieUtils;
@@ -38,7 +39,7 @@ public class AuthControllerTest {
 
         // when
         String token = "exampleToken";
-        Mockito.when(authService.createToken(email)).thenReturn(new TokenResponseDto(token));
+        Mockito.when(authService.login(loginRequestDto)).thenReturn(new TokenResponseDto(token));
 
         // then
         mockMvc.perform(post("/login")

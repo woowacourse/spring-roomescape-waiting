@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dto.request.ReservationAdminRegisterDto;
 import roomescape.model.Member;
@@ -31,6 +32,7 @@ public class ReservationAdminService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public void saveReservation(ReservationAdminRegisterDto registerDto) {
         Member member = findMemberById(registerDto.memberId());
         ReservationTime reservationTime = findReservationTimeById(registerDto.timeId());
