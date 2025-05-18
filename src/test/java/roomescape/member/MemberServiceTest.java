@@ -1,29 +1,35 @@
 package roomescape.member;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.auth.dto.LoginMember;
+import roomescape.exception.custom.reason.member.MemberEmailConflictException;
+import roomescape.member.dto.MemberRequest;
+import roomescape.member.dto.MemberResponse;
+import roomescape.reservation.ReservationRepository;
+
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import java.util.List;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.exception.custom.reason.member.MemberEmailConflictException;
-import roomescape.member.dto.MemberRequest;
-import roomescape.member.dto.MemberResponse;
-
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
 
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public MemberServiceTest() {
         memberRepository = mock(MemberRepository.class);
-        memberService = new MemberService(memberRepository);
+        reservationRepository = mock(ReservationRepository.class);
+        memberService = new MemberService(memberRepository, reservationRepository);
     }
 
     @DisplayName("member를 생성하여 저장한다.")
@@ -66,7 +72,7 @@ public class MemberServiceTest {
     void readAll() {
         // given
         given(memberRepository.findAll())
-                .willReturn(List.of(new Member(1L,"email", "pass", "name", MemberRole.MEMBER)));
+                .willReturn(List.of(new Member(1L, "email", "pass", "name", MemberRole.MEMBER)));
 
         // when
         final List<MemberResponse> actual = memberService.readAllMember();
@@ -83,5 +89,17 @@ public class MemberServiceTest {
 
         // then
         assertThat(actual).isEmpty();
+    }
+
+    @DisplayName("member로 예약 목록을 불러올 때, member를 찾을 수 없는 경우 예외를 발생시킨다")
+    @Test
+    void readReservationsByMember() {
+        // given
+        String notExistEmail = "may@gmail.com";
+        given(memberRepository.findByEmail(notExistEmail))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> memberService.readAllReservationsByMember(new LoginMember("may", notExistEmail, MemberRole.MEMBER)));
     }
 }

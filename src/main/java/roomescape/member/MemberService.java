@@ -1,6 +1,5 @@
 package roomescape.member;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
@@ -9,12 +8,16 @@ import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
+import roomescape.reservation.ReservationRepository;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public void createMember(final MemberRequest request) {
         validateDuplicationEmail(request);
@@ -23,11 +26,11 @@ public class MemberService {
         memberRepository.save(notSavedMember);
     }
 
-    public List<MemberReservationResponse> readAllReservationsByMember(final LoginMember loginMember){
+    public List<MemberReservationResponse> readAllReservationsByMember(final LoginMember loginMember) {
         final Member member = memberRepository.findByEmail(loginMember.email())
                 .orElseThrow(() -> new MemberNotFoundException());
 
-        return member.getReservations().stream()
+        return reservationRepository.findAllByMember(member).stream()
                 .map(MemberReservationResponse::of)
                 .toList();
     }
