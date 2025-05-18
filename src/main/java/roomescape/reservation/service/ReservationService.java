@@ -25,10 +25,10 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    
+
     public Reservation save(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
         if (!date.isAfter(LocalDate.now())) {
-            throw new PastDateException("과거 시간은 예약 등록을 할 수 없습니다. date = " + date);
+            throw new PastDateException(date);
         }
         final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
