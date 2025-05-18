@@ -23,7 +23,7 @@ public class Member {
     private MemberEmail email;
 
     @Embedded
-    private Password password2;
+    private Password password;
 
     @Enumerated(value = EnumType.STRING)
     private Role role;
@@ -33,7 +33,7 @@ public class Member {
         this.id = id;
         this.name = name;
         this.email = email;
-        this.password2 = password;
+        this.password = password;
         this.role = role;
     }
 
@@ -61,8 +61,8 @@ public class Member {
         return email;
     }
 
-    public Password getPassword2() {
-        return password2;
+    public Password getPassword() {
+        return password;
     }
 
     public Role getRole() {
