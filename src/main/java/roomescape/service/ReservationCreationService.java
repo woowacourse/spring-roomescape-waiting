@@ -12,6 +12,7 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.NotFoundException;
+import roomescape.exception.UnAvailableReservationException;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
 
@@ -65,7 +66,14 @@ public class ReservationCreationService {
     }
 
     private void validateCanWaiting(Reservation reservation) {
-        //TODO: validate 같은 사용자가 같은 예약대기를 또 할 수는 없음 / 이미 예약상태의 자신의예약이존재하는데 대기를걸수없음
+        boolean exists = reservationRepository.hasAlreadyReservedOrWaited
+                (reservation.getMember().getId(),
+                reservation.getTheme().getId(),
+                reservation.getTime().getId(),
+                reservation.getDate());
+        if (exists) {
+            throw new UnAvailableReservationException("이미 동일한 시간에 예약(또는 대기)이 존재합니다.");
+        }
     }
 
     private ReservationComponents loadContext(CreateReservationParam param) {
