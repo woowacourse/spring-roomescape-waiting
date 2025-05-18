@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.business.domain.Member;
-import roomescape.business.service.MemberService;
 import roomescape.persistence.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,9 +23,6 @@ class MemberControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
-
-    @Autowired
-    private MemberService memberService;
 
     @Autowired
     private MemberRepository memberRepository;

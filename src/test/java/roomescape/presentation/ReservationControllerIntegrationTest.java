@@ -36,12 +36,16 @@ class ReservationControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     private ThemeRepository themeRepository;
+
     @Autowired
     private MemberRepository memberRepository;
+
     @Autowired
     private ReservationRepository reservationRepository;
 
@@ -221,7 +225,7 @@ class ReservationControllerIntegrationTest {
                 .queryParam("date", date.toString())
                 .queryParam("themeId", themeId)
                 .when()
-                .get("/available-times")
+                .get("/reservations/available-times")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2))

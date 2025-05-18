@@ -13,7 +13,7 @@ public class UserController {
         return "reservation";
     }
 
-    @GetMapping(value = "reservation-mine")
+    @GetMapping("/reservation-mine")
     public String reservationMine() {
         return "reservation-mine";
     }

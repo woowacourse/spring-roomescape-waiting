@@ -37,7 +37,7 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createByLoginMember(
             @RequestBody final ReservationRequest reservationRequest,
-            final @AuthenticationPrincipal  LoginMember loginMember
+            final @AuthenticationPrincipal LoginMember loginMember
     ) {
         final ReservationResponse reservationResponse = reservationService.insert(
                 reservationRequest.date(),
@@ -78,7 +78,7 @@ public class ReservationController {
                 .build();
     }
 
-    @GetMapping("/available-times")
+    @GetMapping("/reservations/available-times")
     public ResponseEntity<List<ReservationAvailableTimeResponse>> readAvailableTimes(
             @RequestParam("date") final LocalDate date,
             @RequestParam("themeId") final Long themeId

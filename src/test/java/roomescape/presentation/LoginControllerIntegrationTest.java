@@ -24,6 +24,7 @@ class LoginControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
+
     @Autowired
     private MemberRepository memberRepository;
 
@@ -36,7 +37,7 @@ class LoginControllerIntegrationTest {
     @DisplayName("올바른 이메일과 비밀번호로 로그인하면 성공 응답을 반환한다")
     void login_WithValidCredentials_ReturnsSuccess() {
         // given
-        Member member = new Member("이름", "USER", "email@test.com", "password1234!");
+        final Member member = new Member("이름", "USER", "email@test.com", "password1234!");
         memberRepository.save(member);
         final LoginRequest request = new LoginRequest("email@test.com", "password1234!");
 

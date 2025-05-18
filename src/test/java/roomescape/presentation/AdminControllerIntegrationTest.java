@@ -30,10 +30,13 @@ class AdminControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+
     @Autowired
     private ThemeRepository themeRepository;
+
     @Autowired
     private MemberRepository memberRepository;
 
