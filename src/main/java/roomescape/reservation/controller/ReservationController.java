@@ -47,7 +47,7 @@ public class ReservationController {
             @RequestParam("date") final LocalDate date,
             @RequestParam("themeId") final Long themeId
     ) {
-        List<BookedReservationTimeResponse> responses = reservationService.getAvailableTimes(date, themeId);
+        List<BookedReservationTimeResponse> responses = reservationService.getSortedAvailableTimes(date, themeId);
 
         return ResponseEntity.ok(responses);
     }

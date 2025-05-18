@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,13 +132,15 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<BookedReservationTimeResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
+    public List<BookedReservationTimeResponse> getSortedAvailableTimes(final LocalDate date, final Long themeId) {
         Map<ReservationTime, Boolean> allTimes = processAlreadyBookedTimesMap(date, themeId);
 
-        return allTimes.entrySet()
+        return allTimes.keySet()
                 .stream()
-                .map(entry -> bookedReservationTimeResponseOf(entry.getKey(), entry.getValue()))
-                .toList();
+                .map(key -> bookedReservationTimeResponseOf(key, allTimes.get(key)))
+                .sorted(Comparator.comparing(bookedReservationTimeResponse
+                        -> bookedReservationTimeResponse.timeResponse().startAt()
+                )).toList();
     }
 
     private Map<ReservationTime, Boolean> processAlreadyBookedTimesMap(final LocalDate date, final Long themeId) {
