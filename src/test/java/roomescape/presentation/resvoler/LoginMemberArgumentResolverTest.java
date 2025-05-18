@@ -1,14 +1,15 @@
 package roomescape.presentation.resvoler;
 
-import jakarta.servlet.http.Cookie;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.BDDMockito.given;
 import org.mockito.Mock;
-import static org.mockito.Mockito.mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -48,7 +49,7 @@ class LoginMemberArgumentResolverTest {
         servletRequest.setCookies(new Cookie("token", token));
         NativeWebRequest webRequest = new ServletWebRequest(servletRequest);
 
-        Member member = new Member(1L, "히로", email, "password", Role.ADMIN);
+        Member member = new Member("히로", email, "password", Role.ADMIN);
         given(cookieUtils.getToken(servletRequest)).willReturn(token);
         given(authService.getAuthenticatedMember(token)).willReturn(member);
 

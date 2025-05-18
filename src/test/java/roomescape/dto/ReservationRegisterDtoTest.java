@@ -32,9 +32,9 @@ class ReservationRegisterDtoTest {
 
         // when & then
         assertThatThrownBy(
-                () -> reservationRegisterDto.convertToReservation(new ReservationTime(1L, LocalTime.of(12, 30)),
-                        new Theme(1L, "공포", "무서워요", "image"),
-                        new Member(1L, "히로", "example@gmail.com", "password", Role.ADMIN)))
+                () -> reservationRegisterDto.convertToReservation(new ReservationTime(LocalTime.of(12, 30)),
+                        new Theme("공포", "무서워요", "image"),
+                        new Member("히로", "example@gmail.com", "password", Role.ADMIN)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("날짜");
 
