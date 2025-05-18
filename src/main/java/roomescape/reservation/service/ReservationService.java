@@ -16,7 +16,7 @@ import roomescape.reservation.dto.AvailableReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepositoryInterface;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final ThemeRepositoryInterface themeRepository;
 
     public Reservation save(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
         if (!date.isAfter(LocalDate.now())) {

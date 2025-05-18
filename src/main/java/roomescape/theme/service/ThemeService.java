@@ -9,7 +9,7 @@ import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepositoryInterface;
 
 @RequiredArgsConstructor
 @Service
@@ -18,7 +18,7 @@ public class ThemeService {
     private static final int POPULAR_THEME_DAYS = 7;
     private static final int POPULAR_THEME_LIMIT = 10;
 
-    private final ThemeRepository themeRepository;
+    private final ThemeRepositoryInterface themeRepository;
     private final ReservationRepository reservationRepository;
 
     public Theme save(final String name, final String description, final String thumbnail) {
