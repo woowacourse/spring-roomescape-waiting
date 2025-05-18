@@ -25,7 +25,7 @@ class AdminRestControllerTest {
     void setUp() {
         adminToken = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("email", "east@email.com", "password", "1234"))
+                .body(Map.of("email", "yebink@email.com", "password", "1234"))
                 .when().post("/login").getCookie("token");
     }
 
@@ -53,7 +53,7 @@ class AdminRestControllerTest {
         // given
         final String adminToken = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("email", "east@email.com", "password", "1234"))
+                .body(Map.of("email", "yebink@email.com", "password", "1234"))
                 .when().post("/login").getCookie("token");
 
         final String dateFrom = LocalDate.now().minusDays(1).toString();
