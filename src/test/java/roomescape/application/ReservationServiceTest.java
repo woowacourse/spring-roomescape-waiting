@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.domain.Role.USER;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,8 @@ public class ReservationServiceTest {
     private ThemeService themeService;
     @Mock
     private MemberService memberService;
+    @Mock
+    private ClockProvider clockProvider;
 
     @DisplayName("사용자 예약 목록 조회 성공")
     @Test
@@ -85,6 +88,7 @@ public class ReservationServiceTest {
 
         Reservation reservation = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, waiting);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
+        Mockito.doReturn(LocalDateTime.now()).when(clockProvider).now();
 
         //when
         ReservationDto reservationDto = reservationService.registerReservation(new ReservationCreateDto(

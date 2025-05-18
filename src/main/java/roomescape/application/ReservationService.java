@@ -1,6 +1,7 @@
 package roomescape.application;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -25,21 +26,27 @@ public class ReservationService {
     private final TimeService timeService;
     private final ThemeService themeService;
     private final MemberService memberService;
+    private final ClockProvider clockProvider;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             TimeService timeService,
             ThemeService themeService,
-            MemberService memberService
+            MemberService memberService,
+            ClockProvider clockProvider
     ) {
         this.reservationRepository = reservationRepository;
         this.timeService = timeService;
         this.themeService = themeService;
         this.memberService = memberService;
+        this.clockProvider = clockProvider;
     }
 
     @Transactional
-    public ReservationDto registerReservationByUser(UserReservationCreateDto request, Long memberId) {
+    public ReservationDto registerReservationByUser(
+            UserReservationCreateDto request,
+            Long memberId
+    ) {
         return registerReservation(ReservationCreateDto.of(request, memberId));
     }
 
@@ -57,7 +64,8 @@ public class ReservationService {
                 reservationTime,
                 waiting
         );
-        validateNotPast(reservationWithoutId);
+        LocalDateTime now = clockProvider.now();
+        validateNotPast(reservationWithoutId, now);
         Reservation reservation = reservationRepository.save(reservationWithoutId);
         return ReservationDto.from(reservation);
     }
@@ -73,8 +81,8 @@ public class ReservationService {
         }
     }
 
-    private void validateNotPast(Reservation reservation) {
-        if (reservation.isPast()) {
+    private void validateNotPast(Reservation reservation, LocalDateTime now) {
+        if (reservation.isPast(now)) {
             throw new IllegalArgumentException("과거 일시로 예약할 수 없습니다.");
         }
     }

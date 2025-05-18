@@ -67,10 +67,9 @@ public class Reservation {
         return new Reservation(null, member, theme, reservationDate, reservationTime, waiting);
     }
 
-    public boolean isPast() {
-        LocalDateTime now = LocalDateTime.now();
+    public boolean isPast(LocalDateTime comparedDateTime) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        return reservationDateTime.isBefore(now);
+        return reservationDateTime.isBefore(comparedDateTime);
     }
 
     public boolean isDuplicated(Reservation other) {

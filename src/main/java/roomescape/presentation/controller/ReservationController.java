@@ -1,6 +1,7 @@
 package roomescape.presentation.controller;
 
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,7 @@ public class ReservationController {
             @Valid @RequestBody UserReservationCreateDto request,
             @AuthenticatedMemberId MemberIdDto memberIdDto
     ) {
+        LocalDateTime now = LocalDateTime.now();
         ReservationDto reservationDto = service.registerReservationByUser(request, memberIdDto.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
     }

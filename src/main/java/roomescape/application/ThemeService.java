@@ -17,9 +17,11 @@ public class ThemeService {
 
     public static final int RANKING_LIMIT_COUNT = 10;
     private final ThemeRepository themeRepository;
+    private final ClockProvider clockProvider;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ThemeRepository themeRepository, ClockProvider clockProvider) {
         this.themeRepository = themeRepository;
+        this.clockProvider = clockProvider;
     }
 
     public List<ThemeDto> getAllThemes() {
@@ -50,9 +52,9 @@ public class ThemeService {
     }
 
     public List<ThemeDto> getThemeRanking() {
-        LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusWeeks(1);
-        LocalDate endDate = today.minusDays(1);
+        LocalDate now = clockProvider.now().toLocalDate();
+        LocalDate startDate = now.minusWeeks(1);
+        LocalDate endDate = now.minusDays(1);
         List<Theme> themeRanking = themeRepository.findThemeRanking(startDate, endDate, RANKING_LIMIT_COUNT);
         return ThemeDto.from(themeRanking);
     }
