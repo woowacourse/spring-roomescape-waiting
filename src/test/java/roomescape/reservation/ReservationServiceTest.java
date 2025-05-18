@@ -1,15 +1,5 @@
 package roomescape.reservation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,13 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
-import roomescape.exception.custom.reason.reservation.ReservationConflictException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
-import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
-import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
-import roomescape.exception.custom.reason.reservation.ReservationPastTimeException;
+import roomescape.exception.custom.reason.reservation.*;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
@@ -35,6 +19,18 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepository;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static roomescape.util.TestFactory.reservationWithId;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
@@ -72,14 +68,13 @@ public class ReservationServiceTest {
                 new Theme(REQUEST.themeId(), "야당", "야당당", "123"));
         private static final Optional<Member> MEMBER_BY_EMAIL = Optional.of(
                 new Member(1L, LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER));
-        private static final Reservation RESERVATION = new Reservation(
-                1L,
+        private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
                 REQUEST.date(),
                 MEMBER_BY_EMAIL.get(),
                 TIME_BY_ID.get(),
                 THEME_BY_ID.get(),
                 ReservationStatus.PENDING
-        );
+        ));
 
         @BeforeEach
         void setUp() {
@@ -204,14 +199,13 @@ public class ReservationServiceTest {
                 new Theme(REQUEST.themeId(), "야당", "야당당", "123"));
         private static final Optional<Member> MEMBER_BY_ID = Optional.of(
                 new Member(REQUEST.memberId(), "asd@naver.com", "password", "boogie", MemberRole.MEMBER));
-        private static final Reservation RESERVATION = new Reservation(
-                1L,
+        private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
                 REQUEST.date(),
                 MEMBER_BY_ID.get(),
                 TIME_BY_ID.get(),
                 THEME_BY_ID.get(),
                 ReservationStatus.PENDING
-        );
+        ));
 
         @BeforeEach
         void setUp() {
@@ -235,6 +229,7 @@ public class ReservationServiceTest {
         @Test
         void create() {
             // given
+
             // when
             final ReservationResponse response = reservationService.createForAdmin(REQUEST);
 
@@ -344,14 +339,15 @@ public class ReservationServiceTest {
         @Test
         void readAll2() {
             // given
+            Reservation reservation = new Reservation(
+                    LocalDate.of(2024, 1, 1),
+                    new Member(1L, "boogie", "password", "boogie", MemberRole.MEMBER),
+                    new ReservationTime(1L, LocalTime.of(12, 40)),
+                    new Theme(1L, "야당", "야당당", "123"),
+                    ReservationStatus.PENDING
+            );
             given(reservationRepository.findAll())
-                    .willReturn(List.of(new Reservation( 1L,
-                            LocalDate.of(2024, 1, 1),
-                            new Member(1L, "boogie", "password", "boogie", MemberRole.MEMBER),
-                            new ReservationTime(1L, LocalTime.of(12, 40)),
-                            new Theme(1L, "야당", "야당당", "123"),
-                            ReservationStatus.PENDING
-                    )));
+                    .willReturn(List.of(reservationWithId(1L, reservation)));
 
             // when
             final List<ReservationResponse> actual = reservationService.readAll();
@@ -406,8 +402,8 @@ public class ReservationServiceTest {
             given(themeRepository.findById(request.themeId()))
                     .willReturn(Optional.of(theme));
             given(reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, request.from(), request.to())).willReturn(List.of(
-                    new Reservation(1L, LocalDate.of(2024, 6, 15), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING),
-                    new Reservation(2L, LocalDate.of(2024, 7, 20), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING)
+                    reservationWithId(1L, new Reservation(LocalDate.of(2024, 6, 15), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING)),
+                    reservationWithId(2L, new Reservation(LocalDate.of(2024, 7, 20), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING))
             ));
 
             // when

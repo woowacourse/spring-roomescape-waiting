@@ -1,7 +1,6 @@
 package roomescape.reservation;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,6 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Reservation {
@@ -43,6 +41,10 @@ public class Reservation {
             final Theme theme,
             final ReservationStatus reservationStatus
     ) {
-        this(null, date, member, reservationTime, theme, reservationStatus);
+        this.date = date;
+        this.member = member;
+        this.reservationTime = reservationTime;
+        this.theme = theme;
+        this.reservationStatus = reservationStatus;
     }
 }
