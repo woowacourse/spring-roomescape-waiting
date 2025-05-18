@@ -43,6 +43,12 @@ public class ReservationTime {
                 .anyMatch(reservation -> reservation.isAlreadyBookedTime(date, themeId, this.id));
     }
 
+    public void addReservation(Reservation reservation) {
+        if (!reservations.contains(reservation)) {
+            reservations.add(reservation);
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -57,9 +63,10 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof ReservationTime that)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
+        ReservationTime that = (ReservationTime) o;
         return Objects.equals(id, that.id);
     }
 
