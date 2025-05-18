@@ -43,7 +43,7 @@ public class Reservation {
         this.waiting = waiting;
     }
 
-    public Reservation() {
+    private Reservation() {
     }
 
     public static Reservation of(
