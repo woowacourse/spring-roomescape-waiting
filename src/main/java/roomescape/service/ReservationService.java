@@ -61,7 +61,7 @@ public class ReservationService {
         LocalDate startDate = reservationSearchDto.startDate();
         LocalDate endDate = reservationSearchDto.endDate();
 
-        return reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(
+        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
                         themeId,
                         memberId,
                         startDate,
@@ -76,7 +76,7 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
 
         return reservations.stream()
                 .map(MemberReservationResponseDto::new)
