@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -19,6 +20,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public MemberResponse save(final MemberRequest request) {
         boolean emailExist = memberRepository.existsByEmail(new Email(request.email()));
         validateEmailExists(emailExist);

@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.util.time.DateTime;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -38,6 +39,7 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
+    @Transactional
     public void deleteThemeById(final Long id) {
         validateExistIdToDelete(id);
 
