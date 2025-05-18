@@ -42,7 +42,8 @@ public class AdminReservationController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo) {
 
-        SearchConditionsRequest searchConditionsRequest = new SearchConditionsRequest(themeId, memberId, dateFrom, dateTo);
+        SearchConditionsRequest searchConditionsRequest = new SearchConditionsRequest(themeId, memberId, dateFrom,
+                dateTo);
 
         return ResponseEntity.ok()
                 .body(reservationService.getReservationsByConditions(searchConditionsRequest));

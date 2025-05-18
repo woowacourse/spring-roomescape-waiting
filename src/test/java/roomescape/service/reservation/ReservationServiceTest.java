@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
 import roomescape.dto.admin.AdminReservationRequest;
-import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
@@ -34,7 +32,7 @@ import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
 
 @ExtendWith(MockitoExtension.class)
-class ReservationServiceImplTest {
+class ReservationServiceTest {
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -49,7 +47,7 @@ class ReservationServiceImplTest {
     private MemberRepository memberRepository;
 
     @InjectMocks
-    private ReservationServiceImpl reservationService;
+    private ReservationService reservationService;
 
     @DisplayName("예약 시간이 존재하지 않으면 예약을 생성할 수 없다")
     @Test

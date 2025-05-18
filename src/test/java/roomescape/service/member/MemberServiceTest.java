@@ -23,7 +23,7 @@ import roomescape.repository.member.MemberRepository;
 import roomescape.util.JwtTokenProvider;
 
 @ExtendWith(MockitoExtension.class)
-class MemberServiceImplTest {
+class MemberServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
@@ -31,7 +31,7 @@ class MemberServiceImplTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @InjectMocks
-    private MemberServiceImpl memberService;
+    private MemberService memberService;
 
     @Test
     @DisplayName("모든 회원을 조회할 수 있다")
@@ -80,7 +80,7 @@ class MemberServiceImplTest {
     @DisplayName("회원가입 요청으로 새 회원을 추가할 수 있다")
     void addMember_success() {
         // given
-        SignupRequest request = new SignupRequest("email", "pw","슬링키");
+        SignupRequest request = new SignupRequest("email", "pw", "슬링키");
 
         when(memberRepository.save(any())).thenReturn(new Member(10L, "슬링키", "email", "pw", Role.USER));
 

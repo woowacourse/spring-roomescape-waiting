@@ -27,7 +27,7 @@ import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 
 @ExtendWith(MockitoExtension.class)
-class ReservationTimeServiceImplTest {
+class ReservationTimeServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
 
@@ -35,7 +35,7 @@ class ReservationTimeServiceImplTest {
     private ReservationTimeRepository timeRepository;
 
     @InjectMocks
-    private ReservationTimeServiceImpl reservationTimeService;
+    private ReservationTimeService reservationTimeService;
 
     @DisplayName("중복되는 시간은 생성할 수 없다")
     @Test

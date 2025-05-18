@@ -14,18 +14,18 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public WebMvcConfiguration(MemberService memberService,JwtTokenProvider jwtTokenProvider) {
+    public WebMvcConfiguration(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoginMemberArgumentResolver(memberService,jwtTokenProvider));
+        resolvers.add(new LoginMemberArgumentResolver(memberService, jwtTokenProvider));
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AdminInterceptor(memberService,jwtTokenProvider)).addPathPatterns("/admin/**");
+        registry.addInterceptor(new AdminInterceptor(memberService, jwtTokenProvider)).addPathPatterns("/admin/**");
     }
 }
