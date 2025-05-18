@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
@@ -39,29 +40,29 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findReservationsByMemberId(Member member) {
         return reservationRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new NotFoundException("reservations"));
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findReservationsByFilters(
             long themeId,
             long memberId,
             LocalDate dateFrom,
             LocalDate dateTo
     ) {
-        return reservationRepository.findAll().stream()
-            .filter(r -> r.getTheme().getId().equals(themeId))
-            .filter(r -> r.getMember().getId().equals(memberId))
-            .filter(r -> r.getDate().isAfter(dateFrom))
-            .filter(r -> r.getDate().isBefore(dateTo))
-            .toList();
+        return reservationRepository.findReservationsByFilters(themeId, memberId, dateFrom, dateTo)
+                .orElseThrow(() -> new NotFoundException("reservation"));
     }
 
+    @Transactional
     public Reservation addReservationAfterNow(Member member, ReservationRequest request) {
         LocalDate date = request.date();
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
@@ -72,6 +73,7 @@ public class ReservationService {
         return addReservation(member, request);
     }
 
+    @Transactional
     public Reservation addReservation(ReservationRequest request) {
         Member member = memberRepository.findById(request.memberId())
             .orElseThrow(() -> new NotFoundException("member"));
@@ -79,6 +81,7 @@ public class ReservationService {
         return addReservation(member, request);
     }
 
+    @Transactional
     private Reservation addReservation(Member member, ReservationRequest request) {
         validateDuplicateReservation(request);
 
@@ -92,6 +95,7 @@ public class ReservationService {
             new Reservation(member, request.date(), time, theme));
     }
 
+    @Transactional(readOnly = true)
     private void validateDuplicateReservation(ReservationRequest request) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(),
@@ -102,6 +106,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional(readOnly = true)
     private void validateDateTimeAfterNow(LocalDate date, ReservationTime time) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -111,6 +116,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void removeReservation(long id) {
         if (reservationRepository.existsById(id)) {
             throw new NotFoundException("reservation");

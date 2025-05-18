@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ThemeRequest;
 import roomescape.entity.Theme;
 import roomescape.exception.custom.DuplicatedException;
@@ -20,16 +21,19 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findAllThemes() {
         return themeRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findTopReservedThemes() {
         LocalDate today = LocalDate.now();
 
         return themeRepository.findTop10ByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today);
     }
 
+    @Transactional
     public Theme addTheme(ThemeRequest request) {
         validateDuplicateTheme(request);
 
@@ -37,12 +41,14 @@ public class ThemeService {
             new Theme(request.name(), request.description(), request.thumbnail()));
     }
 
+    @Transactional(readOnly = true)
     private void validateDuplicateTheme(ThemeRequest request) {
         if (themeRepository.existsByName(request.name())) {
             throw new DuplicatedException("theme");
         }
     }
 
+    @Transactional
     public void removeTheme(long id) {
         if (!themeRepository.existsById(id)) {
             throw new NotFoundException("theme");

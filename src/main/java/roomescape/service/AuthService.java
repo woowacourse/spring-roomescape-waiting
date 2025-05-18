@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.LoginRequest;
 import roomescape.entity.Member;
 import roomescape.exception.custom.AuthenticatedException;
@@ -21,6 +22,7 @@ public class AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    @Transactional
     public String createToken(LoginRequest request) {
        Member member = memberRepository.findByEmail(request.email())
                .orElseThrow(() -> new NotFoundException("member"));
@@ -35,6 +37,7 @@ public class AuthService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Member findMemberByToken(String token) {
         Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
 
