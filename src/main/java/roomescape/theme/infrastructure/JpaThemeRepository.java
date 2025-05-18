@@ -11,19 +11,14 @@ public interface JpaThemeRepository extends CrudRepository<Theme, Long> {
 
     @Query(value = """
         SELECT
-            count(*) as count,
-            t.id as id,
-            t.name as name,
-            t.description as description,
-            t.thumbnail as thumbnail
-        FROM theme as t
-        LEFT JOIN reservation as r ON t.id = r.theme_id
+            t
+        FROM Theme t
+        LEFT JOIN Reservation r ON r.theme = t
         WHERE r.date >= :start_date AND r.date <= :end_date
-        GROUP BY id, name, description, thumbnail
-        ORDER BY count DESC
-        LIMIT :limit
-        """, nativeQuery = true)
-    List<Theme> findPopularThemes(@Param("start_date") LocalDate start, @Param("end_date") LocalDate end, @Param("limit") int popularCount);
+        GROUP BY t.id, t.name, t.description, t.thumbnail
+        ORDER BY COUNT(r) DESC
+    """)
+    List<Theme> findPopularThemes(@Param("start_date") LocalDate start, @Param("end_date") LocalDate end);
 
     List<Theme> findAll();
 }
