@@ -42,7 +42,7 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
+    public ResponseEntity<ReservationResponse> createReservationByAdmin(
             @RequestBody final ReservationRequest reservationRequest
     ) {
         final ReservationResponse reservationResponse = reservationService.insert(reservationRequest.date(),
