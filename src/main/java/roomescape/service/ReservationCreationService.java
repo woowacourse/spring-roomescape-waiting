@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationPolicy;
@@ -15,6 +16,7 @@ import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationCreationService {
 
     private final ReservationRepository reservationRepository;
@@ -34,6 +36,7 @@ public class ReservationCreationService {
         this.reservationPolicy = reservationPolicy;
     }
 
+    @Transactional
     public ReservationResult create(CreateReservationParam param) {
         ReservationComponents components = loadContext(param);
         Reservation reservation = Reservation.createNew(
@@ -50,6 +53,7 @@ public class ReservationCreationService {
         reservationPolicy.validateReservationAvailable(reservation, existsDuplicateReservation);
     }
 
+    @Transactional
     public ReservationResult createWaiting(CreateReservationParam param) {
         ReservationComponents components = loadContext(param);
         Reservation reservation = Reservation.createWaiting(

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimePolicy;
 import roomescape.domain.repository.ReservationRepository;
@@ -16,6 +17,7 @@ import roomescape.service.result.AvailableReservationTimeResult;
 import roomescape.service.result.ReservationTimeResult;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -29,6 +31,7 @@ public class ReservationTimeService {
         this.reservationTimePolicy = reservationTimePolicy;
     }
 
+    @Transactional
     public ReservationTimeResult create(CreateReservationTimeParam createReservationTimeParam) {
         LocalTime startAt = createReservationTimeParam.startAt();
         reservationTimePolicy.validate(startAt);
@@ -61,6 +64,7 @@ public class ReservationTimeService {
                 )).toList();
     }
 
+    @Transactional
     public void deleteById(Long reservationTimeId) {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new DeletionNotAllowedException("해당 예약 시간에 예약이 존재합니다.");

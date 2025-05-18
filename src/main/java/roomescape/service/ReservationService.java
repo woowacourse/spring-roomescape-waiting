@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.request.LoginMemberInfo;
 import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
@@ -16,6 +17,7 @@ import roomescape.service.result.ReservationWithWaitingResult;
 import roomescape.service.result.WaitingWithRank;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -59,6 +61,7 @@ public class ReservationService {
                 ));
     }
 
+    @Transactional
     public void deleteById(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("reservationId", reservationId));
@@ -72,6 +75,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void cancelWaitingById(Long reservationId, LoginMemberInfo loginMemberInfo) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("reservationId", reservationId));
