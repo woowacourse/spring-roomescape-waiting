@@ -33,7 +33,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
     boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
 
     @Query("SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(rt.id, rt.startAt, "
-            + "CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked) "
+            + "CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked ) "
             + "FROM ReservationTime AS rt "
             + "LEFT JOIN Reservation r ON rt.id = r.time.id AND r.date = :date AND r.theme.id = :themeId "
             + "ORDER BY rt.startAt")

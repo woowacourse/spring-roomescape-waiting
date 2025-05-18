@@ -23,8 +23,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.global.auth.dto.CheckLoginResponse;
 import roomescape.global.auth.dto.LoginRequest;
-import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.dto.request.SignupRequest;
+import roomescape.member.dto.response.MemberResponse;
 import roomescape.reservation.controller.ReservationController;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.response.MyReservationResponse;
@@ -117,8 +117,9 @@ public class MissionStepTest {
             createReservationTime();
             createTheme("추리");
 
-            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                    futureDate, "1", "1", "1");
+            jdbcTemplate.update(
+                    "INSERT INTO reservation (date, time_id, theme_id, member_id, reservation_status) VALUES (?, ?, ?, ?, ?)",
+                    futureDate, "1", "1", "1", ReservationStatus.RESERVED.name());
 
             RestAssured.given().log().all()
                     .when().get("/reservations")

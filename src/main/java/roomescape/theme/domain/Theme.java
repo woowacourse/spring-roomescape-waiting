@@ -14,10 +14,13 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(nullable = false)
     private String description;
+
+    @Column(nullable = false)
     private String thumbnail;
 
     public Theme(final String name, final String description, final String thumbnail) {
