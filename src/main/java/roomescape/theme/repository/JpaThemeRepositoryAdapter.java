@@ -3,6 +3,7 @@ package roomescape.theme.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 
@@ -15,8 +16,9 @@ public class JpaThemeRepositoryAdapter implements ThemeRepository {
         this.jpaThemeRepository = jpaThemeRepository;
     }
 
-    public List<Theme> findTop10PopularThemesWithinLastWeek(LocalDate fromDate, LocalDate toDate) {
-        return jpaThemeRepository.findTop10PopularThemesWithinLastWeek(fromDate, toDate);
+    public List<Theme> findTop10PopularThemesWithinLastWeek(LocalDate fromDate, LocalDate toDate,
+                                                            final Pageable pageable) {
+        return jpaThemeRepository.findPopularThemesWithinDateRange(fromDate, toDate, pageable);
     }
 
     public List<Theme> findAll() {
@@ -32,7 +34,7 @@ public class JpaThemeRepositoryAdapter implements ThemeRepository {
         return jpaThemeRepository.save(theme);
     }
 
-    public Optional<Theme> findById(Long id){
+    public Optional<Theme> findById(Long id) {
         return jpaThemeRepository.findById(id);
     }
 }

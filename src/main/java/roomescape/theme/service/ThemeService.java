@@ -2,18 +2,22 @@ package roomescape.theme.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.repository.JpaThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
+
+    private static final int DEFAULT_POPULAR_SIZE = 10;
+    private static final int POPULAR_START_DAYS = 7;
+    private static final int POPULAR_END_DAYS = 1;
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
@@ -43,7 +47,10 @@ public class ThemeService {
 
     public List<ThemeResponse> getPopularThemes() {
         final LocalDate date = LocalDate.now();
-        return themeRepository.findTop10PopularThemesWithinLastWeek(date.minusDays(7), date.minusDays(1)).stream()
+        Pageable pageable = PageRequest.of(0, DEFAULT_POPULAR_SIZE);
+        return themeRepository.findTop10PopularThemesWithinLastWeek(date.minusDays(POPULAR_START_DAYS),
+                        date.minusDays(POPULAR_END_DAYS), pageable)
+                .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
