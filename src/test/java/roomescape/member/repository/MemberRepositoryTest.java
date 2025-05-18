@@ -12,7 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.fixture.TestFixture;
+import roomescape.fixture.TestFixture;
 
 @DataJpaTest
 @Import(TestConfig.class)

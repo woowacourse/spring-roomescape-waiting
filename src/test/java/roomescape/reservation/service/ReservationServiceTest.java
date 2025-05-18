@@ -19,7 +19,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.fixture.TestFixture;
+import roomescape.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;

@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
-import roomescape.reservation.fixture.TestFixture;
+import roomescape.fixture.TestFixture;
 import roomescape.reservationtime.domain.ReservationTime;
 
 @DataJpaTest

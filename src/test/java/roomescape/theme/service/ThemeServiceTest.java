@@ -20,7 +20,7 @@ import roomescape.member.dto.request.SignupRequest;
 import roomescape.member.dto.response.SignUpResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.fixture.TestFixture;
+import roomescape.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;

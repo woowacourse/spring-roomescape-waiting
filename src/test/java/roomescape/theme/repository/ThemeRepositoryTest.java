@@ -15,7 +15,7 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.fixture.TestFixture;
+import roomescape.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;

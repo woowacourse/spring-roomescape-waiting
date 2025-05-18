@@ -16,7 +16,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.fixture.TestFixture;
+import roomescape.fixture.TestFixture;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import roomescape.reservation.exception.InvalidReservationException;
-import roomescape.reservation.fixture.TestFixture;
+import roomescape.fixture.TestFixture;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
