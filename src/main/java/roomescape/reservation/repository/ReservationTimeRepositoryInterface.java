@@ -6,6 +6,7 @@ import java.util.Optional;
 import roomescape.reservation.domain.ReservationTime;
 
 public interface ReservationTimeRepositoryInterface {
+
     ReservationTime save(ReservationTime reservationTime);
 
     Optional<ReservationTime> findById(Long id);

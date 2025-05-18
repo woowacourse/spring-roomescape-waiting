@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 
@@ -19,7 +19,7 @@ public class ThemeService {
     private static final int POPULAR_THEME_LIMIT = 10;
 
     private final ThemeRepositoryInterface themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepositoryInterface reservationRepository;
 
     public Theme save(final String name, final String description, final String thumbnail) {
         if (themeRepository.existsByName(name)) {

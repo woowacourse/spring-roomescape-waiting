@@ -9,26 +9,27 @@ import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.theme.domain.Theme;
 
-public class FakeReservationRepository implements ReservationRepository {
+public class FakeReservationRepository implements ReservationRepositoryInterface {
 
     private final Map<Long, Reservation> reservations = new HashMap<>();
 
     private long sequence = 0;
 
     @Override
-    public <S extends Reservation> S save(final S entity) {
+    public Reservation save(final Reservation reservation) {
         sequence++;
-        Reservation reservation = new Reservation(
+        Reservation newReservation = new Reservation(
                 sequence,
-                entity.getMember(),
-                entity.getTheme(),
-                entity.getDate(),
-                entity.getTime());
-        reservations.put(sequence, reservation);
-        return (S) reservation;
+                reservation.getMember(),
+                reservation.getTheme(),
+                reservation.getDate(),
+                reservation.getTime()
+        );
+        reservations.put(sequence, newReservation);
+        return newReservation;
     }
 
     @Override
@@ -44,22 +45,6 @@ public class FakeReservationRepository implements ReservationRepository {
                 )
                 .map(Reservation::getTheme)
                 .distinct()
-                .toList();
-    }
-
-    @Override
-    public List<Reservation> findByThemeAndMemberAndDateBetween(
-            final Theme theme,
-            final Member member,
-            final LocalDate dateFrom,
-            final LocalDate dateTo) {
-        return reservations.values().stream()
-                .filter(reservation ->
-                        reservation.getTheme().equals(theme) &&
-                                reservation.getMember().equals(member) &&
-                                !reservation.getDate().isBefore(dateFrom) &&
-                                !reservation.getDate().isAfter(dateTo)
-                )
                 .toList();
     }
 
@@ -96,45 +81,5 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.values().stream()
                 .filter(reservation -> reservation.getMember().equals(member))
                 .toList();
-    }
-
-    @Override
-    public <S extends Reservation> Iterable<S> saveAll(Iterable<S> entities) {
-        return null;
-    }
-
-    @Override
-    public boolean existsById(Long aLong) {
-        return false;
-    }
-
-    @Override
-    public Iterable<Reservation> findAllById(Iterable<Long> longs) {
-        return null;
-    }
-
-    @Override
-    public long count() {
-        return 0;
-    }
-
-    @Override
-    public void delete(Reservation entity) {
-
-    }
-
-    @Override
-    public void deleteAllById(Iterable<? extends Long> longs) {
-
-    }
-
-    @Override
-    public void deleteAll(Iterable<? extends Reservation> entities) {
-
-    }
-
-    @Override
-    public void deleteAll() {
-
     }
 }

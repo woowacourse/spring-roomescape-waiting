@@ -18,7 +18,7 @@ import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.AvailableReservationTime;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ReservationServiceTest {
 
-    private final ReservationRepository reservationRepository = new FakeReservationRepository();
+    private final ReservationRepositoryInterface reservationRepository = new FakeReservationRepository();
     private final ReservationTimeRepositoryInterface reservationTimeRepository = new FakeReservationTimeRepository();
     private final ThemeRepositoryInterface themeRepository = new FakeThemeRepository();
     private final MemberRepositoryInterface memberRepository = new FakeMemberRepository();

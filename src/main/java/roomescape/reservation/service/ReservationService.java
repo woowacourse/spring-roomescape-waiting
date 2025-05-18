@@ -13,7 +13,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.AvailableReservationTime;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
@@ -22,7 +22,7 @@ import roomescape.theme.repository.ThemeRepositoryInterface;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepositoryInterface reservationRepository;
     private final ReservationTimeRepositoryInterface reservationTimeRepository;
     private final ThemeRepositoryInterface themeRepository;
 
