@@ -64,6 +64,18 @@ class ReservationRestControllerTest {
     }
 
     @Test
+    void 예약_추가_시_토큰이_존재하지_않는_경우_401을_반환한다() {
+        final Map<String, String> reservationParams = reservationParams1();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
     void 로그인_상태가_아니면_예약을_추가할_수_없다() {
         final Map<String, String> reservationParams = reservationParams1();
 
