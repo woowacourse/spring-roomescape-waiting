@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationRepository;
 
-@Primary
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>, ReservationRepository {
 
     @Query("""
