@@ -26,9 +26,10 @@ public class AuthRoleCheckInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        final RequiresRole requiresRole = handlerMethod.getMethodAnnotation(RequiresRole.class);
+        RequiresRole requiresRole;
 
-        if (requiresRole == null) {
+        if ((requiresRole = handlerMethod.getMethodAnnotation(RequiresRole.class)) == null
+                && (requiresRole = handlerMethod.getBeanType().getAnnotation(RequiresRole.class)) == null) {
             return true;
         }
 
