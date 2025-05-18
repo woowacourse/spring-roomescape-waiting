@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationFacadeImplTransactionTest {
+class ReservationFacadeImplTest {
 
     @Autowired
     private ReservationFacade reservationFacade;
@@ -85,8 +85,8 @@ class ReservationFacadeImplTransactionTest {
     }
 
     @Test
-    @DisplayName("예약 생성이 하나의 트랜잭션으로 성공적으로 처리된다")
-    void createReservationSuccessfully() {
+    @DisplayName("예약 생성을 성공적으로 처리된다")
+    void create() {
         // given
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
@@ -112,7 +112,7 @@ class ReservationFacadeImplTransactionTest {
 
     @Test
     @DisplayName("존재하지 않는 사용자 ID로 예약 생성 시도 시 예외가 발생된다")
-    void createReservationWithNonExistentUserId() {
+    void createWithNonExistentUserId() {
         // given
         final Long nonExistentUserId = 9999L;
 
@@ -160,7 +160,7 @@ class ReservationFacadeImplTransactionTest {
 
     @Test
     @DisplayName("예약 삭제가 성공적으로 처리된다")
-    void deleteReservationSuccessfully() {
+    void delete() {
         // given
         Reservation reservation = reservationRepository.save(
                 Reservation.withoutId(
