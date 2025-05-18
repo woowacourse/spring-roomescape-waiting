@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.controller.request.SignUpRequest;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.domain.Email;
@@ -30,6 +31,7 @@ public class MemberService {
         return memberRepository.save(new Member(name, email, password, Role.MEMBER));
     }
 
+    @Transactional(readOnly = true)
     public Member findById(Long id) {
         Optional<Member> member = memberRepository.findById(id);
         if (member.isPresent()) {
@@ -38,6 +40,7 @@ public class MemberService {
         throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
     }
 
+    @Transactional(readOnly = true)
     public Member findByName(String name) {
         Optional<Member> member = memberRepository.findByName(new Name(name));
         if (member.isPresent()) {
@@ -46,6 +49,7 @@ public class MemberService {
         throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)

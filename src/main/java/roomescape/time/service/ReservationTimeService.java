@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.controller.request.AvailableReservationTimeRequest;
@@ -25,6 +26,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeCreateRequest request) {
         LocalTime startAt = request.startAt();
         if (reservationTimeJpaRepository.existsByStartAt(startAt)) {
@@ -37,12 +39,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(created);
     }
 
-    public List<ReservationTimeResponse> getAll() {
-        List<ReservationTime> reservationTimes = reservationTimeJpaRepository.findAll();
-
-        return ReservationTimeResponse.from(reservationTimes);
-    }
-
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByReservationTimeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
@@ -52,11 +49,20 @@ public class ReservationTimeService {
         reservationTimeJpaRepository.deleteById(reservationTime.getId());
     }
 
+    @Transactional(readOnly = true)
+    public List<ReservationTimeResponse> getAll() {
+        List<ReservationTime> reservationTimes = reservationTimeJpaRepository.findAll();
+
+        return ReservationTimeResponse.from(reservationTimes);
+    }
+
+    @Transactional(readOnly = true)
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeJpaRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
         return reservationTimeJpaRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),

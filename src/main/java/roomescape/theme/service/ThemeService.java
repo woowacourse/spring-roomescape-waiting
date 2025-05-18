@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
@@ -24,6 +25,14 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
+    public ThemeResponse create(ThemeCreateRequest request) {
+        Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
+        Theme savedTheme = themeJpaRepository.save(theme);
+        return ThemeResponse.from(savedTheme);
+    }
+
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
@@ -32,22 +41,19 @@ public class ThemeService {
         themeJpaRepository.deleteById(theme.getId());
     }
 
-    public ThemeResponse create(ThemeCreateRequest request) {
-        Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
-        Theme savedTheme = themeJpaRepository.save(theme);
-        return ThemeResponse.from(savedTheme);
-    }
-
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getAll() {
         List<Theme> themes = themeJpaRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
+    @Transactional(readOnly = true)
     public Theme getTheme(Long id) {
         return themeJpaRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes() {
         LocalDate endDate = LocalDate.now().minusDays(1L);
         LocalDate startDate = LocalDate.now().minusDays(7L);

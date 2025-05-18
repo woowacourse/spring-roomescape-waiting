@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
@@ -36,12 +37,7 @@ public class ReservationService {
         this.memberService = memberService;
     }
 
-    public List<ReservationResponse> getAll() {
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        return ReservationResponse.from(reservations);
-    }
-
+    @Transactional
     public ReservationResponse create(Long memberId, ReservationRequest request) {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
@@ -54,6 +50,7 @@ public class ReservationService {
         return createReservation(request, reservationDate, member);
     }
 
+    @Transactional
     public ReservationResponse createByName(String name, ReservationRequest request) {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
@@ -66,11 +63,20 @@ public class ReservationService {
         return createReservation(request, reservationDate, member);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         Reservation reservation = getReservation(id);
         reservationRepository.deleteById(reservation.getId());
     }
 
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getAll() {
+        List<Reservation> reservations = reservationRepository.findAll();
+
+        return ReservationResponse.from(reservations);
+    }
+
+    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate start, LocalDate end) {
         return ReservationResponse.from(
                 reservationRepository.findByFilter(
@@ -79,15 +85,16 @@ public class ReservationService {
         );
     }
 
-    private Reservation getReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다."));
-    }
-
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllByMemberId(Long id) {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
+    }
+
+    private Reservation getReservation(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다."));
     }
 
     private ReservationResponse createReservation(ReservationRequest request, ReservationDate reservationDate,
