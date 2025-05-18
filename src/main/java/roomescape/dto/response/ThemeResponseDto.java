@@ -8,8 +8,8 @@ public record ThemeResponseDto(
         String description,
         String thumbnail
 ) {
-    public static ThemeResponseDto from(Theme theme) {
-        return new ThemeResponseDto(
+    public ThemeResponseDto(Theme theme) {
+        this(
                 theme.getId(),
                 theme.getName(),
                 theme.getDescription(),

@@ -8,8 +8,8 @@ public record AvailableReservationTimeResponseDto(
         LocalTime startAt,
         boolean alreadyBooked
 ) {
-    public static AvailableReservationTimeResponseDto from(ReservationTime reservationTime, boolean alreadyBooked) {
-        return new AvailableReservationTimeResponseDto(
+    public AvailableReservationTimeResponseDto(ReservationTime reservationTime, boolean alreadyBooked) {
+        this(
                 reservationTime.getId(),
                 reservationTime.getStartAt(),
                 alreadyBooked

@@ -1,10 +1,7 @@
 package roomescape.dto.response;
 
 import java.time.LocalDate;
-import roomescape.model.Member;
 import roomescape.model.Reservation;
-import roomescape.model.ReservationTime;
-import roomescape.model.Theme;
 
 public record ReservationResponseDto(
         Long id,
@@ -14,18 +11,13 @@ public record ReservationResponseDto(
         ThemeResponseDto theme
 ) {
 
-    public static ReservationResponseDto from(Reservation reservationInfo) {
-        ReservationTime timeInfo = reservationInfo.getReservationTime();
-        Theme themeInfo = reservationInfo.getTheme();
-        Member member = reservationInfo.getMember();
-
-        return new ReservationResponseDto(
+    public ReservationResponseDto(Reservation reservationInfo) {
+        this(
                 reservationInfo.getId(),
-                new MemberResponseDto(member),
+                new MemberResponseDto(reservationInfo.getMember()),
                 reservationInfo.getDate(),
-                new ReservationTimeResponseDto(timeInfo.getId(), timeInfo.getStartAt()),
-                new ThemeResponseDto(themeInfo.getId(), themeInfo.getName(), themeInfo.getDescription(),
-                        themeInfo.getThumbnail())
+                new ReservationTimeResponseDto(reservationInfo.getReservationTime()),
+                new ThemeResponseDto(reservationInfo.getTheme())
         );
     }
 }

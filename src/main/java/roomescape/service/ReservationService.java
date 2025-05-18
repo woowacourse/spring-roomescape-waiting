@@ -43,12 +43,12 @@ public class ReservationService {
         assertReservationIsNotDuplicated(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponseDto.from(savedReservation);
+        return new ReservationResponseDto(savedReservation);
     }
 
     public List<ReservationResponseDto> getAllReservations() {
         return reservationRepository.findAll().stream()
-                .map(ReservationResponseDto::from)
+                .map(ReservationResponseDto::new)
                 .toList();
     }
 
@@ -63,7 +63,7 @@ public class ReservationService {
                         memberId,
                         startDate,
                         endDate).stream()
-                .map(ReservationResponseDto::from)
+                .map(ReservationResponseDto::new)
                 .toList();
     }
 

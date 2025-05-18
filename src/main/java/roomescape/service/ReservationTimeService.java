@@ -30,7 +30,7 @@ public class ReservationTimeService {
     public List<ReservationTimeResponseDto> getAllTimes() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
-        return reservationTimes.stream().map(ReservationTimeResponseDto::from).toList();
+        return reservationTimes.stream().map(ReservationTimeResponseDto::new).toList();
     }
 
     public ReservationTimeResponseDto saveTime(ReservationTimeRegisterDto reservationTimeRegisterDto) {
@@ -82,7 +82,7 @@ public class ReservationTimeService {
     private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
             List<ReservationTime> reservationTimes) {
         return new java.util.ArrayList<>(reservationTimes.stream()
-                .map(reservationTime -> AvailableReservationTimeResponseDto.from(
+                .map(reservationTime -> new AvailableReservationTimeResponseDto(
                         reservationTime,
                         false))
                 .toList());
@@ -91,7 +91,7 @@ public class ReservationTimeService {
     private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
             Set<ReservationTime> nonDuplicatedReservationTimes) {
         return nonDuplicatedReservationTimes.stream()
-                .map(reservationTime -> AvailableReservationTimeResponseDto.from(
+                .map(reservationTime -> new AvailableReservationTimeResponseDto(
                         reservationTime,
                         true))
                 .toList();
