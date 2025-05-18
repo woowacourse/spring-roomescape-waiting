@@ -54,6 +54,7 @@ public class ThemeService {
     public void deleteTheme(Long id) {
         try {
             themeRepository.deleteById(id);
+            themeRepository.flush();
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("예약이 존재하는 테마는 삭제할 수 없습니다.");
         } catch (EmptyResultDataAccessException e) {
