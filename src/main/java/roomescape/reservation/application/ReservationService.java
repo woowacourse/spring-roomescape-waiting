@@ -46,8 +46,17 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAll() {
-        final List<Reservation> reservations = reservationRepository.findAllWithAssociations();
+    public List<ReservationResponse> findReservedReservations() {
+        final List<Reservation> reservations = reservationRepository.findByStatusWithAssociations(
+                BookingStatus.RESERVED);
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> findWaitingReservations() {
+        final List<Reservation> reservations = reservationRepository.findByStatusWithAssociations(
+                BookingStatus.WAITING);
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -120,7 +129,7 @@ public class ReservationService {
             final LocalDate end
     ) {
         final List<Reservation> reservations = reservationRepository
-                .findByFilteringWithAssociations(themeId, memberId, start, end);
+                .findByFilteringWithAssociations(themeId, memberId, start, end, BookingStatus.RESERVED);
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();

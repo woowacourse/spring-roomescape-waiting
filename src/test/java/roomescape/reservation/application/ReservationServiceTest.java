@@ -32,7 +32,7 @@ class ReservationServiceTest {
         // given
 
         // when & then
-        assertThat(reservationService.findAll()).hasSize(6);
+        assertThat(reservationService.findReservedReservations()).hasSize(6);
     }
 
     @Test

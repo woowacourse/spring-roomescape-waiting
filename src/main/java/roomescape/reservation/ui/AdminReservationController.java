@@ -28,8 +28,13 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        return ResponseEntity.ok(reservationService.findAll());
+    public ResponseEntity<List<ReservationResponse>> findAllReserved() {
+        return ResponseEntity.ok(reservationService.findReservedReservations());
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
+        return ResponseEntity.ok(reservationService.findWaitingReservations());
     }
 
     @PostMapping

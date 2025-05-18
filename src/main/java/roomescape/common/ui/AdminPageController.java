@@ -27,4 +27,9 @@ public class AdminPageController {
     public String adminThemeDashboard() {
         return "admin/theme";
     }
+
+    @GetMapping("/reservation/waiting")
+    public String adminReservationWaitingDashboard() {
+        return "admin/waiting";
+    }
 }

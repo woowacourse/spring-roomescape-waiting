@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -36,12 +37,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
               AND (:memberId IS NULL OR r.member.id = :memberId)
               AND (:from IS NULL OR r.date >= :from)
               AND (:to IS NULL OR r.date <= :to)
+              AND (:status IS NULL OR r.bookingStatus = :status)
             """)
     List<Reservation> findByFilteringWithAssociations(
             @Param("themeId") Long themeId,
             @Param("memberId") Long memberId,
             @Param("from") LocalDate from,
-            @Param("to") LocalDate to
+            @Param("to") LocalDate to,
+            @Param("status") BookingStatus status
     );
 
     @Query("""
@@ -51,7 +54,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.member.id = :memberId
             """)
     List<Reservation> findByMemberIdWithAssociations(@Param("memberId") Long memberId);
-    
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            JOIN FETCH r.member
+            WHERE r.bookingStatus = :status
+            """)
+    List<Reservation> findByStatusWithAssociations(@Param("status") BookingStatus status);
+
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);

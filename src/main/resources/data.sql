@@ -52,3 +52,8 @@ INSERT INTO reservation (date, time_id, theme_id, member_id, status)
 VALUES (DATEADD('DAY', +3, CURRENT_DATE), 2, 2, 1, 'RESERVED');
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
 VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 2, 'RESERVED');
+
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', +3, CURRENT_DATE), 2, 2, 3, 'WAITING');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 3, 'WAITING');
