@@ -82,5 +82,46 @@ class AdminReservationApiTest {
                 .statusCode(404);
     }
 
+    @Test
+    void 예약을_성공적으로_삭제한다() {
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+    }
 
+    @Test
+    void 인증되지_않은_사용자가_관리자_예약_페이지_접근시_401_반환() {
+        RestAssured.given().log().all()
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(401);
+    }
+
+    @Test
+    void 예약_상태를_RESERVED로_변경한다() {
+        // 기존 확정된 예약은 8개
+        // 예약대기를 확정으로 바꾸면, 확정된 예약은 9개
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(8));
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().put("/admin/reservations/waiting/11")
+                .then().log().all()
+                .statusCode(200);
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(9));
+    }
 }
