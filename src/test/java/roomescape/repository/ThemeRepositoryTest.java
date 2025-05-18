@@ -1,12 +1,11 @@
 package roomescape.repository;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +43,6 @@ class ThemeRepositoryTest {
 
         Member member = new Member("도기", "ff@gmail.com", "password", Role.ADMIN);
         entityManager.persist(member);
-
-        entityManager.flush();
-        entityManager.clear();
 
         Reservation reservation = new Reservation(LocalDate.now().minusDays(1), reservationTime, theme, member,
                 LocalDate.now().minusDays(3
