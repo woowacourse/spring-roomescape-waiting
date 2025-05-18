@@ -14,17 +14,18 @@ public class AuthService {
 
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
 
     public String generateToken(final LoginRequest loginRequest) {
-        final Member memberByEmail = memberRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new AuthNotExistsEmailException());
-        validatePassword(loginRequest, memberByEmail);
+        final Member member = memberRepository.findByEmail(loginRequest.email())
+                .orElseThrow(AuthNotExistsEmailException::new);
+        validatePassword(loginRequest, member);
 
-        return jwtProvider.provideToken(memberByEmail.getEmail(), memberByEmail.getRole(), memberByEmail.getName());
+        return jwtProvider.provideToken(member.getEmail(), member.getRole(), member.getName());
     }
 
-    private void validatePassword(final LoginRequest loginRequest, final Member memberByEmail) {
-        if (!memberByEmail.matchesPassword(loginRequest.password())) {
+    private void validatePassword(final LoginRequest loginRequest, final Member member) {
+        if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
             throw new AuthNotValidPasswordException();
         }
     }
