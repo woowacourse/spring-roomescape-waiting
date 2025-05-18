@@ -14,10 +14,11 @@ public class FakeMemberRepository implements MemberRepository {
     private final List<Member> members = new ArrayList<>();
 
     @Override
-    public long add(Member member) {
+    public Member save(Member member) {
         long id = index.getAndIncrement();
-        members.add(Member.of(id, member));
-        return id;
+        Member createdMember = Member.of(id, member);
+        members.add(createdMember);
+        return createdMember;
     }
 
     @Override
@@ -35,7 +36,7 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
-    public boolean existByUsername(String username) {
+    public boolean existsByUsername(String username) {
         return members.stream()
                 .anyMatch(((member) -> member.isSameUsername(username)));
     }

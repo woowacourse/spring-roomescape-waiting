@@ -41,7 +41,7 @@ public class MemberService {
 
     @Transactional
     public long signup(SignupRequestDto signupRequestDto) {
-        boolean isDuplicateUserExist = memberRepository.existByUsername(signupRequestDto.email());
+        boolean isDuplicateUserExist = memberRepository.existsByUsername(signupRequestDto.email());
         if (isDuplicateUserExist) {
             throw new InvalidMemberException("이미 존재하는 유저입니다.");
         }
@@ -49,10 +49,10 @@ public class MemberService {
         Member member = signupRequestDto.toEntity();
         String encodedPassword = passwordEncoder.encode(member.getPassword());
         Member newMember = new Member(null, member.getUsername(), encodedPassword, member.getName(), member.getRole());
-        return memberRepository.add(newMember);
+        return memberRepository.save(newMember).getId();
     }
 
-    public Member getMemberById(long id) {
+    public Member getMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> new InvalidMemberException("존재하지 않는 유저입니다"));
     }
 
