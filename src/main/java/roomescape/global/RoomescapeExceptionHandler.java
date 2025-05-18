@@ -28,7 +28,7 @@ public class RoomescapeExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handelException(Exception e) {
+    public ResponseEntity<String> handleException(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("[ERROR] 잠시 후 시도해 주세요.");
     }
 }
