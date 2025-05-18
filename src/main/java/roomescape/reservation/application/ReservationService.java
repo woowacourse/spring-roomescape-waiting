@@ -17,11 +17,13 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ReservationTimeRepository;
+import roomescape.reservation.ui.dto.request.AdminCreateReservationRequest;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
+import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
 import roomescape.reservation.ui.dto.request.ReservationsByfilterRequest;
+import roomescape.reservation.ui.dto.response.AdminReservationResponse;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.ui.dto.response.ReservationResponse;
+import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -37,14 +39,14 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ReservationResponse createForAdmin(final CreateReservationRequest.ForAdmin request) {
+    public AdminReservationResponse createForAdmin(final AdminCreateReservationRequest request) {
         return registerReservation(request.date(), request.timeId(), request.themeId(), request.memberId(),
                 request.status());
     }
 
     @Transactional
-    public ReservationResponse createForMember(
-            final CreateReservationRequest.ForMember request,
+    public AdminReservationResponse createForMember(
+            final MemberCreateReservationRequest request,
             final Long memberId
     ) {
         return registerReservation(request.date(), request.timeId(), request.themeId(), memberId,
@@ -69,15 +71,15 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAll() {
+    public List<AdminReservationResponse> findAll() {
         return reservationRepository.findAll()
                 .stream()
-                .map(ReservationResponse::from)
+                .map(AdminReservationResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> findAllByFilter(final ReservationsByfilterRequest request) {
+    public List<AdminReservationResponse> findAllByFilter(final ReservationsByfilterRequest request) {
         if (request.dateFrom().isAfter(request.dateTo())) {
             throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
         }
@@ -86,7 +88,7 @@ public class ReservationService {
                         request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
                 )
                 .stream()
-                .map(ReservationResponse::from)
+                .map(AdminReservationResponse::from)
                 .toList();
     }
 
@@ -114,14 +116,14 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse.ForMember> findReservationsByMemberId(final Long memberId) {
+    public List<MemberReservationResponse> findReservationsByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(ReservationResponse.ForMember::from)
+                .map(MemberReservationResponse::from)
                 .toList();
     }
 
-    private ReservationResponse registerReservation(final LocalDate date, final Long timeId, final Long themeId,
-                                                    final Long memberId, final BookingState state) {
+    private AdminReservationResponse registerReservation(final LocalDate date, final Long timeId, final Long themeId,
+                                                         final Long memberId, final BookingState state) {
         validateNoDuplicateReservation(date, timeId, themeId);
         final ReservationTime time = reservationTimeRepository.getByIdOrThrow(timeId);
         final Theme theme = themeRepository.getByIdOrThrow(themeId);
@@ -130,7 +132,7 @@ public class ReservationService {
 
         final Reservation saved = reservationRepository.save(reservation);
 
-        return ReservationResponse.from(saved);
+        return AdminReservationResponse.from(saved);
     }
 
     private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {

@@ -15,7 +15,6 @@ import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -88,42 +87,6 @@ class ReservationRestControllerTest {
     }
 
     @Test
-    void 예약을_삭제한다() {
-        final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
-        final Map<String, String> reservationParams = reservationParams1();
-
-        final Integer reservationId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(memberCookies)
-                .body(reservationParams)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.CREATED.value())
-                .extract().path("id");
-
-        RestAssured.given().log().all()
-                .cookies(adminCookies)
-                .when().get("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .body("size()", is(1));
-
-        RestAssured.given().log().all()
-                .cookies(adminCookies)
-                .when().delete("/reservations/{id}", reservationId)
-                .then().log().all()
-                .statusCode(HttpStatus.NO_CONTENT.value());
-
-        RestAssured.given().log().all()
-                .cookies(adminCookies)
-                .when().get("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .body("size()", is(0));
-    }
-
-    @Test
     void 삭제할_예약이_없는_경우_not_found를_반환한다() {
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
 
@@ -133,39 +96,6 @@ class ReservationRestControllerTest {
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value());
-    }
-
-    @Test
-    void 예약_목록을_조회한다() {
-        final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> reservationParams = reservationParams1();
-
-        final int sizeBeforeCreate = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(adminCookies)
-                .when().get("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .extract().path("size()");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(adminCookies)
-                .body(reservationParams)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.CREATED.value());
-
-        final int sizeAfterCreate = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(adminCookies)
-                .when().get("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .extract()
-                .path("size()");
-
-        Assertions.assertThat(sizeAfterCreate).isEqualTo(sizeBeforeCreate + 1);
     }
 
     @Test

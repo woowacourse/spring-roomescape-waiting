@@ -33,9 +33,9 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
+import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.ui.dto.response.ReservationResponse.ForMember;
+import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -66,7 +66,7 @@ class ReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, time.getId(),
+        final MemberCreateReservationRequest request = new MemberCreateReservationRequest(date, time.getId(),
                 theme.getId());
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
@@ -215,7 +215,7 @@ class ReservationServiceTest {
         reservationRepository.save(
                 Reservation.createForRegister(date, time, theme, member, BookingState.CONFIRMED));
 
-        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, time.getId(),
+        final MemberCreateReservationRequest request = new MemberCreateReservationRequest(date, time.getId(),
                 theme.getId());
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
@@ -233,7 +233,7 @@ class ReservationServiceTest {
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
-        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, time.getId(),
+        final MemberCreateReservationRequest request = new MemberCreateReservationRequest(date, time.getId(),
                 theme.getId());
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
@@ -268,16 +268,18 @@ class ReservationServiceTest {
         );
 
         // when
-        final List<ForMember> founds = reservationService.findReservationsByMemberId(member.getId());
+        final List<MemberReservationResponse> founds = reservationService.findReservationsByMemberId(member.getId());
 
         // then
         assertAll(
                 () -> assertThat(founds).hasSize(2),
                 () -> assertThat(founds)
                         .containsExactlyInAnyOrder(
-                                new ForMember(saved1.getId(), "테마1", LocalDate.now().plusDays(1), LocalTime.of(10, 0),
+                                new MemberReservationResponse(saved1.getId(), "테마1", LocalDate.now().plusDays(1),
+                                        LocalTime.of(10, 0),
                                         "대기"),
-                                new ForMember(saved2.getId(), "테마2", LocalDate.now().plusDays(2), LocalTime.of(11, 0),
+                                new MemberReservationResponse(saved2.getId(), "테마2", LocalDate.now().plusDays(2),
+                                        LocalTime.of(11, 0),
                                         "대기")
                         )
         );

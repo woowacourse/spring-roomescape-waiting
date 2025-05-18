@@ -21,11 +21,11 @@ import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
-import roomescape.reservation.ui.dto.request.ReservationsByfilterRequest;
+import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
+import roomescape.reservation.ui.dto.response.AdminReservationResponse;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.BookingStateResponse;
-import roomescape.reservation.ui.dto.response.ReservationResponse;
+import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,19 +33,10 @@ public class ReservationRestController {
 
     private final ReservationService reservationService;
 
-    @PostMapping("/admin/reservations")
-    @RequiresRole(authRoles = {ADMIN})
-    public ResponseEntity<ReservationResponse> create(
-            @RequestBody @Valid final CreateReservationRequest.ForAdmin request
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(reservationService.createForAdmin(request));
-    }
-
     @PostMapping("/reservations")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<ReservationResponse> create(
-            @RequestBody @Valid final CreateReservationRequest.ForMember request,
+    public ResponseEntity<AdminReservationResponse> create(
+            @RequestBody @Valid final MemberCreateReservationRequest request,
             final MemberAuthInfo memberAuthInfo
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -63,29 +54,11 @@ public class ReservationRestController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/admin/reservations")
-    @RequiresRole(authRoles = {ADMIN})
-    public ResponseEntity<List<ReservationResponse>> findAll() {
-        final List<ReservationResponse> reservationResponses = reservationService.findAll();
-
-        return ResponseEntity.ok(reservationResponses);
-    }
-
     @GetMapping("/reservations-mine")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<ReservationResponse.ForMember>> myReservations(final MemberAuthInfo memberAuthInfo) {
+    public ResponseEntity<List<MemberReservationResponse>> myReservations(final MemberAuthInfo memberAuthInfo) {
         return ResponseEntity.ok()
                 .body(reservationService.findReservationsByMemberId(memberAuthInfo.id()));
-    }
-
-    @GetMapping("/admin/reservations/filtered")
-    @RequiresRole(authRoles = {ADMIN})
-    public ResponseEntity<List<ReservationResponse>> findAllByFilter(
-            @ModelAttribute @Valid final ReservationsByfilterRequest request
-    ) {
-        final List<ReservationResponse> reservationResponses = reservationService.findAllByFilter(request);
-
-        return ResponseEntity.ok(reservationResponses);
     }
 
     @GetMapping("/reservations/available-times")
