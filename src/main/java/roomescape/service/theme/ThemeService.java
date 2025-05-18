@@ -41,6 +41,7 @@ public class ThemeService {
         LocalDate startDate = endDate.minusDays(7);
         List<Long> themeIds = reservationRepository.findTopThemesByReservationCountBetween(startDate, endDate).stream()
                 .limit(10)
+                .map(Theme::getId)
                 .toList();
 
         return themeIds.stream().map(themeId -> {

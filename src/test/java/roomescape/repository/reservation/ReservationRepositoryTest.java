@@ -55,35 +55,76 @@ class ReservationRepositoryTest {
         }
 
         for (int i = 0; i < 12; i++) {
-            createReservationsInRange(themes[i], 15 - i, startDate);
+            createReservationsInRange(themes[i], 15 - i, startDate, member);
         }
 
-        createReservationsInRange(themes[10], 20, outOfRangeDate);
-        createReservationsInRange(themes[11], 30, outOfRangeDate);
+        createReservationsInRange(themes[10], 20, outOfRangeDate, member);
+        createReservationsInRange(themes[11], 30, outOfRangeDate, member);
 
         entityManager.flush();
         entityManager.clear();
 
         // when
-        List<Long> topThemeIds = reservationRepository.findTopThemesByReservationCountBetween(startDate, endDate);
+        List<Theme> topThemes = reservationRepository.findTopThemesByReservationCountBetween(startDate, endDate);
 
         // then
         Assertions.assertAll(
                 () -> {
-                    assertThat(topThemeIds).hasSize(12);
+                    assertThat(topThemes).hasSize(12);
                     for (int i = 0; i < 12; i++) {
-                        assertThat(topThemeIds.get(i)).isEqualTo(themes[i].getId());
+                        assertThat(topThemes.get(i).getId()).isEqualTo(themes[i].getId());
                     }
                 }
         );
     }
 
-    private void createReservationsInRange(Theme theme, int count, LocalDate startDate) {
+    @Test
+    @DisplayName("특정 테마, 회원, 특정 기간에 대한 예약 목록을 조회할 수 있다")
+    void findAllByThemeIdAndMemberIdAndDateBetweenTest() {
+        // given
+        Theme theme1 = new Theme("theme1", "description", "thumbnail");
+        Theme theme2 = new Theme("theme2", "description", "thumbnail");
+        entityManager.persist(theme1);
+        entityManager.persist(theme2);
+
+        Member otherMember = new Member(null, "other", "other@email.com", "password", Role.USER);
+        memberRepository.save(otherMember);
+
+        LocalDate startDate = LocalDate.of(2025, 5, 1);
+        LocalDate endDate = LocalDate.of(2025, 5, 31);
+        LocalDate outOfRangeDate = LocalDate.of(2025, 6, 1);
+
+        createReservationsInRange(theme1, 3, startDate, member);
+        createReservationsInRange(theme2, 2, startDate, member);
+        createReservationsInRange(theme1, 2, startDate, otherMember);
+        createReservationsInRange(theme1, 1, outOfRangeDate, member);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        List<Reservation> reservations = reservationRepository
+                .findAllByThemeIdAndMemberIdAndDateBetween(theme1.getId(), member.getId(), startDate, endDate);
+
+        // then
+        Assertions.assertAll(
+                () -> assertThat(reservations).hasSize(3),
+                () -> assertThat(reservations)
+                        .allMatch(reservation ->
+                                reservation.getTheme().getId().equals(theme1.getId()) &&
+                                        reservation.getMember().getId().equals(member.getId()) &&
+                                        !reservation.getDate().isBefore(startDate) &&
+                                        !reservation.getDate().isAfter(endDate)
+                        )
+        );
+    }
+
+    private void createReservationsInRange(Theme theme, int count, LocalDate startDate, Member targetMember) {
         for (int i = 0; i < count; i++) {
             ReservationTime time = new ReservationTime(LocalTime.of(10, 0).plusHours(i % 8));
             entityManager.persist(time);
 
-            Reservation reservation = new Reservation(startDate.plusDays(i % 7), time, theme, member);
+            Reservation reservation = new Reservation(startDate.plusDays(i % 7), time, theme, targetMember);
             entityManager.persist(reservation);
         }
     }

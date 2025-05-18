@@ -95,7 +95,7 @@ public class ReservationService {
                 searchConditionsRequest.dateTo()
         );
         return reservations.stream().
-                map(reservation -> ReservationResponse.from(reservation))
+                map(ReservationResponse::from)
                 .toList();
     }
 
