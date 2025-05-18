@@ -10,11 +10,18 @@ public class Name {
     private String name;
 
     public Name(String name) {
+        validateBlank(name);
         this.name = name;
     }
 
     public Name() {
 
+    }
+
+    private void validateBlank(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("[ERROR] 이름은 공백이 될 수 없습니다.");
+        }
     }
 
     public String getName() {
