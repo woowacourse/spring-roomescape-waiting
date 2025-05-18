@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -34,7 +35,7 @@ public class User {
     @Embedded
     private Password password;
     @OneToMany(mappedBy = "user")
-    private List<Reservation> reservations;
+    private List<Reservation> reservations = new ArrayList<>();
 
     public User(final Long id, final UserName name, final UserRole role, final Email email, final Password password) {
         this.id = id;
@@ -57,5 +58,16 @@ public class User {
 
     public boolean isAdmin() {
         return role == UserRole.ADMIN;
+    }
+
+    public void reserve(final Reservation reservation) {
+        if (!reservation.user().equals(this)) {
+            throw new IllegalArgumentException("예약자가 일치하지 않습니다.");
+        }
+        reservations.add(reservation);
+    }
+
+    public List<Reservation> reservations() {
+        return List.copyOf(reservations);
     }
 }

@@ -17,11 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
-import roomescape.application.AuthenticationService;
-import roomescape.domain.user.Email;
-import roomescape.domain.user.Password;
-import roomescape.domain.user.User;
-import roomescape.domain.user.UserName;
+import roomescape.domain.auth.AuthenticationInfo;
+import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.domain.user.UserRole;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.AuthorizationException;
@@ -33,41 +30,37 @@ import roomescape.presentation.auth.UserArgumentResolver;
 class UserArgumentResolverTest {
 
     @Mock
-    private AuthenticationService authenticationService;
+    private AuthenticationTokenHandler tokenHandler;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
         mockMvc = standaloneSetup(new TestController())
-                .setCustomArgumentResolvers(new UserArgumentResolver(authenticationService))
+                .setCustomArgumentResolvers(new UserArgumentResolver(tokenHandler))
                 .build();
     }
 
     @Test
-    @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 유효한 토큰이 있으면 바인딩된다.")
+    @DisplayName("@Authenticated 인증 정보를 바인딩할 때 쿠키에 유효한 토큰이 있으면 바인딩된다.")
     void bindUserWhenRequestWithValidToken() throws Exception {
         var cookie = AuthenticationTokenCookie.forResponse("validToken");
-        var user = new User(1L, new UserName("유저1"), UserRole.USER, new Email("email@email.com"), new Password("password"));
-        Mockito.when(authenticationService.getUserByToken("validToken")).thenReturn(user);
+        Mockito.when(tokenHandler.extractAuthenticationInfo("validToken")).thenReturn(new AuthenticationInfo(1L, UserRole.USER));
 
-        mockMvc.perform(get("/authenticatedUser").cookie(cookie))
+        mockMvc.perform(get("/authenticatedInfo").cookie(cookie))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         {
                           "id": 1,
-                          "name": "유저1",
                           "role": "USER",
-                          "email": "email@email.com",
-                          "password": "password"
                         }
                         """)
                 );
     }
 
     @Test
-    @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 토큰이 없으면 예외가 발생한다.")
+    @DisplayName("@Authenticated 인증 정보를 바인딩할 때 쿠키에 토큰이 없으면 예외가 발생한다.")
     void bindUserWhenRequestWithoutToken() {
-        assertThatThrownBy(() -> mockMvc.perform(get("/authenticatedUser")))
+        assertThatThrownBy(() -> mockMvc.perform(get("/authenticatedInfo")))
                 .hasCauseInstanceOf(AuthenticationException.class);
     }
 
@@ -75,35 +68,18 @@ class UserArgumentResolverTest {
     @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 유효하지 않은 토큰이 있으면 예외가 발생한다.")
     void bindUserWhenRequestWithInvalidToken() {
         var invalidTokenCookie = AuthenticationTokenCookie.forResponse("invalidToken");
-        Mockito.when(authenticationService.getUserByToken("invalidToken"))
+        Mockito.when(tokenHandler.extractAuthenticationInfo("invalidToken"))
                 .thenThrow(new AuthorizationException("invalid token"));
-        assertThatThrownBy(() -> mockMvc.perform(get("/authenticatedUser").cookie(invalidTokenCookie)))
+        assertThatThrownBy(() -> mockMvc.perform(get("/authenticatedInfo").cookie(invalidTokenCookie)))
                 .hasCauseInstanceOf(AuthorizationException.class);
     }
 
     @Controller
     private static class TestController {
 
-        @GetMapping("/authenticatedUser")
-        public ResponseEntity<UserResponseForTest> test(@Authenticated User user) {
-            var response = new UserResponseForTest(
-                    user.id(),
-                    user.name().value(),
-                    user.role(),
-                    user.email().value(),
-                    user.password().value()
-            );
-            return ResponseEntity.ok(response);
+        @GetMapping("/authenticatedInfo")
+        public ResponseEntity<AuthenticationInfo> test(@Authenticated AuthenticationInfo authenticationInfo) {
+            return ResponseEntity.ok(authenticationInfo);
         }
-    }
-
-    private record UserResponseForTest(
-            long id,
-            String name,
-            UserRole role,
-            String email,
-            String password
-    ) {
-
     }
 }

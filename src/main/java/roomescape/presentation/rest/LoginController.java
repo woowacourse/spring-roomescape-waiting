@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.AuthenticationService;
-import roomescape.domain.user.User;
+import roomescape.application.UserService;
+import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.presentation.auth.Authenticated;
 import roomescape.presentation.auth.AuthenticationTokenCookie;
 import roomescape.presentation.request.LoginRequest;
@@ -18,9 +19,14 @@ import roomescape.presentation.response.UserResponse;
 public class LoginController {
 
     private final AuthenticationService authenticationService;
+    private final UserService userService;
 
-    public LoginController(final AuthenticationService authenticationService) {
+    public LoginController(
+        final AuthenticationService authenticationService,
+        final UserService userService
+    ) {
         this.authenticationService = authenticationService;
+        this.userService = userService;
     }
 
     @PostMapping("/login")
@@ -34,7 +40,8 @@ public class LoginController {
     }
 
     @GetMapping("/login/check")
-    public UserResponse getUser(@Authenticated final User user) {
+    public UserResponse getUser(@Authenticated final AuthenticationInfo authenticationInfo) {
+        var user = userService.getById(authenticationInfo.id());
         return UserResponse.from(user);
     }
 

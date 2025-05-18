@@ -31,8 +31,7 @@ public class AdminController {
     @PostMapping("/reservations")
     @ResponseStatus(CREATED)
     public ReservationResponse reserve(@RequestBody @Valid final CreateReservationAdminRequest request) {
-        var user = userService.getById(request.userId());
-        var reservation = reservationService.reserve(user, request.date(), request.timeId(), request.themeId());
+        var reservation = reservationService.reserve(request.userId(), request.date(), request.timeId(), request.themeId());
         return ReservationResponse.from(reservation);
     }
 

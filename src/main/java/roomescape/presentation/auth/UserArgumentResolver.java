@@ -6,15 +6,15 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.application.AuthenticationService;
+import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.exception.AuthenticationException;
 
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final AuthenticationService authenticationService;
+    private final AuthenticationTokenHandler tokenHandler;
 
-    public UserArgumentResolver(final AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+    public UserArgumentResolver(final AuthenticationTokenHandler tokenHandler) {
+        this.tokenHandler = tokenHandler;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         var request = (HttpServletRequest) webRequest.getNativeRequest();
         var tokenCookie = AuthenticationTokenCookie.fromRequest(request);
         if (tokenCookie.hasToken()) {
-            return authenticationService.getUserByToken(tokenCookie.token());
+            return tokenHandler.extractAuthenticationInfo(tokenCookie.token());
         }
         throw new AuthenticationException("사용자 인증이 필요합니다.");
     }

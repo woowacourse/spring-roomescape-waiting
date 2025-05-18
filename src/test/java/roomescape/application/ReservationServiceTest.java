@@ -49,7 +49,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약을 추가할 수 있다.")
     void reserve() {
-        var reserved = service.reserve(user, tomorrow(), timeSlot.id(), theme.id());
+        var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
         var reservations = service.findAllReservations(NONE_FILTERING);
         assertThat(reservations).contains(reserved);
@@ -59,7 +59,7 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제할 수 있다.")
     void deleteReservation() {
         // given
-        var reserved = service.reserve(user, tomorrow(), timeSlot.id(), theme.id());
+        var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
         // when
         service.removeById(reserved.id());
@@ -73,9 +73,9 @@ class ReservationServiceTest {
     @DisplayName("검색 필터로 예약을 조회할 수 있다.")
     void findAllReservationsWithFilter() {
         // given
-        var afterOneDay = service.reserve(user, tomorrow(), timeSlot.id(), theme.id());
-        var afterTwoDay = service.reserve(user, afterNDay(2), timeSlot.id(), theme.id());
-        var afterThreeDay = service.reserve(user, afterNDay(3), timeSlot.id(), theme.id());
+        var afterOneDay = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
+        var afterTwoDay = service.reserve(user.id(), afterNDay(2), timeSlot.id(), theme.id());
+        var afterThreeDay = service.reserve(user.id(), afterNDay(3), timeSlot.id(), theme.id());
 
         // when
         var fromYesterday_toToday = new ReservationSearchFilter(theme.id(), user.id(), yesterday(), today());
@@ -92,7 +92,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("지나간 날짜와 시간에 대한 예약 생성은 불가능하다.")
     void cannotReservePastDateTime() {
-        assertThatThrownBy(() -> service.reserve(user, yesterday(), timeSlot.id(), theme.id()))
+        assertThatThrownBy(() -> service.reserve(user.id(), yesterday(), timeSlot.id(), theme.id()))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
@@ -100,11 +100,11 @@ class ReservationServiceTest {
     @DisplayName("이미 해당 날짜, 시간, 테마에 대한 예약이 존재하는 경우 중복된 예약은 불가능하다.")
     void cannotReserveDuplicate() {
         // given
-        service.reserve(user, tomorrow(), timeSlot.id(), theme.id());
+        service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
         // when & then
         assertThatThrownBy(
-                () -> service.reserve(user, tomorrow(), timeSlot.id(), theme.id())
+                () -> service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id())
         ).isInstanceOf(AlreadyExistedException.class);
     }
 }

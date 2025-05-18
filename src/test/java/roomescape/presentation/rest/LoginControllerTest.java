@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import roomescape.application.AuthenticationService;
+import roomescape.application.UserService;
 import roomescape.exception.AuthenticationException;
 import roomescape.presentation.GlobalExceptionHandler;
 import roomescape.presentation.auth.AuthenticationTokenCookie;
@@ -19,8 +20,9 @@ import roomescape.presentation.auth.AuthenticationTokenCookie;
 class LoginControllerTest {
 
     private final AuthenticationService authenticationService = Mockito.mock(AuthenticationService.class);
+    private final UserService userService = Mockito.mock(UserService.class);
     private final MockMvc mockMvc = MockMvcBuilders
-        .standaloneSetup(new LoginController(authenticationService))
+        .standaloneSetup(new LoginController(authenticationService, userService))
         .setControllerAdvice(new GlobalExceptionHandler())
         .build();
 

@@ -17,6 +17,7 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.User;
+import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.NotFoundException;
 
@@ -26,22 +27,26 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
+    private final UserRepository userRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final TimeSlotRepository timeSlotRepository,
-            final ThemeRepository themeRepository
+            final ThemeRepository themeRepository,
+            final UserRepository userRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
+        this.userRepository = userRepository;
     }
 
-    public Reservation reserve(final User user, final LocalDate date, final long timeId, final long themeId) {
+    public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var timeSlot = getTimeSlotById(timeId);
         var theme = getThemeById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
 
+        var user = getUserById(userId);
         var reservation = new Reservation(user, date, timeSlot, theme);
         return reservationRepository.save(reservation);
     }
@@ -64,6 +69,11 @@ public class ReservationService {
     private Theme getThemeById(final long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private User getUserById(final long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
