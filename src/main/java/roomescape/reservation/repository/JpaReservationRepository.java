@@ -12,20 +12,14 @@ import roomescape.theme.domain.Theme;
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepository {
 
     @Override
-    boolean existsByTimeId(Long timeId);
-
-    @Override
-    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
-
-    @Override
-    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
-                                                             ReservationDate to);
+    List<Reservation> findAllByMemberId(Long memberId);
 
     @Override
     List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId);
 
     @Override
-    List<Reservation> findAllByMemberId(Long memberId);
+    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
+                                                             ReservationDate to);
 
     @Override
     @Query("SELECT t FROM Theme t " +
@@ -37,5 +31,11 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     List<Theme> findThemesWithReservationCount(ReservationDate startDate,
                                                ReservationDate endDate,
                                                int limit);
+
+    @Override
+    boolean existsByTimeId(Long timeId);
+
+    @Override
+    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
 }

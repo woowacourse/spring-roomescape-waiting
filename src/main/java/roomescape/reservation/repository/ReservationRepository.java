@@ -8,24 +8,24 @@ import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository {
 
-    boolean existsByTimeId(Long timeId);
+    Optional<Reservation> findById(Long id);
 
-    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+    List<Reservation> findAll();
 
-    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
-                                                             ReservationDate to);
+    List<Reservation> findAllByMemberId(Long memberId);
 
     List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId);
 
-    List<Reservation> findAllByMemberId(Long memberId);
+    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
+                                                             ReservationDate to);
 
     List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit);
 
     Reservation save(Reservation reservation);
 
-    List<Reservation> findAll();
-
     void deleteById(Long id);
 
-    Optional<Reservation> findById(Long id);
+    boolean existsByTimeId(Long timeId);
+
+    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 }

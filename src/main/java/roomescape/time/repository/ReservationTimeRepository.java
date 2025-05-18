@@ -7,8 +7,6 @@ import roomescape.time.domain.ReservationTime;
 
 public interface ReservationTimeRepository {
 
-    boolean existsByStartAt(LocalTime startAt);
-
     Optional<ReservationTime> findById(Long id);
 
     List<ReservationTime> findAll();
@@ -16,4 +14,6 @@ public interface ReservationTimeRepository {
     ReservationTime save(ReservationTime reservationTime);
 
     void deleteById(Long id);
+
+    boolean existsByStartAt(LocalTime startAt);
 }

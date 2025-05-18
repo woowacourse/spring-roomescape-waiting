@@ -7,11 +7,11 @@ import roomescape.member.domain.MemberEmail;
 
 public interface MemberRepository {
 
-    boolean existsByEmail(MemberEmail email);
-
-    Member save(Member member);
-
     Optional<Member> findById(Long id);
 
     List<Member> findAll();
+
+    Member save(Member member);
+
+    boolean existsByEmail(MemberEmail email);
 }

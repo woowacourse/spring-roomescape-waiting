@@ -10,11 +10,11 @@ import roomescape.member.domain.MemberEmail;
 public interface JpaMemberRepository extends MemberRepository, JpaRepository<Member, Long> {
 
     @Override
-    boolean existsByEmail(MemberEmail email);
+    List<Member> findAll();
 
     @Override
     Member save(Member member);
 
     @Override
-    List<Member> findAll();
+    boolean existsByEmail(MemberEmail email);
 }

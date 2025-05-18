@@ -11,9 +11,6 @@ import roomescape.time.domain.ReservationTime;
 public interface JpaReservationTimeRepository extends JpaRepository<ReservationTime, Long>, ReservationTimeRepository {
 
     @Override
-    boolean existsByStartAt(LocalTime startAt);
-
-    @Override
     Optional<ReservationTime> findById(Long id);
 
     @Override
@@ -24,4 +21,7 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
 
     @Override
     void deleteById(Long id);
+
+    @Override
+    boolean existsByStartAt(LocalTime startAt);
 }

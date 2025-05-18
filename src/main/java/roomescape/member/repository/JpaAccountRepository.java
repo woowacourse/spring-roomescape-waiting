@@ -10,11 +10,11 @@ import roomescape.member.domain.MemberEmail;
 public interface JpaAccountRepository extends AccountRepository, JpaRepository<Account, Long> {
 
     @Override
-    Account save(Account account);
-
-    @Override
     Account findByMemberId(Long memberId);
 
     @Override
     Optional<Account> findAccountByMemberEmail(MemberEmail email);
+
+    @Override
+    Account save(Account account);
 }

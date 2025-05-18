@@ -10,10 +10,10 @@ import roomescape.theme.domain.Theme;
 public interface JpaThemeRepository extends JpaRepository<Theme, Long>, ThemeRepository {
 
     @Override
-    List<Theme> findAll();
+    Optional<Theme> findById(Long id);
 
     @Override
-    Optional<Theme> findById(Long id);
+    List<Theme> findAll();
 
     @Override
     Theme save(Theme theme);
