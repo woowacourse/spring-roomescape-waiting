@@ -1,6 +1,7 @@
 package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.common.exception.impl.NotFoundException;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MyReservationResponse;
 
@@ -59,5 +61,38 @@ class ReservationQueryServiceTest {
         final List<MyReservationResponse> responses = reservationQueryService.findByMemberId(memberId);
 
         assertThat(responses).hasSize(4);
+    }
+
+    @Test
+    void 대기중인_예약을_조회한다() {
+        assertThat(reservationQueryService.findWaitingReservations()).hasSize(3);
+    }
+
+    @Test
+    void 존재하지_않는_테마의_예약가능_시간을_조회할_수_없다() {
+        final Long invalidThemeId = 999L;
+        final String date = LocalDate.now().toString();
+
+        assertThatThrownBy(() -> reservationQueryService.findAvailableReservationTime(invalidThemeId, date))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("선택한 테마가 존재하지 않습니다.");
+    }
+
+    @Test
+    void 기간내_테마와_멤버의_예약이_없으면_빈_목록을_반환한다() {
+        final Long themeId = 1L;
+        final Long memberId = 999L;
+        final LocalDate start = LocalDate.now();
+        final LocalDate end = LocalDate.now().plusDays(1);
+
+        assertThat(reservationQueryService.findReservationByThemeIdAndMemberIdInDuration(
+                themeId, memberId, start, end)).isEmpty();
+    }
+
+    @Test
+    void 존재하지_않는_멤버의_예약기록은_빈_목록을_반환한다() {
+        final long nonExistingMemberId = 999L;
+
+        assertThat(reservationQueryService.findByMemberId(nonExistingMemberId)).isEmpty();
     }
 }
