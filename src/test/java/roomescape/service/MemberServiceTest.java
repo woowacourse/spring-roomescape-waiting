@@ -12,7 +12,7 @@ import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.repository.MemberRepository;
-import roomescape.exception.NotFoundMemberException;
+import roomescape.exception.NotFoundException;
 import roomescape.exception.UnAuthorizedException;
 import roomescape.service.param.LoginMemberParam;
 import roomescape.service.param.RegisterMemberParam;
@@ -36,8 +36,8 @@ class MemberServiceTest {
 
         //when & then
         assertThatThrownBy(() -> memberService.login(loginMemberParam))
-                .isInstanceOf(NotFoundMemberException.class)
-                .hasMessageContaining(loginMemberParam.email() + "에 해당하는 유저가 없습니다.");
+                .isInstanceOf(UnAuthorizedException.class)
+                .hasMessage("이메일이나 비밀번호가 일치하지 않습니다.");
     }
 
     @Test
@@ -48,7 +48,7 @@ class MemberServiceTest {
         //when & then
         assertThatThrownBy(() -> memberService.login(new LoginMemberParam(member.getEmail(), "password2")))
                 .isInstanceOf(UnAuthorizedException.class)
-                .hasMessage("비밀 번호가 일치하지 않습니다.");
+                .hasMessage("이메일이나 비밀번호가 일치하지 않습니다.");
     }
 
     @Test
@@ -80,7 +80,6 @@ class MemberServiceTest {
     @Test
     void id를_통해_멤버를_찾으려_할_때_해당하는_id의_멤버가_존재하지_않으면_예외() {
         assertThatThrownBy(() -> memberService.getById(1L))
-                .isInstanceOf(NotFoundMemberException.class)
-                .hasMessage(1L + "에 해당하는 유저가 없습니다.");
+                .isInstanceOf(NotFoundException.class);
     }
 }

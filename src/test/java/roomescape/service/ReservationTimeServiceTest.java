@@ -1,6 +1,15 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.TestFixture.DEFAULT_DATE;
+
 import jakarta.transaction.Transactional;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -8,23 +17,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestFixture;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.exception.NotFoundReservationTimeException;
+import roomescape.exception.NotFoundException;
 import roomescape.service.param.CreateReservationTimeParam;
 import roomescape.service.result.ReservationTimeResult;
-
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DEFAULT_DATE;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -45,8 +49,6 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
-    @Autowired
-    private ReservationService reservationService;
 
     @Test
     void 예약_시간을_생성할_수_있다() {
@@ -77,8 +79,7 @@ class ReservationTimeServiceTest {
     void id에_해당하는_예약_시간이_없는경우_예외가_발생한다() {
         //given & when & then
         assertThatThrownBy(() -> reservationTimeService.getById(1L))
-                .isInstanceOf(NotFoundReservationTimeException.class)
-                .hasMessage("1에 해당하는 reservation_time 튜플이 없습니다.");
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test

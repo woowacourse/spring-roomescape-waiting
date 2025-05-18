@@ -9,7 +9,7 @@ import roomescape.domain.ReservationTimePolicy;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.exception.NotFoundReservationTimeException;
+import roomescape.exception.NotFoundException;
 import roomescape.persistence.dto.ReservationTimeAvailabilityData;
 import roomescape.service.param.CreateReservationTimeParam;
 import roomescape.service.result.AvailableReservationTimeResult;
@@ -39,7 +39,7 @@ public class ReservationTimeService {
 
     public ReservationTimeResult getById(Long reservationTimeId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(reservationTimeId).orElseThrow(
-                () -> new NotFoundReservationTimeException(reservationTimeId + "에 해당하는 reservation_time 튜플이 없습니다."));
+                () -> new NotFoundException("timeId", reservationTimeId));
         return toReservationResult(reservationTime);
     }
 

@@ -20,7 +20,7 @@ import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
-import roomescape.exception.NotFoundReservationTimeException;
+import roomescape.exception.NotFoundException;
 import roomescape.exception.UnAvailableReservationException;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
@@ -72,8 +72,7 @@ class ReservationCreationServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationCreationService.create(createReservationParam))
-                .isInstanceOf(NotFoundReservationTimeException.class)
-                .hasMessage("1에 해당하는 정보가 없습니다.");
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test

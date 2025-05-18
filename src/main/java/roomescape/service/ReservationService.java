@@ -10,7 +10,7 @@ import roomescape.controller.request.LoginMemberInfo;
 import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.exception.NotFoundReservationException;
+import roomescape.exception.NotFoundException;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationWithWaitingResult;
 import roomescape.service.result.WaitingWithRank;
@@ -61,7 +61,7 @@ public class ReservationService {
 
     public void deleteById(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundReservationException("해당 id의 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException("reservationId", reservationId));
 
         reservationRepository.deleteById(reservationId);
 
@@ -74,7 +74,7 @@ public class ReservationService {
 
     public void cancelWaitingById(Long reservationId, LoginMemberInfo loginMemberInfo) {
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundReservationException("해당 id의 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException("reservationId", reservationId));
         validateCancelPermission(loginMemberInfo, reservation);
 
         reservationRepository.deleteById(reservationId);

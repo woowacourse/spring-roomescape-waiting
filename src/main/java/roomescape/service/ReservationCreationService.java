@@ -10,9 +10,7 @@ import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
-import roomescape.exception.NotFoundMemberException;
-import roomescape.exception.NotFoundReservationTimeException;
-import roomescape.exception.NotFoundThemeException;
+import roomescape.exception.NotFoundException;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.ReservationResult;
 
@@ -68,11 +66,11 @@ public class ReservationCreationService {
 
     private ReservationComponents loadContext(CreateReservationParam param) {
         ReservationTime reservationTime = reservationTimeRepository.findById(param.timeId())
-                .orElseThrow(() -> new NotFoundReservationTimeException(param.timeId() + "에 해당하는 정보가 없습니다."));
+                .orElseThrow(() -> new NotFoundException("timeId", param.timeId()));
         Theme theme = themeRepository.findById(param.themeId())
-                .orElseThrow(() -> new NotFoundThemeException(param.themeId() + "에 해당하는 정보가 없습니다."));
+                .orElseThrow(() -> new NotFoundException("themeId", param.themeId()));
         Member member = memberRepository.findById(param.memberId())
-                .orElseThrow(() -> new NotFoundMemberException(param.memberId() + "에 해당하는 정보가 없습니다."));
+                .orElseThrow(() -> new NotFoundException("memberId", param.memberId()));
 
         return new ReservationComponents(member, theme, reservationTime);
     }

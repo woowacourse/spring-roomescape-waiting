@@ -1,26 +1,28 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.TestFixture.DEFAULT_DATE;
+
 import jakarta.transaction.Transactional;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestFixture;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.exception.NotFoundThemeException;
+import roomescape.exception.NotFoundException;
 import roomescape.service.param.CreateThemeParam;
 import roomescape.service.result.ThemeResult;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.DEFAULT_DATE;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -87,8 +89,7 @@ class ThemeServiceTest {
     void id값으로_테마를_찾을때_없다면_예외가_발생한다() {
         // given & when & then
         assertThatThrownBy(() -> themeService.getById(1L))
-                .isInstanceOf(NotFoundThemeException.class)
-                .hasMessage("id에 해당하는 Theme이 없습니다.");
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test

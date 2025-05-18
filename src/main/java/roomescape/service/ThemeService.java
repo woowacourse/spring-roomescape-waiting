@@ -5,7 +5,7 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.exception.NotFoundThemeException;
+import roomescape.exception.NotFoundException;
 import roomescape.service.param.CreateThemeParam;
 import roomescape.service.result.ThemeResult;
 
@@ -39,7 +39,7 @@ public class ThemeService {
 
     public ThemeResult getById(Long id) {
         Theme theme = themeRepository.findById(id).orElseThrow(
-                () -> new NotFoundThemeException("id에 해당하는 Theme이 없습니다."));
+                () -> new NotFoundException("themeId", id));
 
         return ThemeResult.from(theme);
     }
