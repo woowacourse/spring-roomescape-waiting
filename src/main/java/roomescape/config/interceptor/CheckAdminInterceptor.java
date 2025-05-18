@@ -1,12 +1,12 @@
 package roomescape.config.interceptor;
 
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.Role;
+import roomescape.dto.business.AccessTokenContent;
 import roomescape.exception.global.ForbiddenException;
 import roomescape.exception.local.NotFoundCookieException;
 import roomescape.utility.JwtTokenProvider;
@@ -29,11 +29,8 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (TOKEN_NAME_FILED.equals(cookie.getName())) {
-                    Claims claims = jwtTokenProvider.getClaims(cookie.getValue());
-                    String roleStr = (String) claims.get("role");
-                    Role role = Role.valueOf(roleStr);
-                    boolean equals = role.equals(Role.ROLE_ADMIN);
-                    if (!equals) {
+                    AccessTokenContent accessTokenContent = jwtTokenProvider.parseAccessToken(cookie.getValue());
+                    if (accessTokenContent.role() != Role.ROLE_ADMIN) {
                         throw new ForbiddenException();
                     }
                     return true;

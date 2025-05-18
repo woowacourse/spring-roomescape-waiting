@@ -6,7 +6,7 @@ import roomescape.domain.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findOneByEmailAndPassword(String email, String password);
+    Optional<User> findOneByEmail(String email);
 
     boolean existsById(long id);
 }

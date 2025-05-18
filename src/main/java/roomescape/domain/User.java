@@ -36,6 +36,10 @@ public class User {
         return new User(null, role, name, email, password);
     }
 
+    public boolean isEqualPassword(String password) {
+        return this.password.equals(password);
+    }
+
     public boolean isMember() {
         return this.role.equals(Role.ROLE_MEMBER);
     }

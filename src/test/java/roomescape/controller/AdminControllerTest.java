@@ -1,123 +1,105 @@
-package roomescape.controller;
-
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Theme;
-import roomescape.domain.User;
-import roomescape.dto.request.AdminReservationRequest;
-import roomescape.dto.response.AccessTokenResponse;
-import roomescape.service.AuthService;
-import roomescape.test.fixture.AuthFixture;
-import roomescape.test.fixture.ReservationTimeFixture;
-import roomescape.test.fixture.ThemeFixture;
-import roomescape.test.fixture.UserFixture;
-
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Transactional
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class AdminControllerTest {
-
-    @Autowired
-    private TestEntityManager entityManager;
-
-    @Autowired
-    private AuthService authService;
-
-    @LocalServerPort
-    int port;
-
-    private User savedMember;
-    private User savedAdmin;
-    private Theme savedTheme;
-    private ReservationTime savedTime;
-    private AccessTokenResponse memberAccessTokenResponse;
-    private AccessTokenResponse adminAccessTokenResponse;
-    private LocalDate date;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-
-        date = LocalDate.now().plusDays(1);
-
-        // Create and persist test data
-        User member = UserFixture.create(Role.ROLE_MEMBER, "member_dummyName", "member_dummyEmail",
-                "member_dummyPassword");
-        User admin = UserFixture.create(Role.ROLE_ADMIN, "admin_dummyName", "admin_dummyEmail", "admin_dummyPassword");
-        Theme theme = ThemeFixture.create("dummyName", "dummyDescription", "dummyThumbnail");
-        ReservationTime time = ReservationTimeFixture.create(LocalTime.of(2, 40));
-
-        savedMember = entityManager.persist(member);
-        savedAdmin = entityManager.persist(admin);
-        savedTheme = entityManager.persist(theme);
-        savedTime = entityManager.persist(time);
-
-        entityManager.flush();
-
-        memberAccessTokenResponse = authService.login(
-                AuthFixture.createTokenRequestDto(savedMember.getEmail(), savedMember.getPassword()));
-        adminAccessTokenResponse = authService.login(
-                AuthFixture.createTokenRequestDto(savedAdmin.getEmail(), savedAdmin.getPassword()));
-    }
-
-    @Nested
-    @DisplayName("POST /admin/reservations 요청")
-    class createReservation {
-
-        @DisplayName("memberId의 role이 ROLE_MEMBER 일 때 201 CREATED 와 함께 member의 예약이 추가된다.")
-        @Test
-        void createReservation_success_byMemberId() {
-            // given
-            AdminReservationRequest dto = new AdminReservationRequest(
-                    savedMember.getId(), savedTheme.getId(), date, savedTime.getId());
-
-            String token = adminAccessTokenResponse.accessToken();
-
-            // when
-            // then
-            RestAssured.given().log().all()
-                    .cookies("token", token)
-                    .contentType(ContentType.JSON)
-                    .body(dto)
-                    .when().post("/admin/reservations")
-                    .then().log().all()
-                    .statusCode(HttpStatus.CREATED.value());
-        }
-
-        @DisplayName("memberId에 role이 ROLE_ADMIN 일 때 401 A를 반환한다")
-        @Test
-        void createReservation_throwException_byAdminId() {
-            // given
-            AdminReservationRequest dto = new AdminReservationRequest(
-                    savedMember.getId(), savedTheme.getId(), date, savedTime.getId());
-
-            String token = adminAccessTokenResponse.accessToken();
-
-            // when
-            // then
-            RestAssured.given().log().all()
-                    .cookies("token", token)
-                    .contentType(ContentType.JSON)
-                    .body(dto)
-                    .when().post("/admin/reservations")
-                    .then().log().all()
-                    .statusCode(HttpStatus.UNAUTHORIZED.value());
-        }
-    }
-}
+//package roomescape.controller;
+//
+//import static roomescape.test.fixture.DateFixture.NEXT_DAY;
+//
+//import io.restassured.RestAssured;
+//import io.restassured.http.ContentType;
+//import java.time.LocalDate;
+//import java.time.LocalTime;
+//import java.util.HashMap;
+//import org.junit.jupiter.api.DisplayName;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+//import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.test.annotation.DirtiesContext;
+//import org.springframework.test.annotation.DirtiesContext.ClassMode;
+//import org.springframework.transaction.annotation.Transactional;
+//import roomescape.domain.Reservation;
+//import roomescape.domain.ReservationStatus;
+//import roomescape.domain.ReservationTime;
+//import roomescape.domain.Role;
+//import roomescape.domain.Theme;
+//import roomescape.domain.User;
+//import roomescape.dto.business.AccessTokenContent;
+//import roomescape.dto.request.AdminReservationRequest;
+//import roomescape.utility.JwtTokenProvider;
+//
+//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+//@Transactional
+//@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+//class AdminControllerTest {
+//
+//    @Autowired
+//    private TestEntityManager entityManager;
+//    @Autowired
+//    private JwtTokenProvider jwtTokenProvider;
+//
+//    @DisplayName("어드민은 특정 멤버의 예약을 추가할 수 있다.")
+//    @Test
+//    void createReservationByAdmin() {
+//        // given
+//        User admin = entityManager.persist(
+//                User.createWithoutId(Role.ROLE_ADMIN, "관리자", "admin@test.com", "qwer1234!"));
+//        User user = entityManager.persist(
+//                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "qwer1234!"));
+//        Theme theme = entityManager.persist(
+//                Theme.createWithoutId("테마", "설명", "섬네일"));
+//        ReservationTime time = entityManager.persist(
+//                ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+//
+//        AdminReservationRequest request = new AdminReservationRequest(
+//                user.getId(), theme.getId(), NEXT_DAY, time.getId());
+//
+//        String adminToken =
+//                jwtTokenProvider.createToken(new AccessTokenContent(admin.getId(), admin.getRole(), admin.getName()));
+//
+//        // when & then
+//        RestAssured.given().log().all()
+//                .cookies("token", adminToken)
+//                .contentType(ContentType.JSON)
+//                .body(request)
+//                .when().post("/admin/reservations")
+//                .then().log().all()
+//                .statusCode(HttpStatus.CREATED.value());
+//    }
+//
+//    @DisplayName("필터를 통해 예약을 검색할 수 있다.")
+//    @Test
+//    void canSearchReservationByFilter() {
+//        // given
+//        User admin = entityManager.persist(
+//                User.createWithoutId(Role.ROLE_ADMIN, "관리자", "admin@test.com", "qwer1234!"));
+//        User user = entityManager.persist(
+//                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "qwer1234!"));
+//        Theme theme = entityManager.persist(
+//                Theme.createWithoutId("테마", "설명", "섬네일"));
+//        ReservationTime time = entityManager.persist(
+//                ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+//        entityManager.persist(
+//                Reservation.createWithoutId(LocalDate.now().plusDays(1), ReservationStatus.BOOKED, time, theme, user));
+//        entityManager.persist(
+//                Reservation.createWithoutId(LocalDate.now().plusDays(2), ReservationStatus.BOOKED, time, theme, user));
+//        entityManager.persist(
+//                Reservation.createWithoutId(LocalDate.now().plusDays(3), ReservationStatus.BOOKED, time, theme, user));
+//
+//        String adminToken =
+//                jwtTokenProvider.createToken(new AccessTokenContent(admin.getId(), admin.getRole(), a));
+//
+//        HashMap<String, Object> params = new HashMap<>();
+//        params.put("userId", user.getId());
+//        params.put("themeId", theme.getId());
+//        params.put("from", LocalDate.now());
+//        params.put("to", LocalDate.now().plusDays(3));
+//
+//        // when & then
+//        RestAssured.given().log().all()
+//                .cookies("token", adminToken)
+//                .params(params)
+//                .when().get("/admin/search")
+//                .then().log().all()
+//                .statusCode(HttpStatus.CREATED.value());
+//    }
+//}

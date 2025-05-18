@@ -6,6 +6,7 @@ import roomescape.domain.User;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
+import roomescape.exception.global.AuthorizationException;
 import roomescape.exception.local.NotFoundUserException;
 import roomescape.repository.UserRepository;
 import roomescape.utility.JwtTokenProvider;
@@ -23,13 +24,21 @@ public class AuthService {
     }
 
     public AccessTokenResponse login(LoginRequest loginRequest) {
-        User user = loadUserByEmailAndPassword(loginRequest.email(), loginRequest.password());
-        String accessToken = jwtTokenProvider.createToken(new AccessTokenContent(user.getId(), user.getRole()));
+        User user = loadUserByEmail(loginRequest.email());
+        validatePasswordForLogin(user, loginRequest.password());
+        String accessToken = jwtTokenProvider.createAccessToken(
+                new AccessTokenContent(user.getId(), user.getRole(), user.getName()));
         return new AccessTokenResponse(accessToken);
     }
 
-    private User loadUserByEmailAndPassword(String email, String password) {
-        return userRepository.findOneByEmailAndPassword(email, password)
+    private User loadUserByEmail(String email) {
+        return userRepository.findOneByEmail(email)
                 .orElseThrow(NotFoundUserException::new);
+    }
+
+    private void validatePasswordForLogin(User user, String password) {
+        if (!user.isEqualPassword(password)) {
+            throw new AuthorizationException("로그인 정보가 올바르지 않습니다.");
+        }
     }
 }

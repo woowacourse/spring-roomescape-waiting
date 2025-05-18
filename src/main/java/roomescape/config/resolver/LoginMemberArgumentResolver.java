@@ -9,6 +9,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.domain.User;
+import roomescape.dto.business.AccessTokenContent;
 import roomescape.exception.local.NotFoundCookieException;
 import roomescape.service.UserService;
 import roomescape.utility.JwtTokenProvider;
@@ -45,8 +46,8 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             for (Cookie cookie : cookies) {
                 if (TOKEN_NAME_FIELD.equals(cookie.getName())) {
                     String token = cookie.getValue();
-                    String payload = jwtTokenProvider.getPayload(token);
-                    return userService.getUserById(Long.parseLong(payload));
+                    AccessTokenContent accessTokenContent = jwtTokenProvider.parseAccessToken(token);
+                    return userService.getUserById(accessTokenContent.id());
                 }
             }
         }
