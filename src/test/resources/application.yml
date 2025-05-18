@@ -6,11 +6,13 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
   # DB connection setting
   datasource:
     url: jdbc:h2:mem:testdb
     username: test
     password: password
+
   # DB initialization
   sql:
     init:
@@ -25,7 +27,6 @@ spring:
         format_sql: true
     hibernate:
       ddl-auto: create-drop
-#    defer-datasource-initialization: true
 
 security:
   jwt:
