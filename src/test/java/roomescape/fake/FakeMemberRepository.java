@@ -14,12 +14,24 @@ public class FakeMemberRepository implements MemberRepository {
     private long sequence = 0;
 
     @Override
-    public <S extends Member> S save(S entity) {
+    public <S extends Member> S save(final S entity) {
         sequence++;
         Member member = new Member(sequence, entity.getName(), entity.getEmail(), entity.getPassword(),
                 entity.getRole());
         members.put(sequence, member);
         return (S) member;
+    }
+
+    @Override
+    public Optional<Member> findByEmail(final String email) {
+        return members.values().stream()
+                .filter(member -> member.getEmail().equals(email))
+                .findFirst();
+    }
+
+    @Override
+    public List<Member> findAll() {
+        return List.copyOf(members.values());
     }
 
     @Override
@@ -33,18 +45,8 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findByEmail(String email) {
-        return Optional.empty();
-    }
-
-    @Override
     public Optional<Member> findById(Long memberId) {
         return Optional.empty();
-    }
-
-    @Override
-    public List<Member> findAll() {
-        return List.of();
     }
 
     @Override

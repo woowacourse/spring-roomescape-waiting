@@ -3,25 +3,18 @@ package roomescape.member.service;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import roomescape.common.exception.DataNotFoundException;
+import roomescape.fake.FakeMemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
 public class MemberServiceTest {
 
-    @Autowired
-    private MemberService memberService;
-
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository = new FakeMemberRepository();
+    private final MemberService memberService = new MemberService(memberRepository);
 
     @Test
     void 이메일에_해당하는_멤버_조회() {
@@ -52,17 +45,5 @@ public class MemberServiceTest {
 
         //then
         assertThat(members).isEmpty();
-    }
-
-
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public MemberService memberService(
-                final MemberRepository memberRepository
-        ) {
-            return new MemberService(memberRepository);
-        }
     }
 }
