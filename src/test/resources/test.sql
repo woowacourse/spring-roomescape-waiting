@@ -31,18 +31,31 @@ VALUES ('컨저링', '실화 기반의 공포가 현실이 된다, 악령이 도
         'https://upload.wikimedia.org/wikipedia/ko/c/c6/%EC%BB%A8%EC%A0%80%EB%A7%81.jpg');
 
 -- 2 -> 1 -> 3
+-- 과거 예약
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 2, 1, 'RESERVED');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -4, CURRENT_DATE), 2, 2, 1, 'RESERVED');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 2, 2, 2, 'RESERVED');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 2, 1, 'CONFIRMATION');
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 3, 1, 2, 'RESERVED');
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -4, CURRENT_DATE), 2, 2, 1, 'CONFIRMATION');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 2, 2, 2, 'CONFIRMATION');
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 1, 3, 'RESERVED');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 3, 1, 2, 'CONFIRMATION');
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 3, 3, 'RESERVED');
+
+-- 미래 예약
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 1, 3, 'CONFIRMATION');
+VALUES (DATEADD('DAY', +3, CURRENT_DATE), 2, 2, 1, 'RESERVED');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 2, 'RESERVED');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 3, 3, 'CONFIRMATION');
+VALUES (DATEADD('DAY', +3, CURRENT_DATE), 2, 2, 3, 'WAITING');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 3, 'WAITING');
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES (DATEADD('DAY', +5, CURRENT_DATE), 4, 1, 1, 'WAITING');

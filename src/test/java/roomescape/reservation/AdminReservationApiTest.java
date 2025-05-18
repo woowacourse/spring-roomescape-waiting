@@ -70,14 +70,14 @@ class AdminReservationApiTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(6));
+                .body("size()", is(8));
     }
 
     @Test
     void 존재하지_않는_예약을_삭제할_경우_NOT_FOUND_반환() {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().delete("/admin/reservations/7")
+                .when().delete("/admin/reservations/20")
                 .then().log().all()
                 .statusCode(404);
     }

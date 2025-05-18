@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.login.application.dto.LoginCheckRequest;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.ReservationCommandService;
+import roomescape.reservation.application.ReservationQueryService;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
 import roomescape.reservation.application.dto.MyReservationResponse;
@@ -23,10 +24,29 @@ import roomescape.reservation.application.dto.ReservationResponse;
 @RequestMapping("/reservations")
 public class UserReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationCommandService commandService;
+    private final ReservationQueryService queryService;
 
-    public UserReservationController(final ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public UserReservationController(
+            final ReservationCommandService commandService,
+            final ReservationQueryService queryService
+    ) {
+        this.commandService = commandService;
+        this.queryService = queryService;
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(final LoginCheckRequest request) {
+        List<MyReservationResponse> response = queryService.findByMemberId(request.id());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/themes/{themeId}/times")
+    public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailableReservationTime(
+            @PathVariable final Long themeId,
+            @RequestParam final String date
+    ) {
+        return ResponseEntity.ok(queryService.findAvailableReservationTime(themeId, date));
     }
 
     @PostMapping
@@ -34,22 +54,9 @@ public class UserReservationController {
             @Valid @RequestBody final MemberReservationRequest request,
             final LoginCheckRequest loginCheckRequest
     ) {
-        final ReservationResponse reservationResponse = reservationService.addMemberReservation(request,
+        final ReservationResponse reservationResponse = commandService.addMemberReservation(request,
                 loginCheckRequest.id());
         return new ResponseEntity<>(reservationResponse, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> findMyReservations(final LoginCheckRequest request) {
-        List<MyReservationResponse> response = reservationService.findByMemberId(request.id());
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/themes/{themeId}/times")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailableReservationTime(
-            @PathVariable final Long themeId,
-            @RequestParam final String date) {
-        return ResponseEntity.ok(reservationService.findAvailableReservationTime(themeId, date));
     }
 
     @DeleteMapping("/{id}")
@@ -57,7 +64,7 @@ public class UserReservationController {
             @PathVariable("id") final Long id,
             final LoginCheckRequest request
     ) {
-        reservationService.deleteById(id, request.id());
+        commandService.deleteById(id, request.id());
         return ResponseEntity.noContent().build();
     }
 }

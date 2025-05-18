@@ -58,8 +58,13 @@ public class Reservation {
         this.bookingStatus = bookingStatus;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
-                       final BookingStatus bookingStatus) {
+    public Reservation(
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final Member member,
+            final BookingStatus bookingStatus
+    ) {
         this(null, date, time, theme, member, bookingStatus);
     }
 

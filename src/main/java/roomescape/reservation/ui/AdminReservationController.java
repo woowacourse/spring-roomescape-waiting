@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.ReservationCommandService;
+import roomescape.reservation.application.ReservationQueryService;
 import roomescape.reservation.application.dto.AdminReservationRequest;
 import roomescape.reservation.application.dto.ReservationResponse;
 
@@ -22,29 +23,25 @@ import roomescape.reservation.application.dto.ReservationResponse;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationCommandService commandService;
+    private final ReservationQueryService queryService;
 
-    public AdminReservationController(final ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(
+            final ReservationCommandService commandService,
+            final ReservationQueryService queryService
+    ) {
+        this.commandService = commandService;
+        this.queryService = queryService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAllReserved() {
-        return ResponseEntity.ok(reservationService.findReservedReservations());
+        return ResponseEntity.ok(queryService.findReservedReservations());
     }
 
     @GetMapping("/waiting")
     public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
-        return ResponseEntity.ok(reservationService.findWaitingReservations());
-    }
-
-    @PostMapping
-    public ResponseEntity<ReservationResponse> add(
-            @Valid @RequestBody final AdminReservationRequest request
-    ) {
-        final ReservationResponse response = reservationService.addAdminReservation(request);
-        return ResponseEntity.created(URI.create("/admin/reservations/" + response.id()))
-                .body(response);
+        return ResponseEntity.ok(queryService.findWaitingReservations());
     }
 
     @GetMapping("/search")
@@ -54,21 +51,29 @@ public class AdminReservationController {
             @RequestParam(required = false, name = "from") final LocalDate start,
             @RequestParam(required = false, name = "to") final LocalDate end
     ) {
-        final List<ReservationResponse> reservationResponses = reservationService.findReservationByThemeIdAndMemberIdInDuration(
+        final List<ReservationResponse> reservationResponses = queryService.findReservationByThemeIdAndMemberIdInDuration(
                 themeId, memberId, start, end);
         return ResponseEntity.ok(reservationResponses);
     }
 
+    @PostMapping
+    public ResponseEntity<ReservationResponse> add(
+            @Valid @RequestBody final AdminReservationRequest request
+    ) {
+        final ReservationResponse response = commandService.addAdminReservation(request);
+        return ResponseEntity.created(URI.create("/admin/reservations/" + response.id()))
+                .body(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
-        reservationService.deleteById(id);
+        commandService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/waiting/{id}")
     public ResponseEntity<Void> updateStatus(@PathVariable("id") final Long id) {
-        reservationService.updateStatus(id);
+        commandService.updateStatus(id);
         return ResponseEntity.ok().build();
     }
-
 }

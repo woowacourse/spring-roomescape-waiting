@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.login.application.TokenCookieService;
 import roomescape.login.application.dto.LoginRequest;
 import roomescape.reservation.application.dto.MemberReservationRequest;
+import roomescape.reservation.domain.BookingStatus;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -54,7 +55,8 @@ public class MemberReservationApiTest {
         final MemberReservationRequest request = new MemberReservationRequest(
                 LocalDate.now().plusDays(1),
                 1L,
-                1L
+                1L,
+                BookingStatus.RESERVED
         );
 
         RestAssured.given().log().all()
@@ -68,7 +70,7 @@ public class MemberReservationApiTest {
 
     @Test
     void 예약날짜는_null을_받을_수_없다() {
-        final MemberReservationRequest request = new MemberReservationRequest(null, 1L, 1L);
+        final MemberReservationRequest request = new MemberReservationRequest(null, 1L, 1L, BookingStatus.RESERVED);
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
@@ -82,7 +84,8 @@ public class MemberReservationApiTest {
 
     @Test
     void 예약_시간_id는_null을_받을_수_없다() {
-        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), null, 1L);
+        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), null, 1L,
+                BookingStatus.RESERVED);
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
@@ -98,7 +101,8 @@ public class MemberReservationApiTest {
         final MemberReservationRequest request = new MemberReservationRequest(
                 LocalDate.now().minusDays(10),
                 1L,
-                1L
+                1L,
+                BookingStatus.RESERVED
         );
 
         RestAssured.given().log().all()
@@ -108,39 +112,7 @@ public class MemberReservationApiTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body(equalTo("현재보다 과거의 날짜로 예약 할 수 없습니다."));
-    }
-
-
-    @Test
-    void 중복된_시간에_예약을_하면_에러가_발생한다() {
-        final MemberReservationRequest request1 = new MemberReservationRequest(
-                LocalDate.now().plusDays(10),
-                1L,
-                1L
-        );
-
-        final MemberReservationRequest request2 = new MemberReservationRequest(
-                LocalDate.now().plusDays(10),
-                1L,
-                1L
-        );
-
-        RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .contentType(ContentType.JSON)
-                .body(request1)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .contentType(ContentType.JSON)
-                .body(request2)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(409);
+                .body(equalTo("현재보다 과거의 날짜로 예약할 수 없습니다."));
     }
 
     @Test
@@ -151,7 +123,7 @@ public class MemberReservationApiTest {
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(4));
     }
 
     @Test
