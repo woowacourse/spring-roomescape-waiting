@@ -5,13 +5,12 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.time.AvailableReservationTime;
 import roomescape.domain.time.ReservationTime;
 
-public interface ReservationTimeRepository extends CrudRepository<ReservationTime, Long> {
-
-    List<ReservationTime> findAll();
+public interface ReservationTimeRepository extends ListCrudRepository<ReservationTime, Long> {
 
     @Query("""
             SELECT new roomescape.domain.time.AvailableReservationTime(

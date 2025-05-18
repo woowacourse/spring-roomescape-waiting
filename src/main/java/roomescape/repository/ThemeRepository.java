@@ -5,12 +5,11 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.theme.Theme;
 
-public interface ThemeRepository extends CrudRepository<Theme, Long> {
-
-    List<Theme> findAll();
+public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
 
     @Query("""
             SELECT t
