@@ -69,6 +69,10 @@ public class Reservation {
                 reservationTime.hasConflict(theme.getDuration(), startAt);
     }
 
+    public boolean isWaiting() {
+        return bookingStatus == BookingStatus.WAITING;
+    }
+
     public Long getId() {
         return id;
     }
@@ -107,6 +111,10 @@ public class Reservation {
 
     public String getStatusValue() {
         return bookingStatus.getValue();
+    }
+
+    public void setStatus(final BookingStatus bookingStatus) {
+        this.bookingStatus = bookingStatus;
     }
 
     @Override

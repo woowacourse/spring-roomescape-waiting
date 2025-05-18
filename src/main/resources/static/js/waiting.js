@@ -1,5 +1,3 @@
-const RESERVATION_API_ENDPOINT = '/admin/reservations';
-
 document.addEventListener('DOMContentLoaded', () => {
     fetch('/admin/reservations/waiting') // 내 예약 목록 조회 API 호출
         .then(response => {
@@ -44,24 +42,24 @@ function approve(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 승인 API 호출
      */
-    const endpoint = '/admin/reservations/waiting' + id;
+    const endpoint = '/admin/reservations/waiting/' + id;
     return fetch(endpoint, {
         method: 'PUT'
     }).then(response => {
         if (response.status === 200) return;
-        throw new Error('Delete failed');
-    }).then(() => location.reload());
+        throw new Error('Approve failed');
+    }).then(() => location.reload())
+        .catch((error) => {
+            alert("예약 승인에 실패했습니다.");
+        });
 }
 
 function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 거절 API 호출
-     */
-    return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, {
+    const endpoint = '/admin/reservations/' + id;
+    return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;

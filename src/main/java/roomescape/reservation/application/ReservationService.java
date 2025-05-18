@@ -143,23 +143,22 @@ public class ReservationService {
                 .toList();
     }
 
-    private ReservationResponse addReservation(final Long timeId, final Long themeId, final Long memberId,
-                                               final LocalDate date) {
-        final ReservationTime reservationTime = getReservationTime(timeId);
-        final Theme theme = getTheme(themeId);
-        final Member member = getMember(memberId);
-
-        final List<Reservation> sameDateAndThemeReservations = reservationRepository.findByDateAndThemeIdWithAssociations(
-                date,
-                themeId);
-
-        validateIsBooked(sameDateAndThemeReservations, reservationTime, theme);
-        validatePastDateTime(date, reservationTime.getStartAt());
-
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member,
-                BookingStatus.RESERVED);
-        final Reservation saved = reservationRepository.save(reservation);
-        return ReservationResponse.from(saved);
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStatus(final Long id) {
+        final Reservation reservation = getReservation(id);
+        if (!reservation.isWaiting()) {
+            throw new BadRequestException("대기 중인 예약이 아닙니다.");
+        }
+        boolean isDuplicated = reservationRepository.existsByDateAndThemeAndTimeAndBookingStatus(
+                reservation.getDate(),
+                reservation.getTheme(),
+                reservation.getTime(),
+                BookingStatus.RESERVED
+        );
+        if (isDuplicated) {
+            throw new BadRequestException("이미 동일한 시간에 예약된 건이 있습니다.");
+        }
+        reservation.setStatus(BookingStatus.RESERVED);
     }
 
     private void validateIsBooked(final List<Reservation> sameTimeReservations, final ReservationTime reservationTime,
@@ -193,6 +192,11 @@ public class ReservationService {
             responses.add(response);
         }
         return responses;
+    }
+
+    private Reservation getReservation(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("선택한 예약이 존재하지 않습니다."));
     }
 
     private ReservationTime getReservationTime(final Long timeId) {
