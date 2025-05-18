@@ -37,12 +37,6 @@ public class ReservationTime {
     public ReservationTime() {
     }
 
-    private void validateStartAt(final LocalTime startAt) {
-        if (startAt == null) {
-            throw new IllegalArgumentException("startAt이 null 입니다.");
-        }
-    }
-
     public boolean isSameReservationTime(final ReservationTime reservationTime) {
         return id.equals(reservationTime.getId());
     }
@@ -53,5 +47,11 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    private void validateStartAt(final LocalTime startAt) {
+        if (startAt == null) {
+            throw new IllegalArgumentException("startAt이 null 입니다.");
+        }
     }
 }
