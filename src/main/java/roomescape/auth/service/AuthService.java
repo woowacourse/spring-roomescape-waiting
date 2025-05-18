@@ -1,0 +1,50 @@
+package roomescape.auth.service;
+
+import org.springframework.stereotype.Service;
+
+import roomescape.auth.dto.LoginMember;
+import roomescape.auth.dto.LoginRequest;
+import roomescape.auth.dto.LoginResponse;
+import roomescape.common.exception.EntityNotFoundException;
+import roomescape.common.exception.LoginFailException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
+
+@Service
+public class AuthService {
+
+    private final MemberRepository memberRepository;
+    private final JwtTokenHandler jwtTokenHandler;
+
+    public AuthService(final MemberRepository memberRepository, final JwtTokenHandler jwtTokenHandler) {
+        this.memberRepository = memberRepository;
+        this.jwtTokenHandler = jwtTokenHandler;
+    }
+
+    public LoginResponse login(final LoginRequest request) {
+        Member member = memberRepository.findByEmailAndPassword(
+                request.email(), request.password()
+        ).orElseThrow(() -> new LoginFailException("이메일 또는 비밀번호가 잘못 되었습니다."));
+
+        String tokenValue = jwtTokenHandler.createToken(member);
+        return new LoginResponse(tokenValue);
+    }
+
+    public Member findById(final Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자 입니다."));
+    }
+
+    public LoginMember findLoginMemberById(final Long id) {
+        return LoginMember.of(findById(id));
+    }
+
+    public LoginMember createLoginMemberByToken(final String token) {
+        Long memberId = Long.parseLong(jwtTokenHandler.getMemberId(token));
+        String name = jwtTokenHandler.getName(token);
+        Role role = jwtTokenHandler.getRole(token);
+
+        return new LoginMember(memberId, name, role);
+    }
+}
