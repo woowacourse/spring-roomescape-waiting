@@ -17,8 +17,8 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeCommandRepo
     private final JpaReservationTimeRepository jpaReservationTimeRepository;
 
     @Override
-    public Long save(final ReservationTime reservationTime) {
-        return jpaReservationTimeRepository.save(reservationTime).getId();
+    public ReservationTime save(final ReservationTime reservationTime) {
+        return jpaReservationTimeRepository.save(reservationTime);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeCommandRepo
     }
 
     @Override
-    public ReservationTime getByIdOrThrow(Long id) {
+    public ReservationTime getByIdOrThrow(final Long id) {
         return jpaReservationTimeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
     }

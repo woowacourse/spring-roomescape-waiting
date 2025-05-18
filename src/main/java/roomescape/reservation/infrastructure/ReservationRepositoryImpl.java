@@ -16,8 +16,8 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     private final JpaReservationRepository jpaReservationRepository;
 
     @Override
-    public Long save(final Reservation reservation) {
-        return jpaReservationRepository.save(reservation).getId();
+    public Reservation save(final Reservation reservation) {
+        return jpaReservationRepository.save(reservation);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ReservationRepositoryImpl implements ReservationCommandRepository, 
     }
 
     @Override
-    public Reservation getByIdOrThrow(Long id) {
+    public Reservation getByIdOrThrow(final Long id) {
         return jpaReservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
     }

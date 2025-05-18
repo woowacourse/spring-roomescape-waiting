@@ -16,8 +16,8 @@ public class ThemeRepositoryImpl implements ThemeCommandRepository, ThemeQueryRe
     private final JpaThemeRepository jpaThemeRepository;
 
     @Override
-    public Long save(final Theme theme) {
-        return jpaThemeRepository.save(theme).getId();
+    public Theme save(final Theme theme) {
+        return jpaThemeRepository.save(theme);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class ThemeRepositoryImpl implements ThemeCommandRepository, ThemeQueryRe
     }
 
     @Override
-    public Theme getByIdOrThrow(Long id) {
+    public Theme getByIdOrThrow(final Long id) {
         return jpaThemeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
     }

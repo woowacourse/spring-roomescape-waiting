@@ -26,10 +26,9 @@ public class ThemeService {
         }
 
         final Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
-        final Long id = themeCommandRepository.save(theme);
-        final Theme found = themeQueryRepository.getByIdOrThrow(id);
+        final Theme saved = themeCommandRepository.save(theme);
 
-        return ThemeResponse.from(found);
+        return ThemeResponse.from(saved);
     }
 
     public void delete(final Long id) {

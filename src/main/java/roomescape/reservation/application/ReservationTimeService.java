@@ -27,10 +27,9 @@ public class ReservationTimeService {
             throw new AlreadyExistException("해당 예약 시간이 이미 존재합니다. startAt = " + startAt);
         }
 
-        final Long id = reservationTimeCommandRepository.save(new ReservationTime(startAt));
-        final ReservationTime found = reservationTimeQueryRepository.getByIdOrThrow(id);
+        final ReservationTime saved = reservationTimeCommandRepository.save(new ReservationTime(startAt));
 
-        return ReservationTimeResponse.from(found);
+        return ReservationTimeResponse.from(saved);
     }
 
     public void deleteById(final Long id) {

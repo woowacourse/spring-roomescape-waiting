@@ -1,6 +1,10 @@
 package roomescape.theme.application;
 
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -11,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.AlreadyExistException;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeCommandRepository;
+import roomescape.theme.domain.ThemeQueryRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
@@ -27,6 +33,8 @@ class ThemeServiceTest {
 
     @Autowired
     private ThemeCommandRepository themeCommandRepository;
+    @Autowired
+    private ThemeQueryRepository themeQueryRepository;
 
     @Test
     void 테마를_저장한다() {
@@ -37,9 +45,8 @@ class ThemeServiceTest {
         final CreateThemeRequest request = new CreateThemeRequest(name, description, thumbnail);
 
         // when & then
-        Assertions.assertThatCode(() -> {
-            themeService.create(request);
-        }).doesNotThrowAnyException();
+        Assertions.assertThatCode(() -> themeService.create(request))
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -48,13 +55,16 @@ class ThemeServiceTest {
         final String name = "우가우가";
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
-        final Theme theme = new Theme(name, description, thumbnail);
-        final Long id = themeCommandRepository.save(theme);
+        final Theme theme = themeCommandRepository.save(new Theme(name, description, thumbnail));
 
         // when & then
-        Assertions.assertThatCode(() -> {
-            themeService.delete(id);
-        }).doesNotThrowAnyException();
+        assertAll(
+                () -> assertThatCode(() -> themeService.delete(theme.getId()))
+                        .doesNotThrowAnyException(),
+                () -> assertThatThrownBy(() -> themeQueryRepository.getByIdOrThrow(theme.getId()))
+                        .isInstanceOf(ResourceNotFoundException.class)
+                        .hasMessage("해당 테마가 존재하지 않습니다.")
+        );
     }
 
     @Test

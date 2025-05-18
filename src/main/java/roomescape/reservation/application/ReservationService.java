@@ -58,10 +58,9 @@ public class ReservationService {
         final Member member = memberQueryRepository.getByIdOrThrow(memberId);
         final Reservation reservation = Reservation.createForRegister(date, time, theme, member, state);
 
-        final Long id = reservationCommandRepository.save(reservation);
-        final Reservation found = reservationQueryRepository.getByIdOrThrow(id);
+        final Reservation saved = reservationCommandRepository.save(reservation);
 
-        return ReservationResponse.from(found);
+        return ReservationResponse.from(saved);
     }
 
     private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {
