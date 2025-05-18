@@ -16,15 +16,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.business.service.ThemeService;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ThemeControllerIntegrationTest {
 
     @LocalServerPort
@@ -36,7 +33,6 @@ class ThemeControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        RestAssured.basePath = "/themes";
     }
 
     @Test
@@ -48,7 +44,7 @@ class ThemeControllerIntegrationTest {
                 .contentType(ContentType.JSON)
                 .body(themeRequest)
                 .when()
-                .post()
+                .post("/themes")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("name", equalTo("Mystery Room"))
@@ -59,15 +55,25 @@ class ThemeControllerIntegrationTest {
     @DisplayName("저장된 모든 테마 정보를 조회할 때, 저장된 테마 목록을 반환해야 한다")
     void readAllThemes() {
         // Given
-        themeService.insert(new ThemeRequest("Theme 1", "Description 1", "썸네일"));
-        themeService.insert(new ThemeRequest("Theme 2", "Description 2", "썸네일"));
+        ThemeRequest themeRequest1 = new ThemeRequest("Theme 1", "Description 1", "썸네일");
+        given()
+                .contentType(ContentType.JSON)
+                .body(themeRequest1)
+                .when()
+                .post("/themes");
+
+        ThemeRequest themeRequest2 = new ThemeRequest("Theme 2", "Description 2", "썸네일");
+        given()
+                .contentType(ContentType.JSON)
+                .body(themeRequest2)
+                .when()
+                .post("/themes");
 
         when()
-                .get()
+                .get("/themes")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2));
-        // .body("name", hasItems("Theme 1", "Theme 2"));
     }
 
     @Test
@@ -77,7 +83,7 @@ class ThemeControllerIntegrationTest {
         ThemeResponse theme = themeService.insert(new ThemeRequest("To Delete", "Some description", "썸네일90"));
 
         when()
-                .delete("/{id}", theme.id())
+                .delete("themes/{id}", theme.id())
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
@@ -91,7 +97,7 @@ class ThemeControllerIntegrationTest {
 
         // TODO: reservation도 넣어보고 동작 확인하기!
         when()
-                .get("/popular")
+                .get("themes/popular")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2))
@@ -102,29 +108,29 @@ class ThemeControllerIntegrationTest {
     @Test
     @DisplayName("필수 필드가 누락된 요청으로 테마 생성 시, 400 BAD REQUEST가 반환되어야 한다")
     void createThemeWithInvalidRequest() {
-        // Given: 유효하지 않은 ThemeRequest 객체 생성 (필수 필드 누락)
+        // Given
         final ThemeRequest invalidRequest = new ThemeRequest("", "", "썸네일");
 
-        // When / Then: POST 요청 후 400 BAD REQUEST 응답 검증
+        // When & Then
         given()
                 .contentType(ContentType.JSON)
                 .body(invalidRequest)
                 .when()
-                .post()
+                .post("/themes")
                 .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value()); // 예외 메시지 검증
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
     @DisplayName("존재하지 않는 ID로 테마 삭제 시, 404 NOT FOUND가 반환되어야 한다")
     void deleteNonExistingTheme() {
-        // Given: 존재하지 않는 ID를 정의
+        // Given
         final Long invalidId = 9999L;
 
-        // When / Then: DELETE 요청 후 404 NOT FOUND 응답 검증
+        // When & Then
         when()
-                .delete("/{id}", invalidId)
+                .delete("themes/{id}", invalidId)
                 .then()
-                .statusCode(HttpStatus.NOT_FOUND.value()); // 예외 메시지 검증
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 }

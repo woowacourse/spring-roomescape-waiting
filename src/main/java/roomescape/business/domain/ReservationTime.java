@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "reservation_times")
+@Table(name = "reservation_time")
 public class ReservationTime {
 
     @Id
@@ -27,11 +27,6 @@ public class ReservationTime {
 
     public ReservationTime(final LocalTime startAt) {
         this(null, startAt);
-    }
-
-    public ReservationTime(final Long id) {
-        this.id = id;
-        this.startAt = null;
     }
 
     public ReservationTime() {

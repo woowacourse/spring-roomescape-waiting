@@ -67,9 +67,9 @@ public class ReservationTimeService {
         final List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
-                .map(playTime -> {
-                    boolean isAlreadyBooked = containPlayTime(reservations, playTime);
-                    return new ReservationAvailableTimeResponse(playTime, isAlreadyBooked);
+                .map(reservationTime -> {
+                    boolean isAlreadyBooked = containPlayTime(reservations, reservationTime);
+                    return ReservationAvailableTimeResponse.from(reservationTime, isAlreadyBooked);
                 })
                 .collect(Collectors.toList());
     }

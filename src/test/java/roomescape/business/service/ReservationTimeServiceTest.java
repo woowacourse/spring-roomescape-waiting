@@ -16,8 +16,8 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.business.domain.ReservationTime;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.presentation.dto.PlayTimeRequest;
 import roomescape.presentation.dto.PlayTimeResponse;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
@@ -149,10 +149,10 @@ class ReservationTimeServiceTest {
 
         // then
         final ReservationAvailableTimeResponse notAvailableTimeResponse = availableTimeResponses.stream()
-                        .filter(response -> response.reservationTime().getId() == 100L)
+                        .filter(response -> response.reservationTimeResponse().id() == 100L)
                 .findFirst().get();
         final ReservationAvailableTimeResponse availableTimeResponse = availableTimeResponses.stream()
-                        .filter(response -> response.reservationTime().getId() == 101L)
+                        .filter(response -> response.reservationTimeResponse().id() == 101L)
                 .findFirst().get();
         assertAll(
                 () -> assertThat(availableTimeResponses).hasSize(2),

@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "members")
+@Table(name = "member")
 public class Member {
 
     @Id
@@ -37,14 +37,6 @@ public class Member {
 
     public Member(final String name, final String role, final String email, final String password) {
         this(null, name, role, email, password);
-    }
-
-    public Member(final Long id) {
-        this.id = id;
-        this.name = null;
-        this.role = null;
-        this.email = null;
-        this.password = null;
     }
 
     public Member() {
