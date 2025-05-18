@@ -14,23 +14,19 @@ import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeCommandRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
-class ReservationTimeRepositoryImplTest {
+class ReservationTimeRepositoryTest {
 
     @Autowired
-    ReservationTimeRepositoryImpl reservationTimeRepository;
-
-    @Autowired
-    ReservationTimeCommandRepository reservationTimeCommandRepository;
+    ReservationTimeRepository reservationTimeRepository;
 
     @Test
     void ID_값에_해당하는_예약_시간을_반환한다() {
         // given
-        final ReservationTime saved = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final ReservationTime saved = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
 
         // when
         final ReservationTime found = reservationTimeRepository.getByIdOrThrow(saved.getId());

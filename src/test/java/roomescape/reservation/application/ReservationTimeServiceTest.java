@@ -14,7 +14,7 @@ import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeCommandRepository;
+import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 
 @DataJpaTest
@@ -26,7 +26,7 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Autowired
-    private ReservationTimeCommandRepository reservationTimeCommandRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -45,7 +45,7 @@ class ReservationTimeServiceTest {
     void 예약_시간을_삭제한다() {
         // given
         final LocalTime startAt = LocalTime.of(20, 28);
-        final ReservationTime saved = reservationTimeCommandRepository.save(new ReservationTime(startAt));
+        final ReservationTime saved = reservationTimeRepository.save(new ReservationTime(startAt));
 
         // when & then
         Assertions.assertThatCode(() -> reservationTimeService.deleteById(saved.getId()))
@@ -56,7 +56,7 @@ class ReservationTimeServiceTest {
     void 이미_존재하는_예약_시간을_추가하면_예외가_발생한다() {
         // given
         final LocalTime startAt = LocalTime.of(19, 55);
-        reservationTimeCommandRepository.save(new ReservationTime(startAt));
+        reservationTimeRepository.save(new ReservationTime(startAt));
 
         final CreateReservationTimeRequest request = new CreateReservationTimeRequest(startAt);
 
@@ -64,8 +64,6 @@ class ReservationTimeServiceTest {
         Assertions.assertThatThrownBy(() -> reservationTimeService.create(request))
                 .isInstanceOf(AlreadyExistException.class);
     }
-
-    // TODO: 테스트 추가: 해당_예약_시간으로_등록된_예약이_있으면_삭제할_수_없다
 
     @Test
     void 삭제할_예약_시간이_없으면_예외가_발생한다() {

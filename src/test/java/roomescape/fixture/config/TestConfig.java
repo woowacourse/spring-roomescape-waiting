@@ -3,60 +3,34 @@ package roomescape.fixture.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import roomescape.member.infrastructure.JpaMemberRepository;
-import roomescape.member.infrastructure.MemberRepositoryImpl;
+import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
-import roomescape.reservation.infrastructure.JpaReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
-import roomescape.reservation.infrastructure.ReservationRepositoryImpl;
-import roomescape.reservation.infrastructure.ReservationTimeRepositoryImpl;
+import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.theme.application.ThemeService;
-import roomescape.theme.infrastructure.JpaThemeRepository;
-import roomescape.theme.infrastructure.ThemeRepositoryImpl;
+import roomescape.theme.infrastructure.ThemeRepository;
 
 @TestConfiguration
 public class TestConfig {
 
     @Bean
-    public ReservationTimeRepositoryImpl reservationTimeRepository(
-            final JpaReservationTimeRepository jpaReservationTimeRepository) {
-        return new ReservationTimeRepositoryImpl(jpaReservationTimeRepository);
-    }
-
-    @Bean
-    public ThemeRepositoryImpl themeRepository(final JpaThemeRepository jpaThemeRepository) {
-        return new ThemeRepositoryImpl(jpaThemeRepository);
-    }
-
-    @Bean
-    public MemberRepositoryImpl memberRepository(final JpaMemberRepository jpaMemberRepository) {
-        return new MemberRepositoryImpl(jpaMemberRepository);
-    }
-
-    @Bean
-    public ReservationRepositoryImpl reservationRepositoryImpl(
-            final JpaReservationRepository jpaReservationRepository) {
-        return new ReservationRepositoryImpl(jpaReservationRepository);
-    }
-
-    @Bean
     public ReservationTimeService reservationTimeService(
-            final ReservationTimeRepositoryImpl reservationTimeRepository) {
-        return new ReservationTimeService(reservationTimeRepository, reservationTimeRepository);
+            final ReservationTimeRepository reservationTimeRepository) {
+        return new ReservationTimeService(reservationTimeRepository);
     }
 
     @Bean
-    public ThemeService themeService(final ThemeRepositoryImpl themeRepository) {
-        return new ThemeService(themeRepository, themeRepository);
+    public ThemeService themeService(final ThemeRepository themeRepository) {
+        return new ThemeService(themeRepository);
     }
 
     @Bean
-    public ReservationService reservationService(final ReservationRepositoryImpl reservationRepository,
-                                                 final ReservationTimeRepositoryImpl reservationTimeRepository,
-                                                 final ThemeRepositoryImpl themeRepository,
-                                                 final MemberRepositoryImpl memberRepository) {
-        return new ReservationService(reservationRepository, reservationRepository, reservationTimeRepository,
+    public ReservationService reservationService(final ReservationRepository reservationRepository,
+                                                 final ReservationTimeRepository reservationTimeRepository,
+                                                 final ThemeRepository themeRepository,
+                                                 final MemberRepository memberRepository) {
+        return new ReservationService(reservationRepository, reservationTimeRepository,
                 themeRepository, memberRepository);
     }
 }

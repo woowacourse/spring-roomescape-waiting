@@ -14,23 +14,19 @@ import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberCommandRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
-class MemberRepositoryImplTest {
+class MemberRepositoryTest {
 
     @Autowired
-    MemberRepositoryImpl memberRepository;
-
-    @Autowired
-    MemberCommandRepository memberCommandRepository;
+    MemberRepository memberRepository;
 
     @Test
     void ID_값에_해당하는_테마를_반환한다() {
         // given
-        final Member saved = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
+        final Member saved = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         // when
         final Member found = memberRepository.getByIdOrThrow(saved.getId());

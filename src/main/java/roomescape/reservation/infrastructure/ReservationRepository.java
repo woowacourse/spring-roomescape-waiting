@@ -4,9 +4,15 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.reservation.domain.Reservation;
 
-public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    default Reservation getByIdOrThrow(Long id) {
+        return this.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+    }
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

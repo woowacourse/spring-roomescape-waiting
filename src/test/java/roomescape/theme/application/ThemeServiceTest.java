@@ -18,8 +18,7 @@ import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeCommandRepository;
-import roomescape.theme.domain.ThemeQueryRepository;
+import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
@@ -32,9 +31,7 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Autowired
-    private ThemeCommandRepository themeCommandRepository;
-    @Autowired
-    private ThemeQueryRepository themeQueryRepository;
+    private ThemeRepository themeRepository;
 
     @Test
     void 테마를_저장한다() {
@@ -55,13 +52,13 @@ class ThemeServiceTest {
         final String name = "우가우가";
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
-        final Theme theme = themeCommandRepository.save(new Theme(name, description, thumbnail));
+        final Theme theme = themeRepository.save(new Theme(name, description, thumbnail));
 
         // when & then
         assertAll(
                 () -> assertThatCode(() -> themeService.delete(theme.getId()))
                         .doesNotThrowAnyException(),
-                () -> assertThatThrownBy(() -> themeQueryRepository.getByIdOrThrow(theme.getId()))
+                () -> assertThatThrownBy(() -> themeRepository.getByIdOrThrow(theme.getId()))
                         .isInstanceOf(ResourceNotFoundException.class)
                         .hasMessage("해당 테마가 존재하지 않습니다.")
         );
@@ -74,13 +71,13 @@ class ThemeServiceTest {
         final String description1 = "우가우가 설명";
         final String thumbnail1 = "따봉우가.jpg";
         final Theme theme1 = new Theme(name1, description1, thumbnail1);
-        themeCommandRepository.save(theme1);
+        themeRepository.save(theme1);
 
         final String name2 = "우가우가2";
         final String description2 = "우가우가2 설명";
         final String thumbnail2 = "따봉우가2.jpg";
         final Theme theme2 = new Theme(name2, description2, thumbnail2);
-        themeCommandRepository.save(theme2);
+        themeRepository.save(theme2);
 
         // when
         final List<ThemeResponse> themes = themeService.findAll();
@@ -104,7 +101,7 @@ class ThemeServiceTest {
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
         final Theme theme = new Theme(name, description, thumbnail);
-        themeCommandRepository.save(theme);
+        themeRepository.save(theme);
 
         final CreateThemeRequest request = new CreateThemeRequest(name, description, thumbnail);
 

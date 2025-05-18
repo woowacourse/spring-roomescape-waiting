@@ -24,43 +24,38 @@ import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberCommandRepository;
+import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeCommandRepository;
+import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
-class ReservationRepositoryImplTest {
+class ReservationRepositoryTest {
 
     @Autowired
-    ReservationRepositoryImpl reservationRepository;
+    ReservationRepository reservationRepository;
 
     @Autowired
-    MemberCommandRepository memberCommandRepository;
+    MemberRepository memberRepository;
 
     @Autowired
-    ThemeCommandRepository themeCommandRepository;
+    ThemeRepository themeRepository;
 
     @Autowired
-    ReservationTimeCommandRepository reservationTimeCommandRepository;
-
-    @Autowired
-    ReservationCommandRepository reservationCommandRepository;
+    ReservationTimeRepository reservationTimeRepository;
 
     @Test
     void ID_값에_해당하는_예약을_반환한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime time = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final Theme theme = themeCommandRepository.save(NOT_SAVED_THEME_1());
-        final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
-        final Reservation saved = reservationCommandRepository.save(
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Reservation saved = reservationRepository.save(
                 Reservation.createForRegister(date, time, theme, member,
                         BookingState.WAITING));
 
@@ -97,18 +92,18 @@ class ReservationRepositoryImplTest {
                                             final List<LocalDate> dates) {
         // given
         final LocalDate date1 = LocalDate.now().plusDays(1);
-        final ReservationTime time1 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
 
         final LocalDate date2 = LocalDate.now().plusDays(5);
-        final ReservationTime time2 = reservationTimeCommandRepository.save(NOT_SAVED_RESERVATION_TIME_2());
+        final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
 
-        final Theme theme = themeCommandRepository.save(NOT_SAVED_THEME_1());
-        final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 Reservation.createForRegister(date1, time1, theme, member, BookingState.WAITING));
 
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 Reservation.createForRegister(date2, time2, theme, member, BookingState.WAITING));
 
         // when
