@@ -58,6 +58,7 @@ public class TimeService {
     public void deleteTime(Long id) {
         try {
             repository.deleteById(id);
+            repository.flush();
         } catch (DataIntegrityViolationException e) {
             throw new IllegalArgumentException("예약이 존재하는 시간은 삭제할 수 없습니다.");
         } catch (EmptyResultDataAccessException e) {
