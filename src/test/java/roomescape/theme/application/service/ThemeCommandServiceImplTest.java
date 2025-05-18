@@ -1,4 +1,4 @@
-package roomescape.theme.application;
+package roomescape.theme.application.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.theme.application.dto.CreateThemeServiceRequest;
-import roomescape.theme.application.service.ThemeCommandServiceImpl;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;

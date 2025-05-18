@@ -1,4 +1,4 @@
-package roomescape.theme.application;
+package roomescape.theme.application.service;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +11,6 @@ import roomescape.common.domain.Email;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.theme.application.service.ThemeQueryServiceImpl;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
