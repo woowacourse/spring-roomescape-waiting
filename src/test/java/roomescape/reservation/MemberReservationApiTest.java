@@ -127,6 +127,20 @@ public class MemberReservationApiTest {
     }
 
     @Test
+    void 테마_id가_null이면_에러를_반환한다() {
+        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), 1L, null,
+                BookingStatus.RESERVED);
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
     void 로그인을_안한상태로_본인의_예약을_조회하면_401를_반환한다() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
