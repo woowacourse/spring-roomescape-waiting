@@ -1,9 +1,7 @@
 package roomescape.user.domain;
 
-import jakarta.persistence.Embeddable;
 import roomescape.common.domain.DomainId;
 
-@Embeddable
 public class UserId extends DomainId {
 
     protected UserId() {
