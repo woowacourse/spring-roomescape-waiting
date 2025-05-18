@@ -3,6 +3,8 @@ package roomescape.controller.api;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
+import java.util.Objects;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,8 +42,16 @@ class ThemeControllerTest {
     @Test
     @DisplayName("테마 관리 페이지 내에서 테마 삭제")
     void deleteTheme() {
+        int  id = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(getTestParamsWithTheme())
+                .when().post("/themes")
+                .then().log().all()
+                .statusCode(201)
+                .extract().path("id");
+
         RestAssured.given().log().all()
-            .when().delete("/themes/1")
+            .when().delete("/themes/" + id)
             .then().log().all()
             .statusCode(204);
 

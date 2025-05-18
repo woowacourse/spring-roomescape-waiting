@@ -3,6 +3,8 @@ package roomescape.controller.api;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
+import java.util.Objects;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,8 +42,16 @@ class TimeControllerTest {
     @Test
     @DisplayName("시간 관리 페이지 내에서 예약 삭제")
     void deleteReservationTime() {
+        int  id = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(getTestParamsWithReservationTime())
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract().path("id");
+
         RestAssured.given().log().all()
-            .when().delete("/times/1")
+            .when().delete("/times/" + id)
             .then().log().all()
             .statusCode(204);
 

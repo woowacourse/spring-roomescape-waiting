@@ -16,10 +16,12 @@ public record MyReservationResponse(
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
             reservation.getId(),
-            reservation.getTheme().getName(),
+            reservation.getThemeName(),
             reservation.getDate(),
-            reservation.getTime().getStartAt(),
-            reservation.getStatus().getText()
+            reservation.getStartAt(),
+            reservation.getStatusText()
         );
     }
+
+
 }

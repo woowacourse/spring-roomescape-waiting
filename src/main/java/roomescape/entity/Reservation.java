@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 public class Reservation {
@@ -69,4 +70,17 @@ public class Reservation {
     public ReservationStatus getStatus() {
         return status;
     }
+
+    public String getThemeName() {
+        return theme.getName();
+    }
+
+    public LocalTime getStartAt() {
+        return time.getStartAt();
+    }
+
+    public String getStatusText() {
+        return status.getText();
+    }
+
 }
