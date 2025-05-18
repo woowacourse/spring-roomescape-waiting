@@ -1,5 +1,6 @@
 package roomescape.member;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,8 +27,13 @@ public class Member {
     @EqualsAndHashCode.Include
     private final Long id;
 
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)

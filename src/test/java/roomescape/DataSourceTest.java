@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.dto.ReservationResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class DataSourceTest {
+class DataSourceTest {
 
     private static final Map<String, String> RESERVATION_BODY = new HashMap<>();
     private static final Map<String, String> TIME_BODY = new HashMap<>();
@@ -94,8 +94,8 @@ public class DataSourceTest {
         jdbcTemplate.update("INSERT INTO member (name, email, password, role) VALUES (?, ?, ?, ?)", "name", "email@email.com", "password", "MEMBER");
         jdbcTemplate.update("INSERT INTO THEME (name, description, thumbnail) VALUES (?, ?, ?)", "name", "dest", "thumb");
         jdbcTemplate.update("INSERT INTO RESERVATION_TIME (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO RESERVATION (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)", "2023-08-05",
-                "1", "1", "1");
+        jdbcTemplate.update("INSERT INTO RESERVATION (date, reservation_time_id, theme_id, member_id, reservation_status) VALUES (?, ?, ?, ?, ?)", "2023-08-05",
+                "1", "1", "1", "PENDING");
         final Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
         // when
@@ -106,7 +106,7 @@ public class DataSourceTest {
                 .jsonPath().getList(".", ReservationResponse.class);
 
         // then
-        assertThat(reservations.size()).isEqualTo(count);
+        assertThat(reservations).hasSize(count);
     }
 
     @DisplayName("reservation 삽입, 삭제 검증")
@@ -130,7 +130,7 @@ public class DataSourceTest {
                 .statusCode(204);
 
         Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-        assertThat(countAfterDelete).isEqualTo(0);
+        assertThat(countAfterDelete).isZero();
     }
 
     @DisplayName("time과 reservation 연결 테스트")

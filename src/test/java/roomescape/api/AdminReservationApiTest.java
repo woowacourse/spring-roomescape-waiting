@@ -166,10 +166,10 @@ class AdminReservationApiTest {
                         ('theme2', 'des2', 'thumb2');
                     """);
             jdbcTemplate.update("""
-                        INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES
-                        ('2025-05-07', 1, 1, 1),
-                        ('2025-05-07', 1, 1, 2),
-                        ('2025-05-08', 1, 1, 2);
+                        INSERT INTO reservation (date, member_id, reservation_time_id, theme_id, reservation_status) VALUES
+                        ('2025-05-07', 1, 1, 1, 'PENDING'),
+                        ('2025-05-07', 1, 1, 2, 'PENDING'),
+                        ('2025-05-08', 1, 1, 2, 'PENDING');
                     """);
 
             // when & then

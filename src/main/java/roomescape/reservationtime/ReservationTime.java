@@ -1,5 +1,6 @@
 package roomescape.reservationtime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +19,8 @@ public class ReservationTime {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private final Long id;
+
+    @Column(nullable = false)
     private final LocalTime startAt;
 
     public ReservationTime() {
