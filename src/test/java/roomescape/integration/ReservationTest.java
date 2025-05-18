@@ -2,7 +2,7 @@ package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static roomescape.reservation.fixture.ReservationDateFixture.예약날짜_내일;
+import static roomescape.common.Constant.예약날짜_내일;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

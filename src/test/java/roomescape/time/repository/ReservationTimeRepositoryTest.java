@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.time.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +21,6 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.ReservationTimeRepository;
 
 @DataJpaTest
 class ReservationTimeRepositoryTest {

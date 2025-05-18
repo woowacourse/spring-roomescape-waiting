@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.theme.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,10 +21,10 @@ import roomescape.member.domain.Password;
 import roomescape.member.role.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.service.ReservationRepository;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 
 @ExtendWith(MockitoExtension.class)

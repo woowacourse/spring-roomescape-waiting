@@ -1,8 +1,8 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.common.Constant.예약날짜_내일;
 import static roomescape.member.role.Role.ADMIN;
-import static roomescape.reservation.fixture.ReservationDateFixture.예약날짜_내일;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

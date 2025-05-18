@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static roomescape.reservation.fixture.MemberFixture.MATT;
-import static roomescape.reservation.fixture.ReservationDateFixture.예약날짜_내일;
+import static roomescape.common.Constant.MATT;
+import static roomescape.common.Constant.예약날짜_내일;
 
 import java.time.LocalTime;
 import java.util.NoSuchElementException;
