@@ -1,15 +1,5 @@
 package roomescape.reservationtime;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,6 +16,18 @@ import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static roomescape.util.TestFactory.reservationTimeWithId;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
@@ -55,7 +57,7 @@ public class ReservationTimeServiceTest {
             final ReservationTimeRequest request = new ReservationTimeRequest(startAt);
             given(reservationTimeRepository.existsByStartAt(startAt))
                     .willReturn(false);
-            final ReservationTime reservationTime = new ReservationTime(1L, startAt);
+            final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(startAt));
             given(reservationTimeRepository.save(new ReservationTime(startAt)))
                     .willReturn(reservationTime);
 
@@ -74,7 +76,7 @@ public class ReservationTimeServiceTest {
             final ReservationTimeRequest request = new ReservationTimeRequest(startAt);
             given(reservationTimeRepository.existsByStartAt(startAt))
                     .willReturn(true);
-            final ReservationTime reservationTime = new ReservationTime(1L, startAt);
+            final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(startAt));
             given(reservationTimeRepository.save(new ReservationTime(startAt)))
                     .willReturn(reservationTime);
 
@@ -94,8 +96,8 @@ public class ReservationTimeServiceTest {
         void findAllTime1() {
             // given
             given(reservationTimeRepository.findAll())
-                    .willReturn(List.of(
-                            new ReservationTime(1L, LocalTime.of(12, 40))
+                    .willReturn(List.of(reservationTimeWithId(1L,
+                            new ReservationTime(LocalTime.of(12, 40)))
                     ));
 
             // when
@@ -135,9 +137,9 @@ public class ReservationTimeServiceTest {
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             given(reservationTimeRepository.findAll())
                     .willReturn(List.of(
-                            new ReservationTime(1L,LocalTime.of(12, 0)),
-                            new ReservationTime(2L,LocalTime.of(13, 0)),
-                            new ReservationTime(3L,LocalTime.of(14, 0))
+                            reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 0))),
+                            reservationTimeWithId(2L, new ReservationTime(LocalTime.of(13, 0))),
+                            reservationTimeWithId(3L, new ReservationTime(LocalTime.of(14, 0)))
                     ));
             given(themeRepository.findById(dummyThemeId))
                     .willReturn(Optional.of(theme));
@@ -159,7 +161,7 @@ public class ReservationTimeServiceTest {
             final Long dummyThemeId = 1L;
             final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
-            final ReservationTime savedTime = new ReservationTime(1L, LocalTime.of(12, 0));
+            final ReservationTime savedTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 0)));
             given(reservationTimeRepository.findAll())
                     .willReturn(List.of(
                             savedTime
@@ -168,7 +170,7 @@ public class ReservationTimeServiceTest {
                     .willReturn(Optional.of(theme));
             given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of(
-                            new Reservation(1L, null, null, savedTime, theme, ReservationStatus.PENDING))
+                            new Reservation(null, null, savedTime, theme, ReservationStatus.PENDING))
                     );
 
             // when
@@ -187,8 +189,8 @@ public class ReservationTimeServiceTest {
             final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             given(reservationTimeRepository.findAll())
-                    .willReturn(List.of(
-                            new ReservationTime(1L,LocalTime.of(12, 0))
+                    .willReturn(List.of(reservationTimeWithId(1L,
+                            new ReservationTime(LocalTime.of(12, 0)))
                     ));
             given(themeRepository.findById(dummyThemeId))
                     .willReturn(Optional.of(theme));
@@ -213,7 +215,7 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById1() {
             // given
-            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
+            final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
             given(reservationTimeRepository.findById(reservationTime.getId()))
                     .willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByReservationTime(reservationTime))
@@ -230,7 +232,7 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById2() {
             // given
-            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
+            final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
             given(reservationTimeRepository.findById(reservationTime.getId()))
                     .willReturn(Optional.empty());
 
@@ -244,7 +246,7 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById3() {
             // given
-            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
+            final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
             given(reservationTimeRepository.findById(reservationTime.getId()))
                     .willReturn(Optional.of(reservationTime));
             given(reservationRepository.existsByReservationTime(reservationTime))

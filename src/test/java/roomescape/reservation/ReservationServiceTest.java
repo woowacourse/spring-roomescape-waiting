@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
+import static roomescape.util.TestFactory.reservationTimeWithId;
 import static roomescape.util.TestFactory.reservationWithId;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +64,7 @@ public class ReservationServiceTest {
         private static final LoginMember LOGIN_MEMBER =
                 new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
         private static final Optional<ReservationTime> TIME_BY_ID = Optional.of(
-                new ReservationTime(REQUEST.timeId(), LocalTime.of(12, 40)));
+                reservationTimeWithId(REQUEST.themeId(), new ReservationTime(LocalTime.of(12, 40))));
         private static final Optional<Theme> THEME_BY_ID = Optional.of(
                 new Theme(REQUEST.themeId(), "야당", "야당당", "123"));
         private static final Optional<Member> MEMBER_BY_EMAIL = Optional.of(
@@ -178,7 +179,7 @@ public class ReservationServiceTest {
             final ReservationRequest request = new ReservationRequest(
                     LocalDate.now(), 1L, 1L);
             given(reservationTimeRepository.findById(request.timeId()))
-                    .willReturn(Optional.of(new ReservationTime(request.timeId(), LocalTime.now().minusHours(1))));
+                    .willReturn(Optional.of(reservationTimeWithId(request.themeId(), new ReservationTime(LocalTime.now().minusHours(1)))));
 
             // when & then
             assertThatThrownBy(() -> {
@@ -194,7 +195,7 @@ public class ReservationServiceTest {
         private static final AdminReservationRequest REQUEST =
                 new AdminReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 1L);
         private static final Optional<ReservationTime> TIME_BY_ID = Optional.of(
-                new ReservationTime(REQUEST.timeId(), LocalTime.of(12, 40)));
+                reservationTimeWithId(REQUEST.timeId(), new ReservationTime(LocalTime.of(12, 40))));
         private static final Optional<Theme> THEME_BY_ID = Optional.of(
                 new Theme(REQUEST.themeId(), "야당", "야당당", "123"));
         private static final Optional<Member> MEMBER_BY_ID = Optional.of(
@@ -342,7 +343,7 @@ public class ReservationServiceTest {
             Reservation reservation = new Reservation(
                     LocalDate.of(2024, 1, 1),
                     new Member(1L, "boogie", "password", "boogie", MemberRole.MEMBER),
-                    new ReservationTime(1L, LocalTime.of(12, 40)),
+                    reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))),
                     new Theme(1L, "야당", "야당당", "123"),
                     ReservationStatus.PENDING
             );
@@ -402,8 +403,8 @@ public class ReservationServiceTest {
             given(themeRepository.findById(request.themeId()))
                     .willReturn(Optional.of(theme));
             given(reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, request.from(), request.to())).willReturn(List.of(
-                    reservationWithId(1L, new Reservation(LocalDate.of(2024, 6, 15), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING)),
-                    reservationWithId(2L, new Reservation(LocalDate.of(2024, 7, 20), member, new ReservationTime(1L, LocalTime.of(12, 40)), theme, ReservationStatus.PENDING))
+                    reservationWithId(1L, new Reservation(LocalDate.of(2024, 6, 15), member, reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))), theme, ReservationStatus.PENDING)),
+                    reservationWithId(2L, new Reservation(LocalDate.of(2024, 7, 20), member, reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))), theme, ReservationStatus.PENDING))
             ));
 
             // when
