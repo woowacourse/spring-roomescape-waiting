@@ -1,5 +1,8 @@
 package roomescape.reservation.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum BookingStatus {
 
     RESERVED("예약"),
@@ -9,9 +12,5 @@ public enum BookingStatus {
 
     BookingStatus(final String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 }

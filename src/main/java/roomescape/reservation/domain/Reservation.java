@@ -11,12 +11,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.theme.domain.Theme;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(of = "id")
 public class Reservation {
 
     @Id
@@ -37,10 +43,6 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private BookingStatus bookingStatus;
-
-    protected Reservation() {
-
-    }
 
     public Reservation(
             final Long id,
@@ -78,28 +80,8 @@ public class Reservation {
         return bookingStatus == BookingStatus.WAITING;
     }
 
-    public Long getId() {
-        return id;
-    }
-
     public MemberName getName() {
         return member.getName();
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Member getMember() {
-        return member;
     }
 
     public String getThemeName() {
@@ -110,29 +92,11 @@ public class Reservation {
         return time.getStartAt();
     }
 
-    public BookingStatus getStatus() {
-        return bookingStatus;
-    }
-
     public String getStatusValue() {
         return bookingStatus.getValue();
     }
 
     public void setStatus(final BookingStatus bookingStatus) {
         this.bookingStatus = bookingStatus;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }
