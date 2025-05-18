@@ -5,16 +5,16 @@ INSERT INTO reservation_time (start_at) VALUES
 
 -- theme
 INSERT INTO theme (name, description, thumbnail) VALUES
-                                                     ('Mystery Room', 'Solve the mysterious case in 60 minutes', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Prison Break', 'Escape from prison before time runs out', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Zombie Lab', 'Find the cure before zombies take over', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Space Mission', 'Repair the shuttle and return safely', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Haunted House', 'Survive the ghosts and escape', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Spy Academy', 'Pass the spy training missions', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Bank Heist', 'Steal the gold without triggering alarms', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Time Travel', 'Fix the time machine to return', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Alien Invasion', 'Evacuate Earth and contact allies', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp'),
-                                                     ('Secret Society', 'Uncover the cult and stop the ritual', 'https://i.namu.wiki/i/zfRtOmLQlnowdqQsfQPPFtjIuZcXI0sXsCYCypGmAGlg4L89S5q7s38sMYwYLdHkV6tYgDwKDIk38StNo_TdaovVMbYKJz46DL3yMjR3VglSFodoABoZQ2VG83vNOMuHuwmsrPlmz6KOot8MbLsNjQ.webp');
+                                                     ('Mystery Room', 'Solve the mysterious case in 60 minutes', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Prison Break', 'Escape from prison before time runs out', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Zombie Lab', 'Find the cure before zombies take over', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Space Mission', 'Repair the shuttle and return safely', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Haunted House', 'Survive the ghosts and escape', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Spy Academy', 'Pass the spy training missions', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Bank Heist', 'Steal the gold without triggering alarms', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Time Travel', 'Fix the time machine to return', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Alien Invasion', 'Evacuate Earth and contact allies', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg'),
+                                                     ('Secret Society', 'Uncover the cult and stop the ritual', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Arth_tapestry2.jpg/500px-Arth_tapestry2.jpg');
 
 -- member
 INSERT INTO member (email, password, name, role) VALUES
