@@ -299,4 +299,66 @@ class ReservationRepositoryTest {
         assertThat(actual).isEmpty();
     }
 
+    @DisplayName("해당하는 테마가 예약에 존재하면 true를 반환한다.")
+    @Test
+    void existsByThemeId() {
+        //given
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(23, 30));
+        reservationTimeRepository.save(reservationTime);
+
+        Member member = new Member("도기", "email@example.com", "1234", Role.USER);
+        memberRepository.save(member);
+
+        Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        Reservation reservation = new Reservation(
+                date,
+                reservationTime,
+                theme,
+                member,
+                LocalDate.of(2025, 1, 1)
+        );
+        reservationRepository.save(reservation);
+
+        //when
+        boolean actual = reservationRepository.existsByThemeId(theme.getId());
+
+        //then
+        assertThat(actual).isTrue();
+    }
+
+    @DisplayName("해당하는 테마가 예약에 존재하지 않으면 false를 반환한다.")
+    @Test
+    void nonExistsByThemeId() {
+        //given
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(23, 30));
+        reservationTimeRepository.save(reservationTime);
+
+        Member member = new Member("도기", "email@example.com", "1234", Role.USER);
+        memberRepository.save(member);
+
+        Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        Reservation reservation = new Reservation(
+                date,
+                reservationTime,
+                theme,
+                member,
+                LocalDate.of(2025, 1, 1)
+        );
+        reservationRepository.save(reservation);
+
+        //when
+        boolean actual = reservationRepository.existsByThemeId(null);
+
+        //then
+        assertThat(actual).isFalse();
+    }
+
 }

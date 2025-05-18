@@ -3,7 +3,6 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
@@ -11,6 +10,7 @@ import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Theme;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
@@ -20,9 +20,11 @@ public class ThemeService {
     private static final int POPULAR_THEME_SIZE = 10;
 
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional(readOnly = true)
@@ -56,9 +58,12 @@ public class ThemeService {
 
     @Transactional
     public void deleteTheme(Long id) {
-        try {
-            themeRepository.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
+        validateAlreadyReservationForTheme(id);
+        themeRepository.deleteById(id);
+    }
+
+    private void validateAlreadyReservationForTheme(final Long id) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new ResourceInUseException("삭제하고자 하는 테마에 예약된 정보가 있습니다.");
         }
     }
