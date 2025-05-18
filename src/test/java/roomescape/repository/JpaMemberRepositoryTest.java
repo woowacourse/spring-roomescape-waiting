@@ -9,6 +9,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.entity.Member;
 
+import java.util.Optional;
+
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class JpaMemberRepositoryTest {
@@ -19,13 +21,16 @@ class JpaMemberRepositoryTest {
     @Test
     @DisplayName("이메일이 존재한다면 조회할 수 있다.")
     void findMemberByExistedEmail() {
+        // given
         Member member = Member.createUser("이름", "이메일", "비밀번호");
         jpaMemberRepository.save(member);
 
-        String email = member.getEmail();
-        Member expected = jpaMemberRepository.findByEmail(email);
+        // when
+        Optional<Member> result = jpaMemberRepository.findByEmail(member.getEmail());
 
-        assertThat(expected.getEmail()).isEqualTo(email);
+        // then
+        assertThat(result).isPresent(); // Optional이 존재하는지
+        assertThat(result.get().getEmail()).isEqualTo(member.getEmail());
     }
 
     @Test

@@ -8,6 +8,8 @@ import roomescape.exception.custom.NotFoundException;
 import roomescape.provider.JwtTokenProvider;
 import roomescape.repository.JpaMemberRepository;
 
+import java.util.Optional;
+
 @Service
 public class AuthService {
 
@@ -20,7 +22,8 @@ public class AuthService {
     }
 
     public String createToken(LoginRequest request) {
-        Member member = memberRepository.findByEmail(request.email());
+       Member member = memberRepository.findByEmail(request.email())
+               .orElseThrow(() -> new NotFoundException("member"));
 
         validatePassword(request.password(), member);
         return jwtTokenProvider.createToken(member);
