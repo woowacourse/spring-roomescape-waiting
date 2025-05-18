@@ -1,5 +1,6 @@
 package roomescape;
 
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 import org.springframework.http.ResponseCookie;
 import roomescape.domain.*;
@@ -10,27 +11,35 @@ import roomescape.service.result.ThemeResult;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 
 public class TestFixture {
-    public static final LocalDate TEST_DATE = LocalDate.of(2025, 1, 1);
+    //인증 관련 상수
     public static final String AUTH_COOKIE_NAME = "token";
-
-    // 추가된 공통 테스트 상수
     public static final String VALID_TOKEN = "header.payload.signature";
+
+    //멤버 관련 상수
+    public static final Long TEST_MEMBER_ID = 1L;
     public static final String TEST_EMAIL = "test@email.com";
     public static final String TEST_PASSWORD = "password";
     public static final String TEST_NAME = "test";
-    public static final Long TEST_MEMBER_ID = 1L;
-    public static final Long TEST_THEME_ID = 1L;
+
+    //예약 관련 상수
     public static final Long TEST_RESERVATION_ID = 1L;
+    public static final LocalDate TEST_DATE = LocalDate.of(2025, 1, 1);
+
+    //예약 시간 관련 상수
     public static final Long TEST_TIME_ID = 1L;
     public static final LocalTime TEST_TIME = LocalTime.of(12, 0);
-    
-    // 테마 관련 상수
+
+    //테마 관련 상수
+    public static final Long TEST_THEME_ID = 1L;
     public static final String TEST_THEME_NAME = "테마1";
     public static final String TEST_THEME_DESCRIPTION = "description";
     public static final String TEST_THEME_THUMBNAIL = "thumbnail";
 
+    //객체 생성 메서드
     public static ReservationTime createDefaultReservationTime() {
         return ReservationTime.createNew(LocalTime.of(12, 0));
     }
@@ -75,13 +84,8 @@ public class TestFixture {
                 .build();
     }
 
-    // 추가된 테스트 결과 객체 생성 메서드
     public static MemberResult createMemberResult() {
         return new MemberResult(TEST_MEMBER_ID, TEST_NAME, MemberRole.USER, TEST_EMAIL);
-    }
-    
-    public static MemberResult createMemberResult(Long id, String name, MemberRole role, String email) {
-        return new MemberResult(id, name, role, email);
     }
     
     public static ThemeResult createThemeResult() {
@@ -111,6 +115,8 @@ public class TestFixture {
         );
     }
 
+
+    //JSON 생성 메서드
     public static String createLoginJson() {
         return String.format("""
                 {
@@ -149,5 +155,60 @@ public class TestFixture {
                     "thumbnail": "%s"
                 }
                 """, TEST_THEME_NAME, TEST_THEME_DESCRIPTION, TEST_THEME_THUMBNAIL);
+    }
+
+    //인기 테마 조회 셋업 메서드
+    public static List<Theme> setupThemeRankTestCaseByLimit(EntityManager em) {
+        Theme theme1 = createThemeByName("theme1");
+        Theme theme2 = createThemeByName("theme2");
+        Theme theme3 = createThemeByName("theme3");
+        em.persist(theme1);
+        em.persist(theme2);
+        em.persist(theme3);
+        
+        Member member = createDefaultMember();
+        em.persist(member);
+        ReservationTime time = createDefaultReservationTime();
+        em.persist(time);
+        
+        // theme1에 2개의 예약
+        Reservation reservation1 = createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
+        Reservation reservation2 = createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
+        em.persist(reservation1);
+        em.persist(reservation2);
+        
+        // theme2에 1개의 예약
+        Reservation reservation3 = createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
+        em.persist(reservation3);
+        
+        return Arrays.asList(theme1, theme2, theme3);
+    }
+    
+    public static List<Theme> setupThemeRankTestCaseByDateRange(EntityManager em) {
+        Theme theme1 = createThemeByName("theme1");
+        Theme theme2 = createThemeByName("theme2");
+        Theme theme3 = createThemeByName("theme3");
+        em.persist(theme1);
+        em.persist(theme2);
+        em.persist(theme3);
+        
+        Member member = createDefaultMember();
+        em.persist(member);
+        ReservationTime time = createDefaultReservationTime();
+        em.persist(time);
+        
+        // theme1에 3개의 예약 (다양한 날짜에)
+        Reservation reservation1 = createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
+        Reservation reservation2 = createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
+        Reservation reservation3 = createDefaultReservation(member, LocalDate.of(2025, 1, 3), time, theme1);
+        em.persist(reservation1);
+        em.persist(reservation2);
+        em.persist(reservation3);
+        
+        // theme2에 1개의 예약
+        Reservation reservation4 = createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
+        em.persist(reservation4);
+        
+        return Arrays.asList(theme1, theme2, theme3);
     }
 }
