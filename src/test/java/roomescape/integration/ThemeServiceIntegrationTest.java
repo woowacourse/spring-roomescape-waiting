@@ -12,9 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.CurrentDateTime;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
@@ -25,9 +28,11 @@ import roomescape.reservation.service.ThemeService;
 import roomescape.reservation.service.dto.ThemeCreateCommand;
 import roomescape.reservation.service.dto.ThemeInfo;
 
+@ActiveProfiles("test")
 @DataJpaTest
 @Import(value = {ThemeRepositoryImpl.class, ReservationRepositoryImpl.class})
-@Sql(scripts = {"/schema.sql", "/test-data.sql"})
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ThemeServiceIntegrationTest {
 
     @Autowired

@@ -13,11 +13,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles({"test", "auth"})
 @AutoConfigureMockMvc
+@SpringBootTest
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Sql(scripts = "/member-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class AdminRoleInterceptorMockMvcTest {
 
     @Autowired

@@ -20,15 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.controller.ReservationController;
 
+@ActiveProfiles({"test", "auth"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(
-        value = "/schema.sql",
-        statements = "insert into member(name, email, password, role) values('레오', 'admin@gmail.com', 'qwer!', 'ADMIN')"
-)
+@Sql(scripts = "/member-data.sql")
 public class MissionStepTest {
 
     @Autowired
@@ -68,7 +67,7 @@ public class MissionStepTest {
     void testDatabaseConnection() {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
-            assertThat(connection.getCatalog()).isEqualTo("DATABASE");
+            assertThat(connection.getCatalog()).isEqualTo("TESTDB");
             assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
         } catch (SQLException e) {
             throw new RuntimeException(e);
