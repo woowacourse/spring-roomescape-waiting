@@ -22,10 +22,12 @@ public class ErrorResponse {
     }
 
     public static ErrorResponse of(ErrorCode errorCode, HttpServletRequest request) {
-        return new ErrorResponse(errorCode.getStatusValue(), errorCode.name(), errorCode.getMessage(), request.getMethod(), request.getRequestURI());
+        return new ErrorResponse(errorCode.getStatusValue(), errorCode.name(), errorCode.getMessage(),
+                request.getMethod(), request.getRequestURI());
     }
 
     public static ErrorResponse of(ErrorCode errorCode, String message, HttpServletRequest request) {
-        return new ErrorResponse(errorCode.getStatusValue(), errorCode.name(), message, request.getMethod(), request.getRequestURI());
+        return new ErrorResponse(errorCode.getStatusValue(), errorCode.name(), message, request.getMethod(),
+                request.getRequestURI());
     }
 }

@@ -1,11 +1,11 @@
 package roomescape.member.domain;
 
-import org.junit.jupiter.api.Test;
-import roomescape.common.exception.InvalidInputException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.Test;
+import roomescape.common.exception.InvalidInputException;
 
 class MemberTest {
 

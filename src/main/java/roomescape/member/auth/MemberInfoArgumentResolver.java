@@ -22,11 +22,12 @@ public class MemberInfoArgumentResolver implements HandlerMethodArgumentResolver
     }
 
     @Override
-    public Object resolveArgument(final MethodParameter parameter,
-                                      final ModelAndViewContainer mavContainer,
-                                      final NativeWebRequest webRequest,
-                                      final WebDataBinderFactory binderFactory) {
-
+    public Object resolveArgument(
+            final MethodParameter parameter,
+            final ModelAndViewContainer mavContainer,
+            final NativeWebRequest webRequest,
+            final WebDataBinderFactory binderFactory
+    ) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         final String token = jwtTokenExtractor.extractTokenFromCookie(request.getCookies());
         return authService.getMemberInfo(token);

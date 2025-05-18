@@ -1,5 +1,9 @@
 package roomescape.member.service.usecase;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.ConflictException;
@@ -11,10 +15,6 @@ import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MemberCommandUseCaseTest {
 

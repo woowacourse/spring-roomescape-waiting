@@ -29,9 +29,9 @@ public class AuthService {
         return MemberConverter.toResponse(
                 memberService.create(
                         new SignupRequest(
-                            signupRequest.email(),
-                            passwordEncoder.encode(signupRequest.password()),
-                            signupRequest.name()
+                                signupRequest.email(),
+                                passwordEncoder.encode(signupRequest.password()),
+                                signupRequest.name()
                         )
                 )
         );

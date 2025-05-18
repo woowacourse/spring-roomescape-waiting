@@ -1,5 +1,7 @@
 package roomescape.reservation.domain;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,9 +15,6 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 class ReservationTest {
 

@@ -28,8 +28,8 @@ public class FakeReservationRepository implements ReservationRepository {
     public boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> Objects.equals(reservation.getDate(), date)
-                        && Objects.equals(reservation.getTime().getId(), timeId)
-                        && Objects.equals(reservation.getTheme().getId(), themeId));
+                                         && Objects.equals(reservation.getTime().getId(), timeId)
+                                         && Objects.equals(reservation.getTheme().getId(), themeId));
     }
 
     @Override
@@ -37,9 +37,11 @@ public class FakeReservationRepository implements ReservationRepository {
                                                                     ReservationDate to) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getMember().getId(), memberId)
-                        && Objects.equals(reservation.getTheme().getId(), themeId)
-                        && (reservation.getDate().equals(from) || reservation.getDate().isAfter(from.getValue()))
-                        && (reservation.getDate().equals(to) || reservation.getDate().isBefore(to.getValue())))
+                                       && Objects.equals(reservation.getTheme().getId(), themeId)
+                                       && (reservation.getDate().equals(from) || reservation.getDate()
+                        .isAfter(from.getValue()))
+                                       && (reservation.getDate().equals(to) || reservation.getDate()
+                        .isBefore(to.getValue())))
                 .toList();
 
     }
@@ -48,7 +50,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getDate(), date)
-                        && Objects.equals(reservation.getTheme().getId(), themeId))
+                                       && Objects.equals(reservation.getTheme().getId(), themeId))
                 .toList();
     }
 
@@ -63,9 +65,9 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit) {
         return reservations.stream()
                 .filter(reservation -> (reservation.getDate().getValue().isEqual(startDate.getValue()) ||
-                        reservation.getDate().getValue().isAfter(startDate.getValue()))
-                        && (reservation.getDate().getValue().isEqual(endDate.getValue()) ||
-                        reservation.getDate().getValue().isBefore(endDate.getValue())))
+                                        reservation.getDate().getValue().isAfter(startDate.getValue()))
+                                       && (reservation.getDate().getValue().isEqual(endDate.getValue()) ||
+                                           reservation.getDate().getValue().isBefore(endDate.getValue())))
                 .collect(Collectors.groupingBy(
                         Reservation::getTheme,
                         Collectors.summingInt(reservation -> 1)

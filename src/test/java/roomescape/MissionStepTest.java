@@ -1,5 +1,8 @@
 package roomescape;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.lang.reflect.Field;
@@ -21,9 +24,6 @@ import roomescape.member.controller.dto.SignupRequest;
 import roomescape.member.service.AuthService;
 import roomescape.reservation.controller.ReservationController;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -217,8 +217,8 @@ public class MissionStepTest {
 
     @Test
     @DisplayName("JdbcTemplate로 DataSource객체에 접근할 수 있다" +
-            "DataSource로 Connection 확인할 수 있다" +
-            "Connection로 데이터베이스, 테이블 이름 검증할 수 있다")
+                 "DataSource로 Connection 확인할 수 있다" +
+                 "Connection로 데이터베이스, 테이블 이름 검증할 수 있다")
     void fourth() {
         try (final Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();

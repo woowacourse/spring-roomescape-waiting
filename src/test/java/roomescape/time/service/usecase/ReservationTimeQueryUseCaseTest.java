@@ -1,5 +1,7 @@
 package roomescape.time.service.usecase;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class ReservationTimeQueryUseCaseTest {
 

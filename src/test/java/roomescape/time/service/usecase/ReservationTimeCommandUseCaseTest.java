@@ -1,5 +1,8 @@
 package roomescape.time.service.usecase;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,9 +27,6 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTimeCommandUseCaseTest {
 

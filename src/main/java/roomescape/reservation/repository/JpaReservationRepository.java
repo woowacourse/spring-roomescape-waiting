@@ -29,11 +29,11 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     @Override
     @Query("SELECT t FROM Theme t " +
-            "LEFT JOIN Reservation r ON r.theme.id = t.id " +
-            "WHERE r.date BETWEEN :startDate AND :endDate " +
-            "GROUP BY t " +
-            "ORDER BY COUNT(r) DESC " +
-            "LIMIT :limit")
+           "LEFT JOIN Reservation r ON r.theme.id = t.id " +
+           "WHERE r.date BETWEEN :startDate AND :endDate " +
+           "GROUP BY t " +
+           "ORDER BY COUNT(r) DESC " +
+           "LIMIT :limit")
     List<Theme> findThemesWithReservationCount(ReservationDate startDate,
                                                ReservationDate endDate,
                                                int limit);

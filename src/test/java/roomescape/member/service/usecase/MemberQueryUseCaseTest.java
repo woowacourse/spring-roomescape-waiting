@@ -1,5 +1,7 @@
 package roomescape.member.service.usecase;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,8 +17,6 @@ import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberConverter;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class MemberQueryUseCaseTest {
 

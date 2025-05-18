@@ -1,5 +1,7 @@
 package roomescape.theme.service.usecase;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -28,8 +30,6 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class ThemeQueryUseCaseTest {
 

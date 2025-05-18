@@ -1,9 +1,9 @@
 package roomescape.time.domain;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.InvalidInputException;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class ReservationTimeTest {
 

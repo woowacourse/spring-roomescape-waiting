@@ -42,7 +42,8 @@ public class ReservationConverter {
                 .toList();
     }
 
-    public static AvailableReservationTimeWebResponse toWebDto(final AvailableReservationTimeServiceResponse availableReservationTimeServiceResponse) {
+    public static AvailableReservationTimeWebResponse toWebDto(
+            final AvailableReservationTimeServiceResponse availableReservationTimeServiceResponse) {
         return new AvailableReservationTimeWebResponse(
                 availableReservationTimeServiceResponse.startAt(),
                 availableReservationTimeServiceResponse.timeId(),

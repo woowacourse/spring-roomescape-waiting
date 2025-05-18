@@ -1,10 +1,10 @@
 package roomescape.member.domain;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.InvalidInputException;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class MemberNameTest {
 

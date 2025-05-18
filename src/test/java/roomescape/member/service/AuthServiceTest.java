@@ -1,5 +1,8 @@
 package roomescape.member.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +18,6 @@ import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
 import roomescape.member.service.usecase.MemberCommandUseCase;
 import roomescape.member.service.usecase.MemberQueryUseCase;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class AuthServiceTest {

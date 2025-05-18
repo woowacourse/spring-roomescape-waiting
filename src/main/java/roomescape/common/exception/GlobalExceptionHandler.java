@@ -16,7 +16,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(final CustomException e, final HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleCustomException(final CustomException e,
+                                                               final HttpServletRequest request) {
         ErrorCode errorCode = e.getErrorCode();
         ErrorResponse errorResponse = ErrorResponse.of(errorCode, request);
         return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);

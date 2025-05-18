@@ -1,5 +1,9 @@
 package roomescape.theme.service.usecase;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,10 +16,6 @@ import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.theme.repository.FakeThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.CreateThemeServiceRequest;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ThemeCommandUseCaseTest {
 

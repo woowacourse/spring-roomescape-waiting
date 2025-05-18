@@ -36,7 +36,8 @@ public class ReservationTimeController {
     @PostMapping
     public ResponseEntity<ReservationTimeWebResponse> create(
             @RequestBody final CreateReservationTimeWebRequest createReservationTimeWebRequest) {
-        final ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeService.create(createReservationTimeWebRequest);
+        final ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeService.create(
+                createReservationTimeWebRequest);
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationTimeWebResponse.id()));
         return ResponseEntity.created(location)
                 .body(reservationTimeWebResponse);

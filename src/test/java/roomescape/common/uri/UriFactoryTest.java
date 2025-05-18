@@ -1,14 +1,13 @@
 package roomescape.common.uri;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import roomescape.common.utils.UriFactory;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class UriFactoryTest {
 

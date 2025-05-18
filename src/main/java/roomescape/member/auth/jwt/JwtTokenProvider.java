@@ -19,7 +19,7 @@ public class JwtTokenProvider {
 
     public String generateToken(Account account) {
         Member member = account.getMember();
-        return  Jwts.builder()
+        return Jwts.builder()
                 .setSubject(member.getId().toString())
                 .claim("name", member.getName().getValue())
                 .setIssuedAt(new Date())
