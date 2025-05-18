@@ -16,11 +16,13 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @ActiveProfiles({"test", "auth"})
 @AutoConfigureMockMvc
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Transactional
 @Sql(scripts = "/member-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class AdminRoleInterceptorMockMvcTest {
 

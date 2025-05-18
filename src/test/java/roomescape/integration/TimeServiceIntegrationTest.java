@@ -18,6 +18,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -32,6 +33,7 @@ import roomescape.reservation.service.dto.ReservationTimeInfo;
 @DataJpaTest
 @Import(value = {ReservationTimeRepositoryImpl.class, ReservationRepositoryImpl.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Transactional
 @Sql(value = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class TimeServiceIntegrationTest {
 

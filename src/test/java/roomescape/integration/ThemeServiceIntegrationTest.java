@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
@@ -32,6 +33,7 @@ import roomescape.reservation.service.dto.ThemeInfo;
 @DataJpaTest
 @Import(value = {ThemeRepositoryImpl.class, ReservationRepositoryImpl.class})
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Transactional
 @Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ThemeServiceIntegrationTest {
 
