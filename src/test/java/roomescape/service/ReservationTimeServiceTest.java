@@ -88,7 +88,7 @@ class ReservationTimeServiceTest {
         ReservationTime reservationTime2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(13, 0)));
 
         //when
-        List<ReservationTimeResult> reservationTimeResults = reservationTimeService.findAll();
+        List<ReservationTimeResult> reservationTimeResults = reservationTimeService.getAll();
 
         //then
         assertAll(

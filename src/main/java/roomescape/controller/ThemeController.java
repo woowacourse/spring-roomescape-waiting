@@ -21,7 +21,7 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> findAll() {
+    public ResponseEntity<List<ThemeResponse>> getAll() {
         List<ThemeResult> themeResults = themeService.getAll();
         List<ThemeResponse> themeResponses = themeResults.stream()
                 .map(ThemeResponse::from)
@@ -42,8 +42,8 @@ public class ThemeController {
     }
 
     @GetMapping("/rank")
-    public ResponseEntity<List<ThemeResponse>> rank() {
-        List<ThemeResult> rankForWeek = themeService.findRankByTheme();
+    public ResponseEntity<List<ThemeResponse>> getRankingTheme() {
+        List<ThemeResult> rankForWeek = themeService.getRankByTheme();
 
         List<ThemeResponse> themeResponses = rankForWeek.stream()
                 .map(ThemeResponse::from)

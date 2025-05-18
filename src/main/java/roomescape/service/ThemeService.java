@@ -51,7 +51,7 @@ public class ThemeService {
         themeRepository.deleteById(themeId);
     }
 
-    public List<ThemeResult> findRankByTheme() {
+    public List<ThemeResult> getRankByTheme() {
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusWeeks(1);
         LocalDate endDate = today.minusDays(1);

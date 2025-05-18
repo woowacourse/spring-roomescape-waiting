@@ -43,15 +43,15 @@ public class ReservationTimeService {
         return toReservationResult(reservationTime);
     }
 
-    public List<ReservationTimeResult> findAll() {
+    public List<ReservationTimeResult> getAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(this::toReservationResult)
                 .toList();
     }
 
-    public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId,
-                                                                                   LocalDate reservationDate) {
+    public List<AvailableReservationTimeResult> getAvailableTimesByThemeIdAndDate(Long themeId,
+                                                                                  LocalDate reservationDate) {
         List<ReservationTimeAvailabilityData> availableTimesData = reservationTimeRepository.findAvailableTimesByThemeAndDate(
                 themeId, reservationDate);
 
