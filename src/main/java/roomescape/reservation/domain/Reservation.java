@@ -26,6 +26,7 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
+
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
