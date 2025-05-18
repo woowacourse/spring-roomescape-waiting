@@ -2,7 +2,7 @@ package roomescape.theme.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -25,15 +25,15 @@ class ThemeTest {
                         .isInstanceOf(NullPointerException.class),
 
                 () -> assertThatThrownBy(() -> Theme.withoutId(null, description, thumbnail))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: Theme.name"),
 
                 () -> assertThatThrownBy(() -> Theme.withoutId(name, null, thumbnail))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: Theme.description"),
 
                 () -> assertThatThrownBy(() -> Theme.withoutId(name, description, null))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: Theme.thumbnail")
         );
     }

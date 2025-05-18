@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
 import roomescape.theme.domain.Theme;
@@ -50,19 +50,19 @@ class ReservationTest {
                         .isInstanceOf(NullPointerException.class),
 
                 () -> assertThatThrownBy(() -> Reservation.withoutId(null, date, time, theme))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: Reservation.userId"),
 
                 () -> assertThatThrownBy(() -> Reservation.withoutId(userId, null, time, theme))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: Reservation.date"),
 
                 () -> assertThatThrownBy(() -> Reservation.withoutId(userId, date, null, theme))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: Reservation.time"),
 
                 () -> assertThatThrownBy(() -> Reservation.withoutId(userId, date, time, null))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: Reservation.theme")
         );
     }

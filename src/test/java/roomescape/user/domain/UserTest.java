@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -27,19 +27,19 @@ class UserTest {
                         .isInstanceOf(NullPointerException.class),
 
                 () -> assertThatThrownBy(() -> User.withoutId(null, email, password, role))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: User.name"),
 
                 () -> assertThatThrownBy(() -> User.withoutId(name, null, password, role))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: User.email"),
 
                 () -> assertThatThrownBy(() -> User.withoutId(name, email, null, role))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: User.password"),
 
                 () -> assertThatThrownBy(() -> User.withoutId(name, email, password, null))
-                        .isInstanceOf(InvalidInputException.class)
+                        .isInstanceOf(InvalidArgumentException.class)
                         .hasMessageContaining("Validation failed [while checking null]: User.role")
         );
     }

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import roomescape.common.exception.base.AuthException;
 import roomescape.common.exception.base.BusinessException;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import java.net.URI;
 import java.time.format.DateTimeParseException;
@@ -68,10 +68,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleJsonParseError(final HttpMessageNotReadableException ex, final WebRequest request) {
-        final Optional<InvalidInputException> cause =
+        final Optional<InvalidArgumentException> cause =
                 Stream.iterate(ex.getCause(), Objects::nonNull, Throwable::getCause)
-                        .filter(InvalidInputException.class::isInstance)
-                        .map(InvalidInputException.class::cast)
+                        .filter(InvalidArgumentException.class::isInstance)
+                        .map(InvalidArgumentException.class::cast)
                         .findFirst();
 
         if (cause.isPresent()) {

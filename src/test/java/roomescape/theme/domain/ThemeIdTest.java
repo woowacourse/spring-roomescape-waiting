@@ -2,7 +2,7 @@ package roomescape.theme.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,7 +16,7 @@ class ThemeIdTest {
         // when
         // then
         assertThatThrownBy(() -> ThemeId.from(null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking null]: DomainId.value");
     }
 

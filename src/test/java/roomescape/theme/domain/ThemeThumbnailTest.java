@@ -3,7 +3,7 @@ package roomescape.theme.domain;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,7 +16,7 @@ class ThemeThumbnailTest {
         // when
         // then
         assertThatThrownBy(() -> ThemeThumbnail.from(null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking blank]: ThemeThumbnail.value");
     }
 
@@ -27,11 +27,11 @@ class ThemeThumbnailTest {
         // then
         Assertions.assertAll(() -> {
             assertThatThrownBy(() -> ThemeThumbnail.from(""))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: ThemeThumbnail.value");
 
             assertThatThrownBy(() -> ThemeThumbnail.from(" "))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: ThemeThumbnail.value");
         });
     }
@@ -43,11 +43,11 @@ class ThemeThumbnailTest {
         // then
         Assertions.assertAll(() -> {
             assertThatThrownBy(() -> ThemeThumbnail.from("invalid uri format"))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking URI]: ThemeThumbnail.value");
 
             assertThatThrownBy(() -> ThemeThumbnail.from("http://invalid uri.com"))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking URI]: ThemeThumbnail.value");
         });
     }

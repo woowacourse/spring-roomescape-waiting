@@ -18,7 +18,7 @@ class ValidatorTest {
         // when
         // then
         assertThatThrownBy(() -> validator.validateNotNull("sampleField", null, "예시 필드"))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking null]: SampleClass.sampleField");
     }
 
@@ -42,11 +42,11 @@ class ValidatorTest {
         // when
         // then
         assertThatThrownBy(() -> validator.validateNotBlank("sampleField", null, "예시 필드"))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking blank]: SampleClass.sampleField");
 
         assertThatThrownBy(() -> validator.validateNotBlank("sampleField", " ", "예시 필드"))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking blank]: SampleClass.sampleField");
     }
 
@@ -70,7 +70,7 @@ class ValidatorTest {
         // when
         // then
         assertThatThrownBy(() -> validator.validateUriFormat("sampleField", "ht^tp://invalidFormat.com", "예시 URI"))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking URI]: SampleClass.sampleField");
     }
 

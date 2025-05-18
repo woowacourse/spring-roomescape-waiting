@@ -2,20 +2,16 @@ package roomescape.common.validate;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 import java.net.URI;
-import java.util.regex.Pattern;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Validator {
 
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-
-    private final Class<?> clazz;
+    private final String className;
 
     public static Validator of(final Class<?> clazz) {
-        return new Validator(clazz);
+        return new Validator(clazz.getSimpleName());
     }
 
     public Validator validateNotNull(final String fieldName,
@@ -57,40 +53,16 @@ public class Validator {
         }
     }
 
-    public Validator validateEmailFormat(final String fieldName,
-                                         final String target,
-                                         final String fieldDescription) {
-        validateNotBlank(fieldName, target, fieldDescription);
-
-        if (EMAIL_PATTERN.matcher(target).matches()) {
-            return this;
-        }
-
-        throw buildException(
-                ValidationType.EMAIL_CHECK,
-                fieldName,
-                fieldDescription);
-    }
-
-    private InvalidInputException buildException(final ValidationType type,
-                                                 final String fieldName,
-                                                 final String fieldDescription) {
-        return new InvalidInputException(
+    private InvalidArgumentException buildException(final ValidationType type,
+                                                    final String fieldName,
+                                                    final String fieldDescription) {
+        return new InvalidArgumentException(
                 type,
-                clazz.getSimpleName(),
+                className,
                 fieldName,
                 fieldDescription
         );
     }
 
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
-    @Getter
-    public enum ValidationType {
-        NULL_CHECK("while checking null"),
-        BLANK_CHECK("while checking blank"),
-        URI_CHECK("while checking URI"),
-        EMAIL_CHECK("while checking email");
 
-        private final String description;
-    }
 }

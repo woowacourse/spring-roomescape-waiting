@@ -2,7 +2,7 @@ package roomescape.time.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import java.time.LocalTime;
 
@@ -18,11 +18,11 @@ class ReservationTimeTest {
         // when
         // then
         assertThatThrownBy(() -> ReservationTime.withoutId(null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking null]: ReservationTime.startAt");
 
         assertThatThrownBy(() -> ReservationTime.withId(ReservationTimeId.from(1L), null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking null]: ReservationTime.startAt");
     }
 

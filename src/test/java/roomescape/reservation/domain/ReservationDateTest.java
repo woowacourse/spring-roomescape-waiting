@@ -2,7 +2,7 @@ package roomescape.reservation.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import java.time.LocalDate;
 
@@ -18,7 +18,7 @@ class ReservationDateTest {
         // when
         // then
         assertThatThrownBy(() -> ReservationDate.from(null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking null]: ReservationDate.value");
     }
 

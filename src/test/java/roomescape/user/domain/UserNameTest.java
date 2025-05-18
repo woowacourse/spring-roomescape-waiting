@@ -2,7 +2,7 @@ package roomescape.user.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,7 +16,7 @@ class UserNameTest {
         // when
         // then
         assertThatThrownBy(() -> UserName.from(null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking blank]: UserName.value");
     }
 
@@ -27,11 +27,11 @@ class UserNameTest {
         // then
         assertAll(() -> {
             assertThatThrownBy(() -> UserName.from(""))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: UserName.value");
 
             assertThatThrownBy(() -> UserName.from(" "))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: UserName.value");
         });
     }

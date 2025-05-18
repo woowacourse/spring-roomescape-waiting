@@ -2,7 +2,7 @@ package roomescape.auth.sign.password;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -19,11 +19,11 @@ class PasswordTest {
         // then
         assertAll(() -> {
             assertThatThrownBy(() -> Password.fromRaw(null, encoder))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Password.encodedValue");
 
             assertThatThrownBy(() -> Password.fromEncoded(null))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Password.encodedValue");
         });
     }
@@ -35,19 +35,19 @@ class PasswordTest {
         // then
         assertAll(() -> {
             assertThatThrownBy(() -> Password.fromRaw("", encoder))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Password.encodedValue");
 
             assertThatThrownBy(() -> Password.fromRaw(" ", encoder))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Password.encodedValue");
 
             assertThatThrownBy(() -> Password.fromEncoded(""))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Password.encodedValue");
 
             assertThatThrownBy(() -> Password.fromEncoded(" "))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Password.encodedValue");
         });
     }

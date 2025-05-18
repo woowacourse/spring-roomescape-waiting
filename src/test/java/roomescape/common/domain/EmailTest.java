@@ -2,7 +2,7 @@ package roomescape.common.domain;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.common.validate.InvalidInputException;
+import roomescape.common.validate.InvalidArgumentException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,7 +16,7 @@ class EmailTest {
         // when
         // then
         assertThatThrownBy(() -> Email.from(null))
-                .isInstanceOf(InvalidInputException.class)
+                .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking blank]: Email.value");
     }
 
@@ -27,11 +27,11 @@ class EmailTest {
         // then
         assertAll(() -> {
             assertThatThrownBy(() -> Email.from(""))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Email.value");
 
             assertThatThrownBy(() -> Email.from(" "))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking blank]: Email.value");
         });
     }
@@ -43,15 +43,15 @@ class EmailTest {
         // then
         assertAll(() -> {
             assertThatThrownBy(() -> Email.from("invalid-email"))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking email]: Email.value");
 
             assertThatThrownBy(() -> Email.from("invalid@"))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking email]: Email.value");
 
             assertThatThrownBy(() -> Email.from("@invalid.com"))
-                    .isInstanceOf(InvalidInputException.class)
+                    .isInstanceOf(InvalidArgumentException.class)
                     .hasMessage("Validation failed [while checking email]: Email.value");
         });
     }
