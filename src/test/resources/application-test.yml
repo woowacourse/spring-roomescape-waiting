@@ -16,4 +16,3 @@ spring:
   sql:
     init:
       mode: always
-      data-locations: classpath:testData.sql

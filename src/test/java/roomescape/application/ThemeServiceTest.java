@@ -2,33 +2,20 @@ package roomescape.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import(ThemeService.class)
 class ThemeServiceTest {
 
+    @Autowired
     private ThemeService service;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @BeforeEach
-    void setUp() {
-        service = new ThemeService(reservationRepository, themeRepository);
-    }
 
     @Test
     @DisplayName("테마를 추가할 수 있다.")

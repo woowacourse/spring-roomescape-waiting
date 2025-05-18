@@ -8,31 +8,34 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.TestRepositoryHelper;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserName;
-import roomescape.domain.user.UserRepository;
 import roomescape.exception.AuthenticationException;
+import roomescape.infrastructure.JwtTokenHandler;
 
+@DataJpaTest
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import({AuthenticationService.class, JwtTokenHandler.class, TestRepositoryHelper.class})
 class AuthenticationServiceTest {
 
     @Autowired
     private AuthenticationService service;
-
     @Autowired
-    private UserRepository userRepository;
+    private TestRepositoryHelper repositoryHelper;
 
     @BeforeEach
     void setUp() {
-        var user = User.createUser(new UserName("라젤"), new Email("razel@email.com"), new Password("password"));
-        userRepository.save(user);
+        repositoryHelper.saveUser(new User(
+            new UserName("라젤"),
+            new Email("razel@email.com"),
+            new Password("password")
+        ));
     }
 
     @Test
