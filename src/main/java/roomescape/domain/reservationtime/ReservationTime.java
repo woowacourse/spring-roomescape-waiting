@@ -1,11 +1,12 @@
 package roomescape.domain.reservationtime;
 
+import java.time.LocalTime;
+import java.util.Objects;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.time.LocalTime;
-import java.util.Objects;
 import roomescape.exception.reservation.InvalidReservationTimeException;
 
 @Entity
@@ -45,17 +46,15 @@ public class ReservationTime {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
-        if (id == null && ((ReservationTime) o).id == null) {
+        ReservationTime that = (ReservationTime) o;
+        if (id == null && that.id == null) {
             return false;
         }
-
-        ReservationTime that = (ReservationTime) o;
-        return Objects.equals(id, that.id) && Objects.equals(time, that.time);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, time);
+        return Objects.hash(id);
     }
 }

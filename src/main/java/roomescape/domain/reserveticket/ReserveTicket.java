@@ -8,6 +8,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 
@@ -66,5 +67,22 @@ public class ReserveTicket {
 
     public long getMemberId() {
         return member.getId();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ReserveTicket that = (ReserveTicket) o;
+        if (id == null && that.id == null) {
+            return false;
+        }
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
