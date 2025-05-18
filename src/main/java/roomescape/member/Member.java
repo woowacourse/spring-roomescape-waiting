@@ -1,7 +1,6 @@
 package roomescape.member;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,6 @@ import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
-@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 public class Member {
@@ -28,7 +26,10 @@ public class Member {
     private MemberRole role;
 
     public Member(final String email, final String password, final String name, final MemberRole role) {
-        this(null, email, password, name, role);
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.role = role;
     }
 
     public boolean matchesPassword(final String password) {

@@ -9,6 +9,7 @@ import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.ReservationRepository;
+import roomescape.util.TestFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +73,7 @@ public class MemberServiceTest {
     void readAll() {
         // given
         given(memberRepository.findAll())
-                .willReturn(List.of(new Member(1L, "email", "pass", "name", MemberRole.MEMBER)));
+                .willReturn(List.of(TestFactory.memberWithId(1L, new Member("email", "pass", "name", MemberRole.MEMBER))));
 
         // when
         final List<MemberResponse> actual = memberService.readAllMember();

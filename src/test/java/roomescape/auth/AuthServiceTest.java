@@ -1,11 +1,5 @@
 package roomescape.auth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,6 +11,14 @@ import roomescape.exception.custom.reason.auth.AuthNotValidPasswordException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static roomescape.util.TestFactory.memberWithId;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -40,7 +42,7 @@ public class AuthServiceTest {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "pw1234");
             given(memberRepository.findByEmail(request.email()))
-                    .willReturn(Optional.of(new Member(1L, request.email(), request.password(), "부기", MemberRole.MEMBER)));
+                    .willReturn(Optional.of(memberWithId(1L, new Member(request.email(), request.password(), "부기", MemberRole.MEMBER))));
 
             // when
             final String actual = authService.generateToken(request);
@@ -67,7 +69,7 @@ public class AuthServiceTest {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "not matches password");
             given(memberRepository.findByEmail(request.email()))
-                    .willReturn(Optional.of(new Member(1L, request.email(), "pw1234", "부기", MemberRole.MEMBER)));
+                    .willReturn(Optional.of(memberWithId(1L, new Member(request.email(), "pw1234", "부기", MemberRole.MEMBER))));
 
             // when & then
             assertThatThrownBy(() -> {
@@ -75,5 +77,5 @@ public class AuthServiceTest {
             }).isInstanceOf(AuthNotValidPasswordException.class);
         }
     }
-    
+
 }

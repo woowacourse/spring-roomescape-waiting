@@ -67,7 +67,7 @@ public class ReservationServiceTest {
         private static final Optional<Theme> THEME_BY_ID = Optional.of(
                 themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
         private static final Optional<Member> MEMBER_BY_EMAIL = Optional.of(
-                new Member(1L, LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER));
+                memberWithId(1L, new Member(LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER)));
         private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
                 REQUEST.date(),
                 MEMBER_BY_EMAIL.get(),
@@ -198,7 +198,7 @@ public class ReservationServiceTest {
         private static final Optional<Theme> THEME_BY_ID = Optional.of(
                 themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
         private static final Optional<Member> MEMBER_BY_ID = Optional.of(
-                new Member(REQUEST.memberId(), "asd@naver.com", "password", "boogie", MemberRole.MEMBER));
+                memberWithId(REQUEST.memberId(), new Member("asd@naver.com", "password", "boogie", MemberRole.MEMBER)));
         private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
                 REQUEST.date(),
                 MEMBER_BY_ID.get(),
@@ -341,7 +341,7 @@ public class ReservationServiceTest {
             // given
             Reservation reservation = new Reservation(
                     LocalDate.of(2024, 1, 1),
-                    new Member(1L, "boogie", "password", "boogie", MemberRole.MEMBER),
+                    memberWithId(1L, new Member("boogie", "password", "boogie", MemberRole.MEMBER)),
                     reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))),
                     themeWithId(1L, new Theme("야당", "야당당", "123")),
                     ReservationStatus.PENDING
@@ -371,7 +371,7 @@ public class ReservationServiceTest {
                     LocalDate.of(2024, 1, 1),
                     LocalDate.of(2024, 12, 31)
             );
-            Member member = new Member(request.memberId(), "boogie", "password", "boogie", MemberRole.MEMBER);
+            Member member = memberWithId(request.memberId(), new Member("boogie", "password", "boogie", MemberRole.MEMBER));
             Theme theme = themeWithId(request.themeId(), new Theme("야당", "야당당", "123"));
             given(memberRepository.findById(request.memberId()))
                     .willReturn(Optional.of(member));
@@ -395,7 +395,7 @@ public class ReservationServiceTest {
                     LocalDate.of(2024, 1, 1),
                     LocalDate.of(2024, 12, 31)
             );
-            Member member = new Member(request.memberId(), "boogie", "password", "boogie", MemberRole.MEMBER);
+            Member member = memberWithId(request.memberId(), new Member("boogie", "password", "boogie", MemberRole.MEMBER));
             Theme theme = themeWithId(request.themeId(), new Theme("야당", "야당당", "123"));
             given(memberRepository.findById(request.memberId()))
                     .willReturn(Optional.of(member));
