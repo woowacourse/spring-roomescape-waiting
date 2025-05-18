@@ -16,20 +16,27 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.MemberService;
 import roomescape.repository.fake.FakeMemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class AuthControllerTest {
-
-    private static final MemberRepository memberRepository = new FakeMemberRepository();
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public MemberRepository memberRepository() {
+            return new FakeMemberRepository();
+        }
+    }
 
     @Autowired
     private AuthorizationProvider authorizationProvider;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     @Test
-    void login() {
+    void 로그인_요청_시_토큰_응답() {
         // given
         Member member = MemberFixture.createMember(MemberRole.USER);
 
@@ -90,13 +97,5 @@ class AuthControllerTest {
                 member.getRole()
             )
         );
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public MemberService memberService() {
-            return new MemberService(memberRepository);
-        }
     }
 }
