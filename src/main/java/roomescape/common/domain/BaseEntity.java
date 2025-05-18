@@ -19,39 +19,24 @@ public abstract class BaseEntity {
     protected Long id;
 
     protected BaseEntity(final Long id) {
-        this.id = id;
-        requireAssigned();
-    }
-
-    private void requireAssigned() {
-        if (isAssigned()) {
-            return;
+        if (id == null) {
+            throw new IllegalStateException("Identifier has not been assigned.");
         }
-        throw new IllegalStateException("식별자가 할당되지 않았습니다.");
+        this.id = id;
     }
-
-    private boolean isAssigned() {
-        return id != null;
-    }
-
+    
+    // 프록시 객체도 같은 타입 계열로 간주
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        final BaseEntity that = (BaseEntity) o;
-
-        if (o == null || getClass() != o.getClass()) return false;
-
-        if (this.id == null || that.id == null) {
-            return false;
-        }
-
-        return this.id.equals(that.id);
+        if (!(o instanceof final BaseEntity that)) return false;
+        return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
         if (id == null) {
-            return System.identityHashCode(this);
+            throw new IllegalStateException("hashCode() called on entity without ID");
         }
         return Objects.hash(id);
     }
