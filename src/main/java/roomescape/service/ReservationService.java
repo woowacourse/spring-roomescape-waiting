@@ -68,9 +68,9 @@ public class ReservationService {
 
         reservationRepository.deleteById(reservationId);
 
-        boolean alreadyExistsReserved = reservationRepository.existsAlreadyReserved(
+        boolean reservationSlotEmpty = reservationRepository.isReservationSlotEmpty(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
-        if(!alreadyExistsReserved) {
+        if(reservationSlotEmpty) {
             autoReserveNextWaiting(reservation);
         }
     }

@@ -79,25 +79,16 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId);
 
     @Query("""
-    SELECT CASE WHEN COUNT(r) = 0 THEN TRUE ELSE FALSE END
-    FROM Reservation r
-    WHERE r.status = 'WAITING'
-      AND r.theme.id = :themeId
-      AND r.time.id = :timeId
-      AND r.date = :date
-      AND r.id < :reservationId
+        SELECT CASE WHEN EXISTS (
+            SELECT 1
+            FROM Reservation r
+            WHERE r.status = 'RESERVED'
+              AND r.theme.id = :themeId
+              AND r.time.id = :timeId
+              AND r.date = :date
+        ) THEN false ELSE true END
     """)
-    boolean isFirstWaiting(Long reservationId, LocalDate date, Long themeId, Long timeId);
+    boolean isReservationSlotEmpty(LocalDate date, Long timeId, Long themeId);
 
-    @Query("""
-    SELECT EXISTS (
-        SELECT 1
-        FROM Reservation r
-        WHERE r.status = 'RESERVED'
-          AND r.theme.id = :themeId
-          AND r.time.id = :timeId
-          AND r.date = :date
-        )
-    """)
-    boolean existsAlreadyReserved(LocalDate date, Long timeId, Long themeId);
+    boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(Long memberId, Long themeId, Long timeId, LocalDate date);
 }

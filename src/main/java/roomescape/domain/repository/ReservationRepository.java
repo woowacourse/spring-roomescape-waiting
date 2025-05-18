@@ -23,7 +23,7 @@ public interface ReservationRepository {
 
     boolean existsDuplicateReservation(LocalDate reservationDate, Long timeId, Long themeId);
 
-    boolean existsAlreadyReserved(LocalDate reservationDate, Long timeId, Long themeId);
+    boolean isReservationSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean existsByThemeId(Long themeId);
 
@@ -33,5 +33,5 @@ public interface ReservationRepository {
 
     Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId);
 
-    boolean isFirstWaiting(Long reservationId, LocalDate date, Long themeId, Long timeId);
+    boolean hasAlreadyReservedOrWaited(Long memberId, Long themeId, Long timeId, LocalDate date);
 }

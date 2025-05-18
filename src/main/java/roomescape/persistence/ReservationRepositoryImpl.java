@@ -54,8 +54,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsAlreadyReserved(LocalDate reservationDate, Long timeId, Long themeId) {
-        return jpaReservationRepository.existsAlreadyReserved(reservationDate, timeId, themeId);
+    public boolean isReservationSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId) {
+        return jpaReservationRepository.isReservationSlotEmpty(reservationDate, timeId, themeId);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean isFirstWaiting(Long reservationId, LocalDate date, Long themeId, Long timeId) {
-        return jpaReservationRepository.isFirstWaiting(reservationId, date, themeId, timeId);
+    public boolean hasAlreadyReservedOrWaited(Long memberId, Long themeId, Long timeId, LocalDate date) {
+        return jpaReservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(memberId, themeId, timeId, date);
     }
 }
