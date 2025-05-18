@@ -1,84 +1,73 @@
 package roomescape.presentation.rest;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.util.Map;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.Mockito;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import roomescape.application.AuthenticationService;
+import roomescape.exception.AuthenticationException;
+import roomescape.presentation.GlobalExceptionHandler;
+import roomescape.presentation.auth.AuthenticationTokenCookie;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class LoginControllerTest {
 
-    private static String getToken(String email, String password) {
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(Map.of("email", email, "password", password))
-                .when().post("/login")
-                .then().statusCode(200)
-                .extract().response().getDetailedCookies().getValue("token");
-    }
+    private final AuthenticationService authenticationService = Mockito.mock(AuthenticationService.class);
+    private final MockMvc mockMvc = MockMvcBuilders
+        .standaloneSetup(new LoginController(authenticationService))
+        .setControllerAdvice(new GlobalExceptionHandler())
+        .build();
 
-    @DisplayName("어드민 계정으로 로그인 한다")
     @Test
-    void adminLoginTest() {
-        var token = getToken("admin@email.com", "password");
+    @DisplayName("이메일과 비밀번호로 로그인 시 토큰을 쿠키로 발급받는다.")
+    void performLogin() throws Exception {
+        var expectedToken = "token";
+        Mockito.when(authenticationService.issueToken("admin@email.com", "password"))
+            .thenReturn(expectedToken);
 
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .cookie("token", token)
-                .when().get("/login/check")
-                .then().statusCode(200);
+        mockMvc.perform(post("/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                    "email": "admin@email.com",
+                    "password": "password"
+                }
+                """))
+            .andExpect(cookie().value(AuthenticationTokenCookie.COOKIE_KEY, expectedToken))
+            .andExpect(status().isOk());
     }
 
-    @DisplayName("사용자 계정으로 로그인 한다")
     @Test
-    void userLoginTest() {
-        final var token = getToken("popo@email.com", "password");
+    @DisplayName("이메일이나 비밀번호가 일치하지 않는 경우 로그인에 실패한다.")
+    void performLoginWithInvalidEmail() throws Exception {
+        Mockito.when(authenticationService.issueToken("admin@email.com", "ppp"))
+            .thenThrow(new AuthenticationException("wrong password"));
 
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .cookie("token", token)
-                .when().get("/login/check")
-                .then().statusCode(200);
+        mockMvc.perform(post("/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                {
+                    "email": "admin@email.com",
+                    "password": "ppp"
+                }
+                """))
+            .andExpect(cookie().doesNotExist(AuthenticationTokenCookie.COOKIE_KEY))
+            .andExpect(status().isUnauthorized());
     }
 
-    @DisplayName("잘못된 비밀 번호로 로그인 하는 경우 예외를 던진다")
     @Test
-    void adminLoginTest_WhenPasswordIsWrong() {
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(Map.of("email", "admin@email.com", "password", "wrong"))
-                .when().post("/login")
-                .then().statusCode(401);
-    }
-
-    @DisplayName("잘못된 이메일로 로그인 하는 경우 예외를 던진다")
-    @Test
-    void adminLoginTest_WhenEmailNotExist() {
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(Map.of("email", "wrong@email.com", "password", "password"))
-                .when().post("/login")
-                .then().statusCode(401);
-    }
-
     @DisplayName("로그아웃 시 토큰 쿠키가 삭제되고 메인 페이지로 리다이렉트 된다")
-    @Test
-    void logoutTest() {
-        var token = getToken("popo@email.com", "password");
-
-        RestAssured.given()
-                .cookie("token", token)
-                .redirects().follow(false) // 리다이렉트 따라가지 않게 설정
-                .when().post("/logout")
-                .then()
-                .statusCode(302)
-                .header("Location", "http://localhost:8080/")
-                .cookie("token", "");
+    void performLogout() throws Exception {
+        mockMvc.perform(post("/logout")
+                .cookie(AuthenticationTokenCookie.forResponse("token")))
+            .andExpect(cookie().maxAge(AuthenticationTokenCookie.COOKIE_KEY, 0))
+            .andExpect(header().string("Location", "/"))
+            .andExpect(status().isFound());
     }
 }

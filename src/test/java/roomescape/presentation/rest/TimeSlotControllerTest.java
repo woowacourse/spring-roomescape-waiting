@@ -1,63 +1,94 @@
 package roomescape.presentation.rest;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.util.Map;
-import org.hamcrest.Matchers;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.TestFixtures.anyTimeSlotWithId;
+import static roomescape.TestFixtures.anyUserWithId;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.Mockito;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import roomescape.application.TimeSlotService;
+import roomescape.exception.InUseException;
+import roomescape.exception.NotFoundException;
+import roomescape.presentation.GlobalExceptionHandler;
+import roomescape.presentation.StubUserArgumentResolver;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TimeSlotControllerTest {
 
-    private static final Map<String, String> RESERVATION_BODY = Map.of(
-            "startAt", "13:00"
-    );
+    private final TimeSlotService timeSlotService = Mockito.mock(TimeSlotService.class);
+    private final MockMvc mockMvc = MockMvcBuilders
+        .standaloneSetup(new TimeSlotController(timeSlotService))
+        .setCustomArgumentResolvers(new StubUserArgumentResolver(anyUserWithId()))
+        .setControllerAdvice(new GlobalExceptionHandler())
+        .build();
 
     @Test
-    @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다")
-    void addReservationTimeTest() {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(RESERVATION_BODY)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(HttpStatus.CREATED.value())
-                .body("id", Matchers.equalTo(7))
-                .body("startAt", Matchers.equalTo("13:00:00"));
+    @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다.")
+    void register() throws Exception {
+        Mockito.when(timeSlotService.register(any()))
+            .thenReturn(anyTimeSlotWithId());
+
+        mockMvc.perform(post("/times")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "startAt": "10:00"
+                    }
+                    """))
+            .andExpect(jsonPath("$..['id','startAt']").exists())
+            .andExpect(status().isCreated());
     }
 
     @Test
-    @DisplayName("예약 시간 조회 요청시, 존재하는 모든 예약 시간과 OK를 응답한다")
-    void findAllReservationTimeTest() {
-        RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .body("size()", Matchers.is(6));
+    @DisplayName("예약 시간 조회 요청시, 존재하는 모든 예약 시간과 OK를 응답한다.")
+    void getAllTimeSlots() throws Exception{
+        var expectedList = List.of(anyTimeSlotWithId(), anyTimeSlotWithId(), anyTimeSlotWithId());
+        Mockito.when(timeSlotService.findAllTimeSlots()).thenReturn(expectedList);
+
+        mockMvc.perform(get("/times"))
+            .andExpect(jsonPath("$..['id','startAt']").exists())
+            .andExpect(jsonPath("$", hasSize(expectedList.size())))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 있다면 삭제하고 NO CONTENT를 응답한다.")
+    void deleteSuccessfully() throws Exception {
+        mockMvc.perform(delete("/times/1"))
+            .andExpect(status().isNoContent());
+
+        Mockito.verify(timeSlotService, times(1)).removeById(1L);
     }
 
     @Test
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 없다면 NOT FOUND를 응답한다.")
-    void removeReservationTimeTest_WhenReservationTimeDoesNotExisted() {
-        RestAssured.given().log().all()
-                .when().delete("/times/1000")
-                .then().log().all()
-                .statusCode(HttpStatus.NOT_FOUND.value());
+    void deleteWhenNotFound() throws Exception {
+        Mockito.doThrow(new NotFoundException("time slot not found"))
+            .when(timeSlotService).removeById(eq(999L));
+
+        mockMvc.perform(delete("/times/999"))
+            .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 사용 중이라면 CONFLICT를 응답한다.")
-    void removeReservationTimeTest() {
-        RestAssured.given().log().all()
-            .when().delete("/times/3")
-            .then().log().all()
-            .statusCode(HttpStatus.CONFLICT.value());
+    void deleteWhenConflict() throws Exception {
+        Mockito.doThrow(new InUseException("some reservation is referencing this time slot"))
+            .when(timeSlotService).removeById(eq(999L));
+
+        mockMvc.perform(delete("/times/999"))
+            .andExpect(status().isConflict());
     }
 }

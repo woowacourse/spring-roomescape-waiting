@@ -35,6 +35,10 @@ public class ReservationDateTime {
 
     }
 
+    public static ReservationDateTime of(final LocalDate date, final TimeSlot timeSlot) {
+        return new ReservationDateTime(date, timeSlot);
+    }
+
     public static ReservationDateTime forReserve(final LocalDate date, final TimeSlot timeSlot) {
         if (isBeforeNow(date, timeSlot)) {
             throw new BusinessRuleViolationException("지나간 일시로 예약할 수 없습니다.");
