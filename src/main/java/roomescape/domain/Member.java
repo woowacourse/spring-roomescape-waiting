@@ -43,6 +43,10 @@ public class Member {
         this.role = role;
     }
 
+    public boolean isAdmin() {
+        return role.equals(Role.ADMIN);
+    }
+
     private void validate(String name, String email, String password, Role role) {
         validateName(name);
         validateEmail(email);

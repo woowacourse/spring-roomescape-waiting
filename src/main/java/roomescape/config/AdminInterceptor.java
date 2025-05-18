@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.Member;
-import roomescape.domain.enums.Role;
+import roomescape.exception.member.AccessDeniedException;
 import roomescape.service.member.MemberService;
 import roomescape.util.CookieManager;
 import roomescape.util.JwtTokenProvider;
@@ -30,9 +30,8 @@ public class AdminInterceptor implements HandlerInterceptor {
         }
         Long id = jwtTokenProvider.findMemberIdByToken(jwtToken);
         Member member = memberService.findMemberById(id);
-        if (member == null || !member.getRole().equals(Role.ADMIN)) {
-            response.setStatus(401);
-            return false;
+        if (!member.isAdmin()) {
+            throw new AccessDeniedException("해당 페이지에 접근할 권한이 없습니다.");
         }
         return true;
     }
