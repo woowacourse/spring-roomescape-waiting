@@ -3,8 +3,6 @@ package roomescape.member.domain.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +14,6 @@ import roomescape.member.domain.Member;
 @DataJpaTest
 class MemberRepositoryTest {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Autowired
     private MemberRepository memberRepository;
 
@@ -26,10 +21,7 @@ class MemberRepositoryTest {
     @Test
     void save() {
         // given
-        String name = "kim";
-        String email = "kim@gmail.com";
-        String password = "1234";
-        Member member = new Member(name, email, password);
+        Member member = new Member("name", "email", "password");
 
         // when
         memberRepository.save(member);
@@ -37,6 +29,6 @@ class MemberRepositoryTest {
 
         // then
         assertThat(members).extracting(Member::getName, Member::getEmail, Member::getPassword)
-                .containsExactlyInAnyOrder(tuple(name, email, password));
+                .containsExactlyInAnyOrder(tuple("name", "email", "password"));
     }
 }

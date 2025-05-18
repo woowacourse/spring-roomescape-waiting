@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.HttpStatus;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 class UserViewControllerTest {
@@ -15,7 +16,7 @@ class UserViewControllerTest {
         RestAssured.given().log().all()
                 .when().get("/")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("사용자 예약 내역 페이지를 출력한다")
@@ -24,7 +25,7 @@ class UserViewControllerTest {
         RestAssured.given().log().all()
                 .when().get("/reservation")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("사용자 로그인 페이지를 출력한다")
@@ -33,7 +34,7 @@ class UserViewControllerTest {
         RestAssured.given().log().all()
                 .when().get("/login")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("사용자 회원 가입 페이지를 출력한다")
@@ -42,6 +43,6 @@ class UserViewControllerTest {
         RestAssured.given().log().all()
                 .when().get("/signup")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 }

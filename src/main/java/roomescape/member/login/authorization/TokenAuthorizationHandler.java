@@ -3,6 +3,7 @@ package roomescape.member.login.authorization;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import org.springframework.stereotype.Component;
 import roomescape.common.exception.AuthorizationException;
 import roomescape.common.exception.message.LoginExceptionMessage;
@@ -16,12 +17,10 @@ public class TokenAuthorizationHandler implements AuthorizationHandler<String> {
     public String extractToken(HttpServletRequest httpServletRequest) {
         Cookie[] cookies = httpServletRequest.getCookies();
         validateCookie(cookies);
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals(AUTHORIZATION)) {
-                return cookie.getValue();
-            }
-        }
-        throw new AuthorizationException(LoginExceptionMessage.INVALID_TOKEN_VALUE.getMessage());
+        return Arrays.stream(cookies)
+                .filter(cookie -> cookie.getName().equals(AUTHORIZATION))
+                .map(Cookie::getValue).findAny()
+                .orElseThrow(() -> new AuthorizationException(LoginExceptionMessage.INVALID_TOKEN_VALUE.getMessage()));
     }
 
     @Override

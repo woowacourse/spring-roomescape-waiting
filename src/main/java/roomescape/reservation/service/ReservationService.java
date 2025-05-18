@@ -11,7 +11,6 @@ import roomescape.common.exception.message.IdExceptionMessage;
 import roomescape.common.exception.message.ReservationExceptionMessage;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.dto.MyReservationResponse;
@@ -21,10 +20,8 @@ import roomescape.reservation.dto.admin.AdminReservationSearchRequest;
 import roomescape.reservation.dto.user.UserReservationRequest;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
-import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.theme.dto.ThemeResponse;
 
 @Service
 public class ReservationService {
@@ -34,8 +31,12 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository timeRepository,
-                              ThemeRepository themeRepository, MemberRepository memberRepository) {
+    public ReservationService(
+            ReservationRepository reservationRepository,
+            ReservationTimeRepository timeRepository,
+            ThemeRepository themeRepository,
+            MemberRepository memberRepository
+    ) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
@@ -44,25 +45,13 @@ public class ReservationService {
 
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
-                .map(reservation -> new ReservationResponse(
-                        reservation.getId(),
-                        MemberResponse.from(reservation.getMember()),
-                        ThemeResponse.from(reservation.getTheme()),
-                        reservation.getDate(),
-                        ReservationTimeResponse.from(reservation.getTime()))
-                )
+                .map(ReservationResponse::from)
                 .toList();
     }
 
     public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(reservation -> new MyReservationResponse(
-                        reservation.getId(),
-                        reservation.getTheme().getName(),
-                        reservation.getDate(),
-                        reservation.getTime().getStartAt(),
-                        "예약")
-                )
+                .map(MyReservationResponse::from)
                 .toList();
     }
 
@@ -75,21 +64,15 @@ public class ReservationService {
         LocalDate dateTo = adminReservationSearchRequest.dateTo();
 
         return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
-                .stream().map(reservation -> new ReservationResponse(
-                        reservation.getId(),
-                        MemberResponse.from(reservation.getMember()),
-                        ThemeResponse.from(reservation.getTheme()),
-                        reservation.getDate(),
-                        ReservationTimeResponse.from(reservation.getTime()))
-                )
+                .stream()
+                .map(ReservationResponse::from)
                 .toList();
     }
 
     public ReservationResponse add(final Long memberId, final UserReservationRequest userReservationRequest) {
         Member memberResult = searchMember(memberId);
         ReservationTime reservationTimeResult = searchReservationTime(userReservationRequest.timeId());
-        validateTime(userReservationRequest.date(), reservationTimeResult);
-        validateAvailability(userReservationRequest.date(), reservationTimeResult);
+        validateRequest(userReservationRequest.date(), reservationTimeResult);
         Theme themeResult = searchTheme(userReservationRequest.themeId());
 
         Reservation newReservation = new Reservation(
@@ -99,21 +82,13 @@ public class ReservationService {
                 themeResult
         );
         Reservation savedReservation = reservationRepository.save(newReservation);
-
-        return new ReservationResponse(
-                savedReservation.getId(),
-                MemberResponse.from(savedReservation.getMember()),
-                ThemeResponse.from(savedReservation.getTheme()),
-                savedReservation.getDate(),
-                ReservationTimeResponse.from(savedReservation.getTime())
-        );
+        return ReservationResponse.from(savedReservation);
     }
 
     public ReservationResponse addByAdmin(final AdminReservationRequest adminReservationRequest) {
         Member memberResult = searchMember(adminReservationRequest.memberId());
         ReservationTime reservationTimeResult = searchReservationTime(adminReservationRequest.timeId());
-        validateTime(adminReservationRequest.date(), reservationTimeResult);
-        validateAvailability(adminReservationRequest.date(), reservationTimeResult);
+        validateRequest(adminReservationRequest.date(), reservationTimeResult);
         Theme themeResult = searchTheme(adminReservationRequest.themeId());
 
         Reservation newReservation = new Reservation(
@@ -123,30 +98,36 @@ public class ReservationService {
                 themeResult
         );
         Reservation savedReservation = reservationRepository.save(newReservation);
-
-        return new ReservationResponse(
-                savedReservation.getId(),
-                MemberResponse.from(savedReservation.getMember()),
-                ThemeResponse.from(savedReservation.getTheme()),
-                savedReservation.getDate(),
-                ReservationTimeResponse.from(savedReservation.getTime())
-        );
+        return ReservationResponse.from(savedReservation);
     }
 
-    private void validateTime(final LocalDate reservationDate, final ReservationTime reservationTimeResult) {
-        if (reservationDate.isEqual(LocalDate.now())
-                && reservationTimeResult.getStartAt().isBefore(LocalTime.now())) {
+    private void validateRequest(final LocalDate reservationDate, final ReservationTime reservationTime) {
+        validateFutureTime(reservationDate, reservationTime);
+        validateDuplicateReservation(reservationDate, reservationTime);
+    }
+
+    private void validateFutureTime(final LocalDate reservationDate, final ReservationTime reservationTimeResult) {
+        if (isToday(reservationDate) && isPastTime(reservationTimeResult)) {
             throw new InvalidTimeException(ReservationExceptionMessage.TIME_BEFORE_NOW.getMessage());
         }
     }
 
-    private void validateAvailability(
+    private boolean isToday(final LocalDate reservationDate) {
+        return reservationDate.equals(LocalDate.now());
+    }
+
+    private boolean isPastTime(final ReservationTime reservationTime) {
+        return reservationTime.getStartAt().isBefore(LocalTime.now());
+    }
+
+    private void validateDuplicateReservation(
             final LocalDate reservationDate,
             final ReservationTime reservationTimeResult
     ) {
-        boolean isDuplicate = reservationRepository.existsByDateAndTimeId(reservationDate,
-                reservationTimeResult.getId());
-
+        boolean isDuplicate = reservationRepository.existsByDateAndTimeId(
+                reservationDate,
+                reservationTimeResult.getId()
+        );
         if (isDuplicate) {
             throw new DuplicateException(ReservationExceptionMessage.DUPLICATE_RESERVATION.getMessage());
         }
@@ -157,8 +138,8 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private Reservation searchReservation(final Long id) {
-        return reservationRepository.findById(id)
+    private void searchReservation(final Long id) {
+        reservationRepository.findById(id)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_RESERVATION_ID.getMessage()));
     }
 

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -44,7 +45,7 @@ class AdminViewControllerTest {
                 .body("{\"email\":\"admin@email.com\",\"password\":\"password123\"}")
                 .when().post("/login")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(HttpStatus.OK.value())
                 .extract().cookie("token");
 
         requestSpecification = RestAssured.given()
@@ -57,7 +58,7 @@ class AdminViewControllerTest {
         requestSpecification.log().all()
                 .when().get("/admin")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("어드민 예약 내역 페이지를 출력한다")
@@ -66,7 +67,7 @@ class AdminViewControllerTest {
         requestSpecification.log().all()
                 .when().get("/admin/reservation")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("어드민 예약 시간 관리 페이지를 출력한다")
@@ -75,7 +76,7 @@ class AdminViewControllerTest {
         requestSpecification.log().all()
                 .when().get("/admin/time")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 
     @DisplayName("어드민 예약 테마 관리 페이지를 출력한다")
@@ -84,6 +85,6 @@ class AdminViewControllerTest {
         requestSpecification.log().all()
                 .when().get("/admin/theme")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 }

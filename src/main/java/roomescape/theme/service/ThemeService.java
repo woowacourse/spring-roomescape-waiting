@@ -29,11 +29,7 @@ public class ThemeService {
 
     public List<ThemeResponse> findAll() {
         return themeRepository.findAll().stream()
-                .map(theme -> new ThemeResponse(
-                        theme.getId(),
-                        theme.getName(),
-                        theme.getDescription(),
-                        theme.getThumbnail()))
+                .map(ThemeResponse::from)
                 .toList();
     }
 
@@ -45,25 +41,16 @@ public class ThemeService {
         ).stream().toList();
 
         return topRankedThemes.stream()
-                .map(theme -> new RankedThemeResponse(
-                        theme.getName(),
-                        theme.getDescription(),
-                        theme.getThumbnail())
-                )
+                .map(RankedThemeResponse::from)
                 .toList();
     }
 
     public ThemeResponse add(final ThemeRequest themeRequest) {
         validateDuplicate(themeRequest);
         Theme newTheme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
-        Theme savedTheme = themeRepository.save(newTheme);
 
-        return new ThemeResponse(
-                savedTheme.getId(),
-                savedTheme.getName(),
-                savedTheme.getDescription(),
-                savedTheme.getThumbnail()
-        );
+        Theme savedTheme = themeRepository.save(newTheme);
+        return ThemeResponse.from(savedTheme);
     }
 
     private void validateDuplicate(final ThemeRequest themeRequest) {

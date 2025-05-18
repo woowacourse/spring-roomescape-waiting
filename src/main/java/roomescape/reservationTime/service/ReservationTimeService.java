@@ -25,8 +25,11 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationTimeService(ReservationTimeRepository timeRepository, ReservationRepository reservationRepository,
-                                  ThemeRepository themeRepository) {
+    public ReservationTimeService(
+            ReservationTimeRepository timeRepository,
+            ReservationRepository reservationRepository,
+            ThemeRepository themeRepository
+    ) {
         this.timeRepository = timeRepository;
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
@@ -34,10 +37,7 @@ public class ReservationTimeService {
 
     public List<ReservationTimeResponse> findAll() {
         return timeRepository.findAll().stream()
-                .map(reservationTime -> new ReservationTimeResponse(
-                        reservationTime.getId(),
-                        reservationTime.getStartAt())
-                )
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 
@@ -62,17 +62,15 @@ public class ReservationTimeService {
             final AvailableReservationTimeRequest availableReservationTimeRequest
     ) {
         themeRepository.findById(availableReservationTimeRequest.themeId())
-                .orElseThrow(() -> new InvalidIdException(
-                        IdExceptionMessage.INVALID_THEME_ID.getMessage()
-                ));
+                .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_THEME_ID.getMessage()));
     }
 
     private List<ReservationTime> findReservedTimes(
             final AvailableReservationTimeRequest availableReservationTimeRequest
     ) {
         return reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getDate().equals(availableReservationTimeRequest.date())
-                        && reservation.getTheme().getId().equals(availableReservationTimeRequest.themeId())
+                .filter(reservation -> reservation.isSameDate(availableReservationTimeRequest.date())
+                        && reservation.isSameTheme(availableReservationTimeRequest.themeId())
                 ).map(reservation -> new ReservationTime(
                         reservation.getTime().getId(),
                         reservation.getTime().getStartAt())
@@ -91,7 +89,7 @@ public class ReservationTimeService {
 
         ReservationTime newReservationTime = new ReservationTime(reservationTimeRequest.startAt());
         ReservationTime savedReservationTime = timeRepository.save(newReservationTime);
-        return new ReservationTimeResponse(savedReservationTime.getId(), savedReservationTime.getStartAt());
+        return ReservationTimeResponse.from(savedReservationTime);
     }
 
     private void validateDuplicate(final ReservationTimeRequest reservationTimeRequest) {
@@ -110,8 +108,7 @@ public class ReservationTimeService {
 
     private void searchReservationTimeId(final Long id) {
         timeRepository.findById(id)
-                .orElseThrow(
-                        () -> new InvalidIdException(IdExceptionMessage.INVALID_TIME_ID.getMessage()));
+                .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_TIME_ID.getMessage()));
     }
 
     private void validateUnoccupiedTime(final Long id) {

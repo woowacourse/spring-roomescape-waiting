@@ -32,11 +32,7 @@ public class MemberService {
 
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
-                .map(member -> new MemberResponse(
-                        member.getId(),
-                        member.getName(),
-                        member.getEmail())
-                )
+                .map(MemberResponse::from)
                 .toList();
     }
 
@@ -52,18 +48,22 @@ public class MemberService {
     }
 
     public MemberTokenResponse createToken(final MemberLoginRequest memberLoginRequest) {
-        Member member = memberRepository.findByEmail(memberLoginRequest.email())
-                .orElseThrow(() -> new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage()));
+        Member member = validateLoginEmail(memberLoginRequest);
         validatePassword(memberLoginRequest.password(), member.getPassword());
+
         String role = assignRole(memberLoginRequest.email()).getRole();
         String accessToken = jwtTokenProvider.createToken(memberLoginRequest.email(), role);
         return new MemberTokenResponse(accessToken);
     }
 
+    private Member validateLoginEmail(MemberLoginRequest memberLoginRequest) {
+        return memberRepository.findByEmail(memberLoginRequest.email())
+                .orElseThrow(() -> new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage()));
+    }
+
     public MemberResponse add(final MemberSignupRequest memberSignupRequest) {
-        if (memberRepository.existsByEmail(memberSignupRequest.email())) {
-            throw new AuthorizationException(MemberExceptionMessage.DUPLICATE_MEMBER.getMessage());
-        }
+        validateDuplicateMember(memberSignupRequest);
+
         String hashedPassword = passwordEncoder.encode(memberSignupRequest.password());
         Member member = new Member(
                 memberSignupRequest.name(),
@@ -71,16 +71,18 @@ public class MemberService {
                 hashedPassword
         );
         Member savedMember = memberRepository.save(member);
+        return MemberResponse.from(savedMember);
+    }
 
-        return new MemberResponse(
-                savedMember.getId(),
-                savedMember.getName(),
-                savedMember.getEmail()
-        );
+    private void validateDuplicateMember(MemberSignupRequest memberSignupRequest) {
+        if (memberRepository.existsByEmail(memberSignupRequest.email())) {
+            throw new AuthorizationException(MemberExceptionMessage.DUPLICATE_MEMBER.getMessage());
+        }
     }
 
     private Role assignRole(String email) {
-        Member member = memberRepository.findByEmail(email).get();
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidEmailException(MemberExceptionMessage.INVALID_MEMBER_EMAIL.getMessage()));
         return member.getRole();
     }
 

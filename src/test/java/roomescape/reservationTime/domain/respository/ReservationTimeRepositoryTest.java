@@ -2,8 +2,6 @@ package roomescape.reservationTime.domain.respository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,9 +13,6 @@ import roomescape.reservationTime.domain.ReservationTime;
 @ActiveProfiles("test")
 @DataJpaTest
 public class ReservationTimeRepositoryTest {
-
-    @PersistenceContext
-    private EntityManager entityManager;
 
     @Autowired
     private ReservationTimeRepository timeRepository;
@@ -36,5 +31,4 @@ public class ReservationTimeRepositoryTest {
         // then
         assertThat(times).extracting(ReservationTime::getStartAt).containsOnly(startAt);
     }
-
 }

@@ -44,6 +44,14 @@ public class Reservation {
         this.theme = Objects.requireNonNull(theme);
     }
 
+    public boolean isSameDate(LocalDate date) {
+        return this.date.equals(date);
+    }
+
+    public boolean isSameTheme(Long themeId) {
+        return this.theme.getId().equals(themeId);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == null || getClass() != other.getClass()) {
