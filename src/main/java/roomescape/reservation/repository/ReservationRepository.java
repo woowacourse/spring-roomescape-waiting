@@ -12,6 +12,13 @@ import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository extends CrudRepository<Reservation, Long> {
 
+    @Query("""
+                SELECT r
+                FROM Reservation r
+                JOIN FETCH r.theme
+                JOIN FETCH r.member
+                JOIN FETCH r.time
+            """)
     List<Reservation> findAll();
 
     boolean existsByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme);
@@ -30,5 +37,12 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
     List<Theme> findPopularThemesByReservationBetween(final LocalDate dateFrom, final LocalDate dateTo,
                                                       final PageRequest pageRequest);
 
+    @Query("""
+                SELECT r
+                FROM Reservation r
+                JOIN FETCH r.time
+                JOIN FETCH r.theme
+                WHERE r.member = :member
+            """)
     List<Reservation> findByMember(final Member member);
 }
