@@ -19,7 +19,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate dateAfter,
             LocalDate dateBefore);
 
-    List<Reservation> findByThemeIdAndDate(final Long theme_id, final LocalDate date);
+    List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate date);
 
     List<Reservation> findByMemberId(Long id);
 }
