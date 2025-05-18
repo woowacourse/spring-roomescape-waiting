@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.entity.Member;
+import roomescape.exception.custom.NotFoundException;
 
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -23,7 +24,8 @@ class JpaMemberRepositoryTest {
         jpaMemberRepository.save(member);
 
         String email = member.getEmail();
-        Member expected = jpaMemberRepository.findByEmail(email);
+        Member expected = jpaMemberRepository.findByEmail(email)
+            .orElseThrow(() -> new NotFoundException("member"));
 
         assertThat(expected.getEmail()).isEqualTo(email);
     }

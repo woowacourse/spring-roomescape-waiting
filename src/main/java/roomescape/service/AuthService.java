@@ -20,7 +20,8 @@ public class AuthService {
     }
 
     public String createToken(LoginRequest request) {
-        Member member = memberRepository.findByEmail(request.email());
+        Member member = memberRepository.findByEmail(request.email())
+            .orElseThrow(() -> new NotFoundException("member"));
 
         validatePassword(request.password(), member);
         return jwtTokenProvider.createToken(member);
