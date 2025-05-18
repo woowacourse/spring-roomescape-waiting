@@ -17,7 +17,7 @@ import roomescape.common.validate.Validator;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@FieldNameConstants(level = AccessLevel.PRIVATE)
+@FieldNameConstants
 @Entity
 @Table(name = "themes")
 public class Theme {

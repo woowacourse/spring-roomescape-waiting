@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@FieldNameConstants(level = AccessLevel.PRIVATE)
+@FieldNameConstants
 @Entity
 @Table(name = "reservations")
 public class Reservation {

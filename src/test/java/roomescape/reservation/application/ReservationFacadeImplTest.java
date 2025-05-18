@@ -13,8 +13,10 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
+import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
@@ -29,13 +31,15 @@ import roomescape.user.domain.UserRole;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ReservationFacadeImplTest {
 
     @Autowired
@@ -82,6 +86,266 @@ class ReservationFacadeImplTest {
         time = timeRepository.save(
                 ReservationTime.withoutId(LocalTime.of(15, 0))
         );
+    }
+
+    @Test
+    @DisplayName("모든 예약을 조회할 수 있다")
+    void getAll() {
+        // given
+        Reservation reservation1 = reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(1)),
+                        time,
+                        theme
+                )
+        );
+
+        User anotherUser = userRepository.save(
+                User.withoutId(
+                        UserName.from("다른사용자"),
+                        Email.from("another@example.com"),
+                        Password.fromEncoded("encoded-password"),
+                        UserRole.NORMAL
+                )
+        );
+
+        Reservation reservation2 = reservationRepository.save(
+                Reservation.withoutId(
+                        anotherUser.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(2)),
+                        time,
+                        theme
+                )
+        );
+
+        // when
+        List<ReservationResponse> responses = reservationFacade.getAll();
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses)
+                        .extracting(ReservationResponse::reservationId)
+                        .containsExactly(
+                                reservation1.getId().getValue(),
+                                reservation2.getId().getValue()
+                        ),
+                () -> assertThat(responses)
+                        .extracting(response -> response.user().id())
+                        .containsExactlyInAnyOrder(
+                                user.getId().getValue(),
+                                anotherUser.getId().getValue()
+                        )
+        );
+    }
+
+    @Test
+    @DisplayName("빈 예약 목록을 조회할 수 있다")
+    void getAllWhenEmpty() {
+        // when
+        List<ReservationResponse> responses = reservationFacade.getAll();
+
+        // then
+        assertThat(responses).isEmpty();
+    }
+
+    @Test
+    @DisplayName("특정 날짜와 테마의 사용 가능한 예약 시간을 조회할 수 있다")
+    void getAvailable() {
+        // given
+        LocalDate targetDate = LocalDate.now().plusDays(1);
+
+        ReservationTime anotherTime = timeRepository.save(
+                ReservationTime.withoutId(LocalTime.of(16, 0))
+        );
+
+        reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(targetDate),
+                        time,
+                        theme
+                )
+        );
+
+        // when
+        List<AvailableReservationTimeWebResponse> responses = reservationFacade.getAvailable(
+                targetDate,
+                theme.getId().getValue()
+        );
+
+        // then
+        assertThat(responses).isNotEmpty();
+        assertThat(responses)
+                .anyMatch(response -> response.timeId().equals(anotherTime.getId().getValue()) && response.isBooked() == false)
+                .anyMatch(response -> response.timeId().equals(time.getId().getValue()) && response.isBooked() == true);
+    }
+
+    @Test
+    @DisplayName("사용자 ID로 해당 사용자의 모든 예약을 조회할 수 있다")
+    void getAllByUserId() {
+        // given
+        Reservation reservation1 = reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(1)),
+                        time,
+                        theme
+                )
+        );
+
+        Reservation reservation2 = reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(2)),
+                        time,
+                        theme
+                )
+        );
+
+        User anotherUser = userRepository.save(
+                User.withoutId(
+                        UserName.from("다른사용자"),
+                        Email.from("another@example.com"),
+                        Password.fromEncoded("encoded-password"),
+                        UserRole.NORMAL
+                )
+        );
+
+        reservationRepository.save(
+                Reservation.withoutId(
+                        anotherUser.getId(),
+                        ReservationDate.from(LocalDate.now().plusDays(3)),
+                        time,
+                        theme
+                )
+        );
+
+        // when
+        List<ReservationResponse> responses = reservationFacade.getAllByUserId(user.getId().getValue());
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses)
+                        .extracting(ReservationResponse::reservationId)
+                        .containsExactly(
+                                reservation1.getId().getValue(),
+                                reservation2.getId().getValue()
+                        ),
+                () -> assertThat(responses)
+                        .allMatch(response -> response.user().id().equals(user.getId().getValue()))
+        );
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자 ID로 예약 조회 시 예외가 발생한다")
+    void getAllByUserIdWithNonExistentUserId() {
+        // given
+        Long nonExistentUserId = 9999L;
+
+        // when & then
+        assertThatThrownBy(() -> reservationFacade.getAllByUserId(nonExistentUserId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("[USER] not found");
+    }
+
+    @Test
+    @DisplayName("검색 조건으로 예약을 조회할 수 있다")
+    void getByParams() {
+        // given
+        LocalDate targetDate = LocalDate.now().plusDays(1);
+
+        Reservation reservation = reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(targetDate),
+                        time,
+                        theme
+                )
+        );
+
+        reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(targetDate.plusDays(10)),
+                        time,
+                        theme
+                )
+        );
+
+        ReservationSearchWebRequest searchRequest = new ReservationSearchWebRequest(
+                theme.getId().getValue(),
+                user.getId().getValue(),
+                targetDate,
+                targetDate
+        );
+        // when
+        List<ReservationResponse> responses = reservationFacade.getByParams(searchRequest);
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(1),
+                () -> assertThat(responses.getFirst().reservationId()).isEqualTo(reservation.getId().getValue()),
+                () -> assertThat(responses.getFirst().user().id()).isEqualTo(user.getId().getValue()),
+                () -> assertThat(responses.getFirst().theme().id()).isEqualTo(theme.getId().getValue())
+        );
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마 ID로 예약 생성 시도 시 예외가 발생한다")
+    void createWithNonExistentThemeId() {
+        // given
+        Long nonExistentThemeId = 9999L;
+
+        CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
+                LocalDate.now().plusDays(1),
+                time.getId().getValue(),
+                nonExistentThemeId,
+                user.getId().getValue()
+        );
+
+        int initialCount = countReservations();
+
+        // when & then
+        assertThatThrownBy(() -> reservationFacade.create(request))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("[THEME] not found");
+
+        assertThat(countReservations()).isEqualTo(initialCount);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 시간 ID로 예약 생성 시도 시 예외가 발생한다")
+    void createWithNonExistentTimeId() {
+        // given
+        Long nonExistentTimeId = 9999L;
+
+        CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
+                LocalDate.now().plusDays(1),
+                nonExistentTimeId,
+                theme.getId().getValue(),
+                user.getId().getValue()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationFacade.create(request))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약 ID로 삭제 시도 시 예외가 발생한다")
+    void deleteWithNonExistentReservationId() {
+        // given
+        Long nonExistentReservationId = 9999L;
+        int initialCount = countReservations();
+
+        // when & then
+        assertThatThrownBy(() -> reservationFacade.delete(nonExistentReservationId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("[RESERVATION] not found");
+
+        assertThat(countReservations()).isEqualTo(initialCount);
     }
 
     @Test
