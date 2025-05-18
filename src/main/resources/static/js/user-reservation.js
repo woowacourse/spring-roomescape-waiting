@@ -83,7 +83,7 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-  fetch('/reservations/available?date='+ date +"&themeId=" + themeId, {
+  fetch('/reservations/times/available?date='+ date +"&themeId=" + themeId, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
