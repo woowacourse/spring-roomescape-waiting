@@ -33,7 +33,7 @@ public class User {
     @Embedded
     private Password password;
 
-    public User() {
+    protected User() {
         id = Id.issue();
     }
 

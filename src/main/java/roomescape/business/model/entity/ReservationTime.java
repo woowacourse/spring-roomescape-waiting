@@ -27,7 +27,7 @@ public class ReservationTime {
     @Embedded
     private StartTime startTime;
 
-    public ReservationTime() {
+    protected ReservationTime() {
         id = Id.issue();
     }
 
