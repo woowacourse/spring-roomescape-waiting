@@ -7,20 +7,20 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.service.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeJpaRepository;
 
 @Service
 public class ThemeService {
 
-    private final ThemeRepository themeRepository;
+    private final ThemeJpaRepository themeJpaRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
+    public ThemeService(ThemeJpaRepository themeJpaRepository, ReservationRepository reservationRepository) {
+        this.themeJpaRepository = themeJpaRepository;
         this.reservationRepository = reservationRepository;
     }
 
@@ -29,22 +29,22 @@ public class ThemeService {
             throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
         Theme theme = getTheme(id);
-        themeRepository.deleteById(theme.getId());
+        themeJpaRepository.deleteById(theme.getId());
     }
 
     public ThemeResponse create(ThemeCreateRequest request) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeJpaRepository.save(theme);
         return ThemeResponse.from(savedTheme);
     }
 
     public List<ThemeResponse> getAll() {
-        List<Theme> themes = themeRepository.findAll();
+        List<Theme> themes = themeJpaRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
     public Theme getTheme(Long id) {
-        return themeRepository.findById(id)
+        return themeJpaRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 

@@ -23,10 +23,10 @@ import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
 
 @DataJpaTest
-class ReservationTimeRepositoryTest {
+class ReservationTimeJpaRepositoryTest {
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
     private EntityManager em;
@@ -72,7 +72,7 @@ class ReservationTimeRepositoryTest {
     @Test
     void 예약_가능_시간_목록을_조회한다() {
         List<AvailableReservationTimeResponse> responses =
-                reservationTimeRepository.findAllAvailableReservationTimes(new ReservationDate(date), theme.getId());
+                reservationTimeJpaRepository.findAllAvailableReservationTimes(new ReservationDate(date), theme.getId());
 
         assertThat(responses).hasSize(2);
 

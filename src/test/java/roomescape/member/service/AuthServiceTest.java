@@ -20,6 +20,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JwtTokenProvider;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.role.Role;
 
 @ExtendWith(MockitoExtension.class)

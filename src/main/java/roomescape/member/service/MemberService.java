@@ -10,6 +10,7 @@ import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
+import roomescape.member.repository.MemberRepository;
 import roomescape.member.role.Role;
 
 @Service

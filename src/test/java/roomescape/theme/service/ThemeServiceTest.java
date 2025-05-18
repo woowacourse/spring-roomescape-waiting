@@ -21,17 +21,17 @@ import roomescape.member.domain.Password;
 import roomescape.member.role.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.service.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeJpaRepository;
 import roomescape.time.domain.ReservationTime;
 
 @ExtendWith(MockitoExtension.class)
 public class ThemeServiceTest {
 
     @Mock
-    private ThemeRepository themeRepository;
+    private ThemeJpaRepository themeJpaRepository;
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -44,7 +44,7 @@ public class ThemeServiceTest {
 
         Theme theme = new Theme(1L, "공포", "공포 테마", "공포.jpg");
         when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
-        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+        when(themeJpaRepository.findById(1L)).thenReturn(Optional.of(theme));
         themeService.deleteById(1L);
         assertThat(themeService.getAll()).isEmpty();
     }
@@ -61,7 +61,7 @@ public class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마를_삭제할_수_없다() {
         when(reservationRepository.existsByThemeId(3L)).thenReturn(false);
-        when(themeRepository.findById(3L)).thenReturn(Optional.empty());
+        when(themeJpaRepository.findById(3L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> themeService.deleteById(3L))
                 .isInstanceOf(NoSuchElementException.class);
     }

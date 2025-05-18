@@ -5,40 +5,40 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.service.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.controller.request.AvailableReservationTimeRequest;
 import roomescape.time.controller.request.ReservationTimeCreateRequest;
 import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.time.repository.ReservationTimeJpaRepository;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+    public ReservationTimeService(ReservationTimeJpaRepository reservationTimeJpaRepository,
                                   ReservationRepository reservationRepository) {
-        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
         this.reservationRepository = reservationRepository;
     }
 
     public ReservationTimeResponse create(ReservationTimeCreateRequest request) {
         LocalTime startAt = request.startAt();
-        if (reservationTimeRepository.existsByStartAt(startAt)) {
+        if (reservationTimeJpaRepository.existsByStartAt(startAt)) {
             throw new IllegalArgumentException("[ERROR] 이미 존재하는 시간입니다.");
         }
 
         ReservationTime reservationTime = ReservationTime.create(request.startAt());
-        ReservationTime created = reservationTimeRepository.save(reservationTime);
+        ReservationTime created = reservationTimeJpaRepository.save(reservationTime);
 
         return ReservationTimeResponse.from(created);
     }
 
     public List<ReservationTimeResponse> getAll() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<ReservationTime> reservationTimes = reservationTimeJpaRepository.findAll();
 
         return ReservationTimeResponse.from(reservationTimes);
     }
@@ -49,17 +49,17 @@ public class ReservationTimeService {
         }
 
         ReservationTime reservationTime = getReservationTime(id);
-        reservationTimeRepository.deleteById(reservationTime.getId());
+        reservationTimeJpaRepository.deleteById(reservationTime.getId());
     }
 
     public ReservationTime getReservationTime(Long id) {
-        return reservationTimeRepository.findById(id)
+        return reservationTimeJpaRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
-        return reservationTimeRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),
+        return reservationTimeJpaRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),
                 request.themeId());
     }
 }

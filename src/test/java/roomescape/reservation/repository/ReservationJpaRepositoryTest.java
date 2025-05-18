@@ -15,14 +15,13 @@ import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
-import roomescape.member.service.MemberRepository;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.service.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeJpaRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.time.repository.ReservationTimeJpaRepository;
 
 @DataJpaTest
 class ReservationJpaRepositoryTest {
@@ -34,10 +33,10 @@ class ReservationJpaRepositoryTest {
     MemberRepository memberRepository;
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
-    ThemeRepository themeRepository;
+    ThemeJpaRepository themeJpaRepository;
 
     private Member member;
     private ReservationTime reservationTime;
@@ -48,10 +47,10 @@ class ReservationJpaRepositoryTest {
     void setUp() {
         member = memberRepository.save(
                 new Member(new Name("매트"), new Email("matt@kakao.com"), new Password("1234"), ADMIN));
-        reservationTime = reservationTimeRepository.save(
+        reservationTime = reservationTimeJpaRepository.save(
                 ReservationTime.create(LocalTime.of(10, 0))
         );
-        theme = themeRepository.save(new Theme("공포", "ss", "ss"));
+        theme = themeJpaRepository.save(new Theme("공포", "ss", "ss"));
         reservation = reservationRepository.save(
                 Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
         reservationRepository.save(
