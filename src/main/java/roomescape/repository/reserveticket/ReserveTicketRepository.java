@@ -1,17 +1,17 @@
 package roomescape.repository.reserveticket;
 
 import java.util.List;
-import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
+import org.springframework.data.repository.Repository;
 import roomescape.domain.reserveticket.ReserveTicket;
 
-public interface ReserveTicketRepository {
+@org.springframework.stereotype.Repository
+public interface ReserveTicketRepository extends Repository<ReserveTicket, Long> {
 
-    long add(Reservation reservation, Member member);
+    ReserveTicket save(ReserveTicket reserveTicket);
 
     void deleteById(long id);
 
-    List<ReserveTicket> findAllByMemberId(Long memberId);
+    List<ReserveTicket> findAllByMember_id(Long memberId);
 
     List<ReserveTicket> findAll();
 }

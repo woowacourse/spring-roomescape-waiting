@@ -69,6 +69,14 @@ public class ReserveTicket {
         return member.getId();
     }
 
+    public Reservation getReservation() {
+        return reservation;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

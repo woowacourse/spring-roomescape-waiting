@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import roomescape.domain.member.Member;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
@@ -22,10 +20,11 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
     }
 
     @Override
-    public long add(Reservation reservation, Member member) {
-        long id = index.getAndIncrement();
-        reserveTickets.add(new ReserveTicket(id, reservation, member));
-        return id;
+    public ReserveTicket save(ReserveTicket reserveTicket) {
+        ReserveTicket newReserveTicket = new ReserveTicket(index.getAndIncrement(), reserveTicket.getReservation(),
+                reserveTicket.getMember());
+        reserveTickets.add(newReserveTicket);
+        return newReserveTicket;
     }
 
     @Override
@@ -38,7 +37,7 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
     }
 
     @Override
-    public List<ReserveTicket> findAllByMemberId(Long memberId) {
+    public List<ReserveTicket> findAllByMember_id(Long memberId) {
         return reserveTickets.stream()
                 .filter(currentReservationMember -> currentReservationMember.getMemberId() == memberId)
                 .collect(Collectors.toList());

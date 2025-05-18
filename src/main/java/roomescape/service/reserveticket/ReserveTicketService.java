@@ -2,8 +2,10 @@ package roomescape.service.reserveticket;
 
 import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reserveticket.ReserveTicket;
@@ -27,11 +29,11 @@ public class ReserveTicketService {
     }
 
     @Transactional
-    public long addReservation(AddReservationDto newReservationDto, long memberId) {
+    public long addReservation(AddReservationDto newReservationDto, Long memberId) {
         Member member = memberService.getMemberById(memberId);
         long reservationId = reservationService.addReservation(newReservationDto);
         Reservation reservation = reservationService.getReservationById(reservationId);
-        return reserveTicketRepository.add(reservation, member);
+        return reserveTicketRepository.save(new ReserveTicket(null, reservation, member)).getId();
     }
 
     public List<ReserveTicket> allReservations() {
@@ -45,7 +47,7 @@ public class ReserveTicketService {
 
     public List<ReserveTicket> searchReservations(Long themeId, Long memberId, LocalDate dateFrom,
                                                   LocalDate dateTo) {
-        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByMemberId(memberId);
+        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByMember_id(memberId);
 
         reserveTickets.removeIf(reservationMember ->
                 reservationService.searchReservation(
@@ -56,7 +58,7 @@ public class ReserveTicketService {
         return reserveTickets;
     }
 
-    public List<ReserveTicket> memberReservations(long memberId) {
-        return reserveTicketRepository.findAllByMemberId(memberId);
+    public List<ReserveTicket> memberReservations(Long memberId) {
+        return reserveTicketRepository.findAllByMember_id(memberId);
     }
 }
