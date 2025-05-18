@@ -33,10 +33,9 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public ThemeDto getThemeById(Long id) {
-        Theme theme = themeRepository.findById(id)
+    public Theme getThemeById(Long id) {
+        return themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id에 해당하는 테마가 없습니다."));
-        return ThemeDto.from(theme);
     }
 
     @Transactional(readOnly = true)

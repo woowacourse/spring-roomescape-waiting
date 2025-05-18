@@ -20,7 +20,6 @@ import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.application.dto.ThemeDto;
-import roomescape.application.dto.TimeDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -103,7 +102,7 @@ public class ReservationServiceTest {
 
     private Theme stubTheme(long themeId) {
         Theme theme = Theme.of(themeId, "테마1", "테마1입니다.", "썸네일1");
-        Mockito.doReturn(ThemeDto.from(theme)).when(themeService).getThemeById(themeId);
+        Mockito.doReturn(theme).when(themeService).getThemeById(themeId);
         return theme;
     }
 
