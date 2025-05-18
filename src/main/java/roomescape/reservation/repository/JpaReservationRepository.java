@@ -36,7 +36,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     @Query("""
             SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(rt.id, rt.startAt, 
-            CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked ) 
+            r.id IS NOT NULL) 
             FROM ReservationTime AS rt 
             LEFT JOIN Reservation r ON rt.id = r.time.id AND r.date = :date AND r.theme.id = :themeId 
             ORDER BY rt.startAt
