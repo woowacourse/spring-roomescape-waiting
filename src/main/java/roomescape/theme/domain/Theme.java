@@ -29,7 +29,7 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {

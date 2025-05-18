@@ -32,7 +32,7 @@ public class Member {
         this.memberRole = memberRole;
     }
 
-    public Member() {
+    protected Member() {
     }
 
     private void validate(final String name) {
