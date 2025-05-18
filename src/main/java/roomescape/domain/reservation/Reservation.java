@@ -1,10 +1,5 @@
 package roomescape.domain.reservation;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Objects;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,7 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Objects;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.reservation.InvalidReservationException;
@@ -39,13 +37,6 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "varchar(255) default 'RESERVATION'")
     private ReservationStatus reservationStatus = ReservationStatus.RESERVATION;
-
-    @PrePersist
-    public void prePersist() {
-        if (reservationStatus == null) {
-            this.reservationStatus = ReservationStatus.RESERVATION;
-        }
-    }
 
     public Reservation() {
 
