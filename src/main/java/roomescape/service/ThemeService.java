@@ -14,6 +14,8 @@ import roomescape.repository.JpaThemeRepository;
 @Service
 public class ThemeService {
 
+    private static final int POPULAR_THEMES_COUNT = 10;
+
     private final JpaThemeRepository themeRepository;
     private final JpaReservationRepository reservationRepository;
 
@@ -55,7 +57,8 @@ public class ThemeService {
     public List<ThemeResponseDto> findPopularThemes() {
         LocalDate end = LocalDate.now();
         LocalDate start = end.minusDays(7);
-        List<Theme> popularThemes = themeRepository.findPopular(start, end);
+        List<Theme> popularThemes = themeRepository.findMostReservedThemesBetween(start, end)
+                .subList(0, POPULAR_THEMES_COUNT);
         return popularThemes.stream()
                 .map(ThemeResponseDto::from)
                 .toList();

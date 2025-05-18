@@ -19,7 +19,6 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
             WHERE r.date >= ? and r.date < ?
             GROUP BY th.id
             ORDER BY COUNT(th.id) DESC
-            LIMIT 10
             """, nativeQuery = true)
-    List<Theme> findPopular(LocalDate start, LocalDate end);
+    List<Theme> findMostReservedThemesBetween(LocalDate start, LocalDate end);
 }
