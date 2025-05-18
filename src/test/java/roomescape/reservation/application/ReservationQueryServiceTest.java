@@ -1,0 +1,63 @@
+package roomescape.reservation.application;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
+import roomescape.reservation.application.dto.MyReservationResponse;
+
+@ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@SpringBootTest
+class ReservationQueryServiceTest {
+
+    @Autowired
+    private ReservationQueryService reservationQueryService;
+
+    @Test
+    void 모든_예약기록을_조회한다() {
+        assertThat(reservationQueryService.findReservedReservations()).hasSize(8);
+    }
+
+    @Test
+    void 예약가능한_시간을_조회한다() {
+        final Long themeId = 2L;
+        final String date = LocalDate.now().minusDays(3).toString();
+
+        assertThat(reservationQueryService.findAvailableReservationTime(themeId, date))
+                .isEqualTo(List.of(
+                        new AvailableReservationTimeResponse(1L, LocalTime.of(10, 0), true),
+                        new AvailableReservationTimeResponse(2L, LocalTime.of(12, 0), true),
+                        new AvailableReservationTimeResponse(3L, LocalTime.of(14, 0), false),
+                        new AvailableReservationTimeResponse(4L, LocalTime.of(16, 0), false),
+                        new AvailableReservationTimeResponse(5L, LocalTime.of(18, 0), false),
+                        new AvailableReservationTimeResponse(6L, LocalTime.of(20, 0), false)
+                ));
+    }
+
+    @Test
+    void 해당기간에서_테마id와_멤버id로_예약을_조회한다() {
+        final Long themeId = 2L;
+        final Long memberId = 1L;
+        final LocalDate start = LocalDate.now().minusDays(10);
+        final LocalDate end = LocalDate.now().minusDays(1);
+
+        assertThat(reservationQueryService.findReservationByThemeIdAndMemberIdInDuration(
+                themeId, memberId, start, end)).hasSize(2);
+    }
+
+    @Test
+    void 멤버id로_예약기록을_조회한다() {
+        final long memberId = 1L;
+        final List<MyReservationResponse> responses = reservationQueryService.findByMemberId(memberId);
+
+        assertThat(responses).hasSize(4);
+    }
+}
