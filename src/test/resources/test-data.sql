@@ -1,15 +1,15 @@
-INSERT INTO member (name, email, password, role)
-VALUES
+insert into member (name, email, password, role)
+values
     ('레오', 'admin@gmail.com', 'qwer!', 'ADMIN');
 
-INSERT INTO reservation_time (start_at)
-VALUES
+insert into reservation_time (start_at)
+values
     ('10:00'),
     ('15:00'),
     ('16:00');
 
-INSERT INTO theme (name, description, thumbnail)
-VALUES
+insert into theme (name, description, thumbnail)
+values
     ('테마1',  '테마1입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마2',  '테마2입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마3',  '테마3입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
@@ -22,8 +22,8 @@ VALUES
     ('테마10', '테마10입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마11', '테마11입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO reservation (date, member_id, time_id, theme_id, status)
-VALUES
+insert into reservation (date, member_id, time_id, theme_id, status)
+values
     ('2025-04-30', 1, 1, 11, 'RESERVED'),
     ('2025-04-30', 1, 2, 11, 'RESERVED'),
     ('2025-04-29', 1, 1, 11, 'RESERVED'),

@@ -2,9 +2,9 @@ package roomescape.member.application.dto;
 
 import roomescape.member.domain.Member;
 
-public record MemberInfo(long id, String name, String email, String password) {
+public record MemberInfo(Long id, String name, String email, String password) {
 
-    public MemberInfo(final Member member) {
-        this(member.getId(), member.getName(), member.getEmail(), member.getPassword());
+    public MemberInfo(Member member) {
+        this(member.id(), member.memberName().name(), member.email(), member.password());
     }
 }

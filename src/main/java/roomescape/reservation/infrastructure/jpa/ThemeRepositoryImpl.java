@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.ThemeName;
-import roomescape.reservation.domain.ThemeRepository;
+import roomescape.reservation.domain.theme.Theme;
+import roomescape.reservation.domain.theme.ThemeName;
+import roomescape.reservation.domain.theme.ThemeRepository;
 
 @Repository
 public class ThemeRepositoryImpl implements ThemeRepository {
@@ -18,13 +18,18 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     }
 
     @Override
-    public boolean existsByName(final ThemeName name) {
-        return themeJpaRepository.existsByName(name);
+    public boolean existsByThemeName(final ThemeName themeName) {
+        return themeJpaRepository.existsByThemeName(themeName);
     }
 
     @Override
     public Theme save(final Theme theme) {
         return themeJpaRepository.save(theme);
+    }
+
+    @Override
+    public void deleteById(final long id) {
+        themeJpaRepository.deleteById(id);
     }
 
     @Override
@@ -35,11 +40,6 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     @Override
     public Optional<Theme> findById(final long id) {
         return themeJpaRepository.findById(id);
-    }
-
-    @Override
-    public void deleteById(final long id) {
-        themeJpaRepository.deleteById(id);
     }
 
     @Override

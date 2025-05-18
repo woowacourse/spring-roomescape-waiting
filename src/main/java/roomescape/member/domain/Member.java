@@ -7,52 +7,41 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Entity
+@Getter
+@NoArgsConstructor
+@Accessors(fluent = true)
+@EqualsAndHashCode(of = "id")
 public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Embedded
-    private MemberName name;
+    private MemberName memberName;
+
     private String email;
+
     private String password;
+
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    public Member(final Long id, final String name, final String email, final String password, final MemberRole role) {
+    public Member(Long id, String name, String email, String password, MemberRole role) {
         this.id = id;
-        this.name = new MemberName(name);
+        this.memberName = new MemberName(name);
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public Member() {
-    }
-
-    public boolean hasSameId(final long other) {
-        return id == other;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name.getName();
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public MemberRole getRole() {
-        return role;
+    public boolean isSameId(long id) {
+        return this.id == id;
     }
 }

@@ -14,13 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.support.util.TestCurrentDateTime;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ThemeRepository;
-import roomescape.reservation.application.service.ThemeService;
 import roomescape.reservation.application.dto.ThemeCreateCommand;
 import roomescape.reservation.application.dto.ThemeInfo;
+import roomescape.reservation.application.service.ThemeService;
+import roomescape.reservation.domain.reservation.ReservationRepository;
+import roomescape.reservation.domain.theme.Theme;
+import roomescape.reservation.domain.theme.ThemeRepository;
+import roomescape.support.util.TestCurrentDateTime;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -46,7 +46,7 @@ public class ThemeServiceIntegrationTest {
     @Test
     void createTheme() {
         // given
-        final ThemeCreateCommand request = new ThemeCreateCommand("우테코방탈출", "우테코를 탈출해라", "www.naver.com");
+        final ThemeCreateCommand request = new ThemeCreateCommand("테마", "설명", "썸네일.png");
         // when
         final ThemeInfo result = themeService.createTheme(request);
         // then
@@ -56,10 +56,10 @@ public class ThemeServiceIntegrationTest {
                 () -> assertThat(result.name()).isEqualTo(request.name()),
                 () -> assertThat(result.description()).isEqualTo(request.description()),
                 () -> assertThat(result.thumbnail()).isEqualTo(request.thumbnail()),
-                () -> assertThat(savedTheme.getId()).isNotNull(),
-                () -> assertThat(savedTheme.getName()).isEqualTo(request.name()),
-                () -> assertThat(savedTheme.getDescription()).isEqualTo(request.description()),
-                () -> assertThat(savedTheme.getThumbnail()).isEqualTo(request.thumbnail())
+                () -> assertThat(savedTheme.id()).isNotNull(),
+                () -> assertThat(savedTheme.getNameOfTheme()).isEqualTo(request.name()),
+                () -> assertThat(savedTheme.getDescriptionOfTheme()).isEqualTo(request.description()),
+                () -> assertThat(savedTheme.getThumbnailOfTheme()).isEqualTo(request.thumbnail())
         );
     }
 
@@ -67,10 +67,11 @@ public class ThemeServiceIntegrationTest {
     @Test
     void should_ThrowException_WhenDuplicateThemeName() {
         // given
-        final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "우테코를 탈출해라", "www.naver.com");
-        // when
-        // then
-        assertThatThrownBy(() -> themeService.createTheme(request))
+        final ThemeCreateCommand request1 = new ThemeCreateCommand("테마", "설명1", "썸네일1.png");
+        final ThemeCreateCommand request2 = new ThemeCreateCommand("테마", "설명2", "썸네일2.png");
+        themeService.createTheme(request1);
+        // when & then
+        assertThatThrownBy(() -> themeService.createTheme(request2))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("해당 이름의 테마는 이미 존재합니다.");
     }
@@ -97,8 +98,7 @@ public class ThemeServiceIntegrationTest {
     @DisplayName("예약이 존재하는 테마를 삭제하면 예외가 발생한다")
     @Test
     void should_ThrowException_WhenDeleteThemeWithinReservation() {
-        // when
-        // then
+        // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(7L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");

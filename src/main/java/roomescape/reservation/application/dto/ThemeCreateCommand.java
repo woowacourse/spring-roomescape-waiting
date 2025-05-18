@@ -1,6 +1,6 @@
 package roomescape.reservation.application.dto;
 
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.theme.Theme;
 
 public record ThemeCreateCommand(String name, String description, String thumbnail) {
 

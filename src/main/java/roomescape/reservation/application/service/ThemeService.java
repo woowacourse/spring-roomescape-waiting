@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.time.CurrentDateTime;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ThemeRepository;
 import roomescape.reservation.application.dto.ThemeCreateCommand;
 import roomescape.reservation.application.dto.ThemeInfo;
+import roomescape.reservation.domain.reservation.ReservationRepository;
+import roomescape.reservation.domain.theme.Theme;
+import roomescape.reservation.domain.theme.ThemeRepository;
 
 @Service
 public class ThemeService {
@@ -29,7 +29,7 @@ public class ThemeService {
 
     public ThemeInfo createTheme(final ThemeCreateCommand command) {
         final Theme theme = command.convertToTheme();
-        if (themeRepository.existsByName(theme.getThemeName())) {
+        if (themeRepository.existsByThemeName(theme.themeName())) {
             throw new IllegalArgumentException("해당 이름의 테마는 이미 존재합니다.");
         }
         final Theme savedTheme = themeRepository.save(theme);

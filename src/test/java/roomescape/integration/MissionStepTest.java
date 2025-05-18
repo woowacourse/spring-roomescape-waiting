@@ -116,9 +116,9 @@ public class MissionStepTest {
                 .statusCode(CREATED.value());
 
         final Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "우테코방탈출");
-        themeParams.put("description", "우테코방탈출출출");
-        themeParams.put("thumbnail", "우테코방탈출");
+        themeParams.put("name", "테마");
+        themeParams.put("description", "설명");
+        themeParams.put("thumbnail", "썸네일.png");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

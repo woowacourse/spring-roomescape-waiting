@@ -17,15 +17,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.support.util.TestCurrentDateTime;
 import roomescape.member.domain.MemberRepository;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.reservation.domain.ThemeRepository;
-import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
+import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.domain.reservation.Reservation;
+import roomescape.reservation.domain.reservation.ReservationRepository;
+import roomescape.reservation.domain.theme.ThemeRepository;
+import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.support.util.TestCurrentDateTime;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -81,8 +81,7 @@ public class ReservationServiceIntegrationTest {
         // given
         final ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 1L, 11L);
         reservationService.createReservation(request);
-        // when
-        // then
+        // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("해당 시간에 이미 예약이 존재합니다.");
@@ -96,8 +95,7 @@ public class ReservationServiceIntegrationTest {
         final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 11L);
         reservationService.createReservation(request);
         final ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 1L, 10L);
-        // when
-        // then
+        // when & then
         assertThatCode(() -> reservationService.createReservation(request2))
                 .doesNotThrowAnyException();
     }
@@ -108,8 +106,7 @@ public class ReservationServiceIntegrationTest {
         // given
         final LocalDate date = currentDateTime.getDate().minusDays(1);
         final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 3L);
-        // when
-        // then
+        // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");

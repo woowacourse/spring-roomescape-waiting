@@ -1,11 +1,11 @@
 package roomescape.member.application.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.member.application.dto.LoginMemberInfo;
+import roomescape.member.application.dto.MemberLoginCommand;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.security.TokenProvider;
-import roomescape.member.application.dto.LoginMemberInfo;
-import roomescape.member.application.dto.MemberLoginCommand;
 
 @Service
 public class AuthService {
@@ -21,7 +21,7 @@ public class AuthService {
     public String tokenLogin(final MemberLoginCommand command) {
         final Member loginMember = memberRepository.findByEmailAndPassword(command.email(), command.password())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일 혹은 비밀번호입니다."));
-        final Long memberId = loginMember.getId();
+        final Long memberId = loginMember.id();
         return tokenProvider.createToken(memberId.toString());
     }
 

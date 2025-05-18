@@ -3,13 +3,13 @@ package roomescape.reservation.application.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.application.dto.AvailableTimeInfo;
 import roomescape.reservation.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservation.application.dto.ReservationTimeInfo;
+import roomescape.reservation.domain.reservation.Reservation;
+import roomescape.reservation.domain.reservation.ReservationRepository;
+import roomescape.reservation.domain.time.ReservationTime;
+import roomescape.reservation.domain.time.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
@@ -24,7 +24,7 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeInfo createReservationTime(final ReservationTimeCreateCommand command) {
-        if (reservationTimeRepository.existsByTime(command.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(command.startAt())) {
             throw new IllegalArgumentException("이미 존재하는 시간입니다.");
         }
         final ReservationTime reservationTime = command.convertToReservationTime();
@@ -50,7 +50,7 @@ public class ReservationTimeService {
         final List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(date, themeId);
         return reservationTimes.stream()
                 .map(time ->
-                        new AvailableTimeInfo(time.getId(), time.getStartAt(), isAlreadyBooked(time, reservations)))
+                        new AvailableTimeInfo(time.id(), time.startAt(), isAlreadyBooked(time, reservations)))
                 .toList();
     }
 

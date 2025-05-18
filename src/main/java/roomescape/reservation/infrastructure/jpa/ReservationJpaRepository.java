@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.reservation.Reservation;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>,
         JpaSpecificationExecutor<Reservation> {

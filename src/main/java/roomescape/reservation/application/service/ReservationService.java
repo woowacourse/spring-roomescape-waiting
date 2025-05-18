@@ -7,15 +7,15 @@ import org.springframework.stereotype.Service;
 import roomescape.common.time.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.reservation.domain.ThemeRepository;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.dto.ReservationSearchCondition;
+import roomescape.reservation.domain.reservation.Reservation;
+import roomescape.reservation.domain.reservation.ReservationRepository;
+import roomescape.reservation.domain.theme.Theme;
+import roomescape.reservation.domain.theme.ThemeRepository;
+import roomescape.reservation.domain.time.ReservationTime;
+import roomescape.reservation.domain.time.ReservationTimeRepository;
 
 @Service
 public class ReservationService {

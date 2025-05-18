@@ -27,8 +27,7 @@ public class AdminRoleInterceptorMockMvcTest {
     @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time"})
     @ParameterizedTest
     void should_Response403_WhenNotAdminMemberAccessAdminPage(final String uri) throws Exception {
-        // when
-        // then
+        // when & then
         final Cookie cookie = new Cookie("token", getUserToken());
         mockMvc.perform(get(uri)
                 .contentType("application/json")
@@ -40,8 +39,7 @@ public class AdminRoleInterceptorMockMvcTest {
     @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time"})
     @ParameterizedTest
     void can_Access_WhenAdminAccessAdminPage(final String uri) throws Exception {
-        // when
-        // then
+        // when & then
         final Cookie cookie = new Cookie("token", getAdminToken());
         mockMvc.perform(get(uri)
                 .contentType("application/json")

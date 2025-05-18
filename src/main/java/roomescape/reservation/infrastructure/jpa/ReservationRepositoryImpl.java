@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.reservation.Reservation;
+import roomescape.reservation.domain.reservation.ReservationRepository;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -14,21 +14,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     public ReservationRepositoryImpl(final ReservationJpaRepository reservationJpaRepository) {
         this.reservationJpaRepository = reservationJpaRepository;
-    }
-
-    @Override
-    public List<Reservation> findAll() {
-        return reservationJpaRepository.findAll();
-    }
-
-    @Override
-    public Reservation save(final Reservation reservation) {
-        return reservationJpaRepository.save(reservation);
-    }
-
-    @Override
-    public void deleteById(final long id) {
-        reservationJpaRepository.deleteById(id);
     }
 
     @Override
@@ -44,6 +29,21 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public boolean existsByThemeId(final long themeId) {
         return reservationJpaRepository.existsByThemeId(themeId);
+    }
+
+    @Override
+    public Reservation save(final Reservation reservation) {
+        return reservationJpaRepository.save(reservation);
+    }
+
+    @Override
+    public void deleteById(final long id) {
+        reservationJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Reservation> findAll() {
+        return reservationJpaRepository.findAll();
     }
 
     @Override

@@ -14,12 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.reservation.application.service.ReservationTimeService;
 import roomescape.reservation.application.dto.AvailableTimeInfo;
 import roomescape.reservation.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservation.application.dto.ReservationTimeInfo;
+import roomescape.reservation.application.service.ReservationTimeService;
+import roomescape.reservation.domain.time.ReservationTime;
+import roomescape.reservation.domain.time.ReservationTimeRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -37,8 +37,7 @@ public class TimeServiceIntegrationTest {
     void should_ThrowException_WhenCreateDuplicatedTime() {
         // given
         final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(10, 0));
-        // when
-        // then
+        // when & then
         assertThatThrownBy(() -> reservationTimeService.createReservationTime(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 존재하는 시간입니다.");
@@ -57,8 +56,8 @@ public class TimeServiceIntegrationTest {
         assertAll(
                 () -> assertThat(result.id()).isEqualTo(4L),
                 () -> assertThat(result.startAt()).isEqualTo(time),
-                () -> assertThat(savedTime.getId()).isEqualTo(4L),
-                () -> assertThat(savedTime.getStartAt()).isEqualTo(time)
+                () -> assertThat(savedTime.id()).isEqualTo(4L),
+                () -> assertThat(savedTime.startAt()).isEqualTo(time)
         );
     }
 
@@ -74,8 +73,7 @@ public class TimeServiceIntegrationTest {
     @DisplayName("예약이 존재하는 시간을 삭제할 경우 예외가 발생한다")
     @Test
     void should_ThrowException_WhenDeleteTimeWithinReservation() {
-        // when
-        // then
+        // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(1L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");

@@ -2,9 +2,9 @@ package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.reservation.Reservation;
+import roomescape.reservation.domain.theme.Theme;
+import roomescape.reservation.domain.time.ReservationTime;
 
 public record ReservationCreateCommand(LocalDate date, long memberId, Long timeId, Long themeId) {
 

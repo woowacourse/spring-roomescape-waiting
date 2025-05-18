@@ -16,16 +16,6 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findByEmailAndPassword(final String email, final String password) {
-        return memberJpaRepository.findByEmailAndPassword(email, password);
-    }
-
-    @Override
-    public Optional<Member> findById(final long id) {
-        return memberJpaRepository.findById(id);
-    }
-
-    @Override
     public Member save(final Member member) {
         return memberJpaRepository.save(member);
     }
@@ -34,4 +24,15 @@ public class MemberRepositoryImpl implements MemberRepository {
     public List<Member> findAll() {
         return memberJpaRepository.findAll();
     }
+
+    @Override
+    public Optional<Member> findById(final long id) {
+        return memberJpaRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Member> findByEmailAndPassword(final String email, final String password) {
+        return memberJpaRepository.findByEmailAndPassword(email, password);
+    }
+
 }
