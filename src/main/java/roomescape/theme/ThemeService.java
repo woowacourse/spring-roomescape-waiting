@@ -1,7 +1,5 @@
 package roomescape.theme;
 
-import java.time.LocalDate;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
@@ -9,6 +7,9 @@ import roomescape.exception.custom.reason.theme.ThemeUsedException;
 import roomescape.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -52,9 +53,9 @@ public class ThemeService {
             final Long id
     ) {
         final Theme theme = themeRepository.findById(id)
-                .orElseThrow(() -> new ThemeNotFoundException());
+                .orElseThrow(ThemeNotFoundException::new);
 
-        if(reservationRepository.existsByTheme(theme)) {
+        if (reservationRepository.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
 

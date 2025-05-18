@@ -28,7 +28,7 @@ public class MemberService {
 
     public List<MemberReservationResponse> readAllReservationsByMember(final LoginMember loginMember) {
         final Member member = memberRepository.findByEmail(loginMember.email())
-                .orElseThrow(() -> new MemberNotFoundException());
+                .orElseThrow(MemberNotFoundException::new);
 
         return reservationRepository.findAllByMember(member).stream()
                 .map(MemberReservationResponse::of)

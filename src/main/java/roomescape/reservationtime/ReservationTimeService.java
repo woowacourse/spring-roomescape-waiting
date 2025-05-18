@@ -1,9 +1,5 @@
 package roomescape.reservationtime;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
@@ -17,6 +13,11 @@ import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -43,7 +44,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
         final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new ReservationTimeNotExistsThemeException());
+                .orElseThrow(ReservationTimeNotExistsThemeException::new);
 
         final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(theme, date).stream()
                 .map(Reservation::getReservationTime)
@@ -61,9 +62,9 @@ public class ReservationTimeService {
 
     public void deleteById(final Long id) {
         final ReservationTime reservationTime = reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ReservationTimeNotFoundException());
+                .orElseThrow(ReservationTimeNotFoundException::new);
 
-        if(reservationRepository.existsByReservationTime(reservationTime)){
+        if (reservationRepository.existsByReservationTime(reservationTime)) {
             throw new ReservationTimeUsedException();
         }
 

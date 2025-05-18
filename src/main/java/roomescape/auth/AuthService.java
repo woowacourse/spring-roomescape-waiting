@@ -17,7 +17,7 @@ public class AuthService {
 
     public String generateToken(final LoginRequest loginRequest) {
         final Member memberByEmail = memberRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new AuthNotExistsEmailException());
+                .orElseThrow(AuthNotExistsEmailException::new);
         validatePassword(loginRequest, memberByEmail);
 
         return jwtProvider.provideToken(memberByEmail.getEmail(), memberByEmail.getRole(), memberByEmail.getName());

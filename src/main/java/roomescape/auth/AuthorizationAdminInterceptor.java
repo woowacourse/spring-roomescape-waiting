@@ -3,14 +3,15 @@ package roomescape.auth;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.exception.custom.reason.auth.AuthNotExistsCookieException;
 import roomescape.exception.custom.reason.auth.AuthNotValidTokenException;
 import roomescape.member.MemberRole;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 @AllArgsConstructor
 public class AuthorizationAdminInterceptor implements HandlerInterceptor {
@@ -45,17 +46,17 @@ public class AuthorizationAdminInterceptor implements HandlerInterceptor {
                 .filter(cookie -> Objects.equals(cookie.getName(), TOKEN_NAME))
                 .map(Cookie::getValue)
                 .findAny()
-                .orElseThrow(() -> new AuthNotExistsCookieException());
+                .orElseThrow(AuthNotExistsCookieException::new);
     }
 
     private void validateToken(final String token) {
-        if(!jwtProvider.isValidToken(token)){
+        if (!jwtProvider.isValidToken(token)) {
             throw new AuthNotValidTokenException();
         }
     }
 
     private void validateExistsCookies(final Cookie[] cookies) {
-        if(cookies == null){
+        if (cookies == null) {
             throw new AuthNotExistsCookieException();
         }
     }
