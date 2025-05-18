@@ -16,7 +16,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
 
-    @Query(value = "SELECT theme.id FROM Reservation WHERE date BETWEEN :startDate AND :endDate GROUP BY theme ORDER BY COUNT(*) DESC LIMIT 10")
+    @Query(value = "SELECT r.theme.id FROM Reservation r WHERE r.date BETWEEN :startDate AND :endDate GROUP BY r.theme.id ORDER BY COUNT(r) DESC")
     List<Long> findTopThemesByReservationCountBetween(LocalDate startDate, LocalDate endDate);
 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateFrom,

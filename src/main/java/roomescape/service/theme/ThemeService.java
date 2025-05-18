@@ -39,7 +39,9 @@ public class ThemeService {
     public List<PopularThemeResponse> getPopularThemes() {
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = endDate.minusDays(7);
-        List<Long> themeIds = reservationRepository.findTopThemesByReservationCountBetween(startDate, endDate);
+        List<Long> themeIds = reservationRepository.findTopThemesByReservationCountBetween(startDate, endDate).stream()
+                .limit(10)
+                .toList();
 
         return themeIds.stream().map(themeId -> {
             Theme theme = themeRepository.findById(themeId)

@@ -70,8 +70,8 @@ class ReservationRepositoryTest {
         // then
         Assertions.assertAll(
                 () -> {
-                    assertThat(topThemeIds).hasSize(10);
-                    for (int i = 0; i < 10; i++) {
+                    assertThat(topThemeIds).hasSize(12);
+                    for (int i = 0; i < 12; i++) {
                         assertThat(topThemeIds.get(i)).isEqualTo(themes[i].getId());
                     }
                 }
