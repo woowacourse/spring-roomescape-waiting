@@ -75,22 +75,6 @@ public class ReservationService {
         }
     }
 
-    @Transactional
-    public void cancelWaitingById(Long reservationId, LoginMemberInfo loginMemberInfo) {
-        Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("reservationId", reservationId));
-        validateCancelPermission(loginMemberInfo, reservation);
-
-        reservationRepository.deleteById(reservationId);
-        autoReserveNextWaiting(reservation);
-    }
-
-    private void validateCancelPermission(LoginMemberInfo loginMemberInfo, Reservation reservation) {
-        if (!loginMemberInfo.id().equals(reservation.getMember().getId())) {
-            throw new DeletionNotAllowedException("자신의 예약만 삭제할 수 있습니다.");
-        }
-    }
-
     private void autoReserveNextWaiting(Reservation canceled) {
         Optional<Reservation> firstWaiting = reservationRepository.findFirstWaiting(
                 canceled.getDate(), canceled.getTheme().getId(), canceled.getTime().getId());
@@ -99,5 +83,20 @@ public class ReservationService {
             waiting.changeStatusToReserved();
             reservationRepository.save(waiting);
         });
+    }
+
+    @Transactional
+    public void cancelWaitingById(Long reservationId, LoginMemberInfo loginMemberInfo) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException("reservationId", reservationId));
+        validateCancelPermission(loginMemberInfo, reservation);
+
+        reservationRepository.deleteById(reservationId);
+    }
+
+    private void validateCancelPermission(LoginMemberInfo loginMemberInfo, Reservation reservation) {
+        if (!loginMemberInfo.id().equals(reservation.getMember().getId())) {
+            throw new DeletionNotAllowedException("자신의 예약만 삭제할 수 있습니다.");
+        }
     }
 }
