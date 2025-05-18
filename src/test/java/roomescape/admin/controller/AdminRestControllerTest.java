@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 class AdminRestControllerTest {
 
     private String adminToken;
+    private LocalDate now;
 
     @BeforeEach
     void setUp() {
@@ -27,6 +28,7 @@ class AdminRestControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "east@email.com", "password", "1234"))
                 .when().post("/login").getCookie("token");
+        now = LocalDate.now();
     }
 
     @Test
@@ -56,8 +58,8 @@ class AdminRestControllerTest {
                 .body(Map.of("email", "east@email.com", "password", "1234"))
                 .when().post("/login").getCookie("token");
 
-        final String dateFrom = LocalDate.now().minusDays(1).toString();
-        final String dateTo = LocalDate.now().plusDays(1).toString();
+        final String dateFrom = now.minusDays(1).toString();
+        final String dateTo = now.plusDays(1).toString();
 
         // when & then
         RestAssured.given().log().all()

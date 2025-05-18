@@ -48,8 +48,8 @@ public class ThemeService {
     }
 
     public List<Theme> findPopularThemes() {
-        final LocalDate sevenDaysAgo = LocalDate.now().minusDays(POPULAR_THEME_DAYS);
         final LocalDate today = LocalDate.now();
+        final LocalDate sevenDaysAgo = today.minusDays(POPULAR_THEME_DAYS);
         final PageRequest pageRequest = PageRequest.of(0, POPULAR_THEME_LIMIT);
 
         return reservationRepository.findPopularThemesByReservationBetween(

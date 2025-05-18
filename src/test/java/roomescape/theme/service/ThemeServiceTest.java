@@ -40,6 +40,8 @@ class ThemeServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    private LocalDate now = LocalDate.now();
+
     @Test
     void 테마를_저장한다() {
         // given
@@ -124,17 +126,17 @@ class ThemeServiceTest {
         final Member member = new Member("name", "email", "password", Role.USER);
         memberRepository.save(member);
 
-        final Reservation inlineReservation = new Reservation(member, LocalDate.now().minusDays(7), reservationTime,
+        final Reservation inlineReservation = new Reservation(member, now.minusDays(7), reservationTime,
                 theme1);
-        final Reservation outlineReservation = new Reservation(member, LocalDate.now().plusDays(10), reservationTime,
+        final Reservation outlineReservation = new Reservation(member, now.plusDays(10), reservationTime,
                 theme1);
-        final Reservation inlineReservation2 = new Reservation(member, LocalDate.now().minusDays(5), reservationTime,
+        final Reservation inlineReservation2 = new Reservation(member, now.minusDays(5), reservationTime,
                 theme1);
-        final Reservation inlineReservation3 = new Reservation(member, LocalDate.now().minusDays(4), reservationTime,
+        final Reservation inlineReservation3 = new Reservation(member, now.minusDays(4), reservationTime,
                 theme2);
-        final Reservation inlineReservation4 = new Reservation(member, LocalDate.now().minusDays(3), reservationTime,
+        final Reservation inlineReservation4 = new Reservation(member, now.minusDays(3), reservationTime,
                 theme2);
-        final Reservation inlineReservation5 = new Reservation(member, LocalDate.now().minusDays(5), reservationTime,
+        final Reservation inlineReservation5 = new Reservation(member, now.minusDays(5), reservationTime,
                 theme2);
         reservationRepository.save(inlineReservation);
         reservationRepository.save(outlineReservation);
