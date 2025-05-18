@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.controller.request.SignUpRequest;
 import roomescape.member.controller.response.MemberResponse;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
 import roomescape.member.domain.PasswordEncryptor;
@@ -22,13 +23,14 @@ public class MemberService implements MemberQueryService {
 
     @Transactional
     public MemberResponse signUp(SignUpRequest request) {
-        boolean exists = memberRepository.existsByEmail(request.email());
+        Email email = new Email(request.email());
+        boolean exists = memberRepository.existsByEmail_Email(email.email());
         if (exists) {
             throw new InvalidArgumentException("이미 가입된 이메일입니다.");
         }
 
         Password password = Password.encrypt(request.password(), passwordEncryptor);
-        Member signed = Member.signUpUser(request.name(), request.email(), password);
+        Member signed = Member.signUpUser(request.name(), email, password);
         Member saved = memberRepository.save(signed);
         return MemberResponse.from(saved);
     }
@@ -40,7 +42,7 @@ public class MemberService implements MemberQueryService {
 
     public Member getMember(String email, String password) {
         String encryptPassword = passwordEncryptor.encrypt(password);
-        return memberRepository.findByEmailAndPassword_Password(email, encryptPassword)
+        return memberRepository.findByEmail_EmailAndPassword_Password(email, encryptPassword)
                 .orElseThrow(() -> new InvalidArgumentException("가입되지 않은 회원입니다."));
     }
 

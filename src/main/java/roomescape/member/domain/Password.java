@@ -4,8 +4,9 @@ import jakarta.persistence.Embeddable;
 import roomescape.global.exception.InvalidArgumentException;
 
 @Embeddable
-public record Password(String password) {
-
+public record Password(
+        String password
+) {
     private static final int PASSWORD_MAX_LENGTH = 25;
 
     public static Password encrypt(String rawPassword, PasswordEncryptor passwordEncoder) {
