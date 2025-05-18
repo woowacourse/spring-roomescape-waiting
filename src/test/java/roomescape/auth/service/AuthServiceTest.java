@@ -7,11 +7,11 @@ import roomescape.common.exception.DataNotFoundException;
 import roomescape.fake.FakeMemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 
 public class AuthServiceTest {
 
-    private final MemberRepository memberRepository = new FakeMemberRepository();
+    private final MemberRepositoryInterface memberRepository = new FakeMemberRepository();
     private final JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
             "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=",
             3600000L

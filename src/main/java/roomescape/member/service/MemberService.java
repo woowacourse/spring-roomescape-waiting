@@ -5,13 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 
 @RequiredArgsConstructor
 @Service
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+    private final MemberRepositoryInterface memberRepository;
 
     public Member findMemberByEmail(final String email) {
         return memberRepository.findByEmail(email)

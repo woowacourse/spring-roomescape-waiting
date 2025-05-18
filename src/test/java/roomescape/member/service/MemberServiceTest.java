@@ -7,13 +7,13 @@ import roomescape.common.exception.DataNotFoundException;
 import roomescape.fake.FakeMemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MemberServiceTest {
 
-    private final MemberRepository memberRepository = new FakeMemberRepository();
+    private final MemberRepositoryInterface memberRepository = new FakeMemberRepository();
     private final MemberService memberService = new MemberService(memberRepository);
 
     @Test

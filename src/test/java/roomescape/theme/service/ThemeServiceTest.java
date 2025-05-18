@@ -14,7 +14,7 @@ import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.fake.FakeThemeRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
@@ -24,7 +24,7 @@ import roomescape.theme.repository.ThemeRepositoryInterface;
 
 class ThemeServiceTest {
 
-    private final MemberRepository memberRepository = new FakeMemberRepository();
+    private final MemberRepositoryInterface memberRepository = new FakeMemberRepository();
     private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
     private final ThemeRepositoryInterface themeRepository = new FakeThemeRepository();
     private final ReservationRepository reservationRepository = new FakeReservationRepository();
