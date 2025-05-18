@@ -8,9 +8,9 @@ import roomescape.member.domain.MemberRole;
 
 public interface JpaMemberRepository extends ListCrudRepository<Member, Long> {
 
-    List<Member> findByMemberRole(final MemberRole memberRole);
+    List<Member> findByMemberRole(MemberRole memberRole);
 
-    Optional<Member> findByEmail(final String email);
+    Optional<Member> findByEmail(String email);
 
     boolean existsByEmail(String email);
 }

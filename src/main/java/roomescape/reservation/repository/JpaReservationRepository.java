@@ -20,10 +20,10 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             AND m.id         = :memberId
             AND r.date BETWEEN :startDate AND :endDate
             """)
-    List<Reservation> findFilteredReservations(final Long themeId,
-                                               final Long memberId,
-                                               final LocalDate startDate,
-                                               final LocalDate endDate);
+    List<Reservation> findFilteredReservations(Long themeId,
+                                               Long memberId,
+                                               LocalDate startDate,
+                                               LocalDate endDate);
 
     @Query("""
             SELECT EXISTS (
