@@ -23,23 +23,24 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> findById(Long id) {
-        return Optional.empty();
+    public boolean existsByStartAt(final LocalTime startAt) {
+        return reservationTimes.values().stream()
+                .anyMatch(reservationTime -> reservationTime.getStartAt().equals(startAt));
     }
 
     @Override
-    public boolean existsByStartAt(LocalTime startAt) {
-        return false;
+    public Optional<ReservationTime> findById(final Long id) {
+        return Optional.ofNullable(reservationTimes.get(id));
+    }
+
+    @Override
+    public void deleteById(final Long id) {
+        reservationTimes.remove(id);
     }
 
     @Override
     public List<ReservationTime> findAll() {
-        return List.of();
-    }
-
-    @Override
-    public void deleteById(Long id) {
-
+        return List.copyOf(reservationTimes.values());
     }
 
     @Override

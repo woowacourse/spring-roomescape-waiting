@@ -36,11 +36,6 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
-    public ReservationTime getById(final Long id) {
-        return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + id));
-    }
-
     public List<ReservationTime> findAll() {
         return reservationTimeRepository.findAll();
     }
