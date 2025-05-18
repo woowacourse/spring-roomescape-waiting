@@ -32,14 +32,15 @@
 
 ### 예약
 
-| 기능          | Method | URL                             | 파라미터 / Path Variable                        | Body                                    |
-|-------------|--------|---------------------------------|---------------------------------------------|-----------------------------------------|
-| 예약 전체 조회    | GET    | `/reservations`                 | -                                           | -                                       |
-| 예약 상세 조회    | GET    | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
-| 예약 생성       | POST   | `/reservations`                 | -                                           | `themeId`, `timeId`, `date`             |
-| 예약 삭제       | DELETE | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
-| 조건부 예약 조회   | GET    | `/admin/reservations`           | `themeId`, `memberId`, `dateFrom`, `dateTo` | -                                       |
-| 예약 생성 (관리자) | POST   | `/admin/reservations`           | -                                           | `themeId`, `memberId`, `date`, `timeId` |
+| 기능           | Method | URL                             | 파라미터 / Path Variable                        | Body                                    |
+|--------------|--------|---------------------------------|---------------------------------------------|-----------------------------------------|
+| 예약 전체 조회     | GET    | `/reservations`                 | -                                           | -                                       |
+| 예약 상세 조회     | GET    | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
+| 사용자 예약 전체 조회 | GET    | `/reservations/member`          | -                                           | -                                       |
+| 예약 생성        | POST   | `/reservations`                 | -                                           | `themeId`, `timeId`, `date`             |
+| 예약 삭제        | DELETE | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
+| 조건부 예약 조회    | GET    | `/admin/reservations`           | `themeId`, `memberId`, `dateFrom`, `dateTo` | -                                       |
+| 예약 생성 (관리자)  | POST   | `/admin/reservations`           | -                                           | `themeId`, `memberId`, `date`, `timeId` |
 
 ### 예약 시간
 
@@ -75,4 +76,3 @@
     - [x] 예약 상태를 포함한 예약 조회 기능 구현
         - [x] 화면 응답
         - [x] 조회 API 구현
-
