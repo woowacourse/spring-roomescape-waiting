@@ -25,7 +25,7 @@ public class MemberController {
 
     @GetMapping
     public List<MemberDto> getAllMembers() {
-        return memberService.getAllMembers();
+        return memberService.getAllMemberDtos();
     }
 
     @PostMapping

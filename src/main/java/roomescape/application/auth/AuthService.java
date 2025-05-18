@@ -7,6 +7,7 @@ import roomescape.application.MemberService;
 import roomescape.application.auth.dto.LoginRequest;
 import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.MemberDto;
+import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.exception.AuthorizationException;
 import roomescape.exception.NotFoundException;
@@ -25,7 +26,7 @@ public class AuthService {
     }
 
     public MemberDto getMemberById(Long id) {
-        return memberService.getMemberById(id);
+        return memberService.getMemberDtoById(id);
     }
 
     public Cookie createCookie(LoginRequest loginRequest) {
@@ -42,7 +43,7 @@ public class AuthService {
 
     private String createToken(LoginRequest loginRequest) {
         try {
-            MemberDto memberDto = memberService.getMemberBy(loginRequest.email(), loginRequest.password());
+            MemberDto memberDto = memberService.getMemberDtoBy(loginRequest.email(), loginRequest.password());
             return jwtTokenProvider.createToken(new MemberIdDto(memberDto.id()));
         } catch (NotFoundException e) {
             throw new AuthorizationException("이메일 또는 비밀번호가 일치하지 않습니다.");
@@ -50,7 +51,7 @@ public class AuthService {
     }
 
     public boolean isAdminAuthorized(MemberIdDto memberIdDto) {
-        MemberDto memberDto = memberService.getMemberById(memberIdDto.id());
-        return memberDto.role() == Role.ADMIN;
+        Member member = memberService.getMemberEntityById(memberIdDto.id());
+        return member.getRole() == Role.ADMIN;
     }
 }

@@ -116,7 +116,7 @@ public class ReservationServiceTest {
 
     private Member stubMember(long memberId) {
         Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
-        Mockito.doReturn(MemberDto.from(member)).when(memberService).getMemberById(memberId);
+        Mockito.doReturn(member).when(memberService).getMemberEntityById(memberId);
         return member;
     }
 }

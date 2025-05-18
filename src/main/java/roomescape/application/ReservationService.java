@@ -54,7 +54,7 @@ public class ReservationService {
         validateNotDuplicate(request);
         Theme theme = themeService.getThemeById(request.themeId()).toEntity();
         ReservationTime reservationTime = timeService.getTimeById(request.timeId()).toEntity();
-        Member member = memberService.getMemberById(request.memberId()).toEntity();
+        Member member = memberService.getMemberEntityById(request.memberId());
         Waiting waiting = new Waiting(ReservationStatus.RESERVED);
         Reservation reservationWithoutId = Reservation.withoutId(
                 member,
@@ -94,7 +94,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationWaitingDto> getReservationsByMember(Long memberId) {
-        Member member = memberService.getMemberById(memberId).toEntity();
+        Member member = memberService.getMemberEntityById(memberId);
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
         return memberReservations.stream()
                 .map(reservation -> new ReservationWaitingDto(

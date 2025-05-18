@@ -33,21 +33,27 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public MemberDto getMemberById(Long id) {
+    public MemberDto getMemberDtoById(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id에 해당하는 사용자가 없습니다."));
         return MemberDto.from(member);
     }
 
     @Transactional(readOnly = true)
-    public MemberDto getMemberBy(String email, String password) {
+    public Member getMemberEntityById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id에 해당하는 사용자가 없습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public MemberDto getMemberDtoBy(String email, String password) {
         Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new NotFoundException("이메일과 비밀번호가 일치하는 사용자가 없습니다."));
         return MemberDto.from(member);
     }
 
     @Transactional(readOnly = true)
-    public List<MemberDto> getAllMembers() {
+    public List<MemberDto> getAllMemberDtos() {
         List<Member> members = memberRepository.findAll();
         return MemberDto.from(members);
     }
