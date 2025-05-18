@@ -18,10 +18,9 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    private final LocalTime startAt;
+    private LocalTime startAt;
 
-    public ReservationTime() {
-        this.startAt = null;
+    protected ReservationTime() {
     }
 
     public ReservationTime(final LocalTime startAt) {
