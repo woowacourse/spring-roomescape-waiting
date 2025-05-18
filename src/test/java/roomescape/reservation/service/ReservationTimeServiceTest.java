@@ -9,11 +9,11 @@ import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
 
 class ReservationTimeServiceTest {
 
-    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    private final ReservationTimeRepositoryInterface reservationTimeRepository = new FakeReservationTimeRepository();
     private final ReservationTimeService reservationTimeService = new ReservationTimeService(reservationTimeRepository);
 
     @ParameterizedTest

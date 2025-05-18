@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeRepositoryInterface reservationTimeRepository;
 
     public ReservationTime save(final LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {

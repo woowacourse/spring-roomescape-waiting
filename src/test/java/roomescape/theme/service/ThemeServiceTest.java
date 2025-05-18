@@ -18,14 +18,14 @@ import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 
 class ThemeServiceTest {
 
     private final MemberRepositoryInterface memberRepository = new FakeMemberRepository();
-    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    private final ReservationTimeRepositoryInterface reservationTimeRepository = new FakeReservationTimeRepository();
     private final ThemeRepositoryInterface themeRepository = new FakeThemeRepository();
     private final ReservationRepository reservationRepository = new FakeReservationRepository();
     private final ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
