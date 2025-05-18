@@ -1,6 +1,7 @@
 package roomescape.application;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.domain.ReservationStatus.RESERVED;
 import static roomescape.domain.Role.USER;
 
 import java.time.LocalDate;
@@ -23,10 +24,8 @@ import roomescape.application.dto.ThemeDto;
 import roomescape.application.dto.TimeDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,10 +51,9 @@ public class ReservationServiceTest {
 
         Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Waiting waiting = new Waiting(ReservationStatus.RESERVED);
 
-        Reservation reservation1 = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, waiting);
-        Reservation reservation2 = Reservation.of(2L, member, theme, LocalDate.now().plusDays(1), time, waiting);
+        Reservation reservation1 = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, RESERVED);
+        Reservation reservation2 = Reservation.of(2L, member, theme, LocalDate.now().plusDays(1), time, RESERVED);
 
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
@@ -81,9 +79,8 @@ public class ReservationServiceTest {
         Theme theme = stubTheme(1L);
         ReservationTime time = stubTime(1L);
         Member member = stubMember(1L);
-        Waiting waiting = Mockito.mock(Waiting.class);
 
-        Reservation reservation = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, waiting);
+        Reservation reservation = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, RESERVED);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
         //when

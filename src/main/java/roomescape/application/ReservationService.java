@@ -13,7 +13,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.NotFoundException;
 
@@ -44,13 +43,12 @@ public class ReservationService {
         Theme theme = themeService.getThemeById(request.themeId()).toEntity();
         ReservationTime reservationTime = timeService.getTimeById(request.timeId()).toEntity();
         Member member = memberService.getMemberById(request.memberId()).toEntity();
-        Waiting waiting = new Waiting(ReservationStatus.RESERVED);
         Reservation reservationWithoutId = Reservation.withoutId(
                 member,
                 theme,
                 request.date(),
                 reservationTime,
-                waiting
+                ReservationStatus.RESERVED
         );
         validateNotPast(reservationWithoutId);
         Reservation reservation = reservationRepository.save(reservationWithoutId);
@@ -88,7 +86,7 @@ public class ReservationService {
                                 reservation.getTheme().getName(),
                                 reservation.getDate(),
                                 reservation.getTime().getStartAt(),
-                                ReservationStatus.name(reservation.getWaiting().getStatus())
+                                reservation.getStatus().name()
                         )
                 )
                 .toList();

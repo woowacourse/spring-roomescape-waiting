@@ -12,7 +12,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.presentation.controller.dto.UserReservationRequest;
 
 public class Fixture {
@@ -29,7 +28,7 @@ public class Fixture {
             THEME_1,
             LocalDate.now().plusDays(1),
             RESERVATION_TIME_1,
-            new Waiting(ReservationStatus.RESERVED)
+            ReservationStatus.RESERVED
     );
 
     public static final UserReservationRequest RESERVATION_BODY = createUserReservationBody();

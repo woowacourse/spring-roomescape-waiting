@@ -290,7 +290,7 @@ public class MissionStepTest {
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
         jdbcTemplate.update("INSERT INTO theme (id, name, description, thumbnail) VALUES (1, '테마1', '테마1입니다.', '썸네일')");
         jdbcTemplate.update(
-                "INSERT INTO reservation (id, member_id, date, time_id, theme_id) VALUES (1, 1, '2025-01-01', 1, 1)");
+                "INSERT INTO reservation (id, member_id, date, time_id, theme_id) VALUES (1, 1, '2025-06-01', 1, 1)");
 
         RestAssured.given().log().all()
                 .when().delete("/times/1")

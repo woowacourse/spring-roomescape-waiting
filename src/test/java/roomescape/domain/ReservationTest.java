@@ -26,7 +26,7 @@ class ReservationTest {
                 THEME_1,
                 date,
                 reservationTime,
-                new Waiting(ReservationStatus.RESERVED)
+                ReservationStatus.RESERVED
         );
 
         // when
@@ -36,7 +36,7 @@ class ReservationTest {
                 THEME_1,
                 date,
                 reservationTime,
-                new Waiting(ReservationStatus.RESERVED)
+                ReservationStatus.RESERVED
         );
         boolean duplicated = reservation2.isDuplicated(reservation1);
 
@@ -60,7 +60,7 @@ class ReservationTest {
                 THEME_1,
                 date1,
                 time1,
-                new Waiting(ReservationStatus.RESERVED)
+                ReservationStatus.RESERVED
         );
 
         // when
@@ -72,7 +72,7 @@ class ReservationTest {
                 THEME_1,
                 date2,
                 time2,
-                new Waiting(ReservationStatus.RESERVED)
+                ReservationStatus.RESERVED
         );
         boolean duplicated = reservation2.isDuplicated(reservation1);
 

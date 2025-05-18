@@ -1,12 +1,12 @@
 package roomescape.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -17,9 +17,9 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Waiting waiting;
     @ManyToOne
     private ReservationTime time;
     @ManyToOne
@@ -33,14 +33,14 @@ public class Reservation {
             Theme theme,
             LocalDate date,
             ReservationTime time,
-            Waiting waiting
+            ReservationStatus status
     ) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
-        this.waiting = waiting;
+        this.status = status;
     }
 
     public Reservation() {
@@ -52,9 +52,9 @@ public class Reservation {
             Theme theme,
             LocalDate date,
             ReservationTime time,
-            Waiting waiting
+            ReservationStatus status
     ) {
-        return new Reservation(id, member, theme, date, time, waiting);
+        return new Reservation(id, member, theme, date, time, status);
     }
 
     public static Reservation withoutId(
@@ -62,9 +62,9 @@ public class Reservation {
             Theme theme,
             LocalDate reservationDate,
             ReservationTime reservationTime,
-            Waiting waiting
+            ReservationStatus status
     ) {
-        return new Reservation(null, member, theme, reservationDate, reservationTime, waiting);
+        return new Reservation(null, member, theme, reservationDate, reservationTime, status);
     }
 
     public boolean isPast() {
@@ -105,7 +105,7 @@ public class Reservation {
         return time;
     }
 
-    public Waiting getWaiting() {
-        return waiting;
+    public ReservationStatus getStatus() {
+        return status;
     }
 }
