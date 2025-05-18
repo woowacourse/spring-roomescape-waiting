@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-public record UserReservationRequest(
+public record UserReservationCreateRequest(
         @NotNull
         Long themeId,
         @JsonFormat(pattern = "yyyy-MM-dd")

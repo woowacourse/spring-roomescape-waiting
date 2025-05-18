@@ -1,18 +1,17 @@
 package roomescape.application.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record MemberCreateDto(
-        @NotNull
-        @Email
-        String email,
-        @NotNull
+public record ThemeCreateServiceRequest(
         @NotBlank
-        String password,
         @NotNull
+        String name,
         @NotBlank
-        String name
+        @NotNull
+        String description,
+        @NotBlank
+        @NotNull
+        String thumbnail
 ) {
 }

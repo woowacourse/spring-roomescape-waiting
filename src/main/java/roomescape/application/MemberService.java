@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.dto.MemberCreateDto;
-import roomescape.application.dto.MemberDto;
+import roomescape.application.dto.MemberCreateServiceRequest;
+import roomescape.application.dto.MemberServiceResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.domain.repository.MemberRepository;
@@ -22,7 +22,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberDto registerMember(@Valid MemberCreateDto createDto) {
+    public MemberServiceResponse registerMember(@Valid MemberCreateServiceRequest createDto) {
         Member memberWithoutId = Member.withoutId(
                 createDto.name(),
                 createDto.email(),
@@ -30,23 +30,23 @@ public class MemberService {
                 Role.USER
         );
         Member savedMember = memberRepository.save(memberWithoutId);
-        return MemberDto.from(savedMember);
+        return MemberServiceResponse.from(savedMember);
     }
 
-    public List<MemberDto> getAllMembers() {
+    public List<MemberServiceResponse> getAllMembers() {
         List<Member> members = memberRepository.findAll();
-        return MemberDto.from(members);
+        return MemberServiceResponse.from(members);
     }
 
-    public MemberDto getMemberById(Long id) {
+    public MemberServiceResponse getMemberById(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id에 해당하는 사용자가 없습니다."));
-        return MemberDto.from(member);
+        return MemberServiceResponse.from(member);
     }
 
-    public MemberDto getMemberBy(String email, String password) {
+    public MemberServiceResponse getMemberBy(String email, String password) {
         Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new NotFoundException("이메일과 비밀번호가 일치하는 사용자가 없습니다."));
-        return MemberDto.from(member);
+        return MemberServiceResponse.from(member);
     }
 }

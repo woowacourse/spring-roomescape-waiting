@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.TimeService;
-import roomescape.application.dto.TimeCreateDto;
-import roomescape.application.dto.TimeDto;
+import roomescape.application.dto.TimeCreateServiceRequest;
+import roomescape.application.dto.TimeServiceResponse;
 import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
 import roomescape.presentation.controller.dto.TimeDataWithBookingInfoResponse;
 import roomescape.presentation.controller.dto.TimeResponse;
@@ -36,9 +36,9 @@ public class TimeController {
     }
 
     @PostMapping
-    public ResponseEntity<TimeResponse> addTime(@Valid @RequestBody TimeCreateDto request) {
-        TimeDto timeDto = service.registerNewTime(request);
-        TimeResponse timeResponse = TimeResponse.from(timeDto);
+    public ResponseEntity<TimeResponse> addTime(@Valid @RequestBody TimeCreateServiceRequest request) {
+        TimeServiceResponse timeServiceResponse = service.registerNewTime(request);
+        TimeResponse timeResponse = TimeResponse.from(timeServiceResponse);
         return ResponseEntity.status(HttpStatus.CREATED).body(timeResponse);
     }
 
@@ -54,8 +54,7 @@ public class TimeController {
             @RequestParam Long themeId
     ) {
         List<TimeDataWithBookingInfo> timesWithBookingInfo = service.getTimesWithBookingInfo(date, themeId);
-        List<TimeDataWithBookingInfoResponse> timesWithBookingResponses = TimeDataWithBookingInfoResponse.from(
-                timesWithBookingInfo);
-        return ResponseEntity.ok().body(timesWithBookingResponses);
+        List<TimeDataWithBookingInfoResponse> response = TimeDataWithBookingInfoResponse.from(timesWithBookingInfo);
+        return ResponseEntity.ok().body(response);
     }
 }

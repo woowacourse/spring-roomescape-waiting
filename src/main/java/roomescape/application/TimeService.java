@@ -6,8 +6,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.dto.TimeCreateDto;
-import roomescape.application.dto.TimeDto;
+import roomescape.application.dto.TimeCreateServiceRequest;
+import roomescape.application.dto.TimeServiceResponse;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.repository.TimeRepository;
 import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
@@ -24,21 +24,21 @@ public class TimeService {
     }
 
     @Transactional
-    public TimeDto registerNewTime(TimeCreateDto request) {
+    public TimeServiceResponse registerNewTime(TimeCreateServiceRequest request) {
         ReservationTime newReservationTime = ReservationTime.withoutId(request.startAt());
         ReservationTime savedReservationTime = repository.save(newReservationTime);
-        return TimeDto.from(savedReservationTime);
+        return TimeServiceResponse.from(savedReservationTime);
     }
 
-    public List<TimeDto> getAllTimes() {
+    public List<TimeServiceResponse> getAllTimes() {
         List<ReservationTime> reservationTimes = repository.findAll();
-        return TimeDto.from(reservationTimes);
+        return TimeServiceResponse.from(reservationTimes);
     }
 
-    public TimeDto getTimeById(Long id) {
+    public TimeServiceResponse getTimeById(Long id) {
         ReservationTime reservationTime = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException("찾으려는 id가 존재하지 않습니다. id: " + id));
-        return TimeDto.from(reservationTime);
+        return TimeServiceResponse.from(reservationTime);
     }
 
     public List<TimeDataWithBookingInfo> getTimesWithBookingInfo(LocalDate date, Long themeId) {

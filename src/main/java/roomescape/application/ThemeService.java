@@ -7,8 +7,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.dto.ThemeCreateDto;
-import roomescape.application.dto.ThemeDto;
+import roomescape.application.dto.ThemeCreateServiceRequest;
+import roomescape.application.dto.ThemeServiceResponse;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.NotFoundException;
@@ -25,29 +25,29 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeDto registerTheme(@Valid ThemeCreateDto createDto) {
+    public ThemeServiceResponse registerTheme(@Valid ThemeCreateServiceRequest createDto) {
         Theme themeWithoutId = Theme.withoutId(createDto.name(), createDto.description(), createDto.thumbnail());
         Theme savedTheme = themeRepository.save(themeWithoutId);
-        return ThemeDto.from(savedTheme);
+        return ThemeServiceResponse.from(savedTheme);
     }
 
-    public List<ThemeDto> getAllThemes() {
+    public List<ThemeServiceResponse> getAllThemes() {
         List<Theme> themes = themeRepository.findAll();
-        return ThemeDto.from(themes);
+        return ThemeServiceResponse.from(themes);
     }
 
-    public ThemeDto getThemeById(Long id) {
+    public ThemeServiceResponse getThemeById(Long id) {
         Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id에 해당하는 테마가 없습니다."));
-        return ThemeDto.from(theme);
+        return ThemeServiceResponse.from(theme);
     }
 
-    public List<ThemeDto> getThemeRanking() {
+    public List<ThemeServiceResponse> getThemeRanking() {
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusWeeks(1);
         LocalDate endDate = today.minusDays(1);
         List<Theme> themeRanking = themeRepository.findThemeRanking(startDate, endDate, RANKING_LIMIT_COUNT);
-        return ThemeDto.from(themeRanking);
+        return ThemeServiceResponse.from(themeRanking);
     }
 
     @Transactional

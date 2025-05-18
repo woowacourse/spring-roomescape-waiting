@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.application.MemberService;
 import roomescape.application.auth.dto.LoginRequest;
 import roomescape.application.auth.dto.MemberIdDto;
-import roomescape.application.dto.MemberDto;
+import roomescape.application.dto.MemberServiceResponse;
 import roomescape.domain.Role;
 import roomescape.exception.AuthorizationException;
 import roomescape.exception.NotFoundException;
@@ -22,7 +22,7 @@ public class AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public MemberDto getMemberById(Long id) {
+    public MemberServiceResponse getMemberById(Long id) {
         return memberService.getMemberById(id);
     }
 
@@ -40,15 +40,15 @@ public class AuthService {
 
     private String createToken(LoginRequest loginRequest) {
         try {
-            MemberDto memberDto = memberService.getMemberBy(loginRequest.email(), loginRequest.password());
-            return jwtTokenProvider.createToken(new MemberIdDto(memberDto.id()));
+            MemberServiceResponse memberServiceResponse = memberService.getMemberBy(loginRequest.email(), loginRequest.password());
+            return jwtTokenProvider.createToken(new MemberIdDto(memberServiceResponse.id()));
         } catch (NotFoundException e) {
             throw new AuthorizationException("이메일 또는 비밀번호가 일치하지 않습니다.");
         }
     }
 
     public boolean isAdminAuthorized(MemberIdDto memberIdDto) {
-        MemberDto memberDto = memberService.getMemberById(memberIdDto.id());
-        return memberDto.role() == Role.ADMIN;
+        MemberServiceResponse memberServiceResponse = memberService.getMemberById(memberIdDto.id());
+        return memberServiceResponse.role() == Role.ADMIN;
     }
 }

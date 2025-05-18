@@ -4,18 +4,18 @@ import java.time.LocalTime;
 import java.util.List;
 import roomescape.domain.ReservationTime;
 
-public record TimeDto(
+public record TimeServiceResponse(
         Long id,
         LocalTime startAt
 ) {
 
-    public static TimeDto from(ReservationTime reservationTime) {
-        return new TimeDto(reservationTime.getId(), reservationTime.getStartAt());
+    public static TimeServiceResponse from(ReservationTime reservationTime) {
+        return new TimeServiceResponse(reservationTime.getId(), reservationTime.getStartAt());
     }
 
-    public static List<TimeDto> from(List<ReservationTime> reservationTimes) {
+    public static List<TimeServiceResponse> from(List<ReservationTime> reservationTimes) {
         return reservationTimes.stream()
-                .map(TimeDto::from)
+                .map(TimeServiceResponse::from)
                 .toList();
     }
 

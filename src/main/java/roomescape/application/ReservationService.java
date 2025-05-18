@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.dto.ReservationCreateDto;
-import roomescape.application.dto.ReservationDto;
-import roomescape.application.dto.ReservationWaitingDto;
+import roomescape.application.dto.ReservationCreateServiceRequest;
+import roomescape.application.dto.ReservationServiceResponse;
+import roomescape.application.dto.ReservationStatusServiceResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -38,7 +38,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationDto registerReservation(ReservationCreateDto request) {
+    public ReservationServiceResponse registerReservation(ReservationCreateServiceRequest request) {
         validateNotDuplicate(request);
         Theme theme = themeService.getThemeById(request.themeId()).toEntity();
         ReservationTime reservationTime = timeService.getTimeById(request.timeId()).toEntity();
@@ -52,10 +52,10 @@ public class ReservationService {
         );
         validateNotPast(reservationWithoutId);
         Reservation reservation = reservationRepository.save(reservationWithoutId);
-        return ReservationDto.from(reservation);
+        return ReservationServiceResponse.from(reservation);
     }
 
-    private void validateNotDuplicate(ReservationCreateDto request) {
+    private void validateNotDuplicate(ReservationCreateServiceRequest request) {
         boolean duplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(),
                 request.timeId(),
@@ -72,16 +72,16 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationDto> getAllReservations() {
+    public List<ReservationServiceResponse> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
-        return ReservationDto.from(reservations);
+        return ReservationServiceResponse.from(reservations);
     }
 
-    public List<ReservationWaitingDto> getReservationsByMember(Long memberId) {
+    public List<ReservationStatusServiceResponse> getReservationsByMember(Long memberId) {
         Member member = memberService.getMemberById(memberId).toEntity();
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
         return memberReservations.stream()
-                .map(reservation -> new ReservationWaitingDto(
+                .map(reservation -> new ReservationStatusServiceResponse(
                                 reservation.getId(),
                                 reservation.getTheme().getName(),
                                 reservation.getDate(),
@@ -92,7 +92,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationDto> searchReservationsWith(
+    public List<ReservationServiceResponse> searchReservationsWith(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,
@@ -105,7 +105,7 @@ public class ReservationService {
                         dateFrom,
                         dateTo
                 );
-        return ReservationDto.from(reservations);
+        return ReservationServiceResponse.from(reservations);
     }
 
     @Transactional

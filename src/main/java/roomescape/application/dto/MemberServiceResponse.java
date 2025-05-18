@@ -4,15 +4,15 @@ import java.util.List;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 
-public record MemberDto(
+public record MemberServiceResponse(
         Long id,
         String name,
         String email,
         String password,
         Role role
 ) {
-    public static MemberDto from(Member member) {
-        return new MemberDto(
+    public static MemberServiceResponse from(Member member) {
+        return new MemberServiceResponse(
                 member.getId(),
                 member.getName(),
                 member.getEmail(),
@@ -21,9 +21,9 @@ public record MemberDto(
         );
     }
 
-    public static List<MemberDto> from(List<Member> members) {
+    public static List<MemberServiceResponse> from(List<Member> members) {
         return members.stream()
-                .map(MemberDto::from)
+                .map(MemberServiceResponse::from)
                 .toList();
     }
 

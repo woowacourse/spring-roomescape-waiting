@@ -5,14 +5,14 @@ import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.application.dto.ReservationCreateDto;
+import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.presentation.controller.dto.UserReservationRequest;
+import roomescape.presentation.controller.dto.UserReservationCreateRequest;
 
 public class Fixture {
 
@@ -31,14 +31,14 @@ public class Fixture {
             ReservationStatus.RESERVED
     );
 
-    public static final UserReservationRequest RESERVATION_BODY = createUserReservationBody();
+    public static final UserReservationCreateRequest RESERVATION_BODY = createUserReservationBody();
 
-    public static UserReservationRequest createUserReservationBody() {
-        return new UserReservationRequest(1L, LocalDate.now().plusDays(1), 1L);
+    public static UserReservationCreateRequest createUserReservationBody() {
+        return new UserReservationCreateRequest(1L, LocalDate.now().plusDays(1), 1L);
     }
 
-    public static ReservationCreateDto createReservationBody(Long memberId) {
-        return new ReservationCreateDto(LocalDate.now().plusDays(1), 1L, 1L, memberId);
+    public static ReservationCreateServiceRequest createReservationBody(Long memberId) {
+        return new ReservationCreateServiceRequest(LocalDate.now().plusDays(1), 1L, 1L, memberId);
     }
 
     public static void resetH2TableIds(JdbcTemplate jdbcTemplate) {

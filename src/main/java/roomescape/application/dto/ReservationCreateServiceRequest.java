@@ -3,9 +3,9 @@ package roomescape.application.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.presentation.controller.dto.UserReservationRequest;
+import roomescape.presentation.controller.dto.UserReservationCreateRequest;
 
-public record ReservationCreateDto(
+public record ReservationCreateServiceRequest(
         @JsonFormat(pattern = "yyyy-MM-dd")
         @NotNull
         LocalDate date,
@@ -17,7 +17,7 @@ public record ReservationCreateDto(
         Long memberId
 ) {
 
-    public static ReservationCreateDto of(UserReservationRequest dto, Long memberId) {
-        return new ReservationCreateDto(dto.date(), dto.themeId(), dto.timeId(), memberId);
+    public static ReservationCreateServiceRequest of(UserReservationCreateRequest dto, Long memberId) {
+        return new ReservationCreateServiceRequest(dto.date(), dto.themeId(), dto.timeId(), memberId);
     }
 }

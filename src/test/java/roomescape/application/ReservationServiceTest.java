@@ -16,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.application.dto.MemberDto;
-import roomescape.application.dto.ReservationCreateDto;
-import roomescape.application.dto.ReservationDto;
-import roomescape.application.dto.ReservationWaitingDto;
-import roomescape.application.dto.ThemeDto;
-import roomescape.application.dto.TimeDto;
+import roomescape.application.dto.MemberServiceResponse;
+import roomescape.application.dto.ReservationCreateServiceRequest;
+import roomescape.application.dto.ReservationServiceResponse;
+import roomescape.application.dto.ReservationStatusServiceResponse;
+import roomescape.application.dto.ThemeServiceResponse;
+import roomescape.application.dto.TimeServiceResponse;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -62,7 +62,7 @@ public class ReservationServiceTest {
         Mockito.doReturn(reservations).when(reservationRepository).findByMember(Mockito.any(Member.class));
 
         //when
-        List<ReservationWaitingDto> dtos = reservationService.getReservationsByMember(memberId);
+        List<ReservationStatusServiceResponse> dtos = reservationService.getReservationsByMember(memberId);
 
         //then
         assertAll(
@@ -84,7 +84,7 @@ public class ReservationServiceTest {
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
         //when
-        ReservationDto reservationDto = reservationService.registerReservation(new ReservationCreateDto(
+        ReservationServiceResponse reservationServiceResponse = reservationService.registerReservation(new ReservationCreateServiceRequest(
                 reservation.getDate(),
                 theme.getId(),
                 time.getId(),
@@ -92,24 +92,24 @@ public class ReservationServiceTest {
         ));
 
         //then
-        Assertions.assertThat(reservationDto).isEqualTo(ReservationDto.from(reservation));
+        Assertions.assertThat(reservationServiceResponse).isEqualTo(ReservationServiceResponse.from(reservation));
     }
 
     private Theme stubTheme(long themeId) {
         Theme theme = Theme.of(themeId, "테마1", "테마1입니다.", "썸네일1");
-        Mockito.doReturn(ThemeDto.from(theme)).when(themeService).getThemeById(themeId);
+        Mockito.doReturn(ThemeServiceResponse.from(theme)).when(themeService).getThemeById(themeId);
         return theme;
     }
 
     private ReservationTime stubTime(long timeId) {
         ReservationTime time = ReservationTime.of(timeId, LocalTime.of(10, 0));
-        Mockito.doReturn(TimeDto.from(time)).when(timeService).getTimeById(timeId);
+        Mockito.doReturn(TimeServiceResponse.from(time)).when(timeService).getTimeById(timeId);
         return time;
     }
 
     private Member stubMember(long memberId) {
         Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
-        Mockito.doReturn(MemberDto.from(member)).when(memberService).getMemberById(memberId);
+        Mockito.doReturn(MemberServiceResponse.from(member)).when(memberService).getMemberById(memberId);
         return member;
     }
 }

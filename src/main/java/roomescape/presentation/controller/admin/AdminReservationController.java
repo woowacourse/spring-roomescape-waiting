@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
-import roomescape.application.dto.ReservationCreateDto;
-import roomescape.application.dto.ReservationDto;
+import roomescape.application.dto.ReservationCreateServiceRequest;
+import roomescape.application.dto.ReservationServiceResponse;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -26,13 +26,13 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationDto> createReservation(@Valid @RequestBody ReservationCreateDto request) {
-        ReservationDto reservationDto = service.registerReservation(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
+    public ResponseEntity<ReservationServiceResponse> createReservation(@Valid @RequestBody ReservationCreateServiceRequest request) {
+        ReservationServiceResponse reservationServiceResponse = service.registerReservation(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationServiceResponse);
     }
 
     @GetMapping
-    public List<ReservationDto> getReservationsMatching(
+    public List<ReservationServiceResponse> getReservationsMatching(
             @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
             @RequestParam(required = false) LocalDate dateFrom,

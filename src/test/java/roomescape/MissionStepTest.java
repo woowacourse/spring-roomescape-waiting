@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.application.auth.dto.MemberIdDto;
-import roomescape.application.dto.ReservationDto;
+import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.TimeRepository;
 import roomescape.infrastructure.jwt.JwtTokenProvider;
@@ -176,11 +176,11 @@ public class MissionStepTest {
                 1L, "2023-08-05", 1L, 1L
         );
 
-        List<ReservationDto> reservations = RestAssured.given().log().all()
+        List<ReservationServiceResponse> reservations = RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationDto.class);
+                .jsonPath().getList(".", ReservationServiceResponse.class);
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
