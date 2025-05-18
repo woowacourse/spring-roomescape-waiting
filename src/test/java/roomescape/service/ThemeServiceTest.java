@@ -110,7 +110,7 @@ class ThemeServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme);
+        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, reservationTime, theme);
         reservationRepository.save(reservation);
 
         //when & then

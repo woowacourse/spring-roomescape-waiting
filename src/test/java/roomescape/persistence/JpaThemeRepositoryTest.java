@@ -46,9 +46,9 @@ class JpaThemeRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         em.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
-        Reservation reservation3 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
+        Reservation reservation1 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
+        Reservation reservation2 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
+        Reservation reservation3 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
         em.persist(reservation1);
         em.persist(reservation2);
         em.persist(reservation3);
@@ -80,10 +80,10 @@ class JpaThemeRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         em.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
-        Reservation reservation3 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 3), time, theme1);
-        Reservation reservation4 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
+        Reservation reservation1 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
+        Reservation reservation2 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
+        Reservation reservation3 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 3), time, theme1);
+        Reservation reservation4 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
         em.persist(reservation1);
         em.persist(reservation2);
         em.persist(reservation3);

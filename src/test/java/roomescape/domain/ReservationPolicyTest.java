@@ -77,6 +77,6 @@ class ReservationPolicyTest {
         LocalDateTime dateTime = LocalDateTime.parse(reservationDateTimeStr);
         ReservationTime reservationTime = TestFixture.createDefaultReservationTimeByTime(dateTime.toLocalTime());
 
-        return TestFixture.createDefaultReservation(member, dateTime.toLocalDate(), reservationTime, theme);
+        return TestFixture.createNewReservation(member, dateTime.toLocalDate(), reservationTime, theme);
     }
 }

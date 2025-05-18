@@ -1,12 +1,30 @@
 package roomescape;
 
-import roomescape.domain.*;
-
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import roomescape.domain.Member;
+import roomescape.domain.MemberRole;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 
 public class TestFixture {
-    public static final LocalDate DEFAULT_DATE = LocalDate.of(2025, 1, 1);
+    public static final LocalDate DEFAULT_DATE = LocalDate.now().plusDays(1);
+
+    public static Reservation createDefaultReservation_1() {
+        return createNewReservation(createMemberByName("member1"), DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme());
+    }
+
+    public static Reservation createDefaultReservation_2() {
+        return createNewReservation(createMemberByName("member2"), DEFAULT_DATE.plusDays(1), createDefaultReservationTime(), createDefaultTheme());
+    }
+
+    public static Reservation createDefaultWaiting_1() {
+        return createWaitingReservation(createDefaultMember(), DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme());
+    }
 
     public static ReservationTime createDefaultReservationTime() {
         return ReservationTime.createNew(LocalTime.of(12, 0));
@@ -18,6 +36,10 @@ public class TestFixture {
 
     public static Member createDefaultMember() {
         return Member.createNew("name", MemberRole.USER, "email", "password");
+    }
+
+    public static Member createAdminMember() {
+        return Member.createNew("admin", MemberRole.ADMIN, "admin@email.com", "password");
     }
 
     public static Member createMemberByName(String name) {
@@ -32,7 +54,15 @@ public class TestFixture {
         return new Theme(name, "description", "thumbnail");
     }
 
-    public static Reservation createDefaultReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public static Reservation createNewReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         return Reservation.createNew(member, date, time, theme);
+    }
+
+    public static Reservation createWaitingReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return Reservation.createWaiting(member, date, time, theme);
+    }
+
+    public static Clock fixedClockAt(LocalDateTime fixedDateTime) {
+        return Clock.fixed(fixedDateTime.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
     }
 }

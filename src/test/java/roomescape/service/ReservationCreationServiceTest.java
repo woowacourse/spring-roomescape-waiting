@@ -7,6 +7,7 @@ import static roomescape.TestFixture.DEFAULT_DATE;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
@@ -81,7 +83,7 @@ class ReservationCreationServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme));
+        Reservation reservation = reservationRepository.save(TestFixture.createNewReservation(member, DEFAULT_DATE, reservationTime, theme));
 
         //when & then
         assertThatThrownBy(() -> reservationCreationService.create(new CreateReservationParam(member.getId(), reservation.getDate(), reservationTime.getId(), theme.getId())))
@@ -119,4 +121,39 @@ class ReservationCreationServiceTest {
                 .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
     }
 
+    @DisplayName("예약 대기를 생성할 수 있다.")
+    @Test
+    void canCreateWaiting() {
+        // given
+        ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+        Member member = memberRepository.save(TestFixture.createDefaultMember());
+        CreateReservationParam createReservationParam = new CreateReservationParam(member.getId(), RESERVATION_DATE, reservationTime.getId(), theme.getId());
+
+        //when
+        ReservationResult reservationResult = reservationCreationService.createWaiting(createReservationParam);
+
+        //then
+        Reservation reservation = reservationRepository.findById(reservationResult.id()).get();
+        assertThat(reservation.getId()).isNotNull();
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @DisplayName("예약 대기를 생성할 때, 이미 예약이 존재하면 예외가 발생한다.")
+    @Test
+    void error_createWaiting() {
+        //given
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+        ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
+        Member member = memberRepository.save(TestFixture.createDefaultMember());
+
+        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, reservationTime, theme);
+        reservationRepository.save(reservation);
+
+        //when & then
+        assertThatThrownBy(() -> reservationCreationService.createWaiting(
+                new CreateReservationParam(member.getId(), DEFAULT_DATE, reservationTime.getId(), theme.getId())
+                )).isInstanceOf(UnAvailableReservationException.class)
+                .hasMessage("이미 동일한 시간에 예약(또는 대기)이 존재합니다.");
+    }
 }

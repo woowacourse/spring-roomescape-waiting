@@ -63,7 +63,7 @@ class MemberServiceTest {
 
     @Test
     void 멤버를_생성할_수_있다() {
-        MemberResult memberResult = memberService.create(new RegisterMemberParam("name1", "email1", "password1"));
+        MemberResult memberResult = memberService.create(new RegisterMemberParam("email1", "password1", "name1"));
         assertThat(memberResult)
                 .isEqualTo(new MemberResult(memberResult.id(), "name1", MemberRole.USER, "email1"));
     }

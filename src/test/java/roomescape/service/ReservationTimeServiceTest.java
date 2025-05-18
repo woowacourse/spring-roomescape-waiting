@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DEFAULT_DATE;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundException;
 import roomescape.service.param.CreateReservationTimeParam;
+import roomescape.service.result.AvailableReservationTimeResult;
 import roomescape.service.result.ReservationTimeResult;
 
 @SpringBootTest
@@ -99,7 +101,6 @@ class ReservationTimeServiceTest {
                         new ReservationTimeResult(reservationTime2.getId(), reservationTime2.getStartAt())
                         ))
                 );
-
     }
 
     @Test
@@ -121,7 +122,7 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme);
+        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, reservationTime, theme);
         reservationRepository.save(reservation);
 
         //when & then
@@ -143,5 +144,71 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.create(new CreateReservationTimeParam(time)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("해당 시간은 예약 가능 시간이 아닙니다.");
+    }
+
+    @Test
+    void 테마와_날짜에_해당하는_예약_가능한_시간을_조회할_수_있다() {
+        // given
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(12, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(14, 0)));
+        ReservationTime time3 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(16, 0)));
+        
+        Member member = memberRepository.save(TestFixture.createDefaultMember());
+        reservationRepository.save(TestFixture.createNewReservation(member, DEFAULT_DATE, time2, theme));
+
+        // when
+        List<AvailableReservationTimeResult> results = reservationTimeService.getAvailableTimesByThemeIdAndDate(
+                theme.getId(), DEFAULT_DATE);
+
+        // then
+        assertAll(
+                () -> assertThat(results).hasSize(3),
+                () -> assertThat(results).extracting("startAt")
+                        .containsExactly(LocalTime.of(12, 0), LocalTime.of(14, 0), LocalTime.of(16, 0))
+        );
+    }
+
+    @Test
+    void 예약이_없는_날짜의_모든_시간은_예약_가능_상태이다() {
+        // given
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(12, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(14, 0)));
+        
+        LocalDate futureDate = DEFAULT_DATE.plusDays(7);
+
+        // when
+        List<AvailableReservationTimeResult> results = reservationTimeService.getAvailableTimesByThemeIdAndDate(
+                theme.getId(), futureDate);
+
+        // then
+        assertAll(
+                () -> assertThat(results).hasSize(2),
+                () -> assertThat(results).extracting("booked")
+                        .containsOnly(false)
+        );
+    }
+
+    @Test
+    void 예약이_있는_날짜_정보를_같이_반환한다() {
+        // given
+        Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(12, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(14, 0)));
+        
+        Member member = memberRepository.save(TestFixture.createDefaultMember());
+        reservationRepository.save(TestFixture.createNewReservation(member, DEFAULT_DATE, time1, theme));
+
+        // when
+        List<AvailableReservationTimeResult> results = reservationTimeService.getAvailableTimesByThemeIdAndDate(
+                theme.getId(), DEFAULT_DATE);
+
+        // then
+        assertAll(
+                () -> assertThat(results).hasSize(2),
+                () -> assertThat(results).extracting("booked")
+                        .containsExactly(true, false)
+        );
     }
 }
