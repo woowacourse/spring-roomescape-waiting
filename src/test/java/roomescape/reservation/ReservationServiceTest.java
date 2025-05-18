@@ -35,13 +35,14 @@ import static roomescape.util.TestFactory.*;
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
 
-    private final ReservationService reservationService;
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final MemberRepository memberRepository;
+    private ReservationService reservationService;
+    private ThemeRepository themeRepository;
+    private ReservationRepository reservationRepository;
+    private ReservationTimeRepository reservationTimeRepository;
+    private MemberRepository memberRepository;
 
-    public ReservationServiceTest() {
+    @BeforeEach
+    void setup() {
         reservationRepository = mock(ReservationRepository.class);
         reservationTimeRepository = mock(ReservationTimeRepository.class);
         themeRepository = mock(ThemeRepository.class);
@@ -58,46 +59,45 @@ public class ReservationServiceTest {
     @DisplayName("예약 생성")
     class Create {
 
-        private static final ReservationRequest REQUEST =
-                new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
-        private static final LoginMember LOGIN_MEMBER =
-                new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
-        private static final Optional<ReservationTime> TIME_BY_ID = Optional.of(
-                reservationTimeWithId(REQUEST.themeId(), new ReservationTime(LocalTime.of(12, 40))));
-        private static final Optional<Theme> THEME_BY_ID = Optional.of(
-                themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
-        private static final Optional<Member> MEMBER_BY_EMAIL = Optional.of(
-                memberWithId(1L, new Member(LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER)));
-        private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
-                REQUEST.date(),
-                MEMBER_BY_EMAIL.get(),
-                TIME_BY_ID.get(),
-                THEME_BY_ID.get(),
-                ReservationStatus.PENDING
-        ));
+        private ReservationRequest REQUEST;
+        private LoginMember LOGIN_MEMBER;
+        private Optional<ReservationTime> RESERVATION_TIME;
+        private Optional<Theme> THEME;
+        private Optional<Member> MEMBER;
+        private Reservation RESERVATION;
 
         @BeforeEach
         void setUp() {
-            given(reservationTimeRepository.findById(REQUEST.timeId()))
-                    .willReturn(TIME_BY_ID);
-            given(themeRepository.findById(REQUEST.themeId()))
-                    .willReturn(THEME_BY_ID);
-            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
-                    .willReturn(MEMBER_BY_EMAIL);
-            given(reservationRepository.save(
-                    new Reservation(REQUEST.date(), MEMBER_BY_EMAIL.get(), TIME_BY_ID.get(), THEME_BY_ID.get(), ReservationStatus.PENDING)))
-                    .willReturn(RESERVATION);
-            given(reservationRepository.existsById(RESERVATION.getId()))
-                    .willReturn(true);
-            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
-                    TIME_BY_ID.get(), REQUEST.date(), THEME_BY_ID.get()))
-                    .willReturn(false);
+            REQUEST = new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
+            LOGIN_MEMBER = new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
+            RESERVATION_TIME = Optional.of(reservationTimeWithId(REQUEST.themeId(), new ReservationTime(LocalTime.of(12, 40))));
+            THEME = Optional.of(themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
+            MEMBER = Optional.of(memberWithId(1L, new Member(LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER)));
+            RESERVATION = reservationWithId(1L, new Reservation(
+                    REQUEST.date(),
+                    MEMBER.get(),
+                    RESERVATION_TIME.get(),
+                    THEME.get(),
+                    ReservationStatus.PENDING
+            ));
         }
 
         @DisplayName("reservation request를 생성하면 response 값을 반환한다.")
         @Test
         void create() {
             // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
+                    .willReturn(MEMBER);
+            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
+                    RESERVATION_TIME.get(), REQUEST.date(), THEME.get()))
+                    .willReturn(false);
+            given(reservationRepository.save(
+                    new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.PENDING)))
+                    .willReturn(RESERVATION);
 
             // when
             final ReservationResponse response = reservationService.create(REQUEST, LOGIN_MEMBER);
@@ -106,22 +106,9 @@ public class ReservationServiceTest {
             assertThat(response).isEqualTo(ReservationResponse.from(RESERVATION));
         }
 
-        @DisplayName("테마가 존재하지 않으면 예외가 발생한다.")
-        @Test
-        void create1() {
-            // given
-            given(themeRepository.findById(REQUEST.themeId()))
-                    .willReturn(Optional.empty());
-
-            // when & then
-            assertThatThrownBy(() -> {
-                reservationService.create(REQUEST, LOGIN_MEMBER);
-            }).isInstanceOf(ReservationNotExistsThemeException.class);
-        }
-
         @DisplayName("시간이 존재하지 않으면 예외가 발생한다.")
         @Test
-        void create2() {
+        void create1() {
             // given
             given(reservationTimeRepository.findById(REQUEST.timeId()))
                     .willReturn(Optional.empty());
@@ -132,10 +119,27 @@ public class ReservationServiceTest {
             }).isInstanceOf(ReservationNotExistsTimeException.class);
         }
 
+        @DisplayName("테마가 존재하지 않으면 예외가 발생한다.")
+        @Test
+        void create2() {
+            // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> reservationService.create(REQUEST, LOGIN_MEMBER)).isInstanceOf(ReservationNotExistsThemeException.class);
+        }
+
         @DisplayName("멤버가 존재하지 않으면 예외가 발생한다.")
         @Test
         void create6() {
             // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
             given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
                     .willReturn(Optional.empty());
 
@@ -149,8 +153,14 @@ public class ReservationServiceTest {
         @Test
         void create3() {
             // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
+                    .willReturn(MEMBER);
             given(reservationRepository.existsByReservationTimeAndDateAndTheme(
-                    TIME_BY_ID.get(), REQUEST.date(), THEME_BY_ID.get()))
+                    RESERVATION_TIME.get(), REQUEST.date(), THEME.get()))
                     .willReturn(true);
 
             // when & then
@@ -165,6 +175,16 @@ public class ReservationServiceTest {
             // given
             ReservationRequest requestOfPast = new ReservationRequest(LocalDate.now().plusDays(-1), 1L, 1L);
 
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
+                    .willReturn(MEMBER);
+            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
+                    RESERVATION_TIME.get(), requestOfPast.date(), THEME.get()))
+                    .willReturn(false);
+
             // when & then
             assertThatThrownBy(() -> {
                 reservationService.create(requestOfPast, LOGIN_MEMBER);
@@ -177,8 +197,16 @@ public class ReservationServiceTest {
             // given
             final ReservationRequest request = new ReservationRequest(
                     LocalDate.now(), 1L, 1L);
+
             given(reservationTimeRepository.findById(request.timeId()))
                     .willReturn(Optional.of(reservationTimeWithId(request.themeId(), new ReservationTime(LocalTime.now().minusHours(1)))));
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
+                    .willReturn(MEMBER);
+            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
+                    RESERVATION_TIME.get(), request.date(), THEME.get()))
+                    .willReturn(false);
 
             // when & then
             assertThatThrownBy(() -> {
@@ -191,44 +219,43 @@ public class ReservationServiceTest {
     @DisplayName("admin을 위한 예약 생성")
     class CreateForAdmin {
 
-        private static final AdminReservationRequest REQUEST =
-                new AdminReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 1L);
-        private static final Optional<ReservationTime> TIME_BY_ID = Optional.of(
-                reservationTimeWithId(REQUEST.timeId(), new ReservationTime(LocalTime.of(12, 40))));
-        private static final Optional<Theme> THEME_BY_ID = Optional.of(
-                themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
-        private static final Optional<Member> MEMBER_BY_ID = Optional.of(
-                memberWithId(REQUEST.memberId(), new Member("asd@naver.com", "password", "boogie", MemberRole.MEMBER)));
-        private static final Reservation RESERVATION = reservationWithId(1L, new Reservation(
-                REQUEST.date(),
-                MEMBER_BY_ID.get(),
-                TIME_BY_ID.get(),
-                THEME_BY_ID.get(),
-                ReservationStatus.PENDING
-        ));
+        private AdminReservationRequest REQUEST;
+        private Optional<ReservationTime> RESERVATION_TIME;
+        private Optional<Theme> THEME;
+        private Optional<Member> MEMBER;
+        private Reservation RESERVATION;
 
         @BeforeEach
         void setUp() {
-            given(reservationTimeRepository.findById(REQUEST.timeId()))
-                    .willReturn(TIME_BY_ID);
-            given(themeRepository.findById(REQUEST.themeId()))
-                    .willReturn(THEME_BY_ID);
-            given(reservationRepository.save(
-                    new Reservation(REQUEST.date(), MEMBER_BY_ID.get(), TIME_BY_ID.get(), THEME_BY_ID.get(), ReservationStatus.PENDING)))
-                    .willReturn(RESERVATION);
-            given(memberRepository.findById(MEMBER_BY_ID.get().getId()))
-                    .willReturn(MEMBER_BY_ID);
-            given(reservationRepository.existsById(RESERVATION.getId()))
-                    .willReturn(true);
-            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
-                    TIME_BY_ID.get(), REQUEST.date(), THEME_BY_ID.get()))
-                    .willReturn(false);
+            REQUEST = new AdminReservationRequest(LocalDate.now().plusDays(1), 1L, 1L, 1L);
+            RESERVATION_TIME = Optional.of(reservationTimeWithId(REQUEST.timeId(), new ReservationTime(LocalTime.of(12, 40))));
+            THEME = Optional.of(themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
+            MEMBER = Optional.of(memberWithId(REQUEST.memberId(), new Member("asd@naver.com", "password", "boogie", MemberRole.MEMBER)));
+            RESERVATION = reservationWithId(1L, new Reservation(
+                    REQUEST.date(),
+                    MEMBER.get(),
+                    RESERVATION_TIME.get(),
+                    THEME.get(),
+                    ReservationStatus.PENDING
+            ));
         }
 
         @DisplayName("reservation request를 생성하면 response 값을 반환한다.")
         @Test
         void create() {
             // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findById(MEMBER.get().getId()))
+                    .willReturn(MEMBER);
+            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
+                    RESERVATION_TIME.get(), REQUEST.date(), THEME.get()))
+                    .willReturn(false);
+            given(reservationRepository.save(
+                    new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.PENDING)))
+                    .willReturn(RESERVATION);
 
             // when
             final ReservationResponse response = reservationService.createForAdmin(REQUEST);
@@ -237,22 +264,9 @@ public class ReservationServiceTest {
             assertThat(response).isEqualTo(ReservationResponse.from(RESERVATION));
         }
 
-        @DisplayName("테마가 존재하지 않으면 예외가 발생한다.")
-        @Test
-        void create1() {
-            // given
-            given(themeRepository.findById(REQUEST.themeId()))
-                    .willReturn(Optional.empty());
-
-            // when & then
-            assertThatThrownBy(() -> {
-                reservationService.createForAdmin(REQUEST);
-            }).isInstanceOf(ReservationNotExistsThemeException.class);
-        }
-
         @DisplayName("시간이 존재하지 않으면 예외가 발생한다.")
         @Test
-        void create2() {
+        void create1() {
             // given
             given(reservationTimeRepository.findById(REQUEST.timeId()))
                     .willReturn(Optional.empty());
@@ -263,10 +277,29 @@ public class ReservationServiceTest {
             }).isInstanceOf(ReservationNotExistsTimeException.class);
         }
 
+        @DisplayName("테마가 존재하지 않으면 예외가 발생한다.")
+        @Test
+        void create2() {
+            // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> {
+                reservationService.createForAdmin(REQUEST);
+            }).isInstanceOf(ReservationNotExistsThemeException.class);
+        }
+
         @DisplayName("멤버가 존재하지 않으면 예외가 발생한다.")
         @Test
         void create6() {
             // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
             given(memberRepository.findById(REQUEST.memberId()))
                     .willReturn(Optional.empty());
 
@@ -280,8 +313,14 @@ public class ReservationServiceTest {
         @Test
         void create3() {
             // given
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findById(MEMBER.get().getId()))
+                    .willReturn(MEMBER);
             given(reservationRepository.existsByReservationTimeAndDateAndTheme(
-                    TIME_BY_ID.get(), REQUEST.date(), THEME_BY_ID.get()))
+                    RESERVATION_TIME.get(), REQUEST.date(), THEME.get()))
                     .willReturn(true);
 
             // when & then
@@ -297,6 +336,16 @@ public class ReservationServiceTest {
             AdminReservationRequest requestOfPast = new AdminReservationRequest(
                     LocalDate.now().plusDays(-1), 1L, 1L, 1L);
 
+            given(reservationTimeRepository.findById(REQUEST.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(REQUEST.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findById(MEMBER.get().getId()))
+                    .willReturn(MEMBER);
+            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
+                    RESERVATION_TIME.get(), requestOfPast.date(), THEME.get()))
+                    .willReturn(false);
+
             // when & then
             assertThatThrownBy(() -> {
                 reservationService.createForAdmin(requestOfPast);
@@ -309,6 +358,16 @@ public class ReservationServiceTest {
             // given
             final AdminReservationRequest requestOfPast = new AdminReservationRequest(
                     LocalDate.now(), 1L, 1L, 1L);
+
+            given(reservationTimeRepository.findById(requestOfPast.timeId()))
+                    .willReturn(RESERVATION_TIME);
+            given(themeRepository.findById(requestOfPast.themeId()))
+                    .willReturn(THEME);
+            given(memberRepository.findById(MEMBER.get().getId()))
+                    .willReturn(MEMBER);
+            given(reservationRepository.existsByReservationTimeAndDateAndTheme(
+                    RESERVATION_TIME.get(), requestOfPast.date(), THEME.get()))
+                    .willReturn(false);
 
             // when & then
             assertThatThrownBy(() -> {

@@ -1,5 +1,6 @@
 package roomescape.reservationtime;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -33,12 +34,13 @@ import static roomescape.util.TestFactory.themeWithId;
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
 
-    private final ReservationTimeService reservationTimeService;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private ReservationTimeService reservationTimeService;
+    private ReservationTimeRepository reservationTimeRepository;
+    private ThemeRepository themeRepository;
+    private ReservationRepository reservationRepository;
 
-    public ReservationTimeServiceTest() {
+    @BeforeEach
+    void setUp() {
         reservationTimeRepository = mock(ReservationTimeRepository.class);
         reservationRepository = mock(ReservationRepository.class);
         themeRepository = mock(ThemeRepository.class);
@@ -77,9 +79,6 @@ public class ReservationTimeServiceTest {
             final ReservationTimeRequest request = new ReservationTimeRequest(startAt);
             given(reservationTimeRepository.existsByStartAt(startAt))
                     .willReturn(true);
-            final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(startAt));
-            given(reservationTimeRepository.save(new ReservationTime(startAt)))
-                    .willReturn(reservationTime);
 
             // when
             assertThatThrownBy(() -> {

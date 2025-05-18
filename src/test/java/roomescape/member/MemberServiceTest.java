@@ -1,5 +1,6 @@
 package roomescape.member;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,11 +24,12 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
 
-    private final MemberService memberService;
-    private final MemberRepository memberRepository;
-    private final ReservationRepository reservationRepository;
+    private MemberService memberService;
+    private MemberRepository memberRepository;
+    private ReservationRepository reservationRepository;
 
-    public MemberServiceTest() {
+    @BeforeEach
+    void setUp() {
         memberRepository = mock(MemberRepository.class);
         reservationRepository = mock(ReservationRepository.class);
         memberService = new MemberService(memberRepository, reservationRepository);

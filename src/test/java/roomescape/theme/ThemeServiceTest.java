@@ -1,5 +1,6 @@
 package roomescape.theme;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,11 +24,12 @@ import static roomescape.util.TestFactory.themeWithId;
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
-    private final ThemeRepository themeRepository;
-    private final ThemeService themeService;
-    private final ReservationRepository reservationRepository;
+    private ThemeRepository themeRepository;
+    private ThemeService themeService;
+    private ReservationRepository reservationRepository;
 
-    public ThemeServiceTest() {
+    @BeforeEach
+    void setUp() {
         themeRepository = mock(ThemeRepository.class);
         reservationRepository = mock(ReservationRepository.class);
         themeService = new ThemeService(themeRepository, reservationRepository);
@@ -143,12 +145,9 @@ class ThemeServiceTest {
         void deleteById2() {
             // given
             final Long id = 1L;
-            final Theme theme = themeWithId(id, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.empty());
-            given(reservationRepository.existsByTheme(theme))
-                    .willReturn(true);
-
+            
             // when & then
             assertThatThrownBy(() -> {
                 themeService.deleteById(id);
