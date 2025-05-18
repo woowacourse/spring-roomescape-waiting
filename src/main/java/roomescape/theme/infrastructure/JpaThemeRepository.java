@@ -2,32 +2,26 @@ package roomescape.theme.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.theme.domain.Theme;
 
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
     boolean existsByName(String name);
 
-    @Query(value = """
-                SELECT
-                    t.id AS id,
-                    t.name AS name,
-                    t.description AS description,
-                    t.thumbnail AS thumbnail,
-                    COUNT(r.id) AS reservation_count
-                FROM themes t
-                LEFT JOIN reservations r 
-                    ON t.id = r.theme_id AND r.date BETWEEN ? AND ?
-                GROUP BY t.id, t.name, t.description, t.thumbnail
-                ORDER BY reservation_count DESC
-                LIMIT ?;
-                """, nativeQuery = true)
+    @Query("""
+                SELECT t
+                FROM Reservation r
+                JOIN r.theme t
+                WHERE r.date BETWEEN :from AND :to
+                GROUP BY t
+                ORDER BY COUNT(r.id) DESC
+            """)
     List<Theme> findTopNThemesByReservationCountInDateRange(
-            final LocalDate dateFrom,
-            final LocalDate dateTo,
-            final int limit
-    );
-
+            final @Param("from") LocalDate dateFrom,
+            final @Param("to") LocalDate dateTo,
+            final Pageable pageable);
 }
