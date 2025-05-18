@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -40,6 +41,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservations(ReservationCondition cond) {
         List<Reservation> filteredReservations = reservationRepository.findByCondition(cond);
         return filteredReservations.stream()
@@ -47,6 +49,14 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<ReservationWithStatusResponse> findReservationByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId).stream()
+                .map(ReservationWithStatusResponse::from)
+                .toList();
+    }
+
+    @Transactional
     public ReservationResponse createReservation(Long memberId, Long timeId, Long themeId, LocalDate date) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(ReservationTimeNotFoundException::new);
@@ -65,14 +75,9 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteReservationById(Long id) {
         reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.deleteById(id);
-    }
-
-    public List<ReservationWithStatusResponse> findReservationByMemberId(Long memberId) {
-        return reservationRepository.findByMemberId(memberId).stream()
-                .map(ReservationWithStatusResponse::from)
-                .toList();
     }
 }

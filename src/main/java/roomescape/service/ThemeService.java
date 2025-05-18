@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
@@ -29,40 +30,17 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ThemeResponse createTheme(ThemeRequest themeRequest) {
-        Optional<Theme> optionalTheme = themeRepository.findByName(themeRequest.name());
-        if (optionalTheme.isPresent()) {
-            throw new ExistedThemeException();
-        }
-
-        Theme theme = Theme.createWithoutId(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
-        Theme themeWithId = themeRepository.save(theme);
-        return new ThemeResponse(themeWithId.getId(), themeWithId.getName(), themeWithId.getDescription(),
-                themeWithId.getThumbnail());
-    }
-
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAllThemes() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
                 .map(theme ->
-                        new ThemeResponse(
-                                theme.getId(),
-                                theme.getName(),
-                                theme.getDescription(),
-                                theme.getThumbnail()
-                        )
-                )
+                        new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail()))
                 .toList();
     }
 
-    public void deleteThemeById(long id) {
-        List<Reservation> reservations = reservationRepository.findByThemeId(id);
-        if (!reservations.isEmpty()) {
-            throw new ExistedReservationException();
-        }
-        themeRepository.deleteById(id);
-    }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getTopThemes() {
         LocalDate startDate = LocalDate.now().minusDays(THEME_TRACKING_PERIOD);
         List<Reservation> reservations = reservationRepository.findByDateBetween(startDate,
@@ -83,5 +61,27 @@ public class ThemeService {
     private Map<Theme, Long> countTheme(List<Reservation> reservations) {
         return reservations.stream()
                 .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()));
+    }
+
+    @Transactional
+    public ThemeResponse createTheme(ThemeRequest themeRequest) {
+        Optional<Theme> optionalTheme = themeRepository.findByName(themeRequest.name());
+        if (optionalTheme.isPresent()) {
+            throw new ExistedThemeException();
+        }
+
+        Theme theme = Theme.createWithoutId(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
+        Theme themeWithId = themeRepository.save(theme);
+        return new ThemeResponse(themeWithId.getId(), themeWithId.getName(), themeWithId.getDescription(),
+                themeWithId.getThumbnail());
+    }
+
+    @Transactional
+    public void deleteThemeById(long id) {
+        List<Reservation> reservations = reservationRepository.findByThemeId(id);
+        if (!reservations.isEmpty()) {
+            throw new ExistedReservationException();
+        }
+        themeRepository.deleteById(id);
     }
 }

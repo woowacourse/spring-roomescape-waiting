@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.dto.request.MemberRequest;
@@ -18,6 +19,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAllMembers() {
         return memberRepository.findAll()
                 .stream()
@@ -25,6 +27,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Transactional
     public MemberResponse createMember(MemberRequest memberRequest) {
         Optional<Member> optionalMember = memberRepository.findByEmail(memberRequest.email());
         if (optionalMember.isPresent()) {

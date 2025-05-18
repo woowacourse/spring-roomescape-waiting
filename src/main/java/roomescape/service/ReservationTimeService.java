@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -30,6 +31,7 @@ public class ReservationTimeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAllTimes() {
         List<ReservationTime> reservationTimeDaoAll = reservationTimeRepository.findAll();
 
@@ -38,22 +40,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public ReservationTimeResponse createTime(ReservationTimeRequest reservationTimeRequest) {
-        ReservationTime reservationTime = reservationTimeRequest.toTime();
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponse.from(savedReservationTime);
-    }
-
-    public void deleteTimeById(Long id) {
-        if (reservationTimeRepository.findById(id).isEmpty()) {
-            throw new ReservationTimeNotFoundException();
-        }
-        if (reservationRepository.findByReservationTimeId(id).size() > 0) {
-            throw new ExistedReservationException();
-        }
-        reservationTimeRepository.deleteById(id);
-    }
-
+    @Transactional(readOnly = true)
     public List<TimeWithBookedResponse> findTimesByDateAndThemeIdWithBooked(LocalDate date, Long themeId) {
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
         List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
@@ -66,5 +53,23 @@ public class ReservationTimeService {
         return reservationTimes.stream()
                 .map(time -> TimeWithBookedResponse.of(time, bookedReservationTimes.contains(time)))
                 .toList();
+    }
+
+    @Transactional
+    public ReservationTimeResponse createTime(ReservationTimeRequest reservationTimeRequest) {
+        ReservationTime reservationTime = reservationTimeRequest.toTime();
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        return ReservationTimeResponse.from(savedReservationTime);
+    }
+
+    @Transactional
+    public void deleteTimeById(Long id) {
+        if (reservationTimeRepository.findById(id).isEmpty()) {
+            throw new ReservationTimeNotFoundException();
+        }
+        if (!reservationRepository.findByReservationTimeId(id).isEmpty()) {
+            throw new ExistedReservationException();
+        }
+        reservationTimeRepository.deleteById(id);
     }
 }
