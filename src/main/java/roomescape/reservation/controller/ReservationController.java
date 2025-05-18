@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RequireRole;
-import roomescape.global.auth.dto.UserInfo;
+import roomescape.global.auth.dto.MemberInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
@@ -44,10 +44,10 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationCreateRequest request,
-            UserInfo userInfo
+            MemberInfo memberInfo
     ) {
         ReservationResponse dto = reservationService.create(request.date(), request.timeId(), request.themeId(),
-                userInfo.id(), LocalDateTime.now());
+                memberInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
@@ -72,8 +72,8 @@ public class ReservationController {
 
     @RequireRole(MemberRole.USER)
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MyReservationResponse>> findMyReservations(UserInfo userInfo) {
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(userInfo);
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(MemberInfo memberInfo) {
+        List<MyReservationResponse> myReservations = reservationService.findMyReservations(memberInfo);
         return ResponseEntity.ok().body(myReservations);
     }
 

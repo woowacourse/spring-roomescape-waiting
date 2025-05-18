@@ -4,10 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.auth.dto.UserInfo;
+import roomescape.global.auth.dto.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.MemberNotFoundException;
-import roomescape.member.repository.JpaMemberRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -97,8 +96,8 @@ public class ReservationService {
         }
     }
 
-    public List<MyReservationResponse> findMyReservations(final UserInfo userInfo) {
-        return reservationRepository.findByMemberId(userInfo.id())
+    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
+        return reservationRepository.findByMemberId(memberInfo.id())
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();

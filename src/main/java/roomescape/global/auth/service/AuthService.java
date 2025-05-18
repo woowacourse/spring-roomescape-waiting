@@ -3,7 +3,7 @@ package roomescape.global.auth.service;
 import org.springframework.stereotype.Component;
 import roomescape.global.auth.dto.LoginRequest;
 import roomescape.global.auth.dto.LoginResponse;
-import roomescape.global.auth.dto.UserInfo;
+import roomescape.global.auth.dto.MemberInfo;
 import roomescape.global.auth.exception.UnAuthorizedException;
 import roomescape.global.auth.infrastructure.JwtProvider;
 import roomescape.member.domain.Member;
@@ -25,7 +25,7 @@ public class AuthService {
 
     public LoginResponse login(final LoginRequest loginRequest) {
         Member member = findValidMember(loginRequest.email(), loginRequest.password());
-        String accessToken = jwtProvider.createToken(UserInfo.from(member));
+        String accessToken = jwtProvider.createToken(MemberInfo.from(member));
         return new LoginResponse(accessToken);
     }
 
@@ -35,10 +35,10 @@ public class AuthService {
         return member;
     }
 
-    public UserInfo makeUserInfo(final String token) {
+    public MemberInfo makeUserInfo(final String token) {
         validateToken(token);
         Long memberId = jwtProvider.getMemberId(token);
-        return new UserInfo(memberId, jwtProvider.getRole(token));
+        return new MemberInfo(memberId, jwtProvider.getRole(token));
     }
 
     private Member findMemberByEmail(final String email) {

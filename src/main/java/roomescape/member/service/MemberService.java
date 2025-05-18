@@ -2,7 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.auth.dto.UserInfo;
+import roomescape.global.auth.dto.MemberInfo;
 import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
@@ -39,8 +39,8 @@ public class MemberService {
                 .toList();
     }
 
-    public Member getMember(final UserInfo userInfo) {
-        return memberRepository.findById(userInfo.id())
+    public Member getMember(final MemberInfo memberInfo) {
+        return memberRepository.findById(memberInfo.id())
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않은 멤버입니다."));
     }
 }

@@ -10,7 +10,7 @@ import roomescape.global.auth.annotation.RequireRole;
 import roomescape.global.auth.dto.CheckLoginResponse;
 import roomescape.global.auth.dto.LoginRequest;
 import roomescape.global.auth.dto.LoginResponse;
-import roomescape.global.auth.dto.UserInfo;
+import roomescape.global.auth.dto.MemberInfo;
 import roomescape.global.auth.infrastructure.CookieManager;
 import roomescape.global.auth.service.AuthService;
 import roomescape.member.domain.MemberRole;
@@ -42,8 +42,8 @@ public class AuthController {
 
     @RequireRole(MemberRole.USER)
     @GetMapping("/login/check")
-    public ResponseEntity<CheckLoginResponse> checkLogin(final UserInfo userInfo) {
-        return ResponseEntity.ok(CheckLoginResponse.from(memberService.getMember(userInfo)));
+    public ResponseEntity<CheckLoginResponse> checkLogin(final MemberInfo memberInfo) {
+        return ResponseEntity.ok(CheckLoginResponse.from(memberService.getMember(memberInfo)));
     }
 
     @RequireRole(MemberRole.USER)

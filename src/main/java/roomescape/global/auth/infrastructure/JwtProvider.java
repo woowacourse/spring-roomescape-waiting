@@ -6,8 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.global.auth.dto.UserInfo;
-import roomescape.member.domain.Member;
+import roomescape.global.auth.dto.MemberInfo;
 import roomescape.member.domain.MemberRole;
 
 @Component
@@ -21,13 +20,13 @@ public class JwtProvider {
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
-    public String createToken(final UserInfo userInfo) {
+    public String createToken(final MemberInfo memberInfo) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
-                .setSubject(userInfo.id().toString())
-                .claim(ROLE, userInfo.memberRole().name())
+                .setSubject(memberInfo.id().toString())
+                .claim(ROLE, memberInfo.memberRole().name())
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
