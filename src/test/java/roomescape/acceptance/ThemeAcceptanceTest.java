@@ -1,8 +1,6 @@
 package roomescape.acceptance;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.Date;
@@ -11,6 +9,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,21 +94,6 @@ class ThemeAcceptanceTest {
                 .when().delete("/themes/" + savedId)
                 .then().log().all()
                 .statusCode(204);
-    }
-
-    @Test
-    @DisplayName("특정 테마에 대한 예약 내역이 존재하는 경우 삭제를 시도한다면 422 를 반환한다.")
-    void test8() {
-        // given
-        Long savedId = insertNewThemeWithJdbcTemplate("공포");
-        insertNewReservationWithJdbcTemplate(1L, savedId);
-
-        // when & then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .when().delete("/themes/" + savedId)
-                .then().log().all()
-                .statusCode(422);
     }
 
     private Long insertNewThemeWithJdbcTemplate(final String name) {

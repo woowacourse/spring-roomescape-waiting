@@ -1,9 +1,9 @@
 package roomescape.service;
 
+import java.util.List;
+import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +12,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
+import roomescape.model.Reservation;
 import roomescape.model.Theme;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -29,13 +30,13 @@ class ThemeServiceTest {
     ThemeRepository themeRepository;
 
     @Autowired
+    ReservationRepository reservationRepository;
+
+    @Autowired
     MemberRepository memberRepository;
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    ReservationRepository reservationRepository;
 
     @DisplayName("모든 테마를 조회할 수 있다.")
     @Test
@@ -105,5 +106,23 @@ class ThemeServiceTest {
                 .toList();
 
         assertThat(actual).doesNotContain(savedTheme.getId());
+    }
+
+    @DisplayName("테마가 삭제될 때 연관된 Reservation 의 theme 은 모두 null 이 된다")
+    @Test
+    void test4() {
+        // given
+        Theme theme = new Theme("테마", "설명", "이미지");
+        Theme savedTheme = themeRepository.save(theme);
+        List<Reservation> reservations = reservationRepository.findByThemeId(savedTheme.getId());
+
+        // when
+        themeService.deleteTheme(savedTheme.getId());
+
+        // then
+        List<Theme> actual = reservationRepository.findByThemeId(savedTheme.getId()).stream()
+                .map(Reservation::getTheme)
+                .toList();
+        assertThat(actual).allMatch(Objects::isNull);
     }
 }

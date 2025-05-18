@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -23,12 +24,15 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Setter
     @ManyToOne
     private ReservationTime reservationTime;
 
+    @Setter
     @ManyToOne
     private Theme theme;
 
+    @Setter
     @ManyToOne
     private Member member;
 

@@ -46,6 +46,7 @@ public class ReservationTimeService {
 
     public void deleteTime(Long id) {
         try {
+            clearReservationTimeInReservations(id);
             reservationTimeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new ResourceInUseException("삭제하고자 하는 시각에 예약된 정보가 있습니다.");
@@ -107,6 +108,13 @@ public class ReservationTimeService {
 
         if (reservationTimeRepository.existsByStartAt((parsedStartAt))) {
             throw new DuplicatedException("중복된 예약시각은 등록할 수 없습니다.");
+        }
+    }
+
+    private void clearReservationTimeInReservations(Long id) {
+        List<Reservation> reservations = reservationRepository.findByReservationTimeId(id);
+        for (Reservation reservation : reservations) {
+            reservation.setReservationTime(null);
         }
     }
 }

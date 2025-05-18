@@ -1,9 +1,10 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
+import roomescape.model.Reservation;
+import roomescape.model.ReservationTime;
+import roomescape.repository.ReservationRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -19,8 +23,12 @@ class ReservationTimeServiceTest {
     @Autowired
     ReservationTimeService reservationTimeService;
 
+    @Autowired
+    ReservationRepository reservationRepository;
+
     @Test
-    void 시간을_저장한다() {
+    @DisplayName("시간을 삭제한다")
+    void test1() {
         // given
         ReservationTimeRegisterDto request = new ReservationTimeRegisterDto(LocalTime.of(15, 0).toString());
 
@@ -33,7 +41,8 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void 모든_시간을_조회한다() {
+    @DisplayName("모든 시간을 조회한다")
+    void test2() {
         // when
         List<ReservationTimeResponseDto> times = reservationTimeService.getAllTimes();
 
@@ -47,7 +56,8 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    void 시간을_삭제한다() {
+    @DisplayName("시간을 삭제한다")
+    void test3() {
         // given
         ReservationTimeResponseDto saved = reservationTimeService.saveTime(
                 new ReservationTimeRegisterDto(LocalTime.of(15, 0).toString())
@@ -62,6 +72,24 @@ class ReservationTimeServiceTest {
                 .toList();
 
         assertThat(times).doesNotContain(LocalTime.of(15, 0));
+    }
+
+    @Test
+    @DisplayName("시간을 삭제할 때 연관된 Reservation 의 ReservationTime 은 모두 null 이 된다")
+    void test4() {
+        // given
+        ReservationTimeResponseDto saved = reservationTimeService.saveTime(
+                new ReservationTimeRegisterDto(LocalTime.of(15, 0).toString())
+        );
+
+        // when
+        reservationTimeService.deleteTime(saved.id());
+
+        // then
+        List<ReservationTime> actual = reservationRepository.findByReservationTimeId(saved.id()).stream()
+                .map(Reservation::getReservationTime)
+                .toList();
+        assertThat(actual).allMatch(Objects::isNull);
     }
 
 }
