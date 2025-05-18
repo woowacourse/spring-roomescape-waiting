@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import roomescape.common.exception.BusinessException;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.theme.domain.ThemeRepository;
-import roomescape.theme.exception.ThemeException;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
 import roomescape.theme.presentation.dto.PopularThemeResponse;
@@ -29,7 +29,7 @@ class ThemeServiceTest {
     @Test
     void can_not_remove_exists_reservation() {
         Assertions.assertThatThrownBy(() -> themeService.deleteThemeById(1L))
-                .isInstanceOf(ThemeException.class);
+                .isInstanceOf(BusinessException.class);
     }
 
     @DisplayName("인기 테마를 가져올 수 있다.")

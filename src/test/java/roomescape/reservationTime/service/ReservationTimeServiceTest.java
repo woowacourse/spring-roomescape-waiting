@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import roomescape.common.exception.BusinessException;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
-import roomescape.reservationTime.exception.ReservationTimeException;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepositoryAdaptor;
 import roomescape.reservationTime.presentation.dto.TimeConditionRequest;
@@ -32,7 +32,7 @@ class ReservationTimeServiceTest {
     @Test
     void can_not_delete_when_reservation_exists() {
         Assertions.assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(1L))
-            .isInstanceOf(ReservationTimeException.class);
+            .isInstanceOf(BusinessException.class);
     }
 
     @DisplayName("예약 가능 시간 조회 테스트")

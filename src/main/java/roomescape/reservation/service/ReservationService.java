@@ -14,16 +14,13 @@ import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
-import roomescape.reservationTime.exception.ReservationTimeException;
 import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
-import roomescape.theme.exception.ThemeException;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @Service
@@ -49,9 +46,9 @@ public class ReservationService {
     @Transactional
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
-            .orElseThrow(() -> new ReservationTimeException("예약 시간을 찾을 수 없습니다."));
+            .orElseThrow(() -> new BusinessException("예약 시간을 찾을 수 없습니다."));
         Theme theme = themeRepository.findById(request.themeId())
-            .orElseThrow(() -> new ThemeException("테마를 찾을 수 없습니다."));
+            .orElseThrow(() -> new BusinessException("테마를 찾을 수 없습니다."));
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
 
@@ -71,13 +68,13 @@ public class ReservationService {
             .anyMatch(reservation -> reservation.isSameTime(time));
 
         if (isBooked) {
-            throw new ReservationException("이미 예약이 존재합니다.");
+            throw new BusinessException("이미 예약이 존재합니다.");
         }
     }
 
     private void validateCanReserveDateTime(final Reservation reservation, final LocalDateTime now) {
         if (reservation.isCannotReserveDateTime(now)) {
-            throw new ReservationException("예약할 수 없는 날짜와 시간입니다.");
+            throw new BusinessException("예약할 수 없는 날짜와 시간입니다.");
         }
     }
 

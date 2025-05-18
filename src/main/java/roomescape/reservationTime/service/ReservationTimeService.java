@@ -2,11 +2,11 @@ package roomescape.reservationTime.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.BusinessException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
-import roomescape.reservationTime.exception.ReservationTimeException;
 import roomescape.reservationTime.presentation.dto.ReservationTimeRequest;
 import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
 import roomescape.reservationTime.presentation.dto.TimeConditionRequest;
@@ -34,13 +34,13 @@ public class ReservationTimeService {
     public void deleteReservationTimeById(final Long id) {
         validateExistIdToDelete(id);
 
-        reservationTimeRepository.findById(id).orElseThrow(() -> new ReservationTimeException("존재하지 않는 예약 시간입니다."));
+        reservationTimeRepository.findById(id).orElseThrow(() -> new BusinessException("존재하지 않는 예약 시간입니다."));
         reservationTimeRepository.deleteById(id);
     }
 
     private void validateExistIdToDelete(final Long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new ReservationTimeException("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
+            throw new BusinessException("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
         }
     }
 

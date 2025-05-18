@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.BusinessException;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
-import roomescape.theme.exception.ThemeException;
 import roomescape.theme.presentation.dto.PopularThemeResponse;
 import roomescape.theme.presentation.dto.ThemeRequest;
 import roomescape.theme.presentation.dto.ThemeResponse;
@@ -40,14 +40,14 @@ public class ThemeService {
         validateExistIdToDelete(id);
 
         themeRepository.findById(id)
-            .orElseThrow(() -> new ThemeException("존재하지 않는 테마입니다."));
+            .orElseThrow(() -> new BusinessException("존재하지 않는 테마입니다."));
 
         themeRepository.deleteById(id);
     }
 
     private void validateExistIdToDelete(final Long id) {
         if (reservationRepository.existByThemeId(id)) {
-            throw new ThemeException("해당 테마의 예약이 존재해서 삭제할 수 없습니다.");
+            throw new BusinessException("해당 테마의 예약이 존재해서 삭제할 수 없습니다.");
         }
     }
 

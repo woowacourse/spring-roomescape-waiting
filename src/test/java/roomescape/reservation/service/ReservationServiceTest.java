@@ -17,12 +17,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
+import roomescape.common.exception.BusinessException;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
 import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.presentation.dto.ReservationRequest;
@@ -62,7 +62,7 @@ class ReservationServiceTest {
 
         Assertions.assertThatThrownBy(
                         () -> reservationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
-                .isInstanceOf(ReservationException.class);
+                .isInstanceOf(BusinessException.class);
     }
 
     private static Stream<Arguments> cant_not_reserve_before_now() {
@@ -79,7 +79,7 @@ class ReservationServiceTest {
     void cant_not_reserve_duplicate() {
         Assertions.assertThatThrownBy(() -> reservationService.createReservation(
                         new ReservationRequest(LocalDate.of(2024, 10, 6), 1L, 1L), 1L))
-                .isInstanceOf(ReservationException.class);
+                .isInstanceOf(BusinessException.class);
     }
 
     static class ReservationConfig {
