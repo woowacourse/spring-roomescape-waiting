@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Objects;
 import javax.crypto.SecretKey;
@@ -20,6 +21,7 @@ import roomescape.exception.UnauthorizationException;
 @Component
 public class JwtTokenProvider {
     private final static String ISSUER = "roomescape";
+    private static final Duration EXPIRATION_TIME = Duration.ofHours(1);
 
     @Value("${jwt.secret}")
     private String key;
@@ -37,7 +39,7 @@ public class JwtTokenProvider {
                 .claim("role", member.getRole().toString())
                 .issuer(ISSUER)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME.toMillis()))
                 .signWith(secretKey)
                 .compact();
     }
