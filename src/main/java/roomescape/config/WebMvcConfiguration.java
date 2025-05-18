@@ -5,33 +5,31 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.application.auth.AuthService;
 import roomescape.infrastructure.AuthenticatedMemberIdArgumentResolver;
-import roomescape.infrastructure.AuthenticatedMemberIdExtractor;
 import roomescape.infrastructure.CheckAdminRoleInterceptor;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private final AuthService authService;
-    private final AuthenticatedMemberIdExtractor authenticatedMemberIdExtractor;
+    private final AuthenticatedMemberIdArgumentResolver authenticatedMemberIdArgumentResolver;
+    private final CheckAdminRoleInterceptor checkAdminRoleInterceptor;
 
     public WebMvcConfiguration(
-            AuthService authService,
-            AuthenticatedMemberIdExtractor authenticatedMemberIdExtractor
+            AuthenticatedMemberIdArgumentResolver authenticatedMemberIdArgumentResolver,
+            CheckAdminRoleInterceptor checkAdminRoleInterceptor
     ) {
-        this.authService = authService;
-        this.authenticatedMemberIdExtractor = authenticatedMemberIdExtractor;
+        this.authenticatedMemberIdArgumentResolver = authenticatedMemberIdArgumentResolver;
+        this.checkAdminRoleInterceptor = checkAdminRoleInterceptor;
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthenticatedMemberIdArgumentResolver(authenticatedMemberIdExtractor));
+        resolvers.add(authenticatedMemberIdArgumentResolver);
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new CheckAdminRoleInterceptor(authenticatedMemberIdExtractor, authService))
+        registry.addInterceptor(checkAdminRoleInterceptor)
                 .addPathPatterns("/admin/**");
     }
 }
