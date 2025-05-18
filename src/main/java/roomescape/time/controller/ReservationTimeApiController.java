@@ -39,7 +39,7 @@ public class ReservationTimeApiController {
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getTimes() {
-        List<ReservationTimeResponse> responses = reservationTimeService.getAll();
+        List<ReservationTimeResponse> responses = reservationTimeService.findAll();
         return ResponseEntity.ok(responses);
     }
 
@@ -53,7 +53,7 @@ public class ReservationTimeApiController {
     public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableReservationTimes(
             @ModelAttribute AvailableReservationTimeRequest request) {
         List<AvailableReservationTimeResponse> responses =
-                reservationTimeService.getAvailableReservationTimes(request);
+                reservationTimeService.findAvailableReservationTimes(request);
         return ResponseEntity.ok(responses);
     }
 }

@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.service.ReservationRepository;
 import roomescape.time.controller.request.AvailableReservationTimeRequest;
@@ -25,6 +26,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeCreateRequest request) {
         LocalTime startAt = request.startAt();
         if (reservationTimeRepository.existsByStartAt(startAt)) {
@@ -37,26 +39,30 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(created);
     }
 
-    public List<ReservationTimeResponse> getAll() {
+    @Transactional(readOnly = true)
+    public List<ReservationTimeResponse> findAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return ReservationTimeResponse.from(reservationTimes);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByReservationTimeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
-        ReservationTime reservationTime = getReservationTime(id);
+        ReservationTime reservationTime = findById(id);
         reservationTimeRepository.deleteById(reservationTime.getId());
     }
 
-    public ReservationTime getReservationTime(Long id) {
+    @Transactional(readOnly = true)
+    public ReservationTime findById(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
-    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
+    @Transactional(readOnly = true)
+    public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
         return reservationTimeRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),
                 request.themeId());

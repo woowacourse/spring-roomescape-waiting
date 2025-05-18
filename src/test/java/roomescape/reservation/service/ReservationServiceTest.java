@@ -57,8 +57,8 @@ public class ReservationServiceTest {
                 savedMember, ReservationStatus.RESERVE);
         when(reservationRepository.existsByReservationDateAndReservationTimeId(any(), any())).thenReturn(false);
         when(memberService.findById(any(Long.class))).thenReturn(savedMember);
-        when(reservationTimeService.getReservationTime(any(Long.class))).thenReturn(savedReservationTime);
-        when(themeService.getTheme(any(Long.class))).thenReturn(savedTheme);
+        when(reservationTimeService.findById(any(Long.class))).thenReturn(savedReservationTime);
+        when(themeService.findById(any(Long.class))).thenReturn(savedTheme);
         when(reservationRepository.save(any())).thenReturn(savedReservation);
 
         ReservationRequest reservationRequest = new ReservationRequest(

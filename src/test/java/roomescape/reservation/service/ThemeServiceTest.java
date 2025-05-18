@@ -46,7 +46,7 @@ public class ThemeServiceTest {
         when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         themeService.deleteById(1L);
-        assertThat(themeService.getAll()).isEmpty();
+        assertThat(themeService.findAll()).isEmpty();
     }
 
     @Test
@@ -96,7 +96,7 @@ public class ThemeServiceTest {
         when(reservationRepository.findAll()).thenReturn(allReservations);
 
         // when
-        List<ThemeResponse> responses = themeService.getPopularThemes();
+        List<ThemeResponse> responses = themeService.findPopularThemes();
 
         // then
         assertThat(responses).hasSize(2);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
@@ -24,31 +25,36 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
-        Theme theme = getTheme(id);
+        Theme theme = findById(id);
         themeRepository.deleteById(theme.getId());
     }
 
+    @Transactional
     public ThemeResponse create(ThemeCreateRequest request) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
         Theme savedTheme = themeRepository.save(theme);
         return ThemeResponse.from(savedTheme);
     }
 
-    public List<ThemeResponse> getAll() {
+    @Transactional(readOnly = true)
+    public List<ThemeResponse> findAll() {
         List<Theme> themes = themeRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
-    public Theme getTheme(Long id) {
+    @Transactional(readOnly = true)
+    public Theme findById(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 
-    public List<ThemeResponse> getPopularThemes() {
+    @Transactional(readOnly = true)
+    public List<ThemeResponse> findPopularThemes() {
         LocalDate now = LocalDate.now();
 
         List<Reservation> reservations = reservationRepository.findAll();
@@ -59,16 +65,13 @@ public class ThemeService {
                 .toList();
 
         Map<Theme, Integer> themeCount = new HashMap<>();
-
         recentReservations
                 .forEach(reservation -> themeCount.put(reservation.getTheme(),
                         themeCount.getOrDefault(reservation.getTheme(), 0) + 1));
-
         List<Theme> themesSortedByPopularity = themeCount.entrySet().stream()
                 .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
-
         return ThemeResponse.from(themesSortedByPopularity);
     }
 }

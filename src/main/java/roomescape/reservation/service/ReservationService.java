@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
@@ -35,54 +36,54 @@ public class ReservationService {
         this.memberService = memberService;
     }
 
-    public List<ReservationResponse> getAll() {
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> findAll() {
         List<Reservation> reservations = reservationRepository.findAll();
 
         return ReservationResponse.from(reservations);
     }
 
+    @Transactional
     public ReservationResponse create(Long memberId, ReservationRequest request) {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
-
         if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
-
         Member member = memberService.findById(memberId);
-        ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
+        ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
-        Theme theme = themeService.getTheme(request.themeId());
+        Theme theme = themeService.findById(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
                 .getDate(), reservationTime, theme, member, ReservationStatus.RESERVE));
 
         return ReservationResponse.from(created);
     }
 
+    @Transactional
     public ReservationResponse createByName(String name, ReservationRequest request) {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
-
         if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
-
         Member member = memberService.findByName(name);
-        ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
+        ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
-        Theme theme = themeService.getTheme(request.themeId());
+        Theme theme = themeService.findById(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
                 .getDate(), reservationTime, theme, member, ReservationStatus.RESERVE));
-
         return ReservationResponse.from(created);
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = findById(id);
         reservationRepository.deleteById(reservation.getId());
     }
 
-    public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate start, LocalDate end) {
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> findAllByFilter(Long memberId, Long themeId, LocalDate start, LocalDate end) {
         return ReservationResponse.from(
                 reservationRepository.findByFilter(
                         memberId, themeId, start, end
@@ -90,11 +91,13 @@ public class ReservationService {
         );
     }
 
-    private Reservation getReservation(Long id) {
+    @Transactional(readOnly = true)
+    public Reservation findById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllByMemberId(Long id) {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)

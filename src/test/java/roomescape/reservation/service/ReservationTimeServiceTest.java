@@ -35,7 +35,7 @@ public class ReservationTimeServiceTest {
         when(reservationRepository.existsByReservationTimeId(1L)).thenReturn(false);
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         reservationTimeService.deleteById(1L);
-        assertThat(reservationTimeService.getAll()).isEmpty();
+        assertThat(reservationTimeService.findAll()).isEmpty();
     }
 
     @Test

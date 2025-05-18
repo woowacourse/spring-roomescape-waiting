@@ -35,7 +35,7 @@ public class ReservationApiController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
-        List<ReservationResponse> reservationResponses = reservationService.searchReservations(memberId, themeId,
+        List<ReservationResponse> reservationResponses = reservationService.findAllByFilter(memberId, themeId,
                 startDate,
                 endDate);
         return ResponseEntity.ok(reservationResponses);

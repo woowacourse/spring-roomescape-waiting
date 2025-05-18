@@ -27,7 +27,7 @@ public class ThemeApiController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getThemes() {
-        return ResponseEntity.ok(themeService.getAll());
+        return ResponseEntity.ok(themeService.findAll());
     }
 
     @PostMapping
@@ -47,7 +47,7 @@ public class ThemeApiController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> popularThemes() {
-        List<ThemeResponse> popularThemes = themeService.getPopularThemes();
+        List<ThemeResponse> popularThemes = themeService.findPopularThemes();
         return ResponseEntity.ok(popularThemes);
     }
 }
