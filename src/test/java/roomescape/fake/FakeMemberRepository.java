@@ -43,8 +43,9 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
-    public boolean existsByEmailAndPassword(String email, String password) {
-        return false;
+    public boolean existsByEmailAndPassword(final String email, final String password) {
+        return members.values().stream()
+                .anyMatch(member -> member.getEmail().equals(email) && member.getPassword().equals(password));
     }
 
     @Override

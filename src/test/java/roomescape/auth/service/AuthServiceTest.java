@@ -2,27 +2,21 @@ package roomescape.auth.service;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import roomescape.auth.jwt.JwtTokenProvider;
 import roomescape.common.exception.DataNotFoundException;
+import roomescape.fake.FakeMemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
-@DataJpaTest
 public class AuthServiceTest {
 
-    @Autowired
-    private AuthService authService;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private final MemberRepository memberRepository = new FakeMemberRepository();
+    private final JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+            "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E=",
+            3600000L
+    );
+    private final AuthService authService = new AuthService(memberRepository, jwtTokenProvider);
 
     @Test
     void 토큰_기준으로_이름_찾기_성공() {
@@ -77,23 +71,5 @@ public class AuthServiceTest {
         Assertions.assertThatThrownBy(
                 () -> authService.createToken(invalidEmail, invalidPassword)
         ).isInstanceOf(DataNotFoundException.class);
-    }
-
-
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public JwtTokenProvider jwtTokenProvider() {
-            return new JwtTokenProvider();
-        }
-
-        @Bean
-        public AuthService authService(
-                final MemberRepository memberRepository,
-                final JwtTokenProvider jwtTokenProvider
-        ) {
-            return new AuthService(memberRepository, jwtTokenProvider);
-        }
     }
 }
