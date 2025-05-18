@@ -1,6 +1,5 @@
 package roomescape.theme.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import roomescape.common.util.time.DateTime;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
@@ -48,11 +46,6 @@ class ThemeServiceTest {
     static class ThemeConfig {
 
         @Bean
-        public DateTime dateTime() {
-            return () -> LocalDateTime.of(2025, 4, 29, 10, 0);
-        }
-
-        @Bean
         public ThemeRepository themeRepository(JpaThemeRepository jpaThemeRepository) {
             return new JpaThemeRepositoryAdaptor(jpaThemeRepository);
         }
@@ -63,8 +56,8 @@ class ThemeServiceTest {
         }
 
         @Bean
-        public ThemeService themeService(DateTime dateTime, ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-            return new ThemeService(dateTime, themeRepository, reservationRepository);
+        public ThemeService themeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+            return new ThemeService(themeRepository, reservationRepository);
         }
     }
 }

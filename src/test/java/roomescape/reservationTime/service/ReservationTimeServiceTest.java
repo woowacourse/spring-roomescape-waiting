@@ -38,7 +38,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 가능 시간 조회 테스트")
     @Test
     void time_condition_test() {
-        LocalDate localDate = LocalDate.of(2025, 4, 28);
+        LocalDate localDate = LocalDate.now().minusDays(1);
         Long themeId = 1L;
 
         List<TimeConditionResponse> responses = reservationTimeService.getTimesWithCondition(

@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.SearchCondition;
 import roomescape.common.exception.BusinessException;
-import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.presentation.dto.MemberResponse;
@@ -30,20 +29,17 @@ import roomescape.theme.presentation.dto.ThemeResponse;
 @Service
 public class ReservationService {
 
-    private final DateTime dateTime;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationService(
-        final DateTime dateTime,
         final ReservationRepository reservationRepository,
         final ReservationTimeRepository reservationTimeRepository,
         final ThemeRepository themeRepository,
         final MemberRepository memberRepository
     ) {
-        this.dateTime = dateTime;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -62,8 +58,9 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findBy(request.themeId(), request.date());
         validateExistDuplicateReservation(reservations, time);
 
+        LocalDateTime now = LocalDateTime.now();
         Reservation reservation = Reservation.createWithoutId(request.date(), time, theme, member, Status.RESERVED);
-        validateCanReserveDateTime(reservation, dateTime.now());
+        validateCanReserveDateTime(reservation, now);
         reservation = reservationRepository.save(reservation);
 
         return ReservationResponse.from(reservation);

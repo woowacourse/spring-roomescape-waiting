@@ -3,7 +3,6 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -18,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
-import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
@@ -51,15 +49,17 @@ class ReservationServiceTest {
         List<MyReservationResponse> result = reservationService.getMemberReservations(loginMemberInfo);
 
         List<MyReservationResponse> expected = List.of(
-            new MyReservationResponse(1L, "테마1", LocalDate.of(2025, 4, 28), LocalTime.of(10, 0), "예약"),
-            new MyReservationResponse(2L, "테마1", LocalDate.of(2025, 4, 28), LocalTime.of(11, 0), "예약"));
+            new MyReservationResponse(1L, "테마1", LocalDate.now().minusDays(1), LocalTime.of(10, 0), "예약"),
+            new MyReservationResponse(2L, "테마1", LocalDate.now().minusDays(1), LocalTime.of(11, 0), "예약"));
         assertThat(result).isEqualTo(expected);
     }
 
     @DisplayName("지나간 날짜와 시간에 대한 예약을 생성할 수 없다.")
     @ParameterizedTest
     @MethodSource
-    void cant_not_reserve_before_now(final LocalDate date, final Long timeId) {
+    void cant_not_reserve_before_now(final long days, final Long timeId) {
+        LocalDate date = LocalDate.now().minusDays(days);
+
         Assertions.assertThatThrownBy(
                         () -> reservationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
                 .isInstanceOf(ReservationException.class);
@@ -67,10 +67,10 @@ class ReservationServiceTest {
 
     private static Stream<Arguments> cant_not_reserve_before_now() {
         return Stream.of(
-                Arguments.of(LocalDate.of(2024, 10, 5), 1L),
-                Arguments.of(LocalDate.of(2024, 9, 5), 1L),
-                Arguments.of(LocalDate.of(2024, 10, 4), 1L),
-                Arguments.of(LocalDate.of(2024, 10, 5), 2L)
+                Arguments.of(1L, 1L),
+                Arguments.of(3L, 1L),
+                Arguments.of(6L, 1L),
+                Arguments.of(2L, 2L)
         );
     }
 
@@ -83,11 +83,6 @@ class ReservationServiceTest {
     }
 
     static class ReservationConfig {
-
-        @Bean
-        public DateTime dateTime() {
-            return () -> LocalDateTime.of(2025, 4, 28, 10, 0);
-        }
 
         @Bean
         public ReservationRepository reservationRepository(JpaReservationRepository jpaReservationRepository) {
@@ -111,14 +106,12 @@ class ReservationServiceTest {
 
         @Bean
         public ReservationService reservationService(
-            DateTime dateTime,
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
             MemberRepository memberRepository
         ) {
             return new ReservationService(
-                dateTime,
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
