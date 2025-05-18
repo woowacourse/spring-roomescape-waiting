@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.application.dto.MemberDto;
 import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
@@ -110,7 +109,7 @@ public class ReservationServiceTest {
 
     private ReservationTime stubTime(long timeId) {
         ReservationTime time = ReservationTime.of(timeId, LocalTime.of(10, 0));
-        Mockito.doReturn(TimeDto.from(time)).when(timeService).getTimeById(timeId);
+        Mockito.doReturn(time).when(timeService).getTimeEntityById(timeId);
         return time;
     }
 

@@ -53,7 +53,7 @@ public class ReservationService {
     public ReservationDto registerReservation(ReservationCreateDto request) {
         validateNotDuplicate(request);
         Theme theme = themeService.getThemeById(request.themeId()).toEntity();
-        ReservationTime reservationTime = timeService.getTimeById(request.timeId()).toEntity();
+        ReservationTime reservationTime = timeService.getTimeEntityById(request.timeId());
         Member member = memberService.getMemberEntityById(request.memberId());
         Waiting waiting = new Waiting(ReservationStatus.RESERVED);
         Reservation reservationWithoutId = Reservation.withoutId(

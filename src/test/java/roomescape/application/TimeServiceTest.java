@@ -24,7 +24,7 @@ public class TimeServiceTest {
     private TimeRepository timeRepository;
 
     @Test
-    public void getTimeById() {
+    public void getTimeEntityById() {
         // given
         Long id = 1L;
         TimeDto expectedTime = new TimeDto(id, LocalTime.of(10, 0));
@@ -33,9 +33,9 @@ public class TimeServiceTest {
         Mockito.doReturn(Optional.of(reservationTime)).when(timeRepository).findById(id);
 
         // when
-        TimeDto timeById = timeService.getTimeById(id);
+        ReservationTime time = timeService.getTimeEntityById(id);
 
         // then
-        assertThat(timeById.id()).isEqualTo(id);
+        assertThat(time.getId()).isEqualTo(id);
     }
 }
