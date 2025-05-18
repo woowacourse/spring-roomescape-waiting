@@ -1,4 +1,4 @@
-package roomescape.auth;
+package roomescape.config;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +8,8 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.auth.JwtProvider;
+import roomescape.auth.TokenBody;
 import roomescape.exception.custom.reason.auth.AuthNotExistsCookieException;
 import roomescape.exception.custom.reason.auth.AuthNotValidTokenException;
 import roomescape.member.MemberRole;
@@ -45,7 +47,7 @@ public class AuthorizationAdminInterceptor implements HandlerInterceptor {
                 .filter(cookie -> Objects.equals(cookie.getName(), TOKEN_NAME))
                 .map(Cookie::getValue)
                 .findAny()
-                .orElseThrow(() -> new AuthNotExistsCookieException());
+                .orElseThrow(AuthNotExistsCookieException::new);
     }
 
     private void validateToken(final String token) {
