@@ -12,9 +12,11 @@ import roomescape.domain.User;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.local.DuplicateReservationException;
+import roomescape.exception.local.NotFoundReservationException;
 import roomescape.exception.local.NotFoundReservationTimeException;
 import roomescape.exception.local.NotFoundThemeException;
 import roomescape.exception.local.NotFoundUserException;
+import roomescape.exception.local.PastReservationCreationException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -48,8 +50,8 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservationsByMember(User member) {
-        validateNotExistenceUser(member.getId());
-        List<Reservation> reservations = reservationRepository.findByUser(member);
+        User savedMember = loadUserById(member.getId());
+        List<Reservation> reservations = reservationRepository.findByUser(savedMember);
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -68,28 +70,33 @@ public class ReservationService {
         User user = loadUserById(userId);
         Theme theme = loadThemeById(request.themeId());
         ReservationTime time = loadReservationTimeById(request.timeId());
-        validateDuplicateReservation(request.date(), time);
+
         Reservation reservation = Reservation.createWithoutId(
                 request.date(), ReservationStatus.BOOKED, time, theme, user);
+
+        validateDuplicateReservation(theme, request.date(), time);
+        validatePastReservationCreation(reservation);
+
         Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
 
     public void deleteReservationById(long reservationId) {
-        reservationRepository.deleteById(reservationId);
+        Reservation reservation = loadReservationById(reservationId);
+        reservationRepository.delete(reservation);
     }
 
-    private void validateDuplicateReservation(LocalDate date, ReservationTime time) {
-        boolean isDuplicatedReservation = reservationRepository.existsByDateAndReservationTime(date, time);
+    private void validateDuplicateReservation(Theme theme, LocalDate date, ReservationTime time) {
+        boolean isDuplicatedReservation =
+                reservationRepository.existsByThemeAndDateAndReservationTime(theme, date, time);
         if (isDuplicatedReservation) {
             throw new DuplicateReservationException();
         }
     }
 
-    private void validateNotExistenceUser(long userId) {
-        boolean isExistUser = userRepository.existsById(userId);
-        if (!isExistUser) {
-            throw new NotFoundUserException();
+    private void validatePastReservationCreation(Reservation reservation) {
+        if (reservation.isPastDateTime()) {
+            throw new PastReservationCreationException();
         }
     }
 
@@ -106,5 +113,10 @@ public class ReservationService {
     private ReservationTime loadReservationTimeById(long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(NotFoundReservationTimeException::new);
+    }
+
+    private Reservation loadReservationById(long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(NotFoundReservationException::new);
     }
 }

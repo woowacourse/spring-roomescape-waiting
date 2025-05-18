@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.User;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -15,7 +16,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByReservationTime(ReservationTime reservationTime);
 
-    boolean existsByDateAndReservationTime(LocalDate date, ReservationTime reservationTime);
+    boolean existsByThemeAndDateAndReservationTime(Theme theme, LocalDate date, ReservationTime reservationTime);
 
     @Query(value =
             """
