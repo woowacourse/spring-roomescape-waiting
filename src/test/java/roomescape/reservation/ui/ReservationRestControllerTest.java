@@ -265,7 +265,7 @@ class ReservationRestControllerTest {
                 .contentType(ContentType.JSON)
                 .cookies(memberCookies)
                 .body(reservationParams2)
-                .when().get("/reservations-mine")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", is(2));
