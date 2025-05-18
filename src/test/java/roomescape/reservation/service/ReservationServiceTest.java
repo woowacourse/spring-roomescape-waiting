@@ -5,13 +5,13 @@ import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.common.exception.PastDateException;
+import roomescape.fake.FakeMemberRepository;
+import roomescape.fake.FakeReservationRepository;
+import roomescape.fake.FakeReservationTimeRepository;
+import roomescape.fake.FakeThemeRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
@@ -25,23 +25,17 @@ import roomescape.theme.repository.ThemeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
 class ReservationServiceTest {
 
-    @Autowired
-    private ReservationService reservationService;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private ReservationRepository reservationRepository;
+    private final ReservationRepository reservationRepository = new FakeReservationRepository();
+    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    private final ThemeRepository themeRepository = new FakeThemeRepository();
+    private final MemberRepository memberRepository = new FakeMemberRepository();
+    private final ReservationService reservationService = new ReservationService(
+            reservationRepository,
+            reservationTimeRepository,
+            themeRepository
+    );
 
     @Test
     void 예약_정보_목록을_조회한다() {
@@ -307,17 +301,5 @@ class ReservationServiceTest {
 
         // then
         assertThat(reservations.size()).isEqualTo(1);
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public ReservationService themeService(
-                final ReservationRepository reservationRepository,
-                final ReservationTimeRepository reservationTimeRepository,
-                final ThemeRepository themeRepository
-        ) {
-            return new ReservationService(reservationRepository, reservationTimeRepository, themeRepository);
-        }
     }
 }

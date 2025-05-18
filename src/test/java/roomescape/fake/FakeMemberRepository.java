@@ -35,8 +35,11 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<String> findNameByEmail(String email) {
-        return Optional.empty();
+    public Optional<String> findNameByEmail(final String email) {
+        return members.values().stream()
+                .filter(member -> member.getEmail().equals(email))
+                .map(Member::getName)
+                .findFirst();
     }
 
     @Override

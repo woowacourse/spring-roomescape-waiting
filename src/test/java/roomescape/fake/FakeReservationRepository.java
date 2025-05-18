@@ -64,23 +64,48 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findAll() {
+        return reservations.values().stream().toList();
+    }
+
+    @Override
+    public Optional<Reservation> findById(final Long id) {
+        return Optional.ofNullable(reservations.get(id));
+    }
+
+    @Override
+    public void deleteById(final Long id) {
+        reservations.remove(id);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeAndTheme(
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme) {
+        return reservations.values().stream()
+                .anyMatch(reservation ->
+                        reservation.getDate().equals(date) &&
+                                reservation.getTime().equals(time) &&
+                                reservation.getTheme().equals(theme)
+                );
+    }
+
+    @Override
+    public List<Reservation> findByMember(final Member member) {
+        return reservations.values().stream()
+                .filter(reservation -> reservation.getMember().equals(member))
+                .toList();
+    }
+
+    @Override
     public <S extends Reservation> Iterable<S> saveAll(Iterable<S> entities) {
         return null;
     }
 
     @Override
-    public Optional<Reservation> findById(Long aLong) {
-        return Optional.empty();
-    }
-
-    @Override
     public boolean existsById(Long aLong) {
         return false;
-    }
-
-    @Override
-    public List<Reservation> findAll() {
-        return List.of();
     }
 
     @Override
@@ -91,11 +116,6 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public long count() {
         return 0;
-    }
-
-    @Override
-    public void deleteById(Long aLong) {
-
     }
 
     @Override
@@ -116,15 +136,5 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public void deleteAll() {
 
-    }
-
-    @Override
-    public boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
-        return false;
-    }
-
-    @Override
-    public List<Reservation> findByMember(Member member) {
-        return List.of();
     }
 }
