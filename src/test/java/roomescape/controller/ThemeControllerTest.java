@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.TestFixture;
 import roomescape.auth.CookieProvider;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.service.MemberService;
@@ -26,10 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ThemeController.class)
 class ThemeControllerTest {
 
-    private static final String TEST_THEME_NAME = "테마1";
-    private static final String TEST_THEME_DESCRIPTION = "description";
-    private static final String TEST_THEME_THUMBNAIL = "thumbnail";
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -48,21 +45,18 @@ class ThemeControllerTest {
     @Test
     @DisplayName("테마를 생성할 수 있다.")
     void createTheme() throws Exception {
-        String themeJson = String.format("""
-                {
-                    "name": "%s",
-                    "description": "%s",
-                    "thumbnail": "%s"
-                }
-                """, TEST_THEME_NAME, TEST_THEME_DESCRIPTION, TEST_THEME_THUMBNAIL);
-
-        ThemeResult themeResult = new ThemeResult(1L, TEST_THEME_NAME, TEST_THEME_DESCRIPTION, TEST_THEME_THUMBNAIL);
+        // given
+        ThemeResult themeResult = TestFixture.createThemeResult(1L, 
+                TestFixture.TEST_THEME_NAME, 
+                TestFixture.TEST_THEME_DESCRIPTION, 
+                TestFixture.TEST_THEME_THUMBNAIL);
+                
         when(themeService.create(any(CreateThemeParam.class))).thenReturn(themeResult);
 
+        // when & then
         mockMvc.perform(post("/themes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(themeJson)
-        )
+                .content(TestFixture.createThemeJson()))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(themeResult.id()))
@@ -74,9 +68,15 @@ class ThemeControllerTest {
     @Test
     @DisplayName("테마 목록을 조회할 수 있다.")
     void getThemes() throws Exception {
-        ThemeResult themeResult = new ThemeResult(1L, TEST_THEME_NAME, TEST_THEME_DESCRIPTION, TEST_THEME_THUMBNAIL);
+        // given
+        ThemeResult themeResult = TestFixture.createThemeResult(1L, 
+                TestFixture.TEST_THEME_NAME, 
+                TestFixture.TEST_THEME_DESCRIPTION, 
+                TestFixture.TEST_THEME_THUMBNAIL);
+                
         when(themeService.findAll()).thenReturn(List.of(themeResult));
 
+        // when & then
         mockMvc.perform(get("/themes"))
                 .andDo(print())
                 .andExpect(status().isOk())

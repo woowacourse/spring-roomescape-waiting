@@ -22,7 +22,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DEFAULT_DATE;
+import static roomescape.TestFixture.TEST_DATE;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -81,7 +81,7 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme));
+        Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE, reservationTime, theme));
 
         //when
         reservationService.deleteById(reservation.getId());
@@ -96,8 +96,8 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation1 = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme));
-        Reservation reservation2 = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE.plusDays(1), reservationTime, theme));
+        Reservation reservation1 = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE, reservationTime, theme));
+        Reservation reservation2 = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE.plusDays(1), reservationTime, theme));
 
 
         //when
@@ -117,7 +117,7 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme));
+        Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE, reservationTime, theme));
 
         //when
         ReservationResult reservationResult = reservationService.findById(reservation.getId());
@@ -141,7 +141,7 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme));
+        Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE, reservationTime, theme));
 
         //when & then
         assertThatThrownBy(() -> reservationService.create(new CreateReservationParam(member.getId(), reservation.getDate(), reservationTime.getId(), theme.getId()), LocalDateTime.now()))

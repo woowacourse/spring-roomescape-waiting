@@ -18,7 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DEFAULT_DATE;
+import static roomescape.TestFixture.TEST_DATE;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -40,7 +40,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(theme);
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
+        Reservation reservation = TestFixture.createDefaultReservation(member, TEST_DATE, time, theme);
         entityManager.persist(reservation);
 
         // when
@@ -63,7 +63,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(theme);
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
+        Reservation reservation = TestFixture.createDefaultReservation(member, TEST_DATE, time, theme);
         entityManager.persist(reservation);
 
         //when
@@ -83,7 +83,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(theme);
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
+        Reservation reservation = TestFixture.createDefaultReservation(member, TEST_DATE, time, theme);
         entityManager.persist(reservation);
 
         //when
@@ -103,7 +103,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(theme);
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
+        Reservation reservation = TestFixture.createDefaultReservation(member, TEST_DATE, time, theme);
         entityManager.persist(reservation);
 
         // when
@@ -123,11 +123,11 @@ class JpaReservationRepositoryTest {
         entityManager.persist(theme);
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
+        Reservation reservation = TestFixture.createDefaultReservation(member, TEST_DATE, time, theme);
         entityManager.persist(reservation);
 
         // when
-        List<Reservation> result = jpaReservationRepository.findByThemeIdAndDate(theme.getId(), DEFAULT_DATE);
+        List<Reservation> result = jpaReservationRepository.findByThemeIdAndDate(theme.getId(), TEST_DATE);
 
         // then
         assertAll(
@@ -150,8 +150,8 @@ class JpaReservationRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member1, DEFAULT_DATE, time, theme);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member2, DEFAULT_DATE, time, theme);
+        Reservation reservation1 = TestFixture.createDefaultReservation(member1, TEST_DATE, time, theme);
+        Reservation reservation2 = TestFixture.createDefaultReservation(member2, TEST_DATE, time, theme);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
@@ -179,8 +179,8 @@ class JpaReservationRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme1);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme2);
+        Reservation reservation1 = TestFixture.createDefaultReservation(member, TEST_DATE, time, theme1);
+        Reservation reservation2 = TestFixture.createDefaultReservation(member, TEST_DATE, time, theme2);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 

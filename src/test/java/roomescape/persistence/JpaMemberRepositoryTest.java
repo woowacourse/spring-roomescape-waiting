@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.TestFixture;
 import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
 
 import java.util.Optional;
 
@@ -21,7 +21,7 @@ class JpaMemberRepositoryTest {
     @Test
     void findByEmail() {
         //given
-        jpaMemberRepository.save(Member.createNew("name", MemberRole.USER, "email", "password"));
+        jpaMemberRepository.save(TestFixture.createDefaultMember());
 
         //when
         Optional<Member> result = jpaMemberRepository.findByEmail("email");

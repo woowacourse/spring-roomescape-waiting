@@ -21,7 +21,6 @@ import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationTimeResult;
 import roomescape.service.result.ThemeResult;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -30,15 +29,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.TestFixture.TEST_DATE;
+import static roomescape.TestFixture.VALID_TOKEN;
 
 @WebMvcTest(AdminController.class)
 class AdminControllerTest {
-
-    private static final String VALID_TOKEN = "header.payload.signature";
-    private static final LocalDate TEST_DATE = LocalDate.of(2025, 1, 1);
-    private static final Long TEST_THEME_ID = 1L;
-    private static final Long TEST_TIME_ID = 1L;
-    private static final Long TEST_MEMBER_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,7 +67,7 @@ class AdminControllerTest {
 
         mockMvc.perform(post("/admin/reservations")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(createTestReservationJson())
+                .content(TestFixture.createReservationJson())
                 .cookie(TestFixture.createAuthCookie(VALID_TOKEN))
         )
                 .andDo(print())
@@ -88,7 +83,7 @@ class AdminControllerTest {
 
         mockMvc.perform(post("/admin/reservations")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(createTestReservationJson())
+                .content(TestFixture.createReservationJson())
                 .cookie(TestFixture.createAuthCookie(VALID_TOKEN))
         )
                 .andDo(print())
@@ -102,7 +97,7 @@ class AdminControllerTest {
 
         mockMvc.perform(post("/admin/reservations")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(createTestReservationJson())
+                .content(TestFixture.createReservationJson())
         )
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -117,16 +112,5 @@ class AdminControllerTest {
                 ThemeResult.from(TestFixture.createDefaultTheme()),
                 ReservationStatus.RESERVED
         );
-    }
-
-    private String createTestReservationJson() {
-        return String.format("""
-                {
-                    "date": "%s",
-                    "themeId": %d,
-                    "timeId": %d,
-                    "memberId": %d
-                }
-                """, TEST_DATE, TEST_THEME_ID, TEST_TIME_ID, TEST_MEMBER_ID);
     }
 }

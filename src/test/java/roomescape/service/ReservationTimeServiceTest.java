@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DEFAULT_DATE;
+import static roomescape.TestFixture.TEST_DATE;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -41,8 +41,6 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
-    @Autowired
-    private ReservationService reservationService;
 
     @Test
     void 예약_시간을_생성할_수_있다() {
@@ -116,7 +114,7 @@ class ReservationTimeServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme);
+        Reservation reservation = TestFixture.createDefaultReservation(member, TEST_DATE, reservationTime, theme);
         reservationRepository.save(reservation);
 
         //when & then

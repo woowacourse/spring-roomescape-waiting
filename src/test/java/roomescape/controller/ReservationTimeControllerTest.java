@@ -14,7 +14,6 @@ import roomescape.service.ReservationTimeService;
 import roomescape.service.param.CreateReservationTimeParam;
 import roomescape.service.result.ReservationTimeResult;
 
-import java.time.LocalTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -23,11 +22,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.TestFixture.TEST_TIME;
 
 @WebMvcTest(ReservationTimeController.class)
 class ReservationTimeControllerTest {
-
-    private static final LocalTime TEST_TIME = LocalTime.of(12, 0);
 
     @Autowired
     private MockMvc mockMvc;
