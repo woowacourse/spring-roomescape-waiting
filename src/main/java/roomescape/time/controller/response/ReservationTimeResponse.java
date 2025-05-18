@@ -4,7 +4,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import roomescape.time.domain.ReservationTime;
 
-public record ReservationTimeResponse(Long id, String startAt) {
+public record ReservationTimeResponse(
+        Long id,
+        String startAt
+) {
 
     public static List<ReservationTimeResponse> from(List<ReservationTime> reservationTimes) {
         return reservationTimes.stream()

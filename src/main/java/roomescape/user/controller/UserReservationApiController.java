@@ -24,10 +24,8 @@ public class UserReservationApiController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
-            @LoginMember MemberResponse memberResponse,
-            @RequestBody ReservationRequest request
-    ) {
+    public ResponseEntity<ReservationResponse> createReservation(@LoginMember MemberResponse memberResponse,
+                                                                 @RequestBody ReservationRequest request) {
         ReservationResponse response = reservationService.createByName(memberResponse.name(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -40,8 +38,7 @@ public class UserReservationApiController {
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
-            @LoginMember MemberResponse memberResponse
-    ) {
+            @LoginMember MemberResponse memberResponse) {
         List<MemberReservationResponse> allByMemberId = reservationService.findAllByMemberId(memberResponse.id());
         return ResponseEntity.ok().body(allByMemberId);
     }

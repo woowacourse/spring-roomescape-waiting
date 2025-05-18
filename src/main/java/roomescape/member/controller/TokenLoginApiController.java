@@ -26,10 +26,8 @@ public class TokenLoginApiController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> tokenLogin(
-            @RequestBody @Valid TokenLoginCreateRequest tokenLoginCreateRequest,
-            HttpServletResponse response
-    ) {
+    public ResponseEntity<Void> tokenLogin(@RequestBody @Valid TokenLoginCreateRequest tokenLoginCreateRequest,
+                                           HttpServletResponse response) {
         TokenLoginResponse tokenLoginResponse = authService.loginByToken(tokenLoginCreateRequest);
         Cookie cookie = new Cookie("token", tokenLoginResponse.tokenResponse());
         cookie.setHttpOnly(true);
@@ -40,9 +38,7 @@ public class TokenLoginApiController {
     }
 
     @GetMapping("/check")
-    public ResponseEntity<MemberResponse> getMember(
-            @LoginMember MemberResponse response
-    ) {
+    public ResponseEntity<MemberResponse> getMember(@LoginMember MemberResponse response) {
         return ResponseEntity.ok().body(response);
     }
 }

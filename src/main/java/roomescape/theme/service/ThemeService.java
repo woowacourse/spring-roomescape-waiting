@@ -71,5 +71,4 @@ public class ThemeService {
 
         return ThemeResponse.from(themesSortedByPopularity);
     }
-
 }

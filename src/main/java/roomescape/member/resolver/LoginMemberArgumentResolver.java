@@ -13,7 +13,6 @@ import roomescape.member.service.AuthService;
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    public static final String TOKEN = "token";
     private final AuthService authService;
 
     public LoginMemberArgumentResolver(AuthService authService) {
@@ -27,15 +26,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     @Override
-    public Object resolveArgument(
-            MethodParameter parameter,
-            ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest,
-            WebDataBinderFactory binderFactory
+    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory
     ) {
-
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-
         return authService.findUserByToken(authService.extractToken(request));
     }
 }

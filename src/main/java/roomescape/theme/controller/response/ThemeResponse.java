@@ -3,7 +3,12 @@ package roomescape.theme.controller.response;
 import java.util.List;
 import roomescape.theme.domain.Theme;
 
-public record ThemeResponse(Long id, String name, String description, String thumbnail) {
+public record ThemeResponse(
+        Long id,
+        String name,
+        String description,
+        String thumbnail
+) {
 
     public static List<ThemeResponse> from(List<Theme> themes) {
         return themes.stream()

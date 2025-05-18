@@ -12,5 +12,4 @@ public class SignUpController {
     public String signUp() {
         return "signup";
     }
-
 }

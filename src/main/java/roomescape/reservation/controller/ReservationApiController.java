@@ -46,7 +46,6 @@ public class ReservationApiController {
         ReservationResponse response = reservationService.create(request.memberId(), new ReservationRequest(
                 request.date(), request.themeId(), request.timeId()
         ));
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -55,7 +54,6 @@ public class ReservationApiController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteById(id);
-
         return ResponseEntity.noContent().build();
     }
 }

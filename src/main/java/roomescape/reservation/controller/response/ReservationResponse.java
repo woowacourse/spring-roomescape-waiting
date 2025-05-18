@@ -8,12 +8,14 @@ import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 
 public record ReservationResponse(
+
         Long id,
         Member member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme
 ) {
+    
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),

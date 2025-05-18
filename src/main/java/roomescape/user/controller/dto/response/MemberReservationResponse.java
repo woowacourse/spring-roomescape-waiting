@@ -7,6 +7,7 @@ import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 
 public record MemberReservationResponse(
+
         Long id,
         LocalDate date,
         ReservationTimeResponse time,

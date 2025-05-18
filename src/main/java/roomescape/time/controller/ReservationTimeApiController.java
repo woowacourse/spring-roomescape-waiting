@@ -30,10 +30,8 @@ public class ReservationTimeApiController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> createTime(
-            @RequestBody @Valid ReservationTimeCreateRequest request
-    ) {
+            @RequestBody @Valid ReservationTimeCreateRequest request) {
         ReservationTimeResponse response = reservationTimeService.create(request);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -42,24 +40,20 @@ public class ReservationTimeApiController {
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getTimes() {
         List<ReservationTimeResponse> responses = reservationTimeService.getAll();
-
         return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTime(@PathVariable Long id) {
         reservationTimeService.deleteById(id);
-
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/available")
     public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableReservationTimes(
-            @ModelAttribute AvailableReservationTimeRequest request
-    ) {
+            @ModelAttribute AvailableReservationTimeRequest request) {
         List<AvailableReservationTimeResponse> responses =
                 reservationTimeService.getAvailableReservationTimes(request);
-
         return ResponseEntity.ok(responses);
     }
 }

@@ -25,7 +25,7 @@ public class ReservationDateTime {
         LocalDateTime now = LocalDateTime.now();
 
         if (reservationDateTime.isBefore(now)) {
-            throw new PastReservationException("[ERROR] 현재 시간 이후로 예약할 수 있습니다.");
+            throw new PastReservationException("[ERROR] 현재 시간 이후만 예약할 수 있습니다.");
         }
     }
 
