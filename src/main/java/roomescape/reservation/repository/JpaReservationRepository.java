@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 
@@ -41,8 +40,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             LEFT JOIN Reservation r ON rt.id = r.time.id AND r.date = :date AND r.theme.id = :themeId 
             ORDER BY rt.startAt
             """)
-    List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(@Param("date") LocalDate date,
-                                                                           @Param("themeId") Long themeId);
+    List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query("""
             SELECT  r 
