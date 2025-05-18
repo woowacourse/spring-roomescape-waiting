@@ -40,4 +40,12 @@ public class AuthController {
         final LoginResponse response = new LoginResponse(loginMember.name());
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, "token=")
+                .build();
+    }
 }
