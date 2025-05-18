@@ -72,7 +72,7 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findByMember_Id(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
 
         return reservations.stream()
                 .map(MemberReservationResponseDto::new)
