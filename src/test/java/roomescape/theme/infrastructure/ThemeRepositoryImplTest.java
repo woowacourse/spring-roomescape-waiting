@@ -20,7 +20,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeCommandRepository;
+import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -39,7 +39,7 @@ class ThemeRepositoryImplTest {
     private ReservationCommandRepository reservationCommandRepository;
 
     @Autowired
-    private ReservationTimeCommandRepository reservationTimeCommandRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -58,7 +58,7 @@ class ThemeRepositoryImplTest {
 
         final List<ReservationTime> times = ReservationTimeFixture.notSavedReservationTimes(11);
         for (ReservationTime time : times) {
-            reservationTimeCommandRepository.save(time);
+            reservationTimeRepository.save(time);
         }
 
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());

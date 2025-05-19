@@ -4,7 +4,11 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReservationTimeQueryRepository {
+public interface ReservationTimeRepository {
+
+    ReservationTime save(ReservationTime reservationTime);
+
+    void deleteById(Long id);
 
     Optional<ReservationTime> findById(Long id);
 

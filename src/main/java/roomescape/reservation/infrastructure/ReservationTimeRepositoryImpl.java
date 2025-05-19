@@ -7,13 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeCommandRepository;
-import roomescape.reservation.domain.ReservationTimeQueryRepository;
+import roomescape.reservation.domain.ReservationTimeRepository;
 
 
 @Repository
 @RequiredArgsConstructor
-public class ReservationTimeRepositoryImpl implements ReservationTimeCommandRepository, ReservationTimeQueryRepository {
+public class ReservationTimeRepositoryImpl implements ReservationTimeRepository {
 
     private final JpaReservationTimeRepository jpaRepository;
 

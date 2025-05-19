@@ -21,7 +21,7 @@ import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeQueryRepository;
+import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.ReservationsByFilterRequest;
@@ -37,7 +37,7 @@ public class ReservationService {
 
     private final ReservationCommandRepository reservationCommandRepository;
     private final ReservationQueryRepository reservationQueryRepository;
-    private final ReservationTimeQueryRepository reservationTimeQueryRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
@@ -91,7 +91,7 @@ public class ReservationService {
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
-        final ReservationTime reservationTime = reservationTimeQueryRepository.findById(timeId)
+        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
@@ -155,7 +155,7 @@ public class ReservationService {
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
             final AvailableReservationTimeRequest request
     ) {
-        final List<ReservationTime> reservationTimes = reservationTimeQueryRepository.findAll();
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         final List<LocalTime> bookedTimes = reservationQueryRepository.findAllByDateAndThemeId(
                         request.date(),
                         request.themeId()

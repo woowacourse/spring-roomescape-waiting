@@ -11,8 +11,7 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
-import roomescape.reservation.domain.ReservationTimeCommandRepository;
-import roomescape.reservation.domain.ReservationTimeQueryRepository;
+import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservation.infrastructure.ReservationRepositoryImpl;
@@ -26,14 +25,7 @@ import roomescape.theme.infrastructure.ThemeRepositoryImpl;
 public class TestConfig {
 
     @Bean
-    public ReservationTimeQueryRepository reservationTimeQueryRepository(
-            final JpaReservationTimeRepository jpaReservationTimeRepository
-    ) {
-        return new ReservationTimeRepositoryImpl(jpaReservationTimeRepository);
-    }
-
-    @Bean
-    public ReservationTimeCommandRepository reservationTimeCommandRepository(
+    public ReservationTimeRepository reservationTimeRepository(
             final JpaReservationTimeRepository jpaReservationTimeRepository
     ) {
         return new ReservationTimeRepositoryImpl(jpaReservationTimeRepository);
@@ -76,10 +68,9 @@ public class TestConfig {
 
     @Bean
     public ReservationTimeService reservationTimeService(
-            final ReservationTimeCommandRepository reservationTimeCommandRepository,
-            final ReservationTimeQueryRepository reservationTimeQueryRepository
+            final ReservationTimeRepository reservationTimeRepository
     ) {
-        return new ReservationTimeService(reservationTimeCommandRepository, reservationTimeQueryRepository);
+        return new ReservationTimeService(reservationTimeRepository);
     }
 
     @Bean
@@ -93,14 +84,14 @@ public class TestConfig {
     public ReservationService reservationService(
             final ReservationCommandRepository reservationCommandRepository,
             final ReservationQueryRepository reservationQueryRepository,
-            final ReservationTimeQueryRepository reservationTimeQueryRepository,
+            final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository
     ) {
         return new ReservationService(
                 reservationCommandRepository,
                 reservationQueryRepository,
-                reservationTimeQueryRepository,
+                reservationTimeRepository,
                 themeRepository,
                 memberRepository
         );
