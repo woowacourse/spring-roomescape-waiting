@@ -1,6 +1,4 @@
 package roomescape.service.param;
 
-public record RegisterMemberParam(String name, String email, String password) {
-
-
+public record RegisterMemberParam(String email, String password, String name) {
 }
