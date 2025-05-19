@@ -86,7 +86,7 @@ public class ReservationService {
                                 reservation.getTheme().getName(),
                                 reservation.getDate(),
                                 reservation.getTime().getStartAt(),
-                                reservation.getStatus().name()
+                                ReservationStatus.name(reservation.getStatus())
                         )
                 )
                 .toList();
