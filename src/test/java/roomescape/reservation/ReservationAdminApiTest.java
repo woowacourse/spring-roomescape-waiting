@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import roomescape.auth.stub.StubTokenProvider;
 import roomescape.common.CleanUp;
 import roomescape.config.AuthServiceTestConfig;
@@ -62,7 +63,7 @@ public class ReservationAdminApiTest {
                 .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
                 .when().get("/admin/reservations")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(HttpStatus.OK.value())
                 .body("data.size()", is(1));
     }
 
@@ -73,7 +74,7 @@ public class ReservationAdminApiTest {
                 .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
                 .when().get("/admin/reservation")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(HttpStatus.OK.value());
     }
 
     @Test
@@ -88,6 +89,6 @@ public class ReservationAdminApiTest {
                 .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
                 .when().delete("/admin/reservations/" + id)
                 .then().log().all()
-                .statusCode(204);
+                .statusCode(HttpStatus.NO_CONTENT.value());
     }
 }

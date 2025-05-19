@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import roomescape.common.CleanUp;
 import roomescape.config.AuthServiceTestConfig;
 
@@ -40,6 +41,6 @@ class MemberApiTest {
                 .body(member)
                 .when().post("/members")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(HttpStatus.CREATED.value());
     }
 }

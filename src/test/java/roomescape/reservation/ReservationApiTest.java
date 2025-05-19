@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import roomescape.auth.stub.StubTokenProvider;
 import roomescape.common.CleanUp;
 import roomescape.config.AuthServiceTestConfig;
@@ -66,7 +67,7 @@ class ReservationApiTest {
                 .body(request)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(HttpStatus.CREATED.value());
     }
 
     @Test
@@ -74,7 +75,7 @@ class ReservationApiTest {
         RestAssured.given().log().all()
                 .when().delete("/reservations/1")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(HttpStatus.NOT_FOUND.value());
     }
 
     @Test
@@ -96,7 +97,7 @@ class ReservationApiTest {
                 .body(request)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     private String formatDateTime(LocalDate localDate) {
