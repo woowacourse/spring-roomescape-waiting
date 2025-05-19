@@ -21,8 +21,7 @@ import roomescape.auth.infrastructure.util.CookieManager;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String MEMBER_ID_ATTRIBUTE = "memberId";
-    private static final List<String> WHITELIST = List.of("/login", "/logout", "/signup");
-    private static final List<String> TOKEN_CHECK_LIST = List.of("/");
+    private static final List<String> WHITELIST = List.of("/login", "/logout", "/signup", "/h2-console");
 
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -34,27 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             final HttpServletResponse response,
             final FilterChain filterChain
     ) throws ServletException, IOException {
-        final String uri = request.getRequestURI();
         final String token = cookieManager.extractLoginToken(request.getCookies());
-
-        if (isTokenCheckListed(uri)) {
-            if (StringUtils.hasText(token)) {
-                Long memberId = null;
-                try {
-                    String subject = jwtTokenProvider.extractPrincipal(token);
-                    memberId = Long.valueOf(subject);
-                    request.setAttribute(MEMBER_ID_ATTRIBUTE, memberId);
-                } catch (JwtException e) {
-                    log.debug("토큰을 추출하는 과정에서 문제가 발생했습니다.", e);
-                    return;
-                } catch (NumberFormatException e) {
-                    log.debug("memberId의 형식이 올바르지 않습니다 memberId = {}", memberId, e);
-                    return;
-                }
-            }
-            filterChain.doFilter(request, response);
-            return;
-        }
 
         if (!StringUtils.hasText(token)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다.");
@@ -77,10 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private boolean isTokenCheckListed(String uri) {
-        return TOKEN_CHECK_LIST.stream().anyMatch(uri::equals);
     }
 
     @Override
