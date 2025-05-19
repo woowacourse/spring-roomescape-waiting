@@ -69,7 +69,7 @@ public class ReservationService {
             throw new AlreadyInUseException("reservation is already in use");
         }
 
-        Reservation reservation = getReservation(request, request.loginMember());
+        Reservation reservation = getReservation(request);
         LocalDateTime now = LocalDateTime.now();
         validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
 
@@ -96,9 +96,10 @@ public class ReservationService {
         );
     }
 
-    private Reservation getReservation(final ReservationCreateRequest request, final LoginMember loginMember) {
+    private Reservation getReservation(final ReservationCreateRequest request) {
         ReservationTime reservationTime = gerReservationTime(request);
         Theme theme = getTheme(request);
+        LoginMember loginMember = request.loginMember();
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
         return new Reservation(member, request.date(), reservationTime, theme);
