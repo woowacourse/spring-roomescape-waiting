@@ -111,7 +111,7 @@ class ReservationServiceTest {
                 TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
 
         User otherMember = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member2@test.com", "password123"));
 
         entityManager.persist(Reservation.createWithoutId(
                 TODAY, ReservationStatus.BOOKED, reservationTime, theme, otherMember));

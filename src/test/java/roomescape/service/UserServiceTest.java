@@ -72,9 +72,9 @@ class UserServiceTest {
     void canFindAllUserProfile() {
         // given
         User firstUser = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member1@test.com", "password123"));
         User secondUser = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member2@test.com", "password123"));
 
         entityManager.flush();
 
