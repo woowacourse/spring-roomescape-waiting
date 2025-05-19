@@ -68,14 +68,14 @@ public class ReservationService {
         checkIfReservationExists(date, timeId, themeId);
         ReservationTime time = findReservationTime(timeId);
         Theme theme = findTheme(themeId);
-        Member member = findUserByMemberId(memberId);
+        Member member = findByMemberId(memberId);
 
         Reservation newReservation = reservationRepository.save(
                 Reservation.createUpcomingReservationWithUnassignedId(member, date, time, theme, now, ReservationStatus.RESERVED));
         return ReservationResponse.of(newReservation, time, theme, member);
     }
 
-    private Member findUserByMemberId(final Long memberId) {
+    private Member findByMemberId(final Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
     }
