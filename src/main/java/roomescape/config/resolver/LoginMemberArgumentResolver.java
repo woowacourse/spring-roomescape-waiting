@@ -9,7 +9,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.config.annotation.RequiredAccessToken;
 import roomescape.dto.business.AccessTokenContent;
-import roomescape.exception.local.NotFoundCookieException;
 import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
@@ -37,12 +36,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
-        Cookie accessTokenCookie = getAccessTokenCookie(request);
+        Cookie accessTokenCookie = cookieUtility.getCookie(request, "access");
         return jwtTokenProvider.parseAccessToken(accessTokenCookie.getValue());
-    }
-
-    private Cookie getAccessTokenCookie(HttpServletRequest request) {
-        return cookieUtility.findCookie(request, "access")
-                .orElseThrow(NotFoundCookieException::new);
     }
 }

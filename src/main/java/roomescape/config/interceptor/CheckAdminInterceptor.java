@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.exception.global.ForbiddenException;
-import roomescape.exception.local.NotFoundCookieException;
 import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
@@ -24,14 +23,9 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        Cookie accessTokenCookie = getAccessTokenCookie(request);
+        Cookie accessTokenCookie = cookieUtility.getCookie(request, "access");
         AccessTokenContent tokenContent = jwtTokenProvider.parseAccessToken(accessTokenCookie.getValue());
         return canEnterUri(request.getRequestURI(), tokenContent);
-    }
-
-    private Cookie getAccessTokenCookie(HttpServletRequest request) {
-        return cookieUtility.findCookie(request, "access")
-                .orElseThrow(NotFoundCookieException::new);
     }
 
     private boolean canEnterUri(String uri, AccessTokenContent tokenContent) {
