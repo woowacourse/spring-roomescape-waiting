@@ -119,7 +119,7 @@ class ReservationServiceTest {
         entityManager.flush();
 
         // when
-        List<ReservationResponse> allReservations = reservationService.findAllReservationsByMember(member);
+        List<ReservationResponse> allReservations = reservationService.findAllReservationsByMember(member.getId());
 
         // then
         assertAll(

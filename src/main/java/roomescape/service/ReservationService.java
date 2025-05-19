@@ -49,8 +49,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllReservationsByMember(User member) {
-        User savedMember = loadUserById(member.getId());
+    public List<ReservationResponse> findAllReservationsByMember(long userId) {
+        User savedMember = loadUserById(userId);
         List<Reservation> reservations = reservationRepository.findByUser(savedMember);
         return reservations.stream()
                 .map(ReservationResponse::new)

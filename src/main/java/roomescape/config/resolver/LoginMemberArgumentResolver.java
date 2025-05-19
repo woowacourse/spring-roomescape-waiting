@@ -8,50 +8,43 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.domain.User;
+import roomescape.config.annotation.RequiredAccessToken;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.exception.local.NotFoundCookieException;
-import roomescape.service.UserService;
+import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private static final String TOKEN_NAME_FIELD = "token";
-
+    private final CookieUtility cookieUtility;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserService userService;
 
-    public LoginMemberArgumentResolver(JwtTokenProvider jwtTokenProvider, UserService userService) {
+    public LoginMemberArgumentResolver(CookieUtility cookieUtility, JwtTokenProvider jwtTokenProvider) {
+        this.cookieUtility = cookieUtility;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.userService = userService;
     }
 
     @Override
     public boolean supportsParameter(MethodParameter methodParameter) {
-        return methodParameter.getParameterType().equals(User.class);
+        return methodParameter.hasParameterAnnotation(RequiredAccessToken.class) &&
+                methodParameter.getParameterType().equals(AccessTokenContent.class);
     }
 
     @Override
-    public User resolveArgument(
+    public AccessTokenContent resolveArgument(
             MethodParameter methodParameter,
             ModelAndViewContainer mavContainer,
             NativeWebRequest nativeWebRequest,
             WebDataBinderFactory binderFactory
     ) {
-        HttpServletRequest request = (HttpServletRequest) nativeWebRequest.getNativeRequest();
+        HttpServletRequest request = nativeWebRequest.getNativeRequest(HttpServletRequest.class);
+        Cookie accessTokenCookie = getAccessTokenCookie(request);
+        return jwtTokenProvider.parseAccessToken(accessTokenCookie.getValue());
+    }
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (TOKEN_NAME_FIELD.equals(cookie.getName())) {
-                    String token = cookie.getValue();
-                    AccessTokenContent accessTokenContent = jwtTokenProvider.parseAccessToken(token);
-                    return userService.getUserById(accessTokenContent.id());
-                }
-            }
-        }
-
-        throw new NotFoundCookieException();
+    private Cookie getAccessTokenCookie(HttpServletRequest request) {
+        return cookieUtility.findCookie(request, "access")
+                .orElseThrow(NotFoundCookieException::new);
     }
 }

@@ -1,6 +1,7 @@
 package roomescape.dto.response;
 
 import roomescape.domain.User;
+import roomescape.dto.business.AccessTokenContent;
 
 public record UserProfileResponse(
         Long id,
@@ -10,5 +11,9 @@ public record UserProfileResponse(
 
     public UserProfileResponse(User user) {
         this(user.getId(), user.getRole().toString(), user.getName());
+    }
+
+    public UserProfileResponse(AccessTokenContent accessTokenContent) {
+        this(accessTokenContent.id(), accessTokenContent.role().toString(), accessTokenContent.name());
     }
 }

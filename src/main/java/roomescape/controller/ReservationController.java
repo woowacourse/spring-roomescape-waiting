@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.User;
+import roomescape.config.annotation.RequiredAccessToken;
+import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.request.ReservationCreationRequest;
 import roomescape.dto.response.ReservationResponse;
@@ -35,12 +36,12 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(
             @RequestBody ReservationCreationRequest request,
-            User user
+            @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
         ReservationCreationContent creationContent = new ReservationCreationContent(request);
-        ReservationResponse reservationResponse = service.addReservation(user.getId(), creationContent);
+        ReservationResponse reservationResponse = service.addReservation(accessTokenContent.id(), creationContent);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .location(URI.create("/reservation/" + user.getId()))
+                .location(URI.create("/reservation/" + reservationResponse.id()))
                 .body(reservationResponse);
     }
 

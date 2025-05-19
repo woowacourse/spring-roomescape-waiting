@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.User;
+import roomescape.config.annotation.RequiredAccessToken;
+import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
 import roomescape.dto.response.UserProfileResponse;
@@ -17,7 +18,6 @@ import roomescape.service.AuthService;
 @RestController
 public class AuthController {
 
-    private static final String TOKEN_NAME_FIELD = "token";
     private final AuthService authService;
 
     public AuthController(AuthService authService) {
@@ -30,7 +30,7 @@ public class AuthController {
     ) {
         AccessTokenResponse accessTokenResponse = authService.login(loginRequest);
         ResponseCookie cookie = ResponseCookie
-                .from(TOKEN_NAME_FIELD, accessTokenResponse.accessToken())
+                .from("access", accessTokenResponse.accessToken())
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
@@ -42,14 +42,16 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public UserProfileResponse checkLogin(User user) {
-        return new UserProfileResponse(user);
+    public UserProfileResponse checkLogin(
+            @RequiredAccessToken AccessTokenContent accessTokenContent
+    ) {
+        return new UserProfileResponse(accessTokenContent);
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         ResponseCookie cookie = ResponseCookie
-                .from(TOKEN_NAME_FIELD, "")
+                .from("access", "")
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
