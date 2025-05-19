@@ -12,17 +12,21 @@ public class CleanUp {
     private JdbcTemplate jdbcTemplate;
 
     public void all() {
-        String sql = """
+        List<String> tableNames = jdbcTemplate.query("""
                 select TABLE_NAME
                 from INFORMATION_SCHEMA.TABLES
                 where TABLE_SCHEMA = 'PUBLIC';
-                """;
-        List<String> tableNames = jdbcTemplate.query(sql, (resultSet, rowNum) -> resultSet.getString("TABLE_NAME"));
+                """, (rs, rowNum) -> rs.getString("TABLE_NAME"));
 
-        jdbcTemplate.update("SET REFERENTIAL_INTEGRITY FALSE;");
+        enableForeignKeyConstraints(false);
         tableNames.forEach(tableName -> {
-            jdbcTemplate.update(String.format("TRUNCATE TABLE %s RESTART IDENTITY;", tableName));
+            jdbcTemplate.update("TRUNCATE TABLE " + tableName + " RESTART IDENTITY;");
         });
-        jdbcTemplate.update("SET REFERENTIAL_INTEGRITY TRUE;");
+        enableForeignKeyConstraints(true);
+    }
+
+    private void enableForeignKeyConstraints(boolean enable) {
+        String value = enable ? "TRUE" : "FALSE";
+        jdbcTemplate.update("SET REFERENTIAL_INTEGRITY " + value + ";");
     }
 }
