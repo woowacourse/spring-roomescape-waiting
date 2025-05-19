@@ -17,7 +17,7 @@ public class ThemeService {
     private static final int BETWEEN_DAY_START = 7;
     private static final int BETWEEN_DAY_END = 1;
 
-    private final ThemeRepository themeRepository;
+    private final ThemeRepositoryFacade themeRepositoryFacade;
     private final ReservationRepository reservationRepository;
 
     public ThemeResponse create(
@@ -29,12 +29,12 @@ public class ThemeService {
                 request.thumbnail()
         );
 
-        final Theme theme = themeRepository.save(notSavedTheme);
+        final Theme theme = themeRepositoryFacade.save(notSavedTheme);
         return ThemeResponse.from(theme);
     }
 
     public List<ThemeResponse> findAll() {
-        return themeRepository.findAll().stream()
+        return themeRepositoryFacade.findAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
@@ -43,7 +43,7 @@ public class ThemeService {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
         final LocalDate to = now.minusDays(BETWEEN_DAY_END);
-        return themeRepository.findAllOrderByRank(from, to, size).stream()
+        return themeRepositoryFacade.findAllOrderByRank(from, to, size).stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
@@ -51,13 +51,13 @@ public class ThemeService {
     public void deleteById(
             final Long id
     ) {
-        final Theme theme = themeRepository.findById(id)
+        final Theme theme = themeRepositoryFacade.findById(id)
                 .orElseThrow(ThemeNotFoundException::new);
 
         if (reservationRepository.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
 
-        themeRepository.delete(theme);
+        themeRepositoryFacade.delete(theme);
     }
 }
