@@ -1,11 +1,13 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -25,18 +27,23 @@ public class Reservation {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Member member;
 
     @Temporal(TemporalType.DATE)
+    @Column(nullable = false)
     private LocalDate date;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Theme theme;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private ReservationStatus status;
 
     protected Reservation() {

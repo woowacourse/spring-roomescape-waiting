@@ -9,7 +9,9 @@ public enum ExceptionCause {
 
     MEMBER_NOTFOUND("회원을 찾을 수 없습니다."),
     MEMBER_DUPLICATE_EMAIL("이미 가입한 이메일입니다."),
-    MEMBER_NAME_INVALID_INPUT("사용자의 이름은 1글자 이상으로 이루어져야 합니다."),
+    MEMBER_NAME_INVALID_INPUT("사용자의 이름은 1글자 ~ 5글자로 이루어져야 합니다."),
+    MEMBER_PASSWORD_INVALID_INPUT("비밀번호는 10자 이상이어야 합니다."),
+    MEMBER_EMAIL_INVALID_INPUT("이메일 형식을 지켜야합니다."),
     MEMBER_EMPTY_INPUT("회원 정보는 반드시 입력해야 합니다."),
 
     RESERVATION_TIME_EMPTY_INPUT("예약 시간을 반드시 입력해야 합니다."),
