@@ -35,7 +35,7 @@ public class ReservationApiController {
             @RequestBody UserReservationRequest userReservationRequest,
             @AuthenticationPrincipal MemberResponse memberResponse
     ) {
-        ReservationResponse ReservationResponse = reservationService.add(
+        ReservationResponse ReservationResponse = reservationService.addByUser(
                 memberResponse.id(),
                 userReservationRequest
         );

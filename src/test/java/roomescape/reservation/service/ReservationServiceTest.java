@@ -44,8 +44,12 @@ class ReservationServiceTest {
         themeRepository = mock(ThemeRepository.class);
         memberRepository = mock(MemberRepository.class);
 
-        reservationService = new ReservationService(reservationRepository, timeRepository, themeRepository,
-                memberRepository);
+        reservationService = new ReservationService(
+                reservationRepository,
+                timeRepository,
+                themeRepository,
+                memberRepository
+        );
     }
 
     @DisplayName("예약 추가 시 현재보다 과거 시간인 경우 예외를 발생시킨다")
@@ -57,7 +61,7 @@ class ReservationServiceTest {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidTimeException.class);
 
         verify(timeRepository, times(1)).findById(1L);
@@ -73,7 +77,7 @@ class ReservationServiceTest {
         when(reservationRepository.existsByDateAndTimeId(LocalDate.now(), 1L)).thenReturn(true);
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(DuplicateException.class);
 
         verify(timeRepository, times(1)).findById(1L);
@@ -88,7 +92,7 @@ class ReservationServiceTest {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 2L, 1L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
         verify(timeRepository, times(1)).findById(2L);
@@ -104,7 +108,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(2L)).thenReturn(Optional.empty());
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 2L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
         verify(timeRepository, times(1)).findById(1L);
@@ -117,7 +121,7 @@ class ReservationServiceTest {
         when(memberRepository.findById(2L)).thenReturn(Optional.empty());
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.add(2L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.addByUser(2L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
         verify(memberRepository, times(1)).findById(2L);

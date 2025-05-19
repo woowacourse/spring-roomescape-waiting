@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.reservation.domain.Reservation;
@@ -18,6 +19,7 @@ import roomescape.reservation.domain.Reservation;
 @Entity
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Member {
 
     @Id
@@ -53,19 +55,5 @@ public class Member {
         this.email = Objects.requireNonNull(email);
         this.password = Objects.requireNonNull(password);
         this.role = Objects.requireNonNull(role);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-        Member member = (Member) other;
-        return Objects.equals(id, member.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

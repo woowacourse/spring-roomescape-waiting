@@ -20,6 +20,8 @@ import roomescape.member.login.authorization.JwtTokenProvider;
 @Service
 public class MemberService {
 
+    private static final String EMAIL_FORMAT_REGEX = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
@@ -56,12 +58,13 @@ public class MemberService {
         return new MemberTokenResponse(accessToken);
     }
 
-    private Member validateLoginEmail(MemberLoginRequest memberLoginRequest) {
+    private Member validateLoginEmail(final MemberLoginRequest memberLoginRequest) {
         return memberRepository.findByEmail(memberLoginRequest.email())
                 .orElseThrow(() -> new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage()));
     }
 
     public MemberResponse add(final MemberSignupRequest memberSignupRequest) {
+        validateSignupEmail(memberSignupRequest);
         validateDuplicateMember(memberSignupRequest);
 
         String hashedPassword = passwordEncoder.encode(memberSignupRequest.password());
@@ -74,19 +77,25 @@ public class MemberService {
         return MemberResponse.from(savedMember);
     }
 
-    private void validateDuplicateMember(MemberSignupRequest memberSignupRequest) {
+    private void validateSignupEmail(final MemberSignupRequest memberSignupRequest) {
+        if (!memberSignupRequest.email().matches(EMAIL_FORMAT_REGEX)) {
+            throw new InvalidEmailException(MemberExceptionMessage.INVALID_MEMBER_EMAIL_FORMAT.getMessage());
+        }
+    }
+
+    private void validateDuplicateMember(final MemberSignupRequest memberSignupRequest) {
         if (memberRepository.existsByEmail(memberSignupRequest.email())) {
             throw new AuthorizationException(MemberExceptionMessage.DUPLICATE_MEMBER.getMessage());
         }
     }
 
-    private Role assignRole(String email) {
+    private Role assignRole(final String email) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new InvalidEmailException(MemberExceptionMessage.INVALID_MEMBER_EMAIL.getMessage()));
         return member.getRole();
     }
 
-    private void validatePassword(String plainPassword, String hashedPassword) {
+    private void validatePassword(final String plainPassword, final String hashedPassword) {
         if (!passwordEncoder.matches(plainPassword, hashedPassword)) {
             throw new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage());
         }

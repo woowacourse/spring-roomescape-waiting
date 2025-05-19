@@ -11,21 +11,27 @@ public class GlobalExceptionHandler {
 
     private static final String EXCEPTION_HEADER = "[ERROR] ";
 
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<String> handleCustomException(CustomException customException) {
+        return ResponseEntity.badRequest()
+                .body(EXCEPTION_HEADER + customException.getMessage());
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleException() {
+    public ResponseEntity<String> handleIllegalArgumentException() {
         return ResponseEntity.badRequest()
                 .body(EXCEPTION_HEADER + GlobalExceptionMessage.INVALID_INPUT_VALUE.getMessage());
     }
 
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<String> handleNullException() {
+    public ResponseEntity<String> handleNullPointerException() {
         return ResponseEntity.badRequest()
                 .body(EXCEPTION_HEADER + GlobalExceptionMessage.NULL_VALUE.getMessage());
     }
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<String> handleCustomException(CustomException customException) {
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException() {
         return ResponseEntity.badRequest()
-                .body(EXCEPTION_HEADER + customException.getMessage());
+                .body(EXCEPTION_HEADER + GlobalExceptionMessage.RUNTIME_EXCEPTION.getMessage());
     }
 }

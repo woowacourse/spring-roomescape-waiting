@@ -19,7 +19,7 @@ public class ThemeService {
 
     private static final int SUBTRACT_BEGIN = 7;
     private static final int SUBTRACT_END = 1;
-    private static final int LIMIT_COUNT = 10;
+    private static final int RANK_COUNT_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
 
@@ -37,7 +37,7 @@ public class ThemeService {
         List<Theme> topRankedThemes = themeRepository.findRankedByPeriod(
                 LocalDate.now().minusDays(SUBTRACT_BEGIN),
                 LocalDate.now().minusDays(SUBTRACT_END),
-                LIMIT_COUNT
+                RANK_COUNT_LIMIT
         ).stream().toList();
 
         return topRankedThemes.stream()

@@ -56,12 +56,12 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllByMemberAndThemeAndDate(
-            final AdminReservationSearchRequest adminReservationSearchRequest
+            final AdminReservationSearchRequest request
     ) {
-        Long memberId = adminReservationSearchRequest.memberId();
-        Long themeId = adminReservationSearchRequest.themeId();
-        LocalDate dateFrom = adminReservationSearchRequest.dateFrom();
-        LocalDate dateTo = adminReservationSearchRequest.dateTo();
+        Long memberId = request.memberId();
+        Long themeId = request.themeId();
+        LocalDate dateFrom = request.dateFrom();
+        LocalDate dateTo = request.dateTo();
 
         return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
                 .stream()
@@ -69,34 +69,21 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse add(final Long memberId, final UserReservationRequest userReservationRequest) {
-        Member memberResult = searchMember(memberId);
-        ReservationTime reservationTimeResult = searchReservationTime(userReservationRequest.timeId());
-        validateRequest(userReservationRequest.date(), reservationTimeResult);
-        Theme themeResult = searchTheme(userReservationRequest.themeId());
-
-        Reservation newReservation = new Reservation(
-                memberResult,
-                userReservationRequest.date(),
-                reservationTimeResult,
-                themeResult
-        );
-        Reservation savedReservation = reservationRepository.save(newReservation);
-        return ReservationResponse.from(savedReservation);
+    public ReservationResponse addByUser(final Long memberId, final UserReservationRequest request) {
+        return addReservation(memberId, request.date(), request.timeId(), request.themeId());
     }
 
-    public ReservationResponse addByAdmin(final AdminReservationRequest adminReservationRequest) {
-        Member memberResult = searchMember(adminReservationRequest.memberId());
-        ReservationTime reservationTimeResult = searchReservationTime(adminReservationRequest.timeId());
-        validateRequest(adminReservationRequest.date(), reservationTimeResult);
-        Theme themeResult = searchTheme(adminReservationRequest.themeId());
+    public ReservationResponse addByAdmin(final AdminReservationRequest request) {
+        return addReservation(request.memberId(), request.date(), request.timeId(), request.themeId());
+    }
 
-        Reservation newReservation = new Reservation(
-                memberResult,
-                adminReservationRequest.date(),
-                reservationTimeResult,
-                themeResult
-        );
+    private ReservationResponse addReservation(Long memberId, LocalDate date, Long timeId, Long themeId) {
+        Member member = searchMember(memberId);
+        ReservationTime reservationTime = searchReservationTime(timeId);
+        validateRequest(date, reservationTime);
+        Theme theme = searchTheme(themeId);
+
+        Reservation newReservation = new Reservation(member, date, reservationTime, theme);
         Reservation savedReservation = reservationRepository.save(newReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -106,8 +93,8 @@ public class ReservationService {
         validateDuplicateReservation(reservationDate, reservationTime);
     }
 
-    private void validateFutureTime(final LocalDate reservationDate, final ReservationTime reservationTimeResult) {
-        if (isToday(reservationDate) && isPastTime(reservationTimeResult)) {
+    private void validateFutureTime(final LocalDate reservationDate, final ReservationTime reservationTime) {
+        if (isToday(reservationDate) && isPastTime(reservationTime)) {
             throw new InvalidTimeException(ReservationExceptionMessage.TIME_BEFORE_NOW.getMessage());
         }
     }
@@ -122,11 +109,11 @@ public class ReservationService {
 
     private void validateDuplicateReservation(
             final LocalDate reservationDate,
-            final ReservationTime reservationTimeResult
+            final ReservationTime reservationTime
     ) {
         boolean isDuplicate = reservationRepository.existsByDateAndTimeId(
                 reservationDate,
-                reservationTimeResult.getId()
+                reservationTime.getId()
         );
         if (isDuplicate) {
             throw new DuplicateException(ReservationExceptionMessage.DUPLICATE_RESERVATION.getMessage());
@@ -143,7 +130,7 @@ public class ReservationService {
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_RESERVATION_ID.getMessage()));
     }
 
-    private Member searchMember(Long memberId) {
+    private Member searchMember(final Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_MEMBER_ID.getMessage()));
     }

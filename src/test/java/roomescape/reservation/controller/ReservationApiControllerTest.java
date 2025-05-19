@@ -50,7 +50,6 @@ class ReservationApiControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
-
     @MockitoBean
     private MemberService memberService;
     @MockitoBean
@@ -103,7 +102,7 @@ class ReservationApiControllerTest {
                 .thenReturn("test-token");
         when(memberService.findByToken("test-token"))
                 .thenReturn(memberResponse);
-        when(reservationService.add(1L, reservationRequest))
+        when(reservationService.addByUser(1L, reservationRequest))
                 .thenReturn(reservationResponse);
 
         mockMvc.perform(post(URI)

@@ -10,13 +10,15 @@ import roomescape.theme.domain.Theme;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query(
-            value = "SELECT t.id, t.name, t.description, t.thumbnail " +
-                    "FROM theme t " +
-                    "INNER JOIN reservation r ON r.theme_id = t.id " +
-                    "WHERE r.date BETWEEN :startDate AND :endDate " +
-                    "GROUP BY t.id, t.name, t.description, t.thumbnail " +
-                    "ORDER BY COUNT(r.id) DESC " +
-                    "LIMIT :count",
+            value = """
+                    SELECT t.id, t.name, t.description, t.thumbnail 
+                    FROM theme t 
+                    INNER JOIN reservation r ON r.theme_id = t.id 
+                    WHERE r.date BETWEEN :startDate AND :endDate 
+                    GROUP BY t.id, t.name, t.description, t.thumbnail 
+                    ORDER BY COUNT(r.id) DESC 
+                    LIMIT :count
+                    """,
             nativeQuery = true
     )
     Collection<Theme> findRankedByPeriod(

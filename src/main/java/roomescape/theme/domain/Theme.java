@@ -6,12 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Theme {
 
     @Id
@@ -38,19 +40,5 @@ public class Theme {
         this.name = Objects.requireNonNull(name);
         this.description = Objects.requireNonNull(description);
         this.thumbnail = Objects.requireNonNull(thumbnail);
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-        Theme theme = (Theme) other;
-        return Objects.equals(id, theme.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }

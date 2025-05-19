@@ -29,7 +29,6 @@ class SignupApiControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
 

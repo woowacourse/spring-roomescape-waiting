@@ -42,10 +42,10 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> findByDateAndTheme(
-            final AvailableReservationTimeRequest availableReservationTimeRequest
+            final AvailableReservationTimeRequest timeRequest
     ) {
-        searchTheme(availableReservationTimeRequest);
-        List<ReservationTime> reservedTimes = findReservedTimes(availableReservationTimeRequest);
+        validateThemeId(timeRequest);
+        List<ReservationTime> reservedTimes = findReservedTimes(timeRequest);
         Set<Long> reservedIds = findReservedTimeIds(reservedTimes);
 
         List<ReservationTime> availableReservationTimes = timeRepository.findAll();
@@ -58,19 +58,15 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    private void searchTheme(
-            final AvailableReservationTimeRequest availableReservationTimeRequest
-    ) {
-        themeRepository.findById(availableReservationTimeRequest.themeId())
+    private void validateThemeId(final AvailableReservationTimeRequest timeRequest) {
+        themeRepository.findById(timeRequest.themeId())
                 .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_THEME_ID.getMessage()));
     }
 
-    private List<ReservationTime> findReservedTimes(
-            final AvailableReservationTimeRequest availableReservationTimeRequest
-    ) {
+    private List<ReservationTime> findReservedTimes(final AvailableReservationTimeRequest timeRequest) {
         return reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.isSameDate(availableReservationTimeRequest.date())
-                        && reservation.isSameTheme(availableReservationTimeRequest.themeId())
+                .filter(reservation -> reservation.isSameDate(timeRequest.date())
+                        && reservation.isSameTheme(timeRequest.themeId())
                 ).map(reservation -> new ReservationTime(
                         reservation.getTime().getId(),
                         reservation.getTime().getStartAt())
@@ -84,16 +80,16 @@ public class ReservationTimeService {
                 .collect(Collectors.toSet());
     }
 
-    public ReservationTimeResponse add(final ReservationTimeRequest reservationTimeRequest) {
-        validateDuplicate(reservationTimeRequest);
+    public ReservationTimeResponse add(final ReservationTimeRequest timeRequest) {
+        validateDuplicate(timeRequest);
 
-        ReservationTime newReservationTime = new ReservationTime(reservationTimeRequest.startAt());
+        ReservationTime newReservationTime = new ReservationTime(timeRequest.startAt());
         ReservationTime savedReservationTime = timeRepository.save(newReservationTime);
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
-    private void validateDuplicate(final ReservationTimeRequest reservationTimeRequest) {
-        boolean isDuplicate = timeRepository.existsByStartAt(reservationTimeRequest.startAt());
+    private void validateDuplicate(final ReservationTimeRequest timeRequest) {
+        boolean isDuplicate = timeRepository.existsByStartAt(timeRequest.startAt());
 
         if (isDuplicate) {
             throw new DuplicateException(ReservationTimeExceptionMessage.DUPLICATE_TIME.getMessage());
