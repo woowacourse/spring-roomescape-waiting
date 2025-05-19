@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.domain.repository.ReservationRepository;
 
 @Repository
@@ -52,5 +53,10 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(Long id) {
         return reservationJpaRepository.findById(id);
+    }
+
+    @Override
+    public boolean existsBySpec(ReservationSpec spec) {
+        return reservationJpaRepository.existsBySpec(spec);
     }
 }

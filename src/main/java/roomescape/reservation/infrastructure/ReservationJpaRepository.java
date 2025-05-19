@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 
 @Repository
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
@@ -27,4 +28,11 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("to") LocalDate to);
 
     boolean existsBySpecDateAndSpecTimeId(LocalDate reservationDate, Long id);
+
+    default boolean existsBySpec(ReservationSpec spec) {
+        return existsBySpecDateAndSpecTimeIdAndSpecThemeId(spec.getDate(), spec.getTime().getId(),
+                spec.getTheme().getId());
+    }
+
+    boolean existsBySpecDateAndSpecTimeIdAndSpecThemeId(LocalDate date, Long timeId, Long themeId);
 }

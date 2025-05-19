@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 
 public interface ReservationRepository {
 
@@ -21,4 +22,6 @@ public interface ReservationRepository {
     void deleteById(Long id);
 
     Optional<Reservation> findById(Long id);
+
+    boolean existsBySpec(ReservationSpec spec);
 }

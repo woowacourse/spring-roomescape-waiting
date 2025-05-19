@@ -62,17 +62,17 @@ INSERT INTO member(name, email, password, role)
 VALUES ('mimi', 'mimi@gmail.com', '$2a$10$ZuuoYwqZXLsCBCdeUN0j1eifbsHzleUB0qjtw1UNd.xM1SwWb.MP2', 'user');
 
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-11', 1, 1, 3);
+VALUES ('2025-05-15', 1, 1, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 2, 1, 3);
+VALUES ('2025-05-16', 2, 1, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 3, 12, 3);
+VALUES ('2025-05-16', 3, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 4, 12, 3);
+VALUES ('2025-05-16', 4, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 5, 12, 3);
+VALUES ('2025-05-17', 5, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 6, 12, 3);
+VALUES ('2025-05-18', 6, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-20', 7, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
