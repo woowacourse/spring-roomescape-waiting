@@ -3,7 +3,6 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,8 @@ import roomescape.dto.MemberResponse;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-        "spring.sql.init.mode=never",          // SQL 스크립트 실행 중지
-        "spring.jpa.hibernate.ddl-auto=create-drop",  // Hibernate DDL 자동 생성 비활성화
+        "spring.sql.init.mode=never",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
 })
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class MemberServiceTest {
@@ -29,7 +28,6 @@ class MemberServiceTest {
 
 
     @Test
-    @Transactional
     void addMember() {
         //given
         final MemberRegisterRequest memberRegisterRequest = new MemberRegisterRequest("test", "test", "차니");
@@ -47,7 +45,6 @@ class MemberServiceTest {
     }
 
     @Test
-    @Transactional
     void getAllMembers() {
         //given
         final MemberRegisterRequest memberRegisterRequest = new MemberRegisterRequest("test", "test", "차니");
@@ -62,7 +59,6 @@ class MemberServiceTest {
     }
 
     @Test
-    @Transactional
     void getMemberById() {
         //given
         final MemberRegisterRequest memberRegisterRequest = new MemberRegisterRequest("test", "test", "차니");
