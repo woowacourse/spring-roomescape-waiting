@@ -15,19 +15,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepository;
+import roomescape.member.MemberRepositoryFacade;
+import roomescape.member.MemberRepositoryFacadeImpl;
 import roomescape.member.MemberRole;
 import roomescape.reservation.Reservation;
 import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepository;
+import roomescape.reservationtime.ReservationTimeRepositoryFacade;
+import roomescape.reservationtime.ReservationTimeRepositoryFacadeImpl;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -35,27 +38,27 @@ import roomescape.theme.dto.ThemeResponse;
 @ExtendWith(MockitoExtension.class)
 @Transactional(propagation = Propagation.SUPPORTS)
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import({MemberRepositoryFacadeImpl.class, ReservationTimeRepositoryFacadeImpl.class})
 class ThemeServiceTest {
 
     private final ThemeService themeService;
     private final ThemeRepositoryFacade themeRepositoryFacade;
 
-    private final ThemeRepository themeRepository;
+    private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
+    private final MemberRepositoryFacade memberRepositoryFacade;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final MemberRepository memberRepository;
 
     @Autowired
     public ThemeServiceTest(
             final ThemeRepository themeRepository,
-            final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final MemberRepository memberRepository
-    ) {
-        this.themeRepository = themeRepository;
+            final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade,
+            final MemberRepositoryFacade memberRepositoryFacade,
+
+            final ReservationRepository reservationRepository
+            ) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.memberRepository = memberRepository;
+        this.reservationTimeRepositoryFacade = reservationTimeRepositoryFacade;
+        this.memberRepositoryFacade = memberRepositoryFacade;
 
         themeRepositoryFacade = spy(new ThemeRepositoryFacadeImpl(themeRepository));
         themeService = new ThemeService(themeRepositoryFacade, reservationRepository);
@@ -95,7 +98,9 @@ class ThemeServiceTest {
                     new Theme("로키2", "로키로키2", "http://www.google.com/2"),
                     new Theme("로키3", "로키로키3", "http://www.google.com/3")
             );
-            themeRepository.saveAll(themes);
+            for(final Theme theme : themes) {
+                themeRepositoryFacade.save(theme);
+            }
 
             // when
             final List<ThemeResponse> actual = themeService.findAll();
@@ -128,8 +133,8 @@ class ThemeServiceTest {
             // given
             final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
-            reservationTimeRepository.save(reservationTime);
-            memberRepository.save(member);
+            reservationTimeRepositoryFacade.save(reservationTime);
+            memberRepositoryFacade.save(member);
 
             final List<Theme> themes = List.of(
                     new Theme("1", "2", "3"),
@@ -152,7 +157,9 @@ class ThemeServiceTest {
                     new Reservation(LocalDate.now().minusDays(1), member, reservationTime, themes.get(2),
                             ReservationStatus.PENDING)
             );
-            themeRepository.saveAll(themes);
+            for (final Theme theme : themes) {
+                themeRepositoryFacade.save(theme);
+            }
             reservationRepository.saveAll(reservations);
 
             // when
@@ -176,7 +183,7 @@ class ThemeServiceTest {
         void deleteById1() {
             // given
             final Theme theme = new Theme("로키", "로키로키", "http://www.google.com");
-            themeRepository.save(theme);
+            themeRepositoryFacade.save(theme);
 
             // when
             themeService.deleteById(1L);
@@ -206,9 +213,10 @@ class ThemeServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Reservation reservation = new Reservation(LocalDate.of(2026, 12, 29), member, reservationTime, theme,
                     ReservationStatus.PENDING);
-            memberRepository.save(member);
-            reservationTimeRepository.save(reservationTime);
-            themeRepository.save(theme);
+
+            memberRepositoryFacade.save(member);
+            reservationTimeRepositoryFacade.save(reservationTime);
+            themeRepositoryFacade.save(theme);
             reservationRepository.save(reservation);
 
             // when & then
