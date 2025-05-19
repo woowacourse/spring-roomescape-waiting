@@ -44,13 +44,13 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(newReservationTime);
     }
 
+    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date, final Long themeId) {
+        return reservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
+    }
+
     private void validateIsTimeUnique(final ReservationTimeCreateRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new ReservationTimeAlreadyExistsException("중복된 예약 시간을 생성할 수 없습니다.");
         }
-    }
-
-    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date, final Long themeId) {
-        return reservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
     }
 }

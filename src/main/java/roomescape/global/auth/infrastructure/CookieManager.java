@@ -12,16 +12,16 @@ public class CookieManager {
         response.addCookie(cookie);
     }
 
+    public void deleteCookie(final HttpServletResponse response, final String name) {
+        Cookie cookie = makeCookie(name, null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+    }
+
     private Cookie makeCookie(final String name, final String value) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         return cookie;
-    }
-
-    public void deleteCookie(final HttpServletResponse response, final String name) {
-        Cookie cookie = makeCookie(name, null);
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
     }
 }
