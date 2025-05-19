@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import roomescape.entity.Theme;
 
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
@@ -19,9 +18,7 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
             GROUP BY t
             ORDER BY COUNT(t) DESC
         """)
-    List<Theme> findTopRankByDateBetween(
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate);
+    List<Theme> findTopRankByDateBetween(LocalDate startDate, LocalDate endDate);
 
     boolean existsByName(String name);
 }
