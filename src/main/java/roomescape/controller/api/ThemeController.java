@@ -26,22 +26,18 @@ public class ThemeController {
 
     @GetMapping
     public List<ThemeResponse> readThemes() {
-        return themeService.findAllThemes().stream()
-            .map(ThemeResponse::from)
-            .toList();
+        return themeService.findAllThemes();
     }
 
     @GetMapping("/top-rank")
     public List<ThemeResponse> readTopRankTheme() {
-        return themeService.findTopReservedThemes().stream()
-            .map(ThemeResponse::from)
-            .toList();
+        return themeService.findTopReservedThemes();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ThemeResponse createTheme(@RequestBody ThemeRequest request) {
-        return ThemeResponse.from(themeService.addTheme(request));
+        return themeService.addTheme(request);
     }
 
     @DeleteMapping("/{id}")

@@ -31,9 +31,7 @@ public class ReservationController {
 
     @GetMapping
     public List<ReservationResponse> readReservations() {
-        return reservationService.findAllReservations().stream()
-            .map(ReservationResponse::from)
-            .toList();
+        return reservationService.findAllReservations();
     }
 
     @GetMapping("/filter")
@@ -42,17 +40,12 @@ public class ReservationController {
         @RequestParam(required = false) Long themeId,
         @RequestParam(required = false) LocalDate dateFrom,
         @RequestParam(required = false) LocalDate dateTo) {
-        return reservationService.findReservationsByFilters(themeId, memberId, dateFrom, dateTo)
-            .stream()
-            .map(ReservationResponse::from)
-            .toList();
+        return reservationService.findReservationsByFilters(themeId, memberId, dateFrom, dateTo);
     }
 
     @GetMapping("/mine")
     public List<MyReservationResponse> readMyReservations(@AuthMember Member member) {
-        return reservationService.findReservationsByMemberId(member).stream()
-            .map(MyReservationResponse::from)
-            .toList();
+        return reservationService.findReservationsByMemberId(member);
     }
 
     @PostMapping
@@ -60,7 +53,7 @@ public class ReservationController {
     public ReservationResponse createReservation(
         @AuthMember Member member,
         @RequestBody ReservationRequest request) {
-        return ReservationResponse.from(reservationService.addReservationAfterNow(member, request));
+        return reservationService.addReservationAfterNow(member, request);
     }
 
     @DeleteMapping("/{id}")

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dto.request.ThemeRequest;
+import roomescape.dto.response.ThemeResponse;
 import roomescape.entity.Theme;
 import roomescape.exception.custom.DuplicatedException;
 import roomescape.repository.jpa.JpaThemeRepository;
@@ -19,21 +20,25 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    public List<Theme> findAllThemes() {
-        return themeRepository.findAll();
+    public List<ThemeResponse> findAllThemes() {
+        return themeRepository.findAll().stream()
+            .map(ThemeResponse::from)
+            .toList();
     }
 
-    public List<Theme> findTopReservedThemes() {
+    public List<ThemeResponse> findTopReservedThemes() {
         LocalDate today = LocalDate.now();
 
-        return themeRepository.findTop10ByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today);
+        return themeRepository.findTop10ByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today).stream()
+            .map(ThemeResponse::from)
+            .toList();
     }
 
-    public Theme addTheme(ThemeRequest request) {
+    public ThemeResponse addTheme(ThemeRequest request) {
         validateDuplicateTheme(request);
 
-        return themeRepository.save(
-            new Theme(request.name(), request.description(), request.thumbnail()));
+        return ThemeResponse.from(
+            themeRepository.save(new Theme(request.name(), request.description(), request.thumbnail())));
     }
 
     private void validateDuplicateTheme(ThemeRequest request) {

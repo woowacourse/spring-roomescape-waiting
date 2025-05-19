@@ -36,7 +36,7 @@ class JpaThemeRepositoryTest {
     void findTopReservedThemesInPeriodWithLimit() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
         Theme theme = new Theme("이름", "설명", "썸네일");
-        ReservationTime time = new ReservationTime(LocalTime.of(10, 0), null);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2025, 4, 28);
 
         Reservation reservation = new Reservation(member, date, time, theme);

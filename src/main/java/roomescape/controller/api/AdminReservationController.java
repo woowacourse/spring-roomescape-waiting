@@ -27,6 +27,6 @@ public class AdminReservationController {
     public ReservationResponse createReservation(
         @AuthMember Member member,
         @RequestBody ReservationRequest request) {
-        return ReservationResponse.from(reservationService.addReservation(request));
+        return reservationService.addReservation(member, request);
     }
 }

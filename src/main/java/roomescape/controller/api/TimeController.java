@@ -27,23 +27,19 @@ public class TimeController {
 
     @GetMapping
     public List<TimeResponse> readReservationTimes() {
-        return timeService.findAllReservationTimes().stream()
-            .map(TimeResponse::from)
-            .toList();
+        return timeService.findAllReservationTimes();
     }
 
     @GetMapping("/{date}/{themeId}")
     public List<TimeResponse> readReservationTimesWithBooked(@PathVariable LocalDate date,
         @PathVariable Long themeId) {
-        return timeService.findAllTimesWithBooked(date, themeId).stream()
-            .map(TimeResponse::from)
-            .toList();
+        return timeService.findAllTimesWithBooked(date, themeId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TimeResponse createReservationTime(@RequestBody TimeRequest request) {
-        return TimeResponse.from(timeService.addReservationTime(request));
+        return timeService.addReservationTime(request);
     }
 
     @DeleteMapping("/{id}")

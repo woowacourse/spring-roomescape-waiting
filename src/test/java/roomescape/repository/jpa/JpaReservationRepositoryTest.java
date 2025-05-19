@@ -30,13 +30,34 @@ class JpaReservationRepositoryTest {
     @Autowired
     private JpaMemberRepository jpaMemberRepository;
 
+    @Test
+    @DisplayName("예약이 존재하는 시간 ID를 찾을 수 있다.")
+    void findBookedTimeIds() {
+        Member member = Member.createUser("이름", "이메일", "비밀번호");
+        Theme theme = new Theme("이름", "설명", "썸네일");
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2025, 4, 28);
+
+        Reservation reservation = new Reservation(member, date, time, theme);
+
+        jpaThemeRepository.save(theme);
+        jpaMemberRepository.save(member);
+        jpaReservationTimeRepository.save(time);
+        jpaReservationRepository.save(reservation);
+
+        em.flush();
+        em.clear();
+
+        assertThat(jpaReservationRepository.findBookedTimeIds(date, 1L).getFirst())
+            .isEqualTo(1L);
+    }
 
     @Test
     @DisplayName("해당 날짜, 시간, 테마로 해당 예약이 있다면 true를 반환한다.")
     void existReservationByDateTimeAndTheme() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
         Theme theme = new Theme("이름", "설명", "썸네일");
-        ReservationTime time = new ReservationTime(LocalTime.of(10, 0), null);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2025, 4, 28);
 
         Reservation reservation = new Reservation(member, date, time, theme);
@@ -58,7 +79,7 @@ class JpaReservationRepositoryTest {
     void notExistReservationByDateTimeAndTheme() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
         Theme theme = new Theme("이름", "설명", "썸네일");
-        ReservationTime time = new ReservationTime(LocalTime.of(10, 0), null);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2025, 4, 28);
 
         Reservation reservation = new Reservation(member, date, time, theme);

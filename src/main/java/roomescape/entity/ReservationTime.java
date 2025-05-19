@@ -19,14 +19,11 @@ public class ReservationTime {
     @Column(unique = true, nullable = false)
     private LocalTime startAt;
 
-    private Boolean alreadyBooked;
-
     public ReservationTime() {
     }
 
-    public ReservationTime(LocalTime startAt, Boolean alreadyBooked) {
+    public ReservationTime(LocalTime startAt) {
         this.startAt = startAt;
-        this.alreadyBooked = alreadyBooked;
     }
 
     public boolean isBefore(LocalTime time) {
@@ -39,9 +36,5 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
-    }
-
-    public Boolean getAlreadyBooked() {
-        return alreadyBooked;
     }
 }

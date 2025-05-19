@@ -9,10 +9,17 @@ public record TimeResponse(
     @JsonFormat(pattern = "HH:mm") LocalTime startAt,
     Boolean alreadyBooked) {
 
+    public static TimeResponse from(ReservationTime reservationTime, Boolean alreadyBooked) {
+        return new TimeResponse(
+            reservationTime.getId(),
+            reservationTime.getStartAt(),
+            alreadyBooked);
+    }
+
     public static TimeResponse from(ReservationTime reservationTime) {
         return new TimeResponse(
             reservationTime.getId(),
             reservationTime.getStartAt(),
-            reservationTime.getAlreadyBooked());
+            null);
     }
 }
