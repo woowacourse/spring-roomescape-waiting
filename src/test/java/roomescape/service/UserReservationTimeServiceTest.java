@@ -2,21 +2,21 @@ package roomescape.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ReservationTestFixture;
 import roomescape.reservation.application.UserReservationTimeService;
 import roomescape.reservation.application.dto.response.ReservationTimeServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.repository.ReservationRepository;
+import roomescape.reservation.model.repository.ReservationThemeRepository;
+import roomescape.reservation.model.repository.ReservationTimeRepository;
 import roomescape.support.IntegrationTestSupport;
 
 class UserReservationTimeServiceTest extends IntegrationTestSupport {
@@ -24,8 +24,15 @@ class UserReservationTimeServiceTest extends IntegrationTestSupport {
     @Autowired
     private UserReservationTimeService userReservationTimeService;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    private ReservationThemeRepository reservationThemeRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
 
     @DisplayName("입력된 테마와 날짜에 대해, 전체 예약 시간과 각각의 예약 상태를 함께 조회할 수 있다")
     @Test
@@ -40,12 +47,12 @@ class UserReservationTimeServiceTest extends IntegrationTestSupport {
             reservationTheme);
         Reservation reservation2 = ReservationTestFixture.createReservation(date, reservationTime2,
             reservationTheme);
-        entityManager.persist(reservationTime1);
-        entityManager.persist(reservationTime2);
-        entityManager.persist(reservationTime3);
-        entityManager.persist(reservationTheme);
-        entityManager.persist(reservation1);
-        entityManager.persist(reservation2);
+        reservationTimeRepository.save(reservationTime1);
+        reservationTimeRepository.save(reservationTime2);
+        reservationTimeRepository.save(reservationTime3);
+        reservationThemeRepository.save(reservationTheme);
+        reservationRepository.save(reservation1);
+        reservationRepository.save(reservation2);
 
 
         // when

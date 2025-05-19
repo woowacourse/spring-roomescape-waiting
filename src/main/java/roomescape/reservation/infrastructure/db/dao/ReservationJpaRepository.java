@@ -24,7 +24,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
                   r.id,
                   r.date, 
-                  rt.id , 
+                  rt.id, 
                   rt.startAt, 
                   th.id, 
                   th.name, 
@@ -43,15 +43,15 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     @Query("""
             SELECT NEW roomescape.reservation.model.repository.dto.ReservationWithMember(
                   r.id,
-                  r.date, 
-                  rt.id , 
-                  rt.startAt, 
-                  th.id, 
-                  th.name, 
-                  th.description, 
-                  th.thumbnail, 
-                  m.id, 
-                  m.name, 
+                  r.date,
+                  rt.id,
+                  rt.startAt,
+                  th.id,
+                  th.name,
+                  th.description,
+                  th.thumbnail,
+                  m.id,
+                  m.name,
                   m.email)
             FROM Reservation r
             JOIN r.time rt

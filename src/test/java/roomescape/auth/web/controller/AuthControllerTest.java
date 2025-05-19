@@ -8,7 +8,6 @@ import io.restassured.http.ContentType;
 import io.restassured.http.Cookie;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +28,12 @@ class AuthControllerTest extends IntegrationTestSupport {
     String email = "wade@naver.com";
     String password = "1234";
 
-    @Disabled
     @BeforeEach
     void setUp() {
         Member member = ReservationTestFixture.createUser(name, email, password);
         memberRepository.save(member);
     }
 
-    @Disabled
     @DisplayName("로그인 성공시 쿠키를 반환한다")
     @Test
     void login() {
@@ -51,13 +48,11 @@ class AuthControllerTest extends IntegrationTestSupport {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().response();
-
         //then
         String authCookie = response.getCookie(AUTH_COOKIE_KEY);
         assertThat(authCookie).isNotBlank();
     }
 
-    @Disabled
     @DisplayName("로그인 이후 토큰으로 로그인 체크를 할 수 있다")
     @Test
     void loginCheck() {
@@ -87,7 +82,6 @@ class AuthControllerTest extends IntegrationTestSupport {
         assertThat(result.email()).isEqualTo(email);
     }
 
-    @Disabled
     @DisplayName("로그아웃 시 쿠키가 만료된다")
     @Test
     void logout() {

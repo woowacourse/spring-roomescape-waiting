@@ -1,5 +1,6 @@
 package roomescape.auth.application;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.AuthenticatedMember;
@@ -13,6 +14,7 @@ public class AuthService {
 
     private final TokenService tokenService;
     private final MemberRepository memberRepository;
+    private final EntityManager entityManager;
 
     public String createAuthenticationToken(String email, String password) {
         Member member = memberRepository.findByEmailAndPassword(email, password)
