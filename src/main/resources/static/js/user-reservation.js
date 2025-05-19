@@ -208,10 +208,7 @@ function onWaitButtonClick() {
       time: selectedTimeId
     };
 
-    /*
-    TODO: [3단계] 예약 대기 생성 요청 API 호출
-     */
-    fetch('', {
+    fetch('/reservations/wait', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -219,11 +216,10 @@ function onWaitButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
-          return response.json();
+          if (response.status !== 201) throw new Error('Reservation waiting failed');
         })
-        .then(data => {
-          alert('Reservation waiting successful!');
+        .then(() => {
+          alert('예약 대기가 완료되었습니다.');
           window.location.href = "/";
         })
         .catch(error => {
