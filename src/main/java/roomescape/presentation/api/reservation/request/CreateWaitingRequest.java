@@ -2,7 +2,7 @@ package roomescape.presentation.api.reservation.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.application.reservation.dto.CreateWaitingParam;
+import roomescape.application.reservation.command.dto.CreateWaitingCommand;
 
 public record CreateWaitingRequest(
         @NotNull(message = "date는 필수입니다.")
@@ -13,8 +13,8 @@ public record CreateWaitingRequest(
         Long time
 ) {
 
-    public CreateWaitingParam toCreateParameter(Long memberId) {
-        return new CreateWaitingParam(
+    public CreateWaitingCommand toCreateCommand(Long memberId) {
+        return new CreateWaitingCommand(
                 date,
                 theme,
                 time,

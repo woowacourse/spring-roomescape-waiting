@@ -1,7 +1,7 @@
 package roomescape.presentation.api.reservation.request;
 
 import jakarta.validation.constraints.NotBlank;
-import roomescape.application.reservation.dto.CreateThemeParam;
+import roomescape.application.reservation.command.dto.CreateThemeCommand;
 
 public record CreateThemeRequest(
         @NotBlank(message = "name은 필수입니다.")
@@ -12,7 +12,7 @@ public record CreateThemeRequest(
         String thumbnail
 ) {
 
-    public CreateThemeParam toCreateParameter() {
-        return new CreateThemeParam(name, description, thumbnail);
+    public CreateThemeCommand toCreateCommand() {
+        return new CreateThemeCommand(name, description, thumbnail);
     }
 }

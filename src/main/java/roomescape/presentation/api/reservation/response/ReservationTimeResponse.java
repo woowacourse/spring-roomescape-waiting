@@ -1,7 +1,7 @@
 package roomescape.presentation.api.reservation.response;
 
 import java.time.LocalTime;
-import roomescape.application.reservation.dto.ReservationTimeResult;
+import roomescape.application.reservation.query.dto.ReservationTimeResult;
 
 public record ReservationTimeResponse(
         Long id,

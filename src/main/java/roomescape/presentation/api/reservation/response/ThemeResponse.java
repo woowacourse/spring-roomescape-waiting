@@ -1,6 +1,6 @@
 package roomescape.presentation.api.reservation.response;
 
-import roomescape.application.reservation.dto.ThemeResult;
+import roomescape.application.reservation.query.dto.ThemeResult;
 
 public record ThemeResponse(
         Long id,

@@ -6,8 +6,8 @@ import java.util.stream.Stream;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.reservation.ReservationService;
-import roomescape.application.reservation.WaitingService;
+import roomescape.application.reservation.query.ReservationQueryService;
+import roomescape.application.reservation.query.WaitingQueryService;
 import roomescape.presentation.api.reservation.response.ReservationWithStatusResponse;
 import roomescape.presentation.support.methodresolver.AuthInfo;
 import roomescape.presentation.support.methodresolver.AuthPrincipal;
@@ -15,24 +15,25 @@ import roomescape.presentation.support.methodresolver.AuthPrincipal;
 @RestController
 public class PersonalReservationController {
 
-    private final ReservationService reservationService;
-    private final WaitingService waitingService;
+    private final ReservationQueryService reservationQueryService;
+    private final WaitingQueryService waitingQueryService;
 
-    public PersonalReservationController(ReservationService reservationService, WaitingService waitingService) {
-        this.reservationService = reservationService;
-        this.waitingService = waitingService;
+    public PersonalReservationController(ReservationQueryService reservationQueryService,
+                                         WaitingQueryService waitingQueryService) {
+        this.reservationQueryService = reservationQueryService;
+        this.waitingQueryService = waitingQueryService;
     }
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<ReservationWithStatusResponse>> findMineReservations(@AuthPrincipal AuthInfo authInfo) {
         Long memberId = authInfo.memberId();
-        List<ReservationWithStatusResponse> confirmedReservations = reservationService.findReservationsWithStatus(
+        List<ReservationWithStatusResponse> confirmedReservations = reservationQueryService.findReservationsWithStatus(
                         memberId
                 )
                 .stream()
                 .map(ReservationWithStatusResponse::from)
                 .toList();
-        List<ReservationWithStatusResponse> waitingReservations = waitingService.findWaitingByMemberId(memberId)
+        List<ReservationWithStatusResponse> waitingReservations = waitingQueryService.findWaitingByMemberId(memberId)
                 .stream()
                 .map(ReservationWithStatusResponse::from)
                 .toList();

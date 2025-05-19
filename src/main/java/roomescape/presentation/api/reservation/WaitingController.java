@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.reservation.WaitingService;
+import roomescape.application.reservation.command.CreateWaitingService;
+import roomescape.application.reservation.command.DeleteWaitingService;
 import roomescape.presentation.api.reservation.request.CreateWaitingRequest;
 import roomescape.presentation.support.methodresolver.AuthInfo;
 import roomescape.presentation.support.methodresolver.AuthPrincipal;
@@ -17,16 +18,18 @@ import roomescape.presentation.support.methodresolver.AuthPrincipal;
 @RestController
 public class WaitingController {
 
-    private final WaitingService waitingService;
+    private final CreateWaitingService createWaitingService;
+    private final DeleteWaitingService deleteWaitingService;
 
-    public WaitingController(WaitingService waitingService) {
-        this.waitingService = waitingService;
+    public WaitingController(CreateWaitingService createWaitingService, DeleteWaitingService deleteWaitingService) {
+        this.createWaitingService = createWaitingService;
+        this.deleteWaitingService = deleteWaitingService;
     }
 
     @PostMapping("/reservations/wait")
     public ResponseEntity<Void> createWaiting(@AuthPrincipal AuthInfo authInfo,
                                               @Valid @RequestBody CreateWaitingRequest createWaitingRequest) {
-        Long id = waitingService.create(createWaitingRequest.toCreateParameter(authInfo.memberId()));
+        Long id = createWaitingService.create(createWaitingRequest.toCreateCommand(authInfo.memberId()));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(URI.create("/reservations/wait/" + id))
                 .build();
@@ -35,7 +38,7 @@ public class WaitingController {
     @DeleteMapping("/reservations/wait/{waitingId}")
     public ResponseEntity<Void> cancelWaiting(@AuthPrincipal AuthInfo authInfo,
                                               @PathVariable("waitingId") Long waitingId) {
-        waitingService.cancel(waitingId, authInfo.memberId());
+        deleteWaitingService.cancel(waitingId, authInfo.memberId());
         return ResponseEntity.noContent().build();
     }
 }

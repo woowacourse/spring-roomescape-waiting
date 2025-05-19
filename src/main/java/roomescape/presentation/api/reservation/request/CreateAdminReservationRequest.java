@@ -2,7 +2,7 @@ package roomescape.presentation.api.reservation.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import roomescape.application.reservation.dto.CreateReservationParam;
+import roomescape.application.reservation.command.dto.CreateReservationCommand;
 
 public record CreateAdminReservationRequest(
         @NotNull(message = "date는 필수입니다.")
@@ -15,7 +15,7 @@ public record CreateAdminReservationRequest(
         Long memberId
 ) {
 
-    public CreateReservationParam toCreateParameter() {
-        return new CreateReservationParam(date, timeId, themeId, memberId);
+    public CreateReservationCommand toCreateCommand() {
+        return new CreateReservationCommand(date, timeId, themeId, memberId);
     }
 }

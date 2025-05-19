@@ -2,8 +2,8 @@ package roomescape.presentation.api.reservation.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.application.reservation.dto.ReservationWithStatusResult;
-import roomescape.application.reservation.dto.WaitingResult;
+import roomescape.application.reservation.query.dto.ReservationWithStatusResult;
+import roomescape.application.reservation.query.dto.WaitingResult;
 import roomescape.domain.reservation.ReservationStatus;
 
 public record ReservationWithStatusResponse(
