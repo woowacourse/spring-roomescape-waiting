@@ -46,6 +46,7 @@ class UserServiceTest {
         var savedTheme = repositoryHelper.saveAnyTheme();
         var user = service.register("popo@email.com", "pw", "popo");
         var savedReservation = repositoryHelper.saveReservation(new Reservation(user, tomorrow(), savedTimeSlot, savedTheme));
+        repositoryHelper.flushAndClear();
 
         // when
         var reservations = service.getReservations(user.id());

@@ -60,13 +60,6 @@ public class User {
         return role == UserRole.ADMIN;
     }
 
-    public void reserve(final Reservation reservation) {
-        if (!reservation.user().equals(this)) {
-            throw new IllegalArgumentException("예약자가 일치하지 않습니다.");
-        }
-        reservations.add(reservation);
-    }
-
     public List<Reservation> reservations() {
         return List.copyOf(reservations);
     }

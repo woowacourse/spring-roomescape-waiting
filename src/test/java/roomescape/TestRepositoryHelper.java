@@ -11,8 +11,13 @@ import roomescape.domain.user.User;
 @TestComponent
 public class TestRepositoryHelper {
 
-    @Autowired(required = false)
+    @Autowired
     private EntityManager em;
+
+    public void flushAndClear() {
+        em.flush();
+        em.clear();
+    }
 
     public User saveUser(final User user) {
         em.persist(user);

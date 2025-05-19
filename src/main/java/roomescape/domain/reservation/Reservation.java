@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
@@ -20,7 +19,6 @@ import roomescape.domain.user.User;
 @EqualsAndHashCode(of = {"id"})
 @Getter
 @Accessors(fluent = true)
-@ToString
 @Entity
 public class Reservation {
 
@@ -49,6 +47,17 @@ public class Reservation {
     }
 
     protected Reservation() {
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+               "id=" + id +
+               ", user=" + user.id() +
+               ", dateTime=" + dateTime +
+               ", theme=" + theme.id() +
+               ", status=" + status +
+               '}';
     }
 }
 
