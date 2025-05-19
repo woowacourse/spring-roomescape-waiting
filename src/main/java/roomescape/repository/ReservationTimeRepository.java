@@ -5,27 +5,33 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.dto.business.ReservationTimeWithBookState;
 
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
     @Query("""
-            SELECT new roomescape.dto.business.ReservationTimeWithBookState (
-                rt.id,
-                rt.startAt,
-                CASE
-                    WHEN COUNT(rt.id) = 1 THEN TRUE
-                    ELSE FALSE
-                END
-            )
+            SELECT rt
             FROM ReservationTime AS rt
-            LEFT JOIN Reservation AS r ON r.reservationTime.id = rt.id
-            GROUP BY rt.id
-            ORDER BY rt.startAt
+            ORDER BY rt.startAt ASC
             """)
-    List<ReservationTimeWithBookState> findReservationTimesWithBookState(Theme theme, LocalDate date);
+    List<ReservationTime> findAllOrderByStartAt();
+
+    @Query("""
+            SELECT rt
+            FROM ReservationTime AS rt
+            WHERE EXISTS (
+                SELECT r
+                FROM Reservation AS r
+                WHERE r.reservationTime.id = rt.id
+                AND r.theme.id = :themeId
+                AND r.date = :date
+            )
+            """)
+    List<ReservationTime> findReservationTimesWithBookState(
+            @Param("themeId") long themeId,
+            @Param("date") LocalDate date
+    );
 
     boolean existsByStartAt(LocalTime startAt);
 }

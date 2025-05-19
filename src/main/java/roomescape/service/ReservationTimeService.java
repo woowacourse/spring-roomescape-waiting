@@ -2,21 +2,19 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.local.AlreadyReservedTimeException;
 import roomescape.exception.local.DuplicateReservationException;
 import roomescape.exception.local.NotFoundReservationTimeException;
-import roomescape.exception.local.NotFoundThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional
@@ -24,16 +22,13 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
-    private final ThemeRepository themeRepository;
 
     public ReservationTimeService(
             ReservationTimeRepository timeRepository,
-            ReservationRepository reservationRepository,
-            ThemeRepository themeRepository
+            ReservationRepository reservationRepository
     ) {
         this.timeRepository = timeRepository;
         this.reservationRepository = reservationRepository;
-        this.themeRepository = themeRepository;
     }
 
     public List<ReservationTimeResponse> findAllReservationTimes() {
@@ -44,8 +39,9 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeWithBookState> findReservationTimesWithBookState(long themeId, LocalDate date) {
-        Theme theme = loadThemeById(themeId);
-        return timeRepository.findReservationTimesWithBookState(theme, date);
+        List<ReservationTime> allTimes = timeRepository.findAllOrderByStartAt();
+        List<ReservationTime> bookedTimes = timeRepository.findReservationTimesWithBookState(themeId, date);
+        return getAllTimesWithBookedState(allTimes, bookedTimes);
     }
 
     public ReservationTimeResponse addReservationTime(ReservationTimeCreationContent request) {
@@ -79,8 +75,18 @@ public class ReservationTimeService {
                 .orElseThrow(NotFoundReservationTimeException::new);
     }
 
-    private Theme loadThemeById(long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(NotFoundThemeException::new);
+    private List<ReservationTimeWithBookState> getAllTimesWithBookedState(
+            List<ReservationTime> allTimes,
+            List<ReservationTime> bookedTimes
+    ) {
+        List<ReservationTimeWithBookState> allTimesWithBookState = new ArrayList<>();
+        for (ReservationTime time : allTimes) {
+            if (bookedTimes.contains(time)) {
+                allTimesWithBookState.add(new ReservationTimeWithBookState(time.getId(), time.getStartAt(), false));
+                continue;
+            }
+            allTimesWithBookState.add(new ReservationTimeWithBookState(time.getId(), time.getStartAt(), true));
+        }
+        return allTimesWithBookState;
     }
 }
