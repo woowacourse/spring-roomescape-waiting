@@ -39,7 +39,7 @@ public class AuthService {
 
     public String login(LoginRequest loginRequest) {
         final Account account = accountMemberService.findAccount(loginRequest);
-        if (!account.isSamePassword(passwordEncoder, loginRequest.password())) {
+        if (!(passwordEncoder.matches(loginRequest.password(), account.getPasswordValue()))) {
             throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
         }
         return jwtTokenProvider.generateToken(account);
