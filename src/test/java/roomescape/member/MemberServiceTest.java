@@ -9,7 +9,6 @@ import static org.mockito.Mockito.spy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.PasswordEncoder;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
@@ -35,6 +36,8 @@ import roomescape.theme.ThemeRepository;
 
 @DataJpaTest
 @ExtendWith(MockitoExtension.class)
+@Transactional(propagation = Propagation.SUPPORTS)
+@Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class MemberServiceTest {
 
     private final MemberService memberService;
@@ -59,12 +62,6 @@ class MemberServiceTest {
         this.memberRepositoryFacade = spy(new MemberRepositoryFacadeImpl(memberRepository));
         this.passwordEncoder = new PasswordEncoder();
         this.memberService = new MemberService(memberRepositoryFacade, passwordEncoder);
-    }
-
-    @Sql(scripts = "classpath:/initialize_auto_increment.sql")
-    @BeforeEach
-    void setUp() {
-        // Sql 파일을 통해 auto_increment 초기화
     }
 
     @DisplayName("member를 생성하여 저장한다.")
