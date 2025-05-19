@@ -11,9 +11,9 @@ import roomescape.application.reservation.dto.ReservationTimeResult;
 import roomescape.infrastructure.error.exception.ReservationTimeException;
 import roomescape.domain.reservation.DailyThemeReservations;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.repository.ReservationTimeRepository;
 
 @Service
 @Transactional(readOnly = true)

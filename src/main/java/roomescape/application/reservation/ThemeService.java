@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.CreateThemeParam;
 import roomescape.application.reservation.dto.ThemeResult;
 import roomescape.infrastructure.error.exception.ThemeException;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)

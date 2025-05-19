@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.infrastructure.error.exception.MemberException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.repository.MemberRepository;
 
 @Service
 @Transactional(readOnly = true)

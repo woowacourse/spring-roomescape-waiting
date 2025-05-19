@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.repository.MemberRepository;
 import roomescape.infrastructure.error.exception.ForbiddenException;
 import roomescape.infrastructure.error.exception.JwtExtractException;
 import roomescape.infrastructure.error.exception.UnauthorizedException;

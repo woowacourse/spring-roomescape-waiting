@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.repository.MemberRepository;
 import roomescape.domain.member.Role;
 
 class MemberServiceTest extends AbstractServiceIntegrationTest {

@@ -16,14 +16,14 @@ import roomescape.application.reservation.dto.CreateReservationTimeParam;
 import roomescape.application.reservation.dto.ReservationTimeResult;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.repository.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
-import roomescape.domain.reservation.ReservationTimeRepository;
+import roomescape.domain.reservation.repository.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.repository.ThemeRepository;
 import roomescape.infrastructure.error.exception.ReservationTimeException;
 
 class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
