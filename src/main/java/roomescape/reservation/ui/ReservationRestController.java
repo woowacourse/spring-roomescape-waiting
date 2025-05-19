@@ -57,7 +57,7 @@ public class ReservationRestController {
 
     @GetMapping("/mine")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<ReservationResponse.ForMember>> myReservations(
+    public ResponseEntity<List<ReservationResponse.ForMember>> findAllMyReservations(
             final MemberAuthInfo memberAuthInfo
     ) {
         return ResponseEntity.ok()
@@ -65,7 +65,7 @@ public class ReservationRestController {
     }
 
     @GetMapping("/available-times")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailableReservationTimes(
+    public ResponseEntity<List<AvailableReservationTimeResponse>> findAllAvailableReservationTimes(
             @ModelAttribute @Valid final AvailableReservationTimeRequest request
     ) {
         final List<AvailableReservationTimeResponse> availableReservationTimes =
@@ -76,7 +76,7 @@ public class ReservationRestController {
 
     @GetMapping("/statuses")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<ReservationStatusResponse>> findAll() {
+    public ResponseEntity<List<ReservationStatusResponse>> findAllReservationStatuses() {
         return ResponseEntity.ok()
                 .body(reservationService.findAllReservationStatuses());
     }

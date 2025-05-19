@@ -7,9 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import roomescape.auth.domain.AuthRole;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
@@ -23,7 +21,6 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
-import roomescape.reservation.ui.dto.request.ReservationsByFilterRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
@@ -38,19 +35,6 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-
-    public ReservationResponse create(
-            final CreateReservationRequest request
-    ) {
-        return ReservationResponse.from(
-                createReservation(
-                        request.date(),
-                        request.timeId(),
-                        request.themeId(),
-                        request.memberId(),
-                        request.status()
-                ));
-    }
 
     public ReservationResponse create(
             final CreateReservationRequest.ForMember request,
@@ -105,18 +89,6 @@ public class ReservationService {
         }
     }
 
-    public void deleteAsAdmin(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
-        if (memberAuthInfo.authRole() != AuthRole.ADMIN) {
-            throw new AuthorizationException("관리자만 삭제할 권한이 있습니다.");
-        }
-
-        try {
-            reservationRepository.deleteById(reservationId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
-        }
-    }
-
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
         final Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
@@ -132,19 +104,6 @@ public class ReservationService {
 
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public List<ReservationResponse> findAllByFilter(final ReservationsByFilterRequest request) {
-        if (request.dateFrom().isAfter(request.dateTo())) {
-            throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
-        }
-
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(
-                        request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
-                )
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
