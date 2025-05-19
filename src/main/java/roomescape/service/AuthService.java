@@ -4,16 +4,16 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.dto.auth.LoginRequestDto;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.MemberRepository;
 import roomescape.util.JwtTokenProvider;
 
 @Service
 public class AuthService {
 
-    private final JpaMemberRepository memberRepository;
+    private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthService(JpaMemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
+    public AuthService(MemberRepository memberRepository, JwtTokenProvider jwtTokenProvider) {
         this.memberRepository = memberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
     }

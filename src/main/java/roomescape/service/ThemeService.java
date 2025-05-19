@@ -8,17 +8,17 @@ import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ThemeRepository;
 
 @Service
 public class ThemeService {
 
-    private final JpaThemeRepository themeRepository;
-    private final JpaReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(final JpaThemeRepository themeRepository,
-                        final JpaReservationRepository reservationRepository) {
+    public ThemeService(final ThemeRepository themeRepository,
+                        final ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }

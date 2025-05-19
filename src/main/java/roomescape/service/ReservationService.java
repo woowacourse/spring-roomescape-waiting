@@ -12,24 +12,24 @@ import roomescape.dto.reservation.MyReservationResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationCreateDto;
 
 @Service
 public class ReservationService {
 
-    private final JpaReservationRepository reservationRepository;
-    private final JpaReservationTimeRepository reservationTimeRepository;
-    private final JpaThemeRepository themeRepository;
-    private final JpaMemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
-    public ReservationService(final JpaReservationRepository reservationRepository,
-                              final JpaReservationTimeRepository reservationTimeRepository,
-                              final JpaThemeRepository themeRepository,
-                              final JpaMemberRepository memberRepository) {
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository,
+                              final MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -52,7 +52,7 @@ public class ReservationService {
         Reservation requestReservation = Reservation.createWithoutId(member, dto.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
 
-        return ReservationResponseDto.of(newReservation, newReservation.getTime(), theme);
+        return ReservationResponseDto.from(newReservation);
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId) {
@@ -67,8 +67,7 @@ public class ReservationService {
         List<Reservation> allReservations = reservationRepository.findAll();
 
         return allReservations.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
-                        reservation.getTheme()))
+                .map(ReservationResponseDto::from)
                 .toList();
     }
 
@@ -77,8 +76,7 @@ public class ReservationService {
         List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(
                 from, to, themeId, memberId);
         return reservationsByPeriodAndMemberAndTheme.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
-                        reservation.getTheme()))
+                .map(ReservationResponseDto::from)
                 .toList();
     }
 
@@ -91,6 +89,6 @@ public class ReservationService {
 
     public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
         List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
-        return reservations.stream().map(MyReservationResponseDto::new).toList();
+        return reservations.stream().map(MyReservationResponseDto::from).toList();
     }
 }

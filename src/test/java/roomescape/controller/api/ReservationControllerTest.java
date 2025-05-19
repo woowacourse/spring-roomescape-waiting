@@ -1,7 +1,13 @@
 package roomescape.controller.api;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,13 +18,6 @@ import roomescape.dto.auth.LoginRequestDto;
 import roomescape.dto.auth.SignUpRequestDto;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
-
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

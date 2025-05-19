@@ -1,7 +1,8 @@
-package roomescape.controller;
+package roomescape.controller.api;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,16 +12,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.dto.auth.LoginRequestDto;
-import roomescape.repository.JpaMemberRepository;
-
-import java.util.Map;
+import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AdminPageControllerTest {
 
     @Autowired
-    JpaMemberRepository memberRepository;
+    MemberRepository memberRepository;
     String adminToken;
     String userToken;
 

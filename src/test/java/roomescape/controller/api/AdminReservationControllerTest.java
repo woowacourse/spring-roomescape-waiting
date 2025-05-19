@@ -20,7 +20,7 @@ import roomescape.dto.auth.LoginRequestDto;
 import roomescape.dto.reservation.AdminReservationCreateRequestDto;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
-import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -30,7 +30,7 @@ class AdminReservationControllerTest {
     class AdminAddReservationTest {
 
         @Autowired
-        JpaMemberRepository memberRepository;
+        MemberRepository memberRepository;
 
         String loginToken;
 
@@ -121,7 +121,7 @@ class AdminReservationControllerTest {
     class searchAdminReservationTest {
 
         @Autowired
-        JpaMemberRepository memberRepository;
+        MemberRepository memberRepository;
 
         String loginToken;
 

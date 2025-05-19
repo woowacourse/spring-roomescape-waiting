@@ -14,13 +14,8 @@ public record MyReservationResponseDto(
         String status
 ) {
 
-    public MyReservationResponseDto(Reservation reservation) {
-        this(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                "예약"
-        );
+    public static MyReservationResponseDto from(Reservation reservation) {
+        return new MyReservationResponseDto(reservation.getId(), reservation.getTheme().getName(),
+                reservation.getDate(), reservation.getTime().getStartAt(), "예약");
     }
 }

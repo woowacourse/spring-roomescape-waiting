@@ -1,7 +1,6 @@
 package roomescape.controller.api;
 
 import io.restassured.RestAssured;
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
@@ -14,10 +13,10 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
 import roomescape.util.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -25,13 +24,13 @@ import roomescape.util.JwtTokenProvider;
 class MemberReservationControllerTest {
 
     @Autowired
-    JpaMemberRepository memberRepository;
+    MemberRepository memberRepository;
     @Autowired
-    JpaReservationRepository reservationRepository;
+    ReservationRepository reservationRepository;
     @Autowired
-    JpaThemeRepository themeRepository;
+    ThemeRepository themeRepository;
     @Autowired
-    JpaReservationTimeRepository reservationTimeRepository;
+    ReservationTimeRepository reservationTimeRepository;
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 

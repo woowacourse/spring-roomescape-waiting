@@ -28,8 +28,8 @@ public class AdminReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponseDto> addReservation(
             @RequestBody AdminReservationCreateRequestDto requestDto) {
-        ReservationCreateDto createDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
-                requestDto.themeId(), requestDto.memberId());
+        ReservationCreateDto createDto = new ReservationCreateDto(requestDto.date(), requestDto.themeId(), requestDto.timeId(),
+                requestDto.memberId());
         ReservationResponseDto responseDto = reservationService.createReservation(createDto);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
     }

@@ -3,8 +3,6 @@ package roomescape.dto.reservation;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.dto.member.MemberNameResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.dto.time.ReservationTimeResponseDto;
@@ -14,10 +12,10 @@ public record ReservationResponseDto(long id, MemberNameResponseDto member,
                                      ThemeResponseDto theme,
                                      ReservationTimeResponseDto time) {
 
-    public static ReservationResponseDto of(Reservation reservation, ReservationTime reservationTime, Theme theme) {
+    public static ReservationResponseDto from(Reservation reservation) {
         MemberNameResponseDto memberResponseDto = new MemberNameResponseDto(reservation.getMember().getName());
-        ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.from(reservationTime);
-        ThemeResponseDto themeResponseDto = ThemeResponseDto.from(theme);
+        ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.from(reservation.getTime());
+        ThemeResponseDto themeResponseDto = ThemeResponseDto.from(reservation.getTheme());
 
         return new ReservationResponseDto(
                 reservation.getId(),

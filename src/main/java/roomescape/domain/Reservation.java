@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,7 +9,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.exception.InvalidRequestException;
 
@@ -19,15 +19,16 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
 
+    @Column(nullable = false)
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ReservationTime time;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
 
     public Reservation(
@@ -77,21 +78,6 @@ public class Reservation {
         if (theme == null) {
             throw new IllegalArgumentException("[ERROR] 테마는 반드시 입력해야 합니다.");
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
     }
 
     public Long getId() {

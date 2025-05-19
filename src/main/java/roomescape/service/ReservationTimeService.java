@@ -10,17 +10,17 @@ import roomescape.dto.time.ReservationTimeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
 
-    private final JpaReservationTimeRepository reservationTimeRepository;
-    private final JpaReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final JpaReservationTimeRepository reservationTimeRepository,
-                                  final JpaReservationRepository reservationRepository) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
+                                  final ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
