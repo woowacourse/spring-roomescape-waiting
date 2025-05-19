@@ -1,5 +1,8 @@
 package roomescape.reservation.domain;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,9 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,6 +66,7 @@ public class Reservation {
         this.theme = theme;
         this.member = member;
         this.status = status;
+        validateFutureOrPresent();
     }
 
     public static Reservation booked(
@@ -84,7 +85,6 @@ public class Reservation {
                 .build();
     }
 
-    @PrePersist
     private void validateFutureOrPresent() {
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         final LocalDateTime currentDateTime = LocalDateTime.now();
