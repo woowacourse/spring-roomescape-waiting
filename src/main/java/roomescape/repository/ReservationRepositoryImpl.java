@@ -1,21 +1,17 @@
 package roomescape.repository;
 
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationV2;
 import roomescape.repository.jpa.ReservationJpaRepository;
 
 @Repository
@@ -31,51 +27,17 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(final long id) { // TODO : Legacy 코드 삭제
-        String sql = joinReservationAndTime("WHERE r.id = ?");
-        final List<Reservation> reservations = template.query(sql, reservationRowMapper(), id);
-        if (reservations.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(reservations.getFirst());
+    public Optional<Reservation> findById(Long id) {
+        return reservationJpaRepository.findById(id);
     }
 
     @Override
-    public List<Reservation> findByDate(final LocalDate date) { // TODO : Legacy 코드 삭제
-        String sql = joinReservationAndTime("WHERE r.date = ?");
-        return template.query(sql, reservationRowMapper(), date.toString());
-    }
-
-    @Override
-    public List<Reservation> findAll() { // TODO : Legacy 코드 삭제
-        String sql = joinReservationAndTime("");
-        return template.query(sql, reservationRowMapper());
-    }
-
-    @Override
-    public List<ReservationV2> findAllReservationsV2() {
+    public List<Reservation> findAllReservationsV2() {
         return reservationJpaRepository.findAll();
     }
 
     @Override
-    public Reservation save(final Reservation reservation) { // TODO : Legacy 코드 삭제
-        String sql = "insert into reservation (name, date, time_id, theme_id) values (?, ?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        template.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservation.getName());
-            ps.setString(2, reservation.getDate().toString());
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
-            return ps;
-        }, keyHolder);
-
-        long id = keyHolder.getKey().longValue();
-        return reservation.toEntity(id);
-    }
-
-    @Override
-    public ReservationV2 saveWithMember(final ReservationV2 reservation) {
+    public Reservation saveWithMember(final Reservation reservation) {
         return reservationJpaRepository.save(reservation);
     }
 
@@ -92,9 +54,9 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationV2> findByMemberIdAndThemeIdAndDateFromAndDateTo(final long memberId, final long themeId,
-                                                                            final LocalDate dateFrom,
-                                                                            final LocalDate dateTo) {
+    public List<Reservation> findByMemberIdAndThemeIdAndDateFromAndDateTo(final long memberId, final long themeId,
+                                                                          final LocalDate dateFrom,
+                                                                          final LocalDate dateTo) {
         StringBuilder queryBuilder = new StringBuilder(joinReservationV2AndRelatedTables(""));
         List<Object> params = new ArrayList<>();
         List<String> conditions = new ArrayList<>();
@@ -135,34 +97,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationV2> findByMemberId(Long memberId) {
+    public List<Reservation> findByMemberId(Long memberId) {
         return reservationJpaRepository.findByMemberId(memberId);
     }
 
-    private RowMapper<Reservation> reservationRowMapper() {
-        return (rs, rowNum) -> {
-            ReservationTime reservationTime = new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getTime("time_value").toLocalTime()
-            );
-
-            ReservationTheme reservationTheme = new ReservationTheme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail")
-            );
-            return new Reservation(
-                    rs.getLong("reservation_id"),
-                    rs.getString("name"),
-                    rs.getString("date"),
-                    reservationTime,
-                    reservationTheme
-            );
-        };
-    }
-
-    private RowMapper<ReservationV2> reservationV2RowMapper() {
+    private RowMapper<Reservation> reservationV2RowMapper() {
         return (rs, rowNum) -> {
             // ReservationTime 생성
             ReservationTime reservationTime = new ReservationTime(
@@ -187,7 +126,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                     MemberRole.fromName(rs.getString("member_role"))
                     );
 
-            return new ReservationV2(
+            return new Reservation(
                     rs.getLong("reservation_id"),
                     member,
                     rs.getDate("date").toLocalDate(),

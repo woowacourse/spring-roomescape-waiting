@@ -3,8 +3,8 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTheme;
-import roomescape.dto.ReservationThemeRequest;
-import roomescape.dto.ReservationThemeResponse;
+import roomescape.dto.request.ReservationThemeRequest;
+import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.repository.ReservationThemeRepository;
 
 @Service

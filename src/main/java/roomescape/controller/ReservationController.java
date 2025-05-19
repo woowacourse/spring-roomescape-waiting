@@ -11,32 +11,29 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.ReservationRequestV2;
-import roomescape.dto.ReservationResponse;
+import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
-import roomescape.service.ReservationServiceV2;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final ReservationServiceV2 reservationServiceV2;
 
-    public ReservationController(final ReservationService reservationService,
-                                 final ReservationServiceV2 reservationServiceV2) {
+    public ReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.reservationServiceV2 = reservationServiceV2;
     }
 
     @GetMapping()
     public ResponseEntity<List<ReservationResponse>> reservationList() {
-        return ResponseEntity.status(HttpStatus.OK).body(reservationServiceV2.getAllReservations());
+        return ResponseEntity.status(HttpStatus.OK).body(reservationService.getAllReservations());
     }
 
     @PostMapping()
-    public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid final ReservationRequestV2 request, final Long memberId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationServiceV2.addReservationWithMemberId(request, memberId));
+    public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid final ReservationRequest request, final Long memberId) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                reservationService.addReservationWithMemberId(request, memberId));
     }
 
     @DeleteMapping("/{id}")

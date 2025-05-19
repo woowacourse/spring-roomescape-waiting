@@ -3,7 +3,7 @@ package roomescape.service;
 import java.util.Base64;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.dto.LoginRequest;
+import roomescape.dto.request.LoginRequest;
 import roomescape.repository.MemberRepository;
 
 

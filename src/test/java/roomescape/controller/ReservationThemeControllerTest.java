@@ -19,8 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTheme;
-import roomescape.dto.ReservationThemeRequest;
-import roomescape.dto.ReservationThemeResponse;
+import roomescape.dto.request.ReservationThemeRequest;
+import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.service.ReservationThemeService;
 
 @WebMvcTest(ReservationThemeController.class)

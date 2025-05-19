@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.domain.Member;
-import roomescape.dto.LoginRequest;
+import roomescape.dto.request.LoginRequest;
+import roomescape.dto.response.LoginResponse;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
 
@@ -52,8 +53,4 @@ public class LoginController {
         final long id = (long) session.getAttribute(SESSION_KEY);
         return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(memberService.getMemberById(id).getName()));
     }
-
-    record LoginResponse(
-            String name
-    ) {}
 }

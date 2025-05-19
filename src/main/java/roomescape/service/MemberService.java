@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
-import roomescape.dto.MemberRegisterRequest;
-import roomescape.dto.MemberRegisterResponse;
-import roomescape.dto.MemberResponse;
+import roomescape.dto.request.MemberRegisterRequest;
+import roomescape.dto.response.MemberRegisterResponse;
+import roomescape.dto.response.MemberResponse;
 import roomescape.repository.MemberRepository;
 
 @Service

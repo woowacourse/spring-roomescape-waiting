@@ -40,7 +40,11 @@ public class Member {
     }
 
 
-    public Member(final Long id, final String email, final String password, final String name, final String sessionId,
+    public Member(final Long id,
+                  final String email,
+                  final String password,
+                  final String name,
+                  final String sessionId,
                   final MemberRole role) {
         this.id = id;
         this.email = email;

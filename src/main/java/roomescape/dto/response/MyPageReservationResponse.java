@@ -1,8 +1,8 @@
-package roomescape.dto;
+package roomescape.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.ReservationV2;
+import roomescape.domain.Reservation;
 
 public record MyPageReservationResponse(
         Long reservationId,
@@ -12,7 +12,7 @@ public record MyPageReservationResponse(
         String status
 ) {
 
-    public static MyPageReservationResponse from(ReservationV2 reservation) {
+    public static MyPageReservationResponse from(Reservation reservation) {
         return new MyPageReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),

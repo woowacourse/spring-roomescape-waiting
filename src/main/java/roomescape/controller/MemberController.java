@@ -7,20 +7,20 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import roomescape.dto.MemberRegisterRequest;
-import roomescape.dto.MemberRegisterResponse;
-import roomescape.dto.MemberResponse;
-import roomescape.dto.MyPageReservationResponse;
+import roomescape.dto.request.MemberRegisterRequest;
+import roomescape.dto.response.MemberRegisterResponse;
+import roomescape.dto.response.MemberResponse;
+import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.service.MemberService;
-import roomescape.service.ReservationServiceV2;
+import roomescape.service.ReservationService;
 
 @Controller
 public class MemberController {
 
     private final MemberService memberService;
-    private final ReservationServiceV2 reservationService;
+    private final ReservationService reservationService;
 
-    public MemberController(final MemberService memberService, ReservationServiceV2 reservationService) {
+    public MemberController(final MemberService memberService, ReservationService reservationService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
     }
@@ -41,7 +41,7 @@ public class MemberController {
     }
 
     @GetMapping("/members/reservations")
-    public ResponseEntity<List<MyPageReservationResponse>> getMyReservations(Long memberId) {
+    public ResponseEntity<List<MyPageReservationResponse>> getMyReservations(final Long memberId) {
         List<MyPageReservationResponse> reservations = reservationService.getReservationsByMemberId(memberId);
         return ResponseEntity.ok(reservations);
     }

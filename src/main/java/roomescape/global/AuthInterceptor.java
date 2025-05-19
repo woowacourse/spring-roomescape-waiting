@@ -25,24 +25,20 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
             throws Exception {
 
-        final String requestURI = request.getRequestURI();
 
-        if (requestURI.startsWith("/admin")) {
-            HttpSession session = request.getSession(false);
+        HttpSession session = request.getSession(false);
 
-            if (session == null || session.getAttribute(SESSION_KEY) == null) {
-                response.sendError(HttpStatus.UNAUTHORIZED.value(), "[ERROR] 로그인이 필요합니다.");
-                return false;
-            }
+        if (session == null || session.getAttribute(SESSION_KEY) == null) {
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), "[ERROR] 로그인이 필요합니다.");
+            return false;
+        }
 
-            final Long memberId = (Long) session.getAttribute(SESSION_KEY);
+        final Long memberId = (Long) session.getAttribute(SESSION_KEY);
 
-            final Member member = memberService.getMemberById(memberId);
-
-            if (MemberRole.ADMIN != member.getRole()) {
-                response.sendError(HttpStatus.UNAUTHORIZED.value(), "[ERROR] 관리자 권한이 필요합니다.");
-                return false;
-            }
+        final Member member = memberService.getMemberById(memberId);
+        if (MemberRole.ADMIN != member.getRole()) {
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), "[ERROR] 관리자 권한이 필요합니다.");
+            return false;
         }
 
         return true;

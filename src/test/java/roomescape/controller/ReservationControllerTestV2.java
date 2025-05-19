@@ -1,8 +1,5 @@
 package roomescape.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import java.time.LocalDate;
@@ -18,13 +15,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
-import roomescape.dto.ReservationThemeResponse;
-import roomescape.dto.ReservationTimeResponse;
+import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationThemeResponse;
+import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
-import roomescape.service.ReservationServiceV2;
 
 @WebMvcTest(ReservationController.class)
 public class ReservationControllerTestV2 {
@@ -34,9 +29,6 @@ public class ReservationControllerTestV2 {
 
     @MockitoBean
     private ReservationService reservationService;
-
-    @MockitoBean
-    private ReservationServiceV2 reservationServiceV2;
 
     @MockitoBean
     private MemberService memberService;
@@ -75,7 +67,7 @@ public class ReservationControllerTestV2 {
             final ReservationResponse response = new ReservationResponse(1L, "제프리", LocalDate.now(),
                     new ReservationTimeResponse(1L, LocalTime.now()),
                     new ReservationThemeResponse(1L, "테마", "설명", "썸네일"));
-            given(reservationService.addReservation(any(ReservationRequest.class))).willReturn(response);
+//            given(reservationService.addReservation(any(ReservationRequest.class))).willReturn(response);
             final Map<String, String> request = Map.of("themeId", "1", "date", "2023-08-05", "timeId", "1");
 
             RestAssuredMockMvc.given().log().all()
