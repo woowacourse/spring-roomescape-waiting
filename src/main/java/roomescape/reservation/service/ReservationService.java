@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.InvalidIdException;
@@ -26,22 +27,19 @@ import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
 
 @Service
+@AllArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository timeRepository,
-                              ThemeRepository themeRepository, MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
-        this.timeRepository = timeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
-    }
 
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
@@ -56,15 +54,18 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(reservation -> new MyReservationResponse(
-                        reservation.getId(),
-                        reservation.getTheme().getName(),
-                        reservation.getDate(),
-                        reservation.getTime().getStartAt(),
-                        "예약")
-                )
-                .toList();
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId).stream().toList();
+        List<Waiting> waitings = waitingRepository.findAllByMemberId(memberId).stream().toList();
+        return MyReservationResponse.of(reservations, waitings);
+//        return reservationRepository.findAllByMemberId(memberId).stream()
+//                .map(reservation -> new MyReservationResponse(
+//                        reservation.getId(),
+//                        reservation.getTheme().getName(),
+//                        reservation.getDate(),
+//                        reservation.getTime().getStartAt(),
+//                        "예약")
+//                )
+//                .toList();
     }
 
     public List<ReservationResponse> findAllByMemberAndThemeAndDate(

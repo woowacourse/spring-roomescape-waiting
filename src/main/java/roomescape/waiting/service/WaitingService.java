@@ -51,4 +51,8 @@ public class WaitingService {
         Waiting waiting = new Waiting(member, spec);
         return WaitingResponse.from(waitingRepository.save(waiting));
     }
+
+    public void deleteById(Long id) {
+        waitingRepository.deleteById(id);
+    }
 }
