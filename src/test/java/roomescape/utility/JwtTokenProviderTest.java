@@ -1,66 +1,104 @@
-//package roomescape.utility;
-//
-//import io.jsonwebtoken.Claims;
-//import io.restassured.RestAssured;
-//import org.assertj.core.api.SoftAssertions;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Nested;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-//import org.springframework.boot.test.web.server.LocalServerPort;
-//import roomescape.domain.Role;
-//import roomescape.dto.business.AccessTokenContent;
-//
-//@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-//class JwtTokenProviderTest {
-//
-//    @Autowired
-//    private JwtTokenProvider jwtTokenProvider;
-//
-//    @LocalServerPort
-//    int port;
-//
-//    @BeforeEach
-//    void restAssuredSetUp() {
-//        RestAssured.port = port;
-//    }
-//
-//    @Nested
-//    @DisplayName("토큰 생성 기능")
-//    class createToken {
-//
-//        private static final long USER_ID_FIELD = 1L;
-//        private static final Role ROLE_FIELD = Role.ROLE_MEMBER;
-//
-//        private AccessTokenContent accessTokenContent;
-//
-//        @BeforeEach
-//        public void beforeEach() {
-//            accessTokenContent = new AccessTokenContent(USER_ID_FIELD, ROLE_FIELD);
-//        }
-//
-//        @DisplayName("토큰이 잘 생성되는 지 확인")
-//        @Test
-//        void createToken_andGetClaims() {
-//            // given
-//
-//            // when
-//            String token = jwtTokenProvider.createAccessToken(accessTokenContent);
-//            Claims claims = jwtTokenProvider.getClaims(token);
-//
-//            // then
-//            long actualId = Long.parseLong(claims.getSubject());
-//            Role actualRole = Role.findByName((String) claims.get("role"));
-//
-//            SoftAssertions.assertSoftly(
-//                    s -> {
-//                        s.assertThat(actualId).isEqualTo(USER_ID_FIELD);
-//                        s.assertThat(actualRole).isEqualTo(ROLE_FIELD);
-//                    }
-//            );
-//        }
-//    }
-//}
+package roomescape.utility;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import roomescape.domain.Role;
+import roomescape.domain.User;
+import roomescape.dto.business.AccessTokenContent;
+import roomescape.exception.global.AuthorizationException;
+
+class JwtTokenProviderTest {
+
+    private JwtTokenProvider jwtTokenProvider = new JwtTokenProvider(
+            "test_secret_key_test_secret_key_test_secret_key", 60000);
+
+    @Nested
+    @DisplayName("엑세스 토큰을 생성할 수 있다.")
+    class createToken {
+
+        @DisplayName("엑세스 토큰을 생성할 수 있다.")
+        @Test
+        void canCreateAccessToken() {
+            // given
+            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+            AccessTokenContent expectedTokenContent =
+                    new AccessTokenContent(user.getId(), user.getRole(), user.getName());
+
+            // when
+            String accessToken = jwtTokenProvider.createAccessToken(expectedTokenContent);
+
+            // then
+            AccessTokenContent actualTokenContent = jwtTokenProvider.parseAccessToken(accessToken);
+            assertAll(
+                    () -> assertThat(actualTokenContent.id()).isEqualTo(expectedTokenContent.id()),
+                    () -> assertThat(actualTokenContent.name()).isEqualTo(expectedTokenContent.name()),
+                    () -> assertThat(actualTokenContent.role()).isEqualTo(expectedTokenContent.role())
+
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("엑세스 토큰을 파싱할 수 있다.")
+    class parseAccessToken {
+
+        @DisplayName("엑세스 토큰을 파싱할 수 있다.")
+        @Test
+        void canParseAccessToken() {
+            // given
+            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+            AccessTokenContent expectedTokenContent =
+                    new AccessTokenContent(user.getId(), user.getRole(), user.getName());
+            String accessToken = jwtTokenProvider.createAccessToken(expectedTokenContent);
+
+            // when
+            AccessTokenContent parsed = jwtTokenProvider.parseAccessToken(accessToken);
+
+            // then
+            assertAll(
+                    () -> assertThat(parsed.id()).isEqualTo(expectedTokenContent.id()),
+                    () -> assertThat(parsed.name()).isEqualTo(expectedTokenContent.name()),
+                    () -> assertThat(parsed.role()).isEqualTo(expectedTokenContent.role())
+            );
+        }
+
+        @DisplayName("토큰이 훼손된 경우를 검증할 수 있다.")
+        @Test
+        void cannotParseDamagedAccessToken() {
+            // given
+            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+            AccessTokenContent expectedTokenContent =
+                    new AccessTokenContent(user.getId(), user.getRole(), user.getName());
+            String accessToken = jwtTokenProvider.createAccessToken(expectedTokenContent);
+            String damagedAccessToken = accessToken + "damaged";
+
+            // when & then
+            assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(damagedAccessToken))
+                    .isInstanceOf(AuthorizationException.class)
+                    .hasMessage("토큰 파싱 실패");
+        }
+
+        @DisplayName("토큰의 유효기간이 지난 경우를 검증할 수 있다.")
+        @Test
+        void cannotParseExpiredAccessToken() {
+            // given
+            jwtTokenProvider = new JwtTokenProvider(
+                    "test_secret_key_test_secret_key_test_secret_key", 0);
+            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+            AccessTokenContent expectedTokenContent =
+                    new AccessTokenContent(user.getId(), user.getRole(), user.getName());
+            String expiredToken = jwtTokenProvider.createAccessToken(expectedTokenContent);
+
+            // when & then
+            assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(expiredToken))
+                    .isInstanceOf(AuthorizationException.class)
+                    .hasMessage("토큰 파싱 실패");
+
+        }
+    }
+}
