@@ -1,8 +1,8 @@
 package roomescape.domain.user;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ import roomescape.exception.BusinessRuleViolationException;
 class PasswordTest {
 
     @Test
-    @DisplayName("비밀번호에 공백이 포함되면 예외가 발생한다")
+    @DisplayName("비밀번호에 공백이 포함되면 예외가 발생한다.")
     void passwordCannotContainsBlank() {
         var thirtyOneWords = "가".repeat(31);
         assertThatThrownBy(() -> new Password(thirtyOneWords))
@@ -19,7 +19,7 @@ class PasswordTest {
     }
 
     @Test
-    @DisplayName("비밀번호가 30글자 이상이면 예외가 발생한다")
+    @DisplayName("비밀번호가 30글자 이상이면 예외가 발생한다.")
     void passwordLengthCannotOverMax() {
         var thirtyOneWords = "가".repeat(31);
         assertThatThrownBy(() -> new Password(thirtyOneWords))

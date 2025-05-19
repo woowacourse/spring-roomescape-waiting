@@ -9,7 +9,7 @@ import roomescape.exception.BusinessRuleViolationException;
 class ThemeTest {
 
     @Test
-    @DisplayName("이름이 10자 초과이면 예외가 발생한다")
+    @DisplayName("이름이 10자 초과이면 예외가 발생한다.")
     void nameLengthException() {
         assertThatThrownBy(() -> new Theme(
                 1L,
@@ -20,7 +20,7 @@ class ThemeTest {
     }
 
     @Test
-    @DisplayName("설명이 50자 초과이면 예외가 발생한다")
+    @DisplayName("설명이 50자 초과이면 예외가 발생한다.")
     void descriptionLengthException() {
         assertThatThrownBy(() -> new Theme(
                 1L,

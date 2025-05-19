@@ -56,7 +56,7 @@ class TimeSlotServiceTest {
     }
 
     @Test
-    @DisplayName("예약 시간을 삭제할 때 해당 시간에 대한 예약이 존재하면 예외 발생")
+    @DisplayName("예약 시간을 삭제할 때 해당 시간에 대한 예약이 존재하면 예외가 발생한다.")
     void deleteTimeSlotWithReservation() {
         // given
         var user = repositoryHelper.saveAnyUser();

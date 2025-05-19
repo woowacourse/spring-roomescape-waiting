@@ -17,7 +17,7 @@ class UserNameTest {
     }
 
     @Test
-    @DisplayName("이름이 6글자 이상이면 예외가 발생한다")
+    @DisplayName("이름이 6글자 이상이면 예외가 발생한다.")
     void nameLengthCannotOverMax() {
         assertThatThrownBy(() -> new UserName("여섯글자이름"))
             .isInstanceOf(BusinessRuleViolationException.class);
