@@ -30,9 +30,10 @@ public class UserService {
                 .toList();
     }
 
-    public User addUser(UserCreationContent request) {
+    public UserProfileResponse addUser(UserCreationContent request) {
         User user = User.createWithoutId(request.role(), request.name(), request.email(), request.password());
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return new UserProfileResponse(savedUser);
     }
 
     private User loadUserById(long userId) {
