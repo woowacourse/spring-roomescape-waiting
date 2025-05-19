@@ -11,7 +11,8 @@ import java.util.Date;
 import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.exception.InvalidAuthorizationException;
+import roomescape.exception.ExceptionCause;
+import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 
 @Component
@@ -44,11 +45,11 @@ public class JwtTokenProvider implements TokenProvider {
         try {
             return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
         } catch (SecurityException | MalformedJwtException | UnsupportedJwtException e) {
-            throw new InvalidAuthorizationException("[ERROR] JWT 토큰이 올바르지 않습니다.");
+            throw new UnauthorizedException(ExceptionCause.JWT_TOKEN_INVALID);
         } catch (ExpiredJwtException e) {
-            throw new InvalidAuthorizationException("[ERROR] JWT 토큰이 만료되었습니다.");
+            throw new UnauthorizedException(ExceptionCause.JWT_TOKEN_EXPIRED);
         } catch (IllegalArgumentException e) {
-            throw new InvalidAuthorizationException("[ERROR] JWT 토큰이 비어있습니다.");
+            throw new UnauthorizedException(ExceptionCause.JWT_TOKEN_EMPTY);
         }
     }
 }

@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.dto.RegistrationRequest;
-import roomescape.exception.DuplicateContentException;
+import roomescape.exception.ConflictException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.member.repository.MemberRepository;
 
@@ -36,6 +36,6 @@ class SignupServiceTest {
         signupService.signup(request);
 
         // then
-        assertThatThrownBy(() -> signupService.signup(request)).isInstanceOf(DuplicateContentException.class);
+        assertThatThrownBy(() -> signupService.signup(request)).isInstanceOf(ConflictException.class);
     }
 }

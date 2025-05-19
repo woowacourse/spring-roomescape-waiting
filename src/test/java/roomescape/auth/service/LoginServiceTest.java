@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.TokenResponse;
-import roomescape.exception.InvalidAuthorizationException;
+import roomescape.exception.NotFoundException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
@@ -61,6 +61,6 @@ class LoginServiceTest {
         LoginRequest request = new LoginRequest("", "admin@gmail.com");
 
         // when & then
-        assertThatThrownBy(() -> loginService.createToken(request)).isInstanceOf(InvalidAuthorizationException.class);
+        assertThatThrownBy(() -> loginService.createToken(request)).isInstanceOf(NotFoundException.class);
     }
 }

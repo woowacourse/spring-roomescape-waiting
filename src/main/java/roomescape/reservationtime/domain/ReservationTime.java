@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ExceptionCause;
 
 @Entity
 public class ReservationTime {
@@ -30,7 +32,7 @@ public class ReservationTime {
 
     private void validateStartAt(LocalTime startAt) {
         if (startAt == null) {
-            throw new IllegalArgumentException("[ERROR] 시작 시간을 반드시 입력해야 합니다. 예시) HH:MM");
+            throw new BadRequestException(ExceptionCause.RESERVATION_TIME_EMPTY_INPUT);
         }
     }
 

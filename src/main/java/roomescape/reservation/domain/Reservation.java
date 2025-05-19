@@ -11,6 +11,8 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.time.LocalDate;
 import java.util.Objects;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ExceptionCause;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -57,25 +59,25 @@ public class Reservation {
 
     private void validateMember(Member member) {
         if (member == null) {
-            throw new IllegalArgumentException("[ERROR] 회원 정보는 반드시 입력해야 합니다.");
+            throw new BadRequestException(ExceptionCause.MEMBER_EMPTY_INPUT);
         }
     }
 
     private void validateDate(LocalDate date) {
         if (date == null) {
-            throw new IllegalArgumentException("[ERROR] 예약 날짜는 반드시 입력해야 합니다. 예시) YYYY-MM-DD");
+            throw new BadRequestException(ExceptionCause.RESERVATION_DATE_EMPTY_INPUT);
         }
     }
 
     private void validateReservationTime(ReservationTime reservationTime) {
         if (reservationTime == null) {
-            throw new IllegalArgumentException("[ERROR] 예약 시간을 반드시 입력해야 합니다.");
+            throw new BadRequestException(ExceptionCause.RESERVATION_TIME_EMPTY_INPUT);
         }
     }
 
     private void validateTheme(Theme theme) {
         if (theme == null) {
-            throw new IllegalArgumentException("[ERROR] 예약 시간을 반드시 입력해야 합니다.");
+            throw new BadRequestException(ExceptionCause.THEME_EMPTY_INPUT);
         }
     }
 

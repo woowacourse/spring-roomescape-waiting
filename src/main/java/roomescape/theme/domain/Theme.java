@@ -7,6 +7,8 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ExceptionCause;
 
 @Entity
 public class Theme {
@@ -51,22 +53,22 @@ public class Theme {
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("[ERROR] 테마의 이름은 1글자 이상으로 이루어져야 합니다.");
+            throw new BadRequestException(ExceptionCause.THEME_NAME_INVALID_INPUT);
         }
     }
 
     private void validateDescription(String description) {
         if (description == null) {
-            throw new IllegalArgumentException("[ERROR] 테마 설명이 없습니다.");
+            throw new BadRequestException(ExceptionCause.THEME_DESCRIPTION_INVALID_INPUT);
         }
     }
 
     private void validateThumbnail(String thumbnail) {
         if (thumbnail == null) {
-            throw new IllegalArgumentException("[ERROR] 테마 이미지가 없습니다.");
+            throw new BadRequestException(ExceptionCause.THEME_THUMBNAIL_INVALID_INPUT);
         }
         if (!Pattern.matches(URL_REGEX, thumbnail)) {
-            throw new IllegalArgumentException("[ERROR] 썸네일 이미지가 URL 형식이 아닙니다.");
+            throw new BadRequestException(ExceptionCause.THEME_THUMBNAIL_INVALID_INPUT);
         }
     }
 

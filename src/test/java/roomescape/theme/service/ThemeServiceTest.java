@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.DuplicateContentException;
+import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
 import roomescape.fixture.FakeReservationRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
@@ -64,7 +64,7 @@ class ThemeServiceTest {
 
             // then
             assertThatThrownBy(() -> themeService.createTheme(requestDto)).isInstanceOf(
-                    DuplicateContentException.class);
+                    ConflictException.class);
         }
     }
 

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.InvalidAuthorizationException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -44,7 +44,7 @@ class MemberServiceTest {
 
         // when & then
         assertThatThrownBy(() -> memberService.findMemberByToken(token)).isInstanceOf(
-                InvalidAuthorizationException.class);
+                UnauthorizedException.class);
     }
 
     @DisplayName("모든 사용자 정보를 추출할 수 있다")

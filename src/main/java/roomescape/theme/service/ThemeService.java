@@ -3,8 +3,9 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.exception.ConstrainedDataException;
-import roomescape.exception.DuplicateContentException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ConflictException;
+import roomescape.exception.ExceptionCause;
 import roomescape.exception.NotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -27,7 +28,7 @@ public class ThemeService {
 
     public ThemeResponse createTheme(final ThemeCreateRequest requestDto) {
         if (themeRepository.existsByName(requestDto.name())) {
-            throw new DuplicateContentException("[ERROR] 이미 동일한 이름의 테마가 존재합니다.");
+            throw new ConflictException(ExceptionCause.THEME_NAME_DUPLICATE);
         }
         Theme requestTheme = requestDto.createWithoutId();
         Theme savedTheme = themeRepository.save(requestTheme);
@@ -43,10 +44,10 @@ public class ThemeService {
 
     public void deleteThemeById(final Long id) {
         if (themeRepository.findById(id).isEmpty()) {
-            throw new NotFoundException("[ERROR] 등록된 테마만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+            throw new NotFoundException(ExceptionCause.THEME_NOTFOUND);
         }
         if (reservationRepository.findByThemeId(id).isPresent()) {
-            throw new ConstrainedDataException("[ERROR] 해당 테마에 예약 기록이 존재합니다. 예약을 먼저 삭제해 주세요.");
+            throw new BadRequestException(ExceptionCause.THEME_EXIST);
         }
         themeRepository.deleteById(id);
     }

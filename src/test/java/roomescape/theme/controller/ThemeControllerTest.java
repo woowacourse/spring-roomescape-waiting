@@ -117,7 +117,7 @@ class ThemeControllerTest {
                     .body(request)
                     .when().post("/themes")
                     .then().log().all()
-                    .statusCode(403);
+                    .statusCode(401);
         }
 
         @DisplayName("기존과 동일한 이름을 가진 테마는 생성할 수 없다")
@@ -131,7 +131,7 @@ class ThemeControllerTest {
                     .body(requestTheme)
                     .when().post("/themes")
                     .then().log().all()
-                    .statusCode(400);
+                    .statusCode(409);
         }
 
         @DisplayName("유효하지 않은 name 필드값을 가진 Theme는 생성할 수 없다")
@@ -226,7 +226,7 @@ class ThemeControllerTest {
                     .header("Cookie", adminCookie)
                     .when().delete("/themes/1")
                     .then().log().all()
-                    .statusCode(409);
+                    .statusCode(400);
         }
 
         @DisplayName("일반 유저는 /themes API를 통해 Theme를 삭제할 수 없다")
@@ -242,7 +242,7 @@ class ThemeControllerTest {
                     .header("Cookie", userCookie)
                     .when().delete("/themes/1")
                     .then().log().all()
-                    .statusCode(403);
+                    .statusCode(401);
         }
 
         @DisplayName("존재하지 않는 Id의 Theme 을 삭제할 수 없다")

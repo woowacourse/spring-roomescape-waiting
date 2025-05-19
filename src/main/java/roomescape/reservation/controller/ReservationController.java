@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.exception.UnauthorizedAccessException;
+import roomescape.exception.ExceptionCause;
+import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.dto.ReservationResponse;
@@ -30,10 +31,9 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations(Member member) {
-        if (Role.isUser(member.getRole())) {
-            throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
+        if (!Role.isAdmin(member.getRole())) {
+            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
         }
-
         List<ReservationResponse> allReservations = reservationService.findAllReservationResponses();
         return ResponseEntity.ok(allReservations);
     }
@@ -47,10 +47,9 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id, Member member) {
-        if (Role.isUser(member.getRole())) {
-            throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
+        if (!Role.isAdmin(member.getRole())) {
+            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
         }
-
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }

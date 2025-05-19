@@ -10,8 +10,8 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.DuplicateContentException;
-import roomescape.exception.InvalidRequestException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ConflictException;
 import roomescape.exception.NotFoundException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.fixture.FakeReservationRepositoryFixture;
@@ -160,7 +160,7 @@ class ReservationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationService.createAdminReservation(requestDto))
-                    .isInstanceOf(DuplicateContentException.class);
+                    .isInstanceOf(ConflictException.class);
         }
 
         @DisplayName("이미 지난 날짜의 경우 예약 생성이 불가능 하다")
@@ -172,7 +172,7 @@ class ReservationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationService.createAdminReservation(requestDto))
-                    .isInstanceOf(InvalidRequestException.class);
+                    .isInstanceOf(BadRequestException.class);
         }
     }
 

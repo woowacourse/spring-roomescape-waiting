@@ -73,7 +73,7 @@ class AuthControllerTest {
                     .header("Cookie", userCookie)
                     .when().get("/members")
                     .then().log().all()
-                    .statusCode(403);
+                    .statusCode(401);
         }
     }
 
@@ -194,7 +194,7 @@ class AuthControllerTest {
                     .body(params)
                     .when().post("/members")
                     .then().log().all()
-                    .statusCode(400);
+                    .statusCode(409);
         }
     }
 }

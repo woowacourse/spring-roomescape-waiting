@@ -100,7 +100,7 @@ class ReservationTimeControllerTest {
                     .body(request)
                     .when().post("/times")
                     .then().log().all()
-                    .statusCode(403);
+                    .statusCode(401);
         }
 
         @DisplayName("중복된 시간은 생성할 수 없다")
@@ -114,7 +114,7 @@ class ReservationTimeControllerTest {
                     .body(request)
                     .when().post("/times")
                     .then().log().all()
-                    .statusCode(400);
+                    .statusCode(409);
         }
 
         @DisplayName("유효한 시간만 생성 가능하다")
@@ -166,7 +166,7 @@ class ReservationTimeControllerTest {
                     .header("Cookie", adminCookie)
                     .when().delete("/times/1")
                     .then().log().all()
-                    .statusCode(409);
+                    .statusCode(400);
         }
 
         @DisplayName("일반 유저는 /times API를 통해 ReservationTime을 삭제할 수 없다")
@@ -182,7 +182,7 @@ class ReservationTimeControllerTest {
                     .header("Cookie", userCookie)
                     .when().delete("/times/1")
                     .then().log().all()
-                    .statusCode(403);
+                    .statusCode(401);
         }
 
         @DisplayName("존재하지 않는 Id의 ReservationTime을 삭제할 수 없다")

@@ -3,7 +3,8 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.exception.DuplicateContentException;
+import roomescape.exception.ConflictException;
+import roomescape.exception.ExceptionCause;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
@@ -41,7 +42,7 @@ public class ReservationService {
     private ReservationResponse createReservation(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())) {
-            throw new DuplicateContentException("[ERROR] 해당 날짜와 테마로 이미 예약된 내역이 존재합니다.");
+            throw new ConflictException(ExceptionCause.RESERVATION_ALREADY_BOOKED);
         }
         Reservation newReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(newReservation, newReservation.getTime(), newReservation.getTheme());
@@ -68,7 +69,7 @@ public class ReservationService {
 
     public void deleteReservation(Long id) {
         if (reservationRepository.findById(id).isEmpty()) {
-            throw new NotFoundException("[ERROR] 등록된 예약만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+            throw new NotFoundException(ExceptionCause.RESERVATION_NOTFOUND);
         }
 
         reservationRepository.deleteById(id);

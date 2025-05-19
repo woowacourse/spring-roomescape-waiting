@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.exception.ExceptionCause;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -28,6 +29,7 @@ public class MemberService {
     }
 
     public Member findMemberById(Long memberId) {
-        return memberRepository.findById(memberId).orElseThrow(() -> new NotFoundException("[ERROR] 멤버가 존재하지 않습니다."));
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.UNAUTHORIZED_LOGIN_ACCESS));
     }
 }

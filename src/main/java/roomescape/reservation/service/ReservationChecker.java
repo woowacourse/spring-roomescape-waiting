@@ -2,7 +2,8 @@ package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
-import roomescape.exception.InvalidRequestException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ExceptionCause;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -36,15 +37,15 @@ public class ReservationChecker {
 
     public Reservation createReservationWithoutId(ReservationRequest dto) {
         ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + dto.timeId()));
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.RESERVATION_TIME_NOTFOUND));
 
         validateRequestDateTime(LocalDateTime.of(dto.date(), reservationTime.getStartAt()));
 
         Theme theme = themeRepository.findById(dto.themeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + dto.themeId()));
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.THEME_NOTFOUND));
 
         Member member = memberRepository.findById(dto.memberId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.MEMBER_NOTFOUND));
 
         return dto.createWithoutId(reservationTime, theme, member, ReservationStatus.RESERVED);
     }
@@ -52,7 +53,7 @@ public class ReservationChecker {
     private void validateRequestDateTime(LocalDateTime requestDateTime) {
         LocalDateTime currentDateTime = LocalDateTime.now();
         if (requestDateTime.isBefore(currentDateTime) || requestDateTime.equals(currentDateTime)) {
-            throw new InvalidRequestException("[ERROR] 현 시점 이후의 날짜와 시간을 선택해주세요.");
+            throw new BadRequestException(ExceptionCause.RESERVATION_INVALID_FOR_PAST);
         }
     }
 }

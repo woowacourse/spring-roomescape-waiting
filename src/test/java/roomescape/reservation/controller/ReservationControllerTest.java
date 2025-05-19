@@ -114,7 +114,7 @@ class ReservationControllerTest {
                     .body(params)
                     .when().post("/reservations")
                     .then().log().all()
-                    .statusCode(400);
+                    .statusCode(409);
         }
     }
 
@@ -156,7 +156,7 @@ class ReservationControllerTest {
                     .header("Cookie", userCookie)
                     .when().delete("/reservations/1")
                     .then().log().all()
-                    .statusCode(403);
+                    .statusCode(401);
         }
     }
 }

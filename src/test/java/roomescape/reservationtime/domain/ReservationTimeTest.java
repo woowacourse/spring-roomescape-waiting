@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BadRequestException;
 
 class ReservationTimeTest {
 
@@ -11,6 +12,6 @@ class ReservationTimeTest {
     @Test
     void reservationTimeTest() {
         assertThatThrownBy(() -> new ReservationTime(1L, null))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 }

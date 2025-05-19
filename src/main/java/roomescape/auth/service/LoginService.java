@@ -4,7 +4,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.TokenResponse;
-import roomescape.exception.InvalidAuthorizationException;
+import roomescape.exception.ExceptionCause;
+import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
@@ -29,7 +30,7 @@ public class LoginService {
         Optional<Member> memberOptional = memberRepository.findByEmailAndPassword(loginRequest.email(),
                 loginRequest.password());
         if (memberOptional.isEmpty()) {
-            throw new InvalidAuthorizationException("[ERROR] 로그인 정보를 다시 확인해 주세요.");
+            throw new NotFoundException(ExceptionCause.UNAUTHORIZED_LOGIN_ACCESS);
         }
         String token = jwtTokenProvider.createToken(memberOptional.get());
         return new TokenResponse(token);

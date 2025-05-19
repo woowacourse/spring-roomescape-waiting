@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ExceptionCause;
 
 @Entity
 @Table(name = "member")
@@ -44,7 +46,7 @@ public class Member {
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("[ERROR] 사용자의 이름은 1글자 이상으로 이루어져야 합니다.");
+            throw new BadRequestException(ExceptionCause.MEMBER_NAME_INVALID_INPUT);
         }
     }
 

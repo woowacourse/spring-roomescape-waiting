@@ -15,7 +15,8 @@ import roomescape.auth.dto.RegistrationRequest;
 import roomescape.auth.dto.TokenResponse;
 import roomescape.auth.service.LoginService;
 import roomescape.auth.service.SignupService;
-import roomescape.exception.UnauthorizedAccessException;
+import roomescape.exception.ExceptionCause;
+import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.MemberResponse;
@@ -42,8 +43,8 @@ public class AuthController {
 
     @GetMapping("/members")
     public ResponseEntity<List<MemberResponse>> getAllMembers(Member member) {
-        if (Role.isUser(member.getRole())) {
-            throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
+        if (!Role.isAdmin(member.getRole())) {
+            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
         }
 
         List<MemberResponse> response = memberService.findAllMembers()
