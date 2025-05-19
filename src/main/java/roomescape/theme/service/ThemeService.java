@@ -25,7 +25,6 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    @Transactional
     public ThemeResponse create(ThemeCreateRequest request) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
         Theme savedTheme = themeJpaRepository.save(theme);
@@ -41,19 +40,16 @@ public class ThemeService {
         themeJpaRepository.deleteById(theme.getId());
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> getAll() {
         List<Theme> themes = themeJpaRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
-    @Transactional(readOnly = true)
     public Theme getTheme(Long id) {
         return themeJpaRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes() {
         LocalDate endDate = LocalDate.now().minusDays(1L);
         LocalDate startDate = LocalDate.now().minusDays(7L);

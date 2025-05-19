@@ -49,20 +49,17 @@ public class ReservationTimeService {
         reservationTimeJpaRepository.deleteById(reservationTime.getId());
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getAll() {
         List<ReservationTime> reservationTimes = reservationTimeJpaRepository.findAll();
 
         return ReservationTimeResponse.from(reservationTimes);
     }
 
-    @Transactional(readOnly = true)
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeJpaRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
-    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
         return reservationTimeJpaRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),

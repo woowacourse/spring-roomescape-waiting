@@ -63,20 +63,17 @@ public class ReservationService {
         return createReservation(request, reservationDate, member);
     }
 
-    @Transactional
     public void deleteById(Long id) {
         Reservation reservation = getReservation(id);
         reservationRepository.deleteById(reservation.getId());
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> getAll() {
         List<Reservation> reservations = reservationRepository.findAll();
 
         return ReservationResponse.from(reservations);
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate start, LocalDate end) {
         return ReservationResponse.from(
                 reservationRepository.findByFilter(
@@ -85,7 +82,6 @@ public class ReservationService {
         );
     }
 
-    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllByMemberId(Long id) {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)
