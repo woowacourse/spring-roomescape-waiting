@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql("classpath:data.sql")
+@Sql("classpath:test-data.sql")
 class ReservationTimeRestControllerTest {
 
     @Autowired

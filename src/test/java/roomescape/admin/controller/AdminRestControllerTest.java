@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@Sql("classpath:data.sql")
+@Sql("classpath:test-data.sql")
 class AdminRestControllerTest {
 
     private String adminToken;
