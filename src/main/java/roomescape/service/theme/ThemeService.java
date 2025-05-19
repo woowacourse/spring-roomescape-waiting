@@ -20,7 +20,6 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    @Transactional
     public long addTheme(AddThemeDto addThemeDto) {
         Theme theme = addThemeDto.toEntity();
         return themeRepository.save(theme);

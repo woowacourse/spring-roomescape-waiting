@@ -62,8 +62,7 @@ public class ReservationService {
             throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
         }
     }
-    
-    @Transactional
+
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
     }

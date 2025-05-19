@@ -38,7 +38,6 @@ public class ReserveTicketService {
         return reserveTicketRepository.findAll();
     }
 
-    @Transactional
     public void deleteReservation(long id) {
         reserveTicketRepository.deleteById(id);
     }
