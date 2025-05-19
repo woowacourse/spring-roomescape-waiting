@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.reservation.ReservationRepository;
@@ -25,15 +26,18 @@ public class TimeSlotService {
     private final ReservationRepository reservationRepository;
     private final TimeSlotRepository timeSlotRepository;
 
+    @Transactional
     public TimeSlot register(final LocalTime startAt) {
         var timeSlot = new TimeSlot(startAt);
         return timeSlotRepository.save(timeSlot);
     }
 
+    @Transactional(readOnly = true)
     public List<TimeSlot> findAllTimeSlots() {
         return timeSlotRepository.findAll();
     }
 
+    @Transactional
     public void removeById(final long id) {
         if (reservationRepository.exists(byTimeSlotId(id))) {
             throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
@@ -43,6 +47,7 @@ public class TimeSlotService {
         timeSlotRepository.delete(timeSlot);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableTimeSlot> findAvailableTimeSlots(final LocalDate date, final long themeId) {
         var byDateAndTheme = Specification.allOf(byDate(date), byThemeId(themeId));
         var filteredReservations = reservationRepository.findAll(byDateAndTheme);

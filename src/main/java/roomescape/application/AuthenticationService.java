@@ -2,6 +2,7 @@ package roomescape.application;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.domain.user.Email;
@@ -17,6 +18,7 @@ public class AuthenticationService {
     private final AuthenticationTokenHandler tokenProvider;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public String issueToken(final String email, final String password) {
         var user = userRepository.findByEmail(new Email(email))
                 .orElseThrow(() -> new AuthenticationException("이메일 또는 비밀번호가 틀렸습니다."));
@@ -27,6 +29,7 @@ public class AuthenticationService {
         return tokenProvider.createToken(authenticationInfo);
     }
 
+    @Transactional(readOnly = true)
     public User getUserByToken(final String token) {
         var isValidToken = tokenProvider.isValidToken(token);
         if (!isValidToken) {

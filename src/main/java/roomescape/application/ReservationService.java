@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
@@ -29,6 +30,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var timeSlot = timeSlotRepository.getById(timeId);
         var theme = themeRepository.getById(themeId);
@@ -38,10 +40,12 @@ public class ReservationService {
         return reservationRepository.save(new Reservation(user, date, timeSlot, theme));
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
         return reservationRepository.findAll(byFilter(filter));
     }
 
+    @Transactional
     public void removeById(final long id) {
         var reservation = reservationRepository.getById(id);
         reservationRepository.delete(reservation);

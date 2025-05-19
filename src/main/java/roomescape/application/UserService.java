@@ -3,6 +3,7 @@ package roomescape.application;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Password;
@@ -17,6 +18,7 @@ public class UserService {
 
     private final UserRepository repository;
 
+    @Transactional
     public User register(final String email, final String password, final String name) {
         var optionalUser = repository.findByEmail(new Email(email));
         if (optionalUser.isPresent()) {
@@ -27,15 +29,18 @@ public class UserService {
         return repository.save(user);
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> getReservations(final long id) {
         var user = repository.getById(id);
         return user.reservations();
     }
 
+    @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         return repository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public User getById(final long id) {
         return repository.getById(id);
     }
