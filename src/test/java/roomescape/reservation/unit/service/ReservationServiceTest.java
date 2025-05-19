@@ -171,7 +171,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
-        when(reservationRepository.existsByDateAndTimeId(any(LocalDate.class), anyLong()))
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(LocalDate.class), anyLong(), anyLong()))
                 .thenReturn(true);
 
         var date = LocalDate.now().plusDays(1);
@@ -180,7 +180,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(member.getId(), request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("해당 날짜와 시간에 이미 예약이 존재합니다.");
+                .hasMessage("이미 예약이 존재합니다.");
 
         verify(reservationRepository, never()).save(any(Reservation.class));
     }

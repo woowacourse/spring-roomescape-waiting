@@ -103,8 +103,10 @@ public class ReservationService {
     }
 
     private void validateDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeId(reservation.getDate(), reservation.getTime().getId())) {
-            throw new ConflictException("해당 날짜와 시간에 이미 예약이 존재합니다.");
+        boolean hasDuplicate = reservationRepository.existsByDateAndTimeIdAndThemeId(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        if (hasDuplicate) {
+            throw new ConflictException("이미 예약이 존재합니다.");
         }
     }
 }

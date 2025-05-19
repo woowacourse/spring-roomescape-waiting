@@ -87,7 +87,7 @@ class ReservationAcceptanceTest {
         TestHelper.postWithToken("/reservations", reservationRequest, token)
                 .then()
                 .statusCode(HttpStatus.CONFLICT.value())
-                .body(equalTo("해당 날짜와 시간에 이미 예약이 존재합니다."));
+                .body(equalTo("이미 예약이 존재합니다."));
     }
 
     @Test

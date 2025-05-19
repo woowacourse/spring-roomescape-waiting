@@ -114,7 +114,7 @@ class ReservationIntegrationTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(member.getId(), request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("해당 날짜와 시간에 이미 예약이 존재합니다.");
+                .hasMessage("이미 예약이 존재합니다.");
     }
 
     @Test
