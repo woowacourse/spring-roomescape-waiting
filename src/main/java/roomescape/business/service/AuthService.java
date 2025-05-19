@@ -1,11 +1,11 @@
 package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.AuthToken;
 import roomescape.auth.jwt.JwtUtil;
-import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.exception.auth.AuthenticationException;
 
@@ -21,7 +21,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public AuthToken authenticate(final String email, final String password) {
-        final User user = userRepository.findByEmail(email)
+        val user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthenticationException(INVALID_EMAIL));
 
         if (!user.isPasswordCorrect(password)) {
