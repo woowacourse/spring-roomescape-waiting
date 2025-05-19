@@ -7,6 +7,7 @@ import static roomescape.infrastructure.ReservationSpecs.byTimeSlotId;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
@@ -20,24 +21,13 @@ import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
 
 @Service
+@AllArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final UserRepository userRepository;
-
-    public ReservationService(
-            final ReservationRepository reservationRepository,
-            final TimeSlotRepository timeSlotRepository,
-            final ThemeRepository themeRepository,
-            final UserRepository userRepository
-    ) {
-        this.reservationRepository = reservationRepository;
-        this.timeSlotRepository = timeSlotRepository;
-        this.themeRepository = themeRepository;
-        this.userRepository = userRepository;
-    }
 
     public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var timeSlot = timeSlotRepository.getById(timeId);
@@ -59,8 +49,7 @@ public class ReservationService {
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         var byDateTimeAndThemeId = Specification.allOf(byDate(date), byTimeSlotId(timeSlot.id()), byThemeId(theme.id()));
-        var reservation = reservationRepository.findAll(byDateTimeAndThemeId);
-        if (!reservation.isEmpty()) {
+        if (reservationRepository.exists(byDateTimeAndThemeId)) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
     }

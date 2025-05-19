@@ -1,7 +1,7 @@
 package roomescape.application;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.user.Email;
@@ -12,13 +12,10 @@ import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
     private final UserRepository repository;
-
-    public UserService(final UserRepository repository) {
-        this.repository = repository;
-    }
 
     public User register(final String email, final String password, final String name) {
         var optionalUser = repository.findByEmail(new Email(email));
@@ -30,12 +27,9 @@ public class UserService {
         return repository.save(user);
     }
 
-    @Transactional
     public List<Reservation> getReservations(final long id) {
         var user = repository.getById(id);
-        return user.reservations().stream()
-                .map(r -> new Reservation(r.id(), r.user(), r.dateTime(), r.theme(), r.status()))
-                .toList();
+        return user.reservations();
     }
 
     public List<User> findAllUsers() {

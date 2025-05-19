@@ -1,5 +1,6 @@
 package roomescape.application;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.auth.AuthenticationTokenHandler;
@@ -10,15 +11,11 @@ import roomescape.domain.user.UserRepository;
 import roomescape.exception.AuthenticationException;
 
 @Service
+@AllArgsConstructor
 public class AuthenticationService {
 
     private final AuthenticationTokenHandler tokenProvider;
     private final UserRepository userRepository;
-
-    public AuthenticationService(final AuthenticationTokenHandler tokenHandler, final UserRepository userRepository) {
-        this.tokenProvider = tokenHandler;
-        this.userRepository = userRepository;
-    }
 
     public String issueToken(final String email, final String password) {
         var user = userRepository.findByEmail(new Email(email))
