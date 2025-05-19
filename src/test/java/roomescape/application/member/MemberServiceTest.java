@@ -11,7 +11,7 @@ import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.repository.MemberRepository;
-import roomescape.domain.member.Role;
+import roomescape.domain.member.MemberRole;
 
 class MemberServiceTest extends AbstractServiceIntegrationTest {
 
@@ -29,8 +29,8 @@ class MemberServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 모든_회원_조회() {
         // given
-        memberRepository.save(new Member("벨로", new Email("test1@email.com"), "1234", Role.NORMAL));
-        memberRepository.save(new Member("서프", new Email("test2@email.com"), "1234", Role.NORMAL));
+        memberRepository.save(new Member("벨로", new Email("test1@email.com"), "1234", MemberRole.NORMAL));
+        memberRepository.save(new Member("서프", new Email("test2@email.com"), "1234", MemberRole.NORMAL));
 
         // when
         List<MemberResult> results = memberService.findAll();

@@ -17,7 +17,7 @@ import roomescape.application.reservation.dto.ReservationTimeResult;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.repository.MemberRepository;
-import roomescape.domain.member.Role;
+import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -142,7 +142,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약시간으로_예약된_예약이_존재하는_경우_예외가_발생한다() {
         // given
-        Member member = memberRepository.save(new Member("test", new Email("test@test.com"), "test", Role.ADMIN));
+        Member member = memberRepository.save(new Member("test", new Email("test@test.com"), "test", MemberRole.ADMIN));
         Theme theme = themeRepository.save(new Theme("test", "test", "test"));
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), reservationTime, theme));
@@ -157,7 +157,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약시간을_예약여부와_함께_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("test", new Email("test@test.com"), "test", Role.ADMIN));
+        Member member = memberRepository.save(new Member("test", new Email("test@test.com"), "test", MemberRole.ADMIN));
         Theme theme = themeRepository.save(new Theme("test", "test", "test"));
         ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));

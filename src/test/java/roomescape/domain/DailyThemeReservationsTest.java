@@ -10,7 +10,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.Role;
+import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.DailyThemeReservations;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationTime;
@@ -25,14 +25,14 @@ class DailyThemeReservationsTest {
         List<Reservation> reservations = List.of(
                 new Reservation(
                         1L,
-                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
+                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", MemberRole.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(1L, LocalTime.of(12, 0)),
                         new Theme(1L, "test", "description", "thumbnail")
                 ),
                 new Reservation(
                         2L,
-                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
+                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", MemberRole.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(1L, LocalTime.of(12, 0)),
                         new Theme(2L, "test2", "description2", "thumbnail2")
@@ -51,14 +51,14 @@ class DailyThemeReservationsTest {
         List<Reservation> reservations = List.of(
                 new Reservation(
                         1L,
-                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
+                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", MemberRole.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(1L, LocalTime.of(12, 0)),
                         new Theme(1L, "test", "description", "thumbnail")
                 ),
                 new Reservation(
                         2L,
-                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
+                        new Member(1L, "test1", new Email("email1@gmail.com"), "password", MemberRole.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(2L, LocalTime.of(13, 0)),
                         new Theme(1L, "test", "description", "thumbnail")

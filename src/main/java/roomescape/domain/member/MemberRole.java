@@ -1,6 +1,6 @@
 package roomescape.domain.member;
 
-public enum Role {
+public enum MemberRole {
 
     ADMIN,
     NORMAL

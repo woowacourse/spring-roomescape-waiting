@@ -16,7 +16,7 @@ import roomescape.application.reservation.dto.ThemeResult;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.repository.MemberRepository;
-import roomescape.domain.member.Role;
+import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.reservation.ReservationTime;
@@ -132,7 +132,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약이_존재하는_테마는_삭제할_수_없다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
         Theme theme = themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         reservationRepository.save(new Reservation(member, LocalDate.now(clock), reservationTime, theme));
@@ -147,7 +147,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 테마_예약_랭킹을_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
         Theme theme1 = themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
         Theme theme2 = themeRepository.save(new Theme("테마2", "설명2", "image2.png"));
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
