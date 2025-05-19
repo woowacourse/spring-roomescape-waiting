@@ -21,17 +21,19 @@ public record MyReservationResponse(
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                getBookingStatusFormat(reservation.getBookingStatus(), count)
+                formatStatus(reservation.getBookingStatus(), count)
         );
     }
 
-    private static String getBookingStatusFormat(final BookingStatus bookingStatus, final Long count) {
-        if (bookingStatus == BookingStatus.RESERVED) {
-            return bookingStatus.getValue();
+    private static String formatStatus(BookingStatus status, Long count) {
+        if (status == BookingStatus.RESERVED) {
+            return status.getValue();
         }
+
         if (count == 0L) {
             return "곧 예약 확정으로 바뀝니다.";
         }
-        return count + "번째 예약" + bookingStatus.getValue();
+
+        return String.format("%d번째 예약%s", count, status.getValue());
     }
 }
