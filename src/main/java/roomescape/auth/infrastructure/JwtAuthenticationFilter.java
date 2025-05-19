@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String token = cookieManager.extractLoginToken(request.getCookies());
 
         if (!StringUtils.hasText(token)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다.");
+            filterChain.doFilter(request, response);
             return;
         }
 
