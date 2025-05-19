@@ -55,7 +55,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void loginCheck() {
+    void 로그인_정보_체크() {
         // given
         Member member = MemberFixture.createMember(MemberRole.USER);
 
@@ -72,7 +72,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void logout() {
+    void 로그아웃하기() {
         // given
         Member member = MemberFixture.createMember(MemberRole.USER);
 

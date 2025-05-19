@@ -36,7 +36,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void getMembersTest() {
+    void 멤버_목록_불러오기() {
         List<Member> savedMembers = MemberFixture.createMembers(5, MemberRole.USER).stream()
             .map(memberRepository::save).toList();
 
@@ -55,7 +55,7 @@ class MemberControllerTest {
     }
 
     @Test
-    void signupTest() {
+    void 회원가입하기() {
         MemberSignUpRequest request = new MemberSignUpRequest("test", "test@test.com", "testpassword");
 
         RestAssured.given().log().all()
