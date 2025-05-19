@@ -111,7 +111,7 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("theme not found id =" + themeId));
     }
 
-    private ReservationTime gerReservationTime(final ReservationCreateRequest request) {
+    private ReservationTime getReservationTime(final ReservationCreateRequest request) {
         Long timeId = request.timeId();
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new EntityNotFoundException("reservationsTime not found id =" + timeId));
