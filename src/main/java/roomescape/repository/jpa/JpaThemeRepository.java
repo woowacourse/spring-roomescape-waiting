@@ -9,27 +9,18 @@ import roomescape.entity.Theme;
 
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
-    @Query(
-        value = """
-                SELECT
-                  t.id,
-                  t.name,
-                  t.description,
-                  t.thumbnail
-                FROM
-                  reservation as r
-                  INNER JOIN theme as t
-                  ON r.theme_id = t.id
-                WHERE
-                  r.date >= :startDate
-                  AND r.date <= :endDate
-                GROUP BY
-                  theme_id
-                ORDER BY
-                  COUNT(theme_id) DESC
-                LIMIT 10;
-            """, nativeQuery = true)
-    List<Theme> findTop10ByDateBetween(@Param("startDate") LocalDate startDate,
+    @Query("""
+            SELECT t
+            FROM
+              Reservation r
+              JOIN r.theme t
+            WHERE
+              r.date between :startDate AND :endDate
+            GROUP BY t
+            ORDER BY COUNT(t) DESC
+        """)
+    List<Theme> findTopRankByDateBetween(
+        @Param("startDate") LocalDate startDate,
         @Param("endDate") LocalDate endDate);
 
     boolean existsByName(String name);

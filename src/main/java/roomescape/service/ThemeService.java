@@ -13,6 +13,7 @@ import roomescape.repository.jpa.JpaThemeRepository;
 public class ThemeService {
 
     public static final int TOP_RANK_PERIOD_DAYS = 7;
+    public static final int TOP_MAX_SIZE = 10;
 
     private final JpaThemeRepository themeRepository;
 
@@ -29,7 +30,8 @@ public class ThemeService {
     public List<ThemeResponse> findTopReservedThemes() {
         LocalDate today = LocalDate.now();
 
-        return themeRepository.findTop10ByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today).stream()
+        return themeRepository.findTopRankByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today).stream()
+            .limit(TOP_MAX_SIZE)
             .map(ThemeResponse::from)
             .toList();
     }

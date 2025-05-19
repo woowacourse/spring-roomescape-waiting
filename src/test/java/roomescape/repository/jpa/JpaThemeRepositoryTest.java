@@ -49,7 +49,7 @@ class JpaThemeRepositoryTest {
         em.flush();
         em.clear();
 
-        List<Theme> themes = jpaThemeRepository.findTop10ByDateBetween(date.minusDays(7), date);
+        List<Theme> themes = jpaThemeRepository.findTopRankByDateBetween(date.minusDays(7), date);
 
         assertThat(themes.getLast().getId()).isEqualTo(1);
     }
