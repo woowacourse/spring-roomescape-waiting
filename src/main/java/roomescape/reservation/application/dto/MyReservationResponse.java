@@ -29,6 +29,9 @@ public record MyReservationResponse(
         if (bookingStatus == BookingStatus.RESERVED) {
             return bookingStatus.getValue();
         }
+        if (count == 0L) {
+            return "곧 예약 확정으로 바뀝니다.";
+        }
         return count.toString() + "번째 예약" + bookingStatus.getValue();
     }
 
