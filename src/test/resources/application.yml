@@ -1,0 +1,35 @@
+spring:
+  profiles:
+    active: test
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # DB connection setting
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: test
+    password: password
+
+  # DB initialization
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+  # JPA settings
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create-drop
+
+security:
+  jwt:
+    token:
+      secret-key: "Yn2kjibddFAWtnPJ2AFlL8WXmohJMCvigQggaEypa5E="
+      expire-length: 3600000
