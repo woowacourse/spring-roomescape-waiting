@@ -7,26 +7,31 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.exception.local.AlreadyReservedThemeException;
+import roomescape.exception.local.NotFoundThemeException;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
 @Transactional
 public class ThemeService {
 
-    private final ThemeRepository repository;
+    private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository repository) {
-        this.repository = repository;
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+        this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<ThemeResponse> findAllThemes() {
-        return repository.findAll().stream()
+        return themeRepository.findAll().stream()
                 .map(ThemeResponse::new)
                 .toList();
     }
 
     public List<ThemeResponse> findTopThemes(LocalDate from, LocalDate to, int size) {
-        List<Theme> themes = repository.findThemesOrderByReservationCount(from, to, size);
+        List<Theme> themes = themeRepository.findThemesOrderByReservationCount(from, to, size);
         return themes.stream()
                 .map(ThemeResponse::new)
                 .toList();
@@ -34,11 +39,25 @@ public class ThemeService {
 
     public ThemeResponse addTheme(ThemeCreationContent request) {
         Theme theme = Theme.createWithoutId(request.name(), request.description(), request.thumbnail());
-        Theme savedTheme = repository.save(theme);
+        Theme savedTheme = themeRepository.save(theme);
         return new ThemeResponse(savedTheme);
     }
 
     public void deleteThemeById(Long id) {
-        repository.deleteById(id);
+        Theme theme = loadThemeById(id);
+        validateReservationInTime(theme);
+        themeRepository.deleteById(id);
+    }
+
+    private Theme loadThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(NotFoundThemeException::new);
+    }
+
+    private void validateReservationInTime(Theme theme) {
+        boolean isExistReservation = reservationRepository.existsByTheme(theme);
+        if (isExistReservation) {
+            throw new AlreadyReservedThemeException();
+        }
     }
 }
