@@ -189,7 +189,7 @@ class ReservationControllerTest {
 
         String date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(day);
         RestAssured.given().log().all()
-                .when().get("/reservations/available?date=" + date + "&themeId=" + themeId)
+                .when().get("/reservations/times?date=" + date + "&themeId=" + themeId)
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2))

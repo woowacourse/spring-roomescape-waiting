@@ -35,7 +35,7 @@
 ### 조회
 
 - [x] "/reservations" get 요청 시 모든 예약 정보를 반환한다.
-- [x] "/reservations/available" get 요청으로 날짜(date) 와 테마(themeId)를 쿼리 스트링으로 요청하면 예약 가능한 시간을 가져올 수 있다.
+- [x] "/reservations/times" get 요청으로 날짜(date) 와 테마(themeId)를 쿼리 스트링으로 요청하면 예약 가능한 시간을 가져올 수 있다.
     - 시간 정보 (timeResponse), 예약 여부 (alreadyBooked)를 반환한다.
 
 ### 추가
