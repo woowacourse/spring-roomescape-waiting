@@ -2,12 +2,12 @@ package roomescape.member.repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 
-public interface MemberRepository extends CrudRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("SELECT m.name FROM Member m WHERE m.email = :email")
     Optional<String> findNameByEmail(@Param("email") final String email);
