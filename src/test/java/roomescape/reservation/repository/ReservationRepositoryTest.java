@@ -5,11 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.constant.TestData.RESERVATION_COUNT;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,8 @@ class ReservationRepositoryTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    private Clock clock = Clock.systemDefaultZone();
+
     private LocalDate date;
     private ReservationTime time1;
     private ReservationTime time2;
@@ -70,8 +75,8 @@ class ReservationRepositoryTest {
         themeRepository.save(theme2);
         memberRepository.save(member1);
         memberRepository.save(member2);
-        Reservation reservation1 = Reservation.booked(date, time1, theme1, member1);
-        Reservation reservation2 = Reservation.booked(date, time2, theme2, member2);
+        Reservation reservation1 = Reservation.booked(date, time1, theme1, member1, LocalDateTime.now(clock));
+        Reservation reservation2 = Reservation.booked(date, time2, theme2, member2, LocalDateTime.now(clock));
         repository.save(reservation1);
         repository.save(reservation2);
 
@@ -93,9 +98,9 @@ class ReservationRepositoryTest {
         LocalDate date2 = LocalDate.of(2999, 7, 2);
         LocalDate date3 = LocalDate.of(2999, 7, 3);
 
-        repository.save(Reservation.booked(date1, time1, theme1, member1));
-        repository.save(Reservation.booked(date2, time1, theme1, member1));
-        repository.save(Reservation.booked(date3, time1, theme1, member1));
+        repository.save(Reservation.booked(date1, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.booked(date2, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.booked(date3, time1, theme1, member1, LocalDateTime.now(clock)));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, null, date2, null);
@@ -122,11 +127,11 @@ class ReservationRepositoryTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        repository.save(Reservation.booked(date1, time1, theme1, member1));
-        repository.save(Reservation.booked(date2, time1, theme1, member1));
-        repository.save(Reservation.booked(date3, time1, theme1, member1));
-        repository.save(Reservation.booked(date4, time1, theme1, member2));
-        repository.save(Reservation.booked(date5, time1, theme1, member2));
+        repository.save(Reservation.booked(date1, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.booked(date2, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.booked(date3, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.booked(date4, time1, theme1, member2, LocalDateTime.now(clock)));
+        repository.save(Reservation.booked(date5, time1, theme1, member2, LocalDateTime.now(clock)));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, member1.getId(), null, null);
@@ -151,7 +156,7 @@ class ReservationRepositoryTest {
         themeRepository.save(theme1);
         memberRepository.save(member1);
         reservationTimeRepository.save(futureTime);
-        final Reservation booked = Reservation.booked(today, futureTime, theme1, member1);
+        final Reservation booked = Reservation.booked(today, futureTime, theme1, member1, LocalDateTime.now(clock));
 
         // when
         // then
@@ -166,11 +171,12 @@ class ReservationRepositoryTest {
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);
         ReservationTime pastTime = ReservationTime.from(oneMinuteBefore);
-        final Reservation booked = Reservation.booked(today, pastTime, defaultTheme, defaultMember);
         // when
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> Reservation.booked(today, pastTime, defaultTheme,
+                defaultMember, LocalDateTime.now(clock));
 
         // then
-        assertThatThrownBy(() -> repository.save(booked))
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(ReservationException.class)
                 .hasMessage("예약은 현재 시간 이후로 가능합니다.");
     }

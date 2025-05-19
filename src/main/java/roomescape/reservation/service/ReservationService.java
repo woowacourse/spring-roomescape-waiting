@@ -1,9 +1,13 @@
 package roomescape.reservation.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
@@ -26,6 +30,7 @@ import roomescape.theme.repository.ThemeRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private final Clock clock;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -54,7 +59,8 @@ public class ReservationService {
         }
 
         final Member member = Member.from(loginMember);
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
+        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member,
+                LocalDateTime.now(clock));
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
     }
@@ -69,7 +75,8 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
+        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member,
+                LocalDateTime.now(clock));
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
     }

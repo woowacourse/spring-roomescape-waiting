@@ -3,13 +3,16 @@ package roomescape.theme.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Clock;
 import java.util.List;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+
 import roomescape.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -29,9 +32,11 @@ class ThemeServiceTest {
 
     private ThemeService service;
 
+    private Clock clock = Clock.systemDefaultZone();
+
     @BeforeEach
     void setUp() {
-        service = new ThemeService(themeRepository, reservationRepository);
+        service = new ThemeService(clock, themeRepository, reservationRepository);
     }
 
     @Test

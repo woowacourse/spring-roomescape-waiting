@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.constant.TestData.RESERVATION_COUNT;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -47,6 +49,8 @@ class ReservationServiceTest {
     @Autowired
     private MemberRepository memberRepo;
 
+    private Clock clock = Clock.systemDefaultZone();
+
     private ReservationService service;
 
     private ReservationTime time1;
@@ -59,14 +63,14 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReservationService(reservationRepository, timeRepo, themeRepo, memberRepo);
+        service = new ReservationService(clock, reservationRepository, timeRepo, themeRepo, memberRepo);
         time1 = ReservationTime.from(LocalTime.of(14, 0));
 
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
 
         member = Member.withDefaultRole("member", "mem@naver.com", "1234");
 
-        r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member);
+        r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member, LocalDateTime.now(clock));
     }
 
     @Test
@@ -178,10 +182,14 @@ class ReservationServiceTest {
         memberRepo.save(member);
         timeRepo.save(time1);
         themeRepo.save(theme1);
-        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,1), time1, theme1, member));
-        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,2), time1, theme1, member));
-        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,3), time1, theme1, member));
-        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,4), time1, theme1, member));
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,1), time1, theme1, member,
+                LocalDateTime.now(clock)));
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,2), time1, theme1, member,
+                LocalDateTime.now(clock)));
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,3), time1, theme1, member,
+                LocalDateTime.now(clock)));
+        reservationRepository.save(Reservation.booked(LocalDate.of(2999,5,4), time1, theme1, member,
+                LocalDateTime.now(clock)));
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
 

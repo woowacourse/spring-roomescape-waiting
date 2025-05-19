@@ -1,9 +1,12 @@
 package roomescape.theme.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 import roomescape.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -16,6 +19,7 @@ import roomescape.theme.repository.ThemeRepository;
 @RequiredArgsConstructor
 public class ThemeService {
 
+    private final Clock clock;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -32,8 +36,8 @@ public class ThemeService {
     }
 
     public List<PopularThemeResponse> findAllPopular() {
-        final LocalDate startDate = java.time.LocalDate.now().minusDays(7);
-        final LocalDate endDate = LocalDate.now().minusDays(1);
+        final LocalDate startDate = java.time.LocalDate.now(clock).minusDays(7);
+        final LocalDate endDate = LocalDate.now(clock).minusDays(1);
         return themeRepository.findAllPopular(startDate, endDate)
                 .stream()
                 .map(PopularThemeResponse::new)

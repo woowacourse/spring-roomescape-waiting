@@ -58,7 +58,8 @@ public class Reservation {
             @NonNull final ReservationTime time,
             @NonNull final Theme theme,
             @NonNull final Member member,
-            @NonNull final ReservationStatus status
+            @NonNull final ReservationStatus status,
+            @NonNull final LocalDateTime currentDateTime
     ) {
         this.id = id;
         this.date = date;
@@ -66,14 +67,15 @@ public class Reservation {
         this.theme = theme;
         this.member = member;
         this.status = status;
-        validateFutureOrPresent();
+        validateFutureOrPresent(currentDateTime);
     }
 
     public static Reservation booked(
             final LocalDate date,
             final ReservationTime reservationTime,
             final Theme theme,
-            final Member member
+            final Member member,
+            final LocalDateTime currentDateTime
     ) {
         return builder()
                 .id(null)
@@ -82,12 +84,12 @@ public class Reservation {
                 .theme(theme)
                 .member(member)
                 .status(ReservationStatus.BOOKED)
+                .currentDateTime(currentDateTime)
                 .build();
     }
 
-    private void validateFutureOrPresent() {
+    private void validateFutureOrPresent(LocalDateTime currentDateTime) {
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        final LocalDateTime currentDateTime = LocalDateTime.now();
         if (reservationDateTime.isBefore(currentDateTime)) {
             throw new ReservationException("예약은 현재 시간 이후로 가능합니다.");
         }
