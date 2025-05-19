@@ -4,17 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.model.entity.Reservation;
-import roomescape.reservation.model.repository.dto.ReservationWithMember;
 
 public interface ReservationRepository {
 
-    List<ReservationWithMember> getAllWithMember();
+    List<Reservation> getAll();
 
     Reservation save(Reservation reservation);
-
-    Optional<ReservationWithMember> findWithMemberById(Long id);
-
-    ReservationWithMember getWithMemberById(Long id);
 
     void remove(Reservation reservation);
 
@@ -24,7 +19,7 @@ public interface ReservationRepository {
 
     boolean existsByTimeId(Long reservationTimeId);
 
-    List<ReservationWithMember> getSearchReservationsWithMember(Long themeId, Long memberId, LocalDate from, LocalDate to);
+    List<Reservation> getSearchReservations(Long themeId, Long memberId, LocalDate from, LocalDate to);
 
     Optional<Reservation> findById(Long id);
 

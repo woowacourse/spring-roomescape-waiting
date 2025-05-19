@@ -16,7 +16,6 @@ import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
 import roomescape.reservation.model.service.ReservationValidator;
 import roomescape.global.exception.BusinessRuleViolationException;
-import roomescape.global.exception.ResourceNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +43,8 @@ public class UserReservationService {
     private ReservationDetails createReservationDetails(CreateReservationServiceRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
         ReservationTheme reservationTheme = reservationThemeRepository.getById(request.themeId());
-        return request.toReservationDetails(reservationTime, reservationTheme);
+        Member member = memberRepository.getById(request.memberId());
+        return request.toReservationDetails(member, reservationTime, reservationTheme);
     }
 
 }

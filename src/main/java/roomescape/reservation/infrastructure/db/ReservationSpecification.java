@@ -21,7 +21,7 @@ public class ReservationSpecification {
             if (memberId == null) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("memberId"), memberId);
+            return criteriaBuilder.equal(root.get("member").get("id"), memberId);
         };
     }
 

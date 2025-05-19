@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationDetails;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 
@@ -38,16 +40,18 @@ public class Reservation {
     @JoinColumn(name = "theme_id")
     private ReservationTheme theme;
 
-    private Long memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Builder
     public Reservation(Long id, LocalDate date, ReservationTime time, ReservationTheme theme,
-            Long memberId) {
+            Member member) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.memberId = memberId;
+        this.member = member;
     }
 
     public LocalDateTime getReservationDateTime() {

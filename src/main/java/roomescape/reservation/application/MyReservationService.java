@@ -15,7 +15,7 @@ public class MyReservationService {
 
     private final ReservationRepository reservationRepository;
 
-    public List <MyReservationServiceResponse> getAllByMemberId(Long memberId) {
+    public List<MyReservationServiceResponse> getAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         return reservations.stream()
             .map(reservation -> buildMyReservationServiceResponse(reservation))
@@ -23,8 +23,8 @@ public class MyReservationService {
     }
 
     private MyReservationServiceResponse buildMyReservationServiceResponse(
-        Reservation reservation
-    ) {
+            Reservation reservation
+        ) {
         ReservationStatus reservationStatus = ReservationStatus.getStatus(
             reservation.getReservationDateTime(), LocalDateTime.now()
         );

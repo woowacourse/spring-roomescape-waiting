@@ -10,7 +10,6 @@ import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.reservation.infrastructure.db.dao.ReservationJpaRepository;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.repository.ReservationRepository;
-import roomescape.reservation.model.repository.dto.ReservationWithMember;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,24 +17,13 @@ public class ReservationDbRepository implements ReservationRepository {
 
     private final ReservationJpaRepository reservationJpaRepository;
 
-    public List<ReservationWithMember> getAllWithMember() {
-        return reservationJpaRepository.findAllWithMember();
+    public List<Reservation> getAll() {
+        return reservationJpaRepository.findAll();
     }
 
     @Override
     public Reservation save(Reservation reservation) {
         return reservationJpaRepository.save(reservation);
-    }
-
-    @Override
-    public Optional<ReservationWithMember> findWithMemberById(Long reservationId) {
-        return reservationJpaRepository.findWithMemberById(reservationId);
-    }
-
-    @Override
-    public ReservationWithMember getWithMemberById(Long id) {
-        return findWithMemberById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약이 존재하지 않습니다."));
     }
 
     @Override
@@ -59,18 +47,14 @@ public class ReservationDbRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationWithMember> getSearchReservationsWithMember(Long themeId, Long memberId, LocalDate from, LocalDate to) {
+    public List<Reservation> getSearchReservations(Long themeId, Long memberId, LocalDate from, LocalDate to) {
         Specification<Reservation> spec = Specification.where(
             ReservationSpecification.memberIdEquals(memberId))
             .and(ReservationSpecification.themeIdEquals(themeId))
             .and(ReservationSpecification.betweenDate(from, to));
 
         List<Reservation> reservations = reservationJpaRepository.findAll(spec);
-        List<Long> reservationIds = reservations.stream()
-            .map(reservation -> reservation.getId())
-            .toList();
-
-        return findAllByIds(reservationIds);
+        return reservations;
     }
 
     @Override
@@ -87,9 +71,5 @@ public class ReservationDbRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAllByMemberId(Long memberId) {
         return reservationJpaRepository.findAllByMemberId(memberId);
-    }
-
-    private List<ReservationWithMember> findAllByIds(List<Long> reservationIds) {
-        return reservationJpaRepository.findAllWithMemberByIds(reservationIds);
     }
 }

@@ -3,7 +3,6 @@ package roomescape.reservation.application.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.model.entity.Reservation;
-import roomescape.reservation.model.repository.dto.ReservationWithMember;
 
 public record ReservationServiceResponse(
     Long id,
@@ -23,13 +22,13 @@ public record ReservationServiceResponse(
         );
     }
 
-    public static ReservationServiceResponse from(ReservationWithMember reservationWithMember) {
+    public static ReservationServiceResponse from(Reservation reservation) {
         return new ReservationServiceResponse(
-            reservationWithMember.id(),
-            reservationWithMember.memberName(),
-            reservationWithMember.date(),
-            reservationWithMember.startAt(),
-            reservationWithMember.themeName()
+            reservation.getId(),
+            reservation.getMember().getName(),
+            reservation.getDate(),
+            reservation.getTime().getStartAt(),
+            reservation.getTheme().getName()
         );
     }
 }
