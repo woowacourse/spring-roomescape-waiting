@@ -197,6 +197,22 @@ class ReservationServiceTest {
         List<MyReservationResponse> myReservations = service.findMyReservations(loginMember);
 
         // then
-        assertThat(myReservations).hasSize(4);
+        assertThat(myReservations)
+                .hasSize(4)
+                .extracting(MyReservationResponse::date)
+                .containsExactlyInAnyOrder(
+                        LocalDate.of(2999, 5, 1),
+                        LocalDate.of(2999, 5, 2),
+                        LocalDate.of(2999, 5, 3),
+                        LocalDate.of(2999, 5, 4)
+                );
+
+        assertThat(myReservations)
+                .extracting(MyReservationResponse::theme)
+                .anyMatch(theme -> theme.equals(theme1.getName()));
+
+        assertThat(myReservations)
+                .extracting(MyReservationResponse::time)
+                .allMatch(time -> time.equals(time1.getStartAt()));
     }
 }
