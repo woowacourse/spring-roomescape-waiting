@@ -40,7 +40,7 @@ public class Theme {
         return new Builder();
     }
 
-    public void validateTheme() {
+    private void validateTheme() {
         if (name == null || description == null || thumbnail == null) {
             throw new IllegalArgumentException("Theme field cannot be null");
         }
