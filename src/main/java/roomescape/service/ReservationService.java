@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -19,6 +20,7 @@ import roomescape.repository.jpa.JpaReservationTimeRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final JpaReservationRepository reservationRepository;
@@ -33,18 +35,21 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllReservations() {
         return reservationRepository.findAll().stream()
             .map(ReservationResponse::from)
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> findReservationsByMemberId(Member member) {
         return reservationRepository.findByMemberId(member.getId()).stream()
             .map(MyReservationResponse::from)
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findReservationsByFilters(Long themeId, Long memberId,
         LocalDate dateFrom, LocalDate dateTo) {
         return reservationRepository.findAll().stream()

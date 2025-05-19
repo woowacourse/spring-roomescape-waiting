@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.entity.Theme;
@@ -10,6 +11,7 @@ import roomescape.exception.custom.DuplicatedException;
 import roomescape.repository.jpa.JpaThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     public static final int TOP_RANK_PERIOD_DAYS = 7;
@@ -21,12 +23,14 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAllThemes() {
         return themeRepository.findAll().stream()
             .map(ThemeResponse::from)
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findTopReservedThemes() {
         LocalDate today = LocalDate.now();
 
