@@ -158,38 +158,40 @@ class ReservationServiceTest {
         Reservation reservation3 = Reservation.reserve(
                 member2, ReservationDateTime.create(reservationDate, 열시), theme
         );
-
         reservationRepository.saveAll(List.of(reservation1, reservation2, reservation3));
+
         // when & then
         // 공포 필터링
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(reservationService.getFilteredReservations(
+                    theme.getId(), null, null, null)
+            ).hasSize(3);
+            // 사용자1 필터링
+            softly.assertThat(reservationService.getFilteredReservations(
+                    null, member1.getId(), null, null)
+            ).hasSize(2);
+            // 오늘 필터링
+            softly.assertThat(reservationService.getFilteredReservations
+                    (null, null, today, today)
+            ).isEmpty();
+            // 공포 테마 & 내일 필터링
+            softly.assertThat(reservationService.getFilteredReservations(
+                    theme.getId(), null, tomorrow, tomorrow)
+            ).hasSize(3);
+            // 모든 필터 조합
+            softly.assertThat(reservationService.getFilteredReservations(
+                    theme.getId(), member2.getId(), tomorrow, tomorrow)
+            ).hasSize(1);
+            // 일치하는 결과가 없는 필터 조합
+            softly.assertThat(reservationService.getFilteredReservations(
+                    theme.getId(), member2.getId(), today, today)
+            ).isEmpty();
 
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(
-                        reservationService.getFilteredReservations(theme.getId(), null, null, null))
-                .hasSize(3);
-        // 사용자1 필터링
-        softly.assertThat(reservationService.getFilteredReservations(null, member1.getId(), null, null))
-                .hasSize(2);
-        // 오늘 필터링
-        softly.assertThat(reservationService.getFilteredReservations(null, null, today, today))
-                .isEmpty();
-        // 공포 테마 & 내일 필터링
-        softly.assertThat(
-                        reservationService.getFilteredReservations(theme.getId(), null, tomorrow, tomorrow))
-                .hasSize(3);
-        // 모든 필터 조합
-        softly.assertThat(
-                        reservationService.getFilteredReservations(theme.getId(), member2.getId(), tomorrow, tomorrow))
-                .hasSize(1);
-        // 일치하는 결과가 없는 필터 조합
-        softly.assertThat(reservationService.getFilteredReservations(theme.getId(), member2.getId(), today, today))
-                .isEmpty();
-
-        // 모든 결과 조회
-        softly.assertThat(reservationService.getFilteredReservations(null, null, null, null))
-                .hasSize(3);
-
-        softly.assertAll();
+            // 모든 결과 조회
+            softly.assertThat(reservationService.getFilteredReservations(
+                    null, null, null, null)
+            ).hasSize(3);
+        });
     }
 
     @Test
@@ -205,18 +207,13 @@ class ReservationServiceTest {
 
         List<MyReservationResponse> myReservations = reservationService.getMyReservations(member1.getId());
 
-        System.out.println(myReservations);
-
-        SoftAssertions softly = new SoftAssertions();
-
-        softly.assertThat(myReservations).hasSize(1);
-        softly.assertThat(myReservations.get(0).reservationId()).isEqualTo(reservation1.getId());
-        softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
-        softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
-        softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());
-        softly.assertThat(myReservations.get(0).status()).isEqualTo(reservation1.getStatus().getMessage());
-
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(myReservations).hasSize(1);
+            softly.assertThat(myReservations.get(0).reservationId()).isEqualTo(reservation1.getId());
+            softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
+            softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
+            softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());
+            softly.assertThat(myReservations.get(0).status()).isEqualTo(reservation1.getStatus().getMessage());
+        });
     }
-
 }

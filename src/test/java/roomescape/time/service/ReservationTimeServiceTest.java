@@ -123,13 +123,11 @@ class ReservationTimeServiceTest {
 
         List<AvailableReservationTimeResponse> responses = reservationTimeService.getAvailableReservationTimes(request);
 
-        SoftAssertions softly = new SoftAssertions();
-
-        softly.assertThat(responses.get(0).id()).isNotNull();
-        softly.assertThat(responses.get(0).startAt()).isEqualTo(reservation1.getReservationTime().getStartAt());
-        softly.assertThat(responses.get(0).isReserved()).isEqualTo(true);
-        softly.assertThat(responses.get(1).isReserved()).isEqualTo(false);
-
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(responses.get(0).id()).isNotNull();
+            softly.assertThat(responses.get(0).startAt()).isEqualTo(reservation1.getReservationTime().getStartAt());
+            softly.assertThat(responses.get(0).isReserved()).isEqualTo(true);
+            softly.assertThat(responses.get(1).isReserved()).isEqualTo(false);
+        });
     }
 }
