@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationDetails;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 
@@ -38,16 +39,17 @@ public class Reservation {
     @JoinColumn(name = "theme_id")
     private ReservationTheme theme;
 
-    private Long memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Builder
-    public Reservation(Long id, LocalDate date, ReservationTime time, ReservationTheme theme,
-            Long memberId) {
+    public Reservation(Long id, LocalDate date, ReservationTime time, ReservationTheme theme, Member member) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.memberId = memberId;
+        this.member = member;
     }
 
     public LocalDateTime getReservationDateTime() {

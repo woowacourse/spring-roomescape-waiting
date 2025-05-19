@@ -29,12 +29,11 @@ public class UserReservationService {
 
     public ReservationServiceResponse create(CreateReservationServiceRequest request) {
         ReservationDetails reservationDetails = createReservationDetails(request);
-        Member member = memberRepository.getById(request.memberId());
         try {
             reservationValidator.validateNoDuplication(request.date(), request.timeId(), request.themeId());
             Reservation reservation = Reservation.createFutureReservation(reservationDetails);
             Reservation savedReservation = reservationRepository.save(reservation);
-            return ReservationServiceResponse.from(savedReservation, member.getName());
+            return ReservationServiceResponse.from(savedReservation);
         } catch (ReservationException e) {
             throw new BusinessRuleViolationException(e.getMessage(), e);
         }
@@ -43,7 +42,8 @@ public class UserReservationService {
     private ReservationDetails createReservationDetails(CreateReservationServiceRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
         ReservationTheme reservationTheme = reservationThemeRepository.getById(request.themeId());
-        return request.toReservationDetails(reservationTime, reservationTheme);
+        Member member = memberRepository.getById(request.memberId());
+        return request.toReservationDetails(reservationTime, reservationTheme, member);
     }
 
 }

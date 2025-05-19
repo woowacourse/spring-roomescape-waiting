@@ -33,34 +33,6 @@ public class ReservationTestFixture {
             .build();
     }
 
-    public static Reservation getReservationFixture(Member member) {
-        return Reservation.builder()
-            .date(LocalDate.now().plusDays(5))
-            .time(getReservationTimeFixture())
-            .theme(getReservationThemeFixture())
-            .memberId(member.getId())
-            .build();
-    }
-
-    public static Reservation getReservationFixture(LocalDate date, Member member,
-        ReservationTime time, ReservationTheme theme) {
-        return Reservation.builder()
-            .date(date)
-            .time(time)
-            .theme(theme)
-            .memberId(member.getId())
-            .build();
-    }
-
-    public static Reservation createReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme theme, Long id) {
-        return Reservation.builder()
-            .date(date)
-            .time(getReservationTimeFixture())
-            .theme(getReservationThemeFixture())
-            .memberId(id)
-            .build();
-    }
-
     public static Reservation createReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme) {
         return Reservation.builder()
             .date(date)

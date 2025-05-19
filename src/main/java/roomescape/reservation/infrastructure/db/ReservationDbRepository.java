@@ -10,7 +10,6 @@ import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.reservation.infrastructure.db.dao.ReservationJpaRepository;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.repository.ReservationRepository;
-import roomescape.reservation.model.repository.dto.ReservationWithMember;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,8 +17,9 @@ public class ReservationDbRepository implements ReservationRepository {
 
     private final ReservationJpaRepository reservationJpaRepository;
 
-    public List<ReservationWithMember> getAllWithMember() {
-        return reservationJpaRepository.findAllWithMember();
+    @Override
+    public List<Reservation> getAll() {
+        return reservationJpaRepository.findAll();
     }
 
     @Override
@@ -28,13 +28,13 @@ public class ReservationDbRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<ReservationWithMember> findWithMemberById(Long reservationId) {
-        return reservationJpaRepository.findWithMemberById(reservationId);
+    public Optional<Reservation> findById(Long reservationId) {
+        return reservationJpaRepository.findById(reservationId);
     }
 
     @Override
-    public ReservationWithMember getWithMemberById(Long id) {
-        return findWithMemberById(id)
+    public Reservation getById(Long id) {
+        return this.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약이 존재하지 않습니다."));
     }
 
@@ -59,38 +59,17 @@ public class ReservationDbRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationWithMember> getSearchReservationsWithMember(Long themeId, Long memberId, LocalDate from,
-            LocalDate to) {
+    public List<Reservation> getSearchReservations(Long themeId, Long memberId, LocalDate from, LocalDate to) {
         Specification<Reservation> spec = Specification.where(
                         ReservationSpecification.memberIdEquals(memberId))
                 .and(ReservationSpecification.themeIdEquals(themeId))
                 .and(ReservationSpecification.betweenDate(from, to));
 
-        List<Reservation> reservations = reservationJpaRepository.findAll(spec);
-        List<Long> reservationIds = reservations.stream()
-                .map(reservation -> reservation.getId())
-                .toList();
-
-        return findAllByIds(reservationIds);
-    }
-
-    @Override
-    public Optional<Reservation> findById(Long id) {
-        return reservationJpaRepository.findById(id);
-    }
-
-    @Override
-    public Reservation getById(Long id) {
-        return findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약이 존재하지 않습니다."));
+        return reservationJpaRepository.findAll(spec);
     }
 
     @Override
     public List<Reservation> findAllByMemberId(Long memberId) {
         return reservationJpaRepository.findAllByMemberId(memberId);
-    }
-
-    private List<ReservationWithMember> findAllByIds(List<Long> reservationIds) {
-        return reservationJpaRepository.findAllWithMemberByIds(reservationIds);
     }
 }

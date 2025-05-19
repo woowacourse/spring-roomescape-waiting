@@ -24,7 +24,6 @@ import roomescape.reservation.model.entity.ReservationTime;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
-import roomescape.reservation.model.repository.dto.ReservationWithMember;
 import roomescape.support.IntegrationTestSupport;
 
 class UserReservationServiceTest extends IntegrationTestSupport {
@@ -81,11 +80,11 @@ class UserReservationServiceTest extends IntegrationTestSupport {
         ReservationServiceResponse response = userReservationService.create(request);
 
         // then
-        List<ReservationWithMember> reservations = reservationRepository.getAllWithMember();
+        List<Reservation> reservations = reservationRepository.getAll();
         assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(1);
-            softly.assertThat(reservations.getFirst().memberId()).isEqualTo(response.id());
-            softly.assertThat(reservations.getFirst().date()).isEqualTo(response.date());
+            softly.assertThat(reservations.getFirst().getMember().getId()).isEqualTo(response.id());
+            softly.assertThat(reservations.getFirst().getDate()).isEqualTo(response.date());
         });
     }
 
