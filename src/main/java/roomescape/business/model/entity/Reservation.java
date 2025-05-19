@@ -6,6 +6,8 @@ import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -25,6 +27,8 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne
     private Theme theme;
+    @OneToMany(mappedBy = "waiting")
+    private final List<Waiting> waitingList = new ArrayList<>();
 
     protected Reservation() {
         id = Id.issue();

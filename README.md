@@ -6,13 +6,18 @@
     - 예약이 취소되는 경우 자동으로 가장 낮은 번호가 예약 상태가 된다.
 
 ### Waiting이 Reservation을 Id로 참조
+
+- Waiting - ManyToOne - Reservation
 - 추가가 간편하다
 
+- Reservation이 List<Waiting>을 들고 있고, OneToMany를 거는 방법
+  - 이게 맞나..?
 - Reservation.user를 제외한 정보를 공유할 수 있음.
-- 참조 무결성에 의해 삭제가 불편
+- 참조 무결성에 의해 예약 삭제가 불편
   - Reservation1에 Waiting 1, 2, 3이 참조가 걸려 있는 상황
   - Reservation1 취소(삭제) 불가능, 참조 무결성
     - Waiting 가장 빠른 것 조회, (Waiting1)
     - 참조하는 Reservation1에서 필요한 정보를 추출, Waiting의 user만 갈아껴서 Reservation2를 생성
     - Reservation2로 나머지 모든 Waiting(2, 3) 의 참조를 변경
     - Reservation1 삭제
+  - 대기 기능이 생겼으니 어쩔수 없는 흐름, 서비스 단에서 이루어지면 된다. 
