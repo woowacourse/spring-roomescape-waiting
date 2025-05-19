@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.member.entity.Member;
@@ -34,6 +35,7 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.repository.WaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -52,6 +54,9 @@ class ReservationServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private WaitingRepository waitingRepository;
 
     @Test
     @DisplayName("예약을 생성한다.")
@@ -271,10 +276,13 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(member));
         when(reservationRepository.findAllByMember(member))
                 .thenReturn(inDbReservations);
+        when(waitingRepository.findWaitingsWithRankByMemberId(anyLong()))
+                .thenReturn(List.of());
 
+        var loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
 
         // when
-        var response = reservationService.getReservationsByMember(member.getId());
+        var response = reservationService.getReservationsByMember(loginMember);
 
         // then
         assertThat(response).hasSize(1);

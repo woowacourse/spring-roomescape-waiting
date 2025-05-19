@@ -1,9 +1,11 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.global.error.exception.NotFoundException;
@@ -15,14 +17,16 @@ import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
 import roomescape.reservation.dto.response.ReservationAdminCreateResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
-import roomescape.reservation.dto.response.ReservationReadMemberResponse;
 import roomescape.reservation.dto.response.ReservationReadResponse;
+import roomescape.reservation.dto.response.ReservationWaitingReadMemberResponse;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.entity.WaitingWithRank;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationCreateResponse createReservation(Long memberId, ReservationCreateRequest request) {
         Member member = memberRepository.findById(memberId)
@@ -81,13 +86,26 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationReadMemberResponse> getReservationsByMember(Long id) {
-        Member member = memberRepository.findById(id)
+    public List<ReservationWaitingReadMemberResponse> getReservationsByMember(LoginMember loginMember) {
+        Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
+
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return reservations.stream()
-                .map(ReservationReadMemberResponse::from)
+
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
+
+        List<ReservationWaitingReadMemberResponse> responsesByReservation = reservations.stream()
+                .map(ReservationWaitingReadMemberResponse::fromReservation)
                 .toList();
+
+        List<ReservationWaitingReadMemberResponse> responsesByWaiting = waitingWithRanks.stream()
+                .map(ReservationWaitingReadMemberResponse::fromWaitingWithRank)
+                .toList();
+
+        List<ReservationWaitingReadMemberResponse> responses = new ArrayList<>();
+        responses.addAll(responsesByReservation);
+        responses.addAll(responsesByWaiting);
+        return responses;
     }
 
     public void deleteReservation(Long id) {

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.member.entity.Member;
@@ -206,8 +207,10 @@ class ReservationIntegrationTest {
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
 
+        var loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
+
         // when
-        var response = reservationService.getReservationsByMember(member.getId());
+        var response = reservationService.getReservationsByMember(loginMember);
 
         // then
         assertThat(response).hasSize(1);
