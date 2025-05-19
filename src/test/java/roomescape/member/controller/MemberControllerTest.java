@@ -27,6 +27,14 @@ class MemberControllerTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public MemberRepository memberRepository() {
+            return new FakeMemberRepository();
+        }
+    }
+
     @Test
     void getMembersTest() {
         List<Member> savedMembers = MemberFixture.createMembers(5, MemberRole.USER).stream()
@@ -56,18 +64,5 @@ class MemberControllerTest {
             .when().post("/members")
             .then().log().all()
             .statusCode(HttpStatus.OK.value());
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public MemberService memberService() {
-            return new MemberService(memberRepository());
-        }
-
-        @Bean
-        public MemberRepository memberRepository() {
-            return new FakeMemberRepository();
-        }
     }
 }

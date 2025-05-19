@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -23,7 +24,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
         ReservationTime reservationTimeToSave = ReservationTime.generateWithPrimaryKey(reservationTime,
-            autoIncrementId);
+                autoIncrementId);
         data.put(autoIncrementId, reservationTimeToSave);
         autoIncrementId++;
         return reservationTimeToSave;
@@ -55,13 +56,14 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
         if (date == null || themeId == null) {
             return List.of();
         }
-        return data.values().stream()
-            .filter(reservationTime -> reservationRepository.findAll().stream().map(Reservation::getDate)
-                .anyMatch(reservationDate -> reservationDate.equals(date)))
-            .filter(
-                reservationTime -> reservationRepository.findAll().stream()
-                    .map(reservation -> reservation.getTheme().getId())
-                    .anyMatch(reservationDate -> reservationDate.equals(themeId)))
-            .toList();
+        List<Reservation> allReservation = reservationRepository.findAll();
+        List<ReservationTime> unavailableTimes = allReservation.stream()
+                .filter(reservation -> reservation.getDate().equals(date) && reservation.getTheme().getId().equals(themeId))
+                .map(Reservation::getTime)
+                .toList();
+        List<ReservationTime> availableReservationTime = data.values().stream()
+                .filter(time-> !unavailableTimes.contains(time))
+                .toList();
+        return availableReservationTime;
     }
 }
