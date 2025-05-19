@@ -16,10 +16,8 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotRepository;
-import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
-import roomescape.exception.NotFoundException;
 
 @Service
 public class ReservationService {
@@ -42,13 +40,12 @@ public class ReservationService {
     }
 
     public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
-        var timeSlot = getTimeSlotById(timeId);
-        var theme = getThemeById(themeId);
+        var timeSlot = timeSlotRepository.getById(timeId);
+        var theme = themeRepository.getById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
+        var user = userRepository.getById(userId);
 
-        var user = getUserById(userId);
-        var reservation = new Reservation(user, date, timeSlot, theme);
-        return reservationRepository.save(reservation);
+        return reservationRepository.save(new Reservation(user, date, timeSlot, theme));
     }
 
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
@@ -56,24 +53,8 @@ public class ReservationService {
     }
 
     public void removeById(final long id) {
-        reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
-        reservationRepository.deleteById(id);
-    }
-
-    private TimeSlot getTimeSlotById(final long timeId) {
-        return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 타임 슬롯입니다."));
-    }
-
-    private Theme getThemeById(final long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-    }
-
-    private User getUserById(final long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
+        var reservation = reservationRepository.getById(id);
+        reservationRepository.delete(reservation);
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {

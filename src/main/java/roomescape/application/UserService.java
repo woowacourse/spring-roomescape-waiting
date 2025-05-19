@@ -10,7 +10,6 @@ import roomescape.domain.user.User;
 import roomescape.domain.user.UserName;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
-import roomescape.exception.NotFoundException;
 
 @Service
 public class UserService {
@@ -31,14 +30,9 @@ public class UserService {
         return repository.save(user);
     }
 
-    public User getById(final long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + id));
-    }
-
     @Transactional
     public List<Reservation> getReservations(final long id) {
-        var user = getById(id);
+        var user = repository.getById(id);
         return user.reservations().stream()
                 .map(r -> new Reservation(r.id(), r.user(), r.dateTime(), r.theme(), r.status()))
                 .toList();
@@ -46,5 +40,9 @@ public class UserService {
 
     public List<User> findAllUsers() {
         return repository.findAll();
+    }
+
+    public User getById(final long id) {
+        return repository.getById(id);
     }
 }

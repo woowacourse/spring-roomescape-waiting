@@ -12,7 +12,6 @@ import roomescape.domain.timeslot.AvailableTimeSlot;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.exception.InUseException;
-import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.ReservationSpecs;
 
 @Service
@@ -43,9 +42,8 @@ public class TimeSlotService {
         if (!reservations.isEmpty()) {
             throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
         }
-        timeSlotRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 타임슬롯입니다."));
-        timeSlotRepository.deleteById(id);
+        var timeSlot = timeSlotRepository.getById(id);
+        timeSlotRepository.delete(timeSlot);
     }
 
     public List<AvailableTimeSlot> findAvailableTimeSlots(final LocalDate date, final long themeId) {
@@ -57,7 +55,6 @@ public class TimeSlotService {
                 .toList();
 
         var allTimeSlots = timeSlotRepository.findAll();
-
         return allTimeSlots.stream()
                 .map(ts -> new AvailableTimeSlot(ts, filteredTimeSlots.contains(ts)))
                 .toList();

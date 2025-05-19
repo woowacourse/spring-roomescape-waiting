@@ -2,10 +2,11 @@ package roomescape.domain.theme;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.ListCrudRepository;
+import roomescape.exception.NotFoundException;
 
-public interface ThemeRepository extends JpaRepository<Theme, Long> {
+public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
 
     @Query(""" 
             SELECT t.id, t.name, t.description, t.thumbnail
@@ -16,4 +17,8 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
                                ORDER BY COUNT(r.id) DESC
             """)
     List<Theme> findRankingByPeriod(LocalDate startDate, LocalDate endDate, int limit);
+
+    default Theme getById(final long id) {
+        return findById(id).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다. id : " + id));
+    }
 }
