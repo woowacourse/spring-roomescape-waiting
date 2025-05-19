@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.Email;
+import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -42,7 +45,11 @@ class ReservationRepositoryTest {
         reservationTimeRepository.save(reservationTime);
         final Theme theme = new Theme("name", "description", "thumbnail");
         themeRepository.save(theme);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation = new Reservation(member, LocalDate.of(2025, 12, 25), reservationTime, theme);
@@ -50,7 +57,7 @@ class ReservationRepositoryTest {
         // when
         reservationRepository.save(reservation);
 
-        //then
+        // then
         assertThat(reservationRepository.findAll()).hasSize(1);
     }
 
@@ -61,7 +68,11 @@ class ReservationRepositoryTest {
         reservationTimeRepository.save(reservationTime);
         final Theme theme = new Theme("name", "description", "thumbnail");
         themeRepository.save(theme);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation = new Reservation(member, LocalDate.of(2025, 12, 25), reservationTime, theme);
@@ -82,7 +93,11 @@ class ReservationRepositoryTest {
         reservationTimeRepository.save(reservationTime);
         final Theme theme = new Theme("name", "description", "thumbnail");
         themeRepository.save(theme);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation = new Reservation(member, LocalDate.of(2025, 12, 25), reservationTime, theme);
@@ -102,7 +117,11 @@ class ReservationRepositoryTest {
         reservationTimeRepository.save(reservationTime);
         final Theme theme = new Theme("name", "description", "thumbnail");
         themeRepository.save(theme);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation = new Reservation(member, LocalDate.of(2025, 12, 25), reservationTime, theme);
@@ -123,7 +142,11 @@ class ReservationRepositoryTest {
         reservationTimeRepository.save(reservationTime);
         final Theme theme = new Theme("name", "description", "thumbnail");
         themeRepository.save(theme);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation = new Reservation(member, LocalDate.of(2025, 12, 25), reservationTime, theme);
@@ -144,7 +167,11 @@ class ReservationRepositoryTest {
         reservationTimeRepository.save(reservationTime);
         final Theme theme = new Theme("name", "description", "thumbnail");
         themeRepository.save(theme);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation1 = new Reservation(member, LocalDate.of(2025, 11, 25), reservationTime, theme);
@@ -154,8 +181,7 @@ class ReservationRepositoryTest {
 
         // when
         final List<Reservation> reservations = reservationRepository.findByThemeAndMemberAndDateBetween(
-                theme, member, LocalDate.of(2025, 12, 24), LocalDate.of(2025, 12, 27)
-        );
+                theme, member, LocalDate.of(2025, 12, 24), LocalDate.of(2025, 12, 27));
 
         // then
         assertThat(reservations).containsExactly(reservation2);
@@ -170,7 +196,11 @@ class ReservationRepositoryTest {
         final Theme theme2 = new Theme("name2", "description", "thumbnail");
         themeRepository.save(theme1);
         themeRepository.save(theme2);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation1 = new Reservation(member, LocalDate.of(2025, 12, 15), reservationTime, theme1);
@@ -199,7 +229,11 @@ class ReservationRepositoryTest {
         reservationTimeRepository.save(reservationTime);
         final Theme theme = new Theme("name", "description", "thumbnail");
         themeRepository.save(theme);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation reservation1 = new Reservation(member, LocalDate.of(2025, 12, 25), reservationTime, theme);

@@ -1,6 +1,5 @@
 package roomescape.theme.service;
 
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -13,7 +12,10 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import roomescape.common.exception.DataExistException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Role;
+import roomescape.member.domain.Email;
+import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -123,7 +125,11 @@ class ThemeServiceTest {
         final Theme theme2 = new Theme("name2", "description", "thumbnail");
         themeRepository.save(theme1);
         themeRepository.save(theme2);
-        final Member member = new Member("name", "email", "password", Role.USER);
+        final Member member = new Member(
+                new MemberName("name"),
+                new Email("email@email.com"),
+                new Password("password"),
+                Role.USER);
         memberRepository.save(member);
 
         final Reservation inlineReservation = new Reservation(member, now.minusDays(7), reservationTime,
@@ -158,8 +164,7 @@ class ThemeServiceTest {
         @Bean
         public ThemeService themeService(
                 final ThemeRepository themeRepository,
-                final ReservationRepository reservationRepository
-        ) {
+                final ReservationRepository reservationRepository) {
             return new ThemeService(themeRepository, reservationRepository);
         }
     }

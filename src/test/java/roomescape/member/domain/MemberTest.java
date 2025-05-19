@@ -15,7 +15,7 @@ public class MemberTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Member(1L, name, "wooga@email.com", "1234", Role.USER);
+            new Member(1L, new MemberName(name), new Email("wooga@email.com"), new Password("1234"), Role.USER);
         }).isInstanceOf(MemberException.class);
     }
 
@@ -26,7 +26,7 @@ public class MemberTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Member(1L, name, "wooga@email.com", "1234", Role.USER);
+            new Member(1L, new MemberName(name), new Email("wooga@email.com"), new Password("1234"), Role.USER);
         }).isInstanceOf(MemberException.class);
     }
 
@@ -37,7 +37,7 @@ public class MemberTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Member(1L, "wooga", email, "1234", Role.USER);
+            new Member(1L, new MemberName("wooga"), new Email(email), new Password("1234"), Role.USER);
         }).isInstanceOf(MemberException.class);
     }
 
@@ -48,7 +48,7 @@ public class MemberTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Member(1L, "wooga", email, "1234", Role.USER);
+            new Member(1L, new MemberName("wooga"), new Email(email), new Password("1234"), Role.USER);
         }).isInstanceOf(MemberException.class);
     }
 
@@ -59,7 +59,7 @@ public class MemberTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Member(1L, "wooga", "wooga@email.com", password, Role.USER);
+            new Member(1L, new MemberName("wooga"), new Email("wooga@email.com"), new Password(password), Role.USER);
         }).isInstanceOf(MemberException.class);
     }
 
@@ -70,7 +70,7 @@ public class MemberTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Member(1L, "wooga", "wooga@email.com", password, Role.USER);
+            new Member(1L, new MemberName("wooga"), new Email("wooga@email.com"), new Password(password), Role.USER);
         }).isInstanceOf(MemberException.class);
     }
 
@@ -86,7 +86,7 @@ public class MemberTest {
     void 이메일_형식이_올바르지_않으면_예외가_발생한다(final String email) {
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Member(1L, "wooga", email, "1234", Role.USER);
+            new Member(1L, new MemberName("wooga"), new Email(email), new Password("1234"), Role.USER);
         }).isInstanceOf(MemberException.class);
     }
 }

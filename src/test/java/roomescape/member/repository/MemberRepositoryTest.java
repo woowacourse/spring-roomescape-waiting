@@ -5,7 +5,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,7 +22,7 @@ class MemberRepositoryTest {
     @Test
     void 멤버_등록() {
         // given
-        final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
+        final Member member = new Member(new MemberName("testUser"), new Email("east@email.com"), new Password("password"), Role.USER);
 
         // when
         memberRepository.save(member);
@@ -37,7 +40,7 @@ class MemberRepositoryTest {
     @Test
     void 아이디_기준으로_멤버_찾기() {
         // given
-        final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
+        final Member member = new Member(new MemberName("testUser"), new Email("east@email.com"), new Password("password"), Role.USER);
         final Member savedMember = memberRepository.save(member);
 
         // when
@@ -50,11 +53,11 @@ class MemberRepositoryTest {
     @Test
     void 이메일_기준으로_멤버_찾기() {
         // given
-        final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
+        final Member member = new Member(new MemberName("testUser"), new Email("east@email.com"), new Password("password"), Role.USER);
         final Member savedMember = memberRepository.save(member);
 
         //when
-        final Member foundMember = memberRepository.findByEmail(savedMember.getEmail()).orElse(null);
+        final Member foundMember = memberRepository.findByEmail(savedMember.getEmail().getValue()).orElse(null);
 
         // then
         assertThat(savedMember.getId()).isEqualTo(foundMember.getId());
@@ -63,25 +66,25 @@ class MemberRepositoryTest {
     @Test
     void 이메일_기준으로_멤버_이름_찾기() {
         // given
-        final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
+        final Member member = new Member(new MemberName("testUser"), new Email("east@email.com"), new Password("password"), Role.USER);
         final Member savedMember = memberRepository.save(member);
 
         // when
-        final String foundName = memberRepository.findNameByEmail(savedMember.getEmail()).orElse(null);
+        final String foundName = memberRepository.findNameByEmail(savedMember.getEmail().getValue()).orElse(null);
 
         // then
-        assertThat(savedMember.getName()).isEqualTo(foundName);
+        assertThat(savedMember.getName().getValue()).isEqualTo(foundName);
     }
 
     @Test
     void 이메일_비밀번호_존재하는지_확인() {
         // given
-        final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
+        final Member member = new Member(new MemberName("testUser"), new Email("east@email.com"), new Password("password"), Role.USER);
         final Member savedMember = memberRepository.save(member);
 
         // when
-        final boolean exists = memberRepository.existsByEmailAndPassword(savedMember.getEmail(),
-                savedMember.getPassword());
+        final boolean exists = memberRepository.existsByEmailAndPassword(savedMember.getEmail().getValue(),
+                savedMember.getPassword().getValue());
 
         // then
         assertThat(exists).isTrue();

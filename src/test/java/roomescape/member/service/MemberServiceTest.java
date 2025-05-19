@@ -8,7 +8,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import roomescape.common.exception.DataNotFoundException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
@@ -27,7 +30,7 @@ public class MemberServiceTest {
     void 이메일에_해당하는_멤버_조회() {
         //given
         final String email = "east@email.com";
-        final Member member = new Member("name", email, "password", Role.USER);
+        final Member member = new Member(new MemberName("name"), new Email(email), new Password("password"), Role.USER);
         Member savedMember = memberRepository.save(member);
 
         //when & then
