@@ -41,10 +41,9 @@ public class GlobalExceptionHandler {
     }
 
     private String generateNotValidFieldNames(final BindingResult bindingResult) {
-        final String notValidField = bindingResult.getFieldErrors().stream()
+        return bindingResult.getFieldErrors().stream()
                 .map(FieldError::getField)
                 .collect(Collectors.joining(", "));
-        return notValidField;
     }
 
 

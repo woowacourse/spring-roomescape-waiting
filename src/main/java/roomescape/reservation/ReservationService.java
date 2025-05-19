@@ -42,7 +42,8 @@ public class ReservationService {
         validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
         validatePastDateTime(request.date(), reservationTime);
 
-        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme, ReservationStatus.PENDING);
+        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
+                ReservationStatus.PENDING);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -55,7 +56,8 @@ public class ReservationService {
         validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
         validatePastDateTime(request.date(), reservationTime);
 
-        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme, ReservationStatus.PENDING);
+        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
+                ReservationStatus.PENDING);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -112,21 +114,21 @@ public class ReservationService {
 
     private Theme getThemeById(final Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ReservationNotExistsThemeException());
+                .orElseThrow(ReservationNotExistsThemeException::new);
     }
 
     private ReservationTime getReservationTimeById(final Long reservationTimeId) {
         return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new ReservationNotExistsTimeException());
+                .orElseThrow(ReservationNotExistsTimeException::new);
     }
 
     private Member getMemberById(final Long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new ReservationNotExistsMemberException());
+                .orElseThrow(ReservationNotExistsMemberException::new);
     }
 
     private Member getMemberByEmail(final String email) {
         return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new ReservationNotExistsMemberException());
+                .orElseThrow(ReservationNotExistsMemberException::new);
     }
 }

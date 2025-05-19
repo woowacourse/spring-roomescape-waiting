@@ -13,13 +13,13 @@ import roomescape.member.MemberRole;
 @Component
 public class JwtProvider {
 
-    private final String secretKey = "regjeoigjroigji3j2io3io4h2bjasbdjaksbdkjqu3hu23hru3rhashudhausdhas";
-    private final Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-    private final Long validityInMilliseconds = 3600_000L;
+    private static final String SECRET_KEY = "regjeoigjroigji3j2io3io4h2bjasbdjaksbdkjqu3hu23hru3rhashudhausdhas";
+    private final Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
+    private static final Long VALIDITY_IN_MILLISECONDS = 3600_000L;
 
     public String provideToken(final String email, final MemberRole role, final String name) {
         final Date now = new Date();
-        final Date validity = new Date(now.getTime() + validityInMilliseconds);
+        final Date validity = new Date(now.getTime() + VALIDITY_IN_MILLISECONDS);
 
         return Jwts.builder()
                 .claim("role", role.name())
@@ -29,7 +29,7 @@ public class JwtProvider {
                 .setIssuedAt(now)
                 .setExpiration(validity)
 
-                .signWith(SignatureAlgorithm.HS256, key)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -43,7 +43,7 @@ public class JwtProvider {
 
     public boolean isValidToken(final String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parse(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJwt(token).getBody();
             return true;
         } catch (final JwtException e) {
             return false;

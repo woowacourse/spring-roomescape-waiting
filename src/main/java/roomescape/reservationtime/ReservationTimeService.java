@@ -43,9 +43,10 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
         final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new ReservationTimeNotExistsThemeException());
+                .orElseThrow(ReservationTimeNotExistsThemeException::new);
 
-        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(theme, date).stream()
+        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(theme,
+                        date).stream()
                 .map(Reservation::getReservationTime)
                 .collect(Collectors.toSet());
 
@@ -61,9 +62,9 @@ public class ReservationTimeService {
 
     public void deleteById(final Long id) {
         final ReservationTime reservationTime = reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ReservationTimeNotFoundException());
+                .orElseThrow(ReservationTimeNotFoundException::new);
 
-        if(reservationRepository.existsByReservationTime(reservationTime)){
+        if (reservationRepository.existsByReservationTime(reservationTime)) {
             throw new ReservationTimeUsedException();
         }
 

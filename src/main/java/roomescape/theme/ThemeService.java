@@ -52,9 +52,9 @@ public class ThemeService {
             final Long id
     ) {
         final Theme theme = themeRepository.findById(id)
-                .orElseThrow(() -> new ThemeNotFoundException());
+                .orElseThrow(ThemeNotFoundException::new);
 
-        if(reservationRepository.existsByTheme(theme)) {
+        if (reservationRepository.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
 
