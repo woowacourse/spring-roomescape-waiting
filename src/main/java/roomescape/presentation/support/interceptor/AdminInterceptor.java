@@ -34,7 +34,7 @@ public class AdminInterceptor implements HandlerInterceptor {
                              @NonNull HttpServletResponse response,
                              @NonNull Object handler) {
         Member member = getMemberFromRequest(request);
-        if (member.isAdmin()) {
+        if (!member.isAdmin()) {
             throw new ForbiddenException("접근 권한이 없습니다.");
         }
         return true;
