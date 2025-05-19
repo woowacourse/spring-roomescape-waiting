@@ -1,4 +1,4 @@
-package roomescape.reservation.controller;
+package roomescape.theme.controller;
 
 import static org.hamcrest.Matchers.is;
 
@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import roomescape.reservation.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)

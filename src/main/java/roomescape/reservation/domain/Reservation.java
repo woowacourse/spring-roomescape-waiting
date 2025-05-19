@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import roomescape.member.domain.Member;
+import roomescape.theme.domain.Theme;
 
 @Entity
 public class Reservation {

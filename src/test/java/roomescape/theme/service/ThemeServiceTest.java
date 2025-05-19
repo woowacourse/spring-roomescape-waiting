@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.theme.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -22,12 +22,13 @@ import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.request.ThemeRequest;
-import roomescape.reservation.dto.response.ThemeResponse;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.dto.request.ThemeRequest;
+import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.service.ThemeService;
 
 @ActiveProfiles("test")
 @DataJpaTest

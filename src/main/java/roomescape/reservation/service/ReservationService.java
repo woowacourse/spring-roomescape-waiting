@@ -18,7 +18,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.theme.domain.Theme;
 import roomescape.reservation.dto.response.BookedReservationTimeResponse;
 import roomescape.reservation.dto.request.FilteringReservationRequest;
 import roomescape.reservation.dto.response.MyReservationsResponse;
@@ -27,7 +27,7 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ReservationService {

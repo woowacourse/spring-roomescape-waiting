@@ -25,15 +25,15 @@ import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.theme.domain.Theme;
 import roomescape.reservation.dto.response.BookedReservationTimeResponse;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
-import roomescape.reservation.dto.response.ThemeResponse;
+import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 
 @ActiveProfiles("test")
 @DataJpaTest

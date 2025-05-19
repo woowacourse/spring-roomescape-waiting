@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import roomescape.member.dto.response.MemberResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.theme.dto.response.ThemeResponse;
 
 public record ReservationResponse(
         Long id,
