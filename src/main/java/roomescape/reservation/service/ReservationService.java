@@ -69,7 +69,7 @@ public class ReservationService {
             throw new AlreadyInUseException("reservation is already in use");
         }
 
-        Reservation reservation = getReservation(request);
+        Reservation reservation = createReservation(request);
         LocalDateTime now = LocalDateTime.now();
         validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
 
@@ -96,8 +96,8 @@ public class ReservationService {
         );
     }
 
-    private Reservation getReservation(final ReservationCreateRequest request) {
-        ReservationTime reservationTime = gerReservationTime(request);
+    private Reservation createReservation(final ReservationCreateRequest request) {
+        ReservationTime reservationTime = getReservationTime(request);
         Theme theme = getTheme(request);
         LoginMember loginMember = request.loginMember();
         Member member = memberRepository.findById(loginMember.id())
