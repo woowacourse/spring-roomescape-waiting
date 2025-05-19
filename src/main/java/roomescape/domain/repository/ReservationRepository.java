@@ -12,15 +12,25 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
+    @Query("""
+            SELECT DISTINCT r
+            FROM Reservation r
+            LEFT JOIN FETCH r.theme
+            LEFT JOIN FETCH r.time
+            WHERE r.member = :member
+            """)
     List<Reservation> findByMember(Member member);
 
     @Query("""
-            SELECT r 
-                FROM Reservation r 
-                WHERE (:themeId IS NULL OR r.theme.id = :themeId) 
-                    AND (:memberId IS NULL OR r.member.id = :memberId) 
-                    AND (:dateFrom IS NULL OR r.date >= :dateFrom) 
-                    AND (:dateTo IS NULL OR r.date <= :dateTo)
+            SELECT DISTINCT r
+            FROM Reservation r
+            LEFT JOIN FETCH r.member
+            LEFT JOIN FETCH r.theme
+            LEFT JOIN FETCH r.time
+            WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+                AND (:memberId IS NULL OR r.member.id = :memberId)
+                AND (:dateFrom IS NULL OR r.date >= :dateFrom)
+                AND (:dateTo IS NULL OR r.date <= :dateTo)
             """)
     List<Reservation> findByMemberAndThemeAndDateRange(
             @Param("memberId") Long member,
