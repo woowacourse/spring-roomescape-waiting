@@ -1,10 +1,18 @@
 package roomescape.common.cookie.extractor;
 
 import jakarta.servlet.http.Cookie;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-public interface CookieExtractor {
+@Component
+public class CookieExtractor {
 
-    String execute(List<Cookie> cookies, String cookieName);
+    public String execute(final List<Cookie> cookies, final String cookieName) {
+        return cookies.stream()
+                .filter(cookie -> cookie.getName().equals(cookieName))
+                .map(Cookie::getValue)
+                .findAny()
+                .orElseThrow(() -> new MissingCookieException(cookieName));
+    }
 }

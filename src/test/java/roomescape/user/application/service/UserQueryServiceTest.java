@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @Transactional
-class UserQueryServiceImplTest {
+class UserQueryServiceTest {
 
     @Autowired
     private UserQueryService userQueryService;

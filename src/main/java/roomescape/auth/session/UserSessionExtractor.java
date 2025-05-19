@@ -1,4 +1,4 @@
-package roomescape.auth.session.util;
+package roomescape.auth.session;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import roomescape.auth.jwt.domain.Jwt;
 import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.jwt.manager.JwtManager;
-import roomescape.auth.session.Session;
 import roomescape.common.cookie.manager.CookieManager;
 import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;

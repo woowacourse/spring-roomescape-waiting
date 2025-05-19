@@ -8,7 +8,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import roomescape.auth.session.Session;
 import roomescape.auth.session.annotation.UserSession;
-import roomescape.auth.session.util.UserSessionExtractor;
+import roomescape.auth.session.UserSessionExtractor;
 import roomescape.common.servlet.ServletRequestHolder;
 import roomescape.user.domain.UserRole;
 

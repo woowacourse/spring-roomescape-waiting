@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.theme.application.dto.CreateThemeServiceRequest;
-import roomescape.theme.application.service.ThemeCommandServiceImpl;
+import roomescape.theme.application.service.ThemeCommandService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @Transactional
-class ThemeCommandServiceImplTest {
+class ThemeCommandServiceTest {
 
     @Autowired
-    private ThemeCommandServiceImpl themeCommandService;
+    private ThemeCommandService themeCommandService;
 
     @Autowired
     private ThemeRepository themeRepository;

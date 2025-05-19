@@ -22,10 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-class SignUpUseCaseImplTest {
+class SignUpUseCaseTest {
 
     @Autowired
-    private SignUpUseCaseImpl signUpUseCase;
+    private SignUpUseCase signUpUseCase;
 
     @Autowired
     private JwtManager jwtManager;

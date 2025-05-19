@@ -21,23 +21,19 @@ import roomescape.common.domain.Email;
 import roomescape.user.application.service.UserCommandService;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
-import roomescape.user.domain.UserRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
-class SignInUseCaseImplTest {
+class SignInUseCaseTest {
 
     @Autowired
-    private SignInUseCaseImpl signInUseCase;
+    private SignInUseCase signInUseCase;
 
     @Autowired
     private UserCommandService userCommandService;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

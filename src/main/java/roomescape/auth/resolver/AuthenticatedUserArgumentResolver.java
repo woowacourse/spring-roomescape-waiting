@@ -10,7 +10,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.session.Session;
 import roomescape.auth.session.annotation.UserSession;
-import roomescape.auth.session.util.UserSessionExtractor;
+import roomescape.auth.session.UserSessionExtractor;
 
 @Component
 @RequiredArgsConstructor

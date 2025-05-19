@@ -16,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-class ReservationTimeQueryServiceImplTest {
+class ReservationTimeQueryServiceTest {
 
     @Autowired
-    private ReservationTimeQueryServiceImpl reservationTimeQueryService;
+    private ReservationTimeQueryService reservationTimeQueryService;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;

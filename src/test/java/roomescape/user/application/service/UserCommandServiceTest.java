@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @Transactional
-class UserCommandServiceImplTest {
+class UserCommandServiceTest {
 
     @Autowired
     private UserCommandService userCommandService;

@@ -14,7 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
-public class CookieSetterImplTest {
+public class CookieSetterTest {
 
     @Autowired
     private CookieSetter cookieSetter;

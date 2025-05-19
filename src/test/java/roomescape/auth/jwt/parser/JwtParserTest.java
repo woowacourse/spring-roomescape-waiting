@@ -20,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class JwtParserImplTest {
+class JwtParserTest {
 
     private static final SecretKey secretKey =
             Keys.hmacShaKeyFor("ZMQ5kFGf1MTmnkhik/7rOcmT6OPvlz5Z+4aP4pAfNtk=".getBytes(StandardCharsets.UTF_8));
 
     @Autowired
-    private JwtParserImpl jwtParser;
+    private JwtParser jwtParser;
     @Autowired
     private JwtGenerator jwtGenerator;
 

@@ -11,7 +11,7 @@ import roomescape.common.domain.Email;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.theme.application.service.ThemeQueryServiceImpl;
+import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-class ThemeQueryServiceImplTest {
+class ThemeQueryServiceTest {
 
     @Autowired
-    private ThemeQueryServiceImpl themeQueryService;
+    private ThemeQueryService themeQueryService;
 
     @Autowired
     private ThemeRepository themeRepository;

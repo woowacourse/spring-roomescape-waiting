@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @Transactional
-class ReservationCommandServiceImplTest {
+class ReservationCommandServiceTest {
 
     @Autowired
-    private ReservationCommandServiceImpl reservationCommandService;
+    private ReservationCommandService reservationCommandService;
 
     @Autowired
     private ReservationRepository reservationRepository;

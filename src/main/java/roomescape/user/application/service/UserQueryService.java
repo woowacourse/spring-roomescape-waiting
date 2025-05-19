@@ -1,18 +1,37 @@
 package roomescape.user.application.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import roomescape.common.domain.DomainTerm;
 import roomescape.common.domain.Email;
+import roomescape.common.exception.NotFoundException;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
+import roomescape.user.domain.UserRepository;
 
 import java.util.List;
 
-public interface UserQueryService {
+@Service
+@RequiredArgsConstructor
+public class UserQueryService {
 
-    User getByEmail(Email email);
+    private final UserRepository userRepository;
 
-    List<User> getAll();
+    public User getByEmail(final Email email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(DomainTerm.USER, email));
+    }
 
-    List<User> getAllByIds(List<UserId> ids);
+    public List<User> getAll() {
+        return userRepository.findAll();
+    }
 
-    User getById(UserId id);
+    public List<User> getAllByIds(final List<UserId> ids) {
+        return userRepository.findAllByIds(ids);
+    }
+
+    public User getById(final UserId id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(DomainTerm.USER, id));
+    }
 }
