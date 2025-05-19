@@ -96,6 +96,112 @@ class ReservationRepositoryTest {
     }
 
     @Test
+    void 테마아이디로_예약을_필터링할_수_있다() {
+        // given
+        String themeId1 = generateId();
+        String themeId2 = generateId();
+        String timeId = generateId();
+        String userId = generateId();
+        String reservationId1 = generateId();
+        String reservationId2 = generateId();
+
+        testUtil.insertTheme(themeId1, "호러");
+        testUtil.insertTheme(themeId2, "로맨스");
+        testUtil.insertReservationTime(timeId, TIME);
+        testUtil.insertUser(userId, "돔푸");
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId2, userId);
+
+        // when
+        final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), null, null, null);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1);
+    }
+
+    @Test
+    void 사용자아이디로_예약을_필터링할_수_있다() {
+        // given
+        String themeId = generateId();
+        String timeId = generateId();
+        String userId1 = generateId();
+        String userId2 = generateId();
+        String reservationId1 = generateId();
+        String reservationId2 = generateId();
+
+        testUtil.insertTheme(themeId, "호러");
+        testUtil.insertReservationTime(timeId, TIME);
+        testUtil.insertUser(userId1, "돔푸");
+        testUtil.insertUser(userId2, "레몬");
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId2);
+
+        // when
+        final List<Reservation> result = sut.findAllWithFilter(null, Id.create(userId1), null, null);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1);
+    }
+
+    @Test
+    void 날짜범위로_예약을_필터링할_수_있다() {
+        // given
+        String themeId = generateId();
+        String timeId = generateId();
+        String userId = generateId();
+        String reservationId1 = generateId();
+        String reservationId2 = generateId();
+        String reservationId3 = generateId();
+
+        testUtil.insertTheme(themeId, "호러");
+        testUtil.insertReservationTime(timeId, TIME);
+        testUtil.insertUser(userId, "돔푸");
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId);
+
+        // when
+        final List<Reservation> result = sut.findAllWithFilter(null, null, DATE1, DATE2);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
+    }
+
+    @Test
+    void 여러_필터를_조합하여_예약을_검색할_수_있다() {
+        // given
+        String themeId1 = generateId();
+        String themeId2 = generateId();
+        String timeId = generateId();
+        String userId1 = generateId();
+        String userId2 = generateId();
+        String reservationId1 = generateId();
+        String reservationId2 = generateId();
+        String reservationId3 = generateId();
+        String reservationId4 = generateId();
+
+        testUtil.insertTheme(themeId1, "호러");
+        testUtil.insertTheme(themeId2, "로맨스");
+        testUtil.insertReservationTime(timeId, TIME);
+        testUtil.insertUser(userId1, "돔푸");
+        testUtil.insertUser(userId2, "레몬");
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId1);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId1, userId1);
+        testUtil.insertReservation(reservationId3, DATE2, timeId, themeId2, userId2);
+        testUtil.insertReservation(reservationId4, DATE3, timeId, themeId2, userId2);
+
+        // when
+        final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId1), DATE1, DATE2);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
+    }
+
+    @Test
     void 필터없이_모든_예약을_찾을_수_있다() {
         // given
         String themeId = generateId();
