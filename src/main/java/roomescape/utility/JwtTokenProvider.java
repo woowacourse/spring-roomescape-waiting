@@ -46,7 +46,6 @@ public class JwtTokenProvider {
                     Role.valueOf(tokenPayload.get("role", String.class)),
                     tokenPayload.get("name", String.class));
         } catch (JwtException | IllegalArgumentException e) {
-            System.out.println("e.fillInStackTrace() = " + e.fillInStackTrace());
             throw new AuthorizationException("토큰 파싱 실패");
         }
     }

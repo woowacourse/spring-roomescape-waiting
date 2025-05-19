@@ -28,7 +28,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     @Override
     public boolean supportsParameter(MethodParameter methodParameter) {
         return methodParameter.hasParameterAnnotation(RequiredAccessToken.class) &&
-                methodParameter.getParameterType().equals(AccessTokenContent.class);
+                methodParameter.getParameterType().isAssignableFrom(AccessTokenContent.class);
     }
 
     @Override
