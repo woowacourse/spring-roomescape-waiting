@@ -74,4 +74,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndThemeAndTimeAndBookingStatus(LocalDate date, Theme theme, ReservationTime time,
                                                         BookingStatus bookingStatus);
+
+    @Query("""
+              SELECT COUNT(r)
+              FROM Reservation r
+              WHERE r.theme = :theme
+                AND r.date = :date
+                AND r.time = :time
+                AND r.id < :id
+            """)
+    Long countByThemeAndDateAndTimeAndIdLessThan(
+            @Param("theme") Theme theme,
+            @Param("date") LocalDate date,
+            @Param("time") ReservationTime time,
+            @Param("id") Long id
+    );
+
 }

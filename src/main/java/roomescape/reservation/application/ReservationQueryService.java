@@ -1,7 +1,9 @@
 package roomescape.reservation.application;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.NotFoundException;
@@ -77,9 +79,22 @@ public class ReservationQueryService {
     }
 
     public List<MyReservationResponse> findByMemberId(final Long memberId) {
-        return reservationRepository.findByMemberIdWithAssociations(memberId)
-                .stream()
-                .map(MyReservationResponse::from)
+        final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
+
+        final Map<Reservation, Long> waitingReservations = new HashMap<>();
+
+        for (Reservation reservation : reservations) {
+            Long count = reservationRepository.countByThemeAndDateAndTimeAndIdLessThan(
+                    reservation.getTheme(),
+                    reservation.getDate(),
+                    reservation.getTime(),
+                    reservation.getId()
+            );
+            waitingReservations.put(reservation, count);
+        }
+
+        return reservations.stream()
+                .map(reservation -> MyReservationResponse.from(reservation, waitingReservations.get(reservation)))
                 .toList();
     }
 }
