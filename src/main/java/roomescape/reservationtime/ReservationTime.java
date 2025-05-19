@@ -23,7 +23,7 @@ public class ReservationTime {
     @Column(nullable = false)
     private final LocalTime startAt;
 
-    public ReservationTime() {
+    protected ReservationTime() {
         this(null, null);
     }
 

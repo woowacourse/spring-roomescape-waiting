@@ -40,24 +40,14 @@ public class Member {
     private MemberRole role;
 
     @OneToMany(mappedBy = "member")
-    private final Set<Reservation> reservations;
+    private final Set<Reservation> reservations = new HashSet<>();
 
-    public Member() {
+    protected Member() {
         id = null;
-        reservations = new HashSet<>();
-    }
-
-    public Member(final Long id, final String email, final String password, final String name, final MemberRole role) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.role = role;
-        this.reservations = new HashSet<>();
     }
 
     public Member(final String email, final String password, final String name, final MemberRole role) {
-        this(null, email, password, name, role, new HashSet<>());
+        this(null, email, password, name, role);
     }
 
     public boolean matchesPassword(final String password) {

@@ -45,7 +45,7 @@ public class Reservation {
     @Column(nullable = false)
     private ReservationStatus reservationStatus;
 
-    public Reservation() {
+    protected Reservation() {
         id = null;
     }
 
