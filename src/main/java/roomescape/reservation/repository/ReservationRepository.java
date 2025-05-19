@@ -3,6 +3,7 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
@@ -28,7 +29,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 ORDER BY COUNT(r) DESC
             """)
     List<Theme> findPopularThemesByReservationBetween(final LocalDate dateFrom, final LocalDate dateTo,
-                                                      final PageRequest pageRequest);
+                                                      final Pageable pageable);
 
     List<Reservation> findByMember(final Member member);
 }
