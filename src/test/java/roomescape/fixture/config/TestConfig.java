@@ -9,8 +9,7 @@ import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.MemberRepositoryImpl;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
-import roomescape.reservation.domain.ReservationCommandRepository;
-import roomescape.reservation.domain.ReservationQueryRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
@@ -53,14 +52,7 @@ public class TestConfig {
     }
 
     @Bean
-    public ReservationCommandRepository reservationCommandRepository(
-            final JpaReservationRepository jpaReservationRepository
-    ) {
-        return new ReservationRepositoryImpl(jpaReservationRepository);
-    }
-
-    @Bean
-    public ReservationQueryRepository reservationQueryRepository(
+    public ReservationRepository reservationRepository(
             final JpaReservationRepository jpaReservationRepository
     ) {
         return new ReservationRepositoryImpl(jpaReservationRepository);
@@ -82,15 +74,13 @@ public class TestConfig {
 
     @Bean
     public ReservationService reservationService(
-            final ReservationCommandRepository reservationCommandRepository,
-            final ReservationQueryRepository reservationQueryRepository,
+            final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository
     ) {
         return new ReservationService(
-                reservationCommandRepository,
-                reservationQueryRepository,
+                reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
                 memberRepository

@@ -17,8 +17,7 @@ import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationCommandRepository;
-import roomescape.reservation.domain.ReservationQueryRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
@@ -35,8 +34,7 @@ import roomescape.theme.domain.ThemeRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final ReservationCommandRepository reservationCommandRepository;
-    private final ReservationQueryRepository reservationQueryRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
@@ -87,7 +85,7 @@ public class ReservationService {
 
         final Reservation reservation = new Reservation(date, reservationTime, theme, member, status);
 
-        return reservationCommandRepository.save(reservation);
+        return reservationRepository.save(reservation);
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
@@ -102,7 +100,7 @@ public class ReservationService {
     }
 
     private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationQueryRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
         }
     }
@@ -113,14 +111,14 @@ public class ReservationService {
         }
 
         try {
-            reservationCommandRepository.deleteById(reservationId);
+            reservationRepository.deleteById(reservationId);
         } catch (EmptyResultDataAccessException e) {
             throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
         }
     }
 
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
-        final Reservation reservation = reservationQueryRepository.findById(reservationId)
+        final Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
         final Member member = memberRepository.findById(memberAuthInfo.id())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
@@ -129,11 +127,11 @@ public class ReservationService {
             throw new AuthorizationException("본인이 아니면 삭제할 수 없습니다.");
         }
 
-        reservationCommandRepository.deleteById(reservationId);
+        reservationRepository.deleteById(reservationId);
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationQueryRepository.findAll()
+        return reservationRepository.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -144,7 +142,7 @@ public class ReservationService {
             throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
         }
 
-        return reservationQueryRepository.findAllByThemeIdAndMemberIdAndDateRange(
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(
                         request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
                 )
                 .stream()
@@ -156,7 +154,7 @@ public class ReservationService {
             final AvailableReservationTimeRequest request
     ) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final List<LocalTime> bookedTimes = reservationQueryRepository.findAllByDateAndThemeId(
+        final List<LocalTime> bookedTimes = reservationRepository.findAllByDateAndThemeId(
                         request.date(),
                         request.themeId()
                 ).stream()
@@ -175,7 +173,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse.ForMember> findReservationsByMemberId(final Long memberId) {
-        return reservationQueryRepository.findAllByMemberId(memberId).stream()
+        return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(ReservationResponse.ForMember::from)
                 .toList();
     }

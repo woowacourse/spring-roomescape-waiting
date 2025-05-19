@@ -24,7 +24,7 @@ import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationCommandRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
@@ -54,7 +54,7 @@ class ReservationServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ReservationCommandRepository reservationCommandRepository;
+    private ReservationRepository reservationRepository;
 
     @Test
     void 예약을_추가한다() {
@@ -80,7 +80,7 @@ class ReservationServiceTest {
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
 
         final CreateReservationRequest.ForMember request =
@@ -124,7 +124,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo =
                 new MemberAuthInfo(member.getId(), member.getRole());
 
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
 
         // when & then
@@ -142,7 +142,7 @@ class ReservationServiceTest {
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
                 ReservationStatus.CONFIRMED);
-        final Long reservationId = reservationCommandRepository.save(reservation).getId();
+        final Long reservationId = reservationRepository.save(reservation).getId();
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
         // when & then
@@ -162,7 +162,7 @@ class ReservationServiceTest {
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
                 ReservationStatus.CONFIRMED);
-        final Long reservationId = reservationCommandRepository.save(reservation).getId();
+        final Long reservationId = reservationRepository.save(reservation).getId();
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
         // when & then
@@ -184,10 +184,10 @@ class ReservationServiceTest {
         final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
 
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 new Reservation(date1, time1, theme1, member, ReservationStatus.CONFIRMED)
         );
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 new Reservation(date2, time2, theme2, member, ReservationStatus.CONFIRMED)
         );
 
@@ -213,7 +213,7 @@ class ReservationServiceTest {
                 .stream()
                 .filter(AvailableReservationTimeResponse::alreadyBooked)
                 .count();
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 new Reservation(date, reservationTime1, theme, member, ReservationStatus.CONFIRMED));
 
         // when
@@ -238,11 +238,11 @@ class ReservationServiceTest {
         final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
 
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 new Reservation(date1, time1, theme1, member, ReservationStatus.CONFIRMED)
         );
 
-        reservationCommandRepository.save(
+        reservationRepository.save(
                 new Reservation(date2, time2, theme2, member, ReservationStatus.CONFIRMED)
         );
 
