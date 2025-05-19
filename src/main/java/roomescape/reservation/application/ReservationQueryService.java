@@ -80,9 +80,7 @@ public class ReservationQueryService {
 
     public List<MyReservationResponse> findByMemberId(final Long memberId) {
         final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
-
         final Map<Reservation, Long> waitingReservations = new HashMap<>();
-
         for (Reservation reservation : reservations) {
             Long count = reservationRepository.countByThemeAndDateAndTimeAndIdLessThan(
                     reservation.getTheme(),
@@ -92,7 +90,6 @@ public class ReservationQueryService {
             );
             waitingReservations.put(reservation, count);
         }
-
         return reservations.stream()
                 .map(reservation -> MyReservationResponse.from(reservation, waitingReservations.get(reservation)))
                 .toList();

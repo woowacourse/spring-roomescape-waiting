@@ -32,7 +32,6 @@ public record MyReservationResponse(
         if (count == 0L) {
             return "곧 예약 확정으로 바뀝니다.";
         }
-        return count.toString() + "번째 예약" + bookingStatus.getValue();
+        return count + "번째 예약" + bookingStatus.getValue();
     }
-
 }
