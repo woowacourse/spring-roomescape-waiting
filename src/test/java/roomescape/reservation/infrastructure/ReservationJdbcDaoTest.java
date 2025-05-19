@@ -3,7 +3,6 @@ package roomescape.reservation.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import org.assertj.core.api.SoftAssertions;
@@ -15,11 +14,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 @JdbcTest(properties = "spring.sql.init.mode=never")
 @Import(ReservationJdbcDao.class)
@@ -188,37 +183,5 @@ class ReservationJdbcDaoTest {
         );
 
         assertThat(reservations).isEmpty();
-    }
-
-    @DisplayName("날짜와 시간 아이디로 예약 내역이 존재하는지 확인하는 기능을 구현한다")
-    @Test
-    void existsByDateAndTimeId() {
-        assertThat(reservationJdbcDao.existsByDateAndTimeId(LocalDate.of(2025, 5, 1), 1L)).isTrue();
-    }
-
-    @DisplayName("예약 내역을 추가하는 기능을 구현한다")
-    @Test
-    void add() {
-        Member member = new Member(1L, "홍길동", "hong@email.com", "password123", Role.USER);
-        ReservationTime time = new ReservationTime(2L, LocalTime.parse("11:00"));
-        Theme theme = new Theme(1L, "방 탈출1", "공포 테마", "horror.jpg");
-        Reservation reservation = new Reservation(
-                member,
-                LocalDate.now().plusDays(1),
-                time,
-                theme
-        );
-
-        reservationJdbcDao.add(reservation);
-
-        assertThat(reservationJdbcDao.findAll()).hasSize(2);
-    }
-
-    @DisplayName("예약 내역을 삭제하는 기능을 구현한다")
-    @Test
-    void deleteById() {
-        reservationJdbcDao.deleteById(1L);
-
-        assertThat(reservationJdbcDao.findAll()).hasSize(0);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -39,7 +40,8 @@ class ReservationJpaRepositoryTest {
         entityManager.persist(theme);
         LocalDate date = LocalDate.parse("2025-05-05");
         entityManager.flush();
-        Reservation reservation = new Reservation(member, date, reservationTime, theme);
+        ReservationSpec spec = new ReservationSpec(date, reservationTime, theme);
+        Reservation reservation = new Reservation(member, spec);
 
         // when
         reservationJpaRepository.save(reservation);
@@ -78,21 +80,21 @@ class ReservationJpaRepositoryTest {
         LocalDate day2 = today.plusDays(1);
         LocalDate day3 = today.plusDays(2);
 
-        Reservation r1 = new Reservation(member1, day1, time1, theme1);
-        Reservation r2 = new Reservation(member1, day2, time1, theme1);
-        Reservation r3 = new Reservation(member1, day3, time1, theme1);
+        Reservation r1 = new Reservation(member1, new ReservationSpec(day1, time1, theme1));
+        Reservation r2 = new Reservation(member1, new ReservationSpec(day2, time1, theme1));
+        Reservation r3 = new Reservation(member1, new ReservationSpec(day3, time1, theme1));
 
-        Reservation r4 = new Reservation(member1, day1, time1, theme2);
-        Reservation r5 = new Reservation(member1, day2, time1, theme2);
-        Reservation r6 = new Reservation(member1, day3, time1, theme2);
+        Reservation r4 = new Reservation(member1, new ReservationSpec(day1, time1, theme2));
+        Reservation r5 = new Reservation(member1, new ReservationSpec(day2, time1, theme2));
+        Reservation r6 = new Reservation(member1, new ReservationSpec(day3, time1, theme2));
 
-        Reservation r7 = new Reservation(member2, day1, time2, theme2);
-        Reservation r8 = new Reservation(member2, day2, time2, theme2);
-        Reservation r9 = new Reservation(member2, day3, time2, theme2);
+        Reservation r7 = new Reservation(member2, new ReservationSpec(day1, time2, theme2));
+        Reservation r8 = new Reservation(member2, new ReservationSpec(day2, time2, theme2));
+        Reservation r9 = new Reservation(member2, new ReservationSpec(day3, time2, theme2));
 
-        Reservation r10 = new Reservation(member2, day1, time2, theme3);
-        Reservation r11 = new Reservation(member2, day2, time2, theme3);
-        Reservation r12 = new Reservation(member2, day3, time2, theme3);
+        Reservation r10 = new Reservation(member2, new ReservationSpec(day1, time2, theme3));
+        Reservation r11 = new Reservation(member2, new ReservationSpec(day2, time2, theme3));
+        Reservation r12 = new Reservation(member2, new ReservationSpec(day3, time2, theme3));
 
         entityManager.persist(r1);
         entityManager.persist(r2);
@@ -141,21 +143,21 @@ class ReservationJpaRepositoryTest {
         LocalDate day2 = today.plusDays(1);
         LocalDate day3 = today.plusDays(2);
 
-        Reservation r1 = new Reservation(member1, day1, time1, theme1);
-        Reservation r2 = new Reservation(member1, day2, time1, theme1);
-        Reservation r3 = new Reservation(member1, day3, time1, theme1);
+        Reservation r1 = new Reservation(member1, new ReservationSpec(day1, time1, theme1));
+        Reservation r2 = new Reservation(member1, new ReservationSpec(day2, time1, theme1));
+        Reservation r3 = new Reservation(member1, new ReservationSpec(day3, time1, theme1));
 
-        Reservation r4 = new Reservation(member1, day1, time1, theme2);
-        Reservation r5 = new Reservation(member1, day2, time1, theme2);
-        Reservation r6 = new Reservation(member1, day3, time1, theme2);
+        Reservation r4 = new Reservation(member1, new ReservationSpec(day1, time1, theme2));
+        Reservation r5 = new Reservation(member1, new ReservationSpec(day2, time1, theme2));
+        Reservation r6 = new Reservation(member1, new ReservationSpec(day3, time1, theme2));
 
-        Reservation r7 = new Reservation(member2, day1, time2, theme2);
-        Reservation r8 = new Reservation(member2, day2, time2, theme2);
-        Reservation r9 = new Reservation(member2, day3, time2, theme2);
+        Reservation r7 = new Reservation(member2, new ReservationSpec(day1, time2, theme2));
+        Reservation r8 = new Reservation(member2, new ReservationSpec(day2, time2, theme2));
+        Reservation r9 = new Reservation(member2, new ReservationSpec(day3, time2, theme2));
 
-        Reservation r10 = new Reservation(member2, day1, time2, theme3);
-        Reservation r11 = new Reservation(member2, day2, time2, theme3);
-        Reservation r12 = new Reservation(member2, day3, time2, theme3);
+        Reservation r10 = new Reservation(member2, new ReservationSpec(day1, time2, theme3));
+        Reservation r11 = new Reservation(member2, new ReservationSpec(day2, time2, theme3));
+        Reservation r12 = new Reservation(member2, new ReservationSpec(day3, time2, theme3));
 
         entityManager.persist(r1);
         entityManager.persist(r2);
@@ -204,21 +206,21 @@ class ReservationJpaRepositoryTest {
         LocalDate day2 = today.plusDays(1);
         LocalDate day3 = today.plusDays(2);
 
-        Reservation r1 = new Reservation(member1, day1, time1, theme1);
-        Reservation r2 = new Reservation(member1, day2, time1, theme1);
-        Reservation r3 = new Reservation(member1, day3, time1, theme1);
+        Reservation r1 = new Reservation(member1, new ReservationSpec(day1, time1, theme1));
+        Reservation r2 = new Reservation(member1, new ReservationSpec(day2, time1, theme1));
+        Reservation r3 = new Reservation(member1, new ReservationSpec(day3, time1, theme1));
 
-        Reservation r4 = new Reservation(member1, day1, time1, theme2);
-        Reservation r5 = new Reservation(member1, day2, time1, theme2);
-        Reservation r6 = new Reservation(member1, day3, time1, theme2);
+        Reservation r4 = new Reservation(member1, new ReservationSpec(day1, time1, theme2));
+        Reservation r5 = new Reservation(member1, new ReservationSpec(day2, time1, theme2));
+        Reservation r6 = new Reservation(member1, new ReservationSpec(day3, time1, theme2));
 
-        Reservation r7 = new Reservation(member2, day1, time2, theme2);
-        Reservation r8 = new Reservation(member2, day2, time2, theme2);
-        Reservation r9 = new Reservation(member2, day3, time2, theme2);
+        Reservation r7 = new Reservation(member2, new ReservationSpec(day1, time2, theme2));
+        Reservation r8 = new Reservation(member2, new ReservationSpec(day2, time2, theme2));
+        Reservation r9 = new Reservation(member2, new ReservationSpec(day3, time2, theme2));
 
-        Reservation r10 = new Reservation(member2, day1, time2, theme3);
-        Reservation r11 = new Reservation(member2, day2, time2, theme3);
-        Reservation r12 = new Reservation(member2, day3, time2, theme3);
+        Reservation r10 = new Reservation(member2, new ReservationSpec(day1, time2, theme3));
+        Reservation r11 = new Reservation(member2, new ReservationSpec(day2, time2, theme3));
+        Reservation r12 = new Reservation(member2, new ReservationSpec(day3, time2, theme3));
 
         entityManager.persist(r1);
         entityManager.persist(r2);
@@ -266,21 +268,21 @@ class ReservationJpaRepositoryTest {
         LocalDate day2 = today.plusDays(1);
         LocalDate day3 = today.plusDays(2);
 
-        Reservation r1 = new Reservation(member1, day1, time1, theme1);
-        Reservation r2 = new Reservation(member1, day2, time1, theme1);
-        Reservation r3 = new Reservation(member1, day3, time1, theme1);
+        Reservation r1 = new Reservation(member1, new ReservationSpec(day1, time1, theme1));
+        Reservation r2 = new Reservation(member1, new ReservationSpec(day2, time1, theme1));
+        Reservation r3 = new Reservation(member1, new ReservationSpec(day3, time1, theme1));
 
-        Reservation r4 = new Reservation(member1, day1, time1, theme2);
-        Reservation r5 = new Reservation(member1, day2, time1, theme2);
-        Reservation r6 = new Reservation(member1, day3, time1, theme2);
+        Reservation r4 = new Reservation(member1, new ReservationSpec(day1, time1, theme2));
+        Reservation r5 = new Reservation(member1, new ReservationSpec(day2, time1, theme2));
+        Reservation r6 = new Reservation(member1, new ReservationSpec(day3, time1, theme2));
 
-        Reservation r7 = new Reservation(member2, day1, time2, theme2);
-        Reservation r8 = new Reservation(member2, day2, time2, theme2);
-        Reservation r9 = new Reservation(member2, day3, time2, theme2);
+        Reservation r7 = new Reservation(member2, new ReservationSpec(day1, time2, theme2));
+        Reservation r8 = new Reservation(member2, new ReservationSpec(day2, time2, theme2));
+        Reservation r9 = new Reservation(member2, new ReservationSpec(day3, time2, theme2));
 
-        Reservation r10 = new Reservation(member2, day1, time2, theme3);
-        Reservation r11 = new Reservation(member2, day2, time2, theme3);
-        Reservation r12 = new Reservation(member2, day3, time2, theme3);
+        Reservation r10 = new Reservation(member2, new ReservationSpec(day1, time2, theme3));
+        Reservation r11 = new Reservation(member2, new ReservationSpec(day2, time2, theme3));
+        Reservation r12 = new Reservation(member2, new ReservationSpec(day3, time2, theme3));
 
         entityManager.persist(r1);
         entityManager.persist(r2);

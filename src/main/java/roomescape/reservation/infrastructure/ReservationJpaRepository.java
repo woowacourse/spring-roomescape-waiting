@@ -13,12 +13,12 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     @Query("""
             SELECT r FROM Reservation r
             JOIN FETCH r.member
-            JOIN FETCH r.theme
-            JOIN FETCH r.time
+            JOIN FETCH r.spec.theme
+            JOIN FETCH r.spec.time
             WHERE (:memberId IS NULL OR r.member.id = :memberId)
-              AND (:themeId IS NULL OR r.theme.id = :themeId)
-              AND (:from IS NULL OR r.date >= :from)
-              AND (:to IS NULL OR r.date <= :to)
+              AND (:themeId IS NULL OR r.spec.theme.id = :themeId)
+              AND (:from IS NULL OR r.spec.date >= :from)
+              AND (:to IS NULL OR r.spec.date <= :to)
             """)
     Collection<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
             @Param("memberId") Long memberId,
@@ -26,7 +26,5 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
 
-    boolean existsByDateAndTimeId(LocalDate reservationDate, Long id);
-
-    Collection<Reservation> findAllByMemberId(Long memberId);
+    boolean existsBySpecDateAndSpecTimeId(LocalDate reservationDate, Long id);
 }

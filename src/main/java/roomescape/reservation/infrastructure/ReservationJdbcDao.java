@@ -3,31 +3,26 @@ package roomescape.reservation.infrastructure;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Repository
 public class ReservationJdbcDao {
 
-    private final SimpleJdbcInsert simpleJdbcInsert;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public ReservationJdbcDao(DataSource dataSource) {
-        this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
-                .withTableName("reservation")
-                .usingGeneratedKeyColumns("id");
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
@@ -140,38 +135,6 @@ public class ReservationJdbcDao {
         }
     }
 
-    public Boolean existsByDateAndTimeId(final LocalDate date, final Long timeId) {
-        String sql = "SELECT COUNT(*) FROM reservation WHERE date = :date AND time_id = :timeId";
-        Map<String, Object> parameter = Map.of("date", date, "timeId", timeId);
-
-        Integer count = namedParameterJdbcTemplate.queryForObject(sql, parameter, Integer.class);
-        return count != 0;
-    }
-
-    public Reservation add(final Reservation reservation) {
-        Map<String, Object> parameters = new HashMap<>(5);
-        parameters.put("date", reservation.getDate());
-        parameters.put("time_id", reservation.getTime().getId());
-        parameters.put("theme_id", reservation.getTheme().getId());
-        parameters.put("member_id", reservation.getMember().getId());
-        Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-
-        return new Reservation(
-                id,
-                reservation.getMember(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        );
-    }
-
-    public void deleteById(final Long id) {
-        String sql = "DELETE FROM reservation WHERE id = :id";
-        Map<String, Object> parameter = Map.of("id", id);
-
-        namedParameterJdbcTemplate.update(sql, parameter);
-    }
-
     private Reservation createReservation(final ResultSet resultSet) throws SQLException {
         return new Reservation(
                 resultSet.getLong("reservation_id"),
@@ -182,16 +145,17 @@ public class ReservationJdbcDao {
                         resultSet.getString("password"),
                         Role.from(resultSet.getString("role"))
                 ),
-                resultSet.getDate("date").toLocalDate(),
-                new ReservationTime(
-                        resultSet.getLong("time_id"),
-                        resultSet.getTime("time_value").toLocalTime()
-                ),
-                new Theme(
-                        resultSet.getLong("theme_id"),
-                        resultSet.getString("theme_name"),
-                        resultSet.getString("theme_description"),
-                        resultSet.getString("theme_thumbnail")
+                new ReservationSpec(
+                        resultSet.getDate("date").toLocalDate(),
+                        new ReservationTime(
+                                resultSet.getLong("time_id"),
+                                resultSet.getTime("time_value").toLocalTime()
+                        ),
+                        new Theme(
+                                resultSet.getLong("theme_id"),
+                                resultSet.getString("theme_name"),
+                                resultSet.getString("theme_description"),
+                                resultSet.getString("theme_thumbnail"))
                 ));
     }
 }

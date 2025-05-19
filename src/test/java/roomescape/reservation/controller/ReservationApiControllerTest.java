@@ -31,6 +31,7 @@ import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
 import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.user.UserReservationRequest;
 import roomescape.reservation.service.ReservationService;
@@ -67,9 +68,10 @@ class ReservationApiControllerTest {
     void findAll() throws Exception {
         Reservation reservation = new Reservation(
                 new Member(1L, "test", "test@test.com", "password", Role.USER),
-                LocalDate.now().plusDays(1),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "테마1", "테마1 설명", "thumbnail.jpg")
+                new ReservationSpec(
+                        LocalDate.now().plusDays(1),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        new Theme(1L, "테마1", "테마1 설명", "thumbnail.jpg"))
         );
 
         List<ReservationResponse> expectedResponses = List.of(

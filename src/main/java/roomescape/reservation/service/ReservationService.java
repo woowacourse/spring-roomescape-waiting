@@ -1,7 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicateException;
@@ -13,6 +13,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
@@ -91,12 +92,11 @@ public class ReservationService {
         validateTime(userReservationRequest.date(), reservationTimeResult);
         validateAvailability(userReservationRequest.date(), reservationTimeResult);
         Theme themeResult = searchTheme(userReservationRequest.themeId());
+        ReservationSpec spec = new ReservationSpec(userReservationRequest.date(), reservationTimeResult, themeResult);
 
         Reservation newReservation = new Reservation(
                 memberResult,
-                userReservationRequest.date(),
-                reservationTimeResult,
-                themeResult
+                spec
         );
         Reservation savedReservation = reservationRepository.save(newReservation);
 
@@ -115,12 +115,11 @@ public class ReservationService {
         validateTime(adminReservationRequest.date(), reservationTimeResult);
         validateAvailability(adminReservationRequest.date(), reservationTimeResult);
         Theme themeResult = searchTheme(adminReservationRequest.themeId());
+        ReservationSpec spec = new ReservationSpec(adminReservationRequest.date(), reservationTimeResult, themeResult);
 
         Reservation newReservation = new Reservation(
                 memberResult,
-                adminReservationRequest.date(),
-                reservationTimeResult,
-                themeResult
+                spec
         );
         Reservation savedReservation = reservationRepository.save(newReservation);
 
@@ -134,11 +133,11 @@ public class ReservationService {
     }
 
     private void validateTime(final LocalDate reservationDate, final ReservationTime reservationTimeResult) {
-        if (reservationDate.isEqual(LocalDate.now())
-                && reservationTimeResult.getStartAt().isBefore(LocalTime.now())) {
+        if (LocalDateTime.of(reservationDate, reservationTimeResult.getStartAt()).isBefore(LocalDateTime.now())) {
             throw new InvalidTimeException(ReservationExceptionMessage.TIME_BEFORE_NOW.getMessage());
         }
     }
+
 
     private void validateAvailability(
             final LocalDate reservationDate,
