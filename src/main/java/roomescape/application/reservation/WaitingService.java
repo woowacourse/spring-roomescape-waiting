@@ -71,4 +71,16 @@ public class WaitingService {
                 .map(waitingWithRank -> WaitingResult.from(waitingWithRank.waiting(), waitingWithRank.rank()))
                 .toList();
     }
+
+    @Transactional
+    public void cancel(Long waitingId, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new ReservationException("회원 정보가 존재하지 않습니다."));
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new ReservationException("대기 정보가 존재하지 않습니다."));
+        if (!waiting.isOwner(member)) {
+            throw new ReservationException("대기 취소 권한이 없습니다.");
+        }
+        waitingRepository.delete(waiting);
+    }
 }

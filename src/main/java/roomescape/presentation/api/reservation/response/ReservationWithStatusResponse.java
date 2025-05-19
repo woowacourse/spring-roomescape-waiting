@@ -7,7 +7,7 @@ import roomescape.application.reservation.dto.WaitingResult;
 import roomescape.domain.reservation.ReservationStatus;
 
 public record ReservationWithStatusResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         LocalTime time,

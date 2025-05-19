@@ -46,6 +46,10 @@ public class Waiting {
     protected Waiting() {
     }
 
+    public boolean isOwner(Member member) {
+        return this.member.equals(member);
+    }
+
     public Long getId() {
         return id;
     }
