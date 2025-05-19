@@ -1,22 +1,20 @@
 package roomescape.repository;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.member.Member;
-import roomescape.domain.member.Role;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 
 @DataJpaTest
 class ThemeRepositoryTest {
@@ -88,26 +86,26 @@ class ThemeRepositoryTest {
         Theme theme1 = new Theme(null, "테마1", "테마1 설명", "thumbnail1.jpg");
         Theme theme2 = new Theme(null, "테마2", "테마2 설명", "thumbnail2.jpg");
         Theme theme3 = new Theme(null, "테마3", "테마3 설명", "thumbnail3.jpg");
-        
+
         themeRepository.saveAll(List.of(theme1, theme2, theme3));
-        
+
         Member member = Member.createWithoutId("사용자", "user@example.com", Role.USER, "password");
         memberRepository.save(member);
-        
+
         ReservationTime time = new ReservationTime(null, LocalTime.of(10, 0));
         reservationTimeRepository.save(time);
-        
+
         LocalDate today = LocalDate.now();
         LocalDate startDate = today.minusDays(30);
         LocalDate endDate = today.plusDays(1);
-        
+
         Reservation r1 = Reservation.createWithoutId(member, today.minusDays(5), time, theme1);
         Reservation r2 = Reservation.createWithoutId(member, today.minusDays(10), time, theme1);
         Reservation r3 = Reservation.createWithoutId(member, today.minusDays(15), time, theme1);
         Reservation r4 = Reservation.createWithoutId(member, today.minusDays(7), time, theme2);
         Reservation r5 = Reservation.createWithoutId(member, today.minusDays(12), time, theme2);
         Reservation r6 = Reservation.createWithoutId(member, today.minusDays(20), time, theme3);
-        
+
         reservationRepository.saveAll(List.of(r1, r2, r3, r4, r5, r6));
 
         // when

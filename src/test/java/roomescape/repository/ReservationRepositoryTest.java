@@ -1,5 +1,11 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,13 +16,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 class ReservationRepositoryTest {
@@ -54,7 +53,7 @@ class ReservationRepositoryTest {
         reservationTimeRepository.saveAll(List.of(time1, time2));
 
         today = LocalDate.now();
-        
+
         reservationRepository.deleteAll();
     }
 
@@ -165,7 +164,7 @@ class ReservationRepositoryTest {
         // given
         LocalDate startDate = today.minusDays(5);
         LocalDate endDate = today.plusDays(5);
-        
+
         Reservation reservation1 = Reservation.createWithoutId(member, today.minusDays(2), time1, theme1);
         Reservation reservation2 = Reservation.createWithoutId(member, today, time1, theme1);
         Reservation reservation3 = Reservation.createWithoutId(member, today.plusDays(2), time1, theme1);
@@ -204,7 +203,7 @@ class ReservationRepositoryTest {
         // given
         Member anotherMember = Member.createWithoutId("다른사용자", "another@example.com", Role.USER, "password");
         memberRepository.save(anotherMember);
-        
+
         Reservation reservation1 = Reservation.createWithoutId(member, today, time1, theme1);
         Reservation reservation2 = Reservation.createWithoutId(member, today.plusDays(1), time2, theme2);
         Reservation reservation3 = Reservation.createWithoutId(anotherMember, today, time1, theme1);
