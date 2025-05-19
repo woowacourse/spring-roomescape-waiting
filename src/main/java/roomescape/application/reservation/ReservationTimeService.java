@@ -34,7 +34,7 @@ public class ReservationTimeService {
             throw new BusinessRuleViolationException("이미 존재하는 얘약시간입니다.");
         }
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new ReservationTime(createReservationTimeParam.startAt())
+                ReservationTime.create(createReservationTimeParam.startAt())
         );
         return reservationTime.getId();
     }

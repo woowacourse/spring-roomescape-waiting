@@ -68,7 +68,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 같은_이름의_테마를_생성할_경우_예외가_발생한다() {
         // given
-        themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
+        themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
         CreateThemeParam param = new CreateThemeParam("테마1", "재밌는 방", "image.png");
 
         // when
@@ -81,8 +81,8 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 모든_테마를_조회할_수_있다() {
         // given
-        themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
-        themeRepository.save(new Theme("테마2", "설명2", "image2.png"));
+        themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
 
         // when
         List<ThemeResult> results = themeService.findAll();
@@ -96,7 +96,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 테마를_id로_조회할_수_있다() {
         // given
-        Theme theme = themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
+        Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
 
         // when
         ThemeResult result = themeService.findById(theme.getId());
@@ -121,7 +121,7 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 테마를_삭제할_수_있다() {
         // given
-        Theme theme = themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
+        Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
 
         // when
         themeService.deleteById(theme.getId());
@@ -133,10 +133,10 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약이_존재하는_테마는_삭제할_수_없다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), reservationTime, theme));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock), reservationTime, theme));
 
         // when
         // then
@@ -148,14 +148,14 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 테마_예약_랭킹을_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme1 = themeRepository.save(new Theme("테마1", "설명1", "image1.png"));
-        Theme theme2 = themeRepository.save(new Theme("테마2", "설명2", "image2.png"));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme1 = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+        Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
 
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock).minusDays(2), reservationTime, theme1));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock).minusDays(3), reservationTime, theme1));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock).minusDays(4), reservationTime, theme2));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).minusDays(2), reservationTime, theme1));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).minusDays(3), reservationTime, theme1));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).minusDays(4), reservationTime, theme2));
 
         // when
         List<ThemeResult> results = themeService.findRankBetweenDate();

@@ -61,9 +61,9 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약을_생성할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
 
         CreateReservationParam param = new CreateReservationParam(LocalDate.now(clock).plusDays(1), time.getId(),
                 theme.getId(), member.getId());
@@ -78,8 +78,8 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 존재하지_않는_회원으로_예약할_수_없다() {
         // given
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         CreateReservationParam param = new CreateReservationParam(LocalDate.now(clock), time.getId(), theme.getId(),
                 999L);
 
@@ -94,8 +94,8 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     void 존재하지_않는_예약시간으로_예약할_수_없다() {
         // given
         Long invalidTimeId = 999L;
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         CreateReservationParam param = new CreateReservationParam(LocalDate.now(clock), invalidTimeId, theme.getId(),
                 member.getId());
 
@@ -110,8 +110,8 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     void 존재하지_않는_테마로_예약할_수_없다() {
         // given
         Long invalidThemeId = 999L;
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         CreateReservationParam param = new CreateReservationParam(LocalDate.now(clock), time.getId(), invalidThemeId,
                 member.getId());
 
@@ -125,10 +125,10 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 같은_날짜와_같은_시간과_같은_테마에_예약이_존재한다면_예약을_생성하면_예외가_발생한다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time, theme));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock), time, theme));
         CreateReservationParam param = new CreateReservationParam(
                 LocalDate.now(clock),
                 time.getId(),
@@ -146,11 +146,11 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약을_삭제할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now(clock), time, theme));
+                Reservation.create(member, LocalDate.now(clock), time, theme));
 
         // when
         reservationService.deleteById(reservation.getId());
@@ -162,12 +162,12 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 전체_예약을_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time1, theme));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time2, theme));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(14, 0)));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock), time1, theme));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock), time2, theme));
 
         // when
         List<ReservationResult> reservationResults = reservationService.findAll();
@@ -196,11 +196,11 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약을_id로_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         Reservation reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now(clock), time, theme));
+                Reservation.create(member, LocalDate.now(clock), time, theme));
 
         // when
         ReservationResult result = reservationService.findById(reservation.getId());
@@ -212,12 +212,12 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 검색_조건에_맞는_예약을_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time1, theme));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock).plusDays(1), time2, theme));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(14, 0)));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock), time1, theme));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).plusDays(1), time2, theme));
         ReservationSearchParam reservationSearchParam = new ReservationSearchParam(
                 theme.getId(),
                 member.getId(),
@@ -245,12 +245,12 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 사용자의_예약을_모두_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
-        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
-        ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time1, theme));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock).plusDays(1), time2, theme));
+        Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(14, 0)));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock), time1, theme));
+        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).plusDays(1), time2, theme));
 
         // when
         List<ReservationWithStatusResult> reservationsWithStatus = reservationService.findReservationsWithStatus(

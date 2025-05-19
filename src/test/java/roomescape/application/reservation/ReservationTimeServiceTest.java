@@ -77,7 +77,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 이미_존재하는_예약시간을_추가하는_경우_예외가_발생한다() {
         // given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
         CreateReservationTimeParam createReservationTimeParam = new CreateReservationTimeParam(LocalTime.of(12, 0));
 
         // when
@@ -90,7 +90,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약시간을_조회할_수_있다() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
 
         // when
         ReservationTimeResult result = reservationTimeService.findById(reservationTime.getId());
@@ -114,8 +114,8 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 모든_예약시간을_조회할_수_있다() {
         // given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
+        reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
 
         // when
         List<ReservationTimeResult> results = reservationTimeService.findAll();
@@ -130,7 +130,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약시간을_삭제할_수_있다() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
 
         // when
         reservationTimeService.deleteById(reservationTime.getId());
@@ -143,10 +143,10 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약시간으로_예약된_예약이_존재하는_경우_예외가_발생한다() {
         // given
-        Member member = memberRepository.save(new Member("test", new Email("test@test.com"), "test", Role.ADMIN));
-        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), reservationTime, theme));
+        Member member = memberRepository.save(Member.create("test", new Email("test@test.com"), "test", Role.ADMIN));
+        Theme theme = themeRepository.save(Theme.create("test", "test", "test"));
+        ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
+        reservationRepository.save(Reservation.create(member, LocalDate.now().plusDays(1), reservationTime, theme));
 
         // when
         // then
@@ -158,11 +158,11 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 예약시간을_예약여부와_함께_조회할_수_있다() {
         // given
-        Member member = memberRepository.save(new Member("test", new Email("test@test.com"), "test", Role.ADMIN));
-        Theme theme = themeRepository.save(new Theme("test", "test", "test"));
-        ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), reservationTime1, theme));
+        Member member = memberRepository.save(Member.create("test", new Email("test@test.com"), "test", Role.ADMIN));
+        Theme theme = themeRepository.save(Theme.create("test", "test", "test"));
+        ReservationTime reservationTime1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
+        reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        reservationRepository.save(Reservation.create(member, LocalDate.now().plusDays(1), reservationTime1, theme));
 
         // when
         List<AvailableReservationTimeResult> availableTimesByThemeIdAndDate = reservationTimeService.findAvailableTimesByThemeIdAndDate(

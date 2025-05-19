@@ -40,7 +40,7 @@ public class ThemeService {
         if (themeRepository.existsByName(createThemeParam.name())) {
             throw new BusinessRuleViolationException("이미 같은 이름의 테마가 존재합니다.");
         }
-        Theme theme = themeRepository.save(new Theme(
+        Theme theme = themeRepository.save(Theme.create(
                         createThemeParam.name(),
                         createThemeParam.description(),
                         createThemeParam.thumbnail()

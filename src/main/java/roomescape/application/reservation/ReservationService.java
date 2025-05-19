@@ -50,7 +50,7 @@ public class ReservationService {
         if (isAlreadyReservedAt(createReservationParam.date(), reservationTime, theme)) {
             throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
         }
-        Reservation reservation = new Reservation(
+        Reservation reservation = Reservation.create(
                 member,
                 createReservationParam.date(),
                 reservationTime,

@@ -40,14 +40,6 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
-    }
-
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, member, date, time, theme, ReservationStatus.RESERVE);
-    }
-
     public Reservation(Long id,
                        Member member,
                        LocalDate date,
@@ -63,6 +55,10 @@ public class Reservation {
     }
 
     protected Reservation() {
+    }
+
+    public static Reservation create(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVE);
     }
 
     public void validateReservable(LocalDateTime currentDateTime) {

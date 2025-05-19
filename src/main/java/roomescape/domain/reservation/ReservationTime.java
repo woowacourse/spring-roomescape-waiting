@@ -20,8 +20,8 @@ public final class ReservationTime {
 
     private LocalTime startAt;
 
-    public ReservationTime(LocalTime startAt) {
-        this(null, startAt);
+    public static ReservationTime create(LocalTime startAt) {
+        return new ReservationTime(null, startAt);
     }
 
     public ReservationTime(Long id, LocalTime startAt) {

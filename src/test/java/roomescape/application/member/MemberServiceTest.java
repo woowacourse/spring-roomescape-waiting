@@ -31,8 +31,8 @@ class MemberServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 모든_회원_조회() {
         // given
-        memberRepository.save(new Member("벨로", new Email("test1@email.com"), "1234", Role.NORMAL));
-        memberRepository.save(new Member("서프", new Email("test2@email.com"), "1234", Role.NORMAL));
+        memberRepository.save(Member.create("벨로", new Email("test1@email.com"), "1234", Role.NORMAL));
+        memberRepository.save(Member.create("서프", new Email("test2@email.com"), "1234", Role.NORMAL));
 
         // when
         List<MemberResult> results = memberService.findAll();

@@ -29,14 +29,6 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public Member(String name, Email email, String password, Role role) {
-        this(null, name, email, password, role);
-    }
-
-    public Member(String name, Email email, String password) {
-        this(null, name, email, password, Role.NORMAL);
-    }
-
     public Member(Long id, String name, Email email, String password, Role role) {
         validateName(name);
         validatePassword(password);
@@ -48,6 +40,10 @@ public class Member {
     }
 
     protected Member() {
+    }
+
+    public static Member create(String name, Email email, String password, Role role) {
+        return new Member(null, name, email, password, role);
     }
 
     private void validateName(String name) {

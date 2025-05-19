@@ -13,6 +13,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.DailyThemeReservations;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
 
@@ -27,14 +28,16 @@ class DailyThemeReservationsTest {
                         new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(1L, LocalTime.of(12, 0)),
-                        new Theme(1L, "test", "description", "thumbnail")
+                        new Theme(1L, "test", "description", "thumbnail"),
+                        ReservationStatus.RESERVE
                 ),
                 new Reservation(
                         2L,
                         new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(1L, LocalTime.of(12, 0)),
-                        new Theme(2L, "test2", "description2", "thumbnail2")
+                        new Theme(2L, "test2", "description2", "thumbnail2"),
+                        ReservationStatus.RESERVE
                 )
         );
 
@@ -53,14 +56,16 @@ class DailyThemeReservationsTest {
                         new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(1L, LocalTime.of(12, 0)),
-                        new Theme(1L, "test", "description", "thumbnail")
+                        new Theme(1L, "test", "description", "thumbnail"),
+                        ReservationStatus.RESERVE
                 ),
                 new Reservation(
                         2L,
                         new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
                         LocalDate.of(2025, 5, 8),
                         new ReservationTime(2L, LocalTime.of(13, 0)),
-                        new Theme(1L, "test", "description", "thumbnail")
+                        new Theme(1L, "test", "description", "thumbnail"),
+                        ReservationStatus.RESERVE
                 )
         );
         DailyThemeReservations dailyThemeReservations = new DailyThemeReservations(reservations, 1L,

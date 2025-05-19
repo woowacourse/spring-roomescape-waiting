@@ -24,10 +24,6 @@ public class Theme {
 
     private String thumbnail;
 
-    public Theme(final String name, final String description, final String thumbnail) {
-        this(null, name, description, thumbnail);
-    }
-
     public Theme(Long id, String name, String description, String thumbnail) {
         validateName(name);
         validateDescription(description);
@@ -39,6 +35,10 @@ public class Theme {
     }
 
     protected Theme() {
+    }
+
+    public static Theme create(String name, String description, String thumbnail) {
+        return new Theme(null, name, description, thumbnail);
     }
 
     private void validateName(String name) {

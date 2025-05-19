@@ -7,6 +7,7 @@ import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.Role;
 
 @Service
 public class MemberService {
@@ -29,10 +30,11 @@ public class MemberService {
         if (memberRepository.existsByEmail(new Email(serviceParam.email()))) {
             throw new BusinessRuleViolationException("이미 같은 이메일을 가진 사용자가 존재합니다.");
         }
-        Member member = new Member(
+        Member member = Member.create(
                 serviceParam.name(),
                 new Email(serviceParam.email()),
-                serviceParam.password()
+                serviceParam.password(),
+                Role.NORMAL
         );
         memberRepository.save(member);
     }
