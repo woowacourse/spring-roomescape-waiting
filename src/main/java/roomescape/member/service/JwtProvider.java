@@ -23,13 +23,11 @@ public class JwtProvider implements TokenProvider {
     public String createToken(final Member member) {
         final Date now = new Date();
         final Date expirationDate = new Date(now.getTime() + EXPIRATION_TERM);
-        Claims claims = Jwts.claims();
-        claims.put("role", member.getRole().name());
         return Jwts.builder()
-                .setClaims(claims)
                 .setSubject(String.valueOf(member.getId()))
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
+                .claim("role", member.getRole().name())
                 .signWith(SIGN_ALGORITHM, SECRET_KEY)
                 .compact();
     }

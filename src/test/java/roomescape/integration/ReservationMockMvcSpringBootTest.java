@@ -2,14 +2,19 @@ package roomescape.integration;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.Cookie;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,6 +29,7 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.reservation.controller.dto.AdminReservationCreateRequest;
 
 @ActiveProfiles({"test", "auth"})
 @AutoConfigureMockMvc
@@ -35,6 +41,42 @@ public class ReservationMockMvcSpringBootTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @DisplayName("내 예약 목록을 조회할 수 있다")
+    @Test
+    void getMyReservations() throws Exception {
+        // given
+        String token = getAdminToken();
+        Cookie cookie = new Cookie("token", token);
+
+        // when
+        // then
+        mockMvc.perform(get("/reservations-mine")
+                        .contentType("application/json")
+                        .cookie(cookie)
+                ).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(13));
+    }
+
+    @DisplayName("어드민이 예약을 추가할 수 있다")
+    @Test
+    void adminCreate() throws Exception {
+        // given
+        AdminReservationCreateRequest createRequest = new AdminReservationCreateRequest(
+                LocalDate.now().plusDays(1), 1L, 1L, 1L);
+        String token = getAdminToken();
+        Cookie cookie = new Cookie("token", token);
+
+        // when
+        // then
+        mockMvc.perform(post("/admin/reservations")
+                        .contentType("application/json")
+                        .cookie(cookie)
+                        .content(new ObjectMapper().registerModule(new JavaTimeModule())
+                                .writeValueAsString(createRequest))
+                ).andExpect(status().isCreated())
+                .andExpect(header().stringValues("Location", "/reservations/14"));
+    }
 
     @DisplayName("조건에 따른 예약 목록을 조회할 수 있다")
     @MethodSource("returnParametersAndExpectedSize")
