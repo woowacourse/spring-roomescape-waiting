@@ -22,7 +22,6 @@ import roomescape.waiting.repository.WaitingRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
-
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
@@ -44,6 +43,10 @@ public class WaitingService {
         Long rank = waitingRepository.countByDateAndThemeAndMember(request.date(), theme, member);
 
         return WaitingCreateResponse.from(saved, rank);
+    }
+
+    public void deleteWaiting(Long waitingId) {
+        waitingRepository.deleteById(waitingId);
     }
 
     private void validateAvailableWaiting(LoginMember loginMember, WaitingCreateRequest request) {

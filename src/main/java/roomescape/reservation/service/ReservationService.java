@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -91,21 +90,9 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
 
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
 
-        List<ReservationWaitingReadMemberResponse> responsesByReservation = reservations.stream()
-                .map(ReservationWaitingReadMemberResponse::fromReservation)
-                .toList();
-
-        List<ReservationWaitingReadMemberResponse> responsesByWaiting = waitingWithRanks.stream()
-                .map(ReservationWaitingReadMemberResponse::fromWaitingWithRank)
-                .toList();
-
-        List<ReservationWaitingReadMemberResponse> responses = new ArrayList<>();
-        responses.addAll(responsesByReservation);
-        responses.addAll(responsesByWaiting);
-        return responses;
+        return ReservationWaitingReadMemberResponse.of(reservations, waitingWithRanks);
     }
 
     public void deleteReservation(Long id) {
