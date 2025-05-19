@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationSlots;
@@ -44,11 +45,10 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
-    public ReservationSlots getReservationSlots(AvailableTimeRequest request) {
+    public ReservationSlots getReservationSlots(Long themeId, LocalDate date) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
-        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndTheme_Id(request.date(),
-                request.themeId());
+        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndTheme_Id(date, themeId);
 
         return new ReservationSlots(times, alreadyReservedReservations);
     }
