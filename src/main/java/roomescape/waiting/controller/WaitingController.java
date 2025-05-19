@@ -41,6 +41,12 @@ public class WaitingController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<Void> approve(@PathVariable("id") Long id) {
+        waitingService.approve(id);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
         waitingService.deleteById(id);

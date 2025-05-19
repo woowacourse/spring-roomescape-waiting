@@ -1,6 +1,7 @@
 package roomescape.waiting.domain;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
@@ -12,4 +13,6 @@ public interface WaitingRepository {
     Collection<Waiting> findAllByMemberId(Long memberId);
 
     Collection<WaitingWithRank> findWithRankByMemberId(Long memberId);
+
+    Optional<WaitingWithRank> findWithRankById(Long id);
 }

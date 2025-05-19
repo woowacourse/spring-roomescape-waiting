@@ -1,6 +1,7 @@
 package roomescape.waiting.infrastructure;
 
 import java.util.Collection;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
@@ -37,5 +38,10 @@ public class WaitingRepositoryAdapter implements WaitingRepository {
     @Override
     public Collection<WaitingWithRank> findWithRankByMemberId(Long memberId) {
         return waitingJpaRepository.findWithRankByMemberId(memberId);
+    }
+
+    @Override
+    public Optional<WaitingWithRank> findWithRankById(Long id) {
+        return waitingJpaRepository.findWithRankById(id);
     }
 }
