@@ -1,11 +1,14 @@
 package roomescape.reservation.application;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
 import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
+import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.model.dto.ReservationDetails;
 import roomescape.reservation.model.entity.Reservation;
@@ -16,6 +19,7 @@ import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
 import roomescape.reservation.model.service.ReservationValidator;
+import roomescape.reservation.model.vo.ReservationStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +43,13 @@ public class UserReservationService {
         }
     }
 
+    public List<MyReservationServiceResponse> getAllByMemberId(Long memberId) {
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+        return reservations.stream()
+                .map(this::buildMyReservationServiceResponse)
+                .toList();
+    }
+
     private ReservationDetails createReservationDetails(CreateReservationServiceRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
         ReservationTheme reservationTheme = reservationThemeRepository.getById(request.themeId());
@@ -46,4 +57,10 @@ public class UserReservationService {
         return request.toReservationDetails(reservationTime, reservationTheme, member);
     }
 
+    private MyReservationServiceResponse buildMyReservationServiceResponse(Reservation reservation) {
+        ReservationStatus reservationStatus = ReservationStatus.getStatus(
+                reservation.getReservationDateTime(), LocalDateTime.now()
+        );
+        return MyReservationServiceResponse.from(reservation, reservationStatus);
+    }
 }

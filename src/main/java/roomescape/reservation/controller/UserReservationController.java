@@ -1,8 +1,10 @@
 package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +15,7 @@ import roomescape.auth.web.resolver.AuthenticationPrincipal;
 import roomescape.reservation.application.UserReservationService;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.controller.dto.request.CreateReservationUserRequest;
+import roomescape.reservation.controller.dto.response.MyReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 
 @RestController
@@ -33,5 +36,14 @@ public class UserReservationController {
         ReservationServiceResponse response = userReservationService.create(
                 request.toServiceRequest(memberName, memberId));
         return ReservationResponse.from(response);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/mine")
+    public List<MyReservationResponse> getAll(@AuthenticationPrincipal AuthenticatedMember member) {
+        return userReservationService.getAllByMemberId(member.id())
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 }
