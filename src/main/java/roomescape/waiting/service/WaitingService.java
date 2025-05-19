@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.InvalidIdException;
@@ -54,5 +55,10 @@ public class WaitingService {
 
     public void deleteById(Long id) {
         waitingRepository.deleteById(id);
+    }
+
+    public List<WaitingResponse> findAll() {
+        List<Waiting> waitings = waitingRepository.findAll().stream().toList();
+        return WaitingResponse.from(waitings);
     }
 }
