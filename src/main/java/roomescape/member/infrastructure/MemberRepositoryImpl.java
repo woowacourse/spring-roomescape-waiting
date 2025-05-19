@@ -6,12 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberCommandRepository;
-import roomescape.member.domain.MemberQueryRepository;
+import roomescape.member.domain.MemberRepository;
 
 @Repository
 @RequiredArgsConstructor
-public class MemberRepositoryImpl implements MemberCommandRepository, MemberQueryRepository {
+public class MemberRepositoryImpl implements MemberRepository {
 
     private final JpaMemberRepository jpaMemberRepository;
 

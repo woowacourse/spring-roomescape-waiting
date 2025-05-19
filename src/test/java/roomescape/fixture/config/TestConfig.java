@@ -4,8 +4,7 @@ package roomescape.fixture.config;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import roomescape.member.application.MemberService;
-import roomescape.member.domain.MemberCommandRepository;
-import roomescape.member.domain.MemberQueryRepository;
+import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.MemberRepositoryImpl;
 import roomescape.reservation.application.ReservationService;
@@ -55,14 +54,7 @@ public class TestConfig {
     }
 
     @Bean
-    public MemberCommandRepository memberCommandRepository(
-            final JpaMemberRepository jpaMemberRepository
-    ) {
-        return new MemberRepositoryImpl(jpaMemberRepository);
-    }
-
-    @Bean
-    public MemberQueryRepository memberQueryRepository(
+    public MemberRepository memberRepository(
             final JpaMemberRepository jpaMemberRepository
     ) {
         return new MemberRepositoryImpl(jpaMemberRepository);
@@ -103,22 +95,21 @@ public class TestConfig {
             final ReservationQueryRepository reservationQueryRepository,
             final ReservationTimeQueryRepository reservationTimeQueryRepository,
             final ThemeRepository themeRepository,
-            final MemberQueryRepository memberQueryRepository
+            final MemberRepository memberRepository
     ) {
         return new ReservationService(
                 reservationCommandRepository,
                 reservationQueryRepository,
                 reservationTimeQueryRepository,
                 themeRepository,
-                memberQueryRepository
+                memberRepository
         );
     }
 
     @Bean
     public MemberService memberService(
-            final MemberCommandRepository memberCommandRepository,
-            final MemberQueryRepository memberQueryRepository
+            final MemberRepository memberRepository
     ) {
-        return new MemberService(memberCommandRepository, memberQueryRepository);
+        return new MemberService(memberRepository);
     }
 }

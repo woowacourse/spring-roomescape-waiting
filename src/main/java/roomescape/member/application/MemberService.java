@@ -7,8 +7,7 @@ import roomescape.auth.domain.AuthRole;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberCommandRepository;
-import roomescape.member.domain.MemberQueryRepository;
+import roomescape.member.domain.MemberRepository;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
 import roomescape.member.ui.dto.SignUpRequest;
@@ -17,8 +16,7 @@ import roomescape.member.ui.dto.SignUpRequest;
 @RequiredArgsConstructor
 public class MemberService {
 
-    private final MemberCommandRepository memberCommandRepository;
-    private final MemberQueryRepository memberQueryRepository;
+    private final MemberRepository memberRepository;
 
     public MemberResponse.IdName create(final SignUpRequest request) {
         final Member member = new Member(
@@ -28,22 +26,22 @@ public class MemberService {
                 AuthRole.MEMBER
         );
 
-        final Member saved = memberCommandRepository.save(member);
+        final Member saved = memberRepository.save(member);
         return new MemberResponse.IdName(saved.getId(), saved.getName());
     }
 
     public void delete(final Long id) {
-        final Member found = memberQueryRepository.findById(id)
+        final Member found = memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         if (found.getRole() == AuthRole.ADMIN) {
             throw new AuthorizationException("관리자는 삭제할 수 없습니다.");
         }
-        memberCommandRepository.deleteById(id);
+        memberRepository.deleteById(id);
     }
 
     public List<IdName> findAllNames() {
-        return memberQueryRepository.findAll().stream()
+        return memberRepository.findAll().stream()
                 .map(IdName::from)
                 .toList();
     }

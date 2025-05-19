@@ -15,7 +15,7 @@ import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberQueryRepository;
+import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationQueryRepository;
@@ -39,7 +39,7 @@ public class ReservationService {
     private final ReservationQueryRepository reservationQueryRepository;
     private final ReservationTimeQueryRepository reservationTimeQueryRepository;
     private final ThemeRepository themeRepository;
-    private final MemberQueryRepository memberQueryRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationResponse create(
             final CreateReservationRequest request
@@ -82,7 +82,7 @@ public class ReservationService {
 
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-        final Member member = memberQueryRepository.findById(memberId)
+        final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         final Reservation reservation = new Reservation(date, reservationTime, theme, member, status);
@@ -122,7 +122,7 @@ public class ReservationService {
     public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
         final Reservation reservation = reservationQueryRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
-        final Member member = memberQueryRepository.findById(memberAuthInfo.id())
+        final Member member = memberRepository.findById(memberAuthInfo.id())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         if (!Objects.equals(reservation.getMember(), member)) {

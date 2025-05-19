@@ -15,7 +15,7 @@ import roomescape.fixture.config.TestConfig;
 import roomescape.fixture.domain.ReservationTimeFixture;
 import roomescape.fixture.domain.ThemeFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberCommandRepository;
+import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationCommandRepository;
 import roomescape.reservation.domain.ReservationStatus;
@@ -42,7 +42,7 @@ class ThemeRepositoryImplTest {
     private ReservationTimeCommandRepository reservationTimeCommandRepository;
 
     @Autowired
-    private MemberCommandRepository memberCommandRepository;
+    private MemberRepository memberRepository;
 
     @Test
     void 특정_기간_사이에_예약이_많은_n개의_테마_목록을_내림차순으로_정렬하여_반환한다() {
@@ -61,7 +61,7 @@ class ThemeRepositoryImplTest {
             reservationTimeCommandRepository.save(time);
         }
 
-        final Member member = memberCommandRepository.save(NOT_SAVED_MEMBER_1());
+        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         // theme.get(i) 테마에 예약 themeCounts.get(i)개 추가
         final List<Integer> themeCounts = List.of(5, 3, 4, 6, 2);

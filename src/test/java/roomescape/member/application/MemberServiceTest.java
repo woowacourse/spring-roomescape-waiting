@@ -14,8 +14,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.fixture.config.TestConfig;
 import roomescape.fixture.domain.MemberFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberCommandRepository;
-import roomescape.member.domain.MemberQueryRepository;
+import roomescape.member.domain.MemberRepository;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.SignUpRequest;
 
@@ -28,10 +27,7 @@ class MemberServiceTest {
     private MemberService memberService;
 
     @Autowired
-    private MemberCommandRepository memberCommandRepository;
-
-    @Autowired
-    private MemberQueryRepository memberQueryRepository;
+    private MemberRepository memberRepository;
 
     @Test
     void 회원을_추가한다() {
@@ -57,13 +53,13 @@ class MemberServiceTest {
     void 회원을_삭제한다() {
         // given
         final Member member = MemberFixture.NOT_SAVED_MEMBER_1();
-        final Member savedMember = memberCommandRepository.save(member);
+        final Member savedMember = memberRepository.save(member);
 
         // when
         memberService.delete(savedMember.getId());
 
         // then
-        final Member foundMember = memberQueryRepository.findById(savedMember.getId()).orElse(null);
+        final Member foundMember = memberRepository.findById(savedMember.getId()).orElse(null);
         Assertions.assertThat(foundMember).isNull();
     }
 }

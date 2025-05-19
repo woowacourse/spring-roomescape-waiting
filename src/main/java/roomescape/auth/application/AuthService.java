@@ -7,17 +7,17 @@ import roomescape.auth.ui.dto.LoginRequest;
 import roomescape.exception.auth.AuthenticationException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberQueryRepository;
+import roomescape.member.domain.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final AuthTokenProvider authTokenProvider;
-    private final MemberQueryRepository memberQueryRepository;
+    private final MemberRepository memberRepository;
 
     public String createAccessToken(final LoginRequest request) {
-        final Member member = memberQueryRepository.findByEmail(request.email())
+        final Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("해당 이메일을 가진 회원이 존재하지 않습니다."));
 
         if (member.isWrongPassword(request.password())) {
@@ -28,7 +28,7 @@ public class AuthService {
     }
 
     public String getMemberById(final Long id) {
-        return memberQueryRepository.findById(id)
+        return memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원이 존재하지 않습니다."))
                 .getName();
     }
