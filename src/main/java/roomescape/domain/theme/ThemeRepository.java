@@ -11,7 +11,7 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
     @Query(""" 
             SELECT t.id, t.name, t.description, t.thumbnail
                                FROM Theme t
-                               JOIN Reservation r
+                               JOIN Reservation r ON r.theme.id = t.id
                                WHERE r.dateTime.date BETWEEN :startDate AND :endDate
                                GROUP BY t.id, t.name, t.description, t.thumbnail
                                ORDER BY COUNT(r.id) DESC
