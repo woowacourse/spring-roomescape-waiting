@@ -43,7 +43,7 @@ public class JwtProvider {
 
     public boolean isValidToken(final String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJwt(token).getBody();
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             return true;
         } catch (final JwtException e) {
             return false;

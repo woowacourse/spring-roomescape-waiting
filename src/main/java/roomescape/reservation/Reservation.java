@@ -57,5 +57,10 @@ public class Reservation {
             final ReservationStatus reservationStatus
     ) {
         this(null, date, member, reservationTime, theme, reservationStatus);
+        makeBiDirectionAssociation(member);
+    }
+
+    private void makeBiDirectionAssociation(final Member member) {
+        member.getReservations().add(this);
     }
 }

@@ -15,7 +15,7 @@ import roomescape.member.dto.MemberResponse;
 @AllArgsConstructor
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+    private final MemberRepositoryFacade memberRepositoryFacade;
     private final PasswordEncoder passwordEncoder;
 
     public void createMember(final MemberRequest request) {
@@ -24,11 +24,11 @@ public class MemberService {
         final String encodedPassword = passwordEncoder.encode(request.password());
 
         final Member notSavedMember = new Member(request.email(), encodedPassword, request.name(), MemberRole.MEMBER);
-        memberRepository.save(notSavedMember);
+        memberRepositoryFacade.save(notSavedMember);
     }
 
     public List<MemberReservationResponse> readAllReservationsByMember(final LoginMember loginMember) {
-        final Member member = memberRepository.findByEmail(loginMember.email())
+        final Member member = memberRepositoryFacade.findByEmail(loginMember.email())
                 .orElseThrow(MemberNotFoundException::new);
 
         return member.getReservations().stream()
@@ -37,13 +37,13 @@ public class MemberService {
     }
 
     public List<MemberResponse> readAllMember() {
-        return memberRepository.findAll().stream()
+        return memberRepositoryFacade.findAll().stream()
                 .map(MemberResponse::from)
                 .toList();
     }
 
     private void validateDuplicationEmail(final MemberRequest request) {
-        if (memberRepository.existsByEmail(request.email())) {
+        if (memberRepositoryFacade.existsByEmail(request.email())) {
             throw new MemberEmailConflictException();
         }
     }
