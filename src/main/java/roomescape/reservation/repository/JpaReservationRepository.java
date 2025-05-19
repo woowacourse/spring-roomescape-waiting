@@ -7,25 +7,19 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 
-public interface JpaReservationRepository extends JpaRepository<Reservation, Long>, ReservationRepository {
+public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Override
     boolean existsByTimeId(Long timeId);
 
-    @Override
     boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
-    @Override
     List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
                                                              ReservationDate to);
 
-    @Override
     List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId);
 
-    @Override
     List<Reservation> findAllByMemberId(Long memberId);
 
-    @Override
     @Query("SELECT t FROM Theme t " +
             "LEFT JOIN Reservation r ON r.theme.id = t.id " +
             "WHERE r.date BETWEEN :startDate AND :endDate " +

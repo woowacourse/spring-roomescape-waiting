@@ -8,7 +8,5 @@ public interface AccountRepository {
 
     Account save(Account account);
 
-    Account findByMemberId(Long memberId);
-
     Optional<Account> findAccountByMemberEmail(MemberEmail email);
 }

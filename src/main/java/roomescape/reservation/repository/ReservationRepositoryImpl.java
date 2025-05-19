@@ -1,0 +1,68 @@
+package roomescape.reservation.repository;
+
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.theme.domain.Theme;
+
+@Repository
+@RequiredArgsConstructor
+// TODO : 구현체 이름 고민해보기
+public class ReservationRepositoryImpl implements ReservationRepository {
+
+    private final JpaReservationRepository jpaReservationRepository;
+
+    @Override
+    public boolean existsByTimeId(Long timeId) {
+        return jpaReservationRepository.existsByTimeId(timeId);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
+    public List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
+                                                                    ReservationDate to) {
+        return jpaReservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
+    }
+
+    @Override
+    public List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId) {
+        return jpaReservationRepository.findByDateAndThemeId(date, themeId);
+    }
+
+    @Override
+    public List<Reservation> findAllByMemberId(Long memberId) {
+        return jpaReservationRepository.findAllByMemberId(memberId);
+    }
+
+    @Override
+    public List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit) {
+        return jpaReservationRepository.findThemesWithReservationCount(startDate, endDate, limit);
+    }
+
+    @Override
+    public Reservation save(Reservation reservation) {
+        return jpaReservationRepository.save(reservation);
+    }
+
+    @Override
+    public List<Reservation> findAll() {
+        return jpaReservationRepository.findAll();
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaReservationRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return jpaReservationRepository.findById(id);
+    }
+}

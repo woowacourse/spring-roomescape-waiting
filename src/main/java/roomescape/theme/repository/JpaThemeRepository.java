@@ -5,8 +5,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 
 @Repository
-public interface JpaThemeRepository extends JpaRepository<Theme, Long>, ThemeRepository {
-    
-    @Override
-    void deleteById(Long id);
+public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
+
 }
