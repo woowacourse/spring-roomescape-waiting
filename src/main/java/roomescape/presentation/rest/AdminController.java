@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,15 +19,11 @@ import roomescape.presentation.response.UserResponse;
 
 @RestController
 @RequestMapping("/admin")
+@AllArgsConstructor
 public class AdminController {
 
     private final ReservationService reservationService;
     private final UserService userService;
-
-    public AdminController(final ReservationService reservationService, final UserService userService) {
-        this.reservationService = reservationService;
-        this.userService = userService;
-    }
 
     @PostMapping("/reservations")
     @ResponseStatus(CREATED)

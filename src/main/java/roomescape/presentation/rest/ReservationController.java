@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,13 +24,10 @@ import roomescape.presentation.response.ReservationResponse;
 
 @RestController
 @RequestMapping("/reservations")
+@AllArgsConstructor
 public class ReservationController {
 
     private final ReservationService service;
-
-    public ReservationController(final ReservationService service) {
-        this.service = service;
-    }
 
     @PostMapping
     @ResponseStatus(CREATED)

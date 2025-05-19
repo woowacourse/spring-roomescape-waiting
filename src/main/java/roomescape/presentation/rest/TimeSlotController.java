@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,13 +21,10 @@ import roomescape.presentation.response.AvailableTimeSlotResponse;
 import roomescape.presentation.response.TimeSlotResponse;
 
 @RestController
+@AllArgsConstructor
 public class TimeSlotController {
 
     private final TimeSlotService service;
-
-    public TimeSlotController(final TimeSlotService service) {
-        this.service = service;
-    }
 
     @PostMapping("/times")
     @ResponseStatus(CREATED)

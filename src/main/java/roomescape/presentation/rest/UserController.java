@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,13 +19,10 @@ import roomescape.presentation.response.UserResponse;
 
 @RestController
 @RequestMapping("/users")
+@AllArgsConstructor
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(final UserService userService) {
-        this.userService = userService;
-    }
 
     @PostMapping
     @ResponseStatus(CREATED)
