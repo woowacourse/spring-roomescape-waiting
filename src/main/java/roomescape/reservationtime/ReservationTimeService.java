@@ -16,33 +16,33 @@ import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.theme.ThemeRepositoryFacade;
 
 @Service
 @AllArgsConstructor
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
     private final ReservationRepository reservationRepository;
-    private final ThemeRepository themeRepository;
+    private final ThemeRepositoryFacade themeRepositoryFacade;
 
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
         validateDuplicateTime(request);
 
         final ReservationTime reservationTime = new ReservationTime(request.startAt());
-        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        final ReservationTime savedReservationTime = reservationTimeRepositoryFacade.save(reservationTime);
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimeRepository.findAll().stream()
+        return reservationTimeRepositoryFacade.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
-        final List<ReservationTime> times = reservationTimeRepository.findAll();
-        final Theme theme = themeRepository.findById(themeId)
+        final List<ReservationTime> times = reservationTimeRepositoryFacade.findAll();
+        final Theme theme = themeRepositoryFacade.findById(themeId)
                 .orElseThrow(ReservationTimeNotExistsThemeException::new);
 
         final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(theme,
@@ -61,18 +61,18 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final Long id) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(id)
+        final ReservationTime reservationTime = reservationTimeRepositoryFacade.findById(id)
                 .orElseThrow(ReservationTimeNotFoundException::new);
 
         if (reservationRepository.existsByReservationTime(reservationTime)) {
             throw new ReservationTimeUsedException();
         }
 
-        reservationTimeRepository.delete(reservationTime);
+        reservationTimeRepositoryFacade.delete(reservationTime);
     }
 
     private void validateDuplicateTime(final ReservationTimeRequest request) {
-        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
+        if (reservationTimeRepositoryFacade.existsByStartAt(request.startAt())) {
             throw new ReservationTimeConflictException();
         }
     }
