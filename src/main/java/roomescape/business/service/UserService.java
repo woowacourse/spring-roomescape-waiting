@@ -2,6 +2,7 @@ package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.UserDto;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.UserRepository;
@@ -16,10 +17,12 @@ import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public UserDto register(final String name, final String email, final String password) {
         if (userRepository.existByEmail(email)) {
             throw new InvalidCreateArgumentException(EMAIL_DUPLICATED);

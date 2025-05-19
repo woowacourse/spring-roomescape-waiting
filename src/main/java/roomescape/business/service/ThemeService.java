@@ -2,6 +2,7 @@ package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ThemeDto;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.ReservationRepository;
@@ -18,6 +19,7 @@ import static roomescape.exception.ErrorCode.THEME_NOT_EXIST;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int AGGREGATE_START_DATE_INTERVAL = 7;
@@ -26,6 +28,7 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public ThemeDto addAndGet(final String name, final String description, final String thumbnail) {
         Theme theme = Theme.create(name, description, thumbnail);
         themeRepository.save(theme);
@@ -47,6 +50,7 @@ public class ThemeService {
         return ThemeDto.fromEntities(popularThemes);
     }
 
+    @Transactional
     public void delete(final String themeIdValue) {
         Id themeId = Id.create(themeIdValue);
         if (reservationRepository.existByThemeId(themeId)) {

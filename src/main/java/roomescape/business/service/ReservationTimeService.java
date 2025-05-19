@@ -2,6 +2,7 @@ package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;
 import roomescape.business.model.entity.ReservationTime;
@@ -24,11 +25,13 @@ import static roomescape.exception.ErrorCode.RESERVED_RESERVATION_TIME;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public ReservationTimeDto addAndGet(final LocalTime time) {
         ReservationTime reservationTime = ReservationTime.create(time);
         validateNoDuplication(reservationTime);
@@ -65,6 +68,7 @@ public class ReservationTimeService {
         return ReservableReservationTimeDto.fromEntities(available, notAvailable);
     }
 
+    @Transactional
     public void delete(final String timeIdValue) {
         Id timeId = Id.create(timeIdValue);
         if (reservationRepository.existByTimeId(timeId)) {

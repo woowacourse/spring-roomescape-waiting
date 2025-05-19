@@ -2,6 +2,7 @@ package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.AuthToken;
 import roomescape.auth.jwt.JwtUtil;
 import roomescape.business.model.entity.User;
@@ -13,6 +14,7 @@ import static roomescape.exception.SecurityErrorCode.INVALID_PASSWORD;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final UserRepository userRepository;
