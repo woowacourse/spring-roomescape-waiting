@@ -39,12 +39,12 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation(final LocalDate date, final Member member, final ReservationTime reservationTime, final Theme theme) {
+    public Reservation(final LocalDate date, final Member member, final ReservationTime reservationTime,
+                       final Theme theme) {
         this(null, date, member, reservationTime, theme);
     }
 
-    public Reservation() {
-
+    protected Reservation() {
     }
 
     private void validateDate(final LocalDate date) {

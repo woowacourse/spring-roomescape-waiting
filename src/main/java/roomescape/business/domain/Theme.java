@@ -44,7 +44,7 @@ public class Theme {
         this.thumbnail = null;
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     private void validateName(final String name) {

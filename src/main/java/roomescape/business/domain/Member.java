@@ -45,7 +45,7 @@ public class Member {
         this.password = null;
     }
 
-    public Member() {
+    protected Member() {
     }
 
     public Long getId() {
