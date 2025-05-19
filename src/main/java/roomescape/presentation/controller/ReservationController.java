@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.business.service.ReservationService;
@@ -22,7 +21,6 @@ import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
 
 @RestController
-@RequestMapping
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -37,7 +35,7 @@ public class ReservationController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createByLoginMember(
             @RequestBody final ReservationRequest reservationRequest,
-            final @AuthenticationPrincipal  LoginMember loginMember
+            final @AuthenticationPrincipal LoginMember loginMember
     ) {
         final ReservationResponse reservationResponse = reservationService.insert(
                 reservationRequest.date(),
