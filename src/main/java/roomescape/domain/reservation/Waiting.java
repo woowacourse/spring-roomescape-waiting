@@ -25,21 +25,21 @@ public class Waiting {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_time_id")
-    private ReservationTime reservationTime;
+    private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    public Waiting(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
-        this(null, member, date, reservationTime, theme);
+    public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this(null, member, date, time, theme);
     }
 
-    public Waiting(Long id, Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+    public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
-        this.reservationTime = reservationTime;
+        this.time = time;
         this.theme = theme;
     }
 
@@ -58,8 +58,8 @@ public class Waiting {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Theme getTheme() {

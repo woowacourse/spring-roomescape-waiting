@@ -3,6 +3,7 @@ package roomescape.presentation.api.reservation.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.application.reservation.dto.ReservationWithStatusResult;
+import roomescape.application.reservation.dto.WaitingResult;
 import roomescape.domain.reservation.ReservationStatus;
 
 public record ReservationWithStatusResponse(
@@ -23,9 +24,23 @@ public record ReservationWithStatusResponse(
         );
     }
 
+    public static ReservationWithStatusResponse from(WaitingResult waitingResult) {
+        return new ReservationWithStatusResponse(
+                waitingResult.waitingId(),
+                waitingResult.themeName(),
+                waitingResult.reservationDate(),
+                waitingResult.reservationTime(),
+                toDisplayStatus(waitingResult.waitingCount())
+        );
+    }
+
     private static String toDisplayStatus(ReservationStatus status) {
         return switch (status) {
             case RESERVE -> "예약";
         };
+    }
+
+    private static String toDisplayStatus(long waitingCount) {
+        return waitingCount + "번째 예약 대기";
     }
 }

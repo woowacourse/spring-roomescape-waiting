@@ -28,6 +28,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.WaitingRepository;
 import roomescape.infrastructure.error.exception.MemberException;
 import roomescape.infrastructure.error.exception.ReservationException;
 import roomescape.infrastructure.error.exception.ReservationTimeException;
