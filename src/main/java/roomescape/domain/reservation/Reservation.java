@@ -25,10 +25,8 @@ public class Reservation {
     @Column(length = 30)
     private String name;
     private LocalDate date;
-
     @ManyToOne
     private ReservationTime time;
-
     @ManyToOne
     private Theme theme;
 

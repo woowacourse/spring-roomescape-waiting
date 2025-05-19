@@ -19,6 +19,7 @@ public class Member {
     @Column(length = 100)
     private String password;
     @Enumerated(value = EnumType.STRING)
+    @Column(length = 10, nullable = false)
     private Role role;
     @Column(length = 30)
     private String name;
