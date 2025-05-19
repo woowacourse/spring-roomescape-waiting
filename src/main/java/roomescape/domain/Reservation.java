@@ -3,9 +3,11 @@ package roomescape.domain;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -27,17 +29,19 @@ public class Reservation {
 
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reservation_time_id")
     private ReservationTime time;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time, final Theme theme,
-                       final ReservationStatus status) {
+    public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
+                       final Theme theme, final ReservationStatus status) {
         this.id = id;
         this.member = Objects.requireNonNull(member, "예약 회원은 null일 수 없습니다.");
         this.date = Objects.requireNonNull(date, "예약 날짜는 null일 수 없습니다.");
@@ -46,7 +50,8 @@ public class Reservation {
         this.status = Objects.requireNonNull(status, "예약 상태는 null일 수 없습니다.");
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme, final ReservationStatus status) {
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme,
+                       final ReservationStatus status) {
         this(null, member, date, time, theme, status);
     }
 
