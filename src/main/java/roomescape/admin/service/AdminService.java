@@ -15,6 +15,7 @@ public class AdminService {
         this.adminRepository = adminRepository;
     }
 
+    @Transactional(readOnly = true)
     public boolean isExistsByEmail(final String email) {
         return adminRepository.existsByEmail(email);
     }
