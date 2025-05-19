@@ -30,9 +30,9 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeJpaRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.ReservationTimeJpaRepository;
+import roomescape.time.repository.ReservationTimeRepository;
 
 @Sql("/test-data.sql")
 public class ReservationTest extends BaseTest {
@@ -41,7 +41,7 @@ public class ReservationTest extends BaseTest {
     private int port;
 
     @Autowired
-    private ThemeJpaRepository themeJpaRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
     private AuthService authService;
@@ -50,7 +50,7 @@ public class ReservationTest extends BaseTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ReservationTimeJpaRepository reservationTimeJpaRepository;
+    private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -73,12 +73,12 @@ public class ReservationTest extends BaseTest {
 
         RestAssured.port = port;
 
-        theme = themeJpaRepository.save(new Theme("테마1", "설명1", "썸네일1"));
+        theme = themeRepository.save(new Theme("테마1", "설명1", "썸네일1"));
 
         member = memberRepository.save(
                 new Member(new Name("매트"), new Email("matt@kakao.com"), new Password("1234"), Role.ADMIN));
 
-        reservationTime = reservationTimeJpaRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
+        reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(10, 0)));
 
         token = authService.tokenLogin(new TokenLoginCreateRequest("matt@kakao.com", "1234")).tokenResponse();
 

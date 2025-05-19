@@ -26,7 +26,7 @@ import roomescape.time.domain.ReservationTime;
 class ReservationTimeJpaRepositoryTest {
 
     @Autowired
-    private ReservationTimeJpaRepository reservationTimeJpaRepository;
+    private ReservationTimeJpaTimeRepository reservationTimeJpaRepository;
 
     @Autowired
     private EntityManager em;
