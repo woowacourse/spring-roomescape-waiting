@@ -38,8 +38,7 @@ public class ThemeService {
             throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
         }
 
-        var theme = themeRepository.getById(id);
-        themeRepository.delete(theme);
+        themeRepository.deleteByIdOrElseThrow(id);
     }
 
     @Transactional(readOnly = true)

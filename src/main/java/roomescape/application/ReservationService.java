@@ -47,8 +47,7 @@ public class ReservationService {
 
     @Transactional
     public void removeById(final long id) {
-        var reservation = reservationRepository.getById(id);
-        reservationRepository.delete(reservation);
+        reservationRepository.deleteByIdOrElseThrow(id);
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {

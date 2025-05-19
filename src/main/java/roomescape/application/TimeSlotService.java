@@ -42,9 +42,7 @@ public class TimeSlotService {
         if (reservationRepository.exists(byTimeSlotId(id))) {
             throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
         }
-
-        var timeSlot = timeSlotRepository.getById(id);
-        timeSlotRepository.delete(timeSlot);
+        timeSlotRepository.deleteByIdOrElseThrow(id);
     }
 
     @Transactional(readOnly = true)
