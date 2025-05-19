@@ -14,9 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.LoginException;
 import roomescape.common.util.DateTime;
 import roomescape.common.util.JwtTokenContainer;
+import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.member.domain.Role;
 import roomescape.member.dto.request.LoginMember;
 import roomescape.member.dto.request.LoginRequest;
 
@@ -55,24 +55,24 @@ class LoginServiceMockTest {
     @DisplayName("정상적인 유저이면 토큰을 반환한다.")
     void loginAndReturnToken_test() {
         // given
-        LoginRequest request = new LoginRequest("a", "a");
+        LoginRequest request = new LoginRequest("member@naver.com", "1234");
         when(dateTime.now())
                 .thenReturn(LocalDateTime.now());
-        when(memberRepository.findByEmailAndPassword("a", "a"))
-                .thenReturn(Optional.of(Member.createWithId(1L, "a", "a", "a", Role.USER)));
+        when(memberRepository.findByEmailAndPassword("member@naver.com", "1234"))
+                .thenReturn(Optional.of(TestFixture.createMember("멤버1", "member@naver.com", "1234")));
         when(jwtTokenContainer.createJwtToken(any(Member.class), any(LocalDateTime.class)))
-                .thenReturn("sdfsdafsdfa");
+                .thenReturn("realtoken");
         // when
         String token = loginService.loginAndReturnToken(request);
         // then
-        assertThat(token).isEqualTo("sdfsdafsdfa");
+        assertThat(token).isEqualTo("realtoken");
     }
 
     @Test
     @DisplayName("토큰이 있지만 유효하지 않은 회원일 때 예외가 발생한다.")
     void loginCheck_exception() {
         // given
-        String token = "asdsadasdsa";
+        String token = "realtoken";
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.empty());
         // then
@@ -84,11 +84,11 @@ class LoginServiceMockTest {
     @DisplayName("유효한 토큰이면 회원 정보를 반환한다.")
     void loginCheck_test() {
         // given
-        String token = "asdasdsdsd";
+        String token = "realtoken";
         when(jwtTokenContainer.getMemberId(token))
                 .thenReturn(1L);
         when(memberRepository.findById(1L))
-                .thenReturn(Optional.of(Member.createWithId(1L, "코기", "a", "a", Role.ADMIN)));
+                .thenReturn(Optional.of(TestFixture.createMember("코기", "member@naver.com", "1234")));
         // when
         LoginMember loginMember = loginService.loginCheck(token);
         // then

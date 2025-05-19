@@ -10,12 +10,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.fixture.ThemeTestFixture;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ public class JpaThemeRepositoryTest {
     @Test
     @DisplayName("저장 후 아이디 반환 테스트")
     void save_test() {
-        Theme theme = ThemeTestFixture.createTheme("테마1", "설명1", "썸네일1");
+        Theme theme = TestFixture.createThemeWithoutId("테마1", "설명1", "썸네일1");
 
         Theme save = repository.save(theme);
 
@@ -46,7 +46,7 @@ public class JpaThemeRepositoryTest {
     @CsvSource({"0,true", "1,false"})
     void delete_test(Long plus, boolean expected) {
         // given
-        Theme theme = ThemeTestFixture.createTheme("테마1", "설명1", "썸네일1");
+        Theme theme = TestFixture.createThemeWithoutId("테마1", "설명1", "썸네일1");
         Theme save = repository.save(theme);
         // when & then
         assertDoesNotThrow(() -> repository.deleteById(save.getId() + plus));
@@ -56,9 +56,9 @@ public class JpaThemeRepositoryTest {
     @DisplayName("전체 조회 테스트")
     void find_all_test() {
         // given
-        Theme theme1 = ThemeTestFixture.createTheme("테마1", "설명1", "썸네일1");
-        Theme theme2 = ThemeTestFixture.createTheme("테마2", "설명2", "썸네일2");
-        Theme theme3 = ThemeTestFixture.createTheme("테마3", "설명3", "썸네일3");
+        Theme theme1 = TestFixture.createThemeWithoutId("테마1", "설명1", "썸네일1");
+        Theme theme2 = TestFixture.createThemeWithoutId("테마2", "설명2", "썸네일2");
+        Theme theme3 = TestFixture.createThemeWithoutId("테마3", "설명3", "썸네일3");
 
         repository.save(theme1);
         repository.save(theme2);
@@ -87,7 +87,7 @@ public class JpaThemeRepositoryTest {
     @DisplayName("아이디로 조회 테스트")
     void find_by_id() {
         // given
-        Theme theme = ThemeTestFixture.createTheme("테마1", "설명1", "썸네일1");
+        Theme theme = TestFixture.createThemeWithoutId("테마1", "설명1", "썸네일1");
         Theme save = repository.save(theme);
         // when
         Theme findTheme = repository.findById(save.getId()).orElseThrow();
@@ -103,14 +103,14 @@ public class JpaThemeRepositoryTest {
     @DisplayName("인기 많은 테마를 순서대로 반환한다.(시간 조건 미포함, 개수 조건 미포함)")
     void find_popular_theme_no_time_and_count_condition() {
         // given
-        ReservationTime reservationTime1 = ThemeTestFixture.createTime(10, 00);
-        ReservationTime reservationTime2 = ThemeTestFixture.createTime(11, 00);
+        ReservationTime reservationTime1 = TestFixture.createTimeWithoutId(10, 00);
+        ReservationTime reservationTime2 = TestFixture.createTimeWithoutId(11, 00);
 
-        Theme theme1 = ThemeTestFixture.createTheme("테마1", "설명1", "썸네일1");
-        Theme theme2 = ThemeTestFixture.createTheme("테마2", "설명2", "썸네일2");
-        Theme theme3 = ThemeTestFixture.createTheme("테마3", "설명3", "썸네일3");
+        Theme theme1 = TestFixture.createThemeWithoutId("테마1", "설명1", "썸네일1");
+        Theme theme2 = TestFixture.createThemeWithoutId("테마2", "설명2", "썸네일2");
+        Theme theme3 = TestFixture.createThemeWithoutId("테마3", "설명3", "썸네일3");
 
-        Member member = ThemeTestFixture.createMember("멤버1", "member@com", "password");
+        Member member = TestFixture.createMemberWithoutId("멤버1", "member@com", "password");
 
         em.persist(reservationTime1);
         em.persist(reservationTime2);
@@ -165,14 +165,14 @@ public class JpaThemeRepositoryTest {
     @DisplayName("인기 많은 테마를 순서대로 반환한다.(시간 조건 포함, 개수 조건 미포함)")
     void find_popular_theme_no_count_condition() {
         // given
-        ReservationTime reservationTime1 = ThemeTestFixture.createTime(10, 00);
-        ReservationTime reservationTime2 = ThemeTestFixture.createTime(11, 00);
+        ReservationTime reservationTime1 = TestFixture.createTimeWithoutId(10, 00);
+        ReservationTime reservationTime2 = TestFixture.createTimeWithoutId(11, 00);
 
-        Theme theme1 = ThemeTestFixture.createTheme("테마1", "설명1", "썸네일1");
-        Theme theme2 = ThemeTestFixture.createTheme("테마2", "설명2", "썸네일2");
-        Theme theme3 = ThemeTestFixture.createTheme("테마3", "설명3", "썸네일3");
+        Theme theme1 = TestFixture.createThemeWithoutId("테마1", "설명1", "썸네일1");
+        Theme theme2 = TestFixture.createThemeWithoutId("테마2", "설명2", "썸네일2");
+        Theme theme3 = TestFixture.createThemeWithoutId("테마3", "설명3", "썸네일3");
 
-        Member member = ThemeTestFixture.createMember("멤버1", "member@com", "password");
+        Member member = TestFixture.createMemberWithoutId("멤버1", "member@com", "password");
 
         em.persist(reservationTime1);
         em.persist(reservationTime2);
@@ -222,14 +222,14 @@ public class JpaThemeRepositoryTest {
     @DisplayName("인기 많은 테마를 순서대로 반환한다.(시간 조건 포함, 개수 조건 포함)")
     void find_popular_theme() {
         // given
-        ReservationTime reservationTime1 = ThemeTestFixture.createTime(10, 00);
-        ReservationTime reservationTime2 = ThemeTestFixture.createTime(11, 00);
+        ReservationTime reservationTime1 = TestFixture.createTimeWithoutId(10, 00);
+        ReservationTime reservationTime2 = TestFixture.createTimeWithoutId(11, 00);
 
-        Theme theme1 = ThemeTestFixture.createTheme("테마1", "설명1", "썸네일1");
-        Theme theme2 = ThemeTestFixture.createTheme("테마2", "설명2", "썸네일2");
-        Theme theme3 = ThemeTestFixture.createTheme("테마3", "설명3", "썸네일3");
+        Theme theme1 = TestFixture.createThemeWithoutId("테마1", "설명1", "썸네일1");
+        Theme theme2 = TestFixture.createThemeWithoutId("테마2", "설명2", "썸네일2");
+        Theme theme3 = TestFixture.createThemeWithoutId("테마3", "설명3", "썸네일3");
 
-        Member member = ThemeTestFixture.createMember("멤버1", "member@com", "password");
+        Member member = TestFixture.createMemberWithoutId("멤버1", "member@com", "password");
 
         em.persist(reservationTime1);
         em.persist(reservationTime2);

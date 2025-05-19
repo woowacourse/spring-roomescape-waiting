@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import roomescape.common.exception.LoginException;
 import roomescape.common.util.JwtTokenContainer;
 import roomescape.common.util.SystemDateTime;
+import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.member.domain.Role;
 import roomescape.member.dto.request.LoginMember;
 import roomescape.member.dto.request.LoginRequest;
 import roomescape.member.infrastructure.FakeMemberRepository;
@@ -24,13 +24,13 @@ public class LoginServiceTest {
 
     private MemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
     private LoginService loginService = new LoginService(
-            new JwtTokenContainer("sadasdsasdfasdfasdfsaddsadsadsadadsaasdasdasd"),
+            new JwtTokenContainer("realjwttokensercretkey"),
             memberRepository,
             new SystemDateTime());
 
     @BeforeEach
     void beforeEach() {
-        Member member = Member.createWithoutId("코기", "a@com", "a", Role.USER);
+        Member member = TestFixture.createMemberWithoutId("코기", "member@naver.com", "1234");
         memberRepository.save(member);
     }
 
@@ -49,7 +49,7 @@ public class LoginServiceTest {
     @DisplayName("정상적인 유저이면 토큰을 반환한다.")
     void loginAndReturnToken_test() {
         // given
-        LoginRequest request = new LoginRequest("a@com", "a");
+        LoginRequest request = new LoginRequest("member@naver.com", "1234");
         // when
         String token = loginService.loginAndReturnToken(request);
         // then
@@ -60,7 +60,7 @@ public class LoginServiceTest {
     @DisplayName("토큰이 유효하지 않으면 예외가 발생한다.")
     void loginCheck_exception() {
         // given
-        String token = "asdasdasdasd";
+        String token = "realtoken";
         // when & then
         assertThatThrownBy(() -> loginService.loginCheck(token))
                 .isInstanceOf(LoginException.class);
@@ -70,7 +70,7 @@ public class LoginServiceTest {
     @DisplayName("유효한 토큰이면 회원 정보를 반환한다.")
     void loginCheck_test() {
         // given
-        LoginRequest request = new LoginRequest("a@com", "a");
+        LoginRequest request = new LoginRequest("member@naver.com", "1234");
         String token = loginService.loginAndReturnToken(request);
         // when
         LoginMember loginMember = loginService.loginCheck(token);
