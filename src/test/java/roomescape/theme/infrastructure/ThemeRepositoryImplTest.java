@@ -22,7 +22,7 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeCommandRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeQueryRepository;
+import roomescape.theme.domain.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -33,7 +33,7 @@ class ThemeRepositoryImplTest {
     private ThemeRepositoryImpl themeRepositoryImpl;
 
     @Autowired
-    private ThemeQueryRepository themeQueryRepository;
+    private ThemeRepository themeRepository;
 
     @Autowired
     private ReservationCommandRepository reservationCommandRepository;
@@ -98,7 +98,7 @@ class ThemeRepositoryImplTest {
 
         // when
         final List<Theme> popularThemes =
-                themeQueryRepository.findTopNThemesByReservationCountInDateRange(weekAgo, now, 10);
+                themeRepository.findTopNThemesByReservationCountInDateRange(weekAgo, now, 10);
 
         // then
         assertSoftly(softly -> {

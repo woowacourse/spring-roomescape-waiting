@@ -29,7 +29,7 @@ import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeQueryRepository;
+import roomescape.theme.domain.ThemeRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class ReservationService {
     private final ReservationCommandRepository reservationCommandRepository;
     private final ReservationQueryRepository reservationQueryRepository;
     private final ReservationTimeQueryRepository reservationTimeQueryRepository;
-    private final ThemeQueryRepository themeQueryRepository;
+    private final ThemeRepository themeRepository;
     private final MemberQueryRepository memberQueryRepository;
 
     public ReservationResponse create(
@@ -80,7 +80,7 @@ public class ReservationService {
         final ReservationTime reservationTime = getReservationTime(date, timeId);
         validateNoDuplicateReservation(date, timeId, themeId);
 
-        final Theme theme = themeQueryRepository.findById(themeId)
+        final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
         final Member member = memberQueryRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));

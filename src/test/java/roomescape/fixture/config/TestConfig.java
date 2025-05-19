@@ -19,8 +19,7 @@ import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservation.infrastructure.ReservationRepositoryImpl;
 import roomescape.reservation.infrastructure.ReservationTimeRepositoryImpl;
 import roomescape.theme.application.ThemeService;
-import roomescape.theme.domain.ThemeCommandRepository;
-import roomescape.theme.domain.ThemeQueryRepository;
+import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.ThemeRepositoryImpl;
 
@@ -49,14 +48,7 @@ public class TestConfig {
     }
 
     @Bean
-    public ThemeCommandRepository themeCommandRepository(
-            final JpaThemeRepository jpaThemeRepository
-    ) {
-        return new ThemeRepositoryImpl(jpaThemeRepository);
-    }
-
-    @Bean
-    public ThemeQueryRepository themeQueryRepository(
+    public ThemeRepository themeRepository(
             final JpaThemeRepository jpaThemeRepository
     ) {
         return new ThemeRepositoryImpl(jpaThemeRepository);
@@ -100,10 +92,9 @@ public class TestConfig {
 
     @Bean
     public ThemeService themeService(
-            final ThemeCommandRepository themeCommandRepository,
-            final ThemeQueryRepository themeQueryRepository
+            final ThemeRepository themeRepository
     ) {
-        return new ThemeService(themeCommandRepository, themeQueryRepository);
+        return new ThemeService(themeRepository);
     }
 
     @Bean
@@ -111,14 +102,14 @@ public class TestConfig {
             final ReservationCommandRepository reservationCommandRepository,
             final ReservationQueryRepository reservationQueryRepository,
             final ReservationTimeQueryRepository reservationTimeQueryRepository,
-            final ThemeQueryRepository themeQueryRepository,
+            final ThemeRepository themeRepository,
             final MemberQueryRepository memberQueryRepository
     ) {
         return new ReservationService(
                 reservationCommandRepository,
                 reservationQueryRepository,
                 reservationTimeQueryRepository,
-                themeQueryRepository,
+                themeRepository,
                 memberQueryRepository
         );
     }

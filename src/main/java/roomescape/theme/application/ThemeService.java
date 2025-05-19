@@ -9,8 +9,7 @@ import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceInUseException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeCommandRepository;
-import roomescape.theme.domain.ThemeQueryRepository;
+import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
@@ -18,32 +17,31 @@ import roomescape.theme.ui.dto.ThemeResponse;
 @RequiredArgsConstructor
 public class ThemeService {
 
-    private final ThemeCommandRepository themeCommandRepository;
-    private final ThemeQueryRepository themeQueryRepository;
+    private final ThemeRepository themeRepository;
 
     public ThemeResponse create(final CreateThemeRequest request) {
-        if (themeQueryRepository.existsByName(request.name())) {
+        if (themeRepository.existsByName(request.name())) {
             throw new AlreadyExistException("해당 테마명이 이미 존재합니다. name = " + request.name());
         }
 
         final Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
 
-        return ThemeResponse.from(themeCommandRepository.save(theme));
+        return ThemeResponse.from(themeRepository.save(theme));
     }
 
     public void delete(final Long id) {
-        themeQueryRepository.findById(id)
+        themeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다. id = " + id));
 
         try {
-            themeCommandRepository.deleteById(id);
+            themeRepository.deleteById(id);
         } catch (final DataIntegrityViolationException e) {
             throw new ResourceInUseException("해당 테마를 사용하고 있는 예약이 존재합니다. id = " + id);
         }
     }
 
     public List<ThemeResponse> findAll() {
-        return themeQueryRepository.findAll()
+        return themeRepository.findAll()
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -54,7 +52,7 @@ public class ThemeService {
         final LocalDate dateFrom = dateTo.minusDays(7);
         final int limit = 10;
 
-        return themeQueryRepository.findTopNThemesByReservationCountInDateRange(dateFrom, dateTo, limit)
+        return themeRepository.findTopNThemesByReservationCountInDateRange(dateFrom, dateTo, limit)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();

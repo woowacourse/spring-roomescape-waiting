@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeCommandRepository;
+import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
@@ -26,7 +26,7 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Autowired
-    private ThemeCommandRepository themeCommandRepository;
+    private ThemeRepository themeRepository;
 
     @Test
     void 테마를_저장한다() {
@@ -49,7 +49,7 @@ class ThemeServiceTest {
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
         final Theme theme = new Theme(name, description, thumbnail);
-        final Long id = themeCommandRepository.save(theme).getId();
+        final Long id = themeRepository.save(theme).getId();
 
         // when & then
         Assertions.assertThatCode(() -> themeService.delete(id))
@@ -63,13 +63,13 @@ class ThemeServiceTest {
         final String description1 = "우가우가 설명";
         final String thumbnail1 = "따봉우가.jpg";
         final Theme theme1 = new Theme(name1, description1, thumbnail1);
-        themeCommandRepository.save(theme1);
+        themeRepository.save(theme1);
 
         final String name2 = "우가우가2";
         final String description2 = "우가우가2 설명";
         final String thumbnail2 = "따봉우가2.jpg";
         final Theme theme2 = new Theme(name2, description2, thumbnail2);
-        themeCommandRepository.save(theme2);
+        themeRepository.save(theme2);
 
         // when
         final List<ThemeResponse> themes = themeService.findAll();
@@ -93,7 +93,7 @@ class ThemeServiceTest {
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
         final Theme theme = new Theme(name, description, thumbnail);
-        themeCommandRepository.save(theme);
+        themeRepository.save(theme);
 
         final CreateThemeRequest request = new CreateThemeRequest(name, description, thumbnail);
 

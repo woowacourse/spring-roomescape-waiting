@@ -7,12 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeCommandRepository;
-import roomescape.theme.domain.ThemeQueryRepository;
+import roomescape.theme.domain.ThemeRepository;
 
 @Repository
 @RequiredArgsConstructor
-public class ThemeRepositoryImpl implements ThemeCommandRepository, ThemeQueryRepository {
+public class ThemeRepositoryImpl implements ThemeRepository {
 
     private final JpaThemeRepository jpaThemeRepository;
 

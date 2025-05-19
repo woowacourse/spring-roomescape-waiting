@@ -4,7 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface ThemeQueryRepository {
+public interface ThemeRepository {
+
+    Theme save(Theme theme);
+
+    void deleteById(Long id);
 
     boolean existsByName(String name);
 
