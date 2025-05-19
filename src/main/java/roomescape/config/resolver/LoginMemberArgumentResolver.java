@@ -3,7 +3,6 @@ package roomescape.config.resolver;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -14,7 +13,6 @@ import roomescape.exception.local.NotFoundCookieException;
 import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
-@Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final CookieUtility cookieUtility;

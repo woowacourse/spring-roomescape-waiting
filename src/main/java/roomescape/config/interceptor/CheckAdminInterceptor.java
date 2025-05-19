@@ -5,38 +5,43 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.exception.global.ForbiddenException;
 import roomescape.exception.local.NotFoundCookieException;
+import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
 @Component
 public class CheckAdminInterceptor implements HandlerInterceptor {
 
-    private static final String TOKEN_NAME_FILED = "token";
-
+    private final CookieUtility cookieUtility;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public CheckAdminInterceptor(JwtTokenProvider jwtTokenProvider) {
+    public CheckAdminInterceptor(CookieUtility cookieUtility, JwtTokenProvider jwtTokenProvider) {
+        this.cookieUtility = cookieUtility;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        // token이 존재하고 token의 role 이 ADMIN
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (TOKEN_NAME_FILED.equals(cookie.getName())) {
-                    AccessTokenContent accessTokenContent = jwtTokenProvider.parseAccessToken(cookie.getValue());
-                    if (accessTokenContent.role() != Role.ROLE_ADMIN) {
-                        throw new ForbiddenException();
-                    }
-                    return true;
-                }
+        Cookie accessTokenCookie = getAccessTokenCookie(request);
+        AccessTokenContent tokenContent = jwtTokenProvider.parseAccessToken(accessTokenCookie.getValue());
+        return canEnterUri(request.getRequestURI(), tokenContent);
+    }
+
+    private Cookie getAccessTokenCookie(HttpServletRequest request) {
+        return cookieUtility.findCookie(request, "access")
+                .orElseThrow(NotFoundCookieException::new);
+    }
+
+    private boolean canEnterUri(String uri, AccessTokenContent tokenContent) {
+        boolean isAdminUri = uri.startsWith("/admin");
+        if (isAdminUri) {
+            if (tokenContent.isAdminToken()) {
+                return true;
             }
+            throw new ForbiddenException();
         }
-        throw new NotFoundCookieException();
+        return true;
     }
 }
