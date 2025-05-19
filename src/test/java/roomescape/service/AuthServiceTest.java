@@ -21,7 +21,7 @@ import roomescape.repository.UserRepository;
 import roomescape.utility.JwtTokenProvider;
 
 @DataJpaTest
-public class AuthTest {
+public class AuthServiceTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -52,6 +52,8 @@ public class AuthTest {
 
             LoginRequest loginRequest = new LoginRequest("member@test.com", "password123!");
 
+            entityManager.flush();
+
             // when
             AccessTokenResponse response = authService.login(loginRequest);
 
@@ -71,10 +73,12 @@ public class AuthTest {
 
             LoginRequest wrongLoginRequest = new LoginRequest("wrong@test.com", "password123!");
 
+            entityManager.flush();
+
             // when & then
             assertThatThrownBy(() -> authService.login(wrongLoginRequest))
                     .isInstanceOf(NotFoundUserException.class)
-                    .hasMessage("해당 유저를 찾을 수 없습니다");
+                    .hasMessage("해당 유저를 찾을 수 없습니다.");
         }
 
         @DisplayName("비밀번호가 맞지 않을 경우 로그인이 불가능하다.")
@@ -85,6 +89,8 @@ public class AuthTest {
                     User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123!"));
 
             LoginRequest wrongLoginRequest = new LoginRequest("member@test.com", "wrongPassword123!");
+
+            entityManager.flush();
 
             // when & then
             assertThatThrownBy(() -> authService.login(wrongLoginRequest))
