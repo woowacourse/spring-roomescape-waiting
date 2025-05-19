@@ -4,6 +4,7 @@ import java.util.Collection;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.domain.WaitingWithRank;
 
 @Repository
 public class WaitingRepositoryAdapter implements WaitingRepository {
@@ -26,5 +27,15 @@ public class WaitingRepositoryAdapter implements WaitingRepository {
     @Override
     public Collection<Waiting> findAll() {
         return waitingJpaRepository.findAllWithEagerLoading();
+    }
+
+    @Override
+    public Collection<Waiting> findAllByMemberId(Long memberId) {
+        return waitingJpaRepository.findAllByMemberId(memberId);
+    }
+
+    @Override
+    public Collection<WaitingWithRank> findWithRankByMemberId(Long memberId) {
+        return waitingJpaRepository.findWithRankByMemberId(memberId);
     }
 }

@@ -27,8 +27,8 @@ import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.dto.ThemeResponse;
-import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.domain.WaitingWithRank;
 
 @Service
 @AllArgsConstructor
@@ -55,17 +55,8 @@ public class ReservationService {
 
     public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId).stream().toList();
-        List<Waiting> waitings = waitingRepository.findAllByMemberId(memberId).stream().toList();
+        List<WaitingWithRank> waitings = waitingRepository.findWithRankByMemberId(memberId).stream().toList();
         return MyReservationResponse.of(reservations, waitings);
-//        return reservationRepository.findAllByMemberId(memberId).stream()
-//                .map(reservation -> new MyReservationResponse(
-//                        reservation.getId(),
-//                        reservation.getTheme().getName(),
-//                        reservation.getDate(),
-//                        reservation.getTime().getStartAt(),
-//                        "예약")
-//                )
-//                .toList();
     }
 
     public List<ReservationResponse> findAllByMemberAndThemeAndDate(

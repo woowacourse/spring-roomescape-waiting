@@ -26,6 +26,7 @@ import roomescape.reservation.dto.user.UserReservationRequest;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.waiting.domain.WaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -34,6 +35,7 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     private ReservationRepository reservationRepository;
     private MemberRepository memberRepository;
+    private WaitingRepository waitingRepository;
 
     private ReservationService reservationService;
 
@@ -43,9 +45,10 @@ class ReservationServiceTest {
         reservationRepository = mock(ReservationRepository.class);
         themeRepository = mock(ThemeRepository.class);
         memberRepository = mock(MemberRepository.class);
+        waitingRepository = mock(WaitingRepository.class);
 
         reservationService = new ReservationService(reservationRepository, timeRepository, themeRepository,
-                memberRepository);
+                memberRepository, waitingRepository);
     }
 
     @DisplayName("예약 추가 시 현재보다 과거 시간인 경우 예외를 발생시킨다")
