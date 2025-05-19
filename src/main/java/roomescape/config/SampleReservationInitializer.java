@@ -59,7 +59,7 @@ public class SampleReservationInitializer implements CommandLineRunner {
         save(4L, baseDate.plusDays(5), 7L, 7L);
         save(10L, baseDate.plusDays(4), 11L, 13L);
 
-        saveWaiting(1L, baseDate, 1L, 1L);
+        save(1L, baseDate, 1L, 1L);
         saveWaiting(2L, baseDate, 1L, 1L);
         saveWaiting(3L, baseDate, 1L, 1L);
         saveWaiting(4L, baseDate, 1L, 1L);

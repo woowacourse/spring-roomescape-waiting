@@ -16,7 +16,8 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         JOIN FETCH r.time t
         JOIN FETCH r.theme tm
         JOIN FETCH r.member m
-        WHERE (:memberId IS NULL OR r.member.id = :memberId)
+        WHERE r.status = 'RESERVED'
+        AND (:memberId IS NULL OR r.member.id = :memberId)
         AND (:themeId IS NULL OR r.theme.id = :themeId)
         AND (:dateFrom IS NULL OR r.date >= :dateFrom)
         AND (:dateTo IS NULL OR r.date <= :dateTo)
