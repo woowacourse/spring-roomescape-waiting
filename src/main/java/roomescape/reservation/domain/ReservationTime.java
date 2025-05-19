@@ -33,8 +33,7 @@ public class ReservationTime {
     }
 
     public boolean hasConflict(final Duration duration, final LocalTime anotherTime) {
-        final LocalTime max = startAt.plus(duration);
-        final LocalTime min = startAt.minus(duration);
-        return anotherTime.isAfter(min) && anotherTime.isBefore(max);
+        final LocalTime endAt = startAt.plus(duration);
+        return anotherTime.plus(duration).isAfter(startAt) && anotherTime.isBefore(endAt);
     }
 }
