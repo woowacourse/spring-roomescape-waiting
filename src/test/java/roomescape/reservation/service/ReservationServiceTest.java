@@ -64,7 +64,7 @@ class ReservationServiceTest {
 
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
 
-        member = Member.withoutRole("member", "mem@naver.com", "1234");
+        member = Member.withDefaultRole("member", "mem@naver.com", "1234");
 
         r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member);
     }

@@ -1,8 +1,10 @@
 package roomescape.member.service;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
@@ -19,7 +21,7 @@ public class MemberService {
             throw new IllegalArgumentException("이미 가입된 이메일입니다. email=" + memberRequest.email());
         }
         memberRepository.save(
-                Member.withoutRole(memberRequest.name(), memberRequest.email(), memberRequest.password()));
+                Member.withDefaultRole(memberRequest.name(), memberRequest.email(), memberRequest.password()));
     }
 
     public List<MemberResponse> findAllMember() {
