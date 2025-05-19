@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.domain.Reservation;
 
-public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     boolean existsByThemeId(Long id);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
@@ -14,7 +14,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     List<Reservation> findReservationsByDateBetweenAndThemeIdAndMemberId(LocalDate dateBefore, LocalDate dateAfter,
                                                                          long themeId, long memberId);
-
     boolean existsByTimeId(Long id);
 
     List<Reservation> findReservationsByMemberId(long id);
