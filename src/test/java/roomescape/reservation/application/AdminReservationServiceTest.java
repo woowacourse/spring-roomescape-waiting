@@ -186,18 +186,17 @@ class AdminReservationServiceTest {
     }
 
     @Test
-    void 특정_회원의_특정_기간_동안_특정_테마의_예약_목록을_조회한다() {
+    void 테마_회원_날짜_간격을_기준으로_예약을_조회한다() {
         // given
-        final LocalDate date1 = LocalDate.now().plusDays(1);
-        final ReservationTime time1 = reservationTimeRepository.save(notSavedReservationTime1());
-        final Theme theme = themeRepository.save(notSavedTheme1());
         final Member member = memberRepository.save(notSavedMember1());
-
-        final LocalDate date2 = LocalDate.now().plusDays(2);
+        final Theme theme = themeRepository.save(notSavedTheme1());
+        final ReservationTime time1 = reservationTimeRepository.save(notSavedReservationTime1());
         final ReservationTime time2 = reservationTimeRepository.save(notSavedReservationTime2());
-
-        final LocalDate date3 = LocalDate.now().plusDays(3);
         final ReservationTime time3 = reservationTimeRepository.save(notSavedReservationTime3());
+
+        final LocalDate date1 = LocalDate.now().plusDays(1);
+        final LocalDate date2 = LocalDate.now().plusDays(2);
+        final LocalDate date3 = LocalDate.now().plusDays(3);
 
         reservationRepository.save(new Reservation(date1, time1, theme, member, ReservationStatus.CONFIRMED));
         reservationRepository.save(new Reservation(date2, time2, theme, member, ReservationStatus.CONFIRMED));
@@ -210,7 +209,7 @@ class AdminReservationServiceTest {
         final ReservationsByFilterRequest request3 =
                 new ReservationsByFilterRequest(theme.getId(), member.getId(), date3, date3.plusDays(1));
         final ReservationsByFilterRequest request4 =
-                new ReservationsByFilterRequest(theme.getId(), member.getId(), date3.plusDays(1), date3.plusDays(1));
+                new ReservationsByFilterRequest(theme.getId(), member.getId(), date3.plusDays(1), date3.plusDays(2));
 
         // when & then
         SoftAssertions.assertSoftly(softly -> {
