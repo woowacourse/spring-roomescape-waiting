@@ -52,7 +52,7 @@ class MemberServiceMockTest {
         when(memberRepository.existsByEmail(email))
                 .thenReturn(false);
         when(memberRepository.save(any(Member.class)))
-                .thenReturn(TestFixture.createMember("a", email, "a"));
+                .thenReturn(TestFixture.createMember("멤버1", email, "1234"));
         // when
         SignupResponse response = memberService.createUser(signupRequest);
         // then

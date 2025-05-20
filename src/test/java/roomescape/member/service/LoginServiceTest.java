@@ -24,7 +24,7 @@ public class LoginServiceTest {
 
     private MemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
     private LoginService loginService = new LoginService(
-            new JwtTokenContainer("realjwttokensercretkey"),
+            new JwtTokenContainer("realjwttokensercretkeyrealjwttokensercretkey"),
             memberRepository,
             new SystemDateTime());
 
@@ -60,7 +60,7 @@ public class LoginServiceTest {
     @DisplayName("토큰이 유효하지 않으면 예외가 발생한다.")
     void loginCheck_exception() {
         // given
-        String token = "realtoken";
+        String token = "realtokenrealtoken";
         // when & then
         assertThatThrownBy(() -> loginService.loginCheck(token))
                 .isInstanceOf(LoginException.class);
