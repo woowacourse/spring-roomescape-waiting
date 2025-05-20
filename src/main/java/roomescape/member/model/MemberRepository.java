@@ -11,5 +11,5 @@ public interface MemberRepository {
 
     Member getById(Long id);
 
-    void save(Member member);
+    Member save(Member member);
 }

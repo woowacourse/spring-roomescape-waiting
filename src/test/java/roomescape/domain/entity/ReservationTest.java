@@ -22,7 +22,7 @@ class ReservationTest {
         //given
         ReservationDetails details = new ReservationDetails(
                 LocalDate.now().plusDays(10),
-                new ReservationTime(LocalTime.of(10, 0)),
+                new ReservationTime(LocalTime.now().plusHours(1)),
                 new ReservationTheme("테마 이름", "테마 설명", "테마 url"),
                 ReservationTestFixture.getUserFixture()
                 );

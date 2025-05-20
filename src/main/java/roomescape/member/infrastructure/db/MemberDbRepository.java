@@ -31,7 +31,7 @@ public class MemberDbRepository implements MemberRepository {
     }
 
     @Override
-    public void save(Member member) {
-        memberJpaRepository.save(member);
+    public Member save(Member member) {
+        return memberJpaRepository.save(member);
     }
 }
