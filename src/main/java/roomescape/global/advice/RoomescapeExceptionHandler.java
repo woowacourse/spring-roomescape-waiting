@@ -13,13 +13,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.global.response.ApiResponse;
 
 @RestControllerAdvice
 public class RoomescapeExceptionHandler {
 
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNoSuchElementException() {
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotFoundException() {
         return ResponseEntity.status(NOT_FOUND)
                 .body(ApiResponse.fail(NO_ELEMENTS));
     }

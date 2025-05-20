@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.auth.web.exception.NotAdminException;
+import roomescape.auth.web.exception.NotAuthorizationException;
 import roomescape.auth.web.exception.TokenNotFoundException;
 import roomescape.global.response.ApiResponse;
 
@@ -23,6 +24,13 @@ public class AuthExceptionHandler {
 
     @ExceptionHandler
     public ResponseEntity<ApiResponse<Void>> handleTokenNotFoundException(TokenNotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.fail(NOT_AUTHORIZED));
+    }
+
+    @ExceptionHandler(value = NotAuthorizationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotAuthorizationException() {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.fail(NOT_AUTHORIZED));

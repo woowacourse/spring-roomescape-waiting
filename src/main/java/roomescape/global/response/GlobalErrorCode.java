@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum GlobalErrorCode implements ErrorCode {
 
-    NO_ELEMENTS("GF001", "요소가 존재하지 않습니다."),
+    NO_ELEMENTS("GF001", "리소스가 존재하지 않습니다."),
     WRONG_ARGUMENT("GF002", "잘못된 인자입니다."),
     ROOMESCAPE_SERVER_ERROR("GF003", "서버 오류입니다."),
     ;
