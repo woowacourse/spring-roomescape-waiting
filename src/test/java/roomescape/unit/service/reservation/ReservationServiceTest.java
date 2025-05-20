@@ -45,7 +45,7 @@ class ReservationServiceTest {
     @Test
     void 예약을_추가하고_조회할_수_있다() {
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.of(23, 59)).toEntity());
         Theme theme = themeRepository.save(new AddThemeDto("공포의 숲", "무서운 테마", "image.png").toEntity());
 
         AddReservationDto request = new AddReservationDto("praisebak", LocalDate.now().plusDays(2L),
@@ -59,7 +59,7 @@ class ReservationServiceTest {
     @Test
     void 이전_날짜에_예약할_수_없다() {
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.of(23, 59)).toEntity());
         Theme theme = themeRepository.save(new AddThemeDto("과거의 방", "옛날 테마", "past.png").toEntity());
 
         assertThatThrownBy(() -> reservationService.addReservation(
@@ -81,7 +81,7 @@ class ReservationServiceTest {
     @Test
     void 이후_날짜에_예약할_수_있다() {
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.of(23, 59)).toEntity());
         Theme theme = themeRepository.save(new AddThemeDto("미래의 방", "SF 컨셉", "future.png").toEntity());
 
         assertThatCode(() -> reservationService.addReservation(
@@ -92,7 +92,7 @@ class ReservationServiceTest {
     @Test
     void 같은날짜일시_이후_시간_예약할_수_있다() {
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.of(23, 59)).toEntity());
         Theme theme = themeRepository.save(new AddThemeDto("정시의 방", "시간 엄수", "on_time.png").toEntity());
 
         assertThatCode(() -> reservationService.addReservation(
@@ -103,7 +103,7 @@ class ReservationServiceTest {
     @Test
     void 예약을_삭제하고_조회할_수_있다() {
         ReservationTime reservationTime = reservationTimeRepository.save(
-                new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
+                new AddReservationTimeDto(LocalTime.of(23, 59)).toEntity());
         Theme theme = themeRepository.save(new AddThemeDto("삭제의 방", "삭제 가능", "delete.png").toEntity());
 
         long reservationId = reservationService.addReservation(
@@ -116,7 +116,7 @@ class ReservationServiceTest {
 
     @Test
     void 중복_예약은_불가능하다() {
-        LocalTime localTime = LocalTime.now().plusHours(1L);
+        LocalTime localTime = LocalTime.of(23, 59);
         ReservationTime reservationTime = reservationTimeRepository.save(
                 new AddReservationTimeDto(localTime).toEntity());
         Theme theme = themeRepository.save(new AddThemeDto("중복 금지 방", "한 번만 가능", "unique.png").toEntity());
@@ -131,7 +131,7 @@ class ReservationServiceTest {
 
     @Test
     void 선택된_테마와_날짜에_대해서_가능한_시간들을_확인할_수_있다() {
-        LocalTime firstTime = LocalTime.now().plusHours(1L);
+        LocalTime firstTime = LocalTime.of(23, 59);
         LocalTime secondTime = LocalTime.now().plusHours(2L);
 
         LocalDate today = LocalDate.now();
