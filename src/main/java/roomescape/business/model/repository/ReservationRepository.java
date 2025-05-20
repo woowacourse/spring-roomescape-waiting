@@ -2,6 +2,7 @@ package roomescape.business.model.repository;
 
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.vo.Id;
+import roomescape.presentation.dto.response.ReservationWithAhead;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,6 +16,8 @@ public interface ReservationRepository {
     List<Reservation> findAll();
 
     List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo);
+
+    List<ReservationWithAhead> findReservationsWithAhead(Id userId);
 
     Optional<Reservation> findById(Id id);
 

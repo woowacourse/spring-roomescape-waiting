@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.repository.ReservationRepository;
 import roomescape.business.model.vo.Id;
+import roomescape.presentation.dto.response.ReservationWithAhead;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -34,6 +35,11 @@ public class JpaReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo) {
         return dao.findAllWithFilter(themeId, memberId, dateFrom, dateTo);
+    }
+
+    @Override
+    public List<ReservationWithAhead> findReservationsWithAhead(Id userId) {
+        return dao.findReservationsWithAhead(userId);
     }
 
     @Override

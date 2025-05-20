@@ -3,13 +3,7 @@ package roomescape.presentation.api;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.auth.AuthRequired;
 import roomescape.auth.LoginInfo;
 import roomescape.auth.Role;
@@ -21,6 +15,7 @@ import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
 import roomescape.presentation.dto.response.ReservationMineResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
+import roomescape.presentation.dto.response.ReservationWithAhead;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -66,8 +61,8 @@ public class ReservationApiController {
     @GetMapping("/reservations/mine")
     @AuthRequired
     public ResponseEntity<List<ReservationMineResponse>> getMyReservations(LoginInfo loginInfo) {
-        List<ReservationDto> myReservations = reservationService.getMyReservations(loginInfo.id());
-        List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservations);
+        List<ReservationWithAhead> myReservationsWithAhead = reservationService.getMyReservations(loginInfo.id());
+        List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservationsWithAhead);
         return ResponseEntity.ok(responses);
     }
 

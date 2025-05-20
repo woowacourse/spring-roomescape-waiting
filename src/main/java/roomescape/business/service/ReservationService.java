@@ -1,14 +1,5 @@
 package roomescape.business.service;
 
-import static roomescape.exception.ErrorCode.RESERVATION_DUPLICATED;
-import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
-import static roomescape.exception.ErrorCode.THEME_NOT_EXIST;
-import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
-import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.business.dto.ReservationDto;
@@ -25,6 +16,14 @@ import roomescape.business.model.vo.Status;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
+import roomescape.presentation.dto.response.ReservationWithAhead;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static roomescape.exception.ErrorCode.*;
+import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
 
 @Service
 @RequiredArgsConstructor
@@ -71,10 +70,8 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<ReservationDto> getMyReservations(final String userIdValue) {
+    public List<ReservationWithAhead> getMyReservations(final String userIdValue) {
         Id userId = Id.create(userIdValue);
-        List<Reservation> myReservations = reservationRepository.findAllWithFilter(null, userId, null, null);
-        // 여기서 wait인 애들
-        return ReservationDto.fromEntities(myReservations);
+        return reservationRepository.findReservationsWithAhead(userId);
     }
 }

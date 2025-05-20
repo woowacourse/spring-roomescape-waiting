@@ -19,11 +19,15 @@ function render(data) {
         const date = item.date;
         const time = item.time;
         const status = item.status;
+        const aheadCount = item.aheadCount;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+        const message = status === 'RESERVED'
+            ? status
+            : `${aheadCount} people ahead of you`;
+        row.insertCell(3).textContent = message;
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
