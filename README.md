@@ -2,14 +2,16 @@
 
 # 화면
 
-- 로그인 페이지: localhost:8080/login
-- 회원가입 페이지: localhost:8080/signup
-- 인기 테마 페이지: localhost:8080
-- 사용자 예약 페이지: localhost:8080/reservation
-- 관리자 메인 페이지: localhost:8080/admin
-- 예약 관리 페이지: localhost:8080/admin/reservation
-- 시간 관리 페이지: localhost:8080/admin/time
-- 내 예약 페이지: localhost:8080/reservation-mine
+- 기본 host 주소: localhost:8080
+
+- 로그인 페이지: /login
+- 회원가입 페이지: /signup
+- 인기 테마 페이지: /
+- 사용자 예약 페이지: /reservation
+- 관리자 메인 페이지: /admin
+- 예약 관리 페이지: /admin/reservation
+- 시간 관리 페이지: /admin/time
+- 내 예약 페이지: /reservation-mine
 
 # API 명세
 
