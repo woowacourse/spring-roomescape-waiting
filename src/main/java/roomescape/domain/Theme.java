@@ -32,7 +32,7 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     private void validateNull(String name, String description, String thumbnail) {

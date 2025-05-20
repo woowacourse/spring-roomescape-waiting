@@ -38,7 +38,7 @@ public class Member {
         this.role = role;
     }
 
-    public Member() {
+    protected Member() {
     }
 
     public Member withId(Long id) {

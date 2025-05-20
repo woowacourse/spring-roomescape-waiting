@@ -40,7 +40,7 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public static Reservation of(final Long id, final Member member, final LocalDate date,
