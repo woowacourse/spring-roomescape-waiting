@@ -3,10 +3,10 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,23 +28,19 @@ class ReservationThemeServiceTest {
     @Autowired
     private ReservationThemeService reservationThemeService;
 
-@Test
-@DisplayName("모든 테마를 다 가져온다.")
-void findReservationThemesTest() {
-    //given
-    final ReservationThemeRequest reservationThemeRequest = new ReservationThemeRequest("test", "test", "test");
-    reservationThemeService.addReservationTheme(reservationThemeRequest);
-
-    //when
-    final List<ReservationThemeResponse> expected = reservationThemeService.findReservationThemes();
-
-    //then
-    assertThat(expected).hasSize(1);
-
-}
-
     @Test
-    void findPopularThemes() {
+    @DisplayName("모든 테마를 다 가져온다.")
+    void findReservationThemesTest() {
+        //given
+        final ReservationThemeRequest reservationThemeRequest = new ReservationThemeRequest("test", "test", "test");
+        reservationThemeService.addReservationTheme(reservationThemeRequest);
+
+        //when
+        final List<ReservationThemeResponse> expected = reservationThemeService.findReservationThemes();
+
+        //then
+        assertThat(expected).hasSize(1);
+
     }
 
     @Test
@@ -52,7 +48,6 @@ void findReservationThemesTest() {
     void saveTest() {
         //given
         final ReservationThemeRequest reservationThemeRequest = new ReservationThemeRequest("test", "test", "test");
-
 
         //when
         final ReservationThemeResponse expected = reservationThemeService.addReservationTheme(
@@ -68,16 +63,15 @@ void findReservationThemesTest() {
 
     }
 
-    // TODO : 수정하기
     @Test
     @DisplayName("존재하지 않는 예약 테마를 삭제하여 예외가 발생한다.")
-    @Disabled
     void deleteTest1() {
         //given
         final long id = 1L;
 
         //when & then
-        assertThatThrownBy(() -> reservationThemeService.removeReservationTheme(id)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> reservationThemeService.removeReservationTheme(id)).isInstanceOf(
+                NoSuchElementException.class);
 
     }
 

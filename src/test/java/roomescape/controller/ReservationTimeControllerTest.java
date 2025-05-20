@@ -4,7 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.util.Map;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,11 +13,24 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import roomescape.service.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@Disabled
 class ReservationTimeControllerTest {
+
+    private String sessionId;
+
+    @BeforeEach
+    void setUp() {
+        final LoginRequest loginRequest = new LoginRequest("admin@email.com", "1234");
+        sessionId = RestAssured.given().contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/login")
+                .then()
+                .extract().cookie("JSESSIONID");
+    }
 
     @Nested
     class FailureTest {
@@ -38,7 +51,6 @@ class ReservationTimeControllerTest {
         @Test
         void reservationTimeRemoveTest() {
             Map<String, String> params = Map.of(
-                    "name", "브라운",
                     "date", LocalDate.now().plusDays(2).toString(),
                     "timeId", "1",
                     "themeId", "1"
@@ -46,6 +58,7 @@ class ReservationTimeControllerTest {
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
+                    .sessionId(sessionId)
                     .body(params)
                     .when().post("/reservations")
                     .then().log().all()
