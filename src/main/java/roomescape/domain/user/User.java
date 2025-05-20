@@ -12,14 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 import roomescape.domain.reservation.Reservation;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
 @Accessors(fluent = true)
-@ToString
 @Entity(name = "USERS")
 public class User {
 
@@ -62,5 +60,15 @@ public class User {
 
     public List<Reservation> reservations() {
         return List.copyOf(reservations);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+               "id=" + id +
+               ", name=" + name.value() +
+               ", role=" + role +
+               ", email=" + email.value() +
+               '}';
     }
 }

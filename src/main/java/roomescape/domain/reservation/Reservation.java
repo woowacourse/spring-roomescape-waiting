@@ -53,9 +53,9 @@ public class Reservation {
     public String toString() {
         return "Reservation{" +
                "id=" + id +
-               ", user=" + user.id() +
+               ", userId=" + user.id() +
                ", dateTime=" + dateTime +
-               ", theme=" + theme.id() +
+               ", themeId=" + theme.id() +
                ", status=" + status +
                '}';
     }
