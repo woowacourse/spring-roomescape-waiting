@@ -1,11 +1,13 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
 @Embeddable
 public final class MemberName {
 
+    public static final int NAME_LENGTH_LIMIT = 5;
     private String name;
 
     public MemberName(final String name) {
@@ -18,7 +20,7 @@ public final class MemberName {
     }
 
     private void validateName(final String name) {
-        if (name == null || name.isBlank() || name.length() > 5) {
+        if (name == null || name.isBlank() || name.length() > NAME_LENGTH_LIMIT) {
             throw new IllegalArgumentException("사용자명은 최소 1글자, 최대 5글자여야합니다.");
         }
     }

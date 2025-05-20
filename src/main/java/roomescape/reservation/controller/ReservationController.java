@@ -1,24 +1,19 @@
 package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.global.auth.AuthMember;
 import roomescape.global.auth.LoginMember;
 import roomescape.reservation.dto.CreateReservationRequest;
-import roomescape.reservation.dto.CreateReservationWithMemberRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.UserCreateReservationRequest;
 import roomescape.reservation.service.ReservationService;
+
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 public class ReservationController {
@@ -30,11 +25,11 @@ public class ReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> create(
-            @RequestBody @Valid final CreateReservationRequest request,
+    public ResponseEntity<ReservationResponse> createForUser(
+            @RequestBody @Valid final UserCreateReservationRequest request,
             @AuthMember final LoginMember member
     ) {
-        final CreateReservationWithMemberRequest newRequest = new CreateReservationWithMemberRequest(
+        final CreateReservationRequest newRequest = new CreateReservationRequest(
                 request.date(), request.timeId(), request.themeId(), member.id());
 
         final ReservationResponse response = reservationService.createReservation(newRequest);
@@ -42,8 +37,7 @@ public class ReservationController {
     }
 
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> createByAdmin(
-            @RequestBody @Valid final CreateReservationWithMemberRequest request) {
+    public ResponseEntity<ReservationResponse> createByAdmin(@RequestBody @Valid final CreateReservationRequest request) {
         final ReservationResponse response = reservationService.createReservation(request);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
@@ -55,7 +49,7 @@ public class ReservationController {
     }
 
     @GetMapping("/admin/reservations")
-    public ResponseEntity<List<ReservationResponse>> findAll(
+    public ResponseEntity<List<ReservationResponse>> search(
             @RequestParam(value = "memberId") final Long memberId,
             @RequestParam(value = "themeId") final Long themeId,
             @RequestParam(value = "dateFrom") final LocalDate dateFrom,
@@ -71,7 +65,7 @@ public class ReservationController {
     }
 
     @GetMapping("/me/reservations")
-    public ResponseEntity<List<MyReservationResponse>> findAllMyReservations(@AuthMember LoginMember loginMember) {
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthMember LoginMember loginMember) {
         final List<MyReservationResponse> responses = reservationService.getMyReservations(loginMember);
         return ResponseEntity.ok().body(responses);
     }

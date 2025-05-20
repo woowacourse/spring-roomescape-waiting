@@ -2,7 +2,6 @@ package roomescape.reservation;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +15,9 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.global.auth.JwtTokenProvider;
 import roomescape.reservation.dto.CreateReservationRequest;
-import roomescape.reservation.dto.CreateReservationWithMemberRequest;
+import roomescape.reservation.dto.UserCreateReservationRequest;
+
+import java.time.LocalDate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -30,7 +31,7 @@ public class ReservationApiTest {
     class CreateReservationTest {
 
         private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
-        private static final CreateReservationRequest REQUEST = new CreateReservationRequest(TOMORROW, 1L, 1L);
+        private static final UserCreateReservationRequest REQUEST = new UserCreateReservationRequest(TOMORROW, 1L, 1L);
         private static String TOKEN;
 
         @BeforeEach
@@ -115,7 +116,7 @@ public class ReservationApiTest {
     class AdminCreateReservationTest {
 
         private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
-        private static final CreateReservationWithMemberRequest REQUEST = new CreateReservationWithMemberRequest(
+        private static final CreateReservationRequest REQUEST = new CreateReservationRequest(
                 TOMORROW, 1L, 1L, 1L);
         private static String TOKEN;
 

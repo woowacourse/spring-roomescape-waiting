@@ -1,11 +1,7 @@
 package roomescape.member.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
 @Entity
@@ -42,8 +38,7 @@ public final class Member {
         return this.role == other;
     }
 
-    private void validateNotNull(final MemberName name, final MemberEmail email,
-                                 final String password, final Role role) {
+    private void validateNotNull(final MemberName name, final MemberEmail email, final String password, final Role role) {
         if (name == null) {
             throw new IllegalArgumentException("이름을 입력해야 합니다.");
         }

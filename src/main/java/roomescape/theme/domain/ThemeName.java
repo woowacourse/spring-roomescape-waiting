@@ -6,6 +6,7 @@ import java.util.Objects;
 @Embeddable
 public final class ThemeName {
 
+    public static final int THEME_NAME_LENGTH_LIMIT = 20;
     private String name;
 
     public ThemeName(final String name) {
@@ -18,7 +19,7 @@ public final class ThemeName {
     }
 
     private static void validateName(String name) {
-        if (name == null || name.isBlank() || name.length() > 20) {
+        if (name == null || name.isBlank() || name.length() > THEME_NAME_LENGTH_LIMIT) {
             throw new IllegalArgumentException("테마 이름은 최소 1글자, 최대 20글자여야합니다.");
         }
     }

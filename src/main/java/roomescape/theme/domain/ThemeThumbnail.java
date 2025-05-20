@@ -6,6 +6,7 @@ import java.util.Objects;
 @Embeddable
 public final class ThemeThumbnail {
 
+    public static final int THUMBNAIL_LENGTH_LIMIT = 255;
     private String thumbnail;
 
     public ThemeThumbnail(final String thumbnail) {
@@ -18,7 +19,7 @@ public final class ThemeThumbnail {
     }
 
     private void validateUrl(final String thumbnail) {
-        if (thumbnail == null || thumbnail.isBlank() || thumbnail.length() > 255) {
+        if (thumbnail == null || thumbnail.isBlank() || thumbnail.length() > THUMBNAIL_LENGTH_LIMIT) {
             throw new IllegalArgumentException("썸네일은 최소 1글자, 최대 255글자여야합니다.");
         }
     }
