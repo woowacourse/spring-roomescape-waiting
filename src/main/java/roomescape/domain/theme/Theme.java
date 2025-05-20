@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import roomescape.exception.BusinessRuleViolationException;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
@@ -20,38 +19,21 @@ import roomescape.exception.BusinessRuleViolationException;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Theme {
 
-    private static final int NAME_MAX_LENGTH = 10;
-    private static final int DESCRIPTION_MAX_LENGTH = 50;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String name;
-    private String description;
-    private String thumbnail;
+    private ThemeName name;
+    private Description description;
+    private Thumbnail thumbnail;
 
-    public Theme(final long id, final String name, final String description, final String thumbnail) {
-        validateNameLength(name);
-        validateDescriptionLength(description);
+    public Theme(final long id, final ThemeName name, final Description description, final Thumbnail thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    public Theme(final String name, final String description, final String thumbnail) {
+    public Theme(final ThemeName name, final Description description, final Thumbnail thumbnail) {
         this(0L, name, description, thumbnail);
-    }
-
-    private void validateNameLength(final String name) {
-        if (name.length() > NAME_MAX_LENGTH) {
-            throw new BusinessRuleViolationException(String.format("이름은 %d자를 넘길 수 없습니다.", NAME_MAX_LENGTH));
-        }
-    }
-
-    private void validateDescriptionLength(final String description) {
-        if (description.length() > DESCRIPTION_MAX_LENGTH) {
-            throw new BusinessRuleViolationException(String.format("설명은 %d자를 넘길 수 없습니다.", DESCRIPTION_MAX_LENGTH));
-        }
     }
 }

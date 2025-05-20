@@ -13,9 +13,9 @@ public record ThemeResponse(
     public static ThemeResponse from(final Theme theme) {
         return new ThemeResponse(
                 theme.id(),
-                theme.name(),
-                theme.description(),
-                theme.thumbnail()
+                theme.name().value(),
+                theme.description().value(),
+                theme.thumbnail().url()
         );
     }
 

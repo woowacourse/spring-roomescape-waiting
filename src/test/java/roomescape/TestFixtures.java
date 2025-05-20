@@ -6,7 +6,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.theme.Description;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeName;
+import roomescape.domain.theme.Thumbnail;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Password;
@@ -48,11 +51,11 @@ public class TestFixtures {
     }
 
     public static Theme theme(final String name) {
-        return new Theme(name, "description", "thumbnail.jpg");
+        return new Theme(new ThemeName(name), new Description("description"), new Thumbnail("thumbnail.jpg"));
     }
 
     public static Theme anyTheme() {
-        return new Theme("name", "description", "thumbnail.jpg");
+        return new Theme(new ThemeName("name"), new Description("description"), new Thumbnail("thumbnail.jpg"));
     }
 
     public static Theme anyThemeWithId() {

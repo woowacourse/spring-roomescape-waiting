@@ -7,7 +7,7 @@ import roomescape.exception.InvalidInputException;
 
 @Embeddable
 public record UserName(
-    @Column(name = "name", nullable = false, length = 5)
+    @Column(name = "name", nullable = false, length = MAX_LENGTH)
     String value
 ) {
 
