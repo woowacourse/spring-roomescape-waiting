@@ -20,13 +20,11 @@ class ReservationTest {
     @DisplayName("예약 일시가 현재 일시보다 이전이면 예외가 발생한다.")
     void isBefore() {
         // given
-        var name = JUNK_USER;
         var yesterday = DateUtils.yesterday();
-        var timeSlot = JUNK_TIME_SLOT;
-        var theme = JUNK_THEME;
 
         // when & then
-        assertThatThrownBy(() -> Reservation.reserveNewly(name, yesterday, timeSlot, theme))
+        assertThatThrownBy(
+                () -> Reservation.reserveNewly(JUNK_USER, yesterday, JUNK_TIME_SLOT, JUNK_THEME))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 

@@ -56,13 +56,12 @@ class ReservationServiceTest {
     @DisplayName("예약을 추가할 수 있다.")
     void reserve() {
         // given
-        var user = JUNK_USER;
         var date = tomorrow();
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
         // when
-        Reservation reserved = service.reserve(user, date, timeSlotId, themeId);
+        Reservation reserved = service.reserve(JUNK_USER, date, timeSlotId, themeId);
 
         // then
         var reservations = reservationRepository.findAll();
@@ -73,11 +72,10 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제할 수 있다.")
     void deleteReservation() {
         // given
-        var user = JUNK_USER;
         var date = tomorrow();
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
-        var reserved = service.reserve(user, date, timeSlotId, themeId);
+        var reserved = service.reserve(JUNK_USER, date, timeSlotId, themeId);
 
         // when
         service.removeById(reserved.id());
@@ -98,7 +96,8 @@ class ReservationServiceTest {
         // when
         var fromYesterday_toToday = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), yesterday(), today());
         var fromToday_toTomorrow = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), today(), tomorrow());
-        var fromTomorrow_toThreeDays = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), tomorrow(), afterThreeDay.date());
+        var fromTomorrow_toThreeDays = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), tomorrow(),
+                afterThreeDay.date());
 
         assertAll(
                 () -> assertThat(service.findAllReservations(fromYesterday_toToday)).isEmpty(),
@@ -112,13 +111,12 @@ class ReservationServiceTest {
     @DisplayName("지나간 날짜와 시간에 대한 예약 생성은 불가능하다.")
     void cannotReservePastDateTime() {
         // given
-        var user = JUNK_USER;
         var date = yesterday();
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
         // when & then
-        assertThatThrownBy(() -> service.reserve(user, date, timeSlotId, themeId))
+        assertThatThrownBy(() -> service.reserve(JUNK_USER, date, timeSlotId, themeId))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
@@ -126,14 +124,13 @@ class ReservationServiceTest {
     @DisplayName("지나가지 않은 날짜와 시간에 대한 예약 생성은 가능하다.")
     void canReserveFutureDateTime() {
         // given
-        var user = JUNK_USER;
         var date = tomorrow();
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
         // when & then
         assertThatCode(
-                () -> service.reserve(user, date, timeSlotId, themeId)
+                () -> service.reserve(JUNK_USER, date, timeSlotId, themeId)
         ).doesNotThrowAnyException();
     }
 
