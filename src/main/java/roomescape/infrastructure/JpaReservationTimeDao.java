@@ -16,10 +16,10 @@ public interface JpaReservationTimeDao extends JpaRepository<ReservationTime, Id
             SELECT rt
             FROM ReservationTime rt
             WHERE rt.id NOT IN (
-                 SELECT r.time.id
-                   FROM Reservation r
-                  WHERE r.date = :date
-                    AND r.theme.id = :themeId
+                SELECT r.time.id
+                FROM Reservation r
+                WHERE r.date = :date
+                AND r.theme.id = :themeId
             )
             """)
     List<ReservationTime> findAvailableByDateAndThemeId(
@@ -31,10 +31,10 @@ public interface JpaReservationTimeDao extends JpaRepository<ReservationTime, Id
             SELECT rt
             FROM ReservationTime rt
             WHERE rt.id IN (
-                 SELECT r.time.id
-                   FROM Reservation r
-                  WHERE r.date = :date
-                    AND r.theme.id = :themeId
+                SELECT r.time.id
+                FROM Reservation r
+                WHERE r.date = :date
+                AND r.theme.id = :themeId
             )
             """)
     List<ReservationTime> findNotAvailableByDateAndThemeId(
