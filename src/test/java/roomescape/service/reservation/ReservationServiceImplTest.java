@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
 import roomescape.dto.admin.AdminReservationRequest;
-import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
@@ -107,7 +105,7 @@ class ReservationServiceImplTest {
 
         when(themeRepository.findById(themeId)).thenReturn(
                 Optional.of(new Theme(themeId, "test", "test", "test")));
-        when(reservationRepository.existsByDateAndTime(today, time)).thenReturn(true);
+        when(reservationRepository.existsByDateAndTimeId(today, time.getId())).thenReturn(true);
 
         //then
         assertThatThrownBy(() -> reservationService.create(request, new Member(1L, "슬링키", "이메일", "비밀번호", Role.ADMIN)))
