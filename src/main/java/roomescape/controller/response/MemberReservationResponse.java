@@ -1,6 +1,5 @@
 package roomescape.controller.response;
 
-import roomescape.domain.ReservationStatus;
 import roomescape.service.result.ReservationResult;
 
 import java.time.LocalDate;
@@ -11,9 +10,14 @@ public record MemberReservationResponse(Long reservationId,
                                         String theme,
                                         LocalDate date,
                                         LocalTime time,
-                                        ReservationStatus status) {
+                                        String status) {
     public static MemberReservationResponse from(ReservationResult reservationResult) {
-        return new MemberReservationResponse(reservationResult.id(), reservationResult.theme().name(), reservationResult.date(), reservationResult.time().startAt(), reservationResult.status());
+        return new MemberReservationResponse(
+                reservationResult.id(),
+                reservationResult.theme().name(),
+                reservationResult.date(),
+                reservationResult.time().startAt(),
+                reservationResult.status().getName());
     }
 
     public static List<MemberReservationResponse> from(List<ReservationResult> reservationResults) {
