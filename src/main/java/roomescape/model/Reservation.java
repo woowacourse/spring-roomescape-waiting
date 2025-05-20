@@ -27,11 +27,9 @@ public class Reservation {
     @ManyToOne
     private ReservationTime reservationTime;
 
-    @Setter
     @ManyToOne
     private Theme theme;
 
-    @Setter
     @ManyToOne
     private Member member;
 
