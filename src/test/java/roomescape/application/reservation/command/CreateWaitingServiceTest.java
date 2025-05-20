@@ -22,7 +22,6 @@ import roomescape.domain.reservation.repository.ReservationTimeRepository;
 import roomescape.domain.reservation.repository.ThemeRepository;
 import roomescape.domain.reservation.repository.WaitingRepository;
 import roomescape.infrastructure.error.exception.MemberException;
-import roomescape.infrastructure.error.exception.ReservationException;
 import roomescape.infrastructure.error.exception.WaitingException;
 
 class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
