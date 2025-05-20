@@ -67,3 +67,7 @@ INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (6, '
 INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (8, '2025-05-05', 9, 3, 'RESERVED');
 INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (4, '2025-05-09', 7, 7, 'RESERVED');
 INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (10, '2025-05-08', 11, 13, 'RESERVED');
+INSERT INTO reservation(member_id, date, time_id, theme_id, status) VALUES (10, '2025-05-30', 1, 1, 'RESERVED');
+
+-- waiting 테이블에 대한 INSERT
+INSERT INTO waiting(member_id, date, time_id, theme_id, waiting_order) VALUES (10, '2025-05-30', 1, 1, 1);
