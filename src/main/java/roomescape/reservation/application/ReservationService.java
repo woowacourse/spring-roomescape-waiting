@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.BadRequestException;
 import roomescape.common.exception.impl.ConflictException;
 import roomescape.common.exception.impl.NotFoundException;
@@ -25,6 +26,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -49,14 +51,17 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse addMemberReservation(final MemberReservationRequest request, final Long memberId) {
         return addReservation(request.timeId(), request.themeId(), memberId, request.date());
     }
 
+    @Transactional
     public ReservationResponse addAdminReservation(final AdminReservationRequest request) {
         return addReservation(request.timeId(), request.themeId(), request.memberId(), request.date());
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new NotFoundException("존재하지 않는 예약입니다.");

@@ -2,6 +2,7 @@ package roomescape.theme.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.BadRequestException;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.theme.application.dto.ThemeRequest;
@@ -10,6 +11,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ReservationRepository reservationRepository;
@@ -27,6 +29,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse add(final ThemeRequest requestDto) {
         if (themeRepository.existsByName(requestDto.name())) {
             throw new BadRequestException("동일한 이름의 테마가 이미 존재합니다.");
@@ -36,6 +39,7 @@ public class ThemeService {
         return ThemeResponse.of(savedTheme);
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new BadRequestException("이 테마의 예약이 존재합니다.");

@@ -1,6 +1,7 @@
 package roomescape.login.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.BadRequestException;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.login.application.dto.LoginCheckRequest;
@@ -14,6 +15,7 @@ import roomescape.member.domain.Password;
 import roomescape.member.domain.repository.MemberRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class LoginService {
 
     private final MemberRepository memberRepository;
@@ -39,6 +41,7 @@ public class LoginService {
         return LoginCheckResponse.from(member);
     }
 
+    @Transactional
     public LoginCheckResponse signup(final SignupRequest request) {
         final Member member = request.toMember();
         validateDuplicatedEmail(member);

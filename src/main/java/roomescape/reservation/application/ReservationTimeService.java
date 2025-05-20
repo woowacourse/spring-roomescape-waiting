@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.BadRequestException;
 import roomescape.reservation.application.dto.ReservationTimeRequest;
 import roomescape.reservation.application.dto.ReservationTimeResponse;
@@ -10,6 +11,7 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
@@ -28,6 +30,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResponse add(final ReservationTimeRequest requestDto) {
         if (reservationTimeRepository.existsByStartAt(requestDto.startAt())) {
             throw new BadRequestException("동일한 시간이 이미 존재합니다.");

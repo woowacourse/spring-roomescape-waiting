@@ -28,7 +28,6 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-    @Transactional
     @Test
     void 모든_예약기록을_조회한다() {
         // given
@@ -69,7 +68,6 @@ class ReservationServiceTest {
         assertThatCode(() -> reservationService.deleteById(id)).doesNotThrowAnyException();
     }
 
-    @Transactional
     @Test
     void 예약가능한_시간을_조회한다() {
         // given
@@ -88,7 +86,6 @@ class ReservationServiceTest {
                 ));
     }
 
-    @Transactional
     @Test
     void 해당기간에서_테마id와_멤버id로_예약을_조회한다() {
         // given
@@ -104,7 +101,6 @@ class ReservationServiceTest {
                 themeId, memberId, start, end)).hasSize(2);
     }
 
-    @Transactional
     @Test
     void 멤버id로_예약기록을_조회한다() {
         // given
