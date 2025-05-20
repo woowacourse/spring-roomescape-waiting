@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.Theme;
-import roomescape.infrastructure.ThemeRepository;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.infrastructure.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
 

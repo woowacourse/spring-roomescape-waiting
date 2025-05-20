@@ -3,7 +3,7 @@ values ('name1', 'email1@domain.com', 'email1', 'MEMBER');
 insert into member (name, email, password, role)
 values ('name2', 'email2@domain.com', 'email2', 'MEMBER');
 insert into member (name, email, password, role)
-values ('admin', 'admin', 'admin', 'ADMIN');
+values ('admin', 'admin@domain.com', 'admin', 'ADMIN');
 
 insert into theme (name, description, thumbnail)
 values ('theme1', 'desc1', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');

@@ -7,12 +7,12 @@ import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Theme;
-import roomescape.infrastructure.ReservationRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.infrastructure.ReservationRepository;
 
 class FakeReservationRepositoryTest {
 

@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.Theme;
-import roomescape.infrastructure.ThemeRepository;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.infrastructure.ThemeRepository;
 
 class FakeThemeRepositoryTest {
 

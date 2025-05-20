@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
-import roomescape.infrastructure.MemberRepository;
-import roomescape.presentation.PageController;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.ui.PageController;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

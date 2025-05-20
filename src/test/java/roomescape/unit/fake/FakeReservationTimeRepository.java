@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.ReservationTime;
-import roomescape.infrastructure.ReservationRepository;
-import roomescape.infrastructure.ReservationTimeRepository;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.ReservationTimeRepository;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
 

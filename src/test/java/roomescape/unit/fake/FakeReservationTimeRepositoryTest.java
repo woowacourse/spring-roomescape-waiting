@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationTime;
 
 class FakeReservationTimeRepositoryTest {
 

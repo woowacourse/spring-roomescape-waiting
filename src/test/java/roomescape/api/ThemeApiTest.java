@@ -15,15 +15,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Role;
-import roomescape.domain.Theme;
-import roomescape.infrastructure.MemberRepository;
-import roomescape.infrastructure.ReservationRepository;
-import roomescape.infrastructure.ReservationTimeRepository;
-import roomescape.infrastructure.ThemeRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.ReservationTimeRepository;
+import roomescape.reservation.infrastructure.ThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
