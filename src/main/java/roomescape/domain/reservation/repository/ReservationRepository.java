@@ -26,6 +26,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByThemeIdAndDate(@Param("themeId") Long themeId, @Param("date") LocalDate reservationDate);
 
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+              AND (:memberId IS NULL OR r.member.id = :memberId)
+              AND (:from IS NULL OR r.date >= :from)
+              AND (:to IS NULL OR r.date <= :to)
+            """)
     List<Reservation> findByThemeIdAndMemberIdAndDateBetween(@Param("themeId") Long themeId,
                                                              @Param("memberId") Long memberId,
                                                              @Param("from") LocalDate from,
@@ -43,7 +51,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllWithMemberAndTimeAndTheme();
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(@Param("date") LocalDate date,
-                                                      @Param("timeId") Long timeId,
-                                                      @Param("themeId") Long themeId,
-                                                      @Param("memberId") Long memberId);
+                                                       @Param("timeId") Long timeId,
+                                                       @Param("themeId") Long themeId,
+                                                       @Param("memberId") Long memberId);
 }

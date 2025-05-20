@@ -66,6 +66,13 @@ function fetchMembers() {
 
 function populateSelect(selectId, options, textProperty) {
   const select = document.getElementById(selectId);
+
+  const defaultOption = document.createElement('option');
+  defaultOption.textContent = '미선택';
+  defaultOption.value = '';
+  defaultOption.selected = true
+  select.appendChild(defaultOption);
+
   options.forEach(optionData => {
     const option = document.createElement('option');
     option.value = optionData.id;
@@ -81,7 +88,9 @@ function createSelect(options, defaultText, selectId, textProperty) {
 
   // 기본 옵션 추가
   const defaultOption = document.createElement('option');
-  defaultOption.textContent = defaultText;
+  defaultOption.textContent = '미선택';
+  defaultOption.value = '';
+  defaultOption.selected = true;
   select.appendChild(defaultOption);
 
   // 넘겨받은 옵션을 바탕으로 드롭다운 메뉴 아이템 생성

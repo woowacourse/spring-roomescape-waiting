@@ -54,10 +54,11 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findAll(@RequestParam("themeId") Long themeId,
-                                                             @RequestParam("memberId") Long memberId,
-                                                             @RequestParam("from") LocalDate from,
-                                                             @RequestParam("to") LocalDate to) {
+    public ResponseEntity<List<ReservationResponse>> findAll(
+            @RequestParam(value = "themeId", required = false) Long themeId,
+            @RequestParam(value = "memberId", required = false) Long memberId,
+            @RequestParam(value = "from", required = false) LocalDate from,
+            @RequestParam(value = "to", required = false) LocalDate to) {
         List<ReservationResult> reservationResults = reservationQueryService.findReservationsBy(
                 new ReservationSearchCondition(themeId, memberId, from, to)
         );
