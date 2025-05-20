@@ -34,28 +34,28 @@ public class Reservation {
     private Theme theme;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    private User user;
+    private Member member;
 
     protected Reservation() {
     }
 
     public Reservation(
             Long id, LocalDate date, ReservationStatus status,
-            ReservationTime time, Theme theme, User user
+            ReservationTime time, Theme theme, Member member
     ) {
         this.id = id;
         this.date = date;
         this.status = status;
         this.reservationTime = time;
         this.theme = theme;
-        this.user = user;
+        this.member = member;
     }
 
     public static Reservation createWithoutId(
             LocalDate date, ReservationStatus status, ReservationTime time,
-            Theme theme, User user
+            Theme theme, Member member
     ) {
-        return new Reservation(null, date, status, time, theme, user);
+        return new Reservation(null, date, status, time, theme, member);
     }
 
     public boolean isPastDateTime() {
@@ -83,8 +83,8 @@ public class Reservation {
         return theme;
     }
 
-    public User getUser() {
-        return user;
+    public Member getUser() {
+        return member;
     }
 
     @Override

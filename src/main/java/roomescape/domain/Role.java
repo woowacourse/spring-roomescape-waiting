@@ -5,8 +5,8 @@ import roomescape.exception.local.InvalidRoleException;
 
 public enum Role {
 
-    ROLE_MEMBER,
-    ROLE_ADMIN,
+    GENERAL,
+    ADMIN,
     ;
 
     public static Role findByName(String name) {

@@ -21,8 +21,8 @@ class ReservationTest {
             // given
             ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
             Theme theme = new Theme(1L, "회원", "설명", "섬네일");
-            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
-            Reservation reservation = new Reservation(1L, YESTERDAY, ReservationStatus.BOOKED, time, theme, user);
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
+            Reservation reservation = new Reservation(1L, YESTERDAY, ReservationStatus.BOOKED, time, theme, member);
 
             // when
             boolean isPast = reservation.isPastDateTime();
@@ -37,8 +37,8 @@ class ReservationTest {
             // given
             ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
             Theme theme = new Theme(1L, "회원", "설명", "섬네일");
-            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
-            Reservation reservation = new Reservation(1L, NEXT_DAY, ReservationStatus.BOOKED, time, theme, user);
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
+            Reservation reservation = new Reservation(1L, NEXT_DAY, ReservationStatus.BOOKED, time, theme, member);
 
             // when
             boolean isPast = reservation.isPastDateTime();

@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.User;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.local.DuplicateReservationException;
@@ -50,8 +50,8 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservationsByMember(long userId) {
-        User savedMember = loadUserById(userId);
-        List<Reservation> reservations = reservationRepository.findByUser(savedMember);
+        Member savedMember = loadUserById(userId);
+        List<Reservation> reservations = reservationRepository.findByMember(savedMember);
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -67,12 +67,12 @@ public class ReservationService {
     }
 
     public ReservationResponse addReservation(long userId, ReservationCreationContent request) {
-        User user = loadUserById(userId);
+        Member member = loadUserById(userId);
         Theme theme = loadThemeById(request.themeId());
         ReservationTime time = loadReservationTimeById(request.timeId());
 
         Reservation reservation = Reservation.createWithoutId(
-                request.date(), ReservationStatus.BOOKED, time, theme, user);
+                request.date(), ReservationStatus.BOOKED, time, theme, member);
 
         validateDuplicateReservation(theme, request.date(), time);
         validatePastReservationCreation(reservation);
@@ -100,7 +100,7 @@ public class ReservationService {
         }
     }
 
-    private User loadUserById(long userId) {
+    private Member loadUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(NotFoundUserException::new);
     }

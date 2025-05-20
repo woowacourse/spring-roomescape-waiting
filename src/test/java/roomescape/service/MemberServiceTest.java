@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.domain.Member;
 import roomescape.domain.Role;
-import roomescape.domain.User;
 import roomescape.dto.business.UserCreationContent;
 import roomescape.dto.response.UserProfileResponse;
 import roomescape.exception.local.DuplicatedEmailException;
@@ -21,7 +21,7 @@ import roomescape.exception.local.NotFoundUserException;
 import roomescape.repository.UserRepository;
 
 @DataJpaTest
-class UserServiceTest {
+class MemberServiceTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -37,19 +37,19 @@ class UserServiceTest {
 
     @Nested
     @DisplayName("ID를 통해 유저를 조회할 수 있다.")
-    public class getUserById {
+    public class getMemberById {
 
         @DisplayName("ID를 통해 유저를 조회할 수 있다.")
         @Test
         void canGetUserById() {
             // given
-            User expectedMember = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+            Member expectedMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
 
             entityManager.flush();
 
             // when
-            User actualMember = userService.getUserById(expectedMember.getId());
+            Member actualMember = userService.getUserById(expectedMember.getId());
 
             // then
             assertThat(actualMember).isEqualTo(expectedMember);
@@ -72,10 +72,10 @@ class UserServiceTest {
     @Test
     void canFindAllUserProfile() {
         // given
-        User firstUser = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member1@test.com", "password123"));
-        User secondUser = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member2@test.com", "password123"));
+        Member firstMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123"));
+        Member secondMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원", "member2@test.com", "password123"));
 
         entityManager.flush();
 
@@ -85,27 +85,27 @@ class UserServiceTest {
         // then
         assertThat(allUserProfile)
                 .extracting(UserProfileResponse::id)
-                .containsExactlyInAnyOrder(firstUser.getId(), secondUser.getId());
+                .containsExactlyInAnyOrder(firstMember.getId(), secondMember.getId());
     }
 
     @Nested
     @DisplayName("유저를 추가할 수 있다.")
-    public class addUser {
+    public class addMember {
 
         @DisplayName("유저를 추가할 수 있다.")
         @Test
         void canAddUser() {
             // given
             UserCreationContent creationContent =
-                    new UserCreationContent(Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+                    new UserCreationContent(Role.GENERAL, "회원", "test@test.com", "qwer1234!");
 
             // when
             UserProfileResponse response = userService.addUser(creationContent);
 
             // then
-            User expectedUser = entityManager.find(User.class, response.id());
+            Member expectedMember = entityManager.find(Member.class, response.id());
             assertAll(
-                    () -> assertThat(response.id()).isEqualTo(expectedUser.getId()),
+                    () -> assertThat(response.id()).isEqualTo(expectedMember.getId()),
                     () -> assertThat(response.name()).isEqualTo(creationContent.name()),
                     () -> assertThat(response.roleName()).isEqualTo(creationContent.role().toString())
             );
@@ -115,11 +115,11 @@ class UserServiceTest {
         @Test
         void cannotAddUser() {
             // given
-            User alreadySavedUser = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "회원", "member1@test.com", "password123"));
+            Member alreadySavedMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123"));
 
             UserCreationContent creationContent =
-                    new UserCreationContent(Role.ROLE_MEMBER, "회원", alreadySavedUser.getEmail(), "qwer1234!");
+                    new UserCreationContent(Role.GENERAL, "회원", alreadySavedMember.getEmail(), "qwer1234!");
 
             entityManager.flush();
 

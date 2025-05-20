@@ -14,12 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.User;
 
 @DataJpaTest
 class ThemeRepositoryTest {
@@ -30,14 +30,14 @@ class ThemeRepositoryTest {
     private ThemeRepository themeRepository;
 
     private ReservationTime reservationTime;
-    private User member;
+    private Member member;
 
     @BeforeEach
     void setup() {
         reservationTime = entityManager.persist(
                 ReservationTime.createWithoutId(LocalTime.of(10, 0)));
         member = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
     }
 
 

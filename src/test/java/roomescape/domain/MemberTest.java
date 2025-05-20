@@ -6,7 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-class UserTest {
+class MemberTest {
 
     @Nested
     @DisplayName("비밀번호가 동일한지 여부를 확인할 수 있다.")
@@ -16,10 +16,10 @@ class UserTest {
         @Test
         void isEqualPassword() {
             // given
-            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
 
             // when
-            boolean isEqual = user.isEqualPassword("qwer1234!");
+            boolean isEqual = member.isEqualPassword("qwer1234!");
 
             // then
             assertThat(isEqual).isTrue();
@@ -29,10 +29,10 @@ class UserTest {
         @Test
         void isNotEqualPassword() {
             // given
-            User user = new User(1L, Role.ROLE_ADMIN, "회원", "test@test.com", "qwer1234!");
+            Member member = new Member(1L, Role.ADMIN, "회원", "test@test.com", "qwer1234!");
 
             // when
-            boolean isNotEqual = user.isEqualPassword("asdf5678!");
+            boolean isNotEqual = member.isEqualPassword("asdf5678!");
 
             // then
             assertThat(isNotEqual).isFalse();
@@ -47,10 +47,10 @@ class UserTest {
         @Test
         void isMember() {
             // given
-            User user = new User(1L, Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
 
             // when
-            boolean isMember = user.isMember();
+            boolean isMember = member.isMember();
 
             // then
             assertThat(isMember).isTrue();
@@ -60,10 +60,10 @@ class UserTest {
         @Test
         void isAdmin() {
             // given
-            User user = new User(1L, Role.ROLE_ADMIN, "회원", "test@test.com", "qwer1234!");
+            Member member = new Member(1L, Role.ADMIN, "회원", "test@test.com", "qwer1234!");
 
             // when
-            boolean isMember = user.isMember();
+            boolean isMember = member.isMember();
 
             // then
             assertThat(isMember).isFalse();

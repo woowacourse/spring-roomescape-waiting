@@ -3,7 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.User;
+import roomescape.domain.Member;
 import roomescape.dto.business.UserCreationContent;
 import roomescape.dto.response.UserProfileResponse;
 import roomescape.exception.local.DuplicatedEmailException;
@@ -20,25 +20,25 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User getUserById(long id) {
+    public Member getUserById(long id) {
         return loadUserById(id);
     }
 
     public List<UserProfileResponse> findAllUserProfile() {
-        List<User> users = userRepository.findAll();
-        return users.stream()
+        List<Member> members = userRepository.findAll();
+        return members.stream()
                 .map(UserProfileResponse::new)
                 .toList();
     }
 
     public UserProfileResponse addUser(UserCreationContent request) {
         validateDuplicatedEmail(request.email());
-        User user = User.createWithoutId(request.role(), request.name(), request.email(), request.password());
-        User savedUser = userRepository.save(user);
-        return new UserProfileResponse(savedUser);
+        Member member = Member.createWithoutId(request.role(), request.name(), request.email(), request.password());
+        Member savedMember = userRepository.save(member);
+        return new UserProfileResponse(savedMember);
     }
 
-    private User loadUserById(long userId) {
+    private Member loadUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(NotFoundUserException::new);
     }

@@ -9,8 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
 
-@Entity(name = "Users")
-public class User {
+@Entity
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,10 +26,10 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
 
-    protected User() {
+    protected Member() {
     }
 
-    public User(Long id, Role role, String name, String email, String password) {
+    public Member(Long id, Role role, String name, String email, String password) {
         this.id = id;
         this.role = role;
         this.name = name;
@@ -37,8 +37,8 @@ public class User {
         this.password = password;
     }
 
-    public static User createWithoutId(Role role, String name, String email, String password) {
-        return new User(null, role, name, email, password);
+    public static Member createWithoutId(Role role, String name, String email, String password) {
+        return new Member(null, role, name, email, password);
     }
 
     public boolean isEqualPassword(String password) {
@@ -46,7 +46,7 @@ public class User {
     }
 
     public boolean isMember() {
-        return this.role.equals(Role.ROLE_MEMBER);
+        return this.role.equals(Role.GENERAL);
     }
 
     public Long getId() {
@@ -74,11 +74,11 @@ public class User {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        User user = (User) o;
-        if (this.id == null || user.id == null) {
+        Member member = (Member) o;
+        if (this.id == null || member.id == null) {
             return false;
         }
-        return Objects.equals(id, user.id);
+        return Objects.equals(id, member.id);
     }
 
     @Override

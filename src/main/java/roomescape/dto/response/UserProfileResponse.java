@@ -1,6 +1,6 @@
 package roomescape.dto.response;
 
-import roomescape.domain.User;
+import roomescape.domain.Member;
 import roomescape.dto.business.AccessTokenContent;
 
 public record UserProfileResponse(
@@ -9,8 +9,8 @@ public record UserProfileResponse(
         String name
 ) {
 
-    public UserProfileResponse(User user) {
-        this(user.getId(), user.getRole().toString(), user.getName());
+    public UserProfileResponse(Member member) {
+        this(member.getId(), member.getRole().toString(), member.getName());
     }
 
     public UserProfileResponse(AccessTokenContent accessTokenContent) {

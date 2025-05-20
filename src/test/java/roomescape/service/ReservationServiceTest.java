@@ -16,12 +16,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.User;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ThemeResponse;
@@ -55,7 +55,7 @@ class ReservationServiceTest {
 
     private ReservationTime reservationTime;
     private Theme theme;
-    private User member;
+    private Member member;
 
     @BeforeEach
     void setup() {
@@ -70,7 +70,7 @@ class ReservationServiceTest {
         theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
         member = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
     }
 
     @DisplayName("모든 예약을 조회할 수 있다.")
@@ -110,8 +110,8 @@ class ReservationServiceTest {
         entityManager.persist(Reservation.createWithoutId(
                 TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
 
-        User otherMember = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member2@test.com", "password123"));
+        Member otherMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원", "member2@test.com", "password123"));
 
         entityManager.persist(Reservation.createWithoutId(
                 TODAY, ReservationStatus.BOOKED, reservationTime, theme, otherMember));
@@ -142,8 +142,8 @@ class ReservationServiceTest {
             entityManager.persist(Reservation.createWithoutId(
                     TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
 
-            User otherMember = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "다른회원", "otherMember@test.com", "password123"));
+            Member otherMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123"));
 
             entityManager.persist(Reservation.createWithoutId(
                     TODAY, ReservationStatus.BOOKED, reservationTime, theme, otherMember));

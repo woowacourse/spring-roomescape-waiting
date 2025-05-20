@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.User;
 
 @DataJpaTest
 class ReservationTimeRepositoryTest {
@@ -29,8 +29,8 @@ class ReservationTimeRepositoryTest {
     @Test
     void canFindReservationTimesWithBookState() {
         // given
-        User member = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+        Member member = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
         Theme theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
 

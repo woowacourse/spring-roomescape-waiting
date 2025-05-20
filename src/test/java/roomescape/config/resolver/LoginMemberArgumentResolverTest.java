@@ -90,7 +90,7 @@ class LoginMemberArgumentResolverTest {
         @Test
         void canResolveArgument() {
             // given
-            AccessTokenContent expectedTokenContent = new AccessTokenContent(1L, Role.ROLE_ADMIN, "회원");
+            AccessTokenContent expectedTokenContent = new AccessTokenContent(1L, Role.ADMIN, "회원");
             String accessToken = jwtTokenProvider.createAccessToken(expectedTokenContent);
 
             HttpServletRequest servletRequest = mock(HttpServletRequest.class);
@@ -133,7 +133,7 @@ class LoginMemberArgumentResolverTest {
         @DisplayName("엑세스 토큰이 올바르지 않는 경우 예외를 발생시킨다.")
         @Test
         void cannotResolveArgumentByWrongAccessToken() {
-            AccessTokenContent expectedTokenContent = new AccessTokenContent(1L, Role.ROLE_ADMIN, "회원");
+            AccessTokenContent expectedTokenContent = new AccessTokenContent(1L, Role.ADMIN, "회원");
             String accessToken = jwtTokenProvider.createAccessToken(expectedTokenContent);
             String damagedAccessToken = accessToken + "damaged";
 

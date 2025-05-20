@@ -14,12 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.User;
 import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.response.ReservationTimeResponse;
@@ -71,8 +71,8 @@ class ReservationTimeServiceTest {
         Theme theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
 
-        User member = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+        Member member = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
 
         ReservationTime timeAt10 = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
         ReservationTime timeAt11 = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(11, 0)));
@@ -165,8 +165,8 @@ class ReservationTimeServiceTest {
             Theme theme = entityManager.persist(
                     Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
 
-            User member = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
 
             ReservationTime time = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 

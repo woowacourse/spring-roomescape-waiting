@@ -32,7 +32,7 @@ class CheckAdminInterceptorTest {
         @Test
         void blockWithAdminRequestAndMemberToken() {
             // given
-            AccessTokenContent memberTokenContent = new AccessTokenContent(1L, Role.ROLE_MEMBER, "회원");
+            AccessTokenContent memberTokenContent = new AccessTokenContent(1L, Role.GENERAL, "회원");
             String memberToken = jwtTokenProvider.createAccessToken(memberTokenContent);
 
             HttpServletRequest request = mock(HttpServletRequest.class);
@@ -53,7 +53,7 @@ class CheckAdminInterceptorTest {
         @Test
         void passWithAdminRequestAndAdminToken() {
             // given
-            AccessTokenContent memberTokenContent = new AccessTokenContent(1L, Role.ROLE_ADMIN, "회원");
+            AccessTokenContent memberTokenContent = new AccessTokenContent(1L, Role.ADMIN, "회원");
             String memberToken = jwtTokenProvider.createAccessToken(memberTokenContent);
 
             HttpServletRequest request = mock(HttpServletRequest.class);
@@ -75,7 +75,7 @@ class CheckAdminInterceptorTest {
         @Test
         void passWithMemberRequest() {
             // given
-            AccessTokenContent memberTokenContent = new AccessTokenContent(1L, Role.ROLE_MEMBER, "회원");
+            AccessTokenContent memberTokenContent = new AccessTokenContent(1L, Role.GENERAL, "회원");
             String memberToken = jwtTokenProvider.createAccessToken(memberTokenContent);
 
             HttpServletRequest request = mock(HttpServletRequest.class);

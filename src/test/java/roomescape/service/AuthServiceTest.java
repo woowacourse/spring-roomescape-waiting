@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.domain.Member;
 import roomescape.domain.Role;
-import roomescape.domain.User;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
@@ -47,8 +47,8 @@ public class AuthServiceTest {
         @Test
         void canLogin() {
             // given
-            User member = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123!"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             LoginRequest loginRequest = new LoginRequest("member@test.com", "password123!");
 
@@ -68,8 +68,8 @@ public class AuthServiceTest {
         @Test
         void cannotLoginWithInvalidAccount() {
             // given
-            User member = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123!"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             LoginRequest wrongLoginRequest = new LoginRequest("wrong@test.com", "password123!");
 
@@ -85,8 +85,8 @@ public class AuthServiceTest {
         @Test
         void cannotLoginWithInvalidPassword() {
             // given
-            User member = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123!"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             LoginRequest wrongLoginRequest = new LoginRequest("member@test.com", "wrongPassword123!");
 

@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.User;
 
 @DataJpaTest
 public class ReservationJpaRepositoryTest {
@@ -32,7 +32,7 @@ public class ReservationJpaRepositoryTest {
 
     private ReservationTime reservationTime;
     private Theme theme;
-    private User member;
+    private Member member;
 
     @BeforeEach
     void setup() {
@@ -41,7 +41,7 @@ public class ReservationJpaRepositoryTest {
         theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
         member = entityManager.persist(
-                User.createWithoutId(Role.ROLE_MEMBER, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
     }
 
     @Nested
@@ -52,8 +52,8 @@ public class ReservationJpaRepositoryTest {
         @DisplayName("필터 조건으로 특정 유저의 예약을 조회할 수 있다")
         void canFindReservationsByUserFilter() {
             // given
-            User otherMember = entityManager.persist(
-                    User.createWithoutId(Role.ROLE_MEMBER, "다른회원", "otherMember@test.com", "password123"));
+            Member otherMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123"));
             entityManager.persist(Reservation.createWithoutId(
                     TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
             entityManager.persist(Reservation.createWithoutId(

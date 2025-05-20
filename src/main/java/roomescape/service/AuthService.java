@@ -2,7 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.User;
+import roomescape.domain.Member;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
@@ -24,20 +24,20 @@ public class AuthService {
     }
 
     public AccessTokenResponse login(LoginRequest loginRequest) {
-        User user = loadUserByEmail(loginRequest.email());
-        validatePasswordForLogin(user, loginRequest.password());
+        Member member = loadUserByEmail(loginRequest.email());
+        validatePasswordForLogin(member, loginRequest.password());
         String accessToken = jwtTokenProvider.createAccessToken(
-                new AccessTokenContent(user.getId(), user.getRole(), user.getName()));
+                new AccessTokenContent(member.getId(), member.getRole(), member.getName()));
         return new AccessTokenResponse(accessToken);
     }
 
-    private User loadUserByEmail(String email) {
+    private Member loadUserByEmail(String email) {
         return userRepository.findOneByEmail(email)
                 .orElseThrow(NotFoundUserException::new);
     }
 
-    private void validatePasswordForLogin(User user, String password) {
-        if (!user.isEqualPassword(password)) {
+    private void validatePasswordForLogin(Member member, String password) {
+        if (!member.isEqualPassword(password)) {
             throw new AuthorizationException("로그인 정보가 올바르지 않습니다.");
         }
     }
