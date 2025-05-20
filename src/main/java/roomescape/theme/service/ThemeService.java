@@ -13,7 +13,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
-public class ThemeService {
+public class ThemeService implements ThemeQueryService {
 
     private static final int POPULAR_THEME_LIMIT = 10;
     private static final int POPULAR_THEME_EXPIRES_DAYS = 7;
@@ -43,18 +43,21 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public List<ThemeResponse> getAll() {
         List<Theme> themes = themeRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
     @Transactional(readOnly = true)
+    @Override
     public Theme getTheme(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
     }
 
     @Transactional(readOnly = true)
+    @Override
     public List<ThemeResponse> getPopularThemes() {
         LocalDate to = LocalDate.now();
         LocalDate from = to.minusDays(POPULAR_THEME_EXPIRES_DAYS);
