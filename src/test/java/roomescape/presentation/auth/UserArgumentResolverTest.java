@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.presentation.auth;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,9 +22,6 @@ import roomescape.domain.user.User;
 import roomescape.domain.user.UserRole;
 import roomescape.exception.AuthenticationException;
 import roomescape.exception.AuthorizationException;
-import roomescape.presentation.auth.Authenticated;
-import roomescape.presentation.auth.AuthenticationTokenCookie;
-import roomescape.presentation.auth.UserArgumentResolver;
 
 @ExtendWith(MockitoExtension.class)
 class UserArgumentResolverTest {

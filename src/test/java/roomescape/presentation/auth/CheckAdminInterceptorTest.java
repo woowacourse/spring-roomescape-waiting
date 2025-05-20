@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.presentation.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,8 +12,6 @@ import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.domain.user.UserRole;
 import roomescape.infrastructure.JwtTokenHandler;
-import roomescape.presentation.auth.AuthenticationTokenCookie;
-import roomescape.presentation.auth.CheckAdminInterceptor;
 
 class CheckAdminInterceptorTest {
 

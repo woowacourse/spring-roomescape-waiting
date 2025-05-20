@@ -1,4 +1,4 @@
-package roomescape.presentation;
+package roomescape.presentation.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -8,7 +8,6 @@ import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import roomescape.presentation.auth.AuthenticationTokenCookie;
 
 class AuthenticationTokenCookieTest {
 
