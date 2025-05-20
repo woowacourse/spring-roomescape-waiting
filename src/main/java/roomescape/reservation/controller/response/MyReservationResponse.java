@@ -6,15 +6,17 @@ import java.time.LocalTime;
 import java.util.List;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationWaiting;
-import roomescape.reservation.dto.WaitingWithRank;
+import roomescape.waiting.dto.WaitingWithRank;
 
-public record MyReservationResponse(String theme,
+public record MyReservationResponse(Long id,
+                                    String theme,
                                     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
                                     @JsonFormat(pattern = "HH:mm") LocalTime time,
                                     String status) {
 
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
+                reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
@@ -25,6 +27,7 @@ public record MyReservationResponse(String theme,
     public static MyReservationResponse from(WaitingWithRank waitingWithRank) {
         ReservationWaiting waiting = waitingWithRank.reservationWaiting();
         return new MyReservationResponse(
+                waiting.getId(),
                 waiting.getTheme().getName(),
                 waiting.getDate(),
                 waiting.getStartAt(),
