@@ -8,9 +8,7 @@ import static org.mockito.BDDMockito.then;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -25,7 +23,6 @@ import roomescape.reservationtime.ReservationTimeRepositoryFacadeImpl;
 import roomescape.theme.ThemeRepositoryFacadeImpl;
 
 @DataJpaTest
-@ExtendWith(MockitoExtension.class)
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
         MemberService.class,

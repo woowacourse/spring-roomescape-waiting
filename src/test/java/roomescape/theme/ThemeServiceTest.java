@@ -10,8 +10,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -36,7 +34,6 @@ import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
 @DataJpaTest
-@ExtendWith(MockitoExtension.class)
 @Transactional(propagation = Propagation.SUPPORTS)
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
