@@ -2,8 +2,9 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
@@ -13,7 +14,7 @@ import roomescape.exception.NotFoundException;
 @Service
 public class ThemeService {
 
-    private static final int MAX_THEME_FETCH_COUNT = 10;
+    private static final int MAX_THEME_FETCH_COUNT = 5;
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
@@ -45,7 +46,8 @@ public class ThemeService {
     }
 
     public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {
-        var finalCount = Math.min(count, MAX_THEME_FETCH_COUNT);
-        return themeRepository.findRankingByPeriod(startDate, endDate, finalCount);
+        int finalCount = Math.min(count, MAX_THEME_FETCH_COUNT);
+        Pageable pageable = PageRequest.of(0, finalCount);
+        return themeRepository.findRankingByPeriod(startDate, endDate, pageable);
     }
 }
