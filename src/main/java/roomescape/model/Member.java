@@ -12,23 +12,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
-    @Id
+    @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
 
+    @Getter
     @Column(nullable = false)
     private String name;
 
+    @Getter
     @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
     private String password;
 
+    @Getter
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -43,4 +46,5 @@ public class Member {
     public boolean hasSamePassword(final String comparedPassword) {
         return this.password.equals(comparedPassword);
     }
+
 }

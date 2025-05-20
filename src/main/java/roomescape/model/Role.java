@@ -1,7 +1,9 @@
 package roomescape.model;
 
 import java.util.Arrays;
+import lombok.Getter;
 
+@Getter
 public enum Role {
 
     ADMIN("ADMIN"),
@@ -20,7 +22,4 @@ public enum Role {
                 .orElseThrow(() -> new IllegalArgumentException("조건에 알맞는 Role 이 존재하지 않습니다."));
     }
 
-    public String getValue() {
-        return value;
-    }
 }
