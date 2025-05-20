@@ -1,0 +1,58 @@
+package roomescape.service.waiting;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import roomescape.domain.Member;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
+import roomescape.dto.reservation.MemberReservationResponse;
+import roomescape.dto.reservation.ReservationRequest;
+import roomescape.dto.waiting.WaitingResponse;
+import roomescape.exception.reservation.ReservationInPastException;
+import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
+import roomescape.exception.theme.ThemeNotFoundException;
+import roomescape.repository.reservationtime.ReservationTimeRepository;
+import roomescape.repository.theme.ThemeRepository;
+import roomescape.repository.waiting.WaitingRepsitory;
+
+@Service
+public class WaitingService {
+
+    private final WaitingRepsitory waitingRepsitory;
+    private final ReservationTimeRepository timeRepository;
+    private final ThemeRepository themeRepository;
+
+    public WaitingService(WaitingRepsitory waitingRepsitory, ReservationTimeRepository timeRepository,
+                          ThemeRepository themeRepository) {
+        this.waitingRepsitory = waitingRepsitory;
+        this.timeRepository = timeRepository;
+        this.themeRepository = themeRepository;
+    }
+
+    public WaitingResponse create(ReservationRequest request, Member member) {
+        ReservationTime reservationTime = timeRepository.findById(request.timeId())
+                .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
+
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
+
+        if (LocalDateTime.now().isAfter(LocalDateTime.of(request.date(), reservationTime.getStartAt()))) {
+            throw new ReservationInPastException();
+        }
+
+        Waiting waiting = new Waiting(null, request.date(), reservationTime, theme, member);
+
+        return WaitingResponse.from(waitingRepsitory.save(waiting));
+    }
+
+    public List<MemberReservationResponse> getWaitingByMember(Member member) {
+
+        List<Waiting> waitings = waitingRepsitory.findAllByMember(member);
+
+        return waitings.stream()
+                .map(MemberReservationResponse::from)
+                .toList();
+    }
+}
