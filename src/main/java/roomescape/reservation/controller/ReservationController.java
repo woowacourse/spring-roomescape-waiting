@@ -1,10 +1,8 @@
 package roomescape.reservation.controller;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
@@ -30,6 +32,12 @@ import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 @RequiredArgsConstructor
 @Validated
 public class ReservationController {
+
+    /**
+     * TODO 3단계
+     예약 대기 취소
+     내 예약 목록 조회
+     */
 
     private final ReservationService reservationService;
 

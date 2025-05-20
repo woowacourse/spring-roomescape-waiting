@@ -75,8 +75,8 @@ class ReservationRepositoryTest {
         themeRepository.save(theme2);
         memberRepository.save(member1);
         memberRepository.save(member2);
-        Reservation reservation1 = Reservation.booked(date, time1, theme1, member1, LocalDateTime.now(clock));
-        Reservation reservation2 = Reservation.booked(date, time2, theme2, member2, LocalDateTime.now(clock));
+        Reservation reservation1 = Reservation.of(date, time1, theme1, member1, LocalDateTime.now(clock));
+        Reservation reservation2 = Reservation.of(date, time2, theme2, member2, LocalDateTime.now(clock));
         repository.save(reservation1);
         repository.save(reservation2);
 
@@ -98,9 +98,9 @@ class ReservationRepositoryTest {
         LocalDate date2 = LocalDate.of(2999, 7, 2);
         LocalDate date3 = LocalDate.of(2999, 7, 3);
 
-        repository.save(Reservation.booked(date1, time1, theme1, member1, LocalDateTime.now(clock)));
-        repository.save(Reservation.booked(date2, time1, theme1, member1, LocalDateTime.now(clock)));
-        repository.save(Reservation.booked(date3, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date1, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date2, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date3, time1, theme1, member1, LocalDateTime.now(clock)));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, null, date2, null);
@@ -127,11 +127,11 @@ class ReservationRepositoryTest {
         memberRepository.save(member1);
         memberRepository.save(member2);
 
-        repository.save(Reservation.booked(date1, time1, theme1, member1, LocalDateTime.now(clock)));
-        repository.save(Reservation.booked(date2, time1, theme1, member1, LocalDateTime.now(clock)));
-        repository.save(Reservation.booked(date3, time1, theme1, member1, LocalDateTime.now(clock)));
-        repository.save(Reservation.booked(date4, time1, theme1, member2, LocalDateTime.now(clock)));
-        repository.save(Reservation.booked(date5, time1, theme1, member2, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date1, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date2, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date3, time1, theme1, member1, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date4, time1, theme1, member2, LocalDateTime.now(clock)));
+        repository.save(Reservation.of(date5, time1, theme1, member2, LocalDateTime.now(clock)));
 
         // when
         List<Reservation> reservations = repository.findByCriteria(null, member1.getId(), null, null);
@@ -156,7 +156,7 @@ class ReservationRepositoryTest {
         themeRepository.save(theme1);
         memberRepository.save(member1);
         reservationTimeRepository.save(futureTime);
-        final Reservation booked = Reservation.booked(today, futureTime, theme1, member1, LocalDateTime.now(clock));
+        final Reservation booked = Reservation.of(today, futureTime, theme1, member1, LocalDateTime.now(clock));
 
         // when
         // then
@@ -172,7 +172,7 @@ class ReservationRepositoryTest {
         LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);
         ReservationTime pastTime = ReservationTime.from(oneMinuteBefore);
         // when
-        ThrowableAssert.ThrowingCallable throwingCallable = () -> Reservation.booked(today, pastTime, defaultTheme,
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> Reservation.of(today, pastTime, defaultTheme,
                 defaultMember, LocalDateTime.now(clock));
 
         // then

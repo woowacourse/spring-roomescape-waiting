@@ -38,8 +38,7 @@ public class ReservationService {
 
     public List<ReservationResponse> findReservationsByCriteria(final ReservationSearchRequest request) {
         final List<Reservation> reservations = reservationRepository.findByCriteria(request.themeId(),
-                request.memberId(), request.dateFrom(),
-                request.dateTo());
+                request.memberId(), request.dateFrom(), request.dateTo());
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -54,15 +53,29 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
         final Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)
+                && !request.isWaiting()) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
 
         final Member member = Member.from(loginMember);
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member,
-                LocalDateTime.now(clock));
-        final Reservation newReservation = reservationRepository.save(reservation);
-        return new ReservationResponse(newReservation);
+        final Reservation reservation = saveReservation(request.date(), reservationTime, theme, member,
+                request.isWaiting());
+        return new ReservationResponse(reservation);
+    }
+
+    private Reservation saveReservation(LocalDate date, ReservationTime reservationTime, Theme theme,
+            Member member, boolean isWaiting) {
+        Reservation reservation = null;
+        if (isWaiting) {
+            Long lastWaitingRank = reservationRepository.getLastWaitingRank(theme, date, reservationTime).orElse(0L);
+            reservation = Reservation.waiting(date, reservationTime, theme, member, LocalDateTime.now(clock),
+                    lastWaitingRank + 1);
+        } else {
+            reservation = Reservation.of(date, reservationTime, theme, member, LocalDateTime.now(clock));
+        }
+
+        return reservationRepository.save(reservation);
     }
 
     public ReservationResponse saveAdminReservation(final AdminReservationRequest request) {
@@ -75,7 +88,7 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member,
+        final Reservation reservation = Reservation.of(request.date(), reservationTime, theme, member,
                 LocalDateTime.now(clock));
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);

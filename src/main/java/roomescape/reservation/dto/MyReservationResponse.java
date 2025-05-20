@@ -1,8 +1,10 @@
 package roomescape.reservation.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import roomescape.reservation.domain.Reservation;
 
 public record MyReservationResponse(
@@ -19,7 +21,7 @@ public record MyReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getOutput()
+                reservation.getWaiting().getStatus().getOutput()
         );
     }
 }
