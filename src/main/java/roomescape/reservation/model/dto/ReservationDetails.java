@@ -9,7 +9,6 @@ import roomescape.reservation.model.entity.ReservationTime;
 
 @Builder
 public record ReservationDetails(
-        String memberName,
         Member member,
         LocalDate date,
         ReservationTime reservationTime,

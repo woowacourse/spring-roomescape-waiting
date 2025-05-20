@@ -43,4 +43,8 @@ public class Member {
         this.name = name;
         this.id = id;
     }
+
+    public Member(String password, Role role, String email, String name) {
+        this(password, role, email, name, null);
+    }
 }
