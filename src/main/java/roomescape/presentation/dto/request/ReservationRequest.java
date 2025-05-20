@@ -5,10 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import roomescape.business.model.vo.Status;
 
 public record ReservationRequest(
         @NotNull @FutureOrPresent LocalDate date,
         @NotBlank String timeId,
-        @NotBlank String themeId
+        @NotBlank String themeId,
+        @NotNull Status status
 ) {
 }

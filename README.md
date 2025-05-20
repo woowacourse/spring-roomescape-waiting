@@ -45,5 +45,7 @@ Waiting이 Reservation을 들고 있는 경우 대기 추가를 하려면
      - 해결 : Waiting의 경우를 처리하는 Service를 따로 파자.
 
 ## 결론
-Reservation에 필드 status, createdAt을 추가하고
-대기 관련 로직을 처리하는 WaitingService를 추가하자.
+- [x] Reservation에 필드 status, createdAt을 추가
+  - [ ] Reservation에 status 요청 필드 추가하기 
+- [ ] 대기 관련 로직을 처리하는 WaitingService를 추가하자. 
+

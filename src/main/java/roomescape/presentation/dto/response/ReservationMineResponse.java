@@ -1,18 +1,18 @@
 package roomescape.presentation.dto.response;
 
 import roomescape.business.dto.ReservationDto;
-import roomescape.business.model.vo.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import roomescape.business.model.vo.Status;
 
 public record ReservationMineResponse(
         String id,
         String themeName,
         LocalDate date,
         LocalTime time,
-        String status
+        Status status
 ) {
     public static ReservationMineResponse from(ReservationDto myReservations) {
         return new ReservationMineResponse(
@@ -20,7 +20,7 @@ public record ReservationMineResponse(
                 myReservations.theme().name().value(),
                 myReservations.date().value(),
                 myReservations.time().startTime().value(),
-                ReservationStatus.RESERVED.getDisplayName()
+                myReservations.status()
         );
     }
 

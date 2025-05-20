@@ -161,15 +161,12 @@ function onReservationButtonClick() {
     const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
 
     if (selectedDate && selectedThemeId && selectedTimeId) {
-        /*
-           TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-                 [5단계] 예약 생성 기능 변경 - 사용자
-                 request 명세에 맞게 설정
-           */
+
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
+            status: "RESERVED"
         };
 
         fetch('/reservations', {
@@ -204,14 +201,12 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId,
+            status: "WAITING"
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
-        fetch('', {
+        fetch('/reservations', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
