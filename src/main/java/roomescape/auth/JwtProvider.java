@@ -5,21 +5,31 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.member.MemberRole;
 
 @Component
 public class JwtProvider {
 
-    private static final String SECRET_KEY = "regjeoigjroigji3j2io3io4h2bjasbdjaksbdkjqu3hu23hru3rhashudhausdhas";
-    private final Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY));
-    private static final Long VALIDITY_IN_MILLISECONDS = 3600_000L;
+    @Value("${secret.jwt-key}")
+    private String secretKey;
+    @Value("${secret.jwt-expiration}")
+    private Long validityInMilliseconds;
+
+    private Key key;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+    }
 
     public String provideToken(final String email, final MemberRole role, final String name) {
         final Date now = new Date();
-        final Date validity = new Date(now.getTime() + VALIDITY_IN_MILLISECONDS);
+        final Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
                 .claim("role", role.name())

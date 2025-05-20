@@ -18,3 +18,8 @@ spring:
     hibernate:
       ddl-auto: create
     defer-datasource-initialization: true
+
+secret:
+  jwt-key: regjeoigjroigji3j2io3io4h2bjasbdjaksbdkjqu3hu23hru3rhashudhausdhas
+  jwt-expiration: 3600
+
