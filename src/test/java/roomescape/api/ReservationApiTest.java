@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class ReservationApiTest {
+class ReservationApiTest {
 
     private static final Map<String, String> RESERVATION_BODY = new HashMap<>();
     private static final Map<String, String> TIME_BODY = new HashMap<>();
@@ -240,7 +240,6 @@ public class ReservationApiTest {
         }
     }
 
-
     @DisplayName("member가 가진 예약이 없다면 빈 리스트를 반환한다.")
     @Test
     void readAllMemberReservations() {
@@ -253,7 +252,7 @@ public class ReservationApiTest {
         // when
         RestAssured.given().port(port).log().all()
                 .cookie(cookie)
-                .when().get("/members/reservations")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(0));
@@ -272,7 +271,7 @@ public class ReservationApiTest {
         // when
         RestAssured.given().port(port).log().all()
                 .cookie(cookie)
-                .when().get("/members/reservations")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import roomescape.member.Member;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
@@ -21,12 +22,15 @@ import roomescape.theme.Theme;
 @Getter
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private final Long id;
+
+    @Column(nullable = false)
     private LocalDate date;
 
     @ManyToOne
@@ -57,10 +61,5 @@ public class Reservation {
             final ReservationStatus reservationStatus
     ) {
         this(null, date, member, reservationTime, theme, reservationStatus);
-        makeBiDirectionAssociation(member);
-    }
-
-    private void makeBiDirectionAssociation(final Member member) {
-        member.getReservations().add(this);
     }
 }

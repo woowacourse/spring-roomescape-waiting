@@ -7,13 +7,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import java.util.HashSet;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import roomescape.reservation.Reservation;
 
 @Entity
 @AllArgsConstructor
@@ -37,9 +33,6 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     private MemberRole role;
-
-    @OneToMany(mappedBy = "member")
-    private final Set<Reservation> reservations = new HashSet<>();
 
     protected Member() {
         id = null;

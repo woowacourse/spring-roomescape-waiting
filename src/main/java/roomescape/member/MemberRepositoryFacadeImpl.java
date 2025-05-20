@@ -15,14 +15,22 @@ public class MemberRepositoryFacadeImpl implements MemberRepositoryFacade{
         memberRepository.save(member);
     }
 
+    @Override
     public Optional<Member> findByEmail(final String email) {
         return memberRepository.findByEmail(email);
     }
 
+    @Override
+    public Optional<Member> findById(final Long id) {
+        return memberRepository.findById(id);
+    }
+
+    @Override
     public List<Member> findAll() {
         return memberRepository.findAll();
     }
 
+    @Override
     public boolean existsByEmail(final String email) {
         return memberRepository.existsByEmail(email);
     }

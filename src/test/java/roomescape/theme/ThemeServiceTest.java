@@ -3,7 +3,6 @@ package roomescape.theme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.spy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +26,8 @@ import roomescape.member.MemberRepositoryFacade;
 import roomescape.member.MemberRepositoryFacadeImpl;
 import roomescape.member.MemberRole;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.ReservationRepositoryFacade;
+import roomescape.reservation.ReservationRepositoryFacadeImpl;
 import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepositoryFacade;
@@ -38,30 +39,36 @@ import roomescape.theme.dto.ThemeResponse;
 @ExtendWith(MockitoExtension.class)
 @Transactional(propagation = Propagation.SUPPORTS)
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Import({MemberRepositoryFacadeImpl.class, ReservationTimeRepositoryFacadeImpl.class})
+@Import({
+        MemberRepositoryFacadeImpl.class, ReservationTimeRepositoryFacadeImpl.class,
+        ReservationRepositoryFacadeImpl.class, ThemeRepositoryFacadeImpl.class, ThemeService.class
+})
 class ThemeServiceTest {
 
-    private final ThemeService themeService;
+    @MockitoSpyBean
     private final ThemeRepositoryFacade themeRepositoryFacade;
+    private final ThemeService themeService;
 
     private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
     private final MemberRepositoryFacade memberRepositoryFacade;
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepositoryFacade reservationRepositoryFacade;
 
     @Autowired
     public ThemeServiceTest(
-            final ThemeRepository themeRepository,
-            final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade,
-            final MemberRepositoryFacade memberRepositoryFacade,
+            final ThemeRepositoryFacade themeRepositoryFacade,
+            final ThemeService themeService,
 
-            final ReservationRepository reservationRepository
-            ) {
-        this.reservationRepository = reservationRepository;
+            final ReservationRepositoryFacade reservationRepositoryFacade,
+            final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade,
+            final MemberRepositoryFacade memberRepositoryFacade
+    ) {
+        this.themeRepositoryFacade = themeRepositoryFacade;
+        this.themeService = themeService;
+
+        this.reservationRepositoryFacade = reservationRepositoryFacade;
         this.reservationTimeRepositoryFacade = reservationTimeRepositoryFacade;
         this.memberRepositoryFacade = memberRepositoryFacade;
 
-        themeRepositoryFacade = spy(new ThemeRepositoryFacadeImpl(themeRepository));
-        themeService = new ThemeService(themeRepositoryFacade, reservationRepository);
     }
 
     @Nested
@@ -98,7 +105,7 @@ class ThemeServiceTest {
                     new Theme("로키2", "로키로키2", "http://www.google.com/2"),
                     new Theme("로키3", "로키로키3", "http://www.google.com/3")
             );
-            for(final Theme theme : themes) {
+            for (final Theme theme : themes) {
                 themeRepositoryFacade.save(theme);
             }
 
@@ -160,7 +167,9 @@ class ThemeServiceTest {
             for (final Theme theme : themes) {
                 themeRepositoryFacade.save(theme);
             }
-            reservationRepository.saveAll(reservations);
+            for(final Reservation reservation : reservations) {
+                reservationRepositoryFacade.save(reservation);
+            }
 
             // when
             final List<ThemeResponse> actual = themeService.findTopRankThemes(3);
@@ -217,7 +226,7 @@ class ThemeServiceTest {
             memberRepositoryFacade.save(member);
             reservationTimeRepositoryFacade.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepository.save(reservation);
+            reservationRepositoryFacade.save(reservation);
 
             // when & then
             assertThatThrownBy(() -> {

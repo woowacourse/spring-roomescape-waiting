@@ -3,7 +3,6 @@ package roomescape.reservationtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.spy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +27,8 @@ import roomescape.member.MemberRepositoryFacade;
 import roomescape.member.MemberRepositoryFacadeImpl;
 import roomescape.member.MemberRole;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.ReservationRepositoryFacade;
+import roomescape.reservation.ReservationRepositoryFacadeImpl;
 import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
@@ -40,32 +41,38 @@ import roomescape.theme.ThemeRepositoryFacadeImpl;
 @ExtendWith(MockitoExtension.class)
 @Transactional(propagation = Propagation.SUPPORTS)
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Import({MemberRepositoryFacadeImpl.class, ThemeRepositoryFacadeImpl.class})
+@Import({
+        MemberRepositoryFacadeImpl.class, ThemeRepositoryFacadeImpl.class,
+        ReservationRepositoryFacadeImpl.class, ReservationTimeRepositoryFacadeImpl.class,
+        ReservationTimeService.class
+})
 public class ReservationTimeServiceTest {
 
-    private final ReservationTimeService reservationTimeService;
+    @MockitoSpyBean
     private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
+    private final ReservationTimeService reservationTimeService;
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepositoryFacade reservationRepositoryFacade;
     private final ThemeRepositoryFacade themeRepositoryFacade;
     private final MemberRepositoryFacade memberRepositoryFacade;
 
 
     @Autowired
     public ReservationTimeServiceTest(
+            final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade,
+            final ReservationTimeService reservationTimeService,
+
             final MemberRepositoryFacade memberRepositoryFacade,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ReservationRepository reservationRepository,
+            final ReservationRepositoryFacade reservationRepositoryFacade,
             final ThemeRepositoryFacade themeRepositoryFacade
-    ) {
-        this.reservationRepository = reservationRepository;
+            ) {
+
+        this.reservationTimeRepositoryFacade = reservationTimeRepositoryFacade;
+        this.reservationTimeService = reservationTimeService;
+
+        this.reservationRepositoryFacade = reservationRepositoryFacade;
         this.memberRepositoryFacade = memberRepositoryFacade;
         this.themeRepositoryFacade = themeRepositoryFacade;
-
-        this.reservationTimeRepositoryFacade = spy(new ReservationTimeRepositoryFacadeImpl(reservationTimeRepository));
-        reservationTimeService =
-                new ReservationTimeService(reservationTimeRepositoryFacade, reservationRepository,
-                        themeRepositoryFacade);
     }
 
     @Nested
@@ -143,13 +150,13 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes() {
             // given
-            final Theme theme = new Theme( "메이", "테마", "thumbnail");
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
 
             themeRepositoryFacade.save(theme);
             reservationTimeRepositoryFacade.save(new ReservationTime(LocalTime.of(12, 0)));
             reservationTimeRepositoryFacade.save(new ReservationTime(LocalTime.of(13, 0)));
-            reservationTimeRepositoryFacade.save(new ReservationTime( LocalTime.of(14, 0)));
+            reservationTimeRepositoryFacade.save(new ReservationTime(LocalTime.of(14, 0)));
 
             // when
             final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
@@ -163,7 +170,7 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes1() {
             // given
-            final Theme theme = new Theme( "메이", "테마", "thumbnail");
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
             final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
@@ -172,7 +179,7 @@ public class ReservationTimeServiceTest {
             memberRepositoryFacade.save(member);
             reservationTimeRepositoryFacade.save(time);
             themeRepositoryFacade.save(theme);
-            reservationRepository.save(reservation);
+            reservationRepositoryFacade.save(reservation);
 
             // when
             final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
@@ -187,7 +194,7 @@ public class ReservationTimeServiceTest {
         void findAllAvailableTimes2() {
             // given
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
-            final Theme theme = new Theme( "메이", "테마", "thumbnail");
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
             final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
 
             themeRepositoryFacade.save(theme);
@@ -236,7 +243,7 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById3() {
             // given
-            final Theme theme = new Theme( "메이", "테마", "thumbnail");
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
             final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
@@ -245,7 +252,7 @@ public class ReservationTimeServiceTest {
             memberRepositoryFacade.save(member);
             reservationTimeRepositoryFacade.save(time);
             themeRepositoryFacade.save(theme);
-            reservationRepository.save(reservation);
+            reservationRepositoryFacade.save(reservation);
 
             // when & then
             assertThatThrownBy(() -> {

@@ -6,7 +6,10 @@ import java.util.Optional;
 public interface MemberRepositoryFacade {
 
     void save(Member member);
-    boolean existsByEmail(String email);
+
     Optional<Member> findByEmail(String email);
+    Optional<Member> findById(Long id);
     List<Member> findAll();
+
+    boolean existsByEmail(String email);
 }

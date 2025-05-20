@@ -4,10 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.spy;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,52 +13,44 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.PasswordEncoder;
-import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
-import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.member.dto.MemberRequest;
-import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
-import roomescape.reservation.ReservationStatus;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepository;
-import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.reservation.ReservationRepositoryFacadeImpl;
+import roomescape.reservationtime.ReservationTimeRepositoryFacadeImpl;
+import roomescape.theme.ThemeRepositoryFacadeImpl;
 
 @DataJpaTest
 @ExtendWith(MockitoExtension.class)
-@Transactional(propagation = Propagation.SUPPORTS)
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import({
+        MemberService.class,
+        MemberRepositoryFacadeImpl.class,
+        ReservationRepositoryFacadeImpl.class,
+        ReservationTimeRepositoryFacadeImpl.class,
+        ThemeRepositoryFacadeImpl.class,
+        PasswordEncoder.class
+})
 class MemberServiceTest {
 
-    private final MemberService memberService;
+    @MockitoSpyBean
     private final MemberRepositoryFacade memberRepositoryFacade;
+    private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
-
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
 
     @Autowired
     public MemberServiceTest(
-            final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepositoryFacade memberRepositoryFacade,
+            final PasswordEncoder passwordEncoder,
+            final MemberService memberService
     ) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-
-        this.memberRepositoryFacade = spy(new MemberRepositoryFacadeImpl(memberRepository));
-        this.passwordEncoder = new PasswordEncoder();
-        this.memberService = new MemberService(memberRepositoryFacade, passwordEncoder);
+        this.memberRepositoryFacade = memberRepositoryFacade;
+        this.passwordEncoder = passwordEncoder;
+        this.memberService = memberService;
     }
 
     @DisplayName("member를 생성하여 저장한다.")
@@ -126,45 +115,4 @@ class MemberServiceTest {
         assertThat(actual).isEmpty();
     }
 
-    @DisplayName("member의 예약을 모두 조회한다.")
-    @Test
-    void readAllReservation() {
-        // given
-        final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
-        final MemberReservationResponse expected = new MemberReservationResponse(
-                1L, "테마", LocalDate.of(2026, 12, 31),
-                LocalTime.of(12, 40), "예약"
-        );
-
-        final Member member = new Member(loginMember.email(), "pass", "boogie", MemberRole.MEMBER);
-        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
-        final Theme theme = new Theme("테마", "설명", "썸네일");
-        final Reservation reservation = new Reservation(LocalDate.of(2026, 12, 31), member,
-                reservationTime, theme, ReservationStatus.PENDING);
-
-        memberRepositoryFacade.save(member);
-        reservationTimeRepository.save(reservationTime);
-        themeRepository.save(theme);
-        reservationRepository.save(reservation);
-
-        // when
-        final List<MemberReservationResponse> actual = memberService.readAllReservationsByMember(loginMember);
-
-        // then
-        assertThat(actual)
-                .contains(expected)
-                .hasSize(1);
-    }
-
-    @DisplayName("이메일의 member가 존재하지 않는다면, 예외가 발생한다.")
-    @Test
-    void readAllReservation1() {
-        // given
-        final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
-
-        // when & then
-        assertThatThrownBy(() -> {
-            memberService.readAllReservationsByMember(loginMember);
-        }).isInstanceOf(MemberNotFoundException.class);
-    }
 }
