@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +15,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.request.MemberRegisterRequest;
+import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.request.ReservationTimeRequest;
+import roomescape.dto.response.MemberRegisterResponse;
+import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 
 @SpringBootTest
@@ -27,6 +34,15 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private ReservationThemeService reservationThemeService;
+
+    @Autowired
+    private MemberService memberService;
+
+    @Autowired
+    private ReservationService reservationService;
 
     @Test
     @DisplayName("예약 시간을 성공적으로 추가한다")
@@ -81,5 +97,24 @@ class ReservationTimeServiceTest {
 
         // then
         assertThat(reservationTimes).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("이미 예약이 존재하는 상황에 시간을 삭제하려 하면 예외가 발생한다.")
+    void deleteExistReservationTest() {
+        // given
+        final MemberRegisterResponse member = memberService.addMember(
+                new MemberRegisterRequest("test", "test", "test"));
+        final ReservationThemeResponse theme = reservationThemeService.addReservationTheme(
+                new ReservationThemeRequest("test", "test", "test"));
+        final ReservationTimeResponse time = reservationTimeService.addReservationTime(
+                new ReservationTimeRequest(LocalTime.now()));
+        final ReservationResponse reservation = reservationService.addReservationForAdmin(
+                new AdminReservationRequest(member.id(), LocalDate.now().plusDays(1), theme.id(), time.id())
+        );
+
+        // when, then
+        assertThatThrownBy(() -> reservationTimeService.removeReservationTime(time.id()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

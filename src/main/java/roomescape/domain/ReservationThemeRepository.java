@@ -1,8 +1,7 @@
-package roomescape.repository;
+package roomescape.domain;
 
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.ReservationTheme;
 
 public interface ReservationThemeRepository {
 
@@ -14,7 +13,7 @@ public interface ReservationThemeRepository {
 
     ReservationTheme save(final ReservationTheme reservationTheme);
 
-    int deleteById(final long id);
+    void deleteById(final long id);
 
     boolean existsByName(final String name);
 }

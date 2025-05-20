@@ -39,7 +39,6 @@ public class Member {
         this.role = role;
     }
 
-
     public Member(final Long id,
                   final String email,
                   final String password,
@@ -52,5 +51,9 @@ public class Member {
         this.name = name;
         this.sessionId = sessionId;
         this.role = role;
+    }
+
+    public void updateSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 }

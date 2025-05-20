@@ -4,27 +4,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import jakarta.persistence.EntityManager;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.config.JpaConfig;
 import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.MemberRepositoryImpl;
+import roomescape.domain.MemberRepository;
+import roomescape.repository.impl.MemberRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
 
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
+@Import(JpaConfig.class)
 @DataJpaTest
 class AuthServiceTest {
 
@@ -35,16 +35,9 @@ class AuthServiceTest {
     @Autowired
     private MemberJpaRepository memberJpaRepository;
 
-    @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private EntityManager entityManager;
-
-
     @BeforeEach
     void setUp() {
-        MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository, new JdbcTemplate(dataSource));
+        MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
         authService = new AuthService(memberRepository);
         memberService = new MemberService(memberRepository);
     }
@@ -101,7 +94,6 @@ class AuthServiceTest {
 
         // when
         authService.updateSessionIdByMemberId(member.getId(), "hello");
-        entityManager.clear();
 
         // then
         final Member memberAfterChanged = memberService.getMemberById(response.id());

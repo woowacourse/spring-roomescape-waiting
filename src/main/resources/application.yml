@@ -12,5 +12,5 @@ spring:
         format_sql: true
     show-sql: true
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     defer-datasource-initialization: true

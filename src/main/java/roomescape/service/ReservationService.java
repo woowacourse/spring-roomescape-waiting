@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
+import roomescape.domain.MemberRepository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTheme;
+import roomescape.domain.ReservationThemeRepository;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationThemeRepository;
-import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationService {
@@ -47,7 +47,7 @@ public class ReservationService {
         validateDuplicateReservation(request.date(), timeId, themeId);
         final Reservation reservation = new Reservation(member, request.date(), time, theme);
         Reservation saved = reservationRepository.saveWithMember(reservation);
-        return ReservationResponse.fromV2(saved);
+        return ReservationResponse.from(saved);
     }
 
     public ReservationResponse addReservationForAdmin(final AdminReservationRequest request) {
@@ -68,21 +68,27 @@ public class ReservationService {
                 .theme(theme)
                 .build();
         Reservation saved = reservationRepository.saveWithMember(reservation);
-        return ReservationResponse.fromV2(saved);
+        return ReservationResponse.from(saved);
     }
 
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAllReservationsV2().stream()
-                .map(ReservationResponse::fromV2)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<ReservationResponse> getFilteredReservations(final Long memberId, final Long themeId,
-                                                             final LocalDate dateFrom, final LocalDate dateTo) {
+    public List<ReservationResponse> getFilteredReservations(final Long memberId,
+                                                             final Long themeId,
+                                                             final LocalDate dateFrom,
+                                                             final LocalDate dateTo) {
         final List<Reservation> reservations = reservationRepository.findByMemberIdAndThemeIdAndDateFromAndDateTo(
-                memberId, themeId, dateFrom, dateTo);
+                memberId,
+                themeId,
+                dateFrom,
+                dateTo
+        );
         return reservations.stream()
-                .map(ReservationResponse::fromV2)
+                .map(ReservationResponse::from)
                 .toList();
     }
 

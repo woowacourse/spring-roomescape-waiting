@@ -1,60 +1,84 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
+import roomescape.config.JpaConfig;
 import roomescape.domain.ReservationTheme;
+import roomescape.domain.ReservationThemeRepository;
+import roomescape.repository.impl.ReservationThemeRepositoryImpl;
+import roomescape.repository.jpa.ReservationThemeJpaRepository;
 
-@JdbcTest
-@Disabled
+@TestPropertySource(properties = {
+        "spring.sql.init.mode=never",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
+@Import(JpaConfig.class)
+@DataJpaTest
 class ReservationThemeRepositoryImplTest {
-
-    @Autowired
-    private JdbcTemplate template;
 
     private ReservationThemeRepository repository;
 
+    @Autowired
+    private ReservationThemeJpaRepository reservationThemeJpaRepository;
+
+    private ReservationTheme savedTheme;
+
     @BeforeEach
     void setUp() {
-        repository = new ReservationThemeRepositoryImpl(template, null);
-    }
+        repository = new ReservationThemeRepositoryImpl(reservationThemeJpaRepository);
 
+        ReservationTheme theme = new ReservationTheme("Theme 1", "Description", "Thumbnail");
+        savedTheme = repository.save(theme);
+    }
 
     @DisplayName("id로 테마 데이터를 성공적으로 가져온다.")
     @Test
     void findById() {
-        //given
-        final long id = 1L;
-
         //when
-        final ReservationTheme theme = repository.findById(id).get();
+        final Optional<ReservationTheme> theme = repository.findById(savedTheme.getId());
 
         //then
-        assertThat(theme.getId()).isEqualTo(id);
+        assertAll(
+                () -> assertThat(theme).isPresent(),
+                () -> assertThat(theme.get().getId()).isEqualTo(savedTheme.getId()),
+                () -> assertThat(theme.get().getName()).isEqualTo(savedTheme.getName()),
+                () -> assertThat(theme.get().getDescription()).isEqualTo(savedTheme.getDescription()),
+                () -> assertThat(theme.get().getThumbnail()).isEqualTo(savedTheme.getThumbnail())
+        );
     }
 
     @DisplayName("모든 테마 데이터를 성공적으로 가져온다.")
     @Test
     void findAll() {
-        //given & when
+        //when
         final List<ReservationTheme> themes = repository.findAll();
 
         //then
-        assertThat(themes).isNotEmpty();
+        assertAll(
+                () -> assertThat(themes).isNotEmpty(),
+                () -> assertThat(themes).hasSize(1),
+                () -> assertThat(themes.get(0).getId()).isEqualTo(savedTheme.getId()),
+                () -> assertThat(themes.get(0).getName()).isEqualTo(savedTheme.getName())
+        );
     }
 
+    @Disabled // TODO: findWeeklyThemeOrderByCountDesc를 파라미터를 넣을 수 있게 만든 뒤 테스트
     @DisplayName("주간 인기테마를 성공적으로 가져온다.")
     @Test
     void findWeeklyThemeOrderByCountDesc() {
-        //given & when
+        //when
         final List<ReservationTheme> weeklyThemeOrderByCountDesc = repository.findWeeklyThemeOrderByCountDesc();
 
         //then
@@ -65,16 +89,17 @@ class ReservationThemeRepositoryImplTest {
     @Test
     void save() {
         //given
-        final ReservationTheme reservationTheme = new ReservationTheme("테마1", "디스크립션1", "썸네일1");
+        final ReservationTheme newTheme = new ReservationTheme("new Theme", "new Description", "new Thumbnail");
 
         //when
-        final ReservationTheme expected = repository.save(reservationTheme);
+        final ReservationTheme saved = repository.save(newTheme);
 
         //then
         assertAll(
-                () -> assertThat(expected.getName()).isEqualTo(reservationTheme.getName()),
-                () -> assertThat(expected.getDescription()).isEqualTo(reservationTheme.getDescription()),
-                () -> assertThat(expected.getThumbnail()).isEqualTo(reservationTheme.getThumbnail())
+                () -> assertThat(saved.getId()).isNotNull(),
+                () -> assertThat(saved.getName()).isEqualTo(newTheme.getName()),
+                () -> assertThat(saved.getDescription()).isEqualTo(newTheme.getDescription()),
+                () -> assertThat(saved.getThumbnail()).isEqualTo(newTheme.getThumbnail())
         );
     }
 
@@ -82,26 +107,23 @@ class ReservationThemeRepositoryImplTest {
     @Test
     void deleteById() {
         //given
-        final ReservationTheme reservationTheme = new ReservationTheme("테마1", "디스크립션1", "썸네일1");
+        Long themeId = savedTheme.getId();
 
-        //when
-        final ReservationTheme expected = repository.save(reservationTheme);
-        final int result = repository.deleteById(expected.getId());
-
-        //
-        assertThat(result).isEqualTo(1);
+        //when & then
+        assertAll(
+                () -> assertThatCode(() -> repository.deleteById(themeId)).doesNotThrowAnyException(),
+                () -> assertThat(repository.findById(themeId)).isEmpty()
+        );
     }
 
     @DisplayName("이미 존재하는 테마이므로 true를 반환한다.")
     @Test
     void existsByName() {
         //given
-        final String name = "테마1";
-        final ReservationTheme reservationTheme = new ReservationTheme(name, "디스크립션1", "썸네일1");
-        repository.save(reservationTheme);
+        String themeName = savedTheme.getName();
 
         //when
-        final boolean expected = repository.existsByName(name);
+        final boolean expected = repository.existsByName(themeName);
 
         //then
         assertThat(expected).isTrue();

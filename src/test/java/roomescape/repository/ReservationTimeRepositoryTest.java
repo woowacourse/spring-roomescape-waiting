@@ -1,108 +1,113 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.TestPropertySource;
+import roomescape.config.JpaConfig;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.repository.impl.ReservationTimeRepositoryImpl;
+import roomescape.repository.jpa.ReservationTimeJpaRepository;
 
-@JdbcTest
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@Disabled
+@TestPropertySource(properties = {
+        "spring.sql.init.mode=never",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
+@Import(JpaConfig.class)
+@DataJpaTest
 class ReservationTimeRepositoryTest {
 
     ReservationTimeRepository timeRepository;
 
     @Autowired
-    JdbcTemplate template;
+    ReservationTimeJpaRepository reservationTimeJpaRepository;
+
+    private Long timeId;
+    private LocalTime now;
 
     @BeforeEach
     void setUp() {
+        timeRepository = new ReservationTimeRepositoryImpl(reservationTimeJpaRepository);
 
-        timeRepository = new ReservationTimeRepositoryImpl(null,template);
-        template.execute("DELETE FROM reservation");
-        template.execute("DELETE FROM reservation_time");
-        template.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
-        template.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
-        template.execute("insert into reservation_time (start_at) values ('15:40')");
-
+        now = LocalTime.now();
+        timeId = timeRepository.save(new ReservationTime(now)).getId();
     }
 
     @DisplayName("id로 예약 시간을 조회한다.")
     @Test
     void findById() {
-        //when
-        ReservationTime time = timeRepository.findById(1L).get();
+        // when
+        Optional<ReservationTime> time = timeRepository.findById(timeId);
 
-        //then
-        assertThat(time.getStartAt()).isEqualTo(LocalTime.parse("15:40"));
+        // then
+        assertAll(
+                () -> assertThat(time).isPresent(),
+                () -> assertThat(time.get().getStartAt()).isEqualTo(now)
+        );
     }
 
     @DisplayName("모든 예약 시간을 조회한다.")
     @Test
     void findAll() {
-        //when
+        // when
         List<ReservationTime> times = timeRepository.findAll();
-
-        //then
         ReservationTime time = times.getFirst();
-        assertThat(times).hasSize(1);
-        assertThat(time.getId()).isEqualTo(1L);
-        assertThat(time.getStartAt()).isEqualTo(LocalTime.parse("15:40"));
+
+        // then
+        assertAll(
+                () -> assertThat(times).hasSize(1),
+                () -> assertThat(time.getId()).isEqualTo(timeId),
+                () -> assertThat(time.getStartAt()).isEqualTo(now)
+        );
     }
 
     @DisplayName("예약 시간을 저장한다.")
     @Test
     void save() {
-        //given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(16, 30));
+        // given
+        LocalTime newTime = LocalTime.of(16, 30);
+        ReservationTime reservationTime = new ReservationTime(newTime);
 
-        //when
+        // when
         ReservationTime saved = timeRepository.save(reservationTime);
-        ReservationTime firstTime = timeRepository.findById(1L).get();
-        ReservationTime secondTime = timeRepository.findById(2L).get();
 
-        //then
-        assertThat(saved.getId()).isEqualTo(2L);
-        assertThat(saved.getStartAt()).isEqualTo(LocalTime.parse("16:30"));
-        assertThat(firstTime.getId()).isEqualTo(1L);
-        assertThat(firstTime.getStartAt()).isEqualTo(LocalTime.parse("15:40"));
-        assertThat(secondTime.getId()).isEqualTo(2L);
-        assertThat(secondTime.getStartAt()).isEqualTo(LocalTime.parse("16:30"));
+
+        // then
+        Optional<ReservationTime> found = timeRepository.findById(saved.getId());
+        assertAll(
+                () -> assertThat(saved.getStartAt()).isEqualTo(newTime),
+                () -> assertThat(found).isPresent(),
+                () -> assertThat(found.get().getStartAt()).isEqualTo(newTime)
+        );
     }
 
     @DisplayName("id로 예약시간을 삭제한다.")
     @Test
     void deleteById() {
-        //when
-        int deleteCounts = timeRepository.deleteById(1L);
+        // when
+        timeRepository.deleteById(timeId);
 
-        //then
-        assertThat(deleteCounts).isEqualTo(1);
+        // then
         assertThat(timeRepository.findAll()).isEmpty();
     }
 
     @DisplayName("이미 존재하는 예약 시간이므로 true를 반환한다.")
     @Test
     void existByStartAt() {
-        //given
-        LocalTime startAt = LocalTime.of(16, 30);
-        ReservationTime reservationTime = new ReservationTime(startAt);
-        timeRepository.save(reservationTime);
+        // when
+        final boolean expected = timeRepository.existsByStartAt(now);
 
-        //when
-        final boolean expected = timeRepository.existsByStartAt(LocalTime.of(16,30));
-
-        //then
+        // then
         assertThat(expected).isTrue();
     }
 }

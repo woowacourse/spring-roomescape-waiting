@@ -1,22 +1,20 @@
-package roomescape.repository;
+package roomescape.repository.impl;
 
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
 import roomescape.repository.jpa.ReservationTimeJpaRepository;
 
 @Repository
 public class ReservationTimeRepositoryImpl implements ReservationTimeRepository {
 
     private final ReservationTimeJpaRepository reservationTimeJpaRepository;
-    private final JdbcTemplate template;
 
-    public ReservationTimeRepositoryImpl(final ReservationTimeJpaRepository reservationTimeJpaRepository, final JdbcTemplate template) {
+    public ReservationTimeRepositoryImpl(final ReservationTimeJpaRepository reservationTimeJpaRepository) {
         this.reservationTimeJpaRepository = reservationTimeJpaRepository;
-        this.template = template;
     }
 
     @Override
@@ -35,13 +33,8 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public int deleteById(final long id) {
-        try {
-            String sql = "delete from reservation_time where id = ?";
-            return template.update(sql, id);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("예약 시간을 지울 수 없습니다.");
-        }
+    public void deleteById(final long id) {
+        reservationTimeJpaRepository.deleteById(id);
     }
 
     @Override

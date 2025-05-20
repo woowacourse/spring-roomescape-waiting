@@ -5,29 +5,28 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
+import roomescape.config.JpaConfig;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.MemberRepositoryImpl;
+import roomescape.domain.MemberRepository;
+import roomescape.repository.impl.MemberRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
 
-@DataJpaTest
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",          // SQL 스크립트 실행 중지
         "spring.jpa.hibernate.ddl-auto=create-drop",  // Hibernate DDL 자동 생성 비활성화
 })
-@Transactional
+@Import(JpaConfig.class)
+@DataJpaTest
 class MemberServiceTest {
 
     private MemberService memberService;
@@ -35,12 +34,9 @@ class MemberServiceTest {
     @Autowired
     private MemberJpaRepository memberJpaRepository;
 
-    @Autowired
-    private DataSource dataSource;
-
     @BeforeEach
     void setUp() {
-        MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository, new JdbcTemplate(dataSource));
+        MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
         memberService = new MemberService(memberRepository);
     }
 
@@ -100,7 +96,6 @@ class MemberServiceTest {
 
         //then
         assertAll(
-                () -> assertThat(expected.getId()).isEqualTo(1L),
                 () -> assertThat(expected.getName()).isEqualTo("차니"),
                 () -> assertThat(expected.getEmail()).isEqualTo("test")
         );

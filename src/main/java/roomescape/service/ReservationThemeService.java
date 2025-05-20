@@ -1,11 +1,12 @@
 package roomescape.service;
 
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTheme;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
-import roomescape.repository.ReservationThemeRepository;
+import roomescape.domain.ReservationThemeRepository;
 
 @Service
 public class ReservationThemeService {
@@ -40,9 +41,12 @@ public class ReservationThemeService {
     }
 
     public void removeReservationTheme(final long id) {
-        int deleteCounts = reservationThemeRepository.deleteById(id);
-        if (deleteCounts == DELETE_FAILED_COUNT) {
-            throw new IllegalArgumentException(String.format("[ERROR] 예약테마 %d번은 존재하지 않습니다.", id));
+        reservationThemeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+        try {
+            reservationThemeRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("예약이 존재해 테마를 삭제할 수 없습니다.");
         }
     }
 

@@ -8,7 +8,7 @@ import roomescape.domain.MemberRole;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
-import roomescape.repository.MemberRepository;
+import roomescape.domain.MemberRepository;
 
 @Service
 public class MemberService {

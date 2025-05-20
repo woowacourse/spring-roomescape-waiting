@@ -4,7 +4,7 @@ import java.util.Base64;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequest;
-import roomescape.repository.MemberRepository;
+import roomescape.domain.MemberRepository;
 
 
 @Service
@@ -26,7 +26,9 @@ public class AuthService {
     }
 
     public void updateSessionIdByMemberId(final Long memberId, final String sessionId) {
-        memberRepository.updateSessionId(memberId, sessionId);
+        final Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 사용자를 찾을 수 없습니다."));
+        member.updateSessionId(sessionId);
     }
 
     private String encode(final String rawPassword) {

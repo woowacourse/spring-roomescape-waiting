@@ -23,6 +23,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    implementation 'com.querydsl:querydsl-core:5.0.0'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
@@ -31,6 +33,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.rest-assured:rest-assured'
@@ -40,4 +45,8 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+clean {
+    delete file('src/main/generated')
 }

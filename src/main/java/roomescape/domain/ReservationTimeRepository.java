@@ -1,9 +1,8 @@
-package roomescape.repository;
+package roomescape.domain;
 
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.ReservationTime;
 
 public interface ReservationTimeRepository {
 
@@ -15,5 +14,5 @@ public interface ReservationTimeRepository {
 
     boolean existsByStartAt(final LocalTime startAt);
 
-    int deleteById(final long id);
+    void deleteById(final long id);
 }

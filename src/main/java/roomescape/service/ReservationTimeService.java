@@ -2,11 +2,12 @@ package roomescape.service;
 
 import java.time.LocalTime;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.repository.ReservationTimeRepository;
+import roomescape.domain.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
@@ -27,9 +28,12 @@ public class ReservationTimeService {
     }
 
     public void removeReservationTime(final long id) {
-        int deleteCounts = reservationTimeRepository.deleteById(id);
-        if (deleteCounts == DELETE_FAILED_COUNT) {
-            throw new IllegalArgumentException(String.format("[ERROR] 예약시간 %d번은 존재하지 않습니다.", id));
+        reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하는 시간이 없습니다."));
+        try {
+            reservationTimeRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("이미 예약이 존재해 시간을 삭제할 수 없습니다.");
         }
     }
 
