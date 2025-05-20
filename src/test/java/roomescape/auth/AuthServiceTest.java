@@ -80,7 +80,7 @@ public class AuthServiceTest {
         void generateToken2() {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "not matches password");
-            memberRepositoryFacade.save(new Member(request.email(), "pw1234", "부기", MemberRole.MEMBER));
+            memberRepositoryFacade.save(new Member(request.email(), passwordEncoder.encode("pw1234"), "부기", MemberRole.MEMBER));
 
             // when & then
             assertThatThrownBy(() -> {
