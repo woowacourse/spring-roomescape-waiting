@@ -20,6 +20,9 @@ import roomescape.theme.service.ThemeService;
 @RequestMapping("/themes")
 public class ThemeController {
 
+    private static final int POPULAR_THEMES_DAYS = 7;
+    private static final int POPULAR_THEMES_LIMIT = 10;
+
     private final ThemeService themeService;
 
     public ThemeController(final ThemeService themeService) {
@@ -33,7 +36,7 @@ public class ThemeController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
-        return ResponseEntity.ok(themeService.getTop10PopularThemesLastWeek());
+        return ResponseEntity.ok(themeService.getPopularThemes(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
     }
 
     @RequireRole(MemberRole.ADMIN)

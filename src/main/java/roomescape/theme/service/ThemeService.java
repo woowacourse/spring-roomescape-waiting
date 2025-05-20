@@ -41,12 +41,13 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
-    public List<ThemeResponse> getTop10PopularThemesLastWeek() {
-        final LocalDate date = LocalDate.now();
+    public List<ThemeResponse> getPopularThemes(int days, int limit) {
+        LocalDate endDate = LocalDate.now().minusDays(1);
+        LocalDate startDate = endDate.minusDays(days);
         Page<Theme> popularThemes = themeRepository.findPopularThemes(
-                date.minusDays(7),
-                date.minusDays(1),
-                PageRequest.of(0, 10)
+                startDate,
+                endDate,
+                PageRequest.of(0, limit)
         );
         return popularThemes.getContent().stream()
                 .map(ThemeResponse::from)
