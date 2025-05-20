@@ -12,32 +12,32 @@ import roomescape.exception.ThemeNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.dto.request.ReservationCondition;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationWithStatusResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 @Service
 @Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
+            TimeSlotRepository timeSlotRepository,
             ThemeRepository themeRepository,
             MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
+        this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
@@ -50,19 +50,19 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservation(Long memberId, Long timeId, Long themeId, LocalDate date) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+        TimeSlot timeSlot = timeSlotRepository.findById(timeId)
                 .orElseThrow(ReservationTimeNotFoundException::new);
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-        Reservation reservation = Reservation.createWithoutId(member, date, reservationTime, theme);
+        Reservation reservation = Reservation.createWithoutId(member, date, timeSlot, theme);
         reservation.validateDateTime();
-        validateDuplicate(date, reservationTime, theme);
+        validateDuplicate(date, timeSlot, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
-        if (reservationRepository.findByDateAndReservationTimeAndTheme(date, time, theme).isPresent()) {
+    private void validateDuplicate(LocalDate date, TimeSlot time, Theme theme) {
+        if (reservationRepository.findByDateAndTimeSlotAndTheme(date, time, theme).isPresent()) {
             throw new ExistedReservationException();
         }
     }

@@ -20,11 +20,11 @@ import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.presentation.AuthorizationExtractor;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
-import roomescape.reservation.presentation.ReservationTimeController;
-import roomescape.reservation.service.ReservationTimeService;
+import roomescape.reservation.presentation.TimeSlotController;
+import roomescape.reservation.service.TimeSlotService;
 
-@WebMvcTest(value = {ReservationTimeController.class})
-class ReservationTimeControllerTest {
+@WebMvcTest(value = {TimeSlotController.class})
+class TimeSlotControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,7 +33,7 @@ class ReservationTimeControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private ReservationTimeService reservationTimeService;
+    private TimeSlotService timeSlotService;
 
     @MockitoBean
     private JwtTokenProvider tokenProvider;
@@ -46,7 +46,7 @@ class ReservationTimeControllerTest {
         // given
         ReservationTimeResponse time = new ReservationTimeResponse(1L, LocalTime.of(9, 0));
         List<ReservationTimeResponse> response = List.of(time);
-        given(reservationTimeService.findAllTimes()).willReturn(response);
+        given(timeSlotService.findAllTimes()).willReturn(response);
         // when & then
         mockMvc.perform(get("/api/times")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -59,7 +59,7 @@ class ReservationTimeControllerTest {
         // given
         ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(9, 0));
         ReservationTimeResponse response = new ReservationTimeResponse(1L, LocalTime.of(9, 0));
-        given(reservationTimeService.createTime(request)).willReturn(response);
+        given(timeSlotService.createTime(request)).willReturn(response);
         // when & then
         mockMvc.perform(post("/api/times")
                         .contentType(MediaType.APPLICATION_JSON)

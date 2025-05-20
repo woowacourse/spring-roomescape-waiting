@@ -13,46 +13,46 @@ import roomescape.exception.ExistedReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
-import roomescape.reservation.service.ReservationTimeService;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
+import roomescape.reservation.service.TimeSlotService;
 import roomescape.unit.fake.FakeReservationRepository;
-import roomescape.unit.fake.FakeReservationTimeRepository;
 import roomescape.unit.fake.FakeThemeRepository;
+import roomescape.unit.fake.FakeTimeSlotRepository;
 
-class ReservationTimeServiceTest {
+class TimeSlotServiceTest {
 
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
     private ReservationRepository reservationRepository;
     private ThemeRepository themeRepository;
-    private ReservationTimeService reservationTimeService;
+    private TimeSlotService timeSlotService;
 
     private final Theme theme = new Theme(1L, "themeName1", "des", "th");
 
     @BeforeEach
     void setUp() {
         reservationRepository = new FakeReservationRepository();
-        reservationTimeRepository = new FakeReservationTimeRepository(reservationRepository);
+        timeSlotRepository = new FakeTimeSlotRepository(reservationRepository);
         themeRepository = new FakeThemeRepository();
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository,
+        timeSlotService = new TimeSlotService(timeSlotRepository, reservationRepository,
                 themeRepository);
     }
 
     @Test
     void 예약_시간을_조회할_수_있다() {
         // given
-        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        ReservationTime reservationTime2 = new ReservationTime(2L, LocalTime.of(11, 0));
-        reservationTimeRepository.save(reservationTime1);
-        reservationTimeRepository.save(reservationTime2);
+        TimeSlot timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0));
+        TimeSlot timeSlot2 = new TimeSlot(2L, LocalTime.of(11, 0));
+        timeSlotRepository.save(timeSlot1);
+        timeSlotRepository.save(timeSlot2);
         // when
-        List<ReservationTimeResponse> allTimes = reservationTimeService.findAllTimes();
+        List<ReservationTimeResponse> allTimes = timeSlotService.findAllTimes();
 
         // then
         SoftAssertions soft = new SoftAssertions();
@@ -66,8 +66,8 @@ class ReservationTimeServiceTest {
     void 예약_시간을_추가할_수_있다() {
         // given & when
         ReservationTimeRequest newTime = new ReservationTimeRequest(LocalTime.of(2, 0));
-        reservationTimeService.createTime(newTime);
-        List<ReservationTimeResponse> all = reservationTimeService.findAllTimes();
+        timeSlotService.createTime(newTime);
+        List<ReservationTimeResponse> all = timeSlotService.findAllTimes();
 
         // then
         assertThat(all.size()).isEqualTo(1);
@@ -77,13 +77,13 @@ class ReservationTimeServiceTest {
     @Test
     void 예약_시간을_삭제할_수_있다() {
         // given
-        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        ReservationTime reservationTime2 = new ReservationTime(2L, LocalTime.of(11, 0));
-        reservationTimeRepository.save(reservationTime1);
-        reservationTimeRepository.save(reservationTime2);
+        TimeSlot timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0));
+        TimeSlot timeSlot2 = new TimeSlot(2L, LocalTime.of(11, 0));
+        timeSlotRepository.save(timeSlot1);
+        timeSlotRepository.save(timeSlot2);
         // when
-        reservationTimeService.deleteTimeById(2L);
-        List<ReservationTimeResponse> all = reservationTimeService.findAllTimes();
+        timeSlotService.deleteTimeById(2L);
+        List<ReservationTimeResponse> all = timeSlotService.findAllTimes();
 
         // then
         assertThat(all.size()).isEqualTo(1);
@@ -93,31 +93,31 @@ class ReservationTimeServiceTest {
     @Test
     void 특정_시간에_대한_예약이_존재하면_예약시간을_삭제할_수_없다() {
         // given
-        ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
-        ReservationTime savedReservationTime1 = reservationTimeRepository.save(reservationTime1);
+        TimeSlot timeSlot1 = TimeSlot.createWithoutId(LocalTime.of(10, 0));
+        TimeSlot savedTimeSlot1 = timeSlotRepository.save(timeSlot1);
         Member member1 = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
         Reservation reservation1 = Reservation.createWithoutId(
-                member1, LocalDate.of(2025, 7, 25), savedReservationTime1, theme
+                member1, LocalDate.of(2025, 7, 25), savedTimeSlot1, theme
         );
         reservationRepository.save(reservation1);
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.deleteTimeById(1L))
+        assertThatThrownBy(() -> timeSlotService.deleteTimeById(1L))
                 .isInstanceOf(ExistedReservationException.class);
     }
 
     @Test
     void 특정날짜와_테마의_예약시간들을_예약여부와_함께_조회한다() {
         // given
-        ReservationTime savedTime = reservationTimeRepository.save(
-                ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+        TimeSlot savedTime = timeSlotRepository.save(
+                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
         Member member = new Member(1L, "name1", "email@domain.com", "pass1", Role.MEMBER);
         reservationRepository.save(
                 Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), savedTime, theme)
         );
         // when
-        List<TimeWithBookedResponse> filteredTimes = reservationTimeService.findTimesByDateAndThemeIdWithBooked(
+        List<TimeWithBookedResponse> filteredTimes = timeSlotService.findTimesByDateAndThemeIdWithBooked(
                 LocalDate.of(2025, 1, 1), 1L);
         // then
         assertThat(filteredTimes).hasSize(1);

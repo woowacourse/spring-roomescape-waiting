@@ -7,64 +7,64 @@ import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 @Service
-public class ReservationTimeService {
+public class TimeSlotService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final TimeSlotRepository timeSlotRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository, ThemeRepository themeRepository) {
-        this.reservationTimeRepository = reservationTimeRepository;
+    public TimeSlotService(TimeSlotRepository timeSlotRepository,
+                           ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+        this.timeSlotRepository = timeSlotRepository;
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
     }
 
     public List<ReservationTimeResponse> findAllTimes() {
-        List<ReservationTime> reservationTimeDaoAll = reservationTimeRepository.findAll();
+        List<TimeSlot> timeSlotDaoAll = timeSlotRepository.findAll();
 
-        return reservationTimeDaoAll.stream()
+        return timeSlotDaoAll.stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public ReservationTimeResponse createTime(ReservationTimeRequest reservationTimeRequest) {
-        ReservationTime reservationTime = reservationTimeRequest.toTime();
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponse.from(savedReservationTime);
+        TimeSlot timeSlot = reservationTimeRequest.toTime();
+        TimeSlot savedTimeSlot = timeSlotRepository.save(timeSlot);
+        return ReservationTimeResponse.from(savedTimeSlot);
     }
 
     public void deleteTimeById(Long id) {
-        if (reservationTimeRepository.findById(id).isEmpty()) {
+        if (timeSlotRepository.findById(id).isEmpty()) {
             throw new ReservationTimeNotFoundException();
         }
-        if (reservationRepository.findByReservationTimeId(id).size() > 0) {
+        if (reservationRepository.findByTimeSlotId(id).size() > 0) {
             throw new ExistedReservationException();
         }
-        reservationTimeRepository.deleteById(id);
+        timeSlotRepository.deleteById(id);
     }
 
     public List<TimeWithBookedResponse> findTimesByDateAndThemeIdWithBooked(LocalDate date, Long themeId) {
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
         List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
 
-        List<ReservationTime> bookedReservationTimes = reservations.stream()
+        List<TimeSlot> bookedTimeSlots = reservations.stream()
                 .map(Reservation::getReservationTime)
                 .toList();
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        List<TimeSlot> timeSlots = timeSlotRepository.findAll();
 
-        return reservationTimes.stream()
-                .map(time -> TimeWithBookedResponse.of(time, bookedReservationTimes.contains(time)))
+        return timeSlots.stream()
+                .map(time -> TimeWithBookedResponse.of(time, bookedTimeSlots.contains(time)))
                 .toList();
     }
 }

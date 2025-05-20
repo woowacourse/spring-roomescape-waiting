@@ -85,7 +85,7 @@ Content-Type: application/json
         "id": number,
         "name": string,
         "date": string (YYYY-MM-DD),
-        "reservationTime": {
+        "timeSlot": {
             "id": number,
             "startAt" : string (HH:mm)
         },
@@ -113,7 +113,7 @@ HTTP/1.1 200
     "id": number,
     "name": string,
     "date": string (YYYY-MM-DD),
-    "reservationTime": {
+    "timeSlot": {
         "id": number,
         "startAt" : string (HH:mm)
     },
@@ -142,7 +142,7 @@ HTTP/1.1 200
     "id": number,
     "name": string,
     "date": string (YYYY-MM-DD),
-    "reservationTime": {
+    "timeSlot": {
         "id": number,
         "startAt" : string (HH:mm)
     },
@@ -320,7 +320,7 @@ Content-Type: application/json
     "id": number,
     "name": string,
     "date": string (YYYY-MM-DD),
-    "reservationTime": {
+    "timeSlot": {
         "id": number,
         "startAt" : string (HH:mm)
     },

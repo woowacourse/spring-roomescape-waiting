@@ -15,24 +15,24 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.dto.request.ReservationCondition;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationWithStatusResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.unit.fake.FakeMemberRepository;
 import roomescape.unit.fake.FakeReservationRepository;
-import roomescape.unit.fake.FakeReservationTimeRepository;
 import roomescape.unit.fake.FakeThemeRepository;
+import roomescape.unit.fake.FakeTimeSlotRepository;
 
 class ReservationServiceTest {
 
     private ReservationRepository reservationRepository;
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
     private ThemeRepository themeRepository;
     private MemberRepository memberRepository;
     private ReservationService reservationService;
@@ -40,27 +40,27 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         reservationRepository = new FakeReservationRepository();
-        reservationTimeRepository = new FakeReservationTimeRepository(reservationRepository);
+        timeSlotRepository = new FakeTimeSlotRepository(reservationRepository);
         themeRepository = new FakeThemeRepository();
         memberRepository = new FakeMemberRepository();
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
+        reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository,
                 memberRepository);
     }
 
     @Test
     void 예약을_조회할_수_있다() {
         // given
-        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        reservationTimeRepository.save(reservationTime1);
+        TimeSlot timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0));
+        timeSlotRepository.save(timeSlot1);
         Theme theme1 = new Theme(1L, "themeName1", "des", "th");
         themeRepository.save(theme1);
         Member member1 = memberRepository.save(new Member(null, "포라", "email1@domain.com", "password1", Role.MEMBER));
         Member member2 = memberRepository.save(new Member(null, "아마", "email2@domain.com", "password2", Role.MEMBER));
         Reservation reservation1 = Reservation.of(null, member1, LocalDate.of(2025, 7, 25),
-                reservationTime1, theme1);
+                timeSlot1, theme1);
         reservationRepository.save(reservation1);
         Reservation reservation2 = Reservation.of(null, member2, LocalDate.of(2025, 7, 26),
-                reservationTime1, theme1);
+                timeSlot1, theme1);
         reservationRepository.save(reservation2);
         // when
         List<ReservationResponse> all = reservationService.findReservations(
@@ -80,14 +80,14 @@ class ReservationServiceTest {
     @Test
     void 샤용자가_예약을_조회할_수_있다() {
         // given
-        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        reservationTimeRepository.save(reservationTime1);
+        TimeSlot timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0));
+        timeSlotRepository.save(timeSlot1);
         Theme theme1 = new Theme(1L, "themeName1", "des", "th");
         themeRepository.save(theme1);
         Member member1 = new Member(1L, "포라", "email1@domain.com", "password1", Role.MEMBER);
         memberRepository.save(member1);
         Reservation reservation1 = Reservation.of(null, member1, LocalDate.of(2025, 7, 25),
-                reservationTime1, theme1);
+                timeSlot1, theme1);
         reservationRepository.save(reservation1);
         // when
         List<ReservationWithStatusResponse> memberReservations = reservationService.findReservationByMemberId(1L);
@@ -100,14 +100,14 @@ class ReservationServiceTest {
     @Test
     void 예약을_추가할_수_있다() {
         // given
-        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        reservationTimeRepository.save(reservationTime1);
+        TimeSlot timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0));
+        timeSlotRepository.save(timeSlot1);
         Theme theme1 = new Theme(1L, "themeName1", "des", "th");
         themeRepository.save(theme1);
         Member member1 = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
         memberRepository.save(member1);
         Reservation reservation1 = Reservation.of(null, member1, LocalDate.of(2025, 7, 25),
-                reservationTime1, theme1);
+                timeSlot1, theme1);
         // when
         reservationRepository.save(reservation1);
 
@@ -127,14 +127,14 @@ class ReservationServiceTest {
     @Test
     void 예약을_삭제할_수_있다() {
         // given
-        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.of(10, 0));
-        reservationTimeRepository.save(reservationTime1);
+        TimeSlot timeSlot1 = new TimeSlot(1L, LocalTime.of(10, 0));
+        timeSlotRepository.save(timeSlot1);
         Theme theme1 = new Theme(1L, "themeName1", "des", "th");
         themeRepository.save(theme1);
         Member member1 = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
         memberRepository.save(member1);
         Reservation reservation1 = Reservation.of(null, member1, LocalDate.of(2025, 7, 25),
-                reservationTime1, theme1);
+                timeSlot1, theme1);
         Reservation savedReservation = reservationRepository.save(reservation1);
         // when
         reservationService.deleteReservationById(savedReservation.getId());
@@ -155,8 +155,8 @@ class ReservationServiceTest {
     @Test
     void 중복_예약하면_예외가_발생한다() {
         // given
-        ReservationTime savedTime = reservationTimeRepository.save(
-                new ReservationTime(1L, LocalTime.of(10, 0)));
+        TimeSlot savedTime = timeSlotRepository.save(
+                new TimeSlot(1L, LocalTime.of(10, 0)));
         Theme savedTheme = themeRepository.save(new Theme(null, "themeName1", "des", "th"));
         Member savedMember = memberRepository.save(
                 new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER));

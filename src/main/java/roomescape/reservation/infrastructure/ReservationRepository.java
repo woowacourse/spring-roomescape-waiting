@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.Repository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 
 public interface ReservationRepository extends Repository<Reservation, Long>, ReservationRepositoryCustom {
     List<Reservation> findAll();
@@ -19,13 +19,13 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
 
     List<Reservation> findByThemeId(Long themeId);
 
-    Optional<Reservation> findByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Optional<Reservation> findByDateAndTimeSlotAndTheme(LocalDate date, TimeSlot time, Theme theme);
 
     List<Reservation> findByDateBetween(LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
-    List<Reservation> findByReservationTimeId(Long reservationTimeId);
+    List<Reservation> findByTimeSlotId(Long reservationTimeId);
 
     List<Reservation> findByMemberId(Long memberId);
 }

@@ -23,7 +23,7 @@ public class Reservation {
     private Member member;
 
     @ManyToOne
-    private ReservationTime reservationTime;
+    private TimeSlot timeSlot;
 
     @ManyToOne
     private Theme theme;
@@ -31,13 +31,13 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
-    private Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
+    private Reservation(final Long id, final Member member, final LocalDate date, final TimeSlot timeSlot,
                         final Theme theme) {
-        validateNull(member, date, reservationTime, theme);
+        validateNull(member, date, timeSlot, theme);
         this.id = id;
         this.member = member;
         this.date = date;
-        this.reservationTime = reservationTime;
+        this.timeSlot = timeSlot;
         this.theme = theme;
     }
 
@@ -45,23 +45,23 @@ public class Reservation {
     }
 
     public static Reservation of(final Long id, final Member member, final LocalDate date,
-                                 final ReservationTime reservationTime, final Theme theme) {
-        return new Reservation(id, member, date, reservationTime, theme);
+                                 final TimeSlot timeSlot, final Theme theme) {
+        return new Reservation(id, member, date, timeSlot, theme);
     }
 
     public static Reservation createWithoutId(final Member member, final LocalDate date,
-                                              final ReservationTime reservationTime, final Theme theme) {
-        return new Reservation(null, member, date, reservationTime, theme);
+                                              final TimeSlot timeSlot, final Theme theme) {
+        return new Reservation(null, member, date, timeSlot, theme);
     }
 
-    private static void validateNull(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+    private static void validateNull(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {
         if (member == null) {
             throw new ArgumentNullException("member");
         }
         if (date == null) {
             throw new ArgumentNullException("date");
         }
-        if (reservationTime == null) {
+        if (timeSlot == null) {
             throw new ArgumentNullException("reservationTime");
         }
         if (theme == null) {
@@ -70,14 +70,14 @@ public class Reservation {
     }
 
     public void validateDateTime() {
-        LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
+        LocalDateTime dateTime = LocalDateTime.of(date, timeSlot.getStartAt());
         if (LocalDateTime.now().isAfter(dateTime)) {
             throw new PastDateTimeReservationException();
         }
     }
 
     public Reservation withId(Long id) {
-        return new Reservation(id, member, date, reservationTime, theme);
+        return new Reservation(id, member, date, timeSlot, theme);
     }
 
     public Long getId() {
@@ -92,8 +92,8 @@ public class Reservation {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public TimeSlot getReservationTime() {
+        return timeSlot;
     }
 
     public Theme getTheme() {

@@ -10,7 +10,7 @@ import java.util.Objects;
 import roomescape.exception.ArgumentNullException;
 
 @Entity
-public class ReservationTime {
+public class TimeSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,17 +19,17 @@ public class ReservationTime {
     @Column(nullable = false)
     private LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
+    public TimeSlot(final Long id, final LocalTime startAt) {
         validateNull(startAt);
         this.id = id;
         this.startAt = startAt;
     }
 
-    public ReservationTime() {
+    public TimeSlot() {
     }
 
-    public static ReservationTime createWithoutId(final LocalTime startAt) {
-        return new ReservationTime(null, startAt);
+    public static TimeSlot createWithoutId(final LocalTime startAt) {
+        return new TimeSlot(null, startAt);
     }
 
     private void validateNull(LocalTime startAt) {
@@ -51,7 +51,7 @@ public class ReservationTime {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ReservationTime that = (ReservationTime) o;
+        TimeSlot that = (TimeSlot) o;
         return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
     }
 

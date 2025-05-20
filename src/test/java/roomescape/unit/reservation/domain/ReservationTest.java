@@ -9,7 +9,7 @@ import roomescape.exception.PastDateTimeReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Theme;
 
 class ReservationTest {
@@ -21,7 +21,7 @@ class ReservationTest {
                         () -> Reservation.createWithoutId(
                                 null,
                                 LocalDate.now().plusDays(1),
-                                ReservationTime.createWithoutId(LocalTime.of(9, 0)),
+                                TimeSlot.createWithoutId(LocalTime.of(9, 0)),
                                 Theme.createWithoutId("themeName", "des", "th")
                         ))
                 .isInstanceOf(ArgumentNullException.class);
@@ -37,7 +37,7 @@ class ReservationTest {
                         () -> Reservation.createWithoutId(
                                 member,
                                 null,
-                                ReservationTime.createWithoutId(LocalTime.of(9, 0)),
+                                TimeSlot.createWithoutId(LocalTime.of(9, 0)),
                                 Theme.createWithoutId("themeName", "des", "th")
                         ))
                 .isInstanceOf(ArgumentNullException.class);
@@ -66,7 +66,7 @@ class ReservationTest {
         Reservation reservation = Reservation.createWithoutId(
                 member,
                 LocalDate.of(2024, 1, 1),
-                new ReservationTime(1L, LocalTime.of(9, 0)),
+                new TimeSlot(1L, LocalTime.of(9, 0)),
                 Theme.createWithoutId("themeName", "des", "th")
         );
         Assertions.assertThatThrownBy(() -> reservation.validateDateTime())
@@ -82,7 +82,7 @@ class ReservationTest {
                         () -> Reservation.createWithoutId(
                                 member,
                                 LocalDate.now().plusDays(1),
-                                ReservationTime.createWithoutId(LocalTime.of(9, 0)),
+                                TimeSlot.createWithoutId(LocalTime.of(9, 0)),
                                 null
                         ))
                 .isInstanceOf(ArgumentNullException.class);

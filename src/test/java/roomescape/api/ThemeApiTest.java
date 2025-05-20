@@ -19,11 +19,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -36,7 +36,7 @@ public class ThemeApiTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private ReservationTimeRepository timeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -96,7 +96,7 @@ public class ThemeApiTest {
     void 예약이_존재하는_테마를_삭제하는_경우_400에러가_발생한다() {
         // given
         Theme theme = themeRepository.save(Theme.createWithoutId("theme3", "desc", "thumb3"));
-        ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+        TimeSlot time = timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(9, 0)));
         Member member = memberRepository.save(new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER));
         reservationRepository.save(Reservation.createWithoutId(member, LocalDate.now().minusDays(1), time, theme));
         // when & then
@@ -115,7 +115,7 @@ public class ThemeApiTest {
         // given
         Member member1 = memberRepository.findById(1L).get();
         Member member2 = memberRepository.findById(2L).get();
-        ReservationTime time1 = timeRepository.findById(1L).get();
+        TimeSlot time1 = timeSlotRepository.findById(1L).get();
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
         Theme theme3 = themeRepository.findById(3L).get();

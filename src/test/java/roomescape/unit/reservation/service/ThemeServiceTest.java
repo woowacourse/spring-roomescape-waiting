@@ -12,7 +12,7 @@ import roomescape.exception.ExistedThemeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ThemeRequest;
 import roomescape.reservation.dto.response.ThemeResponse;
@@ -64,7 +64,7 @@ public class ThemeServiceTest {
         // given
         Theme theme = themeRepository.save(Theme.createWithoutId("name1", "description1", "thumbnail1"));
         Member member = new Member(1L, "name1", "email@domain.com", "password1", Role.MEMBER);
-        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         reservationRepository.save(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
@@ -102,9 +102,9 @@ public class ThemeServiceTest {
         Member member1 = new Member(1L, "name1", "email1@email.com", "password1", Role.MEMBER);
         Member member2 = new Member(2L, "name2", "email1@email.com", "password1", Role.MEMBER);
 
-        ReservationTime time1 = ReservationTime.createWithoutId(LocalTime.of(9, 0));
-        ReservationTime time2 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
-        ReservationTime time3 = ReservationTime.createWithoutId(LocalTime.of(11, 0));
+        TimeSlot time1 = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time2 = TimeSlot.createWithoutId(LocalTime.of(10, 0));
+        TimeSlot time3 = TimeSlot.createWithoutId(LocalTime.of(11, 0));
 
         Reservation reservation1 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme1);
         Reservation reservation2 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time2, theme1);

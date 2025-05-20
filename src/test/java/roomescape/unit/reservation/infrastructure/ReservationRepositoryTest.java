@@ -15,8 +15,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.infrastructure.ReservationRepository;
 
 @DataJpaTest
@@ -33,13 +33,13 @@ class ReservationRepositoryTest {
         // given
         Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
         entityManager.persist(member);
-        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         entityManager.persist(time);
         Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
         entityManager.persist(theme);
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
         // when
-        Optional<Reservation> reservation = reservationRepository.findByDateAndReservationTimeAndTheme(
+        Optional<Reservation> reservation = reservationRepository.findByDateAndTimeSlotAndTheme(
                 LocalDate.of(2025, 1, 1), time, theme);
         // then
         assertThat(reservation.isPresent()).isTrue();
@@ -51,7 +51,7 @@ class ReservationRepositoryTest {
         // given
         Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
         entityManager.persist(member);
-        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         entityManager.persist(time);
         Theme theme1 = Theme.createWithoutId("theme1", "desc", "thumb");
         entityManager.persist(theme1);
@@ -76,7 +76,7 @@ class ReservationRepositoryTest {
         // given
         Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
         entityManager.persist(member);
-        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         entityManager.persist(time);
         Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
         entityManager.persist(theme);
@@ -96,7 +96,7 @@ class ReservationRepositoryTest {
         // given
         Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
         entityManager.persist(member);
-        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         entityManager.persist(time);
         Theme theme1 = Theme.createWithoutId("theme1", "desc", "thumb");
         entityManager.persist(theme1);
@@ -117,16 +117,16 @@ class ReservationRepositoryTest {
         // given
         Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
         entityManager.persist(member);
-        ReservationTime time1 = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time1 = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         entityManager.persist(time1);
-        ReservationTime time2 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
+        TimeSlot time2 = TimeSlot.createWithoutId(LocalTime.of(10, 0));
         entityManager.persist(time2);
         Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
         entityManager.persist(theme);
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time1, theme));
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time2, theme));
         // when
-        List<Reservation> reservations = reservationRepository.findByReservationTimeId(time1.getId());
+        List<Reservation> reservations = reservationRepository.findByTimeSlotId(time1.getId());
         // then
         assertThat(reservations).hasSize(1);
         assertThat(reservations.get(0).getTheme().getId()).isEqualTo(theme.getId());
@@ -139,7 +139,7 @@ class ReservationRepositoryTest {
         entityManager.persist(member1);
         Member member2 = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
         entityManager.persist(member2);
-        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         entityManager.persist(time);
         Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
         entityManager.persist(theme);

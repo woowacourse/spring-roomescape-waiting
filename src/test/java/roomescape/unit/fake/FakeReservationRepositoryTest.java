@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.infrastructure.ReservationRepository;
 
@@ -22,13 +22,13 @@ class FakeReservationRepositoryTest {
     void 모든_예약을_조회한다() {
         // given
         Member member = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
-        ReservationTime reservationTime = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot timeSlot = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
         Reservation reservation1 = Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 1), reservationTime, theme
+                member, LocalDate.of(2025, 1, 1), timeSlot, theme
         );
         Reservation reservation2 = Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 2), reservationTime, theme
+                member, LocalDate.of(2025, 1, 2), timeSlot, theme
         );
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -45,10 +45,10 @@ class FakeReservationRepositoryTest {
     void 예약을_생성한다() {
         // given
         Member member = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
-        ReservationTime reservationTime = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot timeSlot = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
         Reservation reservation1 = Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 1), reservationTime, theme
+                member, LocalDate.of(2025, 1, 1), timeSlot, theme
         );
         // when
         reservationRepository.save(reservation1);
@@ -62,10 +62,10 @@ class FakeReservationRepositoryTest {
     void 예약을_삭제한다() {
         // given
         Member member = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
-        ReservationTime reservationTime = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot timeSlot = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
         Reservation reservation1 = Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 1), reservationTime, theme
+                member, LocalDate.of(2025, 1, 1), timeSlot, theme
         );
         reservationRepository.save(reservation1);
         // when
@@ -79,13 +79,13 @@ class FakeReservationRepositoryTest {
     void 테마id로_예약을_조회한다() {
         // given
         Member member = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
-        ReservationTime reservationTime = ReservationTime.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot timeSlot = TimeSlot.createWithoutId(LocalTime.of(9, 0));
         Theme theme = new Theme(1L, "theme1", "desc", "thumb");
         Reservation reservation1 = Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 1), reservationTime, theme
+                member, LocalDate.of(2025, 1, 1), timeSlot, theme
         );
         Reservation reservation2 = Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 2), reservationTime, theme
+                member, LocalDate.of(2025, 1, 2), timeSlot, theme
         );
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);

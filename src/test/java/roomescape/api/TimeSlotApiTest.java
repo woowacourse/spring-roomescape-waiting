@@ -18,20 +18,20 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationTimeApiTest {
+public class TimeSlotApiTest {
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
@@ -55,17 +55,17 @@ public class ReservationTimeApiTest {
                 .extract().as(ReservationTimeResponse.class);
 
         // then
-        List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
+        List<TimeSlot> allTimeSlots = timeSlotRepository.findAll();
         SoftAssertions soft = new SoftAssertions();
         soft.assertThat(response.startAt()).isEqualTo(LocalTime.of(10, 0));
-        soft.assertThat(allReservationTimes).hasSize(1);
+        soft.assertThat(allTimeSlots).hasSize(1);
         soft.assertAll();
     }
 
     @Test
     void 예약시간_조회_테스트() {
         // given
-        reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(10, 0)));
         // when
         List<ReservationTimeResponse> response = RestAssured.given().log().all()
                 .when().get("/api/times")
@@ -83,7 +83,7 @@ public class ReservationTimeApiTest {
     @Test
     void 예약시간_삭제_테스트() {
         // given
-        reservationTimeRepository.save(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(10, 0)));
         // when
         RestAssured.given().log().all()
                 .when().delete("/api/times/{timeId}", 1L)
@@ -91,24 +91,24 @@ public class ReservationTimeApiTest {
                 .statusCode(204);
 
         // then
-        List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
-        assertThat(allReservationTimes).hasSize(0);
+        List<TimeSlot> allTimeSlots = timeSlotRepository.findAll();
+        assertThat(allTimeSlots).hasSize(0);
     }
 
     @Test
     void 가능한_예약시간_조회_테스트() {
         // when
-        ReservationTime reservationTime1 = reservationTimeRepository.save(
-                ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        TimeSlot timeSlot1 = timeSlotRepository.save(
+                TimeSlot.createWithoutId(LocalTime.of(10, 0))
         );
-        ReservationTime reservationTime2 = reservationTimeRepository.save(
-                ReservationTime.createWithoutId(LocalTime.of(11, 0))
+        TimeSlot timeSlot2 = timeSlotRepository.save(
+                TimeSlot.createWithoutId(LocalTime.of(11, 0))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb"));
         Member member = memberRepository.save(
                 new Member(null, "member1", "email1@domain.com", "password1", Role.MEMBER));
         reservationRepository.save(
-                Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), reservationTime1, theme));
+                Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), timeSlot1, theme));
         // when
         List<TimeWithBookedResponse> response = RestAssured.given().log().all()
                 .when().get("/api/times/theme/1?date=2025-01-01")

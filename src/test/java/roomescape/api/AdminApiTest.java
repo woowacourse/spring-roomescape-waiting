@@ -18,11 +18,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -38,7 +38,7 @@ public class AdminApiTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
@@ -52,13 +52,13 @@ public class AdminApiTest {
                 new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
         reservationRepository.save(Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 1), reservationTime, theme
+                member, LocalDate.of(2025, 1, 1), timeSlot, theme
         ));
         reservationRepository.save(Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 2), reservationTime, theme
+                member, LocalDate.of(2025, 1, 2), timeSlot, theme
         ));
         String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
 
@@ -79,15 +79,15 @@ public class AdminApiTest {
                 new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
         String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("date", "2026-08-05");
         reservation.put("memberId", member.getId());
         reservation.put("timeId", theme.getId());
-        reservation.put("themeId", reservationTime.getId());
+        reservation.put("themeId", timeSlot.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -106,15 +106,15 @@ public class AdminApiTest {
                 new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
         String token = tokenProvider.createToken(member.getId().toString(), member.getRole());
 
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("date", "2026-08-05");
         reservation.put("memberId", member.getId());
         reservation.put("timeId", theme.getId());
-        reservation.put("themeId", reservationTime.getId());
+        reservation.put("themeId", timeSlot.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

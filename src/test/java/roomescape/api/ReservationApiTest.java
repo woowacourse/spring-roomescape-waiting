@@ -18,11 +18,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -35,7 +35,7 @@ public class ReservationApiTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationTimeRepository timeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -49,7 +49,7 @@ public class ReservationApiTest {
                 new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER)
         );
         String token = tokenProvider.createToken(savedMember.getId().toString(), savedMember.getRole());
-        ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+        TimeSlot time = timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(9, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("date", "2026-08-05");
@@ -74,7 +74,7 @@ public class ReservationApiTest {
         Member member = memberRepository.save(
                 new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER)
         );
-        ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+        TimeSlot time = timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(9, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
         Reservation reservation = reservationRepository.save(
                 Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));

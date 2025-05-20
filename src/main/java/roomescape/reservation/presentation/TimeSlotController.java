@@ -16,28 +16,28 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
-import roomescape.reservation.service.ReservationTimeService;
+import roomescape.reservation.service.TimeSlotService;
 
 @RestController
 @RequestMapping(value = "/api/times")
-public class ReservationTimeController {
+public class TimeSlotController {
 
-    private final ReservationTimeService reservationTimeService;
+    private final TimeSlotService timeSlotService;
 
-    public ReservationTimeController(ReservationTimeService reservationTimeService) {
-        this.reservationTimeService = reservationTimeService;
+    public TimeSlotController(TimeSlotService timeSlotService) {
+        this.timeSlotService = timeSlotService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getAllReservationTimes() {
-        List<ReservationTimeResponse> all = reservationTimeService.findAllTimes();
+        List<ReservationTimeResponse> all = timeSlotService.findAllTimes();
         return ResponseEntity.ok(all);
     }
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> createNewReservationTime(
             @Valid @RequestBody ReservationTimeRequest reservationTimeRequest) {
-        ReservationTimeResponse reservationTime = reservationTimeService.createTime(reservationTimeRequest);
+        ReservationTimeResponse reservationTime = timeSlotService.createTime(reservationTimeRequest);
         return ResponseEntity
                 .created(URI.create("/api/times/" + reservationTime.id()))
                 .body(reservationTime);
@@ -45,7 +45,7 @@ public class ReservationTimeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable Long id) {
-        reservationTimeService.deleteTimeById(id);
+        timeSlotService.deleteTimeById(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -53,6 +53,6 @@ public class ReservationTimeController {
     public ResponseEntity<List<TimeWithBookedResponse>> getTimesWithBooked(
             @PathVariable("themeId") Long themeId, @RequestParam("date") LocalDate date
     ) {
-        return ResponseEntity.ok(reservationTimeService.findTimesByDateAndThemeIdWithBooked(date, themeId));
+        return ResponseEntity.ok(timeSlotService.findTimesByDateAndThemeIdWithBooked(date, themeId));
     }
 }
