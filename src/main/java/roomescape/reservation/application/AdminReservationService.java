@@ -5,7 +5,6 @@ import static roomescape.auth.domain.AuthRole.ADMIN;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.auth.domain.AuthRole;
 import roomescape.exception.auth.AuthorizationException;
@@ -78,11 +77,11 @@ public class AdminReservationService {
             throw new AuthorizationException("관리자만 삭제할 권한이 있습니다.");
         }
 
-        try {
-            reservationRepository.deleteById(reservationId);
-        } catch (EmptyResultDataAccessException e) {
+        if (!reservationRepository.existsById(reservationId)) {
+            // 이미 취소되어 예약이 존재하지 않음을 구분하는 것이 UX에 좋을 것으로 예상됨
             throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
         }
+        reservationRepository.deleteById(reservationId);
     }
 
     public List<ReservationResponse> findAll() {
