@@ -43,7 +43,8 @@ public class Member {
     }
 
     public boolean isSamePassword(final String password) {
-        return this.password.getPassword().equals(password);
+        String storedPassword = this.password.password();
+        return storedPassword.equals(password);
     }
 
     public Long getId() {
@@ -51,15 +52,15 @@ public class Member {
     }
 
     public String getName() {
-        return name.getName();
+        return name.name();
     }
 
     public String getEmail() {
-        return email.getEmail();
+        return email.email();
     }
 
     public String getPassword() {
-        return password.getPassword();
+        return password.password();
     }
 
     public List<Reservation> getReservations() {
