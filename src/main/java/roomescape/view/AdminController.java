@@ -37,4 +37,11 @@ public class AdminController {
     ) {
         return "/admin/theme";
     }
+
+    @Auth(Role.ADMIN)
+    @GetMapping("/waiting")
+    public String waiting(
+    ) {
+        return "/admin/waiting";
+    }
 }
