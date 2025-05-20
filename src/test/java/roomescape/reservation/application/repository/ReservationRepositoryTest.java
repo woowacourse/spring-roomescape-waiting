@@ -78,7 +78,7 @@ class ReservationRepositoryTest {
 
     private void createAndSaveReservationFixture(Member member, Theme theme, LocalDate date,
                                                  ReservationTime reservationTime) {
-        Reservation reservation = new Reservation(member, theme, date, reservationTime);
+        Reservation reservation = Reservation.createReserved(member, theme, date, reservationTime);
         entityManager.persist(reservation);
     }
 

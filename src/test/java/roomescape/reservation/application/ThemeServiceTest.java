@@ -120,7 +120,7 @@ public class ThemeServiceTest {
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(15, 40));
         reservationTimeService.createReservationTime(reservationTimeRequest);
 
-        reservationRepository.save(new Reservation(
+        reservationRepository.save(Reservation.createReserved(
                 new Member(2L, "admin@admin.com", "admin", "어드민", Role.ADMIN),
                 new Theme(theme.getId(), "레벨3 탈출",
                         "우테코 레벨3를 탈출하는 내용입니다.",

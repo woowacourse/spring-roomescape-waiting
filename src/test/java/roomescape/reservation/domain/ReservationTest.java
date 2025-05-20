@@ -18,7 +18,7 @@ class ReservationTest {
         final Theme theme = new Theme("theme1", "description", "thumbnail");
         final ReservationTime reservationTime = new ReservationTime(LocalTime.MIDNIGHT);
 
-        Reservation reservation = new Reservation(member, theme, LocalDate.now(), reservationTime);
+        Reservation reservation = Reservation.createReserved(member, theme, LocalDate.now(), reservationTime);
 
         assertThat(reservation.getStatus()).isEqualTo(Status.RESERVED);
     }

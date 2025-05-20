@@ -35,6 +35,7 @@ public class ReservationEntityTest {
         // when - then
         assertThatNoException()
                 .isThrownBy(
-                        () -> entityManager.persist(new Reservation(member, theme, LocalDate.now(), reservationTime)));
+                        () -> entityManager.persist(
+                                Reservation.createReserved(member, theme, LocalDate.now(), reservationTime)));
     }
 }
