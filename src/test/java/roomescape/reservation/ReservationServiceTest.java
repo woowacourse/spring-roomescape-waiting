@@ -70,7 +70,7 @@ public class ReservationServiceTest {
         void setUp() {
             REQUEST = new ReservationRequest(LocalDate.now().plusDays(1), 1L, 1L);
             LOGIN_MEMBER = new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
-            RESERVATION_TIME = Optional.of(reservationTimeWithId(REQUEST.themeId(), new ReservationTime(LocalTime.of(12, 40))));
+            RESERVATION_TIME = Optional.of(reservationTimeWithId(REQUEST.timeId(), new ReservationTime(LocalTime.of(12, 40))));
             THEME = Optional.of(themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123")));
             MEMBER = Optional.of(memberWithId(1L, new Member(LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER)));
             RESERVATION = reservationWithId(1L, new Reservation(
@@ -199,7 +199,7 @@ public class ReservationServiceTest {
                     LocalDate.now(), 1L, 1L);
 
             given(reservationTimeRepository.findById(request.timeId()))
-                    .willReturn(Optional.of(reservationTimeWithId(request.themeId(), new ReservationTime(LocalTime.now().minusHours(1)))));
+                    .willReturn(Optional.of(reservationTimeWithId(request.timeId(), new ReservationTime(LocalTime.now().minusHours(1)))));
             given(themeRepository.findById(REQUEST.themeId()))
                     .willReturn(THEME);
             given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
