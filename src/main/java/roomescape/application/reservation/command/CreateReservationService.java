@@ -41,27 +41,35 @@ public class CreateReservationService {
         this.clock = clock;
     }
 
-    public Long create(CreateReservationCommand createReservationCommand) {
-        Member member = memberRepository.findById(createReservationCommand.memberId())
-                .orElseThrow(() -> new MemberException("존재하지 않는 회원입니다."));
-        ReservationTime reservationTime = reservationTimeRepository.findById(createReservationCommand.timeId())
-                .orElseThrow(() -> new ReservationTimeException("존재하지 않는 예약 시간입니다."));
-        Theme theme = themeRepository.findById(createReservationCommand.themeId())
-                .orElseThrow(() -> new ThemeException("존재하지 않는 테마입니다."));
-        if (isAlreadyReservedAt(createReservationCommand.date(), reservationTime, theme)) {
-            throw new ReservationException("날짜와 시간이 중복된 예약이 존재합니다.");
-        }
-        Reservation reservation = new Reservation(
-                member,
-                createReservationCommand.date(),
-                reservationTime,
-                theme
-        );
+    public Long reserve(CreateReservationCommand command) {
+        Member member = getMember(command.memberId());
+        ReservationTime time = getTime(command.timeId());
+        Theme theme = getTheme(command.themeId());
+        validateDuplicateReservation(command.date(), time, theme);
+        Reservation reservation = new Reservation(member, command.date(), time, theme);
         reservation.validateReservable(LocalDateTime.now(clock));
         return reservationRepository.save(reservation).getId();
     }
 
-    private boolean isAlreadyReservedAt(LocalDate date, ReservationTime reservationTime, Theme theme) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, reservationTime.getId(), theme.getId());
+    private Member getMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException("존재하지 않는 회원입니다."));
+    }
+
+    private ReservationTime getTime(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new ReservationTimeException("존재하지 않는 예약 시간입니다."));
+    }
+
+    private Theme getTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new ThemeException("존재하지 않는 테마입니다."));
+    }
+
+    private void validateDuplicateReservation(LocalDate date, ReservationTime time, Theme theme) {
+        boolean duplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(date, time.getId(), theme.getId());
+        if (duplicated) {
+            throw new ReservationException("날짜와 시간이 중복된 예약이 존재합니다.");
+        }
     }
 }

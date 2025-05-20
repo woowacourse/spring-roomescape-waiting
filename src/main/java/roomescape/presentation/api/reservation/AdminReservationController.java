@@ -42,7 +42,7 @@ public class AdminReservationController {
     @PostMapping
     public ResponseEntity<Void> createReservation(
             @Valid @RequestBody CreateAdminReservationRequest createAdminReservationRequest) {
-        Long id = createReservationService.create(createAdminReservationRequest.toCreateCommand());
+        Long id = createReservationService.reserve(createAdminReservationRequest.toCreateCommand());
         return ResponseEntity.created(URI.create(RESERVATIONS_URL.formatted(id)))
                 .build();
     }

@@ -36,7 +36,7 @@ public class ReservationController {
     public ResponseEntity<Void> createReservation(
             @AuthPrincipal AuthInfo authInfo,
             @Valid @RequestBody CreateReservationRequest createReservationRequest) {
-        Long id = createReservationService.create(createReservationRequest.toCreateCommand(authInfo.memberId()));
+        Long id = createReservationService.reserve(createReservationRequest.toCreateCommand(authInfo.memberId()));
         return ResponseEntity.created(URI.create(RESERVATIONS_URL.formatted(id)))
                 .build();
     }

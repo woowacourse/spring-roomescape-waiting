@@ -63,7 +63,7 @@ class CreateReservationServiceTest extends AbstractServiceIntegrationTest {
                 theme.getId(), member.getId());
 
         // when
-        Long id = createReservationService.create(command);
+        Long id = createReservationService.reserve(command);
 
         // then
         assertThat(reservationRepository.findById(id)).isPresent();
@@ -83,7 +83,7 @@ class CreateReservationServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatThrownBy(() -> createReservationService.create(command))
+        assertThatThrownBy(() -> createReservationService.reserve(command))
                 .isInstanceOf(MemberException.class)
                 .hasMessage("존재하지 않는 회원입니다.");
     }
@@ -103,7 +103,7 @@ class CreateReservationServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatThrownBy(() -> createReservationService.create(command))
+        assertThatThrownBy(() -> createReservationService.reserve(command))
                 .isInstanceOf(ReservationTimeException.class)
                 .hasMessage("존재하지 않는 예약 시간입니다.");
     }
@@ -120,7 +120,7 @@ class CreateReservationServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatThrownBy(() -> createReservationService.create(command))
+        assertThatThrownBy(() -> createReservationService.reserve(command))
                 .isInstanceOf(ThemeException.class)
                 .hasMessage("존재하지 않는 테마입니다.");
     }
@@ -141,7 +141,7 @@ class CreateReservationServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatThrownBy(() -> createReservationService.create(command))
+        assertThatThrownBy(() -> createReservationService.reserve(command))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage("날짜와 시간이 중복된 예약이 존재합니다.");
     }
