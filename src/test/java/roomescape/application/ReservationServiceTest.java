@@ -129,9 +129,8 @@ class ReservationServiceTest {
         var themeId = JUNK_THEME.id();
 
         // when & then
-        assertThatCode(
-                () -> service.reserve(JUNK_USER, date, timeSlotId, themeId)
-        ).doesNotThrowAnyException();
+        assertThatCode(() -> service.reserve(JUNK_USER, date, timeSlotId, themeId))
+                .doesNotThrowAnyException();
     }
 
     @Test
@@ -147,9 +146,8 @@ class ReservationServiceTest {
         service.reserve(user, date, timeSlotId, themeId);
 
         // then
-        assertThatThrownBy(
-                () -> service.reserve(user, date, timeSlotId, themeId)
-        ).isInstanceOf(AlreadyExistedException.class);
+        assertThatThrownBy(() -> service.reserve(user, date, timeSlotId, themeId))
+                .isInstanceOf(AlreadyExistedException.class);
     }
 
     @Test
@@ -164,8 +162,7 @@ class ReservationServiceTest {
         service.reserve(user, date, timeSlotId, themeId);
 
         // when & then
-        assertThatThrownBy(
-                () -> service.reserve(user, date, timeSlotId, themeId)
-        ).isInstanceOf(AlreadyExistedException.class);
+        assertThatThrownBy(() -> service.reserve(user, date, timeSlotId, themeId))
+                .isInstanceOf(AlreadyExistedException.class);
     }
 }
