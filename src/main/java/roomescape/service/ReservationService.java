@@ -74,8 +74,7 @@ public class ReservationService {
 
     public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from,
                                                                LocalDate to) {
-        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(
-                from, to, themeId, memberId);
+        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findByPeriod(from, to, themeId, memberId);
         return reservationsByPeriodAndMemberAndTheme.stream()
                 .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
                         reservation.getTheme()))
