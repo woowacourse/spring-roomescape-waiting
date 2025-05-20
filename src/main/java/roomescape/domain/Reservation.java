@@ -92,8 +92,11 @@ public class Reservation {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
+        Reservation reservation = (Reservation) o;
+        if (this.id == null || reservation.id == null) {
+            return false;
+        }
+        return Objects.equals(id, reservation.id);
     }
 
     @Override

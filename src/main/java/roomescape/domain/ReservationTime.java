@@ -43,6 +43,9 @@ public class ReservationTime {
             return false;
         }
         ReservationTime time = (ReservationTime) o;
+        if (this.id == null || time.id == null) {
+            return false;
+        }
         return Objects.equals(id, time.id);
     }
 
