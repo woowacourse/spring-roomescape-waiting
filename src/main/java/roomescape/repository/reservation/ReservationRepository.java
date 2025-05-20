@@ -7,14 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsByDateAndTime(LocalDate date, ReservationTime time);
+    boolean existsByDateAndTimeId(LocalDate date, Long timeId);
 
     @Query(value = "SELECT time.id FROM Reservation WHERE date = :date AND theme.id = :themeId")
     List<Long> findAllTimeIdByDateAndThemeId(LocalDate date, Long themeId);

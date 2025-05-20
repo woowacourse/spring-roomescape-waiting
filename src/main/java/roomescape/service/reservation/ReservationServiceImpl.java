@@ -51,7 +51,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new ReservationInPastException();
         }
 
-        if (reservationRepository.existsByDateAndTime(request.date(), reservationTime)) {
+        if (reservationRepository.existsByDateAndTimeId(request.date(), reservationTime.getId())) {
             throw new ReservationAlreadyExistsException();
         }
 
