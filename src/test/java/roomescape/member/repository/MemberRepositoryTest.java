@@ -35,10 +35,10 @@ class MemberRepositoryTest {
 
     @Test
     void findByMemberRole() {
-        memberRepository.save(new Member("Vector", "vector@gmail.com", "password", MemberRole.USER));
+        memberRepository.save(new Member("Vector", "vector@gmail.com", "password", MemberRole.REGULAR));
 
-        List<Member> users = memberRepository.findByMemberRole(MemberRole.USER);
+        List<Member> members = memberRepository.findByMemberRole(MemberRole.REGULAR);
 
-        assertThat(users.size()).isEqualTo(2);
+        assertThat(members.size()).isEqualTo(2);
     }
 }

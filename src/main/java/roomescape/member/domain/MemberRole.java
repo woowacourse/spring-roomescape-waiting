@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum MemberRole {
 
-    USER, ADMIN;
+    REGULAR, ADMIN;
 
     public static MemberRole from(final String input) {
         return Arrays.stream(MemberRole.values())

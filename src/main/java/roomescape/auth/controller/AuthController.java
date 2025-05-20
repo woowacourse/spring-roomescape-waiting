@@ -41,13 +41,13 @@ public class AuthController {
                 .build();
     }
 
-    @RequireRole(MemberRole.USER)
+    @RequireRole(MemberRole.REGULAR)
     @GetMapping("/login/check")
     public ResponseEntity<CheckLoginResponse> checkLogin(final MemberInfo memberInfo) {
         return ResponseEntity.ok(CheckLoginResponse.from(memberDomainService.getMember(memberInfo.id())));
     }
 
-    @RequireRole(MemberRole.USER)
+    @RequireRole(MemberRole.REGULAR)
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(final HttpServletResponse httpServletResponse) {
         cookieManager.deleteCookie(httpServletResponse, TOKEN);

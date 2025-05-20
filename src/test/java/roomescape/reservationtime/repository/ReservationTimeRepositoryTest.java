@@ -19,7 +19,7 @@ class ReservationTimeRepositoryTest {
 
     @Test
     void existsByStartAt() {
-        ReservationTime reservationTime = TestFixture.makeReservationTime(1L);
+        ReservationTime reservationTime = TestFixture.makeReservationTime();
         reservationTimeRepository.save(reservationTime);
 
         boolean existsByStartAt = reservationTimeRepository.existsByStartAt(reservationTime.getStartAt());

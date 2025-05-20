@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.IntegrationFixture.PASSWORD;
 import static roomescape.fixture.IntegrationFixture.TOKEN;
-import static roomescape.fixture.IntegrationFixture.USER_EMAIL;
+import static roomescape.fixture.IntegrationFixture.REGULAR_EMAIL;
 import static roomescape.fixture.IntegrationFixture.createReservationTime;
 import static roomescape.fixture.IntegrationFixture.createTheme;
-import static roomescape.fixture.IntegrationFixture.createUserReservation;
+import static roomescape.fixture.IntegrationFixture.createRegularReservation;
 import static roomescape.fixture.IntegrationFixture.loginAndGetAuthToken;
 
 import io.restassured.RestAssured;
@@ -29,19 +29,18 @@ import roomescape.reservation.dto.response.MyReservationResponse;
 @TestPropertySource(properties = {
         "spring.sql.init.data-locations=classpath:test-data.sql"
 })
-public class UserTest {
+public class RegularTest {
 
-    private String USER_TOKEN;
+    private String REGULAR_TOKEN;
 
     @BeforeEach
     void setUp() {
-        USER_TOKEN = loginAndGetAuthToken(USER_EMAIL, PASSWORD);
+        REGULAR_TOKEN = loginAndGetAuthToken(REGULAR_EMAIL, PASSWORD);
     }
 
-    @Test
     void login() {
         RestAssured.given().log().all()
-                .body(new LoginRequest(USER_EMAIL, PASSWORD))
+                .body(new LoginRequest(REGULAR_EMAIL, PASSWORD))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all()
@@ -52,9 +51,9 @@ public class UserTest {
     @Test
     void logout() {
         RestAssured.given().log().all()
-                .body(new LoginRequest(USER_EMAIL, PASSWORD))
+                .body(new LoginRequest(REGULAR_EMAIL, PASSWORD))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(TOKEN, USER_TOKEN)
+                .cookie(TOKEN, REGULAR_TOKEN)
                 .when().post("/logout")
                 .then().log().all()
                 .statusCode(204);
@@ -63,16 +62,16 @@ public class UserTest {
     @Test
     void loginCheck() {
         CheckLoginResponse checkLoginResponse = RestAssured.given().log().all()
-                .body(new LoginRequest(USER_EMAIL, PASSWORD))
+                .body(new LoginRequest(REGULAR_EMAIL, PASSWORD))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(TOKEN, USER_TOKEN)
+                .cookie(TOKEN, REGULAR_TOKEN)
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
                 .as(CheckLoginResponse.class);
 
-        assertThat(checkLoginResponse.name()).isEqualTo("User");
+        assertThat(checkLoginResponse.name()).isEqualTo("Regular");
     }
 
 
@@ -80,7 +79,7 @@ public class UserTest {
     void createAndDeleteReservation() {
         IntegrationFixture.createReservationTime();
         createTheme("추리");
-        createUserReservation(1L);
+        createRegularReservation(1L);
 
         RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -89,7 +88,7 @@ public class UserTest {
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
-                .cookie(TOKEN, USER_TOKEN)
+                .cookie(TOKEN, REGULAR_TOKEN)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
@@ -102,7 +101,7 @@ public class UserTest {
     }
 
     @Test
-    void responseUnAuthorizedWhenUserAccessAdminPage() {
+    void responseUnAuthorizedWhenRegularAccessAdminPage() {
         RestAssured.given().log().all()
                 .when().get("/admin/reservation")
                 .then().log().all()
@@ -110,9 +109,9 @@ public class UserTest {
     }
 
     @Test
-    void responseForbiddenWhenUserAccessAdminPage() {
+    void responseForbiddenWhenRegularAccessAdminPage() {
         RestAssured.given().log().all()
-                .cookie(TOKEN, USER_TOKEN)
+                .cookie(TOKEN, REGULAR_TOKEN)
                 .when().get("/admin/reservation")
                 .then().log().all()
                 .statusCode(403);
@@ -122,10 +121,10 @@ public class UserTest {
     void findMyReservations() {
         createReservationTime();
         createTheme("추리");
-        createUserReservation(1L);
+        createRegularReservation(1L);
 
         List<MyReservationResponse> responses = RestAssured.given().log().all()
-                .cookie(TOKEN, USER_TOKEN)
+                .cookie(TOKEN, REGULAR_TOKEN)
                 .when().get("/reservations-mine")
                 .then().log().all()
                 .statusCode(200)

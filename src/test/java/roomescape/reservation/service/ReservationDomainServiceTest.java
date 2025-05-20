@@ -63,7 +63,7 @@ class ReservationDomainServiceTest {
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
         timeId = reservationTimeRepository.save(time2).getId();
-        themeId = themeRepository.save(TestFixture.makeTheme(1L)).getId();
+        themeId = themeRepository.save(TestFixture.makeTheme()).getId();
         memberId = memberRepository.save(TestFixture.makeMember()).getId();
     }
 

@@ -38,18 +38,18 @@ public class MemberDomainServiceTest {
     @Test
     void signUpTest() {
         SignUpResponse response = memberApplicationService.signup(
-                new SignupRequest("userr@gmail.com", "password", "userr"));
+                new SignupRequest("member@gmail.com", "password", "member"));
 
         Optional<Member> optionalMember = memberRepository.findById(response.id());
-        assertThat(optionalMember.get().getName()).isEqualTo("userr");
+        assertThat(optionalMember.get().getName()).isEqualTo("member");
     }
 
     @Test
-    void findAllUsersTest() {
-        memberApplicationService.signup(new SignupRequest("user1@gmail.com", "password", "user1"));
-        memberApplicationService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
-        memberApplicationService.signup(new SignupRequest("user3@gmail.com", "password", "user3"));
-        List<MemberResponse> memberResponses = memberApplicationService.findAllUsers();
+    void findAllRegularTest() {
+        memberApplicationService.signup(new SignupRequest("member1@gmail.com", "password", "member1"));
+        memberApplicationService.signup(new SignupRequest("member2@gmail.com", "password", "member2"));
+        memberApplicationService.signup(new SignupRequest("member3@gmail.com", "password", "member3"));
+        List<MemberResponse> memberResponses = memberApplicationService.findAllRegularMembers();
         assertThat(memberResponses.size()).isEqualTo(3);
     }
 }

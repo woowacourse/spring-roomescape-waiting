@@ -13,7 +13,7 @@ import roomescape.theme.domain.Theme;
 
 class ReservationTest {
 
-    private final Theme theme = TestFixture.makeTheme(1L);
+    private final Theme theme = TestFixture.makeTheme();
 
     @Test
     void createReservation_shouldThrowException_whenTimeIsBeforeNow() {

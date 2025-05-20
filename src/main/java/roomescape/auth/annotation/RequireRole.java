@@ -9,5 +9,5 @@ import roomescape.member.domain.MemberRole;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface RequireRole {
-    MemberRole value() default MemberRole.USER;
+    MemberRole value() default MemberRole.REGULAR;
 }

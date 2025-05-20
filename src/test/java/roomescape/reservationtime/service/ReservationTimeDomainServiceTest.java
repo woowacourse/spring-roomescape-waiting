@@ -37,7 +37,7 @@ class ReservationTimeDomainServiceTest {
     private static final LocalDate futureDate = TestFixture.makeFutureDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
 
-    private Theme theme = TestFixture.makeTheme(1L);
+    private Theme theme = TestFixture.makeTheme();
     private Member member = TestFixture.makeMember();
 
     private ReservationApplicationService reservationApplicationService;

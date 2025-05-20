@@ -40,7 +40,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationApplicationService.findReservations(themeId, memberId, dateFrom, dateTo));
     }
 
-    @RequireRole(MemberRole.USER)
+    @RequireRole(MemberRole.REGULAR)
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody ReservationCreateRequest request,
@@ -63,7 +63,7 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    @RequireRole(MemberRole.USER)
+    @RequireRole(MemberRole.REGULAR)
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservations(
             @PathVariable("id") Long id
@@ -72,7 +72,7 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @RequireRole(MemberRole.USER)
+    @RequireRole(MemberRole.REGULAR)
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(MemberInfo memberInfo) {
         List<MyReservationResponse> myReservations = reservationApplicationService.findMyReservations(memberInfo);

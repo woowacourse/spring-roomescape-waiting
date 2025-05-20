@@ -35,7 +35,7 @@ public class AuthService {
         return member;
     }
 
-    public MemberInfo makeUserInfo(final String token) {
+    public MemberInfo makeMemberInfo(final String token) {
         validateToken(token);
         Long memberId = jwtProvider.getMemberId(token);
         return new MemberInfo(memberId, jwtProvider.getRole(token));

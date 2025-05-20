@@ -14,7 +14,7 @@ public class TestFixture {
 
     private static final LocalTime TIME = LocalTime.of(10, 0);
 
-    public static Theme makeTheme(Long id) {
+    public static Theme makeTheme() {
         return Theme.of("추리", "셜록 추리 게임 with Danny", "image.png");
     }
 
@@ -27,7 +27,7 @@ public class TestFixture {
         return new Reservation(member, date, reservationTime, theme, ReservationStatus.RESERVED);
     }
 
-    public static ReservationTime makeReservationTime(final long reservationTimeId) {
+    public static ReservationTime makeReservationTime() {
         return ReservationTime.withUnassignedId(TIME);
     }
 
@@ -40,6 +40,6 @@ public class TestFixture {
     }
 
     public static Member makeMember() {
-        return new Member("Mint", "mint@gmail.com", "password", MemberRole.USER);
+        return new Member("Mint", "mint@gmail.com", "password", MemberRole.REGULAR);
     }
 }

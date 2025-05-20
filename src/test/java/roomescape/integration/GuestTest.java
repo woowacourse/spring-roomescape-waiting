@@ -6,7 +6,7 @@ import static roomescape.fixture.IntegrationFixture.FUTURE_DATE;
 import static roomescape.fixture.IntegrationFixture.PASSWORD;
 import static roomescape.fixture.IntegrationFixture.createReservationTime;
 import static roomescape.fixture.IntegrationFixture.createTheme;
-import static roomescape.fixture.IntegrationFixture.createUserReservation;
+import static roomescape.fixture.IntegrationFixture.createRegularReservation;
 import static roomescape.fixture.IntegrationFixture.findThemesBySize;
 import static roomescape.fixture.IntegrationFixture.loginAndGetAuthToken;
 
@@ -36,7 +36,7 @@ public class GuestTest {
     void findAllReservations() {
         createReservationTime();
         createTheme("추리");
-        createUserReservation(1L);
+        createRegularReservation(1L);
 
         RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -85,17 +85,17 @@ public class GuestTest {
     @Test
     void signup() {
         RestAssured.given().log().all()
-                .body(new SignupRequest("testuser@gmail.com", PASSWORD, "testUser"))
+                .body(new SignupRequest("testMember@gmail.com", PASSWORD, "testMember"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/members")
                 .then().log().all()
                 .statusCode(201);
 
-        loginAndGetAuthToken("testuser@gmail.com", PASSWORD);
+        loginAndGetAuthToken("testMember@gmail.com", PASSWORD);
     }
 
     @Test
-    void findAllUsers() {
+    void findAllRegulars() {
         List<MemberResponse> memberResponses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/members")
@@ -112,8 +112,8 @@ public class GuestTest {
         createReservationTime();
         createTheme("추리");
         createTheme("로맨스");
-        createUserReservation(1L);
-        createUserReservation(2L);
+        createRegularReservation(1L);
+        createRegularReservation(2L);
 
         List<ReservationResponse> reservationsFilteredByThemeId = RestAssured.given().log().all()
                 .when().queryParams("themeId", 1L, "memberId", 2L, "dateFrom", FUTURE_DATE,

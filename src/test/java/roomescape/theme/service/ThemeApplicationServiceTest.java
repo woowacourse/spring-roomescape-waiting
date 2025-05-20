@@ -89,9 +89,9 @@ class ThemeApplicationServiceTest {
 
     @Test
     void getPopularThemes() {
-        String email = "user2@gmail.com";
+        String email = "regular2@gmail.com";
         String password = "password";
-        String name = "user2";
+        String name = "regular2";
         SignUpResponse signUpResponse = memberApplicationService.signup(new SignupRequest(email, password, name));
         Member member = memberRepository.findById(signUpResponse.id()).get();
 

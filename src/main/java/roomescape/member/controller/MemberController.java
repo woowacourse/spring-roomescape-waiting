@@ -24,8 +24,8 @@ public class MemberController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MemberResponse>> findAllUsers() {
-        return ResponseEntity.ok(memberApplicationService.findAllUsers());
+    public ResponseEntity<List<MemberResponse>> findAllRegularMembers() {
+        return ResponseEntity.ok(memberApplicationService.findAllRegularMembers());
     }
 
     @PostMapping

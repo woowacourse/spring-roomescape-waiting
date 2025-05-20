@@ -50,7 +50,7 @@ class ReservationRepositoryTest {
     public void setup() {
         member = memberRepository.save(TestFixture.makeMember());
         reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
-        theme = themeRepository.save(TestFixture.makeTheme(1L));
+        theme = themeRepository.save(TestFixture.makeTheme());
         reservationRepository.save(
                 new Reservation(member, futureDate, reservationTime, theme, ReservationStatus.RESERVED));
     }
