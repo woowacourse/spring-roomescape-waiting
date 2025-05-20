@@ -1,11 +1,14 @@
 package roomescape.waiting.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
+import roomescape.global.error.exception.ForbiddenException;
 import roomescape.global.error.exception.NotFoundException;
 import roomescape.member.entity.Member;
+import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
@@ -14,6 +17,7 @@ import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.dto.request.WaitingCreateRequest;
 import roomescape.waiting.dto.response.WaitingCreateResponse;
+import roomescape.waiting.dto.response.WaitingReadResponse;
 import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -45,8 +49,24 @@ public class WaitingService {
         return WaitingCreateResponse.from(saved, rank);
     }
 
-    public void deleteWaiting(Long waitingId) {
+    public List<WaitingReadResponse> getWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(WaitingReadResponse::from)
+                .toList();
+    }
+
+    public void deleteWaiting(Long waitingId, LoginMember loginMember) {
+        validateLoginMemberWithWaiting(waitingId, loginMember);
         waitingRepository.deleteById(waitingId);
+    }
+
+    private void validateLoginMemberWithWaiting(Long waitingId, LoginMember loginMember) {
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
+        if (!waiting.getMember().getId().equals(loginMember.id()) && loginMember.role() != RoleType.ADMIN) {
+            throw new ForbiddenException("예약 대기를 삭제할 수 있는 권한이 없습니다.");
+        }
     }
 
     private void validateAvailableWaiting(LoginMember loginMember, WaitingCreateRequest request) {

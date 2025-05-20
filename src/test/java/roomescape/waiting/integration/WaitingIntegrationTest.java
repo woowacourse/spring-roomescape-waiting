@@ -1,6 +1,7 @@
 package roomescape.waiting.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
+import roomescape.global.error.exception.ForbiddenException;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
@@ -132,5 +134,43 @@ public class WaitingIntegrationTest {
         //when & then
         assertThatThrownBy(() -> waitingService.createWaiting(loginMember, request))
                 .isInstanceOf(BadRequestException.class);
+    }
+
+    @DisplayName("본인의 예약 대기가 아니라면, 삭제 시 예외를 발생한다.")
+    @Test
+    void cantDeleteWaitingWhenNotMine() {
+        //given
+        var otherMember = memberRepository.save(new Member("미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        var date = LocalDate.now().plusDays(1);
+        var waiting = new Waiting(date, theme, time, otherMember);
+        var savedWaiting = waitingRepository.save(waiting);
+
+        var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
+        var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
+
+        //when & then
+        assertThatThrownBy(() -> waitingService.deleteWaiting(savedWaiting.getId(), loginMember))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @DisplayName("어드민이라면, 본인 외의 예약 대기를 삭제할 수 있다.")
+    @Test
+    void deleteWaitingWhenAdmin() {
+        //given
+        var otherMember = memberRepository.save(new Member("미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        var date = LocalDate.now().plusDays(1);
+        var waiting = new Waiting(date, theme, time, otherMember);
+        var savedWaiting = waitingRepository.save(waiting);
+
+        var admin = memberRepository.save(new Member("어드민", "admin@email.com", "password", RoleType.ADMIN));
+        var loginMember = new LoginMember(admin.getId(), admin.getPassword(), admin.getRole());
+
+        // when & then
+        assertThatCode(() -> waitingService.deleteWaiting(savedWaiting.getId(), loginMember))
+                .doesNotThrowAnyException();
     }
 }

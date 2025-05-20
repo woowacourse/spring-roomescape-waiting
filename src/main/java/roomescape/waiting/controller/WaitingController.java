@@ -39,9 +39,20 @@ public class WaitingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping
+    @RoleRequired(roleType = RoleType.ADMIN)
+    public ResponseEntity<List<WaitingReadResponse>> getAllWaitings() {
+        List<WaitingReadResponse> responses = waitingService.getWaitings();
+        return ResponseEntity.ok(responses);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWaitingById(@PathVariable Long id) {
-        waitingService.deleteWaiting(id);
+    @RoleRequired(roleType = {RoleType.ADMIN, RoleType.USER})
+    public ResponseEntity<Void> deleteWaitingById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal LoginMember loginMember
+    ) {
+        waitingService.deleteWaiting(id, loginMember);
         return ResponseEntity.noContent().build();
     }
 }
