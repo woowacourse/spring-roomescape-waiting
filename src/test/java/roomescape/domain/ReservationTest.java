@@ -46,6 +46,6 @@ class ReservationTest {
         //when & then
         assertThatThrownBy(() -> reservation.validateReservable(currentDateTime))
                 .isInstanceOf(ReservationException.class)
-                .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
+                .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가능합니다.");
     }
 }
