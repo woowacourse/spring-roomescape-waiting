@@ -38,7 +38,7 @@ public class ReservationTestFixture {
             .date(LocalDate.now().plusDays(5))
             .time(getReservationTimeFixture())
             .theme(getReservationThemeFixture())
-            .memberId(member.getId())
+            .member(member)
             .build();
     }
 
@@ -48,16 +48,7 @@ public class ReservationTestFixture {
             .date(date)
             .time(time)
             .theme(theme)
-            .memberId(member.getId())
-            .build();
-    }
-
-    public static Reservation createReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme theme, Long id) {
-        return Reservation.builder()
-            .date(date)
-            .time(getReservationTimeFixture())
-            .theme(getReservationThemeFixture())
-            .memberId(id)
+            .member(member)
             .build();
     }
 

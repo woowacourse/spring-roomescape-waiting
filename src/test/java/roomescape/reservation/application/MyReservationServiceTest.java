@@ -67,7 +67,7 @@ class MyReservationServiceTest {
     }
 
     @Test
-    @DisplayName("memberId로 올바른 dto를 반환한다")
+    @DisplayName("memberId로 올바른 응답을 반환한다")
     void getAllByMemberIdReturnMyReservationServiceResponse() {
         Member member1 = new Member("1234", Role.USER, "a@naver.com", "유저2", 1L);
 

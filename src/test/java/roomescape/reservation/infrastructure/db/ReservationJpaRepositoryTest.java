@@ -16,7 +16,6 @@ import roomescape.reservation.infrastructure.db.dao.ReservationJpaRepository;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
-import roomescape.reservation.model.repository.dto.ReservationWithMember;
 import roomescape.support.RepositoryTestSupport;
 
 @Disabled
@@ -30,7 +29,7 @@ class ReservationJpaRepositoryTest extends RepositoryTestSupport {
 
     @DisplayName("예약과 함계 맴버 전체를 조회한다")
     @Test
-    void findAllWithMembers() {
+    void findAll() {
         Member member = ReservationTestFixture.getUserFixture();
         ReservationTheme reservationTheme = ReservationTestFixture.getReservationThemeFixture();
         ReservationTime time = ReservationTestFixture.getReservationTimeFixture();
@@ -44,38 +43,11 @@ class ReservationJpaRepositoryTest extends RepositoryTestSupport {
         em.persist(reservation);
         em.persist(reservation1);
 
-        List<ReservationWithMember> reservationsWithMember = reservationJpaRepository.findAllWithMember();
-
-        SoftAssertions.assertSoftly(softAssertions -> {
-            softAssertions.assertThat(reservationsWithMember).hasSize(2);
-            softAssertions.assertThat(reservationsWithMember.getFirst().memberId())
-                .isEqualTo(member.getId());
-        });
-    }
-
-    @DisplayName("예약 id로 예약과 맴버를 함꼐 조회한다")
-    @Test
-    void findAllWithMember() {
-        Member member = ReservationTestFixture.getUserFixture();
-        ReservationTheme reservationTheme = ReservationTestFixture.getReservationThemeFixture();
-        ReservationTime time = ReservationTestFixture.getReservationTimeFixture();
-        Reservation reservation = ReservationTestFixture.getReservationFixture(
-            LocalDate.now().plusDays(1), member, time, reservationTheme);
-        Reservation reservation1 = ReservationTestFixture.getReservationFixture(
-            LocalDate.now().plusDays(2), member, time, reservationTheme);
-        em.persist(member);
-        em.persist(time);
-        em.persist(reservationTheme);
-        em.persist(reservation);
-        em.persist(reservation1);
-        em.flush();
         List<Reservation> reservations = reservationJpaRepository.findAll();
-        Optional<ReservationWithMember> reservationWithMember = reservationJpaRepository.findWithMemberById(
-            reservation1.getId());
+
         SoftAssertions.assertSoftly(softAssertions -> {
-            softAssertions.assertThat(reservationWithMember.get().id())
-                .isEqualTo(reservation1.getId());
-            softAssertions.assertThat(reservationWithMember.get().memberId())
+            softAssertions.assertThat(reservations).hasSize(2);
+            softAssertions.assertThat(reservations.getFirst().getMember())
                 .isEqualTo(member.getId());
         });
     }

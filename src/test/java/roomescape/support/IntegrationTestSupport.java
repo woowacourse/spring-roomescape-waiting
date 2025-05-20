@@ -30,6 +30,6 @@ public abstract class IntegrationTestSupport {
                 TRUNCATE TABLE member;
                 ALTER TABLE member ALTER COLUMN id RESTART WITH 1;
                 SET REFERENTIAL_INTEGRITY TRUE;
-                """);
+                """).executeUpdate();
     }
 }
