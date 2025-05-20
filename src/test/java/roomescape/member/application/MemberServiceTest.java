@@ -33,9 +33,9 @@ class MemberServiceTest {
     void 회원을_추가한다() {
         // given
         final SignUpRequest request = new SignUpRequest(
-                MemberFixture.NOT_SAVED_MEMBER_1().getEmail(),
-                MemberFixture.NOT_SAVED_MEMBER_1().getPassword(),
-                MemberFixture.NOT_SAVED_MEMBER_1().getName()
+                MemberFixture.notSavedMember1().getEmail(),
+                MemberFixture.notSavedMember1().getPassword(),
+                MemberFixture.notSavedMember1().getName()
         );
 
         // when
@@ -52,7 +52,7 @@ class MemberServiceTest {
     @Test
     void 회원을_삭제한다() {
         // given
-        final Member member = MemberFixture.NOT_SAVED_MEMBER_1();
+        final Member member = MemberFixture.notSavedMember1();
         final Member savedMember = memberRepository.save(member);
 
         // when

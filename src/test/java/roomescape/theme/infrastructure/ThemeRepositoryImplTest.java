@@ -1,7 +1,7 @@
 package roomescape.theme.infrastructure;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_1;
+import static roomescape.fixture.domain.MemberFixture.notSavedMember1;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -61,7 +61,7 @@ class ThemeRepositoryImplTest {
             reservationTimeRepository.save(time);
         }
 
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Member member = memberRepository.save(notSavedMember1());
 
         // theme.get(i) 테마에 예약 themeCounts.get(i)개 추가
         final List<Integer> themeCounts = List.of(5, 3, 4, 6, 2);

@@ -1,12 +1,12 @@
 package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_1;
-import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_2;
-import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVATION_TIME_1;
-import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVATION_TIME_2;
-import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_1;
-import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_2;
+import static roomescape.fixture.domain.MemberFixture.notSavedMember1;
+import static roomescape.fixture.domain.MemberFixture.notSavedMember2;
+import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservationTime1;
+import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservationTime2;
+import static roomescape.fixture.domain.ThemeFixture.notSavedTheme1;
+import static roomescape.fixture.domain.ThemeFixture.notSavedTheme2;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -63,9 +63,9 @@ class ReservationServiceTest {
     void 회원_권한으로_예약을_추가한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final Long timeId = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1()).getId();
-        final Long themeId = themeRepository.save(NOT_SAVED_THEME_1()).getId();
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
+        final Long themeId = themeRepository.save(notSavedTheme1()).getId();
+        final Member member = memberRepository.save(notSavedMember1());
         final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date, timeId,
                 themeId);
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
@@ -79,9 +79,9 @@ class ReservationServiceTest {
     void 회원_권한으로_과거_시간에_예약을_추가하려_하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().minusDays(5);
-        final Long timeId = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1()).getId();
-        final Long themeId = themeRepository.save(NOT_SAVED_THEME_1()).getId();
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
+        final Long themeId = themeRepository.save(notSavedTheme1()).getId();
+        final Member member = memberRepository.save(notSavedMember1());
 
         final CreateReservationRequest.ForMember request =
                 new CreateReservationRequest.ForMember(date, timeId, themeId);
@@ -97,9 +97,9 @@ class ReservationServiceTest {
     void 이미_예약된_테마_날짜_시간으로_예약_추가를_시도하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime reservationTime = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final ReservationTime reservationTime = reservationTimeRepository.save(notSavedReservationTime1());
+        final Theme theme = themeRepository.save(notSavedTheme1());
+        final Member member = memberRepository.save(notSavedMember1());
 
         final CreateReservationRequest.ForMember request =
                 new CreateReservationRequest.ForMember(date, reservationTime.getId(), theme.getId());
@@ -118,9 +118,9 @@ class ReservationServiceTest {
     void 회원이_본인의_예약을_삭제한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime reservationTime1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
-        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final ReservationTime reservationTime1 = reservationTimeRepository.save(notSavedReservationTime1());
+        final Theme theme1 = themeRepository.save(notSavedTheme1());
+        final Member member1 = memberRepository.save(notSavedMember1());
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
                 ReservationStatus.CONFIRMED);
@@ -136,11 +136,11 @@ class ReservationServiceTest {
     void 회원이_본인의_예약이_아닌_예약을_삭제하려_하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime reservationTime1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
+        final ReservationTime reservationTime1 = reservationTimeRepository.save(notSavedReservationTime1());
+        final Theme theme1 = themeRepository.save(notSavedTheme1());
 
-        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
+        final Member member1 = memberRepository.save(notSavedMember1());
+        final Member member2 = memberRepository.save(notSavedMember2());
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
                 ReservationStatus.CONFIRMED);
@@ -156,9 +156,9 @@ class ReservationServiceTest {
     void 삭제하려는_예약이_존재하지_않는_경우_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime reservationTime1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
-        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final ReservationTime reservationTime1 = reservationTimeRepository.save(notSavedReservationTime1());
+        final Theme theme1 = themeRepository.save(notSavedTheme1());
+        final Member member1 = memberRepository.save(notSavedMember1());
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
                 ReservationStatus.CONFIRMED);
@@ -174,12 +174,12 @@ class ReservationServiceTest {
     void 특정_날짜에_특정_테마에_대해_이용_가능한_예약_시간_목록을_조회한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
-        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
-        final ReservationTime reservationTime1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
+        final Theme theme = themeRepository.save(notSavedTheme1());
+        final ReservationTime reservationTime1 = reservationTimeRepository.save(notSavedReservationTime1());
+        reservationTimeRepository.save(notSavedReservationTime2());
 
         final AvailableReservationTimeRequest request = new AvailableReservationTimeRequest(date, theme.getId());
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Member member = memberRepository.save(notSavedMember1());
 
         final long beforeCount = reservationService.findAvailableReservationTimes(request)
                 .stream()
@@ -202,13 +202,13 @@ class ReservationServiceTest {
     void 회원_본인의_예약_목록을_조회한다() {
         // given
         final LocalDate date1 = LocalDate.now().plusDays(1);
-        final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final ReservationTime time1 = reservationTimeRepository.save(notSavedReservationTime1());
+        final Theme theme1 = themeRepository.save(notSavedTheme1());
+        final Member member = memberRepository.save(notSavedMember1());
 
         final LocalDate date2 = LocalDate.now().plusDays(2);
-        final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
-        final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
+        final ReservationTime time2 = reservationTimeRepository.save(notSavedReservationTime2());
+        final Theme theme2 = themeRepository.save(notSavedTheme2());
 
         reservationRepository.save(
                 new Reservation(date1, time1, theme1, member, ReservationStatus.CONFIRMED)

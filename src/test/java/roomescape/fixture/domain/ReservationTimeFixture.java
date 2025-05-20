@@ -15,15 +15,15 @@ public class ReservationTimeFixture {
         return reservationTimes;
     }
 
-    public static ReservationTime NOT_SAVED_RESERVATION_TIME_1() {
+    public static ReservationTime notSavedReservationTime1() {
         return new ReservationTime(LocalTime.of(10, 0));
     }
 
-    public static ReservationTime NOT_SAVED_RESERVATION_TIME_2() {
+    public static ReservationTime notSavedReservationTime2() {
         return new ReservationTime(LocalTime.of(11, 0));
     }
 
-    public static ReservationTime NOT_SAVED_RESERVATION_TIME_3() {
+    public static ReservationTime notSavedReservationTime3() {
         return new ReservationTime(LocalTime.of(12, 0));
     }
 }
