@@ -19,19 +19,19 @@ public interface ReservationRepository {
 
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
-    boolean existsByTimeId(Long reservationTimeId);
-
-    boolean existsDuplicateReservation(LocalDate reservationDate, Long timeId, Long themeId);
-
-    boolean isReservationSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId);
-
-    boolean existsByThemeId(Long themeId);
-
     List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findWaitingReservations();
 
     Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId);
+
+    boolean existsByTimeId(Long reservationTimeId);
+
+    boolean existsDuplicateReservation(LocalDate reservationDate, Long timeId, Long themeId);
+
+    boolean existsByThemeId(Long themeId);
+
+    boolean isReservationSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean hasAlreadyReservedOrWaited(Long memberId, Long themeId, Long timeId, LocalDate date);
 }

@@ -10,11 +10,11 @@ public interface ReservationTimeRepository {
 
     ReservationTime save(ReservationTime reservationTime);
 
-    Optional<ReservationTime> findById(Long reservationTimeId);
-
     List<ReservationTime> findAll();
 
-    void deleteById(Long reservationTimeId);
+    Optional<ReservationTime> findById(Long reservationTimeId);
 
     List<ReservationTimeAvailabilityData> findAvailableTimesByThemeAndDate(Long themeId, LocalDate reservationDate);
+
+    void deleteById(Long reservationTimeId);
 }

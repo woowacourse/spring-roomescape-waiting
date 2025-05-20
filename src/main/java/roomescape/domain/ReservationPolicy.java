@@ -25,15 +25,15 @@ public class ReservationPolicy {
         }
     }
 
-    private void validateNotTooCloseFromNow(Reservation reservation) {
-        if (reservation.calculateMinutesUntilStart(clock) < 10) {
-            throw new UnAvailableReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
-        }
-    }
-
     private void validateNotPast(final Reservation reservation) {
         if (reservation.isPast(clock)) {
             throw new UnAvailableReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
+        }
+    }
+
+    private void validateNotTooCloseFromNow(Reservation reservation) {
+        if (reservation.calculateMinutesUntilStart(clock) < 10) {
+            throw new UnAvailableReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
         }
     }
 }

@@ -52,12 +52,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     """)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
-    boolean existsByTimeId(Long reservationTimeId);
-
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
-
-    boolean existsByThemeId(Long themeId);
-
     @Query("""
         SELECT r
         FROM Reservation r
@@ -90,6 +84,12 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         ) THEN false ELSE true END
     """)
     boolean isReservationSlotEmpty(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsByTimeId(Long reservationTimeId);
+
+    boolean existsByThemeId(Long themeId);
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(Long memberId, Long themeId, Long timeId, LocalDate date);
 }
