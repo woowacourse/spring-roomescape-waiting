@@ -54,3 +54,12 @@
     ```
 - [x] 화면 응답
   - [2단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/849391b31f2dfa359e851e95f5f2a64e21650cc8)
+
+### 3단계 - 예약 대기 기능
+- [ ] 예약 대기 요청 기능
+- [ ] 예약 대기 취소 기능
+- [ ] 내 예약 목록 조회 시 예약 대기 목록 포함하도록 수정
+  - [ ] 심화: 몇 번째 대기인지 함께 표시 
+- [ ] 중복 예약 불가능 기능
+- [ ] 화면 응답
+  - [3단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/ce6b8eef9072409e89b91411b3ef144d4de0b48c)
