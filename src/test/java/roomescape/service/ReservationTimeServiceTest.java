@@ -96,7 +96,7 @@ class ReservationTimeServiceTest {
                         .containsExactly(timeAt10.getId(), timeAt11.getId(), timeAt12.getId()),
                 () -> assertThat(timesWithBookState)
                         .extracting(ReservationTimeWithBookState::alreadyBooked)
-                        .containsExactly(false, false, true)
+                        .containsExactly(true, true, false)
         );
     }
 

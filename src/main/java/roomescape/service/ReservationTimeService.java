@@ -82,10 +82,10 @@ public class ReservationTimeService {
         List<ReservationTimeWithBookState> allTimesWithBookState = new ArrayList<>();
         for (ReservationTime time : allTimes) {
             if (bookedTimes.contains(time)) {
-                allTimesWithBookState.add(new ReservationTimeWithBookState(time.getId(), time.getStartAt(), false));
+                allTimesWithBookState.add(new ReservationTimeWithBookState(time.getId(), time.getStartAt(), true));
                 continue;
             }
-            allTimesWithBookState.add(new ReservationTimeWithBookState(time.getId(), time.getStartAt(), true));
+            allTimesWithBookState.add(new ReservationTimeWithBookState(time.getId(), time.getStartAt(), false));
         }
         return allTimesWithBookState;
     }

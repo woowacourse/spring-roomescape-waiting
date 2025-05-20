@@ -82,7 +82,7 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-    fetch(`/times/availability?themeId=${themeId}&date=${date}`, { // 예약 가능 시간 조회 API endpoint
+    fetch(`/times?themeId=${themeId}&date=${date}`, { // 예약 가능 시간 조회 API endpoint
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

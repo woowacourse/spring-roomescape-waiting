@@ -31,7 +31,7 @@ public class AdminController {
     ) {
         ReservationCreationContent creationRequest = new ReservationCreationContent(request);
         ReservationResponse reservationResponse =
-                reservationService.addReservation(request.userId(), creationRequest);
+                reservationService.addReservation(request.memberId(), creationRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponse);
     }
 
