@@ -41,4 +41,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 JOIN FETCH r.theme th
             """)
     List<Reservation> findAllWithMemberAndTimeAndTheme();
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(@Param("date") LocalDate date,
+                                                      @Param("timeId") Long timeId,
+                                                      @Param("themeId") Long themeId,
+                                                      @Param("memberId") Long memberId);
 }

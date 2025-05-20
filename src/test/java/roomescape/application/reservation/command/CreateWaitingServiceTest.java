@@ -41,7 +41,6 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
-
     private CreateWaitingService createWaitingService;
 
     @BeforeEach
@@ -61,15 +60,16 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         reservationRepository.save(new Reservation(member, now.toLocalDate(), time, theme));
+        Member requestMember = memberRepository.save(new Member("서프", new Email("sf@email.com"), "pw", MemberRole.NORMAL));
         CreateWaitingCommand command = new CreateWaitingCommand(
                 now.toLocalDate(),
                 theme.getId(),
                 time.getId(),
-                member.getId()
+                requestMember.getId()
         );
 
         // when
-        Long waitingId = createWaitingService.create(command);
+        Long waitingId = createWaitingService.request(command);
 
         // then
         assertThat(waitingRepository.findById(waitingId))
@@ -94,7 +94,7 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatCode(() -> createWaitingService.create(command))
+        assertThatCode(() -> createWaitingService.request(command))
                 .isInstanceOf(MemberException.class)
                 .hasMessage("존재하지 않는 회원입니다.");
     }
@@ -117,7 +117,7 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatCode(() -> createWaitingService.create(command))
+        assertThatCode(() -> createWaitingService.request(command))
                 .isInstanceOf(WaitingException.class)
                 .hasMessage("예약이 존재하지 않아 대기를 신청할 수 없습니다. 바로 예약을 진행해주세요.");
     }
@@ -140,8 +140,32 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatCode(() -> createWaitingService.create(command))
+        assertThatCode(() -> createWaitingService.request(command))
                 .isInstanceOf(WaitingException.class)
                 .hasMessage("예약이 존재하지 않아 대기를 신청할 수 없습니다. 바로 예약을 진행해주세요.");
-        }
+    }
+
+    @Test
+    void 대기신청을_중복으로_할_수_없다() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).plusDays(1);
+        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
+        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        reservationRepository.save(new Reservation(member, now.toLocalDate(), time, theme));
+        Member requestMember = memberRepository.save(new Member("서프", new Email("sf@email.com"), "pw", MemberRole.NORMAL));
+        CreateWaitingCommand command = new CreateWaitingCommand(
+                now.toLocalDate(),
+                theme.getId(),
+                time.getId(),
+                requestMember.getId()
+        );
+        createWaitingService.request(command);
+
+        // when
+        // then
+        assertThatCode(() -> createWaitingService.request(command))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage("이미 예약했거나 대기 중입니다.");
+    }
 }

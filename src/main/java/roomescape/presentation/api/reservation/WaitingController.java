@@ -29,7 +29,7 @@ public class WaitingController {
     @PostMapping("/reservations/wait")
     public ResponseEntity<Void> createWaiting(@AuthPrincipal AuthInfo authInfo,
                                               @Valid @RequestBody CreateWaitingRequest createWaitingRequest) {
-        Long id = createWaitingService.create(createWaitingRequest.toCreateCommand(authInfo.memberId()));
+        Long id = createWaitingService.request(createWaitingRequest.toCreateCommand(authInfo.memberId()));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(URI.create("/reservations/wait/" + id))
                 .build();

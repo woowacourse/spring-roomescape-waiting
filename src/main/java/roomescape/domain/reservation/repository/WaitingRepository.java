@@ -46,4 +46,9 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                               @Param("timeId") Long timeId,
                               @Param("themeId") Long themeId,
                               @Param("waitingId") Long waitingId);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(@Param("date") LocalDate date,
+                                                      @Param("timeId") Long timeId,
+                                                      @Param("themeId") Long themeId,
+                                                      @Param("memberId") Long memberId);
 }
