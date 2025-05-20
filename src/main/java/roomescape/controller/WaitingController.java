@@ -11,7 +11,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
 import roomescape.dto.request.CreateWaitingRequest;
 import roomescape.dto.request.LoginMemberRequest;
-import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.entity.Waiting;
 import roomescape.global.Role;

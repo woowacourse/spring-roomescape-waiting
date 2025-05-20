@@ -52,7 +52,7 @@ public class WaitingService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마입니다."));
 
-        Waiting waiting = new Waiting(member, date, reservationTime, theme, ReservationStatus.WAIT);
+        Waiting waiting = new Waiting(member, date, reservationTime, theme);
         return waitingRepository.save(waiting);
     }
 
