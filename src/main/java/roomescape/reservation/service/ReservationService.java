@@ -50,7 +50,7 @@ public class ReservationService {
         final Theme theme = findThemeById(request.themeId());
         validateReservationAvailability(request.date(), reservationTime, theme);
 
-        final Member member = Member.from(loginMember);
+        final Member member = findMemberById(loginMember.id());
         final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
@@ -59,8 +59,7 @@ public class ReservationService {
     public ReservationResponse saveAdminReservation(final AdminReservationRequest request) {
         final ReservationTime reservationTime = findReservationTimeById(request.timeId());
         final Theme theme = findThemeById(request.themeId());
-        final Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
+        final Member member = findMemberById(request.memberId());
         validateReservationAvailability(request.date(), reservationTime, theme);
         final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
         final Reservation newReservation = reservationRepository.save(reservation);
@@ -72,6 +71,11 @@ public class ReservationService {
             throw new NotFoundException("존재하지 않는 예약입니다. id=" + id);
         }
         reservationRepository.deleteById(id);
+    }
+
+    private Member findMemberById(final Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {

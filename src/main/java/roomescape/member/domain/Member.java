@@ -1,6 +1,7 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,8 +30,9 @@ public class Member {
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "password", nullable = false)
+    @Embedded
+    private Password password;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -40,7 +42,7 @@ public class Member {
     private Member(final Long id,
                    @NonNull final String name,
                    @NonNull final String email,
-                   final String password,
+                   @NonNull final Password password,
                    @NonNull final MemberRole role
     ) {
         this.id = id;
@@ -50,50 +52,24 @@ public class Member {
         this.role = role;
     }
 
-    public static Member withoutRole(
-            @NonNull final String name,
-            @NonNull final String email,
-            @NonNull final String password
-    ) {
-        return builder()
-                .id(null)
-                .name(name)
-                .email(email)
-                .password(password)
-                .role(MemberRole.MEMBER)
-                .build();
-    }
-
-    public static Member withRole(
-            @NonNull final String name,
-            @NonNull final String email,
-            @NonNull final String password,
-            @NonNull final MemberRole role
-    ) {
-        return builder()
-                .id(null)
-                .name(name)
-                .email(email)
-                .password(password)
-                .role(role)
-                .build();
-    }
-
     public static Member from(final LoginMember loginMember) {
-        return builder()
-                .id(loginMember.id())
+        return Member.builder()
                 .name(loginMember.name())
                 .email(loginMember.email())
-                .password(null)
+                .password(Password.createForLoginMember())
                 .role(loginMember.role())
                 .build();
     }
 
     public boolean matchesPassword(final String password) {
-        return this.password.equals(password);
+        return this.password.getValue().equals(password);
     }
 
     public boolean isAdmin() {
         return this.role.isAdmin();
+    }
+
+    public String getPassword() {
+        return this.password.getValue();
     }
 }

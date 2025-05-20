@@ -18,6 +18,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.member.domain.Password;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -47,8 +48,18 @@ class JdbcReservationRepositoryTest {
         time2 = ReservationTime.from(LocalTime.of(11, 0));
         theme1 = Theme.of("테마1", "설명1", "썸네일1");
         theme2 = Theme.of("테마2", "설명2", "썸네일2");
-        member1 = Member.withRole("유저1", "user1@naver.com", "pwd", MemberRole.MEMBER);
-        member2 = Member.withRole("유저2", "user2@naver.com", "pwd", MemberRole.MEMBER);
+        member1 = Member.builder()
+                .name("유저1")
+                .email("user1@naver.com")
+                .password(Password.createForMember("pwd123"))
+                .role(MemberRole.MEMBER)
+                .build();
+        member2 = Member.builder()
+                .name("유저2")
+                .email("user2@naver.com")
+                .password(Password.createForMember("pwd123"))
+                .role(MemberRole.MEMBER)
+                .build();
     }
 
     @Test
@@ -163,7 +174,12 @@ class JdbcReservationRepositoryTest {
     void 예약_시간이_현재_이전이면_ReservationException이_발생한다() {
         // given
         Theme defaultTheme = Theme.of("테마", "설명", "썸네일");
-        Member defaultMember = Member.withRole("member", "member@naver.com", "1234", MemberRole.MEMBER);
+        Member defaultMember = Member.builder()
+                .name("김철수")
+                .email("member@naver.com")
+                .password(Password.createForMember("1234"))
+                .role(MemberRole.MEMBER)
+                .build();
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);
         ReservationTime pastTime = ReservationTime.from(oneMinuteBefore);

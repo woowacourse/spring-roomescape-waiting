@@ -19,6 +19,8 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
+import roomescape.member.domain.Password;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -55,7 +57,12 @@ class ReservationServiceTest {
 
         theme = Theme.of("테마1", "설명1", "썸네일1");
 
-        member = Member.withoutRole("member", "member@naver.com", "1234");
+        member = Member.builder()
+                .name("김철수")
+                .email("member@example.com")
+                .password(Password.createForMember("pass123"))
+                .role(MemberRole.MEMBER)
+                .build();
 
         reservation = Reservation.booked(LocalDate.of(2999, 5, 11), time, theme, member);
     }
@@ -114,7 +121,7 @@ class ReservationServiceTest {
         tm.persistAndFlush(member);
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
-        tm.clear();
+
         ReservationRequest req = new ReservationRequest(LocalDate.of(2999, 4, 21), time.getId(), theme.getId());
 
         // when
