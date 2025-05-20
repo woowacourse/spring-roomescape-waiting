@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import roomescape.common.exception.CustomException;
+import roomescape.common.exception.GlobalExceptionHandler;
 import roomescape.common.exception.InvalidDateException;
 
 @ExtendWith(SoftAssertionsExtension.class)
