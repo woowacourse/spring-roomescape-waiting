@@ -2,7 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
-import roomescape.dto.auth.LoginRequestDto;
+import roomescape.dto.auth.LoginRequest;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.util.JwtTokenProvider;
@@ -18,9 +18,9 @@ public class AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    public String publishLoginToken(LoginRequestDto loginRequestDto) {
-        String email = loginRequestDto.email();
-        String password = loginRequestDto.password();
+    public String publishLoginToken(LoginRequest loginRequest) {
+        String email = loginRequest.email();
+        String password = loginRequest.password();
 
         Member member = memberRepository.findByEmailAndPassword(email, password).orElseThrow(
                 () -> new NotFoundException("[ERROR] 이메일이나 비밀번호가 올바르지 않습니다."));

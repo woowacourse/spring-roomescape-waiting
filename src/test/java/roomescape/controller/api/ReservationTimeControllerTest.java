@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dto.time.ReservationTimeCreateRequestDto;
+import roomescape.dto.time.ReservationTimeCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -37,7 +37,7 @@ class ReservationTimeControllerTest {
         @Test
         void addReservationTimeTest() {
             LocalTime reservationTime = LocalTime.of(15, 30);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
+            ReservationTimeCreateRequest requestTime = new ReservationTimeCreateRequest(reservationTime);
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
@@ -58,7 +58,7 @@ class ReservationTimeControllerTest {
         @Test
         void timeResponseTest() {
             LocalTime reservationTime = LocalTime.of(15, 40);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
+            ReservationTimeCreateRequest requestTime = new ReservationTimeCreateRequest(reservationTime);
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
@@ -110,7 +110,7 @@ class ReservationTimeControllerTest {
         @Test
         void deleteTimeTest() {
             LocalTime reservationTime = LocalTime.of(15, 30);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
+            ReservationTimeCreateRequest requestTime = new ReservationTimeCreateRequest(reservationTime);
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)

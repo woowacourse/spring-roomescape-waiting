@@ -39,6 +39,6 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
         String token = jwtTokenProvider.extractTokenFromCookie(cookies);
         Long id = jwtTokenProvider.extractId(token);
         Member loginMember = memberService.findMemberById(id);
-        return new LoginInfo(loginMember.getId(), loginMember.getName(), loginMember.getEmail(), loginMember.getRole());
+        return LoginInfo.from(loginMember);
     }
 }

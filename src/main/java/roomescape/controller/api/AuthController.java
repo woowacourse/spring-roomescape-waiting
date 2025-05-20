@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.auth.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
-import roomescape.dto.auth.LoginRequestDto;
-import roomescape.dto.member.MemberNameResponseDto;
+import roomescape.dto.auth.LoginRequest;
+import roomescape.dto.member.MemberNameResponse;
 import roomescape.service.AuthService;
 
 @RestController
@@ -23,8 +23,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
-        String token = authService.publishLoginToken(loginRequestDto);
+    public ResponseEntity<Void> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        String token = authService.publishLoginToken(loginRequest);
         Cookie cookie = createCookie(token);
         response.addCookie(cookie);
         return ResponseEntity.ok().build();
@@ -38,8 +38,8 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<MemberNameResponseDto> checkLogin(@CurrentMember LoginInfo loginMember) {
-        MemberNameResponseDto memberResponse = new MemberNameResponseDto(loginMember.name());
+    public ResponseEntity<MemberNameResponse> checkLogin(@CurrentMember LoginInfo loginMember) {
+        MemberNameResponse memberResponse = new MemberNameResponse(loginMember.name());
         return ResponseEntity.ok(memberResponse);
     }
 

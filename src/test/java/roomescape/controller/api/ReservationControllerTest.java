@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dto.auth.LoginRequestDto;
-import roomescape.dto.auth.SignUpRequestDto;
-import roomescape.dto.theme.ThemeCreateRequestDto;
-import roomescape.dto.time.ReservationTimeCreateRequestDto;
+import roomescape.dto.auth.LoginRequest;
+import roomescape.dto.auth.SignUpRequest;
+import roomescape.dto.theme.ThemeCreateRequest;
+import roomescape.dto.time.ReservationTimeCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -41,26 +41,26 @@ class ReservationControllerTest {
 
         @BeforeEach
         void setUp() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
+            SignUpRequest signUpRequest = new SignUpRequest("가이온", "hello@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
+                    .body(signUpRequest)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(200);
 
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
 
             Map<String, String> cookies = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .getCookies();
 
             loginToken = cookies.get("token");
 
-            ReservationTimeCreateRequestDto reservationTime = new ReservationTimeCreateRequestDto(LocalTime.of(10, 0));
+            ReservationTimeCreateRequest reservationTime = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
@@ -69,7 +69,7 @@ class ReservationControllerTest {
                     .then().log().all()
                     .statusCode(201);
 
-            ThemeCreateRequestDto theme = new ThemeCreateRequestDto("a", "b", "c");
+            ThemeCreateRequest theme = new ThemeCreateRequest("a", "b", "c");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
@@ -135,20 +135,20 @@ class ReservationControllerTest {
 
         @BeforeEach
         void setUp() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
+            SignUpRequest signUpRequest = new SignUpRequest("가이온", "hello@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
+                    .body(signUpRequest)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(200);
 
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
 
             Map<String, String> cookies = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .getCookies();
 
@@ -158,7 +158,7 @@ class ReservationControllerTest {
         @DisplayName("예약이 존재하면 삭제할 수 있다")
         @Test
         void deleteReservationTest() {
-            ReservationTimeCreateRequestDto reservationTime = new ReservationTimeCreateRequestDto(LocalTime.of(10, 0));
+            ReservationTimeCreateRequest reservationTime = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
 
             RestAssured.given().cookie("token", loginToken).log().all()
                     .contentType(ContentType.JSON)
@@ -167,7 +167,7 @@ class ReservationControllerTest {
                     .then().log().all()
                     .statusCode(201);
 
-            ThemeCreateRequestDto theme = new ThemeCreateRequestDto("a", "b", "c");
+            ThemeCreateRequest theme = new ThemeCreateRequest("a", "b", "c");
 
             RestAssured.given().cookie("token", loginToken).log().all()
                     .contentType(ContentType.JSON)

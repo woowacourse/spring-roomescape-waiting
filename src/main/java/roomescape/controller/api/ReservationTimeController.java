@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.time.AvailableReservationTimeResponseDto;
-import roomescape.dto.time.ReservationTimeCreateRequestDto;
-import roomescape.dto.time.ReservationTimeResponseDto;
+import roomescape.dto.time.AvailableReservationTimeResponse;
+import roomescape.dto.time.ReservationTimeCreateRequest;
+import roomescape.dto.time.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
 
 @RestController
@@ -28,23 +28,23 @@ public class ReservationTimeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationTimeResponseDto>> getAllReservationTimes() {
-        List<ReservationTimeResponseDto> allReservationTimeResponses = reservationTimeService.findAllReservationTimes();
+    public ResponseEntity<List<ReservationTimeResponse>> getAllReservationTimes() {
+        List<ReservationTimeResponse> allReservationTimeResponses = reservationTimeService.findAllReservationTimes();
         return ResponseEntity.ok(allReservationTimeResponses);
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<AvailableReservationTimeResponseDto>> getAvailableReservationTimes(
+    public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableReservationTimes(
             @RequestParam("date") LocalDate date, @RequestParam("themeId") Long themeId) {
-        List<AvailableReservationTimeResponseDto> allReservationTimeResponses = reservationTimeService.findAvailableReservationTimes(
+        List<AvailableReservationTimeResponse> allReservationTimeResponses = reservationTimeService.findAvailableReservationTimes(
                 date, themeId);
         return ResponseEntity.ok(allReservationTimeResponses);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponseDto> addReservationTime(
-            @RequestBody final ReservationTimeCreateRequestDto requestDto) {
-        ReservationTimeResponseDto responseDto = reservationTimeService.createReservationTime(requestDto);
+    public ResponseEntity<ReservationTimeResponse> addReservationTime(
+            @RequestBody final ReservationTimeCreateRequest requestDto) {
+        ReservationTimeResponse responseDto = reservationTimeService.createReservationTime(requestDto);
         return ResponseEntity.created(URI.create("times/" + responseDto.id())).body(responseDto);
     }
 

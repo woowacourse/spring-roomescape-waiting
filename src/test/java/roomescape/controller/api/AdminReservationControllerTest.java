@@ -16,10 +16,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.dto.auth.LoginRequestDto;
-import roomescape.dto.reservation.AdminReservationCreateRequestDto;
-import roomescape.dto.theme.ThemeCreateRequestDto;
-import roomescape.dto.time.ReservationTimeCreateRequestDto;
+import roomescape.dto.auth.LoginRequest;
+import roomescape.dto.reservation.AdminReservationCreateRequest;
+import roomescape.dto.theme.ThemeCreateRequest;
+import roomescape.dto.time.ReservationTimeCreateRequest;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -37,7 +37,7 @@ class AdminReservationControllerTest {
         @BeforeEach
         void setUp() {
             LocalTime reservationTime = LocalTime.of(15, 30);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
+            ReservationTimeCreateRequest requestTime = new ReservationTimeCreateRequest(reservationTime);
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
@@ -46,7 +46,7 @@ class AdminReservationControllerTest {
                     .then().log().all()
                     .statusCode(201);
 
-            ThemeCreateRequestDto themeCreateRequestDto = new ThemeCreateRequestDto("테마1", "설명1", "url");
+            ThemeCreateRequest themeCreateRequestDto = new ThemeCreateRequest("테마1", "설명1", "url");
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
                     .body(themeCreateRequestDto)
@@ -57,11 +57,11 @@ class AdminReservationControllerTest {
             Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
             memberRepository.save(admin);
 
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
 
             Map<String, String> cookies = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .getCookies();
 
@@ -71,7 +71,7 @@ class AdminReservationControllerTest {
         @DisplayName("어드민 예약 추가 테스트")
         @Test
         void addReservationTest() {
-            AdminReservationCreateRequestDto dto = new AdminReservationCreateRequestDto(
+            AdminReservationCreateRequest dto = new AdminReservationCreateRequest(
                     LocalDate.now().plusDays(1), 1L, 1L, 1L);
             RestAssured.given().cookie("token", loginToken).log().all()
                     .contentType(ContentType.JSON)
@@ -83,7 +83,7 @@ class AdminReservationControllerTest {
         @DisplayName("themeId가 존재하지 않는 경우 예약을 추가할 수 없다.")
         @Test
         void invalidThemeIdReservationTest() {
-            AdminReservationCreateRequestDto dto = new AdminReservationCreateRequestDto(
+            AdminReservationCreateRequest dto = new AdminReservationCreateRequest(
                     LocalDate.now().plusDays(1), 2L, 1L, 1L);
             RestAssured.given().cookie(loginToken).log().all()
                     .contentType(ContentType.JSON)
@@ -95,7 +95,7 @@ class AdminReservationControllerTest {
         @DisplayName("timeId가 존재하지 않는 경우 예약을 추가할 수 없다.")
         @Test
         void invalidTimeIdReservationTest() {
-            AdminReservationCreateRequestDto dto = new AdminReservationCreateRequestDto(
+            AdminReservationCreateRequest dto = new AdminReservationCreateRequest(
                     LocalDate.now().plusDays(1), 1L, 2L, 1L);
             RestAssured.given().cookie(loginToken).log().all()
                     .contentType(ContentType.JSON)
@@ -107,7 +107,7 @@ class AdminReservationControllerTest {
         @DisplayName("memberId가 존재하지 않는 경우 예약을 추가할 수 없다.")
         @Test
         void invalidMemberIdReservationTest() {
-            AdminReservationCreateRequestDto dto = new AdminReservationCreateRequestDto(
+            AdminReservationCreateRequest dto = new AdminReservationCreateRequest(
                     LocalDate.now().plusDays(1), 1L, 1L, 2L);
             RestAssured.given().cookie(loginToken).log().all()
                     .contentType(ContentType.JSON)
@@ -128,7 +128,7 @@ class AdminReservationControllerTest {
         @BeforeEach
         void setUp() {
             LocalTime reservationTime = LocalTime.of(15, 30);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
+            ReservationTimeCreateRequest requestTime = new ReservationTimeCreateRequest(reservationTime);
 
             RestAssured.given()
                     .contentType(ContentType.JSON)
@@ -137,10 +137,10 @@ class AdminReservationControllerTest {
                     .then()
                     .statusCode(201);
 
-            ThemeCreateRequestDto themeCreateRequestDto = new ThemeCreateRequestDto("테마1", "설명1", "url");
+            ThemeCreateRequest themeCreateRequest = new ThemeCreateRequest("테마1", "설명1", "url");
             RestAssured.given()
                     .contentType(ContentType.JSON)
-                    .body(themeCreateRequestDto)
+                    .body(themeCreateRequest)
                     .when().post("/themes")
                     .then()
                     .statusCode(201);
@@ -148,16 +148,16 @@ class AdminReservationControllerTest {
             Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
             memberRepository.save(admin);
 
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
             Map<String, String> cookies = RestAssured.given()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .getCookies();
             loginToken = cookies.get("token");
 
             for (int day = 1; day < 5; day++) {
-                AdminReservationCreateRequestDto dto1 = new AdminReservationCreateRequestDto(
+                AdminReservationCreateRequest dto1 = new AdminReservationCreateRequest(
                         LocalDate.now().plusDays(day), 1L, 1L, 1L);
                 RestAssured.given().cookie("token", loginToken)
                         .contentType(ContentType.JSON)

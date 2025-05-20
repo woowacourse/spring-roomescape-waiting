@@ -4,9 +4,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.dto.auth.SignUpRequestDto;
-import roomescape.dto.member.MemberResponseDto;
-import roomescape.dto.member.MemberSignupResponseDto;
+import roomescape.dto.auth.SignUpRequest;
+import roomescape.dto.member.MemberResponse;
+import roomescape.dto.member.MemberSignupResponse;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.repository.MemberRepository;
@@ -25,14 +25,14 @@ public class MemberService {
                 .orElseThrow(() -> new UnauthorizedException("[ERROR] 유저를 찾을 수 없습니다. ID : " + id));
     }
 
-    public List<MemberResponseDto> findAllMembers() {
+    public List<MemberResponse> findAllMembers() {
         return memberRepository.findAll().stream()
-                .map(member -> new MemberResponseDto(member.getId(), member.getName(), member.getEmail(),
+                .map(member -> new MemberResponse(member.getId(), member.getName(), member.getEmail(),
                         member.getRole()))
                 .toList();
     }
 
-    public MemberSignupResponseDto registerMember(SignUpRequestDto requestDto) {
+    public MemberSignupResponse registerMember(SignUpRequest requestDto) {
         Member member = Member.createWithoutId(requestDto.name(), requestDto.email(), Role.USER, requestDto.password());
 
         if (memberRepository.existsByEmail(requestDto.email())) {
@@ -40,7 +40,7 @@ public class MemberService {
         }
 
         Member save = memberRepository.save(member);
-        return new MemberSignupResponseDto(save.getId(), save.getName(),
+        return new MemberSignupResponse(save.getId(), save.getName(),
                 save.getEmail());
     }
 }

@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
-import roomescape.dto.theme.ThemeCreateRequestDto;
-import roomescape.dto.theme.ThemeResponseDto;
+import roomescape.dto.theme.ThemeCreateRequest;
+import roomescape.dto.theme.ThemeResponse;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
@@ -23,20 +23,20 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ThemeResponseDto createTheme(final ThemeCreateRequestDto requestDto) {
+    public ThemeResponse createTheme(final ThemeCreateRequest requestDto) {
         Theme requestTheme = requestDto.createWithoutId();
         try {
             Theme savedTheme = themeRepository.save(requestTheme);
-            return ThemeResponseDto.from(savedTheme);
+            return ThemeResponse.from(savedTheme);
         } catch (IllegalStateException e) {
             throw new DuplicateContentException(e.getMessage());
         }
     }
 
-    public List<ThemeResponseDto> findAllThemes() {
+    public List<ThemeResponse> findAllThemes() {
         List<Theme> allTheme = themeRepository.findAll();
         return allTheme.stream()
-                .map(ThemeResponseDto::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
@@ -52,12 +52,12 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
-    public List<ThemeResponseDto> findPopularThemes() {
+    public List<ThemeResponse> findPopularThemes() {
         LocalDate end = LocalDate.now();
         LocalDate start = end.minusDays(7);
         List<Theme> popularThemes = themeRepository.findPopular(start, end);
         return popularThemes.stream()
-                .map(ThemeResponseDto::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 }

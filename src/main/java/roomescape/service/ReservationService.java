@@ -8,15 +8,15 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.dto.auth.LoginInfo;
-import roomescape.dto.reservation.MyReservationResponseDto;
-import roomescape.dto.reservation.ReservationResponseDto;
+import roomescape.dto.reservation.MyReservationResponse;
+import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.ReservationCreateDto;
+import roomescape.dto.reservation.ReservationCreateRequest;
 
 @Service
 public class ReservationService {
@@ -36,7 +36,7 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponseDto createReservation(ReservationCreateDto dto) {
+    public ReservationResponse createReservation(ReservationCreateRequest dto) {
         ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + dto.timeId()));
 
@@ -52,7 +52,7 @@ public class ReservationService {
         Reservation requestReservation = Reservation.createWithoutId(member, dto.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
 
-        return ReservationResponseDto.from(newReservation);
+        return ReservationResponse.from(newReservation);
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId) {
@@ -63,20 +63,20 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponseDto> findAllReservationResponses() {
+    public List<ReservationResponse> findAllReservationResponses() {
         List<Reservation> allReservations = reservationRepository.findAll();
 
         return allReservations.stream()
-                .map(ReservationResponseDto::from)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from,
-                                                               LocalDate to) {
+    public List<ReservationResponse> findReservationBetween(long themeId, long memberId, LocalDate from,
+                                                            LocalDate to) {
         List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(
                 from, to, themeId, memberId);
         return reservationsByPeriodAndMemberAndTheme.stream()
-                .map(ReservationResponseDto::from)
+                .map(ReservationResponse::from)
                 .toList();
     }
 
@@ -87,8 +87,8 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
+    public List<MyReservationResponse> findMyReservations(LoginInfo loginInfo) {
         List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
-        return reservations.stream().map(MyReservationResponseDto::from).toList();
+        return reservations.stream().map(MyReservationResponse::from).toList();
     }
 }

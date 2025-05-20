@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.dto.auth.LoginRequestDto;
+import roomescape.dto.auth.LoginRequest;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -28,19 +28,19 @@ class AdminPageControllerTest {
         memberRepository.save(new Member(null, "가이온", "hello@woowa.com", Role.USER, "password"));
         memberRepository.save(new Member(null, "가이온1", "hello1@woowa.com", Role.ADMIN, "password"));
 
-        LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+        LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
         Map<String, String> cookies = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(loginRequestDto)
+                .body(loginRequest)
                 .when().post("/login")
                 .getCookies();
 
         userToken = cookies.get("token");
 
-        LoginRequestDto loginRequestDto1 = new LoginRequestDto("hello1@woowa.com", "password");
+        LoginRequest loginRequest1 = new LoginRequest("hello1@woowa.com", "password");
         Map<String, String> cookies2 = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(loginRequestDto1)
+                .body(loginRequest1)
                 .when().post("/login")
                 .getCookies();
         adminToken = cookies2.get("token");

@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dto.auth.LoginRequestDto;
-import roomescape.dto.auth.SignUpRequestDto;
+import roomescape.dto.auth.LoginRequest;
+import roomescape.dto.auth.SignUpRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -21,11 +21,11 @@ class AuthControllerTest {
 
         @BeforeEach
         void setUpRegistration() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
+            SignUpRequest signUpRequest = new SignUpRequest("가이온", "hello@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
+                    .body(signUpRequest)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(200);
@@ -34,11 +34,11 @@ class AuthControllerTest {
         @DisplayName("등록된 회원이라면 로그인을 할 수 있다")
         @Test
         void loginMemberTest() {
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .then().log().all()
                     .statusCode(200);
@@ -47,11 +47,11 @@ class AuthControllerTest {
         @DisplayName("등록되지 않은 회원은 로그인할 수 없다")
         @Test
         void loginNotJoinedMemberTest() {
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello1@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello1@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .then().log().all()
                     .statusCode(404);
@@ -60,11 +60,11 @@ class AuthControllerTest {
         @DisplayName("로그인한 상태를 확인할 수 있다")
         @Test
         void loginCheckMemberTest() {
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
 
             Map<String, String> cookies = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .getCookies();
 
@@ -80,11 +80,11 @@ class AuthControllerTest {
         @DisplayName("토큰이 올바르지 않으면 로그인 상태를 유지할 수 없다")
         @Test
         void loginCheckInvalidTokenMemberTest() {
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
 
             Map<String, String> cookies = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .getCookies();
 
@@ -105,20 +105,20 @@ class AuthControllerTest {
 
         @BeforeEach
         void setUpRegistration() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
+            SignUpRequest signUpRequest = new SignUpRequest("가이온", "hello@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
+                    .body(signUpRequest)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(200);
 
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
+            LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
 
             Map<String, String> cookies = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
+                    .body(loginRequest)
                     .when().post("/login")
                     .getCookies();
 

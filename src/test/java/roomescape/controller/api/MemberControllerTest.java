@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dto.auth.SignUpRequestDto;
+import roomescape.dto.auth.SignUpRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -23,11 +23,11 @@ class MemberControllerTest {
         @DisplayName("회원가입을 할 수 있다.")
         @Test
         void registerMember() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
+            SignUpRequest signUpRequest = new SignUpRequest("가이온", "hello@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
+                    .body(signUpRequest)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value());
@@ -36,18 +36,18 @@ class MemberControllerTest {
         @DisplayName("이미 같은 이메일로 회원가입이 되어 있으면 추가할 수 없다.")
         @Test
         void registerDuplicateMember() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
+            SignUpRequest signUpRequest = new SignUpRequest("가이온", "hello@woowa.com", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
+                    .body(signUpRequest)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(200);
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
+                    .body(signUpRequest)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(400);
@@ -58,19 +58,19 @@ class MemberControllerTest {
     class MemberFind {
         @BeforeEach
         void setUpMember() {
-            SignUpRequestDto signUpRequestDto1 = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
-            SignUpRequestDto signUpRequestDto2 = new SignUpRequestDto("가이온", "hello@woowa.com1", "password");
+            SignUpRequest signUpRequest1 = new SignUpRequest("가이온", "hello@woowa.com", "password");
+            SignUpRequest signUpRequest2 = new SignUpRequest("가이온", "hello@woowa.com1", "password");
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto1)
+                    .body(signUpRequest1)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value());
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(signUpRequestDto2)
+                    .body(signUpRequest2)
                     .when().post("/members")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value());
