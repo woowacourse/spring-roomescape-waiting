@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -53,4 +54,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTimeId(final Long timeId);
 
     List<Reservation> findAllByMember(Member member);
+
+    @Query("""
+            select r.waiting
+            from Reservation r
+            where r.date = :date
+              and r.time = :time
+              and r.theme = :theme
+            """)
+    List<Waiting> findAllWaiting(
+            @Param("date") LocalDate date,
+            @Param("time") ReservationTime time,
+            @Param("theme") Theme theme
+    );
 }

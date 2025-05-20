@@ -14,6 +14,7 @@ import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
@@ -95,10 +96,20 @@ public class ReservationService {
     }
 
     public void deleteReservation(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("존재하지 않는 예약입니다. id=" + id);
-        }
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다. id: " + id));
+        Long deleteRank = reservation.getWaiting().getRank();
+        List<Waiting> waitings = reservationRepository.findAllWaiting(reservation.getDate(), reservation.getTime(),
+                reservation.getTheme());
+        reduceWaitingRanks(deleteRank, waitings);
         reservationRepository.deleteById(id);
+    }
+
+    private void reduceWaitingRanks(Long deleteRank, List<Waiting> waitings) {
+        waitings.stream()
+                .filter(waiting -> waiting.getRank() != null)
+                .filter(waiting -> waiting.getRank() > deleteRank)
+                .forEach(Waiting::reduceRank);
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {

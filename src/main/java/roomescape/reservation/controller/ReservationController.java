@@ -33,11 +33,6 @@ import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 @Validated
 public class ReservationController {
 
-    /**
-     * TODO 3단계
-     예약 대기 취소
-     */
-
     private final ReservationService reservationService;
 
     @GetMapping

@@ -53,4 +53,8 @@ public class Waiting {
                 .rank(rank)
                 .build();
     }
+
+    public void reduceRank() {
+        rank--;
+    }
 }
