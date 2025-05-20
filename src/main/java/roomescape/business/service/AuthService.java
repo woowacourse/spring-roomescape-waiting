@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.AuthToken;
 import roomescape.auth.jwt.JwtUtil;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.Users;
 import roomescape.exception.auth.AuthenticationException;
 
 import static roomescape.exception.SecurityErrorCode.INVALID_EMAIL;
@@ -17,11 +17,11 @@ import static roomescape.exception.SecurityErrorCode.INVALID_PASSWORD;
 @Transactional(readOnly = true)
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private final Users users;
     private final JwtUtil jwtUtil;
 
     public AuthToken authenticate(final String email, final String password) {
-        val user = userRepository.findByEmail(email)
+        val user = users.findByEmail(email)
                 .orElseThrow(() -> new AuthenticationException(INVALID_EMAIL));
 
         if (!user.isPasswordCorrect(password)) {

@@ -11,10 +11,10 @@ import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.ReservationRepository;
-import roomescape.business.model.repository.ReservationTimeRepository;
-import roomescape.business.model.repository.ThemeRepository;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.ReservationTimes;
+import roomescape.business.model.repository.Reservations;
+import roomescape.business.model.repository.Themes;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.UserRole;
 
 import java.time.LocalDate;
@@ -26,10 +26,10 @@ import java.time.LocalTime;
 public class LocalDataInitializer {
 
     private final Logger logger = LoggerFactory.getLogger(LocalDataInitializer.class);
-    private final ThemeRepository themeRepository;
-    private final ReservationTimeRepository timeRepository;
-    private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;
+    private final Themes themes;
+    private final ReservationTimes timeRepository;
+    private final Users users;
+    private final Reservations reservations;
     private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @PostConstruct
@@ -57,7 +57,7 @@ public class LocalDataInitializer {
 
     private void insertThemes(final Theme... themes) {
         for (Theme theme : themes) {
-            themeRepository.save(theme);
+            this.themes.save(theme);
         }
     }
 
@@ -69,13 +69,13 @@ public class LocalDataInitializer {
 
     private void insertUsers(final User... users) {
         for (User user : users) {
-            userRepository.save(user);
+            this.users.save(user);
         }
     }
 
     private void insertReservations(final Reservation... reservations) {
         for (Reservation reservation : reservations) {
-            reservationRepository.save(reservation);
+            this.reservations.save(reservation);
         }
     }
 

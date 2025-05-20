@@ -9,10 +9,10 @@ import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.ReservationRepository;
-import roomescape.business.model.repository.ReservationTimeRepository;
-import roomescape.business.model.repository.ThemeRepository;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.ReservationTimes;
+import roomescape.business.model.repository.Reservations;
+import roomescape.business.model.repository.Themes;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
 import roomescape.test_util.JpaTestUtil;
 
@@ -25,28 +25,28 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import({JpaReservationRepository.class, JpaTestUtil.class, JpaReservationTimeRepository.class, JpaThemeRepository.class, JpaUserRepository.class})
-class ReservationRepositoryTest {
+@Import({JpaReservations.class, JpaTestUtil.class, JpaReservationTimes.class, JpaThemes.class, JpaUsers.class})
+class ReservationsTest {
 
     private static final LocalDate DATE1 = LocalDate.now().plusDays(3);
     private static final LocalDate DATE2 = LocalDate.now().plusDays(4);
     private static final LocalDate DATE3 = LocalDate.now().plusDays(5);
     private static final LocalTime TIME = LocalTime.of(10, 0);
 
-    private final ReservationRepository sut;
+    private final Reservations sut;
     private final JpaTestUtil testUtil;
 
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final UserRepository userRepository;
+    private final ReservationTimes reservationTimes;
+    private final Themes themes;
+    private final Users users;
 
     @Autowired
-    ReservationRepositoryTest(ReservationRepository sut, ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository, UserRepository userRepository, JpaTestUtil testUtil) {
+    ReservationsTest(Reservations sut, ReservationTimes reservationTimes,
+                     Themes themes, Users users, JpaTestUtil testUtil) {
         this.sut = sut;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.userRepository = userRepository;
+        this.reservationTimes = reservationTimes;
+        this.themes = themes;
+        this.users = users;
         this.testUtil = testUtil;
     }
 
@@ -61,9 +61,9 @@ class ReservationRepositoryTest {
         final ReservationTime time = ReservationTime.create(TIME);
         final Theme theme = Theme.create("호러", "", "");
         final User user = User.create("돔푸", "dompoo@email.com", "password");
-        reservationTimeRepository.save(time);
-        themeRepository.save(theme);
-        userRepository.save(user);
+        reservationTimes.save(time);
+        themes.save(theme);
+        users.save(user);
 
         // when, then
         assertThatCode(() -> sut.save(Reservation.create(user, DATE1, time, theme)))

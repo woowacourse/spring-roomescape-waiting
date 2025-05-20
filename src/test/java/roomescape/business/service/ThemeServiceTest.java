@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.business.dto.ThemeDto;
 import roomescape.business.model.entity.Theme;
-import roomescape.business.model.repository.ReservationRepository;
-import roomescape.business.model.repository.ThemeRepository;
+import roomescape.business.model.repository.Reservations;
+import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ThemeName;
 import roomescape.exception.business.NotFoundException;
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.*;
 class ThemeServiceTest {
 
     @Mock
-    private ThemeRepository themeRepository;
+    private Themes themes;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private Reservations reservations;
 
     @InjectMocks
     private ThemeService sut;
@@ -49,7 +49,7 @@ class ThemeServiceTest {
         assertThat(result.name().value()).isEqualTo(name);
         assertThat(result.description()).isEqualTo(description);
         assertThat(result.thumbnail()).isEqualTo(thumbnail);
-        verify(themeRepository).save(any(Theme.class));
+        verify(themes).save(any(Theme.class));
     }
 
     @Test
@@ -65,14 +65,14 @@ class ThemeServiceTest {
                 new ThemeDto(Id.create("theme-id-2"), new ThemeName("Theme Two"), "Description Two", "thumbnail2.jpg")
         );
 
-        when(themeRepository.findAll()).thenReturn(themeData);
+        when(themes.findAll()).thenReturn(themeData);
 
         // when
         List<ThemeDto> result = sut.getAll();
 
         // then
         assertThat(result).isEqualTo(expectedThemes);
-        verify(themeRepository).findAll();
+        verify(themes).findAll();
     }
 
     @Test
@@ -91,7 +91,7 @@ class ThemeServiceTest {
                 new ThemeDto(Id.create("theme-id-3"), new ThemeName("Popular Theme Three"), "Description Three", "thumbnail3.jpg")
         );
 
-        when(themeRepository.findPopularThemes(any(LocalDate.class), any(LocalDate.class), eq(size)))
+        when(themes.findPopularThemes(any(LocalDate.class), any(LocalDate.class), eq(size)))
                 .thenReturn(themeData);
 
         // when
@@ -99,7 +99,7 @@ class ThemeServiceTest {
 
         // then
         assertThat(result).isEqualTo(expectedThemes);
-        verify(themeRepository).findPopularThemes(any(LocalDate.class), any(LocalDate.class), eq(size));
+        verify(themes).findPopularThemes(any(LocalDate.class), any(LocalDate.class), eq(size));
     }
 
     @Test
@@ -107,16 +107,16 @@ class ThemeServiceTest {
         // given
         Id themeId = Id.create("theme-id");
 
-        when(reservationRepository.existByThemeId(themeId)).thenReturn(false);
-        when(themeRepository.existById(themeId)).thenReturn(true);
+        when(reservations.existByThemeId(themeId)).thenReturn(false);
+        when(themes.existById(themeId)).thenReturn(true);
 
         // when
         sut.delete(themeId.value());
 
         // then
-        verify(reservationRepository).existByThemeId(themeId);
-        verify(themeRepository).existById(themeId);
-        verify(themeRepository).deleteById(themeId);
+        verify(reservations).existByThemeId(themeId);
+        verify(themes).existById(themeId);
+        verify(themes).deleteById(themeId);
     }
 
     @Test
@@ -124,16 +124,16 @@ class ThemeServiceTest {
         // given
         Id themeId = Id.create("non-existing-id");
 
-        when(reservationRepository.existByThemeId(themeId)).thenReturn(false);
-        when(themeRepository.existById(themeId)).thenReturn(false);
+        when(reservations.existByThemeId(themeId)).thenReturn(false);
+        when(themes.existById(themeId)).thenReturn(false);
 
         // when, then
         assertThatThrownBy(() -> sut.delete(themeId.value()))
                 .isInstanceOf(NotFoundException.class);
 
-        verify(reservationRepository).existByThemeId(themeId);
-        verify(themeRepository).existById(themeId);
-        verify(themeRepository, never()).deleteById(themeId);
+        verify(reservations).existByThemeId(themeId);
+        verify(themes).existById(themeId);
+        verify(themes, never()).deleteById(themeId);
     }
 
     @Test
@@ -141,14 +141,14 @@ class ThemeServiceTest {
         // given
         Id themeId = Id.create("theme-with-reservations");
 
-        when(reservationRepository.existByThemeId(themeId)).thenReturn(true);
+        when(reservations.existByThemeId(themeId)).thenReturn(true);
 
         // when, then
         assertThatThrownBy(() -> sut.delete(themeId.value()))
                 .isInstanceOf(RelatedEntityExistException.class);
 
-        verify(reservationRepository).existByThemeId(themeId);
-        verify(themeRepository, never()).existById(themeId);
-        verify(themeRepository, never()).deleteById(themeId);
+        verify(reservations).existByThemeId(themeId);
+        verify(themes, never()).existById(themeId);
+        verify(themes, never()).deleteById(themeId);
     }
 }

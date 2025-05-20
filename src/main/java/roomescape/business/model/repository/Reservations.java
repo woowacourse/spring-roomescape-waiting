@@ -8,7 +8,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface ReservationRepository {
+public interface Reservations {
 
     void save(Reservation reservation);
 

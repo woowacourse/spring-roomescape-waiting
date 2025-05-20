@@ -6,7 +6,7 @@ import roomescape.business.model.vo.Id;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository {
+public interface Users {
 
     void save(User user);
 

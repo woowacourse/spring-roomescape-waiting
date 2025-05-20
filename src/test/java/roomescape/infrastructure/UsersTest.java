@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
 import roomescape.test_util.JpaTestUtil;
 
@@ -16,14 +16,14 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import({JpaUserRepository.class, JpaTestUtil.class})
-class UserRepositoryTest {
+@Import({JpaUsers.class, JpaTestUtil.class})
+class UsersTest {
 
-    private final UserRepository sut;
+    private final Users sut;
     private final JpaTestUtil testUtil;
 
     @Autowired
-    UserRepositoryTest(UserRepository sut, JpaTestUtil testUtil) {
+    UsersTest(Users sut, JpaTestUtil testUtil) {
         this.sut = sut;
         this.testUtil = testUtil;
     }

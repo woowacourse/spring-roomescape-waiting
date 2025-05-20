@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;
 import roomescape.business.model.entity.ReservationTime;
-import roomescape.business.model.repository.ReservationRepository;
-import roomescape.business.model.repository.ReservationTimeRepository;
+import roomescape.business.model.repository.ReservationTimes;
+import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.InvalidCreateArgumentException;
@@ -29,8 +29,8 @@ import static roomescape.exception.ErrorCode.RESERVED_RESERVATION_TIME;
 @Transactional(readOnly = true)
 public class ReservationTimeService {
 
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationTimes reservationTimes;
+    private final Reservations reservations;
 
     @Transactional
     public ReservationTimeDto addAndGet(final LocalTime time) {
@@ -38,33 +38,33 @@ public class ReservationTimeService {
         validateNoDuplication(reservationTime);
         validateTimeInterval(reservationTime);
 
-        reservationTimeRepository.save(reservationTime);
+        reservationTimes.save(reservationTime);
         return ReservationTimeDto.fromEntity(reservationTime);
     }
 
     private void validateNoDuplication(final ReservationTime reservationTime) {
-        val isExist = reservationTimeRepository.existByTime(reservationTime.startTimeValue());
+        val isExist = reservationTimes.existByTime(reservationTime.startTimeValue());
         if (isExist) {
             throw new DuplicatedException(RESERVATION_TIME_ALREADY_EXIST);
         }
     }
 
     private void validateTimeInterval(final ReservationTime reservationTime) {
-        val existInInterval = reservationTimeRepository.existBetween(reservationTime.startInterval(), reservationTime.endInterval());
+        val existInInterval = reservationTimes.existBetween(reservationTime.startInterval(), reservationTime.endInterval());
         if (existInInterval) {
             throw new InvalidCreateArgumentException(RESERVATION_TIME_INTERVAL_INVALID);
         }
     }
 
     public List<ReservationTimeDto> getAll() {
-        val reservationTimes = reservationTimeRepository.findAll();
+        val reservationTimes = this.reservationTimes.findAll();
         return ReservationTimeDto.fromEntities(reservationTimes);
     }
 
     public List<ReservableReservationTimeDto> getAllByDateAndThemeId(final LocalDate date, final String themeIdValue) {
         val themeId = Id.create(themeIdValue);
-        val available = reservationTimeRepository.findAvailableByDateAndThemeId(date, themeId);
-        val notAvailable = reservationTimeRepository.findNotAvailableByDateAndThemeId(date, themeId);
+        val available = reservationTimes.findAvailableByDateAndThemeId(date, themeId);
+        val notAvailable = reservationTimes.findNotAvailableByDateAndThemeId(date, themeId);
 
         return ReservableReservationTimeDto.fromEntities(available, notAvailable);
     }
@@ -72,12 +72,12 @@ public class ReservationTimeService {
     @Transactional
     public void delete(final String timeIdValue) {
         val timeId = Id.create(timeIdValue);
-        if (reservationRepository.existByTimeId(timeId)) {
+        if (reservations.existByTimeId(timeId)) {
             throw new RelatedEntityExistException(RESERVED_RESERVATION_TIME);
         }
-        if (!reservationTimeRepository.existById(timeId)) {
+        if (!reservationTimes.existById(timeId)) {
             throw new NotFoundException(RESERVATION_NOT_EXIST);
         }
-        reservationTimeRepository.deleteById(timeId);
+        reservationTimes.deleteById(timeId);
     }
 }

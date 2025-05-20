@@ -3,7 +3,7 @@ package roomescape.infrastructure;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Email;
 import roomescape.business.model.vo.Id;
 
@@ -12,11 +12,11 @@ import java.util.Optional;
 
 @Primary
 @Repository
-public class JpaUserRepository implements UserRepository {
+public class JpaUsers implements Users {
 
     private final JpaUserDao dao;
 
-    public JpaUserRepository(JpaUserDao dao) {
+    public JpaUsers(JpaUserDao dao) {
         this.dao = dao;
     }
 

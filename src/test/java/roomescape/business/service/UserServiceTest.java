@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.business.dto.UserDto;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Email;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.UserName;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private Users users;
 
     @InjectMocks
     private UserService sut;
@@ -39,14 +39,14 @@ class UserServiceTest {
         String email = "test@example.com";
         String password = "password123";
 
-        when(userRepository.existByEmail(email)).thenReturn(false);
+        when(users.existByEmail(email)).thenReturn(false);
 
         // when
         sut.register(name, email, password);
 
         // then
-        verify(userRepository).existByEmail(email);
-        verify(userRepository).save(any(User.class));
+        verify(users).existByEmail(email);
+        verify(users).save(any(User.class));
     }
 
     @Test
@@ -56,14 +56,14 @@ class UserServiceTest {
         String email = "test@example.com";
         String password = "password123";
 
-        when(userRepository.existByEmail(email)).thenReturn(true);
+        when(users.existByEmail(email)).thenReturn(true);
 
         // when, then
         assertThatThrownBy(() -> sut.register(name, email, password))
                 .isInstanceOf(InvalidCreateArgumentException.class);
 
-        verify(userRepository).existByEmail(email);
-        verify(userRepository, never()).save(any(User.class));
+        verify(users).existByEmail(email);
+        verify(users, never()).save(any(User.class));
     }
 
     @Test
@@ -73,14 +73,14 @@ class UserServiceTest {
         User userData = User.restore("user-id", "USER", "Test User", email, "password123");
         UserDto expectedUser = new UserDto(Id.create("user-id"), UserRole.USER, new UserName("Test User"), new Email(email));
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(userData));
+        when(users.findByEmail(email)).thenReturn(Optional.of(userData));
 
         // when
         UserDto result = sut.getByEmail(email);
 
         // then
         assertThat(result).isEqualTo(expectedUser);
-        verify(userRepository).findByEmail(email);
+        verify(users).findByEmail(email);
     }
 
     @Test
@@ -88,13 +88,13 @@ class UserServiceTest {
         // given
         String email = "nonexistent@example.com";
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(users.findByEmail(email)).thenReturn(Optional.empty());
 
         // when, then
         assertThatThrownBy(() -> sut.getByEmail(email))
                 .isInstanceOf(NotFoundException.class);
 
-        verify(userRepository).findByEmail(email);
+        verify(users).findByEmail(email);
     }
 
     @Test
@@ -109,13 +109,13 @@ class UserServiceTest {
                 new UserDto(Id.create("user-id-2"), UserRole.USER, new UserName("User Two"), new Email("user2@example.com"))
         );
 
-        when(userRepository.findAll()).thenReturn(userData);
+        when(users.findAll()).thenReturn(userData);
 
         // when
         List<UserDto> result = sut.getAll();
 
         // then
         assertThat(result).isEqualTo(expectedUsers);
-        verify(userRepository).findAll();
+        verify(users).findAll();
     }
 }

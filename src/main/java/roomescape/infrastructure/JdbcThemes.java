@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Theme;
-import roomescape.business.model.repository.ThemeRepository;
+import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
 
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class JdbcThemeRepository implements ThemeRepository {
+public class JdbcThemes implements Themes {
 
     private static final RowMapper<Theme> ROW_MAPPER = (resultSet, rowNum) -> Theme.restore(
             resultSet.getString("id"),
@@ -27,7 +27,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insert;
 
-    public JdbcThemeRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcThemes(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.insert = new SimpleJdbcInsert(jdbcTemplate).
                 withTableName("theme");

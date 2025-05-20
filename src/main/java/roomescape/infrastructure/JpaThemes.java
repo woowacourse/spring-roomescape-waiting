@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Theme;
-import roomescape.business.model.repository.ThemeRepository;
+import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
 
 import java.time.LocalDate;
@@ -13,11 +13,11 @@ import java.util.Optional;
 
 @Primary
 @Repository
-public class JpaThemeRepository implements ThemeRepository {
+public class JpaThemes implements Themes {
 
     private final JpaThemeDao dao;
 
-    public JpaThemeRepository(JpaThemeDao dao) {
+    public JpaThemes(JpaThemeDao dao) {
         this.dao = dao;
     }
 

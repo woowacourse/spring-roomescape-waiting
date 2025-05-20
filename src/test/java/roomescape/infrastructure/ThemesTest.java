@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Theme;
-import roomescape.business.model.repository.ThemeRepository;
+import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
 import roomescape.test_util.JpaTestUtil;
 
@@ -18,13 +18,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import({JpaThemeRepository.class, JpaTestUtil.class})
-class ThemeRepositoryTest {
+@Import({JpaThemes.class, JpaTestUtil.class})
+class ThemesTest {
 
     private static final LocalDate DATE = LocalDate.now().plusDays(5);
 
     @Autowired
-    private ThemeRepository sut;
+    private Themes sut;
     @Autowired
     private JpaTestUtil testUtil;
 

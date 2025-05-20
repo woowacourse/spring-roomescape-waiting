@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.ReservationTime;
-import roomescape.business.model.repository.ReservationTimeRepository;
+import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.vo.Id;
 import roomescape.test_util.JpaTestUtil;
 
@@ -21,17 +21,17 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import({JpaReservationTimeRepository.class, JpaTestUtil.class})
-class ReservationTimeRepositoryTest {
+@Import({JpaReservationTimes.class, JpaTestUtil.class})
+class ReservationTimesTest {
 
     private static final LocalTime TIME1 = LocalTime.of(10, 0);
     private static final LocalTime TIME2 = LocalTime.of(15, 0);
 
-    private final ReservationTimeRepository sut;
+    private final ReservationTimes sut;
     private final JpaTestUtil testUtil;
 
     @Autowired
-    ReservationTimeRepositoryTest(ReservationTimeRepository sut, JpaTestUtil testUtil) {
+    ReservationTimesTest(ReservationTimes sut, JpaTestUtil testUtil) {
         this.sut = sut;
         this.testUtil = testUtil;
     }

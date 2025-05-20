@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.repository.ReservationRepository;
-import roomescape.business.model.repository.ReservationTimeRepository;
-import roomescape.business.model.repository.ThemeRepository;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.ReservationTimes;
+import roomescape.business.model.repository.Reservations;
+import roomescape.business.model.repository.Themes;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.business.DuplicatedException;
@@ -29,30 +29,30 @@ import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
 @Transactional(readOnly = true)
 public class ReservationService {
 
-    private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final Users users;
+    private final Reservations reservations;
+    private final ReservationTimes reservationTimes;
+    private final Themes themes;
 
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
-        val user = userRepository.findById(Id.create(userIdValue))
+        val user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
-        val reservationTime = reservationTimeRepository.findById(Id.create(timeIdValue))
+        val reservationTime = reservationTimes.findById(Id.create(timeIdValue))
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
-        val theme = themeRepository.findById(Id.create(themeIdValue))
+        val theme = themes.findById(Id.create(themeIdValue))
                 .orElseThrow(() -> new NotFoundException(THEME_NOT_EXIST));
 
-        if (reservationRepository.isDuplicateDateAndTimeAndTheme(date, reservationTime.startTimeValue(), theme.getId())) {
+        if (reservations.isDuplicateDateAndTimeAndTheme(date, reservationTime.startTimeValue(), theme.getId())) {
             throw new DuplicatedException(RESERVATION_DUPLICATED);
         }
 
         val reservation = Reservation.create(user, date, reservationTime, theme);
-        reservationRepository.save(reservation);
+        reservations.save(reservation);
         return ReservationDto.fromEntity(reservation);
     }
 
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom, final LocalDate dateTo) {
-        val reservations = reservationRepository.findAllWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
+        val reservations = this.reservations.findAllWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
         return ReservationDto.fromEntities(reservations);
     }
 
@@ -64,11 +64,11 @@ public class ReservationService {
     @Transactional
     public void delete(final String reservationIdValue, final String userIdValue) {
         val reservationId = Id.create(reservationIdValue);
-        val reservation = reservationRepository.findById(reservationId)
+        val reservation = reservations.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
         if (!reservation.isSameReserver(userIdValue)) {
             throw new AuthorizationException(AUTHORITY_LACK);
         }
-        reservationRepository.deleteById(reservationId);
+        reservations.deleteById(reservationId);
     }
 }

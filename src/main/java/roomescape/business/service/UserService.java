@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.UserDto;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
 import roomescape.exception.business.InvalidCreateArgumentException;
 import roomescape.exception.business.NotFoundException;
@@ -21,32 +21,32 @@ import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
 @Transactional(readOnly = true)
 public class UserService {
 
-    private final UserRepository userRepository;
+    private final Users users;
 
     @Transactional
     public UserDto register(final String name, final String email, final String password) {
-        if (userRepository.existByEmail(email)) {
+        if (users.existByEmail(email)) {
             throw new InvalidCreateArgumentException(EMAIL_DUPLICATED);
         }
         val user = User.create(name, email, password);
-        userRepository.save(user);
+        users.save(user);
         return UserDto.fromEntity(user);
     }
 
     public UserDto getById(final String userIdValue) {
-        val user = userRepository.findById(Id.create(userIdValue))
+        val user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
         return UserDto.fromEntity(user);
     }
 
     public UserDto getByEmail(final String email) {
-        val user = userRepository.findByEmail(email)
+        val user = users.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
         return UserDto.fromEntity(user);
     }
 
     public List<UserDto> getAll() {
-        val users = userRepository.findAll();
+        val users = this.users.findAll();
         return UserDto.fromEntities(users);
     }
 }

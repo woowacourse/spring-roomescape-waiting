@@ -9,7 +9,7 @@ import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.ReservationRepository;
+import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
 
 import java.time.LocalDate;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class JdbcReservationRepository implements ReservationRepository {
+public class JdbcReservations implements Reservations {
 
     private static final RowMapper<Reservation> ROW_MAPPER = (resultSet, rowNum) -> Reservation.restore(
             resultSet.getString("reservation_id"),
@@ -69,7 +69,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insert;
 
-    public JdbcReservationRepository(final JdbcTemplate jdbcTemplate) {
+    public JdbcReservations(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation");

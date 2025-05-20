@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.ReservationTime;
-import roomescape.business.model.repository.ReservationTimeRepository;
+import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.vo.Id;
 
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class JdbcReservationTimeRepository implements ReservationTimeRepository {
+public class JdbcReservationTimes implements ReservationTimes {
 
     private static final RowMapper<ReservationTime> ROW_MAPPER = (resultSet, rowNum) -> ReservationTime.restore(
             resultSet.getString("id"),
@@ -26,7 +26,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insert;
 
-    public JdbcReservationTimeRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationTimes(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_time");

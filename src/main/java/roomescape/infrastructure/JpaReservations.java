@@ -3,7 +3,7 @@ package roomescape.infrastructure;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.repository.ReservationRepository;
+import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
 
 import java.time.LocalDate;
@@ -13,11 +13,11 @@ import java.util.Optional;
 
 @Primary
 @Repository
-public class JpaReservationRepository implements ReservationRepository {
+public class JpaReservations implements Reservations {
 
     private final JpaReservationDao dao;
 
-    public JpaReservationRepository(JpaReservationDao dao) {
+    public JpaReservations(JpaReservationDao dao) {
         this.dao = dao;
     }
 

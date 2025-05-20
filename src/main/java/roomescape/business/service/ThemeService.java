@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ThemeDto;
 import roomescape.business.model.entity.Theme;
-import roomescape.business.model.repository.ReservationRepository;
-import roomescape.business.model.repository.ThemeRepository;
+import roomescape.business.model.repository.Reservations;
+import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
 import roomescape.exception.business.NotFoundException;
 import roomescape.exception.business.RelatedEntityExistException;
@@ -26,24 +26,24 @@ public class ThemeService {
     private static final int AGGREGATE_START_DATE_INTERVAL = 7;
     private static final int AGGREGATE_END_DATE_INTERVAL = 1;
 
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final Themes themes;
+    private final Reservations reservations;
 
     @Transactional
     public ThemeDto addAndGet(final String name, final String description, final String thumbnail) {
         val theme = Theme.create(name, description, thumbnail);
-        themeRepository.save(theme);
+        themes.save(theme);
         return ThemeDto.fromEntity(theme);
     }
 
     public List<ThemeDto> getAll() {
-        val themes = themeRepository.findAll();
+        val themes = this.themes.findAll();
         return ThemeDto.fromEntities(themes);
     }
 
     public List<ThemeDto> getPopular(final int size) {
         val now = LocalDate.now();
-        val popularThemes = themeRepository.findPopularThemes(
+        val popularThemes = themes.findPopularThemes(
                 now.minusDays(AGGREGATE_START_DATE_INTERVAL),
                 now.minusDays(AGGREGATE_END_DATE_INTERVAL),
                 size
@@ -54,12 +54,12 @@ public class ThemeService {
     @Transactional
     public void delete(final String themeIdValue) {
         val themeId = Id.create(themeIdValue);
-        if (reservationRepository.existByThemeId(themeId)) {
+        if (reservations.existByThemeId(themeId)) {
             throw new RelatedEntityExistException(RESERVED_THEME);
         }
-        if (!themeRepository.existById(themeId)) {
+        if (!themes.existById(themeId)) {
             throw new NotFoundException(THEME_NOT_EXIST);
         }
-        themeRepository.deleteById(themeId);
+        themes.deleteById(themeId);
     }
 }

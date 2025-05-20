@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public class JdbcUserRepository implements UserRepository {
+public class JdbcUsers implements Users {
 
     private static final RowMapper<User> ROW_MAPPER = (resultSet, rowNum) -> User.restore(
             resultSet.getString("id"),
@@ -27,7 +27,7 @@ public class JdbcUserRepository implements UserRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insert;
 
-    public JdbcUserRepository(final JdbcTemplate jdbcTemplate) {
+    public JdbcUsers(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.insert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users");
