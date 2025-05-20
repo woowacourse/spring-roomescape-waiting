@@ -3,9 +3,10 @@ package roomescape.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.entity.Reservation;
+import roomescape.entity.Waiting;
+import roomescape.global.ReservationStatus;
 
 public record MyReservationResponse(
-        Long reservationId,
         String theme,
         LocalDate date,
         LocalTime time,
@@ -14,10 +15,20 @@ public record MyReservationResponse(
     public static MyReservationResponse from(Reservation reservation) {
 
         return new MyReservationResponse(
-                reservation.getId(),
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                reservation.getStatus().getText());
+                ReservationStatus.RESERVED.getText()
+        );
+    }
+
+    public static MyReservationResponse from(Waiting waiting) {
+
+        return new MyReservationResponse(
+                waiting.getThemeName(),
+                waiting.getDate(),
+                waiting.getStartAt(),
+                ReservationStatus.WAIT.getText()
+        );
     }
 }

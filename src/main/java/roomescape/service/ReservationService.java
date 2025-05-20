@@ -67,7 +67,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마입니다."));
 
-        Reservation reservation = new Reservation(member, date, reservationTime, theme, ReservationStatus.RESERVED);
+        Reservation reservation = new Reservation(member, date, reservationTime, theme);
 
         validateDuplicateReservation(reservation);
         validateAddReservationDateTime(reservation);
