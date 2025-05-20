@@ -2,6 +2,8 @@ package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -12,11 +14,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
+import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.fixture.TestFixture;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -94,8 +96,8 @@ class ReservationRepositoryTest {
     @Test
     void existsByDateAndTimeIdAndThemeId() {
         boolean existsByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate,
-                theme.getId(),
-                reservationTime.getId());
+                reservationTime.getId(),
+                theme.getId());
 
         assertThat(existsByDateAndTimeIdAndThemeId).isTrue();
     }

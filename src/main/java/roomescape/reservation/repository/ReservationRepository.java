@@ -27,5 +27,5 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    Reservation save(Reservation upcomingReservationWithUnassignedId);
+    Reservation save(Reservation reservation);
 }
