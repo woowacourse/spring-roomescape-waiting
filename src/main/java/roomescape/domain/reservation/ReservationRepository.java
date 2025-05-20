@@ -11,10 +11,10 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
 
     @Modifying
     @Query("DELETE FROM Reservation r WHERE r.id = :id")
-    int deleteById(@Param("id") long id);
+    int deleteByIdAndCount(@Param("id") long id);
 
     default void deleteByIdOrElseThrow(final long id) {
-        var deletedCount = deleteById(id);
+        var deletedCount = deleteByIdAndCount(id);
         if (deletedCount == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다. id : " + id);
         }
