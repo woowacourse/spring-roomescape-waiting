@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.web.exception.NotAuthorizationException;
@@ -12,30 +13,22 @@ import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.exception.AlreadyWaitingException;
-import roomescape.waiting.repository.ReservationWaitingRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeQueryService;
 import roomescape.time.service.ReservationTimeQueryService;
+import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 
 @Service
-public class ReservationWaitingService {
+@RequiredArgsConstructor
+public class ReservationWaitingService implements ReservationWaitingQueryService {
 
     private final ThemeQueryService themeQueryService;
     private final MemberQueryService memberQueryService;
     private final ReservationTimeQueryService timeQueryService;
     private final ReservationWaitingRepository reservationWaitingRepository;
-
-    public ReservationWaitingService(ThemeQueryService themeQueryService, MemberQueryService memberQueryService,
-                                     ReservationTimeQueryService timeQueryService,
-                                     ReservationWaitingRepository reservationWaitingRepository) {
-        this.themeQueryService = themeQueryService;
-        this.memberQueryService = memberQueryService;
-        this.timeQueryService = timeQueryService;
-        this.reservationWaitingRepository = reservationWaitingRepository;
-    }
 
     @Transactional
     public ReservationResponse waiting(ReserveCommand reserveCommand) {

@@ -6,7 +6,7 @@ import static roomescape.reservation.controller.response.ReservationSuccessCode.
 
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,19 +18,17 @@ import roomescape.global.response.ApiResponse;
 import roomescape.reservation.controller.request.ReserveByUserRequest;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.command.ReserveCommand;
 
 @RestController
 @RequestMapping("/reservations")
+@RequiredArgsConstructor
 public class ReservationApiController {
 
     private final ReservationService reservationService;
-
-    @Autowired
-    public ReservationApiController(ReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
+    private final ReservationQueryService reservationQueryService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> createReservation(
@@ -50,7 +48,7 @@ public class ReservationApiController {
     public ResponseEntity<ApiResponse<List<MyReservationResponse>>> getMyReservations(
             @Authenticated Long memberId
     ) {
-        List<MyReservationResponse> responses = reservationService.getReservations(memberId);
+        List<MyReservationResponse> responses = reservationQueryService.getReservations(memberId);
         return ResponseEntity.ok(
                 ApiResponse.success(GET_MY_RESERVATIONS, responses)
         );

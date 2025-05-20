@@ -73,31 +73,4 @@ public class ReservationService {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
     }
-
-    @Transactional(readOnly = true)
-    public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate from,
-                                                             LocalDate to) {
-        if (themeId == null && memberId == null && from == null && to == null) {
-            return getAllReservations();
-        }
-
-        List<Reservation> reservations = reservationRepository.findFilteredReservations(themeId, memberId, from, to);
-
-        return ReservationResponse.from(reservations);
-    }
-
-    private List<ReservationResponse> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        return ReservationResponse.from(reservations);
-    }
-
-    @Transactional(readOnly = true)
-    public List<MyReservationResponse> getReservations(Long memberId) {
-        List<Reservation> myReservations = reservationRepository.findByMemberId(memberId);
-
-        // 예약 대기에서도 예약 정보를 가져와야 한다.
-
-        return MyReservationResponse.from(myReservations);
-    }
 }

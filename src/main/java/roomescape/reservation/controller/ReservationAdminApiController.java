@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.response.ApiResponse;
 import roomescape.reservation.controller.request.ReserveByAdminRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.command.ReserveCommand;
 
@@ -31,6 +32,7 @@ import roomescape.reservation.service.command.ReserveCommand;
 public class ReservationAdminApiController {
 
     private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> reserve(
@@ -51,7 +53,7 @@ public class ReservationAdminApiController {
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to
     ) {
-        List<ReservationResponse> responses = reservationService.getFilteredReservations(themeId, memberId, from, to);
+        List<ReservationResponse> responses = reservationQueryService.getFilteredReservations(themeId, memberId, from, to);
         return ResponseEntity.ok(
                 ApiResponse.success(SEARCH_RESERVATION, responses));
     }
