@@ -47,7 +47,7 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public static Reservation createWithoutId(Member member, LocalDate date, ReservationTime time, Theme theme) {

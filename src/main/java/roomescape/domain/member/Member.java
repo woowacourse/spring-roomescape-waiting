@@ -39,7 +39,7 @@ public class Member {
         this.password = password;
     }
 
-    public Member() {
+    protected Member() {
     }
 
     public static Member createWithoutId(String name, String email, Role role, String password) {

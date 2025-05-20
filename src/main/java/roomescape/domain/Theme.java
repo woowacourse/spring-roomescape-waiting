@@ -33,7 +33,7 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     private void validateName(String name) {
