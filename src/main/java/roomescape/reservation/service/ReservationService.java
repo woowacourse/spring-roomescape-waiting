@@ -84,12 +84,15 @@ public class ReservationService {
             .toList();
     }
 
-    @Transactional
     public void deleteReservationById(final Long id) {
-        reservationRepository.findById(id)
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
-
+        validateExistsReservation(id);
         reservationRepository.deleteById(id);
+    }
+
+    private void validateExistsReservation(Long id) {
+        if (reservationRepository.existsById(id)) {
+            throw new BusinessException("해당 예약이 존재하지 않습니다.");
+        }
     }
 
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {

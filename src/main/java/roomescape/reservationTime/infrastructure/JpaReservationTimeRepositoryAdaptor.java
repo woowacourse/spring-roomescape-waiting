@@ -26,6 +26,11 @@ public class JpaReservationTimeRepositoryAdaptor implements ReservationTimeRepos
     }
 
     @Override
+    public boolean existsById(Long id) {
+        return jpaReservationTimeRepository.existsById(id);
+    }
+
+    @Override
     public void deleteById(Long id) {
         jpaReservationTimeRepository.deleteById(id);
     }

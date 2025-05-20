@@ -32,6 +32,11 @@ public class JpaThemeRepositoryAdaptor implements ThemeRepository {
     }
 
     @Override
+    public boolean existsById(Long id) {
+        return jpaThemeRepository.existsById(id);
+    }
+
+    @Override
     public List<Theme> findPopularThemes(LocalDate start, LocalDate end) {
         return jpaThemeRepository.findPopularThemes(start, end);
     }

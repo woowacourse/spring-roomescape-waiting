@@ -18,4 +18,6 @@ public interface ThemeRepository {
     List<Theme> findPopularThemes(LocalDate start, LocalDate end);
 
     List<Theme> findAll();
+
+    boolean existsById(Long id);
 }

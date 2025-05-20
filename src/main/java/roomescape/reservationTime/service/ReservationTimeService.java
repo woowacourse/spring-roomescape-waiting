@@ -32,13 +32,19 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTimeById(final Long id) {
-        validateExistIdToDelete(id);
+        validateExistsIdToDelete(id);
+        validateExistsTime(id);
 
-        reservationTimeRepository.findById(id).orElseThrow(() -> new BusinessException("존재하지 않는 예약 시간입니다."));
         reservationTimeRepository.deleteById(id);
     }
 
-    private void validateExistIdToDelete(final Long id) {
+    private void validateExistsTime(Long id) {
+        if (reservationTimeRepository.existsById(id)) {
+            throw new BusinessException("해당 시간은 존재하지 않습니다.");
+        }
+    }
+
+    private void validateExistsIdToDelete(final Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new BusinessException("해당 시간에 예약이 존재해서 삭제할 수 없습니다.");
         }

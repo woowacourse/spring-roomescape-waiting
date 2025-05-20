@@ -52,12 +52,17 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
+    public boolean existsById(Long id) {
+        return jpaReservationRepository.existsById(id);
+    }
+
+    @Override
     public boolean existsByTimeId(final Long reservationTimeId) {
         return jpaReservationRepository.existsByTimeId(reservationTimeId);
     }
 
     @Override
-    public boolean existByThemeId(final Long themeId) {
+    public boolean existsByThemeId(final Long themeId) {
         return jpaReservationRepository.existsByThemeId(themeId);
     }
 

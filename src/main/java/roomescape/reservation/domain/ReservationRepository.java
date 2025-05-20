@@ -22,7 +22,9 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
+    boolean existsById(Long id);
+
     boolean existsByTimeId(Long timeId);
 
-    boolean existByThemeId(Long themeId);
+    boolean existsByThemeId(Long themeId);
 }
