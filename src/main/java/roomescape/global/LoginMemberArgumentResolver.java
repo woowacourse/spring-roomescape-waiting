@@ -24,6 +24,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             throws Exception {
         final HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
         final HttpSession session = request.getSession();
-        return session.getAttribute("id");
+        final Object attribute = session.getAttribute("id");
+        if (attribute instanceof String) {
+            return Long.valueOf((String) attribute);
+        }
+        return attribute;
     }
 }
