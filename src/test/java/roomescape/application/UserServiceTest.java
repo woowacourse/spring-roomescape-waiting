@@ -6,7 +6,6 @@ import static roomescape.DomainFixtures.JUNK_THEME;
 import static roomescape.DomainFixtures.JUNK_TIME_SLOT;
 import static roomescape.DomainFixtures.JUNK_USER;
 
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
-import roomescape.domain.user.User;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
