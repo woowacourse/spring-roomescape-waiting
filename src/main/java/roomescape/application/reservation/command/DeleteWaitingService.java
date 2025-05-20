@@ -27,7 +27,7 @@ public class DeleteWaitingService {
                 .orElseThrow(() -> new MemberException("회원 정보가 존재하지 않습니다."));
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new WaitingException("대기 정보가 존재하지 않습니다."));
-        if (!waiting.isOwner(member)) {
+        if (!waiting.isOwner(member) && !member.isAdmin()) {
             throw new WaitingException("대기 취소 권한이 없습니다.");
         }
         waitingRepository.delete(waiting);
