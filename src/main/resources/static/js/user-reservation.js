@@ -106,10 +106,6 @@ function renderAvailableTimes(times) {
         return;
     }
     times.forEach(time => {
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
-              response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-        */
         const startAt = time.startAt;
         const timeId = time.id;
         const alreadyBooked = time.alreadyBooked;
@@ -150,11 +146,6 @@ function onReservationButtonClick() {
 
     if (selectedDate && selectedThemeId && selectedTimeId) {
 
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-              [5단계] 예약 생성 기능 변경 - 사용자
-              request 명세에 맞게 설정
-        */
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
@@ -199,9 +190,6 @@ function onWaitButtonClick() {
             isWaiting: true,
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
         fetch('/reservations', {
             method: 'POST',
             headers: {
