@@ -11,7 +11,6 @@ public class ReservationSpecification {
             if (themeId == null) {
                 return null;
             }
-            //TODO : QueryDSL로 안정성 높이기
             return criteriaBuilder.equal(root.get("theme").get("id"), themeId);
         };
     }

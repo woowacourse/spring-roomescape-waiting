@@ -62,8 +62,6 @@ class AdminReservationThemeServiceTest extends IntegrationTestSupport {
             savedTheme
         );
         reservationRepository.save(reservation);
-        System.out.println(reservation.getId());
-        System.out.println(reservationRepository.findById(reservation.getId()));
         // when & then
         assertThatThrownBy(() -> adminReservationThemeService.delete(savedTheme.getId()))
                 .isInstanceOf(BusinessRuleViolationException.class);
