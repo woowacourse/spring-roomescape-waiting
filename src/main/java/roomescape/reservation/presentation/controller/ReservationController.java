@@ -44,6 +44,18 @@ public class ReservationController {
     }
 
     @Auth(Role.USER)
+    @PostMapping("/wait")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(
+            final @RequestBody @Valid ReservationRequest request,
+            final Long memberId
+    ) {
+        ReservationResponse reservation = reservationService.createWaitingReservation(request, memberId);
+
+        return ResponseEntity.created(createUri(reservation.getId()))
+                .body(reservation);
+    }
+
+    @Auth(Role.USER)
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getReservations(
             final @RequestParam(required = false) Long memberId,

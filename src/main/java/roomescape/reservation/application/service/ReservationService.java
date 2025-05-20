@@ -48,7 +48,26 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
 
-        final Reservation reservation = new Reservation(
+        final Reservation reservation = Reservation.createReserved(
+                member,
+                theme,
+                date,
+                reservationTime
+        );
+
+        return new ReservationResponse(reservationRepository.save(reservation));
+    }
+
+    public ReservationResponse createWaitingReservation(final ReservationRequest request, final Long memberId) {
+        ReservationTime reservationTime = getReservationTime(request.getTimeId());
+        Theme theme = getTheme(request.getThemeId());
+        LocalDate date = request.getDate();
+        validateReservationDateTime(date, reservationTime);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+
+        final Reservation reservation = Reservation.createWaiting(
                 member,
                 theme,
                 date,
@@ -67,7 +86,7 @@ public class ReservationService {
 
         Member member = findMemberById(adminReservationRequest.getMemberId());
 
-        final Reservation reservation = new Reservation(
+        final Reservation reservation = Reservation.createReserved(
                 member,
                 theme,
                 date,

@@ -42,18 +42,23 @@ public class Reservation {
     }
 
     public Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime reservationTime) {
+                       final ReservationTime reservationTime, final Status status) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.reservationTime = reservationTime;
-        this.status = Status.RESERVED;
+        this.status = status;
     }
 
-    public Reservation(final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime reservationTime) {
-        this(null, member, theme, date, reservationTime);
+    public static Reservation createReserved(final Member member, final Theme theme, final LocalDate date,
+                                             final ReservationTime reservationTime) {
+        return new Reservation(null, member, theme, date, reservationTime, Status.RESERVED);
+    }
+
+    public static Reservation createWaiting(final Member member, final Theme theme, final LocalDate date,
+                                            final ReservationTime reservationTime) {
+        return new Reservation(null, member, theme, date, reservationTime, Status.WAITING);
     }
 
     public Long getId() {
