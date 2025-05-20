@@ -7,10 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import roomescape.dto.MemberRegisterRequest;
-import roomescape.dto.MemberRegisterResponse;
-import roomescape.dto.MemberResponse;
-import roomescape.dto.MyPageReservationResponse;
+import roomescape.service.dto.MemberRegisterRequest;
+import roomescape.service.dto.MemberRegisterResponse;
+import roomescape.service.dto.MemberResponse;
+import roomescape.service.dto.MyPageReservationResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 

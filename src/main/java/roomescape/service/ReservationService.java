@@ -5,17 +5,16 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.Reservation;
-import roomescape.dto.AdminReservationRequest;
-import roomescape.dto.MyPageReservationResponse;
-import roomescape.dto.ReservationRequestV2;
-import roomescape.dto.ReservationResponse;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationThemeRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.service.dto.MyPageReservationResponse;
+import roomescape.service.dto.ReservationRecipe;
+import roomescape.service.dto.ReservationResponse;
 
 @Service
 public class ReservationService {
@@ -35,38 +34,16 @@ public class ReservationService {
         this.memberRepository = memberRepository;
     }
 
-    public ReservationResponse addReservationWithMemberId(final ReservationRequestV2 request, final long memberId) {
-        final long timeId = request.timeId();
-        final long themeId = request.themeId();
-        final Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 사용자 입니다."));
-        final ReservationTime time = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간 입니다."));
-        final ReservationTheme theme = reservationThemeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다."));
-        validateDuplicateReservation(request.date(), timeId, themeId);
-        final Reservation reservation = new Reservation(member, request.date(), time, theme);
-        Reservation saved = reservationRepository.save(reservation);
-        return ReservationResponse.fromV2(saved);
-    }
-
-    public ReservationResponse addReservationForAdmin(final AdminReservationRequest request) {
-        final long timeId = request.timeId();
-        final long themeId = request.themeId();
-        final Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 사용자 입니다."));
-        final ReservationTime time = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간 입니다."));
-        final ReservationTheme theme = reservationThemeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다."));
-        final LocalDate date = request.date();
+    public ReservationResponse addReservation(final ReservationRecipe recipe) {
+        long timeId = recipe.timeId();
+        final long themeId = recipe.themeId();
+        final LocalDate date = recipe.date();
         validateDuplicateReservation(date, timeId, themeId);
-        final Reservation reservation = Reservation.builder()
-                .member(member)
-                .date(date)
-                .time(time)
-                .theme(theme)
-                .build();
+        final Member member = memberRepository.findById(recipe.memberId())
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 사용자 입니다."));
+        final ReservationTime time = reservationTimeRepository.findById(timeId).orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간 입니다."));
+        final ReservationTheme theme = reservationThemeRepository.findById(themeId).orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다."));
+        final Reservation reservation = new Reservation(member, date, time, theme);
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.fromV2(saved);
     }
@@ -102,6 +79,9 @@ public class ReservationService {
     }
 
     public void removeReservation(final long id) {
+        if (!reservationRepository.existById(id)) {
+            throw new NoSuchElementException("[ERROR] 존재하지 않는 예약 입니다.");
+        }
         reservationRepository.deleteById(id);
     }
 }

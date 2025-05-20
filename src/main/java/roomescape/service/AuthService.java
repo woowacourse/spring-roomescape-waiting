@@ -5,7 +5,7 @@ import java.util.Base64;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.dto.LoginRequest;
+import roomescape.service.dto.LoginRequest;
 import roomescape.repository.MemberRepository;
 
 

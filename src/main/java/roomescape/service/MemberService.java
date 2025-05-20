@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
-import roomescape.dto.MemberRegisterRequest;
-import roomescape.dto.MemberRegisterResponse;
-import roomescape.dto.MemberResponse;
+import roomescape.service.dto.MemberRegisterRequest;
+import roomescape.service.dto.MemberRegisterResponse;
+import roomescape.service.dto.MemberResponse;
 import roomescape.repository.MemberRepository;
 
 @Service
@@ -25,7 +25,7 @@ public class MemberService {
         final Member newMember = Member.builder()
                 .email(request.email())
                 .name(request.name())
-                .password(request.password())
+                .password(encode(request.password()))
                 .role(MemberRole.USER)
                 .build();
         return MemberRegisterResponse.from(memberRepository.save(newMember));

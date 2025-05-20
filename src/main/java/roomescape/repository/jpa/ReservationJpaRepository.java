@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
 
 @Repository
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
@@ -14,5 +13,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
 
     List<Reservation> findByMemberId(Long memberId);
 
-    boolean existsByDateAndTime(LocalDate date, ReservationTime time);
+    boolean existsByThemeId(long themeId);
+
+    boolean existsByTimeId(long timeId);
 }

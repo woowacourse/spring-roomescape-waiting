@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.AdminReservationRequest;
-import roomescape.dto.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.ReservationRecipe;
+import roomescape.service.dto.ReservationResponse;
 
 @RestController
 public class AdminController {
@@ -24,8 +24,8 @@ public class AdminController {
     }
 
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid final AdminReservationRequest request) {
-        ReservationResponse response = reservationServiceV2.addReservationForAdmin(request);
+    public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid final ReservationRecipe recipe) {
+        ReservationResponse response = reservationServiceV2.addReservation(recipe);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

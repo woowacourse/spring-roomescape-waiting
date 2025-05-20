@@ -45,4 +45,8 @@ public class ReservationThemeRepositoryImpl implements ReservationThemeRepositor
         return reservationThemeJpaRepository.existsByName(name);
     }
 
+    @Override
+    public boolean existsById(final long id) {
+        return reservationThemeJpaRepository.existsById(id);
+    }
 }

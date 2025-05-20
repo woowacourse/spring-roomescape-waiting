@@ -11,9 +11,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.domain.Member;
-import roomescape.dto.MemberRegisterRequest;
-import roomescape.dto.MemberRegisterResponse;
-import roomescape.dto.MemberResponse;
+import roomescape.service.dto.MemberRegisterRequest;
+import roomescape.service.dto.MemberRegisterResponse;
+import roomescape.service.dto.MemberResponse;
 
 @SpringBootTest
 @TestPropertySource(properties = {

@@ -1,20 +1,23 @@
 package roomescape.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTheme;
-import roomescape.dto.ReservationThemeRequest;
-import roomescape.dto.ReservationThemeResponse;
+import roomescape.repository.ReservationRepository;
+import roomescape.service.dto.ReservationThemeRequest;
+import roomescape.service.dto.ReservationThemeResponse;
 import roomescape.repository.ReservationThemeRepository;
 
 @Service
 public class ReservationThemeService {
 
-    public static final int DELETE_FAILED_COUNT = 0;
+    private final ReservationRepository reservationRepository;
     private final ReservationThemeRepository reservationThemeRepository;
 
     public ReservationThemeService(
-            final ReservationThemeRepository reservationThemeRepository) {
+            final ReservationRepository reservationRepository, final ReservationThemeRepository reservationThemeRepository) {
+        this.reservationRepository = reservationRepository;
         this.reservationThemeRepository = reservationThemeRepository;
     }
 
@@ -40,7 +43,21 @@ public class ReservationThemeService {
     }
 
     public void removeReservationTheme(final long id) {
+        validateExistTheme(id);
+        validateExistReservation(id);
         reservationThemeRepository.deleteById(id);
+    }
+
+    private void validateExistTheme(final long id) {
+        if (!reservationThemeRepository.existsById(id)) {
+            throw new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다.");
+        }
+    }
+
+    private void validateExistReservation(final long id) {
+        if (reservationRepository.existByThemeId(id)) {
+            throw new IllegalArgumentException("[ERROR] 예약이 존재하는 테마이므로 삭제할 수 없습니다.");
+        }
     }
 
     private void validateUniqueThemes(final ReservationTheme reservationTheme) {

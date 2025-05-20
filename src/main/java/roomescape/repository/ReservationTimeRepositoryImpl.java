@@ -3,7 +3,6 @@ package roomescape.repository;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.jpa.ReservationTimeJpaRepository;
@@ -40,5 +39,10 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     @Override
     public boolean existsByStartAt(final LocalTime startAt) {
         return reservationTimeJpaRepository.existsByStartAt(startAt);
+    }
+
+    @Override
+    public boolean existsById(final long id) {
+        return reservationTimeJpaRepository.existsById(id);
     }
 }

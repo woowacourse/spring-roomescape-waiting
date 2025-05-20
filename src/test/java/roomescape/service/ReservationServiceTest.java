@@ -15,11 +15,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.dto.MemberRegisterRequest;
-import roomescape.dto.ReservationRequestV2;
-import roomescape.dto.ReservationResponse;
-import roomescape.dto.ReservationThemeRequest;
-import roomescape.dto.ReservationTimeRequest;
+import roomescape.service.dto.MemberRegisterRequest;
+import roomescape.service.dto.ReservationRecipe;
+import roomescape.service.dto.ReservationRequest;
+import roomescape.service.dto.ReservationResponse;
+import roomescape.service.dto.ReservationThemeRequest;
+import roomescape.service.dto.ReservationTimeRequest;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -49,15 +50,17 @@ class ReservationServiceTest {
         Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
         Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("", "", "")).id();
 
-        ReservationRequestV2 reservationRequest = new ReservationRequestV2(
+        ReservationRequest reservationRequest = new ReservationRequest(
                 LocalDate.now().plusDays(1),
                 themeId,
                 timeId
         );
 
+        final ReservationRecipe reservationRecipe = new ReservationRecipe(memberId, reservationRequest.date(),
+                reservationRequest.themeId(), reservationRequest.timeId());
+
         // when
-        ReservationResponse reservationResponse = reservationService.addReservationWithMemberId(reservationRequest,
-                memberId);
+        ReservationResponse reservationResponse = reservationService.addReservation(reservationRecipe);
 
         // then
         assertAll(
@@ -77,25 +80,30 @@ class ReservationServiceTest {
         Long nonExistTimeId = 2L;
         Long nonExistThemeId = 2L;
 
-        ReservationRequestV2 reservationRequest1 = new ReservationRequestV2(
+        ReservationRequest reservationRequest1 = new ReservationRequest(
                 LocalDate.now().plusDays(1),
                 nonExistThemeId,
                 timeId
         );
 
-        ReservationRequestV2 reservationRequest2 = new ReservationRequestV2(
+        ReservationRequest reservationRequest2 = new ReservationRequest(
                 LocalDate.now().plusDays(1),
                 themeId,
                 nonExistTimeId
         );
 
+        final ReservationRecipe reservationRecipe1 = new ReservationRecipe(memberId, reservationRequest1.date(),
+                reservationRequest1.themeId(), reservationRequest1.timeId());
+        final ReservationRecipe reservationRecipe2 = new ReservationRecipe(memberId, reservationRequest2.date(),
+                reservationRequest2.themeId(), reservationRequest2.timeId());
+
         // when, then
         assertAll(
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest1, memberId)
+                        () -> reservationService.addReservation(reservationRecipe1)
                 ).isInstanceOf(NoSuchElementException.class),
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest2, memberId)
+                        () -> reservationService.addReservation(reservationRecipe2)
                 ).isInstanceOf(NoSuchElementException.class)
         );
     }
@@ -108,25 +116,30 @@ class ReservationServiceTest {
         Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
         Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("", "", "")).id();
 
-        ReservationRequestV2 reservationRequest1 = new ReservationRequestV2(
+        ReservationRequest reservationRequest1 = new ReservationRequest(
                 LocalDate.now(),
                 themeId,
                 timeId
         );
 
-        ReservationRequestV2 reservationRequest2 = new ReservationRequestV2(
+        ReservationRequest reservationRequest2 = new ReservationRequest(
                 LocalDate.now().minusDays(1),
                 themeId,
                 timeId
         );
 
+        final ReservationRecipe reservationRecipe1 = new ReservationRecipe(memberId, reservationRequest1.date(),
+                reservationRequest1.themeId(), reservationRequest1.timeId());
+        final ReservationRecipe reservationRecipe2 = new ReservationRecipe(memberId, reservationRequest2.date(),
+                reservationRequest2.themeId(), reservationRequest2.timeId());
+
         // when, then
         assertAll(
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest1, memberId)
+                        () -> reservationService.addReservation(reservationRecipe1)
                 ).isInstanceOf(IllegalArgumentException.class),
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest2, memberId)
+                        () -> reservationService.addReservation(reservationRecipe2)
                 ).isInstanceOf(IllegalArgumentException.class)
         );
     }
@@ -140,16 +153,18 @@ class ReservationServiceTest {
         Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
         Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("", "", "")).id();
 
-        ReservationRequestV2 reservationRequest = new ReservationRequestV2(
+        ReservationRequest reservationRequest = new ReservationRequest(
                 LocalDate.now().plusDays(1),
                 themeId,
                 timeId
         );
-        reservationService.addReservationWithMemberId(reservationRequest,
-                memberId);
+
+        final ReservationRecipe reservationRecipe = new ReservationRecipe(memberId, reservationRequest.date(),
+                reservationRequest.themeId(), reservationRequest.timeId());
+        reservationService.addReservation(reservationRecipe);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.addReservationWithMemberId(reservationRequest, memberId))
+        assertThatThrownBy(() -> reservationService.addReservation(reservationRecipe))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -161,13 +176,15 @@ class ReservationServiceTest {
         Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
         Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("", "", "")).id();
 
-        ReservationRequestV2 reservationRequest = new ReservationRequestV2(
+        ReservationRequest reservationRequest = new ReservationRequest(
                 LocalDate.now().plusDays(1),
                 themeId,
                 timeId
         );
-        reservationService.addReservationWithMemberId(reservationRequest,
-                memberId);
+
+        final ReservationRecipe reservationRecipe = new ReservationRecipe(memberId, reservationRequest.date(),
+                reservationRequest.themeId(), reservationRequest.timeId());
+        reservationService.addReservation(reservationRecipe);
         //when
         final List<ReservationResponse> expected = reservationService.getAllReservations();
 

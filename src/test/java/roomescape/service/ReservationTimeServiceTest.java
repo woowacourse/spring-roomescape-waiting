@@ -15,8 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.dto.ReservationTimeRequest;
-import roomescape.dto.ReservationTimeResponse;
+import roomescape.service.dto.ReservationTimeRequest;
+import roomescape.service.dto.ReservationTimeResponse;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -28,6 +28,9 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private ReservationService reservationService;
 
     @Test
     @DisplayName("예약 시간을 성공적으로 추가한다")
@@ -58,7 +61,6 @@ class ReservationTimeServiceTest {
                 .doesNotThrowAnyException();
     }
 
-    // TODO : 수정 하기
     @Test
     @DisplayName("예약 시간이 예약에 사용되고 있다면 예외가 발생한다")
     @Disabled

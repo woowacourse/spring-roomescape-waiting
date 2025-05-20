@@ -54,8 +54,22 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberId(final Long memberId) {
+    public List<Reservation> findByMemberId(final long memberId) {
         return reservationJpaRepository.findByMemberId(memberId);
     }
 
+    @Override
+    public boolean existById(final long id) {
+        return reservationJpaRepository.existsById(id);
+    }
+
+    @Override
+    public boolean existByThemeId(final long themeId) {
+        return reservationJpaRepository.existsByThemeId(themeId);
+    }
+
+    @Override
+    public boolean existByTimeId(final long timeId) {
+        return reservationJpaRepository.existsByTimeId(timeId);
+    }
 }
