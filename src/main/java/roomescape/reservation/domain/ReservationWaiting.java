@@ -50,4 +50,8 @@ public class ReservationWaiting {
     public ReservationTime getReservationTime() {
         return reservationDatetime.getReservationTime();
     }
+
+    public LocalTime getStartAt() {
+        return reservationDatetime.getStartAt();
+    }
 }
