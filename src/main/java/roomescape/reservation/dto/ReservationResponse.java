@@ -15,7 +15,7 @@ public record ReservationResponse(
         MemberResponse member
 ) {
 
-    public ReservationResponse(Reservation reservation) {
+    public ReservationResponse(final Reservation reservation) {
         this(
                 reservation.getId(),
                 reservation.getDate(),

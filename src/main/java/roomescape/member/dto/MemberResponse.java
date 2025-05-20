@@ -10,7 +10,7 @@ public record MemberResponse(
         String role
 ) {
 
-    public MemberResponse(Member member) {
+    public MemberResponse(final Member member) {
         this(member.getId(), member.getName(), member.getEmail(), member.getPassword(), member.getRole().name());
     }
 }

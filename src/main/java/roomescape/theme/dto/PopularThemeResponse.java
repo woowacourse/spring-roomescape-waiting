@@ -8,7 +8,7 @@ public record PopularThemeResponse(
         String thumbnail
 ) {
 
-    public PopularThemeResponse(Theme theme) {
+    public PopularThemeResponse(final Theme theme) {
         this(theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 }

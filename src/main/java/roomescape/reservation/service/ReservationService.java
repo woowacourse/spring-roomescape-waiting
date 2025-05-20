@@ -85,15 +85,15 @@ public class ReservationService {
                 .toList();
     }
 
-    private ReservationTime findReservationTimeById(Long timeId) {
+    private ReservationTime findReservationTimeById(final Long timeId) {
         return reservationTimeRepository.findById(timeId).orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
     }
 
-    private Theme findThemeById(Long themeId) {
+    private Theme findThemeById(final Long themeId) {
         return themeRepository.findById(themeId).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 
-    private void validateReservationAvailability(LocalDate date, ReservationTime time, Theme theme) {
+    private void validateReservationAvailability(final LocalDate date, final ReservationTime time, final Theme theme) {
         if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }

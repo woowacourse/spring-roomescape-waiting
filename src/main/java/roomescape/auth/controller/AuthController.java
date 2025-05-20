@@ -51,7 +51,7 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public LoginCheckResponse checkLogin(@CookieValue(name = COOKIE_TOKEN, required = false) String token) {
+    public LoginCheckResponse checkLogin(@CookieValue(name = COOKIE_TOKEN, required = false) final String token) {
         if (token == null || token.isBlank()) {
             throw new UnauthorizedException("토큰 쿠키가 존재하지 않습니다.");
         }

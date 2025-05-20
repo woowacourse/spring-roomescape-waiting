@@ -2,7 +2,7 @@ package roomescape.exception;
 
 public class TokenCreationException extends RuntimeException {
 
-    public TokenCreationException(String message) {
+    public TokenCreationException(final String message) {
         super(message);
     }
 }

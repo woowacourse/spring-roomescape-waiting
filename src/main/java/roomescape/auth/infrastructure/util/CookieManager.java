@@ -17,7 +17,7 @@ public final class CookieManager {
 
     private final JwtProperties jwtProperties;
 
-    public ResponseCookie generateLoginCookie(String token) {
+    public ResponseCookie generateLoginCookie(final String token) {
         return ResponseCookie.from(LOGIN_TOKEN_NAME, token)
                 .httpOnly(true)
                 .path(PATH)
