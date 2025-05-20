@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.exception.UnauthorizationException;
+import roomescape.exception.UnauthorizedException;
 
 @Component
 public class JwtTokenProvider {
@@ -47,7 +47,7 @@ public class JwtTokenProvider {
             String stringId = parseClaims(token).getSubject();
             return Long.parseLong(stringId);
         } catch (NumberFormatException e) {
-            throw new UnauthorizationException("[ERROR] 잘못된 사용자 ID 형식입니다.");
+            throw new UnauthorizedException("[ERROR] 잘못된 사용자 ID 형식입니다.");
         }
     }
 
@@ -64,23 +64,23 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token);
             Claims claims = jws.getPayload();
             if (claims.getExpiration().before(new Date())) {
-                throw new UnauthorizationException("[ERROR] 토큰이 만료되었습니다.");
+                throw new UnauthorizedException("[ERROR] 토큰이 만료되었습니다.");
             }
             return claims;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new UnauthorizationException("[ERROR] 유효하지 않은 토큰입니다.");
+            throw new UnauthorizedException("[ERROR] 유효하지 않은 토큰입니다.");
         }
     }
 
     public String extractTokenFromCookie(Cookie[] cookies) {
         if (cookies == null) {
-            throw new UnauthorizationException("[ERROR] 쿠키가 존재하지 않습니다.");
+            throw new UnauthorizedException("[ERROR] 쿠키가 존재하지 않습니다.");
         }
         for (Cookie cookie : cookies) {
             if (Objects.equals(cookie.getName(), "token")) {
                 return cookie.getValue();
             }
         }
-        throw new UnauthorizationException("[ERROR] 접근 권한이 없습니다.");
+        throw new UnauthorizedException("[ERROR] 접근 권한이 없습니다.");
     }
 }
