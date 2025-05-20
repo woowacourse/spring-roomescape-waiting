@@ -1,4 +1,4 @@
-package roomescape.presentation.resvoler;
+package roomescape.presentation.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;

@@ -6,7 +6,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.presentation.interceptor.AdminAuthInterceptor;
-import roomescape.presentation.resvoler.LoginMemberArgumentResolver;
+import roomescape.presentation.resolver.LoginMemberArgumentResolver;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
