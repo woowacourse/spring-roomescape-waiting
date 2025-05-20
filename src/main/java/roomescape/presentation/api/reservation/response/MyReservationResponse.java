@@ -6,31 +6,34 @@ import roomescape.application.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.application.reservation.query.dto.WaitingResult;
 import roomescape.domain.reservation.ReservationStatus;
 
-public record ReservationWithStatusResponse(
+public record MyReservationResponse(
         Long id,
         String theme,
         LocalDate date,
         LocalTime time,
-        String status
+        String status,
+        ReservationResponseType type
 ) {
 
-    public static ReservationWithStatusResponse from(ReservationWithStatusResult reservationWithStatusResult) {
-        return new ReservationWithStatusResponse(
+    public static MyReservationResponse from(ReservationWithStatusResult reservationWithStatusResult) {
+        return new MyReservationResponse(
                 reservationWithStatusResult.reservationId(),
                 reservationWithStatusResult.themeName(),
                 reservationWithStatusResult.reservationDate(),
                 reservationWithStatusResult.reservationTime(),
-                toDisplayStatus(reservationWithStatusResult.status())
+                toDisplayStatus(reservationWithStatusResult.status()),
+                ReservationResponseType.RESERVE
         );
     }
 
-    public static ReservationWithStatusResponse from(WaitingResult waitingResult) {
-        return new ReservationWithStatusResponse(
+    public static MyReservationResponse from(WaitingResult waitingResult) {
+        return new MyReservationResponse(
                 waitingResult.waitingId(),
                 waitingResult.themeName(),
                 waitingResult.reservationDate(),
                 waitingResult.reservationTime(),
-                toDisplayStatus(waitingResult.waitingCount())
+                toDisplayStatus(waitingResult.waitingCount()),
+                ReservationResponseType.WAITING
         );
     }
 

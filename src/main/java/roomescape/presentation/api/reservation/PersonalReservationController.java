@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.query.ReservationQueryService;
 import roomescape.application.reservation.query.WaitingQueryService;
-import roomescape.presentation.api.reservation.response.ReservationWithStatusResponse;
+import roomescape.presentation.api.reservation.response.MyReservationResponse;
 import roomescape.presentation.support.methodresolver.AuthInfo;
 import roomescape.presentation.support.methodresolver.AuthPrincipal;
 
@@ -25,24 +25,30 @@ public class PersonalReservationController {
     }
 
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<ReservationWithStatusResponse>> findMineReservations(@AuthPrincipal AuthInfo authInfo) {
-        Long memberId = authInfo.memberId();
-        List<ReservationWithStatusResponse> confirmedReservations = reservationQueryService.findReservationsWithStatus(
-                        memberId
-                )
+    public ResponseEntity<List<MyReservationResponse>> findMineReservations(@AuthPrincipal AuthInfo authInfo) {
+        List<MyReservationResponse> reservations = getSortedReservationsWithStatus(authInfo.memberId());
+        return ResponseEntity.ok(reservations);
+    }
+
+    private List<MyReservationResponse> getSortedReservationsWithStatus(Long memberId) {
+        List<MyReservationResponse> confirmedReservations = getReservations(memberId);
+        List<MyReservationResponse> waitingReservations = getWaitings(memberId);
+        return Stream.concat(confirmedReservations.stream(), waitingReservations.stream())
+                .sorted(Comparator.comparing(MyReservationResponse::date))
+                .toList();
+    }
+
+    private List<MyReservationResponse> getReservations(Long memberId) {
+        return reservationQueryService.findReservationsWithStatus(memberId)
                 .stream()
-                .map(ReservationWithStatusResponse::from)
+                .map(MyReservationResponse::from)
                 .toList();
-        List<ReservationWithStatusResponse> waitingReservations = waitingQueryService.findWaitingByMemberId(memberId)
+    }
+
+    private List<MyReservationResponse> getWaitings(Long memberId) {
+        return waitingQueryService.findWaitingByMemberId(memberId)
                 .stream()
-                .map(ReservationWithStatusResponse::from)
+                .map(MyReservationResponse::from)
                 .toList();
-        List<ReservationWithStatusResponse> combined = Stream.concat(
-                        confirmedReservations.stream(),
-                        waitingReservations.stream()
-                )
-                .sorted(Comparator.comparing(ReservationWithStatusResponse::date))
-                .toList();
-        return ResponseEntity.ok(combined);
     }
 }
