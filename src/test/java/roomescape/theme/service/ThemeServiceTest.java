@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.common.CleanUp;
 import roomescape.fixture.db.MemberDbFixture;
-import roomescape.fixture.db.ReservationDateFixture;
+import roomescape.fixture.entity.ReservationDateFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ReservationTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;

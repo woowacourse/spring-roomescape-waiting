@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
-import roomescape.reservation.domain.exception.PastReservationException;
+import roomescape.reservation.exception.PastReservationException;
 import roomescape.time.domain.ReservationTime;
 
 class ReservationDateTimeTest {

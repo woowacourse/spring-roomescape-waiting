@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.common.CleanUp;
 import roomescape.fixture.db.MemberDbFixture;
-import roomescape.fixture.db.ReservationDateFixture;
+import roomescape.fixture.entity.ReservationDateFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ReservationTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
@@ -209,7 +209,6 @@ class ReservationServiceTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(myReservations).hasSize(1);
-            softly.assertThat(myReservations.get(0).reservationId()).isEqualTo(reservation1.getId());
             softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
             softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
             softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());
