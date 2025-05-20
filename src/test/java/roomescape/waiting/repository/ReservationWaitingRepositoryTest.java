@@ -10,7 +10,7 @@ import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.domain.ReservationWaiting;
+import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.dto.WaitingWithRank;
 import roomescape.theme.domain.Theme;
 

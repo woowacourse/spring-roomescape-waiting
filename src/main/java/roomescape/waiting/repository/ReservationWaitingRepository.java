@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.reservation.domain.ReservationWaiting;
+import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.waiting.dto.WaitingWithRank;
 
 public interface ReservationWaitingRepository extends JpaRepository<ReservationWaiting, Long> {

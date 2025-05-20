@@ -2,7 +2,7 @@ package roomescape.fixture.entity;
 
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.domain.ReservationWaiting;
+import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
 
 public class ReservationWaitingFixture {

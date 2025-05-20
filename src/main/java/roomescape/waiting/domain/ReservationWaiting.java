@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.waiting.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 

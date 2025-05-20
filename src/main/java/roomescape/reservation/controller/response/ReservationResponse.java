@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationWaiting;
+import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 

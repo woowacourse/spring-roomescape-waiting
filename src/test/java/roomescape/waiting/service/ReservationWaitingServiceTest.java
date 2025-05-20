@@ -21,7 +21,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.domain.ReservationWaiting;
+import roomescape.waiting.domain.ReservationWaiting;
 import roomescape.reservation.exception.AlreadyWaitingException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.service.command.ReserveCommand;
