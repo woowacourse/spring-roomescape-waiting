@@ -11,7 +11,7 @@ public interface ReserveTicketRepository extends Repository<ReserveTicket, Long>
 
     void deleteById(long id);
 
-    List<ReserveTicket> findAllByMember_id(Long memberId);
+    List<ReserveTicket> findAllByReserverId(Long reserverId);
 
     List<ReserveTicket> findAll();
 }

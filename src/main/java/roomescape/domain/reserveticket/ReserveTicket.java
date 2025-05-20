@@ -9,7 +9,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.domain.member.Member;
+import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.Reservation;
 
 @Entity
@@ -23,18 +23,18 @@ public class ReserveTicket {
     @ManyToOne
     private Reservation reservation;
 
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "reserver_id")
     @ManyToOne
-    private Member member;
+    private Reserver reserver;
 
     public ReserveTicket() {
 
     }
 
-    public ReserveTicket(Long id, Reservation reservation, Member member) {
+    public ReserveTicket(Long id, Reservation reservation, Reserver reserver) {
         this.id = id;
         this.reservation = reservation;
-        this.member = member;
+        this.reserver = reserver;
     }
 
     public Long getReservationId() {
@@ -54,7 +54,7 @@ public class ReserveTicket {
     }
 
     public String getName() {
-        return member.getName();
+        return reserver.getName();
     }
 
     public String getStatus() {
@@ -66,15 +66,15 @@ public class ReserveTicket {
     }
 
     public long getMemberId() {
-        return member.getId();
+        return reserver.getId();
     }
 
     public Reservation getReservation() {
         return reservation;
     }
 
-    public Member getMember() {
-        return member;
+    public Reserver getMember() {
+        return reserver;
     }
 
     @Override

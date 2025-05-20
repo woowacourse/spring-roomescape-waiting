@@ -37,9 +37,9 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
     }
 
     @Override
-    public List<ReserveTicket> findAllByMember_id(Long memberId) {
+    public List<ReserveTicket> findAllByReserverId(Long id) {
         return reserveTickets.stream()
-                .filter(currentReservationMember -> currentReservationMember.getMemberId() == memberId)
+                .filter(currentReservationMember -> currentReservationMember.getMemberId() == id)
                 .collect(Collectors.toList());
     }
 }

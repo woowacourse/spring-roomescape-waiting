@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import roomescape.domain.member.Member;
+import roomescape.domain.member.Reserver;
 import roomescape.dto.member.LoginRequestDto;
 import roomescape.dto.member.SignupRequestDto;
 import roomescape.infrastructure.auth.jwt.JwtTokenProvider;
@@ -16,7 +16,7 @@ import roomescape.service.member.MemberService;
 import roomescape.unit.repository.member.FakeMemberRepository;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class MemberServiceTest {
+class ReserverServiceTest {
 
     private MemberService memberService;
     private JwtTokenProvider jwtTokenProvider;
@@ -31,8 +31,8 @@ class MemberServiceTest {
     @Test
     void 회원가입_테스트() {
         long id = memberService.signup(new SignupRequestDto("praisebak", "password", "투다"));
-        Member memberById = memberService.getMemberById(id);
-        assertThat(id).isEqualTo(memberById.getId());
+        Reserver reserverById = memberService.getMemberById(id);
+        assertThat(id).isEqualTo(reserverById.getId());
     }
 
     @Test
@@ -48,21 +48,21 @@ class MemberServiceTest {
     void id로_유저를_가져올_수_있다() {
         SignupRequestDto signupRequestDto = new SignupRequestDto("praisebak", "password", "투다");
         long id = memberService.signup(signupRequestDto);
-        Member memberById = memberService.getMemberById(id);
+        Reserver reserverById = memberService.getMemberById(id);
 
-        assertThat(memberById.getUsername().equals(signupRequestDto.email()));
+        assertThat(reserverById.getUsername().equals(signupRequestDto.email()));
     }
 
     @Test
     void 토큰으로_유저를_가져올_수_있다() {
         SignupRequestDto signupRequestDto = new SignupRequestDto("praisebak", "password", "투다");
         long id = memberService.signup(signupRequestDto);
-        Member memberById = memberService.getMemberById(id);
+        Reserver reserverById = memberService.getMemberById(id);
 
-        String token = jwtTokenProvider.createToken(memberById);
+        String token = jwtTokenProvider.createToken(reserverById);
 
-        Member memberByToken = memberService.getMemberByToken(token);
-        assertThat(memberByToken.getUsername()).isEqualTo(memberById.getUsername());
+        Reserver reserverByToken = memberService.getMemberByToken(token);
+        assertThat(reserverByToken.getUsername()).isEqualTo(reserverById.getUsername());
     }
 
     @Test

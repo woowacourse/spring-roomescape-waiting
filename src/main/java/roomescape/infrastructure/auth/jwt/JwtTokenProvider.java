@@ -5,7 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.RequiredTypeException;
 import io.jsonwebtoken.security.Keys;
 import java.util.Date;
-import roomescape.domain.member.Member;
+import roomescape.domain.member.Reserver;
 import roomescape.domain.member.Role;
 import roomescape.exception.auth.AuthenticationException;
 import roomescape.infrastructure.auth.member.UserInfo;
@@ -24,12 +24,12 @@ public class JwtTokenProvider {
         this.secretKey = secretKey;
     }
 
-    public String createToken(Member member) {
+    public String createToken(Reserver reserver) {
         return Jwts.builder()
-                .setSubject(member.getId().toString())
-                .claim(USERNAME_KEY, member.getUsername())
-                .claim(NAME_KEY, member.getName())
-                .claim(ROLE_KEY, member.getRole())
+                .setSubject(reserver.getId().toString())
+                .claim(USERNAME_KEY, reserver.getUsername())
+                .claim(NAME_KEY, reserver.getName())
+                .claim(ROLE_KEY, reserver.getRole())
                 .setExpiration(new Date(System.currentTimeMillis() + ONE_HOUR))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();

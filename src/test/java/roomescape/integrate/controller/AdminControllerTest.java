@@ -76,7 +76,7 @@ class AdminControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(201);
 
-        String sql = "UPDATE member SET role = ? WHERE name = ?";
+        String sql = "UPDATE reserver SET role = ? WHERE name = ?";
         jdbcTemplate.update(sql, "ADMIN", "투다");
 
         Map<String, String> loginParam = Map.of("email", "token-login2@email.com", "password", "password");
@@ -109,7 +109,7 @@ class AdminControllerTest extends IntegrationTest {
                 .then()
                 .statusCode(201);
 
-        String sql = "UPDATE member SET role = ? WHERE name = ?";
+        String sql = "UPDATE reserver SET role = ? WHERE name = ?";
         jdbcTemplate.update(sql, "ADMIN", "투다");
 
         Map<String, String> loginParam = Map.of("email", "token-login2@email.com", "password", "password");

@@ -3,18 +3,18 @@ package roomescape.repository.member;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.Repository;
-import roomescape.domain.member.Member;
+import roomescape.domain.member.Reserver;
 
 @org.springframework.stereotype.Repository
-public interface MemberRepository extends Repository<Member, Long> {
+public interface MemberRepository extends Repository<Reserver, Long> {
 
-    Member save(Member member);
+    Reserver save(Reserver reserver);
 
-    Optional<Member> findByUsername(String username);
+    Optional<Reserver> findByUsername(String username);
 
     boolean existsByUsername(String username);
 
-    List<Member> findAll();
+    List<Reserver> findAll();
 
-    Optional<Member> findById(long id);
+    Optional<Reserver> findById(long id);
 }

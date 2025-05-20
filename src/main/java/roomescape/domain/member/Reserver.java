@@ -11,7 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class Member {
+public class Reserver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +23,11 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member() {
-        
+    public Reserver() {
+
     }
 
-    public Member(Long id, String username, String password, String name, Role role) {
+    public Reserver(Long id, String username, String password, String name, Role role) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -35,8 +35,8 @@ public class Member {
         this.name = name;
     }
 
-    public static Member of(long id, Member member) {
-        return new Member(id, member.username, member.password, member.name, member.role);
+    public static Reserver of(long id, Reserver reserver) {
+        return new Reserver(id, reserver.username, reserver.password, reserver.name, reserver.role);
     }
 
     public boolean isSameUsername(String username) {
@@ -68,11 +68,11 @@ public class Member {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Member member = (Member) o;
-        if (id == null && member.id == null) {
+        Reserver reserver = (Reserver) o;
+        if (id == null && reserver.id == null) {
             return false;
         }
-        return Objects.equals(id, member.id);
+        return Objects.equals(id, reserver.id);
     }
 
     @Override

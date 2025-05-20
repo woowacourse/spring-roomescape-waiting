@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.member.Member;
+import roomescape.domain.member.Reserver;
 import roomescape.dto.member.LoginRequestDto;
 import roomescape.dto.member.LoginResponseDto;
 import roomescape.dto.member.MemberResponseDto;
@@ -43,8 +43,8 @@ public class AuthenticationController {
 
     @GetMapping("/login/check")
     public ResponseEntity<MemberResponseDto> loginCheck(@CookieValue("token") String token) {
-        Member member = memberService.getMemberByToken(token);
-        MemberResponseDto memberResponseDto = new MemberResponseDto(member.getId(), member.getName());
+        Reserver reserver = memberService.getMemberByToken(token);
+        MemberResponseDto memberResponseDto = new MemberResponseDto(reserver.getId(), reserver.getName());
         return ResponseEntity.ok(memberResponseDto);
     }
 
