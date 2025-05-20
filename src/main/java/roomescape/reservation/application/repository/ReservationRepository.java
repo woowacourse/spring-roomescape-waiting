@@ -45,4 +45,17 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                     WHERE r.member.id = :memberId
             """)
     List<ReservationWithRank> findReservationsWithRankByMemberId(Long memberId);
+
+    @Query("""
+                    SELECT new roomescape.reservation.domain.ReservationWithRank(
+                    r, CAST((SELECT COUNT(r2)
+                    FROM Reservation r2
+                    WHERE r2.theme = r.theme
+                    AND r2.date = r.date
+                    AND r2.reservationTime = r.reservationTime
+                    AND r2.id < r.id) AS long))
+                    FROM Reservation r
+                    WHERE r.status = 'WAITING'
+            """)
+    List<ReservationWithRank> findReservationsWithRankOfWaitingStatus();
 }

@@ -18,6 +18,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
+import roomescape.reservation.presentation.dto.AdminWaitingReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.UserReservationsResponse;
@@ -176,5 +177,11 @@ public class ReservationService {
     private Member findMemberById(final Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+    }
+
+    public List<AdminWaitingReservationResponse> getWaitingReservation() {
+        return reservationRepository.findReservationsWithRankOfWaitingStatus().stream()
+                .map(AdminWaitingReservationResponse::new)
+                .toList();
     }
 }
