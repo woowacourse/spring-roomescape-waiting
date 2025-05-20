@@ -64,7 +64,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(request.getTimeId());
         Theme theme = getTheme(request.getThemeId());
         LocalDate date = request.getDate();
-        validateIsPast(LocalDateTime.of(date, reservationTime.getStartAt()));
+        validateReservationDateTime(date, reservationTime);
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
