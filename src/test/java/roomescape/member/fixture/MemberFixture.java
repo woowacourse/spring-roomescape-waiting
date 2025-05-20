@@ -11,6 +11,7 @@ public class MemberFixture {
     public static Member createMember(MemberRole role) {
         identifier++;
         return new Member(
+            identifier,
             "testUser" + identifier,
             identifier + "testEmail@naver.com",
             role,
