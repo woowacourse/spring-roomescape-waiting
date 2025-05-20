@@ -6,6 +6,7 @@ import static roomescape.reservation.controller.response.ReservationSuccessCode.
 
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,7 @@ public class ReservationApiController {
 
     private final ReservationService reservationService;
 
+    @Autowired
     public ReservationApiController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }

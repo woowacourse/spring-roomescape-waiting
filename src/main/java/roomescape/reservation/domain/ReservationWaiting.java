@@ -1,0 +1,48 @@
+package roomescape.reservation.domain;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import roomescape.member.domain.Member;
+import roomescape.theme.domain.Theme;
+
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+public class ReservationWaiting {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
+    private Long id;
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member reserver;
+    @Embedded
+    private ReservationDateTime reservationDatetime;
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private Theme theme;
+
+    @Builder
+    public ReservationWaiting(Member reserver, ReservationDateTime reservationDatetime, Theme theme) {
+        this.reserver = reserver;
+        this.reservationDatetime = reservationDatetime;
+        this.theme = theme;
+    }
+
+    public LocalDate getDate() {
+        return reservationDatetime.reservationDate()
+                .date();
+    }
+}
