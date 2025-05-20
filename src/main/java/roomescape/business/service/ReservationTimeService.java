@@ -12,9 +12,9 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.PlayTimeRequest;
-import roomescape.presentation.dto.PlayTimeResponse;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.ReservationTimeRequest;
+import roomescape.presentation.dto.ReservationTimeResponse;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,11 +29,11 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public PlayTimeResponse insert(final PlayTimeRequest playTimeRequest) {
-        validateStartAtIsNotDuplicate(playTimeRequest.startAt());
-        final ReservationTime reservationTime = playTimeRequest.toDomain();
+    public ReservationTimeResponse insert(final ReservationTimeRequest reservationTimeRequest) {
+        validateStartAtIsNotDuplicate(reservationTimeRequest.startAt());
+        final ReservationTime reservationTime = reservationTimeRequest.toDomain();
         final ReservationTime insertReservationTime = reservationTimeRepository.save(reservationTime);
-        return PlayTimeResponse.from(insertReservationTime);
+        return ReservationTimeResponse.from(insertReservationTime);
     }
 
     private void validateStartAtIsNotDuplicate(final LocalTime startAt) {
@@ -42,17 +42,17 @@ public class ReservationTimeService {
         }
     }
 
-    public List<PlayTimeResponse> findAll() {
+    public List<ReservationTimeResponse> findAll() {
         return reservationTimeRepository.findAll()
                 .stream()
-                .map(PlayTimeResponse::from)
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 
-    public PlayTimeResponse findById(final Long id) {
+    public ReservationTimeResponse findById(final Long id) {
         final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당하는 방탈출 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(id)));
-        return PlayTimeResponse.from(reservationTime);
+        return ReservationTimeResponse.from(reservationTime);
     }
 
     @Transactional

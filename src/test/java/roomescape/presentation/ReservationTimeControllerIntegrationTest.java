@@ -15,7 +15,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.presentation.dto.PlayTimeRequest;
+import roomescape.presentation.dto.ReservationTimeRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -33,7 +33,7 @@ class ReservationTimeControllerIntegrationTest {
     @DisplayName("새로운 예약 시간을 생성하면 201 상태코드와 함께 생성된 시간이 반환된다")
     void create_ValidTime_ReturnsCreatedTime() {
         // given
-        final PlayTimeRequest request = new PlayTimeRequest(LocalTime.of(14, 0));
+        final ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(14, 0));
 
         // when & then
         given()
@@ -50,7 +50,7 @@ class ReservationTimeControllerIntegrationTest {
     @DisplayName("이미 존재하는 예약 시간을 생성하려고 하면 409 상태코드를 반환한다")
     void create_DuplicateTime_ReturnsConflict() {
         // given
-        final PlayTimeRequest request = new PlayTimeRequest(LocalTime.of(14, 0));
+        final ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(14, 0));
 
         // 첫 번째 생성
         given()
@@ -88,8 +88,8 @@ class ReservationTimeControllerIntegrationTest {
     @DisplayName("모든 예약 시간을 조회하면 200 상태코드와 함께 예약 시간 목록이 반환된다")
     void readAll_ReturnsAllTimes() {
         // given
-        final PlayTimeRequest time1 = new PlayTimeRequest(LocalTime.of(14, 0));
-        final PlayTimeRequest time2 = new PlayTimeRequest(LocalTime.of(16, 0));
+        final ReservationTimeRequest time1 = new ReservationTimeRequest(LocalTime.of(14, 0));
+        final ReservationTimeRequest time2 = new ReservationTimeRequest(LocalTime.of(16, 0));
 
         given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -128,7 +128,7 @@ class ReservationTimeControllerIntegrationTest {
     @DisplayName("존재하는 예약 시간을 삭제하면 204 상태코드를 반환한다")
     void delete_ExistingTime_ReturnsNoContent() {
         // given
-        final PlayTimeRequest request = new PlayTimeRequest(LocalTime.of(14, 0));
+        final ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(14, 0));
         
         final Long timeId = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
