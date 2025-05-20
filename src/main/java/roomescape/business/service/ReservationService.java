@@ -34,6 +34,7 @@ public class ReservationService {
     private final ReservationTimes reservationTimes;
     private final Themes themes;
 
+    @Transactional
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
         val user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
@@ -57,7 +58,7 @@ public class ReservationService {
     }
 
     public List<ReservationDto> getMyReservations(final String userIdValue) {
-        List<Reservation> reservations = reservationRepository.findAllByUserId(Id.create(userIdValue));
+        val reservations = this.reservations.findAllByUserId(Id.create(userIdValue));
         return ReservationDto.fromEntities(reservations);
     }
 
