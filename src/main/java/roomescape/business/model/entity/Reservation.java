@@ -27,8 +27,6 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne
     private Theme theme;
-    @OneToMany(mappedBy = "waiting")
-    private final List<Waiting> waitingList = new ArrayList<>();
 
     protected Reservation() {
         id = Id.issue();
