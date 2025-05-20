@@ -80,4 +80,18 @@ class ThemeRepositoryTest {
         assertThat(actual).isEqualTo(comparedNames);
     }
 
+    @Test
+    @DisplayName("이름으로 존재 여부를 확인한다")
+    void test2() {
+        // given
+        String name = "새로운 테마";
+        Theme theme = new Theme(name, "설명", "썸네일");
+        Theme savedTheme = themeRepository.save(theme);
+
+        // when
+        boolean actual = themeRepository.existsByName(name);
+
+        // then
+        assertThat(actual).isTrue();
+    }
 }
