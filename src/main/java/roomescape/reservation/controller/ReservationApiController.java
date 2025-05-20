@@ -50,7 +50,7 @@ public class ReservationApiController {
     public ResponseEntity<ApiResponse<List<MyReservationResponse>>> getMyReservations(
             @Authenticated Long memberId
     ) {
-        List<MyReservationResponse> responses = reservationService.getMyReservations(memberId);
+        List<MyReservationResponse> responses = reservationService.getReservations(memberId);
         return ResponseEntity.ok(
                 ApiResponse.success(GET_MY_RESERVATIONS, responses)
         );

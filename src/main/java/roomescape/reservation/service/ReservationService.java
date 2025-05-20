@@ -92,8 +92,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<MyReservationResponse> getMyReservations(Long memberId) {
+    public List<MyReservationResponse> getReservations(Long memberId) {
         List<Reservation> myReservations = reservationRepository.findByMemberId(memberId);
+
+        // 예약 대기에서도 예약 정보를 가져와야 한다.
+
         return MyReservationResponse.from(myReservations);
     }
 }
