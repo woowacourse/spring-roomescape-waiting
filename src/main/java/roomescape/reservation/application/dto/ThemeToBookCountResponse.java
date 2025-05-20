@@ -8,17 +8,17 @@ import roomescape.reservation.domain.BookedCount;
 import roomescape.theme.domain.Theme;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record ThemeToBookCountServiceResponse(
+public record ThemeToBookCountResponse(
         Theme theme,
         BookedCount bookedCount
 ) {
 
-    public ThemeToBookCountServiceResponse {
+    public ThemeToBookCountResponse {
         validate(theme, bookedCount);
     }
 
     private void validate(final Theme theme, final BookedCount bookedCount) {
-        Validator.of(ThemeToBookCountServiceResponse.class)
+        Validator.of(ThemeToBookCountResponse.class)
                 .validateNotNull(Fields.theme, theme, DomainTerm.THEME_ID.label())
                 .validateNotNull(Fields.bookedCount, bookedCount, DomainTerm.BOOKED_COUNT.label());
     }

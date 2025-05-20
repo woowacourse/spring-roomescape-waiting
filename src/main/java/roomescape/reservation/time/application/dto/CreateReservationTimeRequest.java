@@ -9,9 +9,9 @@ import roomescape.reservation.time.domain.ReservationTime;
 import java.time.LocalTime;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record CreateReservationTimeServiceRequest(LocalTime startAt) {
+public record CreateReservationTimeRequest(LocalTime startAt) {
 
-    public CreateReservationTimeServiceRequest {
+    public CreateReservationTimeRequest {
         validate(startAt);
     }
 
@@ -21,7 +21,7 @@ public record CreateReservationTimeServiceRequest(LocalTime startAt) {
     }
 
     private void validate(final LocalTime startAt) {
-        Validator.of(CreateReservationTimeServiceRequest.class)
+        Validator.of(CreateReservationTimeRequest.class)
                 .validateNotNull(Fields.startAt, startAt, DomainTerm.RESERVATION_TIME.label());
     }
 }

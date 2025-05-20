@@ -8,17 +8,17 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.ThemeId;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record AvailableReservationTimeServiceRequest(
+public record AvailableReservationTimeRequest(
         ReservationDate date,
         ThemeId themeId
 ) {
 
-    public AvailableReservationTimeServiceRequest {
+    public AvailableReservationTimeRequest {
         validate(date, themeId);
     }
 
     private void validate(final ReservationDate date, final ThemeId themeId) {
-        Validator.of(AvailableReservationTimeServiceRequest.class)
+        Validator.of(AvailableReservationTimeRequest.class)
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
                 .validateNotNull(Fields.themeId, themeId, DomainTerm.THEME_ID.label());
     }

@@ -1,4 +1,4 @@
-package roomescape.theme.ui.dto;
+package roomescape.theme.application.dto;
 
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;

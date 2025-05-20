@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.exception.NotFoundException;
-import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
+import roomescape.reservation.application.dto.ThemeToBookCountResponse;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
@@ -42,7 +42,7 @@ public class ThemeQueryService {
 
     public List<Theme> getRanking(final ReservationDate startDate, final ReservationDate endDate, final int count) {
         return reservationQueryService.getRanking(startDate, endDate, count).stream()
-                .map(ThemeToBookCountServiceResponse::theme)
+                .map(ThemeToBookCountResponse::theme)
                 .toList();
     }
 }

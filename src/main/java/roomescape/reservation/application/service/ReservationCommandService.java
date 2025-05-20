@@ -7,7 +7,7 @@ import roomescape.common.domain.DomainTerm;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
-import roomescape.reservation.application.dto.CreateReservationServiceRequest;
+import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
@@ -27,7 +27,7 @@ public class ReservationCommandService {
     private final ThemeQueryService themeQueryService;
     private final TimeProvider timeProvider;
 
-    public Reservation create(final CreateReservationServiceRequest request) {
+    public Reservation create(final CreateReservationRequest request) {
         if (reservationQueryService.existsByParams(
                 request.date(),
                 request.timeId(),

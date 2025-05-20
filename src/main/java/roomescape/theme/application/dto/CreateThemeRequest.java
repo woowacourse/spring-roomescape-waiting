@@ -10,13 +10,13 @@ import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record CreateThemeServiceRequest(
+public record CreateThemeRequest(
         ThemeName name,
         ThemeDescription description,
         ThemeThumbnail thumbnail
 ) {
 
-    public CreateThemeServiceRequest {
+    public CreateThemeRequest {
         validate(name, description, thumbnail);
     }
 
@@ -29,9 +29,9 @@ public record CreateThemeServiceRequest(
     }
 
     private void validate(final ThemeName name, final ThemeDescription description, final ThemeThumbnail thumbnail) {
-        Validator.of(CreateThemeServiceRequest.class)
-                .validateNotNull(CreateThemeServiceRequest.Fields.name, name, DomainTerm.THEME_NAME.label())
-                .validateNotNull(CreateThemeServiceRequest.Fields.description, description, DomainTerm.THEME_DESCRIPTION.label())
-                .validateNotNull(CreateThemeServiceRequest.Fields.thumbnail, thumbnail, DomainTerm.THEME_THUMBNAIL.label());
+        Validator.of(CreateThemeRequest.class)
+                .validateNotNull(CreateThemeRequest.Fields.name, name, DomainTerm.THEME_NAME.label())
+                .validateNotNull(CreateThemeRequest.Fields.description, description, DomainTerm.THEME_DESCRIPTION.label())
+                .validateNotNull(CreateThemeRequest.Fields.thumbnail, thumbnail, DomainTerm.THEME_THUMBNAIL.label());
     }
 }

@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
-import roomescape.reservation.application.dto.CreateReservationServiceRequest;
+import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.time.domain.ReservationTimeId;
 import roomescape.theme.domain.ThemeId;
@@ -22,8 +22,8 @@ public record CreateReservationWithUserIdWebRequest(LocalDate date,
         validate(date, timeId, themeId, userId);
     }
 
-    public CreateReservationServiceRequest toServiceRequest() {
-        return new CreateReservationServiceRequest(
+    public CreateReservationRequest toServiceRequest() {
+        return new CreateReservationRequest(
                 UserId.from(userId),
                 ReservationDate.from(date),
                 ReservationTimeId.from(timeId),

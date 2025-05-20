@@ -4,6 +4,11 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
+import roomescape.reservation.application.dto.CreateReservationRequest;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.time.domain.ReservationTimeId;
+import roomescape.theme.domain.ThemeId;
+import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;
 
@@ -16,12 +21,12 @@ public record CreateReservationWebRequest(LocalDate date,
         validate(date, timeId, themeId);
     }
 
-    public CreateReservationWithUserIdWebRequest toRequestWithUserId(final Long userId) {
-        return new CreateReservationWithUserIdWebRequest(
-                date,
-                timeId,
-                themeId,
-                userId
+    public CreateReservationRequest toRequestWithUserId(final UserId userId) {
+        return new CreateReservationRequest(
+                userId,
+                ReservationDate.from(date),
+                ReservationTimeId.from(timeId),
+                ThemeId.from(themeId)
         );
     }
 

@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.theme.application.dto.CreateThemeServiceRequest;
+import roomescape.theme.application.dto.CreateThemeRequest;
 import roomescape.theme.application.service.ThemeCommandService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
@@ -37,7 +37,7 @@ class ThemeCommandServiceTest {
         final String name = "시소";
         final String description = "공포 방탈출 대표 테마";
         final String url = "https://www.naver.com";
-        final CreateThemeServiceRequest request = new CreateThemeServiceRequest(
+        final CreateThemeRequest request = new CreateThemeRequest(
                 ThemeName.from(name),
                 ThemeDescription.from(description),
                 ThemeThumbnail.from(url));
@@ -63,14 +63,14 @@ class ThemeCommandServiceTest {
     void cannotCreateWithSameThemeName() {
         // given
         final String name = "이름이같다";
-        final CreateThemeServiceRequest request1 = new CreateThemeServiceRequest(
+        final CreateThemeRequest request1 = new CreateThemeRequest(
                 ThemeName.from(name),
                 ThemeDescription.from("des"),
                 ThemeThumbnail.from("uri"));
 
         final Theme theme = themeCommandService.create(request1);
 
-        final CreateThemeServiceRequest request2 = new CreateThemeServiceRequest(
+        final CreateThemeRequest request2 = new CreateThemeRequest(
                 ThemeName.from(name),
                 ThemeDescription.from("des는 같아도 되고 달라도 되는 것"),
                 ThemeThumbnail.from("uricansametoo"));

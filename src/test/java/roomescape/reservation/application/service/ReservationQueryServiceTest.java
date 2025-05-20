@@ -12,7 +12,7 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeRepository;
-import roomescape.reservation.ui.ReservationSearchRequest;
+import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;

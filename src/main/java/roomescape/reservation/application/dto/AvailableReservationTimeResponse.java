@@ -8,17 +8,17 @@ import roomescape.reservation.domain.BookedStatus;
 import roomescape.reservation.time.domain.ReservationTime;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record AvailableReservationTimeServiceResponse(
+public record AvailableReservationTimeResponse(
         ReservationTime time,
         BookedStatus bookedStatus
 ) {
 
-    public AvailableReservationTimeServiceResponse {
+    public AvailableReservationTimeResponse {
         validate(time, bookedStatus);
     }
 
     private void validate(final ReservationTime time, final BookedStatus bookedStatus) {
-        Validator.of(AvailableReservationTimeServiceResponse.class)
+        Validator.of(AvailableReservationTimeResponse.class)
                 .validateNotNull(Fields.time, time, DomainTerm.RESERVATION_TIME.label())
                 .validateNotNull(Fields.bookedStatus, bookedStatus, DomainTerm.BOOKED_STATUS.label());
     }

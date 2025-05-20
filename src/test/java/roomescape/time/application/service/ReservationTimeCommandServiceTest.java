@@ -13,7 +13,7 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.time.application.dto.CreateReservationTimeServiceRequest;
+import roomescape.reservation.time.application.dto.CreateReservationTimeRequest;
 import roomescape.reservation.time.application.service.ReservationTimeCommandService;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeId;
@@ -57,7 +57,7 @@ class ReservationTimeCommandServiceTest {
     @DisplayName("예약 시간을 생성할 수 있다")
     void createReservationTime() {
         // given
-        final CreateReservationTimeServiceRequest request = new CreateReservationTimeServiceRequest(LocalTime.of(12, 30));
+        final CreateReservationTimeRequest request = new CreateReservationTimeRequest(LocalTime.of(12, 30));
 
         // when
         final ReservationTime reservationTime = reservationTimeCommandService.create(request);
@@ -140,7 +140,7 @@ class ReservationTimeCommandServiceTest {
         final LocalTime time = LocalTime.of(14, 0);
         reservationTimeRepository.save(ReservationTime.withoutId(time));
 
-        final CreateReservationTimeServiceRequest sameTimeRequest = new CreateReservationTimeServiceRequest(time);
+        final CreateReservationTimeRequest sameTimeRequest = new CreateReservationTimeRequest(time);
 
         // when
         // then

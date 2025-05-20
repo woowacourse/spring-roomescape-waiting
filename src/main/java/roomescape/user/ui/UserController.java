@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.user.application.UserFacade;
-import roomescape.user.ui.dto.UserResponse;
+import roomescape.user.application.dto.UserResponse;
 
 import java.util.List;
 

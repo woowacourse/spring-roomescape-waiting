@@ -1,4 +1,4 @@
-package roomescape.reservation.time.ui.dto;
+package roomescape.reservation.time.application.dto;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;

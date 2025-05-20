@@ -3,22 +3,17 @@ package roomescape.reservation.application;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.session.UserSession;
-import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
+import roomescape.reservation.application.dto.CreateReservationRequest;
+import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
-import roomescape.reservation.ui.ReservationSearchWebRequest;
-import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
-import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.reservation.ui.dto.ReservationResponse;
-import roomescape.theme.domain.ThemeId;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -41,19 +36,8 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public List<AvailableReservationTimeWebResponse> getAvailable(final LocalDate date, final Long themeId) {
-        final AvailableReservationTimeServiceRequest request = new AvailableReservationTimeServiceRequest(
-                ReservationDate.from(date),
-                ThemeId.from(themeId));
-
-        return reservationQueryService.getTimesWithBookedStatus(request).stream()
-                .map(AvailableReservationTimeWebResponse::from)
-                .toList();
-    }
-
-    @Override
-    public List<ReservationResponse> getByParams(final ReservationSearchWebRequest request) {
-        final List<Reservation> reservations = reservationQueryService.getByParams(request.toServiceRequest());
+    public List<ReservationResponse> getByParams(final ReservationSearchRequest request) {
+        final List<Reservation> reservations = reservationQueryService.getByParams(request);
         final List<UserId> userIds = reservations.stream()
                 .map(Reservation::getUserId)
                 .toList();
@@ -64,24 +48,22 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public List<ReservationResponse> getAllByUserId(final Long userId) {
-        final User user = userQueryService.getById(UserId.from(userId));
+    public List<ReservationResponse> getAllByUserId(final UserId id) {
+        final User user = userQueryService.getById(id);
         return ReservationResponse.from(
-                reservationQueryService.getAllByUserId(
-                        UserId.from(userId)), user);
+                reservationQueryService.getAllByUserId(id), user);
     }
 
     @Override
-    public ReservationResponse create(final CreateReservationWithUserIdWebRequest request, final UserSession userSession) {
-        final Reservation reservation = reservationCommandService.create(
-                request.toServiceRequest());
+    public ReservationResponse create(final CreateReservationRequest request, final UserSession userSession) {
+        final Reservation reservation = reservationCommandService.create(request);
 
         final User user = userQueryService.getById(reservation.getUserId());
         return ReservationResponse.from(reservation, user);
     }
 
     @Override
-    public void delete(final Long id) {
-        reservationCommandService.delete(ReservationId.from(id));
+    public void delete(final ReservationId id) {
+        reservationCommandService.delete(id);
     }
 }

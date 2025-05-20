@@ -8,7 +8,7 @@ import roomescape.common.exception.ConstraintConflictException;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.application.service.ReservationQueryService;
-import roomescape.reservation.time.application.dto.CreateReservationTimeServiceRequest;
+import roomescape.reservation.time.application.dto.CreateReservationTimeRequest;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeId;
 import roomescape.reservation.time.domain.ReservationTimeRepository;
@@ -22,7 +22,7 @@ public class ReservationTimeCommandService {
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
 
-    public ReservationTime create(final CreateReservationTimeServiceRequest request) {
+    public ReservationTime create(final CreateReservationTimeRequest request) {
         if (reservationTimeQueryService.existsByStartAt(request.startAt())) {
             throw new DuplicateException(DomainTerm.RESERVATION_TIME, request.startAt());
         }

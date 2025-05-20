@@ -3,11 +3,11 @@ package roomescape.theme.application;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.theme.application.dto.CreateThemeRequest;
+import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.theme.application.service.ThemeCommandService;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.ThemeId;
-import roomescape.theme.ui.dto.CreateThemeWebRequest;
-import roomescape.theme.ui.dto.ThemeResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,9 +40,9 @@ public class ThemeFacadeImpl implements ThemeFacade {
     }
 
     @Override
-    public ThemeResponse create(final CreateThemeWebRequest request) {
+    public ThemeResponse create(final CreateThemeRequest request) {
         return ThemeResponse.from(
-                themeCommandService.create(request.toServiceRequest()));
+                themeCommandService.create(request));
     }
 
     @Override

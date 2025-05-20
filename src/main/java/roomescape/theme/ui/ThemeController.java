@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.uri.UriFactory;
 import roomescape.theme.application.ThemeFacade;
 import roomescape.theme.ui.dto.CreateThemeWebRequest;
-import roomescape.theme.ui.dto.ThemeResponse;
+import roomescape.theme.application.dto.ThemeResponse;
 
 import java.net.URI;
 import java.util.List;
@@ -38,7 +38,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@RequestBody final CreateThemeWebRequest createThemeWebRequest) {
-        final ThemeResponse themeResponse = themeFacade.create(createThemeWebRequest);
+        final ThemeResponse themeResponse = themeFacade.create(createThemeWebRequest.toServiceRequest());
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(themeResponse.id()));
         return ResponseEntity.created(location)
                 .body(themeResponse);

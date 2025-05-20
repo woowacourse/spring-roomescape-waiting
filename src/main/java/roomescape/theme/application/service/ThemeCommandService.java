@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.theme.application.dto.CreateThemeServiceRequest;
+import roomescape.theme.application.dto.CreateThemeRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
@@ -20,7 +20,7 @@ public class ThemeCommandService {
     private final ThemeRepository themeRepository;
     private final ThemeQueryService themeQueryService;
 
-    public Theme create(final CreateThemeServiceRequest request) {
+    public Theme create(final CreateThemeRequest request) {
         final Theme theme = request.toDomain();
         final ThemeName name = theme.getName();
 

@@ -1,4 +1,4 @@
-package roomescape.reservation.ui;
+package roomescape.reservation.application.dto;
 
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.ThemeId;

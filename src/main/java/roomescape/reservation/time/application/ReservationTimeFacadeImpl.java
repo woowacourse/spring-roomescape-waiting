@@ -2,12 +2,11 @@ package roomescape.reservation.time.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.time.application.dto.CreateReservationTimeServiceRequest;
+import roomescape.reservation.time.application.dto.CreateReservationTimeRequest;
+import roomescape.reservation.time.application.dto.ReservationTimeResponse;
 import roomescape.reservation.time.application.service.ReservationTimeCommandService;
 import roomescape.reservation.time.application.service.ReservationTimeQueryService;
 import roomescape.reservation.time.domain.ReservationTimeId;
-import roomescape.reservation.time.ui.dto.CreateReservationTimeWebRequest;
-import roomescape.reservation.time.ui.dto.ReservationTimeResponse;
 
 import java.util.List;
 
@@ -25,15 +24,13 @@ public class ReservationTimeFacadeImpl implements ReservationTimeFacade {
     }
 
     @Override
-    public ReservationTimeResponse create(final CreateReservationTimeWebRequest request) {
+    public ReservationTimeResponse create(final CreateReservationTimeRequest request) {
         return ReservationTimeResponse.from(
-                reservationTimeCommandService.create(
-                        new CreateReservationTimeServiceRequest(
-                                request.startAt())));
+                reservationTimeCommandService.create(request));
     }
 
     @Override
-    public void delete(final Long id) {
-        reservationTimeCommandService.delete(ReservationTimeId.from(id));
+    public void delete(final ReservationTimeId id) {
+        reservationTimeCommandService.delete(id);
     }
 }

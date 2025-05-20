@@ -1,4 +1,4 @@
-package roomescape.user.ui.dto;
+package roomescape.user.application.dto;
 
 import roomescape.user.domain.User;
 
@@ -19,5 +19,4 @@ public record UserResponse(Long id, String name, String email) {
                 .map(UserResponse::from)
                 .toList();
     }
-
 }

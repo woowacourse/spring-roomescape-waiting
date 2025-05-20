@@ -1,15 +1,15 @@
-package roomescape.reservation.ui.dto;
+package roomescape.reservation.application.dto;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.time.ui.dto.ReservationTimeResponse;
-import roomescape.theme.ui.dto.ThemeResponse;
+import roomescape.reservation.time.application.dto.ReservationTimeResponse;
+import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
-import roomescape.user.ui.dto.UserResponse;
+import roomescape.user.application.dto.UserResponse;
 
 import java.time.LocalDate;
 import java.util.List;

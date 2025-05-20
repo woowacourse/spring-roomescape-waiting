@@ -10,7 +10,7 @@ import roomescape.common.domain.Email;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
-import roomescape.reservation.application.dto.CreateReservationServiceRequest;
+import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
@@ -81,7 +81,7 @@ class ReservationCommandServiceTest {
                         Password.fromEncoded("1234"),
                         UserRole.NORMAL));
 
-        final CreateReservationServiceRequest requestDto = new CreateReservationServiceRequest(
+        final CreateReservationRequest requestDto = new CreateReservationRequest(
                 user.getId(),
                 ReservationDate.from(LocalDate.of(2025, 8, 5)),
                 reservationTime.getId(),
@@ -124,7 +124,7 @@ class ReservationCommandServiceTest {
                         UserRole.NORMAL));
 
         final Reservation savedReservation = reservationCommandService.create(
-                new CreateReservationServiceRequest(
+                new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
                         reservationTime.getId(),
@@ -134,7 +134,7 @@ class ReservationCommandServiceTest {
         // when
         // then
         assertThatThrownBy(() -> reservationCommandService.create(
-                new CreateReservationServiceRequest(
+                new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
                         reservationTime.getId(),
@@ -209,16 +209,16 @@ class ReservationCommandServiceTest {
                         ThemeDescription.from("지구별 방탈출 최고"),
                         ThemeThumbnail.from("www.making.com")));
 
-        final CreateReservationServiceRequest pastDateReservationRequest =
-                new CreateReservationServiceRequest(
+        final CreateReservationRequest pastDateReservationRequest =
+                new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(now.toLocalDate().minusDays(1)),
                         validReservationTime.getId(),
                         theme.getId()
                 );
 
-        final CreateReservationServiceRequest pastTimeReservationRequest =
-                new CreateReservationServiceRequest(
+        final CreateReservationRequest pastTimeReservationRequest =
+                new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(now.toLocalDate()),
                         pastReservationTime.getId(),

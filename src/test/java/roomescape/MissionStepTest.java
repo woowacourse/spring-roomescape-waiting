@@ -22,7 +22,7 @@ import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.ReservationController;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.reservation.ui.dto.ReservationResponse;
+import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
