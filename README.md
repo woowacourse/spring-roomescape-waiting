@@ -289,7 +289,8 @@ Content-Type: application/json
 - 메서드 : GET
 - 요청 URL : /reservations?themeId={themeId}&memberId={memberId}&dateFrom={dateFrom}&dateTo={dateTo}
 - 설명 : 예약들을 조견별로 필터링한다.
-  - 각 파라미터는 선택이다.
+  - 모든 파라미터를 선택해야한다.
+  - 한 파라미터라도 null일 경우 모든 예약이 조회된다.
 
 ```json
 GET /reservations?themeId={themeId}&memberId={memberId}&dateFrom={dateFrom}&dateTo={dateTo} HTTP/1.1
