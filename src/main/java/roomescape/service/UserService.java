@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.User;
 import roomescape.dto.business.UserCreationContent;
 import roomescape.dto.response.UserProfileResponse;
+import roomescape.exception.local.DuplicatedEmailException;
 import roomescape.exception.local.NotFoundUserException;
 import roomescape.repository.UserRepository;
 
@@ -31,6 +32,7 @@ public class UserService {
     }
 
     public UserProfileResponse addUser(UserCreationContent request) {
+        validateDuplicatedEmail(request.email());
         User user = User.createWithoutId(request.role(), request.name(), request.email(), request.password());
         User savedUser = userRepository.save(user);
         return new UserProfileResponse(savedUser);
@@ -39,5 +41,12 @@ public class UserService {
     private User loadUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(NotFoundUserException::new);
+    }
+
+    private void validateDuplicatedEmail(String email) {
+        boolean isDuplicatedEmail = userRepository.existsByEmail(email);
+        if (isDuplicatedEmail) {
+            throw new DuplicatedEmailException();
+        }
     }
 }

@@ -16,6 +16,7 @@ import roomescape.domain.Role;
 import roomescape.domain.User;
 import roomescape.dto.business.UserCreationContent;
 import roomescape.dto.response.UserProfileResponse;
+import roomescape.exception.local.DuplicatedEmailException;
 import roomescape.exception.local.NotFoundUserException;
 import roomescape.repository.UserRepository;
 
@@ -87,22 +88,45 @@ class UserServiceTest {
                 .containsExactlyInAnyOrder(firstUser.getId(), secondUser.getId());
     }
 
+    @Nested
     @DisplayName("유저를 추가할 수 있다.")
-    @Test
-    void canAddUser() {
-        // given
-        UserCreationContent creationContent =
-                new UserCreationContent(Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
+    public class addUser {
 
-        // when
-        UserProfileResponse response = userService.addUser(creationContent);
+        @DisplayName("유저를 추가할 수 있다.")
+        @Test
+        void canAddUser() {
+            // given
+            UserCreationContent creationContent =
+                    new UserCreationContent(Role.ROLE_MEMBER, "회원", "test@test.com", "qwer1234!");
 
-        // then
-        User expectedUser = entityManager.find(User.class, response.id());
-        assertAll(
-                () -> assertThat(response.id()).isEqualTo(expectedUser.getId()),
-                () -> assertThat(response.name()).isEqualTo(creationContent.name()),
-                () -> assertThat(response.roleName()).isEqualTo(creationContent.role().toString())
-        );
+            // when
+            UserProfileResponse response = userService.addUser(creationContent);
+
+            // then
+            User expectedUser = entityManager.find(User.class, response.id());
+            assertAll(
+                    () -> assertThat(response.id()).isEqualTo(expectedUser.getId()),
+                    () -> assertThat(response.name()).isEqualTo(creationContent.name()),
+                    () -> assertThat(response.roleName()).isEqualTo(creationContent.role().toString())
+            );
+        }
+
+        @DisplayName("이메일이 중복인 경우 회원 추가가 불가능하다.")
+        @Test
+        void cannotAddUser() {
+            // given
+            User alreadySavedUser = entityManager.persist(
+                    User.createWithoutId(Role.ROLE_MEMBER, "회원", "member1@test.com", "password123"));
+
+            UserCreationContent creationContent =
+                    new UserCreationContent(Role.ROLE_MEMBER, "회원", alreadySavedUser.getEmail(), "qwer1234!");
+
+            entityManager.flush();
+
+            // when & then
+            assertThatThrownBy(() -> userService.addUser(creationContent))
+                    .isInstanceOf(DuplicatedEmailException.class)
+                    .hasMessage("중복된 이메일입니다.");
+        }
     }
 }
