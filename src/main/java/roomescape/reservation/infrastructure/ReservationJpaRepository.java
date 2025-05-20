@@ -1,15 +1,13 @@
 package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSpec;
 
-@Repository
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
     @Query("""
             SELECT r FROM Reservation r
@@ -21,7 +19,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
               AND (:from IS NULL OR r.spec.date >= :from)
               AND (:to IS NULL OR r.spec.date <= :to)
             """)
-    Collection<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
+    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
             @Param("memberId") Long memberId,
             @Param("themeId") Long themeId,
             @Param("from") LocalDate from,
@@ -35,4 +33,21 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     }
 
     boolean existsBySpecDateAndSpecTimeIdAndSpecThemeId(LocalDate date, Long timeId, Long themeId);
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.member
+            JOIN FETCH r.spec.theme
+            JOIN FETCH r.spec.time
+            WHERE (r.member.id = :memberId)
+            """)
+    List<Reservation> findAllByMemberId(Long id);
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.member
+            JOIN FETCH r.spec.theme
+            JOIN FETCH r.spec.time
+            """)
+    List<Reservation> findAllWithEager();
 }

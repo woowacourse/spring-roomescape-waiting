@@ -1,92 +1,79 @@
 package roomescape.member.service;
 
 import java.util.List;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.common.exception.AuthenticationException;
-import roomescape.common.exception.AuthorizationException;
-import roomescape.common.exception.InvalidEmailException;
-import roomescape.common.exception.message.LoginExceptionMessage;
-import roomescape.common.exception.message.MemberExceptionMessage;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Name;
+import roomescape.member.domain.Password;
+import roomescape.member.domain.PasswordEncoder;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.dto.MemberLoginRequest;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.MemberSignupRequest;
 import roomescape.member.dto.MemberTokenResponse;
+import roomescape.member.exception.EmailAlreadyExistsException;
+import roomescape.member.exception.MemberNotFoundException;
+import roomescape.member.exception.PasswordNotMatchedException;
 import roomescape.member.login.authorization.JwtTokenProvider;
 
 @Service
+@AllArgsConstructor
 public class MemberService {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
 
-    public MemberService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.passwordEncoder = new BCryptPasswordEncoder();
-        this.memberRepository = memberRepository;
+
+    public MemberResponse add(final MemberSignupRequest request) {
+        if (memberRepository.existsByEmail(request.email())) {
+            throw new EmailAlreadyExistsException();
+        }
+
+        Member member = new Member(
+                new Name(request.name()),
+                new Email(request.email()),
+                new Password(request.password(), passwordEncoder)
+        );
+
+        return MemberResponse.from(memberRepository.save(member));
     }
 
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
-                .map(member -> new MemberResponse(
-                        member.getId(),
-                        member.getName(),
-                        member.getEmail())
-                )
+                .map(MemberResponse::from)
                 .toList();
     }
 
+    //TODO: 지우기  (2025-05-21, 수, 3:15)
     public MemberResponse findByEmail(final String email) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new InvalidEmailException(MemberExceptionMessage.INVALID_MEMBER_EMAIL.getMessage()));
-        return new MemberResponse(member.getId(), member.getName(), member.getEmail());
+                .orElseThrow(MemberNotFoundException::new);
+        return MemberResponse.from(member);
     }
 
     public MemberResponse findByToken(final String token) {
         String email = jwtTokenProvider.getPayloadEmail(token);
         return findByEmail(email);
     }
+    //
 
     public MemberTokenResponse createToken(final MemberLoginRequest memberLoginRequest) {
         Member member = memberRepository.findByEmail(memberLoginRequest.email())
-                .orElseThrow(() -> new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage()));
-        validatePassword(memberLoginRequest.password(), member.getPassword());
+                .orElseThrow(MemberNotFoundException::new);
+        if (!passwordEncoder.matches(memberLoginRequest.password(), member.getPassword().getValue())) {
+            throw new PasswordNotMatchedException();
+        }
         String role = assignRole(memberLoginRequest.email()).getRole();
         String accessToken = jwtTokenProvider.createToken(memberLoginRequest.email(), role);
         return new MemberTokenResponse(accessToken);
     }
 
-    public MemberResponse add(final MemberSignupRequest memberSignupRequest) {
-        if (memberRepository.existsByEmail(memberSignupRequest.email())) {
-            throw new AuthorizationException(MemberExceptionMessage.DUPLICATE_MEMBER.getMessage());
-        }
-        String hashedPassword = passwordEncoder.encode(memberSignupRequest.password());
-        Member member = new Member(
-                memberSignupRequest.name(),
-                memberSignupRequest.email(),
-                hashedPassword
-        );
-        Member savedMember = memberRepository.save(member);
-
-        return new MemberResponse(
-                savedMember.getId(),
-                savedMember.getName(),
-                savedMember.getEmail()
-        );
-    }
-
     private Role assignRole(String email) {
         Member member = memberRepository.findByEmail(email).get();
         return member.getRole();
-    }
-
-    private void validatePassword(String plainPassword, String hashedPassword) {
-        if (!passwordEncoder.matches(plainPassword, hashedPassword)) {
-            throw new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage());
-        }
     }
 }

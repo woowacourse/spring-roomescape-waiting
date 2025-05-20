@@ -2,29 +2,24 @@ package roomescape.member.infrastructure;
 
 import java.util.Collection;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 
 @Repository
+@AllArgsConstructor
 public class MemberRepositoryAdapter implements MemberRepository {
     private final MemberJpaRepository memberJpaRepository;
-    private final MemberJdbcDao memberJdbcDao;
-
-    public MemberRepositoryAdapter(MemberJpaRepository memberJpaRepository, MemberJdbcDao memberJdbcDao) {
-        this.memberJpaRepository = memberJpaRepository;
-        this.memberJdbcDao = memberJdbcDao;
-    }
-
 
     @Override
     public Optional<Member> findByEmail(String email) {
-        return memberJpaRepository.findByEmail(email);
+        return memberJpaRepository.findByEmailValue(email);
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return memberJpaRepository.existsByEmail(email);
+        return memberJpaRepository.existsByEmailValue(email);
     }
 
     @Override

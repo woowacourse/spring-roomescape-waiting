@@ -1,27 +1,22 @@
 package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.domain.repository.ReservationRepository;
 
 @Repository
+@AllArgsConstructor
 public class ReservationRepositoryAdapter implements ReservationRepository {
     private final ReservationJpaRepository reservationJpaRepository;
-    private final ReservationJdbcDao reservationJdbcDao;
-
-    public ReservationRepositoryAdapter(ReservationJpaRepository reservationJpaRepository,
-                                        ReservationJdbcDao reservationJdbcDao) {
-        this.reservationJpaRepository = reservationJpaRepository;
-        this.reservationJdbcDao = reservationJdbcDao;
-    }
 
     @Override
-    public Collection<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long id, Long themeId, LocalDate from,
-                                                                             LocalDate to) {
+    public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long id, Long themeId, LocalDate from,
+                                                                       LocalDate to) {
         return reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(id, themeId, from, to);
     }
 
@@ -31,13 +26,13 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public Collection<Reservation> findAllByMemberId(Long id) {
-        return reservationJdbcDao.findAllByMemberId(id);
+    public List<Reservation> findAllByMemberId(Long id) {
+        return reservationJpaRepository.findAllByMemberId(id);
     }
 
     @Override
-    public Collection<Reservation> findAll() {
-        return reservationJdbcDao.findAll();
+    public List<Reservation> findAll() {
+        return reservationJpaRepository.findAllWithEager();
     }
 
     @Override

@@ -54,7 +54,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId).stream().toList();
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         List<WaitingWithRank> waitings = waitingRepository.findWithRankByMemberId(memberId).stream().toList();
         return MyReservationResponse.of(reservations, waitings);
     }
