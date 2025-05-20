@@ -9,7 +9,7 @@ public class ThemeFixture {
     public static List<Theme> notSavedThemes(int count) {
         List<Theme> themes = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            themes.add(new Theme("테마" + i, "테마" + i + " 설명", "테마" + i + " 썸네일"));
+            themes.add(new Theme("자동 생성 테마" + i, "테마" + i + " 설명", "테마" + i + " 썸네일"));
         }
         return themes;
     }

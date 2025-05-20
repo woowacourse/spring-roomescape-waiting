@@ -7,6 +7,7 @@ import roomescape.member.application.MemberService;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.MemberRepositoryImpl;
+import roomescape.reservation.application.AdminReservationService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.domain.ReservationRepository;
@@ -73,6 +74,13 @@ public class TestConfig {
     }
 
     @Bean
+    public MemberService memberService(
+            final MemberRepository memberRepository
+    ) {
+        return new MemberService(memberRepository);
+    }
+
+    @Bean
     public ReservationService reservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
@@ -88,9 +96,17 @@ public class TestConfig {
     }
 
     @Bean
-    public MemberService memberService(
+    public AdminReservationService adminReservationService(
+            final ReservationRepository reservationRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
             final MemberRepository memberRepository
     ) {
-        return new MemberService(memberRepository);
+        return new AdminReservationService(
+                reservationRepository,
+                reservationTimeRepository,
+                themeRepository,
+                memberRepository
+        );
     }
 }

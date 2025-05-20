@@ -11,6 +11,7 @@ import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_2;
 import java.time.LocalDate;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -39,6 +41,7 @@ import roomescape.theme.domain.ThemeRepository;
 @DataJpaTest
 @Import(TestConfig.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
+@DisplayName("회원 예약 관리 서비스")
 class ReservationServiceTest {
 
     @Autowired
@@ -57,7 +60,7 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @Test
-    void 예약을_추가한다() {
+    void 회원_권한으로_예약을_추가한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final Long timeId = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1()).getId();
@@ -73,28 +76,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약을_추가할_때_이미_예약된_시간이면_예외가_발생한다() {
-        // given
-        final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime reservationTime = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
-        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-
-        reservationRepository.save(
-                new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
-
-        final CreateReservationRequest.ForMember request =
-                new CreateReservationRequest.ForMember(date, reservationTime.getId(), theme.getId());
-        final MemberAuthInfo memberAuthInfo =
-                new MemberAuthInfo(member.getId(), member.getRole());
-
-        // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
-                .isInstanceOf(AlreadyExistException.class);
-    }
-
-    @Test
-    void 과거_시간으로_예약을_추가하면_예외가_발생한다() {
+    void 회원_권한으로_과거_시간에_예약을_추가하려_하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().minusDays(5);
         final Long timeId = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1()).getId();
@@ -112,7 +94,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 한_테마의_날짜와_시간이_중복되는_예약을_추가할_수_없다() {
+    void 이미_예약된_테마_날짜_시간으로_예약_추가를_시도하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final ReservationTime reservationTime = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
@@ -133,7 +115,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약을_삭제한다() {
+    void 회원이_본인의_예약을_삭제한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final ReservationTime reservationTime1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
@@ -151,7 +133,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 본인의_예약이_아니면_삭제할_수_없다() {
+    void 회원이_본인의_예약이_아닌_예약을_삭제하려_하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final ReservationTime reservationTime1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
@@ -171,31 +153,21 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약_목록_전체를_조회한다() {
+    void 삭제하려는_예약이_존재하지_않는_경우_예외가_발생한다() {
         // given
-        final int beforeCount = reservationService.findAll().size();
-
-        final LocalDate date1 = LocalDate.now().plusDays(1);
-        final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime reservationTime1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
-        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
 
-        final LocalDate date2 = LocalDate.now().plusDays(2);
-        final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
-        final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
+        final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
+                ReservationStatus.CONFIRMED);
+        reservationRepository.save(reservation);
+        final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
-        reservationRepository.save(
-                new Reservation(date1, time1, theme1, member, ReservationStatus.CONFIRMED)
-        );
-        reservationRepository.save(
-                new Reservation(date2, time2, theme2, member, ReservationStatus.CONFIRMED)
-        );
-
-        // when
-        final int afterCount = reservationService.findAll().size();
-
-        // then
-        assertThat(afterCount - beforeCount).isEqualTo(2);
+        // when & then
+        Assertions.assertThatThrownBy(() -> reservationService.deleteIfOwner(Long.MAX_VALUE, member1AuthInfo))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -227,7 +199,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 특정_회원의_예약_목록을_조회한다() {
+    void 회원_본인의_예약_목록을_조회한다() {
         // given
         final LocalDate date1 = LocalDate.now().plusDays(1);
         final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
