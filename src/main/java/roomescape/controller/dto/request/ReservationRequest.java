@@ -9,7 +9,7 @@ public record ReservationRequest(
     @JsonFormat(pattern = "yyyy-MM-dd") @NotNull LocalDate date,
     @NotNull Long timeId,
     @NotNull Long themeId,
-    @NotNull Long memberId
+    Long memberId
 ) {
 
 }
