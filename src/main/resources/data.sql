@@ -4,7 +4,7 @@ VALUES ('어드민', 'ADMIN', 'admin@email.com', 'password'),
        ('라젤', 'USER', 'razel@email.com', 'razelpass'),
        ('포포', 'USER', 'popo@email.com', 'popopass');
 
-INSERT INTO RESERVATION_TIME (start_at)
+INSERT INTO TIME_SLOT (start_at)
 VALUES ('10:00'),
        ('12:00'),
        ('14:00'),
@@ -25,7 +25,7 @@ VALUES ('인기 테마 3순위 테마', '나는 1번째 테마지만, 인기 순
        ('인기 테마 6순위 테마', '나는 6번째 테마지만, 인기 순위는 6위야',
         'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO RESERVATION (user_id, date, time_id, theme_id, status)
+INSERT INTO RESERVATION (user_id, date, time_slot_id, theme_id, status)
 VALUES (2, '2025-05-19', 1, 3, 'RESERVED'),
        (3, '2025-05-19', 5, 3, 'RESERVED'),
        (4, '2025-05-19', 5, 3, 'RESERVED'),

@@ -3,7 +3,7 @@ VALUES ('어드민', 'ADMIN', 'admin@email.com', 'password'),
        ('포포', 'USER', 'popo@email.com', 'password'),
        ('브라운', 'USER', 'brown@email.com', 'password');
 
-INSERT INTO RESERVATION_TIME (start_at)
+INSERT INTO TIME_SLOT (start_at)
 VALUES ('10:00'),
        ('12:00'),
        ('14:00'),
@@ -18,7 +18,7 @@ VALUES ('레벨1 탈출', '우테코 레벨1을 탈출하는 내용입니다.', 
        ('레벨4 탈출', '우테코 레벨4를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
        ('레벨5 탈출', '우테코 레벨를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO RESERVATION (user_id, date, time_id, theme_id, status)
+INSERT INTO RESERVATION (user_id, date, time_slot_id, theme_id, status)
 VALUES (1, '2025-05-04', 1, 1, 'RESERVED'),
        (1, '2025-05-04', 5, 2, 'RESERVED'),
        (1, '2025-05-04', 6, 2, 'RESERVED'),

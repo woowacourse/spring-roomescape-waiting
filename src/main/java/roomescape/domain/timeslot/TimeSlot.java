@@ -14,7 +14,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
-@Entity(name = "RESERVATION_TIME")
+@Entity
 public class TimeSlot {
 
     @Id
