@@ -24,4 +24,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                                 LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
+
+    long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 }

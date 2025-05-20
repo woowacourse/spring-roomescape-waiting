@@ -104,6 +104,7 @@
 - [x] 로그인 후 Cookie를 이용하여 사용자의 정보를 조회하는 API를 구현.
 
 ### Request
+
 ```http request
 POST /login HTTP/1.1
 content-type: application/json
@@ -114,15 +115,20 @@ host: localhost:8080
     "email": "admin@email.com"
 }
 ```
+
 ### Response
+
 ```http request
 HTTP/1.1 200 OK
 Content-Type: application/json
 Keep-Alive: timeout=60
 Set-Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI; Path=/; HttpOnly
 ```
+
 ---
+
 ### Request
+
 ```http request
 GET /login/check HTTP/1.1
 cookie: _ga=GA1.1.48222725.1666268105; _ga_QD3BVX7MKT=GS1.1.1687746261.15.1.1687747186.0.0.0; Idea-25a74f9c=3cbc3411-daca-48c1-8201-51bdcdd93164; token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
@@ -130,6 +136,7 @@ host: localhost:8080
 ```
 
 ### Response
+
 ```http request
 HTTP/1.1 200 OK
 Connection: keep-alive
@@ -142,15 +149,18 @@ Transfer-Encoding: chunked
     "name": "어드민"
 }
 ```
+
 ---
 
 ## 5단계
+
 - [x] Cookie에 담긴 인증 정보를 이용해서 멤버 객체를 만드는 로직을 분리
     - [x] HandlerMethodArgumentResolver을 활용
 -[x] 사용자가 예약 생성 시, 로그인한 사용자 정보를 활용하도록 리팩터링
     - [x] 사용자가 보낸 쿠키 활용
 
 ### Request
+
 ```http request
 POST /reservations HTTP/1.1
 content-type: application/json
@@ -169,6 +179,7 @@ host: localhost:8080
 -[x] 관리자가 예약 생성 시, 유저를 조회하여 선택 후 예약을 생성하도록 리팩터링
 
 ### Request
+
 ```http request
 POST /admin/reservations HTTP/1.1
 content-type: application/json
@@ -184,6 +195,7 @@ host: localhost:8080
 ```
 
 ---
+
 ## 6단계
 
 - [x] 어드민 페이지 진입은 admin권한이 있는 사람만 할 수 있도록 제한.
@@ -192,8 +204,9 @@ host: localhost:8080
     - 멤버 Id,테마 id,시작일,마지막일
 
 ---
+
 # 방탈출 예약 대기
- 
+
 ## 1단계
 
 - [x] Spring Data JPA 적용.
@@ -203,6 +216,7 @@ host: localhost:8080
 - [x] 내 예약 목록 조회 기능 구현
 
 ### Request
+
 ```http request
 GET /reservations-mine HTTP/1.1
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
@@ -210,8 +224,9 @@ host: localhost:8080
 ```
 
 ### Response
+
 ```http request
-HTTP/1.1 200 
+HTTP/1.1 200
 Content-Type: application/json
 
 [
@@ -237,4 +252,23 @@ Content-Type: application/json
         "status": "예약"
     }
 ]
+```
+
+## 3단계
+
+- [x] 예약 대기 요청 기능 구현
+
+### Request
+
+```http request
+POST /reservations/waiting HTTP/1.1
+content-type: application/json
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+host: localhost:8080
+
+{
+    "date": "2024-03-01",
+    "themeId": 1,
+    "timeId": 1
+}
 ```

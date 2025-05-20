@@ -6,12 +6,15 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.enums.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.WaitingReservationRequest;
 import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
@@ -20,6 +23,7 @@ import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservation.ReservationStatusRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
 
@@ -30,14 +34,19 @@ public class ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationStatusRepository statusRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository timeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
+                              MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository,
+                              ReservationStatusRepository statusRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.statusRepository = statusRepository;
     }
 
     public ReservationResponse create(ReservationRequest request, Member member) {
@@ -55,8 +64,11 @@ public class ReservationService {
             throw new ReservationAlreadyExistsException();
         }
 
+        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
+        statusRepository.save(status);
+
         Reservation newReservation = new Reservation(request.date(),
-                reservationTime, theme, member);
+                reservationTime, theme, member, status);
 
         return ReservationResponse.from(reservationRepository.save(newReservation));
     }
@@ -79,8 +91,11 @@ public class ReservationService {
         Member member = memberRepository.findById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new MemberNotFoundException(adminReservationRequest.memberId()));
 
+        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
+        statusRepository.save(status);
+
         Reservation newReservation = new Reservation(adminReservationRequest.date(),
-                reservationTime, theme, member);
+                reservationTime, theme, member, status);
 
         return ReservationResponse.from(reservationRepository.save(newReservation));
     }
@@ -104,5 +119,22 @@ public class ReservationService {
                 .stream()
                 .map(MemberReservationResponse::from)
                 .toList();
+    }
+
+    public ReservationResponse createWaitingReservation(WaitingReservationRequest request, Member member) {
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
+
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
+
+        long waitingCount = reservationRepository.countByDateAndTimeAndTheme(request.date(), time, theme);
+
+        ReservationStatus status = new ReservationStatus(Waiting.WAITING, waitingCount + 1);
+        statusRepository.save(status);
+
+        Reservation reservation = reservationRepository.save(new Reservation(request.date(),
+                time, theme, member, status));
+        return ReservationResponse.from(reservation);
     }
 }

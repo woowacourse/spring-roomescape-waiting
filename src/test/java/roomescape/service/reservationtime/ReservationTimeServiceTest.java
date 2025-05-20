@@ -16,9 +16,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
+import roomescape.domain.enums.Waiting;
 import roomescape.dto.reservationtime.AvailableTimeResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.exception.reservationtime.ReservationTimeAlreadyExistsException;
@@ -36,6 +38,8 @@ class ReservationTimeServiceTest {
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
+
+    private final ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
 
     @DisplayName("중복되는 시간은 생성할 수 없다")
     @Test
@@ -82,7 +86,8 @@ class ReservationTimeServiceTest {
 
         Member member = new Member(10L, "name", "email@email.com", "pw", Role.USER);
         Theme theme = new Theme(themeId, "theme", "description", "thumbnail");
-        Reservation reservation = new Reservation(1L, date, new ReservationTime(1L, LocalTime.now()), theme, member);
+        Reservation reservation = new Reservation(1L, date, new ReservationTime(1L, LocalTime.now()), theme, member,
+                status);
         when(reservationRepository.findAllByDateAndThemeId(date, themeId)).thenReturn(List.of(reservation));
         when(timeRepository.findAll()).thenReturn(List.of(new ReservationTime(1L, LocalTime.now()),
                 new ReservationTime(2L, LocalTime.now())));

@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import roomescape.exception.reservation.ReservationFieldRequiredException;
@@ -35,20 +36,26 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id")
+    private ReservationStatus status;
+
     protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member,
+                       ReservationStatus status) {
         validate(date, time, theme, member);
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
+        this.status = status;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, ReservationStatus status) {
+        this(null, date, time, theme, member, status);
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -100,5 +107,9 @@ public class Reservation {
 
     public Member getMember() {
         return member;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }

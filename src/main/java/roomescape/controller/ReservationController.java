@@ -14,6 +14,7 @@ import roomescape.domain.Member;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.WaitingReservationRequest;
 import roomescape.service.reservation.ReservationService;
 
 @RestController
@@ -46,5 +47,13 @@ public class ReservationController {
     @GetMapping("reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMyReservations(Member member) {
         return ResponseEntity.ok().body(reservationService.getReservationByMember(member));
+    }
+
+    @PostMapping("reservations/waiting")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(
+            @Valid @RequestBody WaitingReservationRequest request,
+            Member member) {
+        ReservationResponse response = reservationService.createWaitingReservation(request, member);
+        return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 }

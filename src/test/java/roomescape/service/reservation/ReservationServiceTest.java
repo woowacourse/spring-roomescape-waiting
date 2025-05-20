@@ -17,17 +17,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
+import roomescape.domain.enums.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservation.WaitingReservationRequest;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservation.ReservationStatusRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
 
@@ -46,8 +50,13 @@ class ReservationServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
+    @Mock
+    private ReservationStatusRepository reservationStatusRepository;
+
     @InjectMocks
     private ReservationService reservationService;
+
+    private final ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
 
     @DisplayName("예약 시간이 존재하지 않으면 예약을 생성할 수 없다")
     @Test
@@ -126,20 +135,52 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "admin@a.com", "pw", roomescape.domain.enums.Role.ADMIN);
-        Reservation reservation = new Reservation(99L, date, time, theme, member);
+        Reservation reservation = new Reservation(99L, date, time, theme, member, status);
+        ReservationStatus reservationStatus = new ReservationStatus(Waiting.CONFIRMED, null);
 
-        // when
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
-        when(reservationRepository.save(any())).thenReturn(reservation);
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+        when(reservationStatusRepository.save(any(ReservationStatus.class))).thenReturn(reservationStatus);
 
-        // then
+        // when
         ReservationResponse response = reservationService.createByAdmin(request);
 
+        // then
         assertThat(response.id()).isEqualTo(99L);
         assertThat(response.member().name()).isEqualTo("관리자");
         assertThat(response.theme().name()).isEqualTo("SF 테마");
         assertThat(response.date()).isEqualTo(date);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 생성할 수 있다.")
+    void createWaitingReservation() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        long timeId = 2L;
+        long themeId = 2L;
+        long memberId = 2L;
+
+        WaitingReservationRequest request = new WaitingReservationRequest(date, timeId, themeId);
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
+        Member member = new Member(memberId, "관리자", "email@email.com", "pw", roomescape.domain.enums.Role.ADMIN);
+        Reservation reservation = new Reservation(99L, date, time, theme, member, status);
+        ReservationStatus reservationStatus = new ReservationStatus(Waiting.CONFIRMED, null);
+
+        when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
+        when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
+        when(reservationRepository.countByDateAndTimeAndTheme(date, time, theme)).thenReturn(3L);
+        when(reservationStatusRepository.save(any(ReservationStatus.class))).thenReturn(reservationStatus);
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+
+        // when
+        ReservationResponse response = reservationService.createWaitingReservation(request, member);
+
+        // then
+        assertThat(response.id()).isEqualTo(99L);
     }
 }

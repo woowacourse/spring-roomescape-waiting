@@ -15,9 +15,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
+import roomescape.domain.enums.Waiting;
 import roomescape.repository.member.MemberRepository;
 
 @DataJpaTest
@@ -119,12 +121,51 @@ class ReservationRepositoryTest {
         );
     }
 
+    @Test
+    @DisplayName("특정 날짜, 시간, 테마의 예약 개수를 반환할 수 있다")
+    void countByDateAndTimeAndThemeTest() {
+        // given
+        LocalDate date = LocalDate.of(2025, 5, 1);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        entityManager.persist(time);
+
+        Theme theme1 = new Theme("theme1", "description", "thumbnail");
+        entityManager.persist(theme1);
+
+        for (int i = 0; i < 3; i++) {
+            ReservationStatus reservationStatus = new ReservationStatus(Waiting.CONFIRMED, null);
+            entityManager.persist(reservationStatus);
+
+            Reservation reservation = new Reservation(date, time, theme1, member, reservationStatus);
+            entityManager.persist(reservation);
+        }
+
+        ReservationStatus otherDateStatus = new ReservationStatus(Waiting.CONFIRMED, null);
+        entityManager.persist(otherDateStatus);
+
+        Reservation otherDateReservation = new Reservation(date.plusDays(1), time, theme1, member, otherDateStatus);
+        entityManager.persist(otherDateReservation);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        long result = reservationRepository.countByDateAndTimeAndTheme(date, time, theme1);
+
+        // then
+        assertThat(result).isEqualTo(3);
+    }
+
     private void createReservationsInRange(Theme theme, int count, LocalDate startDate, Member targetMember) {
         for (int i = 0; i < count; i++) {
             ReservationTime time = new ReservationTime(LocalTime.of(10, 0).plusHours(i % 8));
             entityManager.persist(time);
 
-            Reservation reservation = new Reservation(startDate.plusDays(i % 7), time, theme, targetMember);
+            ReservationStatus reservationStatus = new ReservationStatus(Waiting.CONFIRMED, null);
+            entityManager.persist(reservationStatus);
+
+            Reservation reservation = new Reservation(startDate.plusDays(i % 7), time, theme, targetMember,
+                    reservationStatus);
             entityManager.persist(reservation);
         }
     }
