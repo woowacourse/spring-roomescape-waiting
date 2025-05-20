@@ -134,14 +134,16 @@ public class ReservationService {
         }
 
         reservationRepository.delete(reservation);
+        acceptStatusByFirstWaiting(reservation);
     }
 
     @Transactional
     public void deleteReservationByAdmin(final Long reservationId) {
-        reservationRepository.findById(reservationId)
+        Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
         reservationRepository.deleteById(reservationId);
+        acceptStatusByFirstWaiting(reservation);
     }
 
     private ReservationTime getReservationTime(Long timeId) {
@@ -152,6 +154,13 @@ public class ReservationService {
     private Theme getTheme(final Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new NoSuchElementException("테마 정보를 찾을 수 없습니다."));
+    }
+
+    private void acceptStatusByFirstWaiting(final Reservation reservation) {
+        reservationRepository.findFirstWaitingReservation(
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme()).acceptStatus();
     }
 
     private void validateReservationDateTime(LocalDate reservationDate, ReservationTime reservationTime) {
