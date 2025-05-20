@@ -1,0 +1,24 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  # DB connection setting
+  datasource:
+    url: jdbc:h2:mem:database
+    username: sa
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 애플리케이션 실행 시작 시기에 @Entity 정보를 기반으로 테이블을 생성하고, 종료 시 삭제함
+    defer-datasource-initialization: true # Hibernate가  @Entity 정보 기반으로 DDL을 실행한 이후에 data.sql이 실행됨을 보장함
+    show-sql: true # JPA가 실행하는 SQL 쿼리를 콘솔에 출력해주는 디버그 기능
+    properties:
+      hibernate:
+        format_sql: true # 출력되는 SQL 쿼리를 보기 편하게 포맷팅 (들여쓰기 등)
+
+security:
+  jwt:
+    access-token:
+      secret-key: since-jjwt-api-0.11-secret-key-must-be-longer-than-32-bytes
+      validity-in-milliseconds: 900000 # 15 minutes
