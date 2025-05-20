@@ -20,13 +20,16 @@ public class UserService {
 
     @Transactional
     public User register(final String email, final String password, final String name) {
-        var optionalUser = repository.findByEmail(new Email(email));
-        if (optionalUser.isPresent()) {
+        if (existsAlready(email)) {
             throw new AlreadyExistedException("이미 해당 이메일로 가입된 사용자가 있습니다.");
         }
 
         var user = new User(new UserName(name), new Email(email), new Password(password));
         return repository.save(user);
+    }
+
+    private boolean existsAlready(final String email) {
+        return repository.findByEmail(new Email(email)).isPresent();
     }
 
     @Transactional(readOnly = true)
