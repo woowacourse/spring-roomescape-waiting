@@ -1,35 +1,51 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
+import javax.sql.DataSource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.MemberRepositoryImpl;
+import roomescape.repository.jpa.MemberJpaRepository;
 
-@SpringBootTest
+@DataJpaTest
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",          // SQL 스크립트 실행 중지
         "spring.jpa.hibernate.ddl-auto=create-drop",  // Hibernate DDL 자동 생성 비활성화
 })
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@Transactional
 class MemberServiceTest {
 
-    @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private MemberJpaRepository memberJpaRepository;
 
+    @Autowired
+    private DataSource dataSource;
+
+    @BeforeEach
+    void setUp() {
+        MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository, new JdbcTemplate(dataSource));
+        memberService = new MemberService(memberRepository);
+    }
+
+    @DisplayName("사용자를 정상적으로 추가한다")
     @Test
-    @Transactional
     void addMember() {
         //given
         final MemberRegisterRequest memberRegisterRequest = new MemberRegisterRequest("test", "test", "차니");
@@ -39,15 +55,26 @@ class MemberServiceTest {
 
         //then
         assertAll(
-                () -> assertThat(expected.id()).isEqualTo(1L),
                 () -> assertThat(expected.name()).isEqualTo("차니"),
                 () -> assertThat(expected.email()).isEqualTo("test")
         );
-
     }
 
+    @DisplayName("이미 존재하는 이메일로 사용자를 추가할 시 예외가 발생한다.")
     @Test
-    @Transactional
+    void addMemberWithDuplicateEmailTest() {
+        // given
+        final MemberRegisterRequest memberRegisterRequest = new MemberRegisterRequest("test", "test", "차니");
+        memberService.addMember(memberRegisterRequest);
+
+        // when, then
+        final MemberRegisterRequest duplicateEmailMemberRegisterRequest = new MemberRegisterRequest("test", "test", "히포");
+        assertThatThrownBy(() -> memberService.addMember(duplicateEmailMemberRegisterRequest))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("모든 사용자를 조회한다")
+    @Test
     void getAllMembers() {
         //given
         final MemberRegisterRequest memberRegisterRequest = new MemberRegisterRequest("test", "test", "차니");
@@ -61,8 +88,8 @@ class MemberServiceTest {
 
     }
 
+    @DisplayName("사용자의 id로 사용자를 조회한다")
     @Test
-    @Transactional
     void getMemberById() {
         //given
         final MemberRegisterRequest memberRegisterRequest = new MemberRegisterRequest("test", "test", "차니");

@@ -25,7 +25,7 @@ public class MemberService {
         final Member newMember = Member.builder()
                 .email(request.email())
                 .name(request.name())
-                .password(request.password())
+                .password(encode(request.password()))
                 .role(MemberRole.USER)
                 .build();
         return MemberRegisterResponse.from(memberRepository.save(newMember));

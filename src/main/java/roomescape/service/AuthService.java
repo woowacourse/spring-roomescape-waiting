@@ -16,17 +16,17 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
-    public Member getMemberByEmailAndPassword(final LoginRequest loginRequest) {
+    public Long authenticate(final LoginRequest loginRequest) {
         final Member member = memberRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 사용자를 찾을 수 없습니다."));
         if (!matches(loginRequest.password(), member.getPassword())) {
             throw new IllegalArgumentException("[ERROR] 비밀번호가 일치 하지않습니다.");
         }
-        return member;
+        return member.getId();
     }
 
-    public void updateSessionId(final Member member, final String sessionId) {
-        memberRepository.updateSessionId(member.getId(), sessionId);
+    public void updateSessionIdByMemberId(final Long memberId, final String sessionId) {
+        memberRepository.updateSessionId(memberId, sessionId);
     }
 
     private String encode(final String rawPassword) {

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.LoginResponse;
 import roomescape.service.AuthService;
@@ -17,6 +16,8 @@ import roomescape.service.MemberService;
 public class LoginController {
 
     private static final String SESSION_KEY = "id";
+    private static final int SESSION_TIMEOUT_SECOND = 60 * 60;
+
     private final AuthService authService;
     private final MemberService memberService;
 
@@ -32,10 +33,13 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody final LoginRequest loginRequest, final HttpSession session) {
-        final Member member = authService.getMemberByEmailAndPassword(loginRequest);
-        session.setAttribute(SESSION_KEY, member.getId());
-        session.setMaxInactiveInterval(60 * 60);
-        authService.updateSessionId(member, session.getId());
+        final Long memberId = authService.authenticate(loginRequest);
+
+        session.setAttribute(SESSION_KEY, memberId);
+        session.setMaxInactiveInterval(SESSION_TIMEOUT_SECOND);
+
+        authService.updateSessionIdByMemberId(memberId, session.getId());
+
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
