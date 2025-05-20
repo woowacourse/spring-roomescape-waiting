@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.waiting.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -16,6 +16,7 @@ import roomescape.fixture.db.MemberDbFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
@@ -23,9 +24,9 @@ import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.domain.ReservationWaiting;
 import roomescape.reservation.exception.AlreadyWaitingException;
 import roomescape.reservation.exception.PastReservationException;
-import roomescape.reservation.repository.ReservationWaitingRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.repository.ReservationWaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ReservationWaitingServiceTest {
@@ -113,7 +114,7 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.waiting(command))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test

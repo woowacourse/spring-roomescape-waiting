@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.waiting.repository;
 
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
@@ -11,7 +11,7 @@ import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.domain.ReservationWaiting;
-import roomescape.reservation.dto.WaitingWithRank;
+import roomescape.waiting.dto.WaitingWithRank;
 import roomescape.theme.domain.Theme;
 
 @CustomJpaTest
@@ -95,6 +95,32 @@ class ReservationWaitingRepositoryTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(존재함).isTrue();
             softly.assertThat(존재하지않음).isFalse();
+        });
+    }
+
+    @Test
+    void 대기_예약의_소유자를_확인할_수_있다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Member 유저2 = memberDbFixture.유저2_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        ReservationWaiting waiting = ReservationWaiting.builder()
+                .reserver(유저1)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+        ReservationWaiting savedWaiting = reservationWaitingRepository.save(waiting);
+
+        // when
+        boolean 소유자_확인 = reservationWaitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저1.getId());
+        boolean 다른_회원_확인 = reservationWaitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저2.getId());
+
+        // then
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(소유자_확인).isTrue();
+            softly.assertThat(다른_회원_확인).isFalse();
         });
     }
 }
