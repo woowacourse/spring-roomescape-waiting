@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -73,7 +74,7 @@ class ThemeRepositoryTest {
         List<String> actual = themeRepository.findTopReservedThemesSince(
                         LocalDate.now().minusDays(2),
                         LocalDate.now(),
-                        2
+                        PageRequest.of(0, 2)
                 ).stream()
                 .map(Theme::getName)
                 .toList();

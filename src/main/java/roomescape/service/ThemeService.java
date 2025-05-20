@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
@@ -70,12 +71,14 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponseDto> findPopularThemes(String date) {
-        LocalDate parsedDate = LocalDate.parse(date);
+        LocalDate startDate = LocalDate.parse(date);
+        LocalDate endDate = startDate.minusDays(POPULAR_DAY_RANGE);
+        PageRequest pageRequest = PageRequest.of(0, POPULAR_THEME_SIZE);
 
         return themeRepository.findTopReservedThemesSince(
-                        parsedDate,
-                        parsedDate.minusDays(POPULAR_DAY_RANGE),
-                        POPULAR_THEME_SIZE).stream()
+                        startDate,
+                        endDate,
+                        pageRequest).stream()
                 .map(theme -> new ThemeResponseDto(
                         theme.getId(),
                         theme.getName(),
