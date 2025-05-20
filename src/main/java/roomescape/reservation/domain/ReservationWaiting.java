@@ -9,12 +9,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -42,7 +44,10 @@ public class ReservationWaiting {
     }
 
     public LocalDate getDate() {
-        return reservationDatetime.reservationDate()
-                .date();
+        return reservationDatetime.getDate();
+    }
+
+    public ReservationTime getReservationTime() {
+        return reservationDatetime.getReservationTime();
     }
 }

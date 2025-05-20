@@ -4,19 +4,33 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.reservation.domain.exception.PastReservationException;
+import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import roomescape.reservation.exception.PastReservationException;
 import roomescape.time.domain.ReservationTime;
 
 @Embeddable
-public record ReservationDateTime(
-        @Embedded
-        ReservationDate reservationDate,
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+public class ReservationDateTime {
+    @Embedded
+    private ReservationDate reservationDate;
+    @JoinColumn(name = "time_id")
+    @ManyToOne
+    private ReservationTime reservationTime;
 
-        @JoinColumn(name = "time_id")
-        @ManyToOne
-        ReservationTime reservationTime
-) {
+    public ReservationDateTime(
+            ReservationDate reservationDate,
+
+            ReservationTime reservationTime
+    ) {
+        this.reservationDate = reservationDate;
+        this.reservationTime = reservationTime;
+    }
 
     public static ReservationDateTime create(ReservationDate reservationDate, ReservationTime reservationTime) {
         validatePast(reservationDate, reservationTime);
@@ -24,11 +38,19 @@ public record ReservationDateTime(
     }
 
     private static void validatePast(ReservationDate reservationDate, ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate.date(), reservationTime.getStartAt());
+        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate.getDate(), reservationTime.getStartAt());
         LocalDateTime now = LocalDateTime.now();
 
         if (reservationDateTime.isBefore(now)) {
             throw new PastReservationException();
         }
+    }
+
+    public LocalDate getDate() {
+        return reservationDate.getDate();
+    }
+
+    public LocalTime getStartAt() {
+        return reservationTime.getStartAt();
     }
 }

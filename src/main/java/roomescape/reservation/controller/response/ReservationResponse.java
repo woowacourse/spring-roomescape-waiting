@@ -31,7 +31,7 @@ public record ReservationResponse(
                 reservationWaiting.getId(),
                 MemberResponse.from(reservationWaiting.getReserver()),
                 reservationWaiting.getDate(),
-                ReservationTimeResponse.from(reservationWaiting.getReservationDatetime().reservationTime()),
+                ReservationTimeResponse.from(reservationWaiting.getReservationTime()),
                 ThemeResponse.from(reservationWaiting.getTheme())
         );
     }

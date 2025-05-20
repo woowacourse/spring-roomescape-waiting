@@ -51,8 +51,8 @@ class ReservationApiTest {
         Long memberId = memberDbFixture.유저1_생성().getId();
         Long themeId = themeDbFixture.공포().getId();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Long timeId = reservationDateTime.reservationTime().getId();
-        String dateTime = formatDateTime(reservationDateTime.reservationDate().date());
+        Long timeId = reservationDateTime.getReservationTime().getId();
+        String dateTime = formatDateTime(reservationDateTime.getDate());
 
         HashMap<String, Object> request = new HashMap<>();
         request.put("memberId", memberId);
@@ -81,8 +81,8 @@ class ReservationApiTest {
     void 예약_생성_시_null_값을_허용하지_않는다() {
         Long themeId = themeDbFixture.공포().getId();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Long timeId = reservationDateTime.reservationTime().getId();
-        String dateTime = formatDateTime(reservationDateTime.reservationDate().date());
+        Long timeId = reservationDateTime.getReservationTime().getId();
+        String dateTime = formatDateTime(reservationDateTime.getDate());
 
         HashMap<String, Object> request = new HashMap<>();
         request.put("memberId", null);

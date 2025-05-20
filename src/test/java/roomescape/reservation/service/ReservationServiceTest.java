@@ -60,7 +60,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeDbFixture.열시();
         Theme theme = themeDbFixture.공포();
         Member reserver = memberDbFixture.유저1_생성();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
 
         ReserveCommand command = new ReserveCommand(
                 date,
@@ -205,7 +205,7 @@ class ReservationServiceTest {
         Reservation reservation1 = reservationRepository.save(Reservation.reserve(member1, reservationDateTime, theme));
         reservationRepository.save(Reservation.reserve(member2, reservationDateTime, theme));
 
-        List<MyReservationResponse> myReservations = reservationService.getMyReservations(member1.getId());
+        List<MyReservationResponse> myReservations = reservationService.getReservations(member1.getId());
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(myReservations).hasSize(1);
@@ -220,7 +220,7 @@ class ReservationServiceTest {
     void 존재하지_않는_회원으로_예약할_수_없다() {
         ReservationTime reservationTime = reservationTimeDbFixture.열시();
         Theme theme = themeDbFixture.공포();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
 
         ReserveCommand command = new ReserveCommand(
                 date,
@@ -238,7 +238,7 @@ class ReservationServiceTest {
     void 존재하지_않는_테마로_예약할_수_없다() {
         ReservationTime reservationTime = reservationTimeDbFixture.열시();
         Member reserver = memberDbFixture.유저1_생성();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
 
         ReserveCommand command = new ReserveCommand(
                 date,
@@ -256,7 +256,7 @@ class ReservationServiceTest {
     void 존재하지_않는_시간으로_예약할_수_없다() {
         Theme theme = themeDbFixture.공포();
         Member reserver = memberDbFixture.유저1_생성();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
 
         ReserveCommand command = new ReserveCommand(
                 date,
@@ -272,7 +272,7 @@ class ReservationServiceTest {
 
     @Test
     void 존재하지_않는_회원의_예약목록을_조회하면_빈_리스트를_반환한다() {
-        List<MyReservationResponse> myReservations = reservationService.getMyReservations(999L);
+        List<MyReservationResponse> myReservations = reservationService.getReservations(999L);
 
         assertThat(myReservations).isEmpty();
     }
@@ -340,7 +340,7 @@ class ReservationServiceTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(horrorOnly).hasSize(1);
-            softly.assertThat(horrorOnly.get(0).theme()).isEqualTo(horror.getName());
+            softly.assertThat(horrorOnly.get(0).theme().name()).isEqualTo(horror.getName());
         });
     }
 
