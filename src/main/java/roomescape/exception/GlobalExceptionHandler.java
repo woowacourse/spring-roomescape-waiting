@@ -4,9 +4,11 @@ package roomescape.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @ControllerAdvice
@@ -46,6 +48,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleDeletionNotAllowedException(DeletionNotAllowedException e) {
         log.error("예외 발생: ", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
+        log.debug("NoResourceFoundException: ", e);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(Exception.class)
