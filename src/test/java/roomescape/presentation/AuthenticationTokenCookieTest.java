@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import jakarta.servlet.http.Cookie;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -40,7 +41,7 @@ class AuthenticationTokenCookieTest {
         // then
         assertAll(
                 () -> assertThat(tokenCookie).isNotNull(),
-                () -> assertThat(tokenCookie.token()).isEqualTo("abcd")
+                () -> assertThat(Objects.requireNonNull(tokenCookie).token()).isEqualTo("abcd")
         );
     }
 
