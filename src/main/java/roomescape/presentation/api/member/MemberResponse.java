@@ -1,6 +1,6 @@
 package roomescape.presentation.api.member;
 
-import roomescape.application.member.MemberResult;
+import roomescape.application.member.dto.MemberResult;
 
 public record MemberResponse(
         Long id,

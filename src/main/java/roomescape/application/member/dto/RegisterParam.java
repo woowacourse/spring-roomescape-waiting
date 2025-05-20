@@ -1,4 +1,4 @@
-package roomescape.application.member;
+package roomescape.application.member.dto;
 
 public record RegisterParam(
         String email,

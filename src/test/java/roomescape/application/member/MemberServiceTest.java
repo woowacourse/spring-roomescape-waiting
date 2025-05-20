@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
+import roomescape.application.member.dto.MemberResult;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;

@@ -1,7 +1,7 @@
 package roomescape.presentation.api.member;
 
 import jakarta.validation.constraints.NotBlank;
-import roomescape.application.member.RegisterParam;
+import roomescape.application.member.dto.RegisterParam;
 
 public record SignupRequest(
         @NotBlank(message = "이메일은 필수입니다.") String email,

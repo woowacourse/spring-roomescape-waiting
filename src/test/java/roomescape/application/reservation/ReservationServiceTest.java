@@ -10,7 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
-import roomescape.application.member.MemberResult;
+import roomescape.application.member.dto.MemberResult;
 import roomescape.application.reservation.dto.CreateReservationParam;
 import roomescape.application.reservation.dto.ReservationResult;
 import roomescape.application.reservation.dto.ReservationSearchParam;

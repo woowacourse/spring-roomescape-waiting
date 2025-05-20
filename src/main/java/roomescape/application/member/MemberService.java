@@ -3,6 +3,8 @@ package roomescape.application.member;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.member.dto.MemberResult;
+import roomescape.application.member.dto.RegisterParam;
 import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
