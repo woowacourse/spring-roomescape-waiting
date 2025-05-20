@@ -1,7 +1,8 @@
 package roomescape.test_util;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.test.context.TestComponent;
+import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
@@ -9,47 +10,72 @@ import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
 import roomescape.infrastructure.JpaReservationDao;
 import roomescape.infrastructure.JpaReservationTimeDao;
+import roomescape.infrastructure.JpaReservationTimes;
+import roomescape.infrastructure.JpaReservations;
 import roomescape.infrastructure.JpaThemeDao;
+import roomescape.infrastructure.JpaThemes;
 import roomescape.infrastructure.JpaUserDao;
+import roomescape.infrastructure.JpaUsers;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Random;
+import java.util.UUID;
 
-@Component
+@TestComponent
+@Import({JpaReservations.class, JpaReservationTimes.class, JpaThemes.class, JpaUsers.class})
 public class JpaTestUtil {
 
-    private final JpaReservationDao reservationDao;
-    private final JpaReservationTimeDao timeDao;
-    private final JpaUserDao userDao;
-    private final JpaThemeDao themeDao;
-
     @Autowired
-    public JpaTestUtil(JpaReservationDao reservationDao, JpaReservationTimeDao timeDao,
-                       JpaUserDao userDao, JpaThemeDao themeDao) {
-        this.reservationDao = reservationDao;
-        this.timeDao = timeDao;
-        this.userDao = userDao;
-        this.themeDao = themeDao;
+    private JpaReservationDao reservationDao;
+    @Autowired
+    private JpaReservationTimeDao timeDao;
+    @Autowired
+    private JpaUserDao userDao;
+    @Autowired
+    private JpaThemeDao themeDao;
+
+    public String insertUser() {
+        String id = generateId();
+        String name = generateRandomAlphabetString(5);
+        String email = name + "@email.com";
+        userDao.save(User.restore(id, "USER", name, email, "password123"));
+        return id;
     }
 
-    public void insertUser(final String id, final String name) {
-        userDao.save(User.restore(id, "USER", name, name + "@email.com", "password123"));
+    public String insertUser(final String name, final String email) {
+        String id = generateId();
+        userDao.save(User.restore(id, "USER", name, email, "password123"));
+        return id;
     }
 
-    public void insertReservation(final String id, final LocalDate date, final String timeId, final String themeId,
-                                  final String userId) {
-        User user = userDao.findById(Id.create(userId)).get();
-        ReservationTime time = timeDao.findById(Id.create(timeId)).get();
-        Theme theme = themeDao.findById(Id.create(themeId)).get();
+    public String insertReservation(final LocalDate date, final String timeId, final String themeId, final String userId) {
+        String id = generateId();
+        User user = userDao.findById(Id.create(userId)).orElseThrow();
+        ReservationTime time = timeDao.findById(Id.create(timeId)).orElseThrow();
+        Theme theme = themeDao.findById(Id.create(themeId)).orElseThrow();
         reservationDao.save(Reservation.restore(id, user, date, time, theme));
+        return id;
     }
 
-    public void insertReservationTime(final String id, final LocalTime time) {
+    public String insertReservationTime() {
+        String id = generateId();
+        LocalTime time = LocalTime.of(10, 0).plusSeconds((long) (Math.random() * 60));
         timeDao.save(ReservationTime.restore(id, time));
+        return id;
     }
 
-    public void insertTheme(final String id, final String name) {
+    public String insertReservationTime(final LocalTime time) {
+        String id = generateId();
+        timeDao.save(ReservationTime.restore(id, time));
+        return id;
+    }
+
+    public String insertTheme() {
+        String id = generateId();
+        String name = generateRandomAlphabetString(5);
         themeDao.save(Theme.restore(id, name, "", ""));
+        return id;
     }
 
     public int countReservation() {
@@ -70,4 +96,22 @@ public class JpaTestUtil {
         themeDao.deleteAll();
         userDao.deleteAll();
     }
+
+    private String generateId() {
+        return UUID.randomUUID().toString();
+    }
+
+    public String generateRandomAlphabetString(int length) {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        StringBuilder result = new StringBuilder();
+        Random random = new Random();
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(alphabet.length());
+            result.append(alphabet.charAt(index));
+        }
+
+        return result.toString();
+    }
+
 }

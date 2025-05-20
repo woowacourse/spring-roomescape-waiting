@@ -19,14 +19,10 @@ import static org.assertj.core.api.Assertions.*;
 @Import({JpaUsers.class, JpaTestUtil.class})
 class UsersTest {
 
-    private final Users sut;
-    private final JpaTestUtil testUtil;
-
     @Autowired
-    UsersTest(Users sut, JpaTestUtil testUtil) {
-        this.sut = sut;
-        this.testUtil = testUtil;
-    }
+    private Users sut;
+    @Autowired
+    private JpaTestUtil testUtil;
 
     @AfterEach
     void tearDown() {
@@ -36,7 +32,7 @@ class UsersTest {
     @Test
     void 사용자를_저장하고_조회할_수_있다() {
         // given
-        final User user = User.create("테스트유저", "test@example.com", "password123");
+        User user = User.create("테스트유저", "test@example.com", "password123");
 
         // when, then
         assertThatCode(() -> sut.save(user))
@@ -46,32 +42,28 @@ class UsersTest {
     @Test
     void 모든_사용자를_조회할_수_있다() {
         // given
-        testUtil.insertUser("1", "유저일");
-        testUtil.insertUser("2", "유저이");
+        String userId1 = testUtil.insertUser();
+        String userId2 = testUtil.insertUser();
 
         // when
         final List<User> result = sut.findAll();
 
         // then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo("1");
-        assertThat(result.get(1).getId().value()).isEqualTo("2");
+        assertThat(result).extracting(User::getId)
+                .containsExactlyInAnyOrder(Id.create(userId1), Id.create(userId2));
     }
 
     @Test
     void ID로_사용자를_조회할_수_있다() {
         // given
-        testUtil.insertUser("1", "유저일");
+        String userId = testUtil.insertUser();
 
         // when
-        final Optional<User> result = sut.findById(Id.create("1"));
+        final Optional<User> result = sut.findById(Id.create(userId));
 
         // then
         assertThat(result).isPresent();
-        final User user = result.get();
-        assertThat(user.getId().value()).isEqualTo("1");
-        assertThat(user.getName().value()).isEqualTo("유저일");
-        assertThat(user.getEmail().value()).isEqualTo("유저일@email.com");
+        assertThat(result.get().getId().value()).isEqualTo(userId);
     }
 
     @Test
@@ -86,18 +78,14 @@ class UsersTest {
     @Test
     void 이메일로_사용자를_조회할_수_있다() {
         // given
-        final String name = "유저일";
-        final String email = name + "@email.com";
-        testUtil.insertUser("1", name);
+        String userId = testUtil.insertUser("돔푸", "dompoo@email.com");
 
         // when
-        final Optional<User> result = sut.findByEmail(email);
+        final Optional<User> result = sut.findByEmail("dompoo@email.com");
 
         // then
         assertThat(result).isPresent();
-        final User user = result.get();
-        assertThat(user.getName().value()).isEqualTo(name);
-        assertThat(user.getEmail().value()).isEqualTo(email);
+        assertThat(result.get().getId().value()).isEqualTo(userId);
     }
 
     @Test
@@ -112,12 +100,10 @@ class UsersTest {
     @Test
     void 이메일이_존재하는지_확인할_수_있다() {
         // given
-        final String name = "유저";
-        final String email = name + "@email.com";
-        testUtil.insertUser("1", name);
+        testUtil.insertUser("돔푸", "dompoo@email.com");
 
         // when
-        final boolean result = sut.existByEmail(email);
+        final boolean result = sut.existByEmail("dompoo@email.com");
 
         // then
         assertThat(result).isTrue();

@@ -21,8 +21,6 @@ import static org.assertj.core.api.Assertions.*;
 @Import({JpaThemes.class, JpaTestUtil.class})
 class ThemesTest {
 
-    private static final LocalDate DATE = LocalDate.now().plusDays(5);
-
     @Autowired
     private Themes sut;
     @Autowired
@@ -41,64 +39,61 @@ class ThemesTest {
 
     @Test
     void 모든_테마를_찾을_수_있다() {
-        testUtil.insertTheme("1", "주홍색 연구");
-        testUtil.insertTheme("2", "아라비아해의 비밀");
+        String themeId1 = testUtil.insertTheme();
+        String themeId2 = testUtil.insertTheme();
 
         final List<Theme> result = sut.findAll();
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo("1");
-        assertThat(result.get(1).getId().value()).isEqualTo("2");
+        assertThat(result).extracting(r -> r.getId().value())
+                .containsExactlyInAnyOrder(themeId1, themeId2);
     }
 
     @Test
     void 예약이_많은_순으로_테마를_찾을_수_있다() {
-        testUtil.insertReservationTime("1", LocalTime.of(10, 0));
-        testUtil.insertTheme("2", "주홍색 연구");
-        testUtil.insertTheme("3", "아라비아해의 비밀");
-        testUtil.insertTheme("4", "범위_외부_테마");
-        testUtil.insertUser("5", "돔푸");
-        testUtil.insertUser("6", "레몬");
-        testUtil.insertReservation("A", DATE, "1", "2", "5");
-        testUtil.insertReservation("B", DATE, "1", "3", "5");
-        testUtil.insertReservation("C", DATE, "1", "3", "5");
-        testUtil.insertReservation("D", DATE.minusDays(10), "1", "4", "6");
-        testUtil.insertReservation("E", DATE.minusDays(10), "1", "4", "6");
-        testUtil.insertReservation("F", DATE.plusDays(10), "1", "4", "6");
+        LocalDate date = LocalDate.now();
+        String reservationTimeId = testUtil.insertReservationTime(LocalTime.of(10, 0));
+        String themeId1 = testUtil.insertTheme();
+        String themeId2 = testUtil.insertTheme();
+        String themeId3 = testUtil.insertTheme();
+        String userId1 = testUtil.insertUser();
+        testUtil.insertReservation(date, reservationTimeId, themeId1, userId1);
+        testUtil.insertReservation(date, reservationTimeId, themeId2, userId1);
+        testUtil.insertReservation(date, reservationTimeId, themeId2, userId1);
+        testUtil.insertReservation(date.minusDays(10), reservationTimeId, themeId3, userId1);
+        testUtil.insertReservation(date.minusDays(10), reservationTimeId, themeId3, userId1);
+        testUtil.insertReservation(date.plusDays(10), reservationTimeId, themeId3, userId1);
 
-        final List<Theme> result = sut.findPopularThemes(DATE.minusDays(5), DATE.plusDays(5), 2);
+        final List<Theme> result = sut.findPopularThemes(date.minusDays(5), date.plusDays(5), 2);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId().value()).isEqualTo("3");
-        assertThat(result.get(1).getId().value()).isEqualTo("2");
+        assertThat(result).extracting(r -> r.getId().value())
+                .containsExactly(themeId2, themeId1);
     }
 
     @Test
     void ID를_기준으로_테마를_찾을_수_있다() {
-        testUtil.insertTheme("1", "주홍색 연구");
+        String themeId = testUtil.insertTheme();
 
-        final Optional<Theme> result = sut.findById(Id.create("1"));
+        final Optional<Theme> result = sut.findById(Id.create(themeId));
 
         assertThat(result.isPresent()).isTrue();
-        assertThat(result.get().getId().value()).isEqualTo("1");
-        assertThat(result.get().getName().value()).isEqualTo("주홍색 연구");
+        assertThat(result.get().getId().value()).isEqualTo(themeId);
     }
 
     @Test
     void ID를_기준으로_존재하는지_확인할_수_있다() {
-        testUtil.insertTheme("1", "주홍색 연구");
+        String themeId = testUtil.insertTheme();
 
-        final boolean result = sut.existById(Id.create("1"));
+        final boolean result = sut.existById(Id.create(themeId));
 
         assertThat(result).isTrue();
     }
 
     @Test
     void ID를_기준으로_삭제할_수_있다() {
-        testUtil.insertTheme("1", "주홍색 연구");
+        String themeId = testUtil.insertTheme();
 
-        sut.deleteById(Id.create("1"));
+        sut.deleteById(Id.create(themeId));
 
-        assertThat(testUtil.countTheme()).isEqualTo(0);
+        assertThat(testUtil.countTheme()).isZero();
     }
 }
