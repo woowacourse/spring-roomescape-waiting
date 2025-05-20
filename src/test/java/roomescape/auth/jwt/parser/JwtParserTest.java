@@ -1,0 +1,126 @@
+package roomescape.auth.jwt.parser;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.auth.jwt.domain.Jwt;
+import roomescape.auth.jwt.domain.TokenType;
+import roomescape.auth.jwt.generator.JwtGenerator;
+import roomescape.auth.session.UserSession;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@SpringBootTest
+class JwtParserTest {
+
+    private static final SecretKey secretKey =
+            Keys.hmacShaKeyFor("ZMQ5kFGf1MTmnkhik/7rOcmT6OPvlz5Z+4aP4pAfNtk=".getBytes(StandardCharsets.UTF_8));
+
+    @Autowired
+    private JwtParser jwtParser;
+    @Autowired
+    private JwtGenerator jwtGenerator;
+
+    @Test
+    @DisplayName("유요한 토큰 파싱이 성공한다")
+    void shouldParseValidTokenSuccessfully() {
+        // given
+        final TokenType type = TokenType.ACCESS;
+
+        final Instant now = Instant.now();
+        final Instant expiration = now.plusMillis(type.getPeriodInMillis());
+
+        final Claims claims = Jwts.claims()
+                .add(UserSession.Fields.id, "1")
+                .add(UserSession.Fields.name, "강산")
+                .add(UserSession.Fields.role, "ADMIN")
+                .build();
+        final Jwt jwt = jwtGenerator.execute(
+                claims,
+                now,
+                expiration,
+                secretKey);
+
+        // when
+        final Claims parsedClaims = jwtParser.execute(jwt, secretKey);
+
+        // then
+        assertThat(parsedClaims.get(UserSession.Fields.id)).isEqualTo(claims.get(UserSession.Fields.id));
+        assertThat(parsedClaims.get(UserSession.Fields.name)).isEqualTo(claims.get(UserSession.Fields.name));
+        assertThat(parsedClaims.get(UserSession.Fields.role)).isEqualTo(claims.get(UserSession.Fields.role));
+    }
+
+    @Test
+    @DisplayName("토큰의 서명이 유효하지 않으면 예외가 발생한다")
+    void shouldThrowExceptionForInvalidSignature() {
+        // given
+        final SecretKey invalidKey =
+                Keys.hmacShaKeyFor("ZMQ5kFGf1MTmnkhik/7rOcmT6OPvlz5Z+4aP4pAfNta=".getBytes(StandardCharsets.UTF_8));
+
+        final TokenType type = TokenType.ACCESS;
+        final Instant now = Instant.now();
+        final Instant expiration = now.plusMillis(type.getPeriodInMillis());
+
+        final Jwt jwt = jwtGenerator.execute(
+                Jwts.claims()
+                        .add(UserSession.Fields.id, "1")
+                        .add(UserSession.Fields.name, "강산")
+                        .add(UserSession.Fields.role, "ADMIN")
+                        .build(),
+                now,
+                expiration,
+                secretKey);
+
+        // when
+        // then
+        assertThatThrownBy(() -> jwtParser.execute(jwt, invalidKey))
+                .isInstanceOf(ParseTokenException.class)
+                .hasMessageContaining("Invalid signature");
+    }
+
+    @Test
+    @DisplayName("토큰이 만료되면 예외가 발생한다")
+    void shouldThrowExceptionForExpiredToken() {
+        // given
+        final Instant now = Instant.now();
+        final Instant expiration = Instant.now().minusMillis(1);
+
+        final Jwt jwt = jwtGenerator.execute(
+                Jwts.claims()
+                        .add(UserSession.Fields.id, "1")
+                        .add(UserSession.Fields.name, "강산")
+                        .add(UserSession.Fields.role, "ADMIN")
+                        .build(),
+                now,
+                expiration,
+                secretKey);
+
+        // when
+        // then
+        assertThatThrownBy(() -> jwtParser.execute(jwt, secretKey))
+                .isInstanceOf(ParseTokenException.class)
+                .hasMessageContaining("Token expired");
+    }
+
+    @Test
+    @DisplayName("토큰이 유효하지 않으면 예외가 발생한다")
+    void shouldThrowExceptionForInvalidToken() {
+        // given
+        final Jwt invalidJwt = Jwt.from("invalid-token-value");
+
+        // when
+        // then
+        assertThatThrownBy(() -> jwtParser.execute(invalidJwt, secretKey))
+                .isInstanceOf(ParseTokenException.class)
+                .hasMessageContaining("Unknown token error");
+    }
+}
