@@ -16,7 +16,7 @@ class EntityIdTest {
         // then
         assertThatThrownBy(() -> new TestEntityId(null))
                 .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("Validation failed [while checking null]: DomainId.value");
+                .hasMessage("Validation failed [while checking null]: EntityId.value");
     }
 
     @Test

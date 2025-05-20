@@ -17,7 +17,7 @@ class ReservationIdTest {
         // then
         assertThatThrownBy(() -> ReservationId.from(null))
                 .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("Validation failed [while checking null]: DomainId.value");
+                .hasMessage("Validation failed [while checking null]: EntityId.value");
     }
 
     @Test
