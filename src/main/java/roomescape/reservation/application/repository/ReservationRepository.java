@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationWithRank;
+import roomescape.reservation.domain.Theme;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
@@ -25,8 +27,6 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
             LocalDate endDate
     );
 
-    List<Reservation> findByMemberId(Long memberId);
-
     boolean existsByReservationTimeId(Long timeId);
 
     boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
@@ -40,7 +40,8 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                     WHERE r2.theme = r.theme
                     AND r2.date = r.date
                     AND r2.reservationTime = r.reservationTime
-                    AND r2.id < r.id) AS long))
+                    AND r2.status = 'WAITING'
+                    AND r2.id <= r.id) AS long))
                     FROM Reservation r
                     WHERE r.member.id = :memberId
             """)
@@ -53,9 +54,21 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                     WHERE r2.theme = r.theme
                     AND r2.date = r.date
                     AND r2.reservationTime = r.reservationTime
-                    AND r2.id < r.id) AS long))
+                    AND r2.status = 'WAITING'
+                    AND r2.id <= r.id) AS long))
                     FROM Reservation r
                     WHERE r.status = 'WAITING'
             """)
     List<ReservationWithRank> findReservationsWithRankOfWaitingStatus();
+
+    @Query("""
+                 SELECT r FROM Reservation r
+                  WHERE r.date = :date
+                  AND r.reservationTime = :reservationTime
+                  AND r.theme = :theme
+                  AND r.status = 'WAITING'
+                  ORDER BY r.id ASC
+                  LIMIT 1
+            """)
+    Reservation findFirstWaitingReservation(LocalDate date, ReservationTime reservationTime, Theme theme);
 }
