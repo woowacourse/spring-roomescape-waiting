@@ -41,23 +41,23 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService service;
 
-    private ReservationTime time1;
+    private ReservationTime time;
 
-    private Theme theme1;
+    private Theme theme;
 
     private Member member;
 
-    private Reservation r1;
+    private Reservation reservation;
 
     @BeforeEach
     void setUp() {
-        time1 = ReservationTime.from(LocalTime.of(14, 0));
+        time = ReservationTime.from(LocalTime.of(14, 0));
 
-        theme1 = Theme.of("테마1", "설명1", "썸네일1");
+        theme = Theme.of("테마1", "설명1", "썸네일1");
 
         member = Member.withoutRole("member", "member@naver.com", "1234");
 
-        r1 = Reservation.booked(LocalDate.of(2999, 5, 11), time1, theme1, member);
+        reservation = Reservation.booked(LocalDate.of(2999, 5, 11), time, theme, member);
     }
 
     @Test
@@ -73,11 +73,11 @@ class ReservationServiceTest {
     @Test
     void 중복된_날짜와_시간이면_예외가_발생한다() {
         // given: r1과 동일한 date/time 요청
-        tm.persistAndFlush(time1);
-        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(time);
+        tm.persistAndFlush(theme);
         tm.persistAndFlush(member);
-        tm.persistAndFlush(r1);
-        ReservationRequest dupReq = new ReservationRequest(r1.getDate(), time1.getId(), theme1.getId());
+        tm.persistAndFlush(reservation);
+        ReservationRequest dupReq = new ReservationRequest(reservation.getDate(), time.getId(), theme.getId());
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
         tm.clear();
@@ -91,10 +91,10 @@ class ReservationServiceTest {
     @Test
     void 지나간_날짜와_시간이면_예외가_발생한다() {
         // given: r1과 동일한 date/time 요청
-        tm.persistAndFlush(time1);
-        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(time);
+        tm.persistAndFlush(theme);
         tm.persistAndFlush(member);
-        ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time1.getId(), theme1.getId());
+        ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time.getId(), theme.getId());
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
         tm.clear();
@@ -109,13 +109,13 @@ class ReservationServiceTest {
     @Test
     void 새로운_예약은_정상_생성된다() {
         // given
-        tm.persistAndFlush(time1);
-        tm.persistAndFlush(theme1);
+        tm.persistAndFlush(time);
+        tm.persistAndFlush(theme);
         tm.persistAndFlush(member);
         final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
         tm.clear();
-        ReservationRequest req = new ReservationRequest(LocalDate.of(2999, 4, 21), time1.getId(), theme1.getId());
+        ReservationRequest req = new ReservationRequest(LocalDate.of(2999, 4, 21), time.getId(), theme.getId());
 
         // when
         ReservationResponse result = service.saveReservation(req, loginMember);
@@ -126,8 +126,8 @@ class ReservationServiceTest {
             soft.assertThat(result.date()).isEqualTo(LocalDate.of(2999, 4, 21));
             soft.assertThat(result.time())
                     .satisfies(rt -> {
-                        assertThat(rt.id()).isEqualTo(time1.getId());
-                        assertThat(rt.startAt()).isEqualTo(time1.getStartAt());
+                        assertThat(rt.id()).isEqualTo(time.getId());
+                        assertThat(rt.startAt()).isEqualTo(time.getStartAt());
                     });
         });
     }
@@ -136,18 +136,18 @@ class ReservationServiceTest {
     void 예약을_삭제한다() {
         // given
         tm.persistAndFlush(member);
-        tm.persistAndFlush(time1);
-        tm.persistAndFlush(theme1);
-        tm.persistAndFlush(r1);
+        tm.persistAndFlush(time);
+        tm.persistAndFlush(theme);
+        tm.persistAndFlush(reservation);
 
         // when
-        service.deleteReservation(r1.getId());
+        service.deleteReservation(reservation.getId());
 
         // then
         assertThat(reservationRepository.findByCriteria(null, null, null, null))
                 .hasSize(RESERVATION_COUNT)
                 .extracting(Reservation::getId)
-                .doesNotContain(r1.getId());
+                .doesNotContain(reservation.getId());
     }
 
     @Test

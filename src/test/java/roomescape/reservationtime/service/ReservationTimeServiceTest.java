@@ -30,15 +30,15 @@ class ReservationTimeServiceTest {
 
     private ReservationTimeService service;
 
-    private final LocalTime t1 = LocalTime.of(13, 0);
-    private final LocalTime t2 = LocalTime.of(14, 0);
+    private final LocalTime time1 = LocalTime.of(13, 0);
+    private final LocalTime time2 = LocalTime.of(14, 0);
 
     @BeforeEach
     void setUp() {
         service = new ReservationTimeService(reservationTimeRepository, reservationRepository);
         reservationTimeRepository.saveAll(List.of(
-                ReservationTime.from(t1),
-                ReservationTime.from(t2)
+                ReservationTime.from(time1),
+                ReservationTime.from(time2)
         ));
     }
 
@@ -50,7 +50,7 @@ class ReservationTimeServiceTest {
         // then
         assertThat(all).hasSize(RESERVATION_TIME_COUNT + 2)
                 .extracting(ReservationTimeResponse::startAt)
-                .contains(t1, t2);
+                .contains(time1, time2);
     }
 
     @Test
@@ -58,7 +58,7 @@ class ReservationTimeServiceTest {
         // given
         List<ReservationTimeResponse> before = service.findAll();
         final Long idToDelete = before.stream()
-                .filter(response -> response.startAt() == t1).findFirst().get().id();
+                .filter(response -> response.startAt() == time1).findFirst().get().id();
 
         // when
         service.delete(idToDelete);
