@@ -19,6 +19,8 @@ import roomescape.domain.member.Member;
 @Entity
 public class Reservation {
 
+    private static final int MIN_TIME_BEFORE_RESERVATION = 10;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -71,9 +73,13 @@ public class Reservation {
             throw new ReservationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
         }
         Duration duration = Duration.between(currentDateTime, reservationDateTime);
-        if (duration.toMinutes() < 10) {
-            throw new ReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
+        if (duration.toMinutes() < MIN_TIME_BEFORE_RESERVATION) {
+            throw new ReservationException("예약 시간까지 %d분도 남지 않아 예약이 불가능합니다.".formatted(MIN_TIME_BEFORE_RESERVATION));
         }
+    }
+
+    public boolean isEqualThemeId(Long themeId) {
+        return theme.getId().equals(themeId);
     }
 
     public Long getId() {
@@ -96,8 +102,8 @@ public class Reservation {
         return theme;
     }
 
-    public boolean isEqualThemeId(Long themeId) {
-        return theme.getId().equals(themeId);
+    public ReservationStatus getStatus() {
+        return this.status;
     }
 
     @Override
@@ -106,19 +112,11 @@ public class Reservation {
             return false;
         }
         Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id)
-                && Objects.equals(member, that.member)
-                && Objects.equals(date, that.date)
-                && Objects.equals(time, that.time)
-                && Objects.equals(theme, that.theme);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
-    }
-
-    public ReservationStatus getStatus() {
-        return this.status;
+        return Objects.hashCode(id);
     }
 }
