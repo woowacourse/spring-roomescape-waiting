@@ -58,7 +58,7 @@ public class ReservationService {
         LocalDate startDate = reservationSearchDto.startDate();
         LocalDate endDate = reservationSearchDto.endDate();
 
-        return reservationRepository.findByTheme_IdAndMember_IdAndDateBetween(
+        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
                         themeId,
                         memberId,
                         startDate,

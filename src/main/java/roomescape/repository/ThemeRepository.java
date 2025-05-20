@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.model.Theme;
 
-@Repository
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     boolean existsByName(String name);
