@@ -99,6 +99,10 @@ public class ReservationService {
             throw new AuthorizationException("본인이 아니면 삭제할 수 없습니다.");
         }
 
+        if (!reservationRepository.existsById(reservationId)) {
+            // 이미 취소되어 예약이 존재하지 않음을 구분하는 것이 UX에 좋을 것으로 예상됨
+            throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
+        }
         reservationRepository.deleteById(reservationId);
     }
 
