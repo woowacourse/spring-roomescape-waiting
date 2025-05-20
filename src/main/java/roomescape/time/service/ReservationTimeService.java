@@ -48,7 +48,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteById(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.hasReservationWithTime(id)) {
             throw new InvalidArgumentException("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
 

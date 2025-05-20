@@ -38,7 +38,7 @@ public class Member {
     }
 
     public void validate() {
-        if (name == null || role == null || password == null) {
+        if (name == null || role == null || email == null || password == null) {
             throw new InvalidArgumentException("Member의 필드는 null 일 수 없습니다.");
         }
     }

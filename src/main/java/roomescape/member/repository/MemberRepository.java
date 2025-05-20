@@ -9,7 +9,6 @@ import roomescape.member.domain.Member;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByEmail_EmailAndPassword_Password(String email, String Password);
-
+    
     boolean existsByEmail_Email(String email);
-
 }

@@ -11,6 +11,18 @@ import roomescape.reservation.domain.Reservation;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    default boolean hasReservationWithDateTime(LocalDate date, Long timeId) {
+        return existsByDateAndTimeId(date, timeId);
+    }
+
+    default boolean hasReservationWithTime(Long timeId) {
+        return existsByTimeId(timeId);
+    }
+
+    default boolean hasReservationWithTheme(Long themeId) {
+        return existsByThemeId(themeId);
+    }
+
     @Query("""
             select exists
                 (select r from Reservation r
@@ -25,7 +37,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     boolean existsByTimeId(@Param(value = "timeId") Long timeId);
 
-    boolean existsByTheme_Id(Long themeId);
+    @Query("""
+            select exists
+                (select r from Reservation r
+                where r.theme.id = :themeId)
+            """)
+    boolean existsByThemeId(Long themeId);
 
     @Query("""
             select count(*) from Reservation r

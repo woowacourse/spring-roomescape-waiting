@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
-import roomescape.member.service.MemberService;
+import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
@@ -28,7 +28,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
-    private final MemberService memberService;
+    private final MemberQueryService memberQueryService;
 
     @Transactional
     public ReservationResponse reserve(ReserveCommand reserveCommand) {
@@ -41,7 +41,7 @@ public class ReservationService {
                 new ReservationDate(date), reservationTimeService.getReservationTime(timeId)
         );
         Theme theme = themeService.getTheme(reserveCommand.themeId());
-        Member reserver = memberService.getMember(reserveCommand.memberId());
+        Member reserver = memberQueryService.getMember(reserveCommand.memberId());
 
         Reservation reserved = Reservation.reserve(reserver, reservationDateTime, theme);
         Reservation saved = reservationRepository.save(reserved);
@@ -50,7 +50,7 @@ public class ReservationService {
     }
 
     private void isAlreadyReservedTime(LocalDate date, Long timeId) {
-        if (reservationRepository.existsByDateAndTimeId(date, timeId)) {
+        if (reservationRepository.hasReservationWithDateTime(date, timeId)) {
             throw new InvalidArgumentException("이미 예약이 존재하는 시간입니다.");
         }
     }
@@ -66,10 +66,11 @@ public class ReservationService {
                 .orElseThrow(() -> new NoElementsException("예약을 찾을 수 없습니다."));
     }
 
-    public List<ReservationResponse> getFilteredReservations(Long themeId,
-                                                             Long memberId,
-                                                             LocalDate from,
-                                                             LocalDate to
+    public List<ReservationResponse> getFilteredReservations(
+            Long themeId,
+            Long memberId,
+            LocalDate from,
+            LocalDate to
     ) {
         if (themeId == null && memberId == null && from == null && to == null) {
             return getAllReservations();
