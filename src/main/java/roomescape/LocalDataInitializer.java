@@ -1,9 +1,6 @@
 package roomescape;
 
 import jakarta.annotation.PostConstruct;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +17,10 @@ import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Status;
 import roomescape.business.model.vo.UserRole;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Component
 @Profile("local")
@@ -58,7 +59,7 @@ public class LocalDataInitializer {
         final Reservation reservation6 = Reservation.restore("15", user1, LocalDate.now().plusDays(3), time1, theme2,
                 Status.RESERVED, LocalDateTime.now());
         final Reservation reservation7 = Reservation.restore("16", user1, LocalDate.now().plusDays(4), time2, theme2,
-                Status.WAITING, LocalDateTime.now());
+                Status.RESERVED, LocalDateTime.now());
         insertThemes(theme1, theme2);
         insertTimes(time1, time2);
         insertUsers(user1, user5, user6, admin);

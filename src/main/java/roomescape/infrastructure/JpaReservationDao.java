@@ -35,7 +35,7 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
                 SELECT new roomescape.presentation.dto.response.ReservationWithAhead(
                     r,
                     (
-                        SELECT COUNT(r2) + 1
+                        SELECT COUNT(r2) * 1L
                         FROM Reservation r2
                         WHERE r2.theme      = r.theme
                           AND r2.date       = r.date
