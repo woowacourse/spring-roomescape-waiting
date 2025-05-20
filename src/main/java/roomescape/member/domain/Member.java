@@ -25,7 +25,7 @@ public class Member {
     @Embedded
     private Password password;
 
-    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member")
     private List<Reservation> reservations = new ArrayList<>();
 
     public Member() {
