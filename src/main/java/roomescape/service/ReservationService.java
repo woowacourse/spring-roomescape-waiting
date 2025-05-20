@@ -36,7 +36,7 @@ public class ReservationService {
     }
 
     public List<ReservationResult> getWaitingReservations() {
-        List<Reservation> reservations = reservationRepository.findWaitingsReservation();
+        List<Reservation> reservations = reservationRepository.findWaitingReservations();
         return ReservationResult.from(reservations);
     }
 

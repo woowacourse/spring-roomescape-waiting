@@ -69,7 +69,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findWaitingsReservation() {
+    public List<Reservation> findWaitingReservations() {
         return jpaReservationRepository.findWaitingReservations();
     }
 

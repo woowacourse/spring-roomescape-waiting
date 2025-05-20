@@ -29,7 +29,7 @@ public interface ReservationRepository {
 
     List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
 
-    List<Reservation> findWaitingsReservation();
+    List<Reservation> findWaitingReservations();
 
     Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId);
 
