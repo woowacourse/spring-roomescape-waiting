@@ -39,7 +39,6 @@ public class ReservationTimeService {
     }
 
     private void validateNoDuplication(final ReservationTime reservationTime) {
-        // TODO : 디미터 법칙
         boolean isExist = reservationTimeRepository.existByTime(reservationTime.startTimeValue());
         if (isExist) {
             throw new DuplicatedException(RESERVATION_TIME_ALREADY_EXIST);
