@@ -7,7 +7,7 @@ import roomescape.common.domain.DomainTerm;
 import roomescape.common.exception.ConstraintConflictException;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.reservation.application.service.ReservationQueryService;
+import roomescape.reservation.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.time.application.dto.CreateReservationTimeRequest;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeId;
