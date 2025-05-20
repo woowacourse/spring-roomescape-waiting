@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
 import roomescape.theme.controller.response.ThemeResponse;
@@ -53,7 +54,7 @@ public class ThemeService implements ThemeQueryService {
     @Override
     public Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException("해당 테마가 존재하지 않습니다."));
     }
 
     @Transactional(readOnly = true)

@@ -19,6 +19,7 @@ import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ReservationTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
@@ -136,7 +137,7 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_예약을_삭제할_수_없다() {
         assertThatThrownBy(() -> reservationService.deleteById(1L))
-                .isInstanceOf(NoSuchElementException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
     }
 
@@ -247,7 +248,7 @@ class ReservationServiceTest {
         );
 
         assertThatThrownBy(() -> reservationService.reserve(command))
-                .isInstanceOf(NoSuchElementException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessage("해당 테마가 존재하지 않습니다.");
     }
 

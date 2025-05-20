@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.MyReservationResponse;
@@ -70,7 +71,7 @@ public class ReservationService {
 
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("예약을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
     }
 
     @Transactional(readOnly = true)
