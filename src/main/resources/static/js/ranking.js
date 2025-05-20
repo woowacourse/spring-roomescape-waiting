@@ -13,7 +13,7 @@ function render(data) {
         const description = theme.description;
 
         const htmlContent = `
-            <img class="mr-3 img-thumbnail" src="${thumbnail}" alt="${name}">
+            <img class="mr-3 img-thumbnail" src="${thumbnail}" alt="${name}" style="width: 30rem; height: 30rem;">
             <div class="media-body">
                 <h5 class="mt-0 mb-1">${name}</h5>
                 ${description}
