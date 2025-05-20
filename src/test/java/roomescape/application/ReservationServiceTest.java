@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.theme.Theme;
@@ -24,7 +23,6 @@ import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
 
 @DataJpaTest
-@ActiveProfiles("test")
 @Import({ReservationService.class, TestRepositoryHelper.class})
 class ReservationServiceTest {
 

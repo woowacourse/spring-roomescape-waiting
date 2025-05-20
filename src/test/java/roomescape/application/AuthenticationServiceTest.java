@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestRepositoryHelper;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Password;
@@ -20,7 +19,6 @@ import roomescape.exception.AuthenticationException;
 import roomescape.infrastructure.JwtTokenHandler;
 
 @DataJpaTest
-@ActiveProfiles("test")
 @Import({AuthenticationService.class, JwtTokenHandler.class, TestRepositoryHelper.class})
 class AuthenticationServiceTest {
 
