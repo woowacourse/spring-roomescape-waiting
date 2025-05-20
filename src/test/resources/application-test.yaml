@@ -1,0 +1,26 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:test.sql
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+
+security:
+  jwt:
+    token:
+      secret-key: s8R$kQz3nZ!L5pT7c@J#xM9vB1&uD6hE
+      access:
+        expire-length: 600000 # 10 분
