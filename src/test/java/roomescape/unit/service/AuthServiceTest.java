@@ -13,12 +13,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
-import roomescape.domain.repository.MemberRepository;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AuthenticatedUserResponse;
 import roomescape.exception.LoginFailedException;
 import roomescape.exception.MemberNotFoundException;
 import roomescape.infrastructure.JwtTokenProvider;
+import roomescape.infrastructure.MemberRepository;
 import roomescape.service.AuthService;
 import roomescape.unit.fake.FakeMemberRepository;
 

@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationRepository;
 import roomescape.dto.request.ReservationCondition;
+import roomescape.infrastructure.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
 

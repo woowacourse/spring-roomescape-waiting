@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.unit.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
+import roomescape.infrastructure.MemberRepository;
 
 @DataJpaTest
-class JpaMemberRepositoryTest {
+class MemberRepositoryTest {
 
     @Autowired
-    private JpaMemberRepository jpaMemberRepository;
+    private MemberRepository memberRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -25,7 +26,7 @@ class JpaMemberRepositoryTest {
         // given
         entityManager.persist(new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER));
         // when
-        Optional<Member> member = jpaMemberRepository.findByEmail("email1@domain.com");
+        Optional<Member> member = memberRepository.findByEmail("email1@domain.com");
         // then
         assertThat(member.isPresent()).isTrue();
         assertThat(member.get().getName()).isEqualTo("name1");

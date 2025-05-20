@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.unit.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,12 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.domain.Theme;
+import roomescape.infrastructure.ThemeRepository;
 
 @DataJpaTest
-class JpaThemeRepositoryTest {
+class ThemeRepositoryTest {
 
     @Autowired
-    private JpaThemeRepository jpaThemeRepository;
+    private ThemeRepository themeRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -24,7 +25,7 @@ class JpaThemeRepositoryTest {
         // given
         entityManager.persist(Theme.createWithoutId("theme1", "desc", "thumb"));
         // when
-        Optional<Theme> theme = jpaThemeRepository.findByName("theme1");
+        Optional<Theme> theme = themeRepository.findByName("theme1");
         // then
         assertThat(theme.isPresent()).isTrue();
         assertThat(theme.get().getName()).isEqualTo("theme1");

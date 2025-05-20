@@ -1,10 +1,11 @@
-package roomescape.domain.repository;
+package roomescape.infrastructure;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.Repository;
 import roomescape.domain.Member;
 
-public interface MemberRepository {
+public interface MemberRepository extends Repository<Member, Long> {
 
     Member save(Member member);
 

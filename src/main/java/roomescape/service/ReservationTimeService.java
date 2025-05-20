@@ -6,15 +6,15 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.TimeWithBookedResponse;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.infrastructure.ReservationRepository;
+import roomescape.infrastructure.ReservationTimeRepository;
+import roomescape.infrastructure.ThemeRepository;
 
 @Service
 public class ReservationTimeService {

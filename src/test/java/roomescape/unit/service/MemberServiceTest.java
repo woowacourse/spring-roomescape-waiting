@@ -5,8 +5,8 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
-import roomescape.domain.repository.MemberRepository;
 import roomescape.dto.response.MemberResponse;
+import roomescape.infrastructure.MemberRepository;
 import roomescape.service.MemberService;
 import roomescape.unit.fake.FakeMemberRepository;
 

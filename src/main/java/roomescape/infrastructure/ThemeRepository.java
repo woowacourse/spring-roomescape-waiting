@@ -1,10 +1,11 @@
-package roomescape.domain.repository;
+package roomescape.infrastructure;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.Repository;
 import roomescape.domain.Theme;
 
-public interface ThemeRepository {
+public interface ThemeRepository extends Repository<Theme, Long> {
     Theme save(Theme theme);
 
     List<Theme> findAll();

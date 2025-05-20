@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.Member;
-import roomescape.domain.repository.MemberRepository;
+import roomescape.infrastructure.MemberRepository;
 
 public class FakeMemberRepository implements MemberRepository {
 

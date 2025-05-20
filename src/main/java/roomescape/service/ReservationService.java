@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -7,10 +8,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.request.ReservationCondition;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationWithStatusResponse;
@@ -19,8 +16,13 @@ import roomescape.exception.MemberNotFoundException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.infrastructure.MemberRepository;
+import roomescape.infrastructure.ReservationRepository;
+import roomescape.infrastructure.ReservationTimeRepository;
+import roomescape.infrastructure.ThemeRepository;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;

@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ThemeRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ExistedThemeException;
+import roomescape.infrastructure.ReservationRepository;
+import roomescape.infrastructure.ThemeRepository;
 
 @Service
 public class ThemeService {

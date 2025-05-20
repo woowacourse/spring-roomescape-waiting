@@ -2,12 +2,12 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.domain.repository.MemberRepository;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AuthenticatedUserResponse;
 import roomescape.exception.LoginFailedException;
 import roomescape.exception.MemberNotFoundException;
 import roomescape.infrastructure.JwtTokenProvider;
+import roomescape.infrastructure.MemberRepository;
 
 @Service
 public class AuthService {

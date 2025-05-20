@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.unit.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,12 +17,13 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
+import roomescape.infrastructure.ReservationRepository;
 
 @DataJpaTest
-class JpaReservationRepositoryTest {
+class ReservationRepositoryTest {
 
     @Autowired
-    private JpaReservationRepository jpaReservationRepository;
+    private ReservationRepository reservationRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -38,7 +39,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(theme);
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
         // when
-        Optional<Reservation> reservation = jpaReservationRepository.findByDateAndReservationTimeAndTheme(
+        Optional<Reservation> reservation = reservationRepository.findByDateAndReservationTimeAndTheme(
                 LocalDate.of(2025, 1, 1), time, theme);
         // then
         assertThat(reservation.isPresent()).isTrue();
@@ -61,7 +62,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 2), time, theme1));
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 2), time, theme2));
         // when
-        List<Reservation> reservations = jpaReservationRepository.findByThemeId(theme1.getId());
+        List<Reservation> reservations = reservationRepository.findByThemeId(theme1.getId());
         // then
         SoftAssertions soft = new SoftAssertions();
         soft.assertThat(reservations).hasSize(2);
@@ -83,7 +84,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 9), time, theme));
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 10), time, theme));
         // when
-        List<Reservation> reservations = jpaReservationRepository.findByDateBetween(
+        List<Reservation> reservations = reservationRepository.findByDateBetween(
                 LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 9)
         );
         // then
@@ -106,7 +107,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 2), time, theme1));
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme2));
         // when
-        List<Reservation> reservations = jpaReservationRepository.findByDateAndTheme(LocalDate.of(2025, 1, 1), theme1);
+        List<Reservation> reservations = reservationRepository.findByDateAndTheme(LocalDate.of(2025, 1, 1), theme1);
         // then
         assertThat(reservations).hasSize(1);
     }
@@ -125,7 +126,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time1, theme));
         entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time2, theme));
         // when
-        List<Reservation> reservations = jpaReservationRepository.findByReservationTimeId(time1.getId());
+        List<Reservation> reservations = reservationRepository.findByReservationTimeId(time1.getId());
         // then
         assertThat(reservations).hasSize(1);
         assertThat(reservations.get(0).getTheme().getId()).isEqualTo(theme.getId());
@@ -145,7 +146,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(Reservation.createWithoutId(member1, LocalDate.of(2025, 1, 1), time, theme));
         entityManager.persist(Reservation.createWithoutId(member2, LocalDate.of(2025, 1, 1), time, theme));
         // when
-        List<Reservation> reservations = jpaReservationRepository.findByMemberId(member1.getId());
+        List<Reservation> reservations = reservationRepository.findByMemberId(member1.getId());
         // then
         assertThat(reservations).hasSize(1);
         assertThat(reservations.get(0).getMember().getId()).isEqualTo(member1.getId());

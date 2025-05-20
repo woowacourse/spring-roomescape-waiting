@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.domain.repository.MemberRepository;
 import roomescape.dto.request.MemberRequest;
 import roomescape.dto.response.MemberResponse;
 import roomescape.exception.DuplicatedEmailException;
+import roomescape.infrastructure.MemberRepository;
 
 @Service
 public class MemberService {

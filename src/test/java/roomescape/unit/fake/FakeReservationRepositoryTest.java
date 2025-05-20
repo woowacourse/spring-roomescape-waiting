@@ -12,7 +12,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationRepository;
+import roomescape.infrastructure.ReservationRepository;
 
 class FakeReservationRepositoryTest {
 

@@ -18,11 +18,11 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.MemberRepository;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.domain.repository.ReservationTimeRepository;
-import roomescape.domain.repository.ThemeRepository;
 import roomescape.infrastructure.JwtTokenProvider;
+import roomescape.infrastructure.MemberRepository;
+import roomescape.infrastructure.ReservationRepository;
+import roomescape.infrastructure.ReservationTimeRepository;
+import roomescape.infrastructure.ThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

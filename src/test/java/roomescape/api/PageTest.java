@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
-import roomescape.domain.repository.MemberRepository;
+import roomescape.infrastructure.MemberRepository;
 import roomescape.presentation.PageController;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
