@@ -28,7 +28,7 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<Reservation> reservations = new ArrayList<>();
 
-    public Member() {
+    protected Member() {
     }
 
     private Member(final Long id, final Name name, final Email email, final Password password) {

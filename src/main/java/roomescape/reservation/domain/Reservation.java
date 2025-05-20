@@ -32,7 +32,7 @@ public class Reservation {
     @Convert(converter = StatusConverter.class)
     private Status status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     private Reservation(final Long id,

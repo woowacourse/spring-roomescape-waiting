@@ -15,7 +15,7 @@ public class Admin {
     private String email;
     private String password;
 
-    public Admin() {
+    protected Admin() {
     }
 
     public Admin(Long id, String name, String email, String password) {
