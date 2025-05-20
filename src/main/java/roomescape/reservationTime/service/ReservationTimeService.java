@@ -14,6 +14,7 @@ import roomescape.reservationTime.presentation.dto.TimeConditionRequest;
 import roomescape.reservationTime.presentation.dto.TimeConditionResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
@@ -47,12 +48,10 @@ public class ReservationTimeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getReservationTimes() {
         return reservationTimeRepository.findAll().stream().map(ReservationTimeResponse::from).toList();
     }
 
-    @Transactional(readOnly = true)
     public List<TimeConditionResponse> getTimesWithCondition(final TimeConditionRequest request) {
         List<Reservation> reservations = reservationRepository.findBy(request.date(), request.themeId());
         List<ReservationTime> times = reservationTimeRepository.findAll();

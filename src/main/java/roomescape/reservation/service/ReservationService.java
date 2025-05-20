@@ -28,6 +28,7 @@ import roomescape.theme.exception.ThemeException;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final DateTime dateTime;
@@ -84,7 +85,6 @@ public class ReservationService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> getReservations() {
         return reservationRepository.findAll().stream()
             .map(ReservationResponse::from)
@@ -99,7 +99,6 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {
         List<Reservation> reservations = reservationRepository.findBy(
             condition.memberId(), condition.themeId(),
@@ -118,7 +117,6 @@ public class ReservationService {
             .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
         Member member = memberRepository.findById(loginMemberInfo.id())
             .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));

@@ -14,6 +14,7 @@ import roomescape.theme.presentation.dto.ThemeRequest;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int POPULAR_THEME_COUNT = 10;
@@ -56,14 +57,12 @@ public class ThemeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> getThemes() {
         return themeRepository.findAll().stream()
             .map(ThemeResponse::from)
             .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<PopularThemeResponse> getPopularThemes() {
         LocalDate now = dateTime.now().toLocalDate();
 

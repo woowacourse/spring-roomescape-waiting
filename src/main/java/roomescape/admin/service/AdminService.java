@@ -7,6 +7,7 @@ import roomescape.admin.domain.AdminRepository;
 import roomescape.common.exception.BusinessException;
 
 @Service
+@Transactional(readOnly = true)
 public class AdminService {
 
     private final AdminRepository adminRepository;
@@ -15,18 +16,15 @@ public class AdminService {
         this.adminRepository = adminRepository;
     }
 
-    @Transactional(readOnly = true)
     public boolean isExistsByEmail(final String email) {
         return adminRepository.existsByEmail(email);
     }
 
-    @Transactional(readOnly = true)
     public Admin findByEmail(final String email) {
         return adminRepository.findByEmail(email)
             .orElseThrow(() -> new BusinessException("관리자를 찾을 수 없습니다."));
     }
 
-    @Transactional(readOnly = true)
     public Admin findById(final Long id) {
         return adminRepository.findById(id)
             .orElseThrow(() -> new BusinessException("관리자를 찾을 수 없습니다."));

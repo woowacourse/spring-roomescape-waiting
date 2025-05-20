@@ -12,6 +12,7 @@ import roomescape.member.presentation.dto.MemberRequest;
 import roomescape.member.presentation.dto.MemberResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -37,24 +38,20 @@ public class MemberService {
         }
     }
 
-    @Transactional(readOnly = true)
     public Member findByEmail(final String email) {
         return memberRepository.findByEmail(new Email(email))
             .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
     }
 
-    @Transactional(readOnly = true)
     public boolean isExistsByEmail(final String email) {
         return memberRepository.existsByEmail(new Email(email));
     }
 
-    @Transactional(readOnly = true)
     public Member findById(final Long id) {
         return memberRepository.findById(id)
             .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
     }
 
-    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
                 .map(member -> new MemberResponse(member.getId(), member.getName()))

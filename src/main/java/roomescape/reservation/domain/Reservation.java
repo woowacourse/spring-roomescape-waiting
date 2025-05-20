@@ -52,7 +52,6 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.member = member;
         this.status = status;
         setMember(member);
     }
