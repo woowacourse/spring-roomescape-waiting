@@ -25,20 +25,20 @@ import roomescape.reservation.application.dto.ReservationResponse;
 @RequestMapping("/reservations")
 public class UserReservationController {
 
-    private final ReservationCommandService commandService;
-    private final ReservationQueryService queryService;
+    private final ReservationCommandService reservationCommandService;
+    private final ReservationQueryService reservationQueryService;
 
     public UserReservationController(
-            final ReservationCommandService commandService,
-            final ReservationQueryService queryService
+            final ReservationCommandService reservationCommandService,
+            final ReservationQueryService reservationQueryService
     ) {
-        this.commandService = commandService;
-        this.queryService = queryService;
+        this.reservationCommandService = reservationCommandService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(final LoginCheckRequest request) {
-        List<MyReservationResponse> response = queryService.findByMemberId(request.id());
+        List<MyReservationResponse> response = reservationQueryService.findByMemberId(request.id());
         return ResponseEntity.ok(response);
     }
 
@@ -47,7 +47,7 @@ public class UserReservationController {
             @PathVariable final Long themeId,
             @RequestParam final LocalDate date
     ) {
-        return ResponseEntity.ok(queryService.findAvailableReservationTime(themeId, date));
+        return ResponseEntity.ok(reservationQueryService.findAvailableReservationTime(themeId, date));
     }
 
     @PostMapping
@@ -55,7 +55,7 @@ public class UserReservationController {
             @Valid @RequestBody final MemberReservationRequest request,
             final LoginCheckRequest loginCheckRequest
     ) {
-        final ReservationResponse reservationResponse = commandService.addMemberReservation(request,
+        final ReservationResponse reservationResponse = reservationCommandService.addMemberReservation(request,
                 loginCheckRequest.id());
         return new ResponseEntity<>(reservationResponse, HttpStatus.CREATED);
     }
@@ -65,7 +65,7 @@ public class UserReservationController {
             @PathVariable("id") final Long id,
             final LoginCheckRequest request
     ) {
-        commandService.deleteById(id, request.id());
+        reservationCommandService.deleteById(id, request.id());
         return ResponseEntity.noContent().build();
     }
 }

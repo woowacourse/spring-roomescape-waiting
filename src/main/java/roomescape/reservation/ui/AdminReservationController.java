@@ -23,25 +23,25 @@ import roomescape.reservation.application.dto.ReservationResponse;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final ReservationCommandService commandService;
-    private final ReservationQueryService queryService;
+    private final ReservationCommandService reservationCommandService;
+    private final ReservationQueryService reservationQueryService;
 
     public AdminReservationController(
-            final ReservationCommandService commandService,
-            final ReservationQueryService queryService
+            final ReservationCommandService reservationCommandService,
+            final ReservationQueryService reservationQueryService
     ) {
-        this.commandService = commandService;
-        this.queryService = queryService;
+        this.reservationCommandService = reservationCommandService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAllReserved() {
-        return ResponseEntity.ok(queryService.findReservedReservations());
+        return ResponseEntity.ok(reservationQueryService.findReservedReservations());
     }
 
     @GetMapping("/waiting")
     public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
-        return ResponseEntity.ok(queryService.findWaitingReservations());
+        return ResponseEntity.ok(reservationQueryService.findWaitingReservations());
     }
 
     @GetMapping("/search")
@@ -51,7 +51,7 @@ public class AdminReservationController {
             @RequestParam(required = false, name = "from") final LocalDate start,
             @RequestParam(required = false, name = "to") final LocalDate end
     ) {
-        final List<ReservationResponse> reservationResponses = queryService.findReservationByThemeIdAndMemberIdInDuration(
+        final List<ReservationResponse> reservationResponses = reservationQueryService.findReservationByThemeIdAndMemberIdInDuration(
                 themeId, memberId, start, end);
         return ResponseEntity.ok(reservationResponses);
     }
@@ -60,20 +60,20 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> add(
             @Valid @RequestBody final AdminReservationRequest request
     ) {
-        final ReservationResponse response = commandService.addAdminReservation(request);
+        final ReservationResponse response = reservationCommandService.addAdminReservation(request);
         return ResponseEntity.created(URI.create("/admin/reservations/" + response.id()))
                 .body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
-        commandService.deleteById(id);
+        reservationCommandService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/waiting/{id}")
     public ResponseEntity<Void> updateStatus(@PathVariable("id") final Long id) {
-        commandService.updateStatus(id);
+        reservationCommandService.updateStatus(id);
         return ResponseEntity.ok().build();
     }
 }
