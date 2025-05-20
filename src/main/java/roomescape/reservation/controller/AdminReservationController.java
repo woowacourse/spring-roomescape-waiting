@@ -1,6 +1,8 @@
 package roomescape.reservation.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,16 +22,15 @@ public class AdminReservationController {
 
     private final ReservationService reservationService;
 
-    /**
-     TODO 4단계
-     ### 예약 대기 취소(어드민)
-     ### 예약 대기 승인(어드민)
-     - 예약 상태인 예약을 취소하면 자동으로 1번 대기 요청이 승인됩니다.
-     */
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse saveReservation(@Valid @RequestBody final AdminReservationRequest request) {
         return reservationService.saveAdminReservation(request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cancelReservation(@PathVariable("id") final Long id) {
+        reservationService.deleteReservation(id);
     }
 }

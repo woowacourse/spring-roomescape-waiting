@@ -55,6 +55,12 @@ public class Waiting {
     }
 
     public void reduceRank() {
+        if (rank == 0) {
+            throw new IllegalStateException("더이상 대기 순번을 앞당길 수 없습니다. Waiting.id: " + id);
+        }
         rank--;
+        if (rank == 0) {
+            status = ReservationStatus.BOOKED;
+        }
     }
 }
