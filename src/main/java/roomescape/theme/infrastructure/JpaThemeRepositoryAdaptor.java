@@ -32,8 +32,8 @@ public class JpaThemeRepositoryAdaptor implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findPopularThemes(LocalDate start, LocalDate end, int popularCount) {
-        return jpaThemeRepository.findPopularThemes(start, end, popularCount);
+    public List<Theme> findPopularThemes(LocalDate start, LocalDate end) {
+        return jpaThemeRepository.findPopularThemes(start, end);
     }
 
     @Override
