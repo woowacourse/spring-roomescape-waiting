@@ -36,16 +36,24 @@ public class ReservationService {
 
         isAlreadyReservedTime(date, timeId);
 
-        ReservationDateTime reservationDateTime = ReservationDateTime.create(new ReservationDate(date),
-                                                                             reservationTimeService.getReservationTime(
-                                                                                     timeId));
-        Theme theme = themeService.getTheme(reserveCommand.themeId());
-        Member reserver = memberService.getMember(reserveCommand.memberId());
-
-        Reservation reserved = Reservation.reserve(reserver, reservationDateTime, theme);
+        Reservation reserved = reservationFrom(reserveCommand, date, timeId);
         Reservation saved = reservationRepository.save(reserved);
 
         return ReservationResponse.from(saved);
+    }
+
+    private Reservation reservationFrom(ReserveCommand reserveCommand, LocalDate date, Long timeId) {
+        ReservationDateTime reservationDateTime = ReservationDateTime.create(new ReservationDate(date),
+                reservationTimeService.getReservationTime(timeId));
+
+        Theme theme = themeService.getTheme(reserveCommand.themeId());
+        Member reserver = memberService.getMember(reserveCommand.memberId());
+
+        return Reservation.builder()
+                .reservationDateTime(reservationDateTime)
+                .reserver(reserver)
+                .theme(theme)
+                .build();
     }
 
     private void isAlreadyReservedTime(LocalDate date, Long timeId) {
