@@ -42,8 +42,18 @@ function approve(event) {
   return fetch(endpoint, {
     method: 'POST',
   }).then(response => {
-    if (!response.ok) throw new Error('Delete failed');
-  }).then(() => location.reload());
+    if (!response.ok) {
+      return response.json().then(data => {
+        // 서버에서 JSON 에러 메시지를 줄 경우
+        throw new Error(data.message || '예약 승인에 실패했습니다.');
+      });
+    }
+    return response;
+  })
+      .then(() => location.reload())
+      .catch(error => {
+        alert(error.message);
+      });
 }
 
 function deny(event) {
@@ -54,8 +64,18 @@ function deny(event) {
   return fetch(endpoint, {
     method: 'DELETE'
   }).then(response => {
-    if (response.status !== 204) throw new Error('예약 대기를 거절할 수 없습니다.');
-  }).then(() => location.reload());
+    if (!response.ok) {
+      return response.json().then(data => {
+        // 서버에서 JSON 에러 메시지를 줄 경우
+        throw new Error(data.message || '예약 승인에 실패했습니다.');
+      });
+    }
+    return response;
+  })
+      .then(() => location.reload())
+      .catch(error => {
+        alert(error.message);
+      });
 }
 
 function createActionButton(label, className, eventListener) {
