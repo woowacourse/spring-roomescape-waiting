@@ -1,4 +1,4 @@
-package roomescape.theme.infrastructure;
+package roomescape.theme.domain;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.fixture.domain.MemberFixture.notSavedMember1;
@@ -21,16 +21,11 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @DisplayNameGeneration(ReplaceUnderscores.class)
-class ThemeRepositoryImplTest {
-
-    @Autowired
-    private ThemeRepositoryImpl themeRepositoryImpl;
+class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -52,12 +47,12 @@ class ThemeRepositoryImplTest {
 
         final int themeSize = 7;
         final List<Theme> themes = ThemeFixture.notSavedThemes(themeSize);
-        for (Theme theme : themes) {
-            themeRepositoryImpl.save(theme);
+        for (final Theme theme : themes) {
+            themeRepository.save(theme);
         }
 
         final List<ReservationTime> times = ReservationTimeFixture.notSavedReservationTimes(11);
-        for (ReservationTime time : times) {
+        for (final ReservationTime time : times) {
             reservationTimeRepository.save(time);
         }
 
