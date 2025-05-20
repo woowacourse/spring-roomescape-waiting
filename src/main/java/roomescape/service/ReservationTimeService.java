@@ -2,9 +2,11 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.dto.request.ReservationTimeRegisterDto;
@@ -75,17 +77,19 @@ public class ReservationTimeService {
                 reservationTimes);
         List<AvailableReservationTimeResponseDto> nonAvailableReservationTimes = getAvailableReservationTimes(
                 nonDuplicatedReservationTimes);
-        availableReservationTimes.addAll(nonAvailableReservationTimes);
-        return availableReservationTimes;
+
+        return Stream.of(availableReservationTimes, nonAvailableReservationTimes)
+                .flatMap(Collection::stream)
+                .toList();
     }
 
     private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
             List<ReservationTime> reservationTimes) {
-        return new java.util.ArrayList<>(reservationTimes.stream()
+        return reservationTimes.stream()
                 .map(reservationTime -> new AvailableReservationTimeResponseDto(
                         reservationTime,
                         false))
-                .toList());
+                .toList();
     }
 
     private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
