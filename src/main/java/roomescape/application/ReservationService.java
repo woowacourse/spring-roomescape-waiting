@@ -40,12 +40,10 @@ public class ReservationService {
         return reservationRepository.save(new Reservation(user, date, timeSlot, theme));
     }
 
-    @Transactional(readOnly = true)
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
         return reservationRepository.findAll(byFilter(filter));
     }
 
-    @Transactional
     public void removeById(final long id) {
         reservationRepository.deleteByIdOrElseThrow(id);
     }

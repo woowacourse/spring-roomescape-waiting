@@ -2,7 +2,6 @@ package roomescape.application;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.domain.user.Email;
@@ -18,21 +17,20 @@ public class AuthenticationService {
     private final AuthenticationTokenHandler tokenProvider;
     private final UserRepository userRepository;
 
-    @Transactional(readOnly = true)
     public String issueToken(final String email, final String password) {
-        var user = userRepository.findByEmail(new Email(email))
-                .orElseThrow(() -> new AuthenticationException("이메일 또는 비밀번호가 틀렸습니다."));
-        if (!user.matchesPassword(new Password(password))) {
-            throw new AuthenticationException("이메일 또는 비밀번호가 틀렸습니다.");
-        }
+        var user = verifyAndGetUser(email, password);
         var authenticationInfo = new AuthenticationInfo(user.id(), user.role());
         return tokenProvider.createToken(authenticationInfo);
     }
 
-    @Transactional(readOnly = true)
+    private User verifyAndGetUser(final String email, final String password) {
+        return userRepository.findByEmail(new Email(email))
+            .filter(user -> user.matchesPassword(new Password(password)))
+            .orElseThrow(() -> new AuthenticationException("이메일 또는 비밀번호가 틀렸습니다."));
+    }
+
     public User getUserByToken(final String token) {
-        var isValidToken = tokenProvider.isValidToken(token);
-        if (!isValidToken) {
+        if (!tokenProvider.isValidToken(token)) {
             throw new AuthenticationException("토큰이 만료되었거나 유효하지 않습니다.");
         }
         var id = tokenProvider.extractId(token);

@@ -18,7 +18,6 @@ public class UserService {
 
     private final UserRepository repository;
 
-    @Transactional
     public User register(final String email, final String password, final String name) {
         if (existsAlready(email)) {
             throw new AlreadyExistedException("이미 해당 이메일로 가입된 사용자가 있습니다.");
@@ -38,12 +37,10 @@ public class UserService {
         return user.reservations();
     }
 
-    @Transactional(readOnly = true)
     public List<User> findAllUsers() {
         return repository.findAll();
     }
 
-    @Transactional(readOnly = true)
     public User getById(final long id) {
         return repository.getById(id);
     }
