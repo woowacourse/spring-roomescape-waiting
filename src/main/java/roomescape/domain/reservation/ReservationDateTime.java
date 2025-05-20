@@ -6,8 +6,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import roomescape.domain.timeslot.TimeSlot;
@@ -18,6 +20,7 @@ import roomescape.exception.BusinessRuleViolationException;
 @Getter
 @Accessors(fluent = true)
 @ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationDateTime {
 
     @Column(nullable = false)
@@ -29,10 +32,6 @@ public class ReservationDateTime {
     private ReservationDateTime(final LocalDate date, final TimeSlot timeSlot) {
         this.date = date;
         this.timeSlot = timeSlot;
-    }
-
-    protected ReservationDateTime() {
-
     }
 
     public static ReservationDateTime of(final LocalDate date, final TimeSlot timeSlot) {

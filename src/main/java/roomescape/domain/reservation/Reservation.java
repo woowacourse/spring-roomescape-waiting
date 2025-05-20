@@ -9,8 +9,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
@@ -19,6 +21,7 @@ import roomescape.domain.user.User;
 @EqualsAndHashCode(of = {"id"})
 @Getter
 @Accessors(fluent = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Reservation {
 
@@ -44,9 +47,6 @@ public class Reservation {
 
     public Reservation(final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         this(0L, user, ReservationDateTime.forReserve(date, timeSlot), theme, ReservationStatus.RESERVED);
-    }
-
-    protected Reservation() {
     }
 
     @Override

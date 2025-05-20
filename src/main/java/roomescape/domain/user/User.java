@@ -10,14 +10,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.reservation.Reservation;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
 @Accessors(fluent = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "USERS")
 public class User {
 
@@ -35,7 +38,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private final List<Reservation> reservations = new ArrayList<>();
 
-    public User(final long id, final UserName name, final UserRole role, final Email email, final Password password) {
+    public User(final long id, final UserName name, final UserRole role, final Email email,
+        final Password password) {
         this.id = id;
         this.name = name;
         this.role = role;
@@ -45,9 +49,6 @@ public class User {
 
     public User(final UserName name, final Email email, final Password password) {
         this(0L, name, UserRole.USER, email, password);
-    }
-
-    protected User() {
     }
 
     public boolean matchesPassword(final Password passwordToCompare) {

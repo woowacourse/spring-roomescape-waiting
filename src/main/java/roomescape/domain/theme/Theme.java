@@ -4,8 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import roomescape.exception.BusinessRuleViolationException;
@@ -15,6 +17,7 @@ import roomescape.exception.BusinessRuleViolationException;
 @Accessors(fluent = true)
 @ToString
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Theme {
 
     private static final int NAME_MAX_LENGTH = 10;
@@ -38,9 +41,6 @@ public class Theme {
 
     public Theme(final String name, final String description, final String thumbnail) {
         this(0L, name, description, thumbnail);
-    }
-
-    protected Theme() {
     }
 
     private void validateNameLength(final String name) {

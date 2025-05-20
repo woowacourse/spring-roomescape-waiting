@@ -5,8 +5,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
@@ -14,6 +16,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "RESERVATION_TIME")
 public class TimeSlot {
 
@@ -29,9 +32,6 @@ public class TimeSlot {
 
     public TimeSlot(final LocalTime startAt) {
         this(0L, startAt);
-    }
-
-    protected TimeSlot() {
     }
 
     public boolean isTimeBefore(final LocalTime time) {
