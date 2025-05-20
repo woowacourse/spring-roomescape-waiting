@@ -1,17 +1,13 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.common.exception.BusinessException;
 import roomescape.member.domain.Member;
+import roomescape.reservation.infrastructure.StatusConverter;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -33,7 +29,7 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = StatusConverter.class)
     private Status status;
 
     public Reservation() {
