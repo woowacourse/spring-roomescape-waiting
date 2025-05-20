@@ -18,13 +18,13 @@ public class AuthExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNotAdminException(NotAdminException e) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.fail(NOT_ADMIN, e.getMessage()));
+                .body(ApiResponse.fail(NOT_ADMIN));
     }
 
     @ExceptionHandler
     public ResponseEntity<ApiResponse<Void>> handleTokenNotFoundException(TokenNotFoundException e) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.fail(NOT_AUTHORIZED, e.getMessage()));
+                .body(ApiResponse.fail(NOT_AUTHORIZED));
     }
 }
