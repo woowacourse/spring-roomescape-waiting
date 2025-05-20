@@ -36,7 +36,6 @@ public class ReservationController {
     /**
      * TODO 3단계
      예약 대기 취소
-     내 예약 목록 조회
      */
 
     private final ReservationService reservationService;
