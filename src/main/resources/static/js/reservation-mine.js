@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     TODO: [2단계] 내 예약 목록 조회 기능
           endpoint 설정
      */
-    fetch('/reservations/my') // 내 예약 목록 조회 API 호출
+    fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -18,7 +18,7 @@ function render(data) {
 
     data.forEach(item => {
         const row = tableBody.insertRow();
-        
+
         const theme = item.theme; // 예약 테마명
         const date = item.date;
         const time = item.time;

@@ -1,10 +1,6 @@
 package roomescape.reservation.controller;
 
 import io.restassured.RestAssured;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,55 +18,32 @@ import roomescape.member.domain.MemberRole;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.member.repository.MemberRepository;
 import roomescape.repository.fake.FakeMemberRepository;
+import roomescape.repository.fake.FakeReservationRepository;
 import roomescape.repository.fake.FakeReservationTimeRepository;
 import roomescape.repository.fake.FakeThemeRepository;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.repository.fake.FakeReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import static org.hamcrest.Matchers.equalTo;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class ReservationControllerTest {
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public MemberRepository memberRepository() {
-            return new FakeMemberRepository();
-        }
-
-        @Bean ReservationRepository reservationRepository() {
-            return new FakeReservationRepository();
-        }
-
-        @Bean
-        public ThemeRepository themeRepository() {
-            return new FakeThemeRepository(reservationRepository());
-        }
-
-        @Bean
-        public ReservationTimeRepository reservationTimeRepository() {
-            return new FakeReservationTimeRepository(reservationRepository());
-        }
-    }
-
     @Autowired
     private ThemeRepository themeRepository;
-
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
     @Autowired
     private MemberRepository memberRepository;
-
     @Autowired
     private AuthorizationProvider authorizationProvider;
-
     private AuthorizationPrincipal principal;
 
     @BeforeEach
@@ -126,7 +99,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType("application/json")
                 .cookie("token", principal.value())
-                .when().get("/reservations/my")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", equalTo(1))
@@ -164,5 +137,28 @@ class ReservationControllerTest {
                 .cookie("token", principal.value())
                 .body(request)
                 .when().post("/reservations");
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public MemberRepository memberRepository() {
+            return new FakeMemberRepository();
+        }
+
+        @Bean
+        ReservationRepository reservationRepository() {
+            return new FakeReservationRepository();
+        }
+
+        @Bean
+        public ThemeRepository themeRepository() {
+            return new FakeThemeRepository(reservationRepository());
+        }
+
+        @Bean
+        public ReservationTimeRepository reservationTimeRepository() {
+            return new FakeReservationTimeRepository(reservationRepository());
+        }
     }
 }
