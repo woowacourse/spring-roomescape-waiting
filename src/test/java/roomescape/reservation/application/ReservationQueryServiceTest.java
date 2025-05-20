@@ -31,7 +31,7 @@ class ReservationQueryServiceTest {
     @Test
     void 예약가능한_시간을_조회한다() {
         final Long themeId = 2L;
-        final String date = LocalDate.now().minusDays(3).toString();
+        final LocalDate date = LocalDate.now().minusDays(3);
 
         assertThat(reservationQueryService.findAvailableReservationTime(themeId, date))
                 .isEqualTo(List.of(
@@ -71,7 +71,7 @@ class ReservationQueryServiceTest {
     @Test
     void 존재하지_않는_테마의_예약가능_시간을_조회할_수_없다() {
         final Long invalidThemeId = 999L;
-        final String date = LocalDate.now().toString();
+        final LocalDate date = LocalDate.now();
 
         assertThatThrownBy(() -> reservationQueryService.findAvailableReservationTime(invalidThemeId, date))
                 .isInstanceOf(NotFoundException.class)

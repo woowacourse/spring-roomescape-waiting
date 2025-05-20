@@ -1,6 +1,7 @@
 package roomescape.reservation.ui;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class UserReservationController {
     @GetMapping("/themes/{themeId}/times")
     public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailableReservationTime(
             @PathVariable final Long themeId,
-            @RequestParam final String date
+            @RequestParam final LocalDate date
     ) {
         return ResponseEntity.ok(queryService.findAvailableReservationTime(themeId, date));
     }

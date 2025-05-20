@@ -50,12 +50,13 @@ public class ReservationQueryService {
                 .toList();
     }
 
-    public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId, final String date) {
+    public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId,
+                                                                               final LocalDate date) {
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("선택한 테마가 존재하지 않습니다."));
         final List<ReservationTime> times = reservationTimeRepository.findAll();
         final List<Reservation> reservations = reservationRepository.findByDateAndThemeIdWithAssociations(
-                LocalDate.parse(date), themeId);
+                date, themeId);
 
         return times.stream()
                 .map(time -> {
