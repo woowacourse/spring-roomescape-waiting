@@ -16,11 +16,11 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.business.domain.ReservationTime;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.presentation.dto.PlayTimeRequest;
-import roomescape.presentation.dto.PlayTimeResponse;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.ReservationTimeResponse;
 
 @DataJpaTest
 @Sql("classpath:data-playTimeService.sql")
@@ -30,7 +30,8 @@ class ReservationTimeServiceTest {
     private final ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    public ReservationTimeServiceTest(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
+    public ReservationTimeServiceTest(final ReservationTimeRepository reservationTimeRepository,
+                                      final ReservationRepository reservationRepository) {
         this.reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
         this.reservationTimeRepository = reservationTimeRepository;
     }
@@ -43,10 +44,10 @@ class ReservationTimeServiceTest {
         final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
 
         // when
-        final PlayTimeResponse playTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
 
         // then
-        assertThat(playTimeResponse.startAt()).isEqualTo(startAt);
+        assertThat(reservationTimeResponse.startAt()).isEqualTo(startAt);
     }
 
     @Test
@@ -70,10 +71,10 @@ class ReservationTimeServiceTest {
         // 2개의 방탈출 예약 시간이 주어진다.
 
         // when
-        final List<PlayTimeResponse> playTimeResponses = reservationTimeService.findAll();
+        final List<ReservationTimeResponse> reservationTimeRespons = reservationTimeService.findAll();
 
         // then
-        assertThat(playTimeResponses).hasSize(2);
+        assertThat(reservationTimeRespons).hasSize(2);
     }
 
     @Test
@@ -82,16 +83,16 @@ class ReservationTimeServiceTest {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
         final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        final PlayTimeResponse playTimeResponse = reservationTimeService.insert(playTimeRequest);
-        final Long id = playTimeResponse.id();
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final Long id = reservationTimeResponse.id();
 
         // when
-        final PlayTimeResponse findPlayTimeResponse = reservationTimeService.findById(id);
+        final ReservationTimeResponse findReservationTimeResponse = reservationTimeService.findById(id);
 
         // then
         assertAll(
-                () -> assertThat(findPlayTimeResponse.id()).isEqualTo(id),
-                () -> assertThat(findPlayTimeResponse.startAt()).isEqualTo(startAt)
+                () -> assertThat(findReservationTimeResponse.id()).isEqualTo(id),
+                () -> assertThat(findReservationTimeResponse.startAt()).isEqualTo(startAt)
         );
     }
 
@@ -112,8 +113,8 @@ class ReservationTimeServiceTest {
         // given
         final LocalTime startAt = LocalTime.of(14, 0);
         final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        final PlayTimeResponse playTimeResponse = reservationTimeService.insert(playTimeRequest);
-        final Long id = playTimeResponse.id();
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final Long id = reservationTimeResponse.id();
 
         // when
         reservationTimeService.deleteById(id);
@@ -149,14 +150,14 @@ class ReservationTimeServiceTest {
 
         // then
         final ReservationAvailableTimeResponse notAvailableTimeResponse = availableTimeResponses.stream()
-                        .filter(response -> response.reservationTime().getId() == 100L)
+                .filter(response -> response.reservationTime().getId() == 100L)
                 .findFirst().get();
         final ReservationAvailableTimeResponse availableTimeResponse = availableTimeResponses.stream()
-                        .filter(response -> response.reservationTime().getId() == 101L)
+                .filter(response -> response.reservationTime().getId() == 101L)
                 .findFirst().get();
         assertAll(
                 () -> assertThat(availableTimeResponses).hasSize(2),
-                ()-> assertThat(notAvailableTimeResponse.alreadyBooked()).isTrue(),
+                () -> assertThat(notAvailableTimeResponse.alreadyBooked()).isTrue(),
                 () -> assertThat(availableTimeResponse.alreadyBooked()).isFalse()
         );
     }
