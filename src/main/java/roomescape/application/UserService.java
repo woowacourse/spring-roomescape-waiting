@@ -2,8 +2,6 @@ package roomescape.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
@@ -13,11 +11,9 @@ import roomescape.exception.NotFoundException;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;
 
-    public UserService(final UserRepository userRepository, final ReservationRepository reservationRepository) {
+    public UserService(final UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     public User register(final String email, final String password, final String name) {
@@ -33,13 +29,6 @@ public class UserService {
     public User getById(final long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + id));
-    }
-
-    public List<Reservation> getReservations(final long id) {
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + id));
-
-        return reservationRepository.findByUserId(user.id());
     }
 
     public List<User> findAllUsers() {

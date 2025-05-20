@@ -46,7 +46,7 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReservationService(reservationRepository, timeSlotRepository, themeRepository);
+        service = new ReservationService(reservationRepository, timeSlotRepository, themeRepository, userRepository);
         userRepository.save(JUNK_USER);
         themeRepository.save(JUNK_THEME);
         timeSlotRepository.save(JUNK_TIME_SLOT);
@@ -164,5 +164,22 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> service.reserve(user, date, timeSlotId, themeId))
                 .isInstanceOf(AlreadyExistedException.class);
+    }
+
+    @Test
+    @DisplayName("사용자의 예약을 조회할 수 있다.")
+    void getReservations() {
+        // given
+        var savedTimeSlot = timeSlotRepository.save(JUNK_TIME_SLOT);
+        var savedTheme = themeRepository.save(JUNK_THEME);
+        var createdUser = userRepository.save(JUNK_USER);
+        var savedReservation = reservationRepository.save(
+                Reservation.reserveNewly(createdUser, tomorrow(), savedTimeSlot, savedTheme));
+
+        // when
+        var reservations = service.getReservations(createdUser.id());
+
+        // then
+        assertThat(reservations).contains(savedReservation);
     }
 }
