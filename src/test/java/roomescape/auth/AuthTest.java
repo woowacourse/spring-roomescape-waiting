@@ -13,9 +13,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @Sql("/data.sql")
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class AuthTest {
 
     @Test
@@ -61,6 +61,28 @@ class AuthTest {
         RestAssured.given().log().all()
                 .cookie("token", token)
                 .when().get("/admin")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    void 이단계_어드민_예약페이지_접근() {
+        // given
+        Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
+        String token = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(adminUser)
+                .when().post("/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .cookie("token");
+
+        // then
+        // when
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/admin/reservation")
                 .then().log().all()
                 .statusCode(200);
     }
