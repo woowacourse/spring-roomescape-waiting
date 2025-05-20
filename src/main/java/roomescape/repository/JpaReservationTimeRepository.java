@@ -25,8 +25,10 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
                FROM reservation_time as rt
                ORDER BY rt.start_at ASC;
             """, nativeQuery = true)
-    List<ReservationTime> findAllTimesWithBooked(@Param("date") LocalDate date,
-        @Param("themeId") long themeId);
+    List<ReservationTime> findAllTimesWithBooked(
+            @Param("date") LocalDate date,
+            @Param("themeId") long themeId
+    );
 
     boolean existsByStartAt(LocalTime startAt);
 }
