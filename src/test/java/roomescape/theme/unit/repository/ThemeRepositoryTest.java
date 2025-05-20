@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.theme.unit.repository;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -16,19 +16,20 @@ import roomescape.member.entity.RoleType;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.theme.entity.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
-class ReservationTimeRepositoryTest {
+class ThemeRepositoryTest {
 
     @Autowired
     private EntityManager entityManager;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ThemeRepository themeRepository;
 
     @Test
-    @DisplayName("날짜와 테마 ID로 모든 예약되어 있는 시간을 조회할 수 있다.")
-    void findAllReservedTimeByDateAndThemeId() {
+    @DisplayName("")
+    void findPopularDescendingUpTo() {
         // given
         var reservationTime1 = new ReservationTime(LocalTime.of(10, 0));
         var reservationTime2 = new ReservationTime(LocalTime.of(11, 0));
@@ -37,7 +38,7 @@ class ReservationTimeRepositoryTest {
         var member1 = new Member("미소", "miso@email.com", "miso", RoleType.USER);
         var member2 = new Member("훌라", "hula@email.com", "hula", RoleType.USER);
         var date = LocalDate.now().plusDays(1);
-        var reservation1 = new Reservation(date, reservationTime1, theme1, member1);
+        var reservation1 = new Reservation(date, reservationTime1, theme2, member1);
         var reservation2 = new Reservation(date, reservationTime2, theme2, member2);
         var reservation3 = new Reservation(date, reservationTime2, theme1, member2);
         entityManager.persist(reservationTime1);
@@ -51,16 +52,15 @@ class ReservationTimeRepositoryTest {
         entityManager.persist(reservation3);
 
         // when
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAllReservedTimeByDateAndThemeId(
-                date,
-                1L
+        List<Theme> themes = themeRepository.findPopularDescendingUpTo(
+                LocalDate.now().minusDays(2),
+                LocalDate.now().plusDays(2), 10
         );
 
         // then
         assertAll(
-                () -> assertThat(reservationTimes.size()).isEqualTo(2),
-                () -> assertThat(reservationTimes.get(0).getStartAt()).isEqualTo(reservationTime1.getStartAt()),
-                () -> assertThat(reservationTimes.get(1).getStartAt()).isEqualTo(reservationTime2.getStartAt())
+                () -> assertThat(themes.get(0)).isEqualTo(theme2),
+                () -> assertThat(themes.get(1)).isEqualTo(theme1)
         );
     }
 }
