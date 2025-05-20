@@ -30,6 +30,11 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
     }
 
     @Override
+    public List<Reservation> findAllByThemeAndDate(final Theme theme, final LocalDate date) {
+        return reservationRepository.findAllByThemeAndDate(theme, date);
+    }
+
+    @Override
     public List<Reservation> findAllByMemberAndThemeAndDateBetween(final Member member, final Theme theme,
                                                                    final LocalDate from,
                                                                    final LocalDate to) {
@@ -44,6 +49,11 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
     @Override
     public boolean existsById(final Long id) {
         return reservationRepository.existsById(id);
+    }
+
+    @Override
+    public boolean existsByReservationTime(final ReservationTime reservationTime) {
+        return reservationRepository.existsByReservationTime(reservationTime);
     }
 
     @Override

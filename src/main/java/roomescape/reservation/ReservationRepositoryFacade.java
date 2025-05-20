@@ -11,10 +11,12 @@ public interface ReservationRepositoryFacade {
 
     List<Reservation> findAll();
     List<Reservation> findAllByMember(Member member);
+    List<Reservation> findAllByThemeAndDate(Theme theme, LocalDate date);
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
 
     void deleteById(Long id);
 
     boolean existsById(Long id);
+    boolean existsByReservationTime(ReservationTime reservationTime);
     boolean existsByReservationTimeAndDateAndTheme(ReservationTime reservationTime, LocalDate date, Theme theme);
 }

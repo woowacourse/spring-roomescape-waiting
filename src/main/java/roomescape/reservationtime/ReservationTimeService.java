@@ -11,7 +11,7 @@ import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExis
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.ReservationRepositoryFacade;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
@@ -23,7 +23,7 @@ import roomescape.theme.ThemeRepositoryFacade;
 public class ReservationTimeService {
 
     private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepositoryFacade reservationRepositoryFacade;
     private final ThemeRepositoryFacade themeRepositoryFacade;
 
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
@@ -45,7 +45,8 @@ public class ReservationTimeService {
         final Theme theme = themeRepositoryFacade.findById(themeId)
                 .orElseThrow(ReservationTimeNotExistsThemeException::new);
 
-        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(theme,
+        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepositoryFacade.findAllByThemeAndDate(
+                        theme,
                         date).stream()
                 .map(Reservation::getReservationTime)
                 .collect(Collectors.toSet());
@@ -64,7 +65,7 @@ public class ReservationTimeService {
         final ReservationTime reservationTime = reservationTimeRepositoryFacade.findById(id)
                 .orElseThrow(ReservationTimeNotFoundException::new);
 
-        if (reservationRepository.existsByReservationTime(reservationTime)) {
+        if (reservationRepositoryFacade.existsByReservationTime(reservationTime)) {
             throw new ReservationTimeUsedException();
         }
 
