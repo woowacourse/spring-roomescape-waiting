@@ -1,17 +1,14 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
+import jakarta.persistence.*;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 public final class Reservation {
@@ -37,7 +34,7 @@ public final class Reservation {
         this.theme = theme;
     }
 
-    public Reservation() {
+    protected Reservation() {
 
     }
 

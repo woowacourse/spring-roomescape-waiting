@@ -1,13 +1,14 @@
 package roomescape.time.repository;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import roomescape.time.domain.ReservationAvailability;
+import roomescape.time.domain.ReservableTime;
 import roomescape.time.domain.ReservationTime;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 
 public interface ReservationTimeRepository extends CrudRepository<ReservationTime, Long> {
 
@@ -24,7 +25,7 @@ public interface ReservationTimeRepository extends CrudRepository<ReservationTim
                 ) AS is_booked
             FROM reservation_time AS t;
             """, nativeQuery = true)
-    List<ReservationAvailability> findAllReservationAvailability(
+    List<ReservableTime> findAllReservableTime(
             @Param("date") LocalDate date,
             @Param("themeId") long themeId
     );

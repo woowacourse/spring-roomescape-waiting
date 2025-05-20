@@ -4,9 +4,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.time.dto.CreateReservationTimeRequest;
+import roomescape.time.dto.ReservableTimeResponse;
 import roomescape.time.dto.ReservationTimeResponse;
-import roomescape.time.dto.TimeAvailabilityResponse;
-import roomescape.time.service.ReservationAvailabilityService;
+import roomescape.time.service.ReservableTimeService;
 import roomescape.time.service.ReservationTimeService;
 
 import java.net.URI;
@@ -18,12 +18,12 @@ import java.util.List;
 public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
-    private final ReservationAvailabilityService reservationAvailabilityService;
+    private final ReservableTimeService reservableTimeService;
 
     public ReservationTimeController(final ReservationTimeService reservationTimeService,
-                                     final ReservationAvailabilityService reservationAvailabilityService) {
+                                     final ReservableTimeService reservableTimeService) {
         this.reservationTimeService = reservationTimeService;
-        this.reservationAvailabilityService = reservationAvailabilityService;
+        this.reservableTimeService = reservableTimeService;
     }
 
     @PostMapping
@@ -39,11 +39,11 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/availability")
-    public ResponseEntity<List<TimeAvailabilityResponse>> findAvailabilityTimes(
+    public ResponseEntity<List<ReservableTimeResponse>> findAvailabilityTimes(
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") long themeId
     ) {
-        final List<TimeAvailabilityResponse> responses = reservationAvailabilityService.getAllTimeAvailability(date, themeId);
+        final List<ReservableTimeResponse> responses = reservableTimeService.findReservableTimes(date, themeId);
         return ResponseEntity.ok().body(responses);
     }
 

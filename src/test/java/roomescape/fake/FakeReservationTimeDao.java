@@ -1,13 +1,14 @@
 package roomescape.fake;
 
+import roomescape.time.domain.ReservableTime;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.ReservationTimeRepository;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import roomescape.time.domain.ReservationAvailability;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.ReservationTimeRepository;
 
 public class FakeReservationTimeDao implements ReservationTimeRepository {
 
@@ -86,7 +87,7 @@ public class FakeReservationTimeDao implements ReservationTimeRepository {
     }
 
     @Override
-    public List<ReservationAvailability> findAllReservationAvailability(final LocalDate date, final long themeId) {
+    public List<ReservableTime> findAllReservableTime(final LocalDate date, final long themeId) {
         throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 }
