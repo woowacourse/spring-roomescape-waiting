@@ -19,16 +19,16 @@ public class TimeSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     private LocalTime startAt;
 
-    public TimeSlot(final Long id, final LocalTime startAt) {
+    public TimeSlot(final long id, final LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
     public TimeSlot(final LocalTime startAt) {
-        this(null, startAt);
+        this(0L, startAt);
     }
 
     protected TimeSlot() {
@@ -36,9 +36,5 @@ public class TimeSlot {
 
     public boolean isTimeBefore(final LocalTime time) {
         return this.startAt.isBefore(time);
-    }
-
-    public boolean isSameAs(final TimeSlot timeSlot) {
-        return this.id.equals(timeSlot.id());
     }
 }

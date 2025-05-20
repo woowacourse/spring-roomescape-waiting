@@ -24,7 +24,7 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     @ManyToOne
     private User user;
     @Embedded
@@ -34,7 +34,7 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(final Long id, final User user, final ReservationDateTime dateTime, final Theme theme, final ReservationStatus status) {
+    public Reservation(final long id, final User user, final ReservationDateTime dateTime, final Theme theme, final ReservationStatus status) {
         this.id = id;
         this.user = user;
         this.dateTime = dateTime;
@@ -43,7 +43,7 @@ public class Reservation {
     }
 
     public Reservation(final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        this(null, user, ReservationDateTime.forReserve(date, timeSlot), theme, ReservationStatus.RESERVED);
+        this(0L, user, ReservationDateTime.forReserve(date, timeSlot), theme, ReservationStatus.RESERVED);
     }
 
     protected Reservation() {

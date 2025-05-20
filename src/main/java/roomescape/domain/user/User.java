@@ -25,7 +25,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     @Embedded
     private UserName name;
     @Enumerated(EnumType.STRING)
@@ -35,9 +35,9 @@ public class User {
     @Embedded
     private Password password;
     @OneToMany(mappedBy = "user")
-    private List<Reservation> reservations = new ArrayList<>();
+    private final List<Reservation> reservations = new ArrayList<>();
 
-    public User(final Long id, final UserName name, final UserRole role, final Email email, final Password password) {
+    public User(final long id, final UserName name, final UserRole role, final Email email, final Password password) {
         this.id = id;
         this.name = name;
         this.role = role;
@@ -46,7 +46,7 @@ public class User {
     }
 
     public User(final UserName name, final Email email, final Password password) {
-        this(null, name, UserRole.USER, email, password);
+        this(0L, name, UserRole.USER, email, password);
     }
 
     protected User() {

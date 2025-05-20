@@ -22,12 +22,12 @@ public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
     private String name;
     private String description;
     private String thumbnail;
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
+    public Theme(final long id, final String name, final String description, final String thumbnail) {
         validateNameLength(name);
         validateDescriptionLength(description);
         this.id = id;
@@ -37,7 +37,7 @@ public class Theme {
     }
 
     public Theme(final String name, final String description, final String thumbnail) {
-        this(null, name, description, thumbnail);
+        this(0L, name, description, thumbnail);
     }
 
     protected Theme() {
