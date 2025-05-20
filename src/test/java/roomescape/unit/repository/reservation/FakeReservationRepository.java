@@ -61,7 +61,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByTheme_id(Long themeId) {
+    public boolean existsByThemeId(Long themeId) {
         return reservations.stream()
                 .anyMatch(r -> r.getTheme().getId().equals(themeId));
     }

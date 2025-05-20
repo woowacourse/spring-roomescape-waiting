@@ -19,7 +19,7 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    boolean existsByTheme_id(Long themeId);
+    boolean existsByThemeId(Long themeId);
 
     Reservation save(Reservation reservation);
 

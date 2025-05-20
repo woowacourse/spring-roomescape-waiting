@@ -11,7 +11,7 @@ public interface ReservationTimeRepository extends Repository<ReservationTime, L
 
     boolean existsByTime(LocalTime time);
 
-    Optional<ReservationTime> findById(Long aLong);
+    Optional<ReservationTime> findById(Long id);
 
     List<ReservationTime> findAll();
 
