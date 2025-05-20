@@ -61,6 +61,10 @@ public class Reservation {
         return new Reservation(null, member, theme, date, reservationTime, Status.WAITING);
     }
 
+    public void acceptStatus() {
+        status = Status.RESERVED;
+    }
+
     public Long getId() {
         return id;
     }

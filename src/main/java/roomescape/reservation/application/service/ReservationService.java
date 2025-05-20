@@ -184,4 +184,12 @@ public class ReservationService {
                 .map(AdminWaitingReservationResponse::new)
                 .toList();
     }
+
+    @Transactional
+    public void acceptWaitingReservation(final Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(NoSuchElementException::new);
+
+        reservation.acceptStatus();
+    }
 }
