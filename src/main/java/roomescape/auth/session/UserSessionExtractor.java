@@ -19,17 +19,17 @@ public class UserSessionExtractor {
     private final JwtManager jwtManager;
     private final CookieManager cookieManager;
 
-    public Session execute(final HttpServletRequest request) {
+    public UserSession execute(final HttpServletRequest request) {
 
         final Jwt accessToken = Jwt.from(
                 cookieManager.extractCookie(request, TokenType.ACCESS.getDescription()));
 
         final Claims claims = jwtManager.parse(accessToken);
 
-        return new Session(
-                UserId.from(claims.get(Session.Fields.id, Long.class)),
-                UserName.from(claims.get(Session.Fields.name, String.class)),
-                UserRole.valueOf(claims.get(Session.Fields.role, String.class))
+        return new UserSession(
+                UserId.from(claims.get(UserSession.Fields.id, Long.class)),
+                UserName.from(claims.get(UserSession.Fields.name, String.class)),
+                UserRole.valueOf(claims.get(UserSession.Fields.role, String.class))
         );
     }
 }

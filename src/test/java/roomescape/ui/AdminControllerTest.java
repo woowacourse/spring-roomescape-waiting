@@ -13,7 +13,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import roomescape.auth.jwt.domain.Jwt;
 import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.jwt.manager.JwtManager;
-import roomescape.auth.session.Session;
+import roomescape.auth.session.UserSession;
 import roomescape.user.domain.UserRole;
 
 import static io.restassured.RestAssured.given;
@@ -38,9 +38,9 @@ class AdminControllerTest {
     void shouldReturn200WhenAdminAccessWithValidToken() {
         // given
         final Claims adminUserClaims = Jwts.claims()
-                .add(Session.Fields.id, 1)
-                .add(Session.Fields.name, "임시")
-                .add(Session.Fields.role, UserRole.ADMIN.name())
+                .add(UserSession.Fields.id, 1)
+                .add(UserSession.Fields.name, "임시")
+                .add(UserSession.Fields.role, UserRole.ADMIN.name())
                 .build();
 
         final Jwt adminCookie = jwtManager.generate(
@@ -63,9 +63,9 @@ class AdminControllerTest {
     void shouldReturn403WhenNonAdminUserAccess() {
         // given
         final Claims normalUserClaims = Jwts.claims()
-                .add(Session.Fields.id, 1)
-                .add(Session.Fields.name, "임시")
-                .add(Session.Fields.role, UserRole.NORMAL.name())
+                .add(UserSession.Fields.id, 1)
+                .add(UserSession.Fields.name, "임시")
+                .add(UserSession.Fields.role, UserRole.NORMAL.name())
                 .build();
 
         final Jwt userCookie = jwtManager.generate(

@@ -8,9 +8,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.auth.session.Session;
-import roomescape.auth.session.annotation.UserSession;
+import roomescape.auth.session.UserSession;
 import roomescape.auth.session.UserSessionExtractor;
+import roomescape.auth.session.annotation.SignInUser;
 
 @Component
 @RequiredArgsConstructor
@@ -20,8 +20,8 @@ public class AuthenticatedUserArgumentResolver implements HandlerMethodArgumentR
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(UserSession.class)
-                && parameter.getParameterType().equals(Session.class);
+        return parameter.hasParameterAnnotation(SignInUser.class)
+                && parameter.getParameterType().equals(UserSession.class);
     }
 
     @Override

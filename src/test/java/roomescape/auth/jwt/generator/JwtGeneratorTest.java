@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.auth.jwt.domain.Jwt;
 import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.jwt.parser.JwtParser;
-import roomescape.auth.session.Session;
+import roomescape.auth.session.UserSession;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -35,9 +35,9 @@ class JwtGeneratorTest {
     void jwtIsGeneratedSuccessfully() {
         // given
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, "1")
-                .add(Session.Fields.name, "강산")
-                .add(Session.Fields.role, "ADMIN")
+                .add(UserSession.Fields.id, "1")
+                .add(UserSession.Fields.name, "강산")
+                .add(UserSession.Fields.role, "ADMIN")
                 .build();
 
         final TokenType type = TokenType.ACCESS;
@@ -57,9 +57,9 @@ class JwtGeneratorTest {
     void claimsShouldBeIncludedInJwt() {
         // given
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, "1")
-                .add(Session.Fields.name, "강산")
-                .add(Session.Fields.role, "ADMIN")
+                .add(UserSession.Fields.id, "1")
+                .add(UserSession.Fields.name, "강산")
+                .add(UserSession.Fields.role, "ADMIN")
                 .build();
 
         final TokenType type = TokenType.ACCESS;
@@ -71,9 +71,9 @@ class JwtGeneratorTest {
 
         // then
         final Claims parsedClaims = jwtParser.execute(jwt, secretKey);
-        assertThat(parsedClaims.get(Session.Fields.id)).isEqualTo("1");
-        assertThat(parsedClaims.get(Session.Fields.name)).isEqualTo("강산");
-        assertThat(parsedClaims.get(Session.Fields.role)).isEqualTo("ADMIN");
+        assertThat(parsedClaims.get(UserSession.Fields.id)).isEqualTo("1");
+        assertThat(parsedClaims.get(UserSession.Fields.name)).isEqualTo("강산");
+        assertThat(parsedClaims.get(UserSession.Fields.role)).isEqualTo("ADMIN");
     }
 
     @Test
@@ -81,9 +81,9 @@ class JwtGeneratorTest {
     void tokenTypeSetsCorrectExpiration() {
         // given
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, "1")
-                .add(Session.Fields.name, "강산")
-                .add(Session.Fields.role, "ADMIN")
+                .add(UserSession.Fields.id, "1")
+                .add(UserSession.Fields.name, "강산")
+                .add(UserSession.Fields.role, "ADMIN")
                 .build();
 
         final TokenType type = TokenType.ACCESS;

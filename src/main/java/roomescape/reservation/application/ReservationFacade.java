@@ -1,6 +1,6 @@
 package roomescape.reservation.application;
 
-import roomescape.auth.session.Session;
+import roomescape.auth.session.UserSession;
 import roomescape.reservation.ui.ReservationSearchWebRequest;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
@@ -19,7 +19,7 @@ public interface ReservationFacade {
 
     List<ReservationResponse> getAllByUserId(Long userId);
 
-    ReservationResponse create(CreateReservationWithUserIdWebRequest request, Session session);
+    ReservationResponse create(CreateReservationWithUserIdWebRequest request, UserSession userSession);
 
     void delete(Long id);
 }

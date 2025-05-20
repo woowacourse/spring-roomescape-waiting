@@ -2,7 +2,7 @@ package roomescape.auth.sign.ui.dto;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
-import roomescape.auth.session.Session;
+import roomescape.auth.session.UserSession;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.user.domain.User;
@@ -16,11 +16,11 @@ public record UserSessionResponse(Long userId,
         validate(userId, userName, userRole);
     }
 
-    public static UserSessionResponse from(final Session session) {
+    public static UserSessionResponse from(final UserSession userSession) {
         return new UserSessionResponse(
-                session.id().getValue(),
-                session.name().getValue(),
-                session.role().name()
+                userSession.id().getValue(),
+                userSession.name().getValue(),
+                userSession.role().name()
         );
     }
 

@@ -2,7 +2,7 @@ package roomescape.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.auth.session.Session;
+import roomescape.auth.session.UserSession;
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
@@ -72,7 +72,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public ReservationResponse create(final CreateReservationWithUserIdWebRequest request, final Session session) {
+    public ReservationResponse create(final CreateReservationWithUserIdWebRequest request, final UserSession userSession) {
         final Reservation reservation = reservationCommandService.create(
                 request.toServiceRequest());
 

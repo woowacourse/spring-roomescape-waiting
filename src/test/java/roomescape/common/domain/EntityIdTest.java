@@ -7,14 +7,14 @@ import roomescape.common.validate.InvalidArgumentException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class DomainIdTest {
+class EntityIdTest {
 
     @Test
     @DisplayName("할당된 ID가 null이면 예외가 발생한다")
     void validateNullAssignedId() {
         // when
         // then
-        assertThatThrownBy(() -> new TestDomainId(null))
+        assertThatThrownBy(() -> new TestEntityId(null))
                 .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("Validation failed [while checking null]: DomainId.value");
     }
@@ -23,7 +23,7 @@ class DomainIdTest {
     @DisplayName("할당된 ID는 값을 조회할 수 있다")
     void getValueFromAssignedId() {
         // given
-        final TestDomainId domainId = new TestDomainId(1L);
+        final TestEntityId domainId = new TestEntityId(1L);
 
         // when
         // then
@@ -31,9 +31,9 @@ class DomainIdTest {
     }
 
     // DomainId를 테스트하기 위한 구체 클래스
-    private static class TestDomainId extends DomainId {
+    private static class TestEntityId extends EntityId {
 
-        public TestDomainId(final Long value) {
+        public TestEntityId(final Long value) {
             super(value);
         }
     }

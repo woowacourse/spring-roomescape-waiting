@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.jwt.domain.Jwt;
 import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.jwt.manager.JwtManager;
-import roomescape.auth.session.Session;
+import roomescape.auth.session.UserSession;
 import roomescape.auth.sign.application.dto.SignInRequest;
 import roomescape.auth.sign.application.dto.SignInResult;
 import roomescape.auth.sign.exception.InvalidSignInException;
@@ -48,9 +48,9 @@ public class SignInUseCase {
 
     private Claims buildClaims(final User user) {
         return Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
-                .add(Session.Fields.name, user.getName().getValue())
-                .add(Session.Fields.role, user.getRole().name())
+                .add(UserSession.Fields.id, user.getId().getValue())
+                .add(UserSession.Fields.name, user.getName().getValue())
+                .add(UserSession.Fields.role, user.getRole().name())
                 .build();
     }
 

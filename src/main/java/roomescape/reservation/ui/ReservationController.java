@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.session.Session;
-import roomescape.auth.session.annotation.UserSession;
+import roomescape.auth.session.UserSession;
+import roomescape.auth.session.annotation.SignInUser;
 import roomescape.common.uri.UriFactory;
 import roomescape.reservation.application.ReservationFacade;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
@@ -32,8 +32,8 @@ public class ReservationController {
     private final ReservationFacade reservationFacade;
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationResponse>> getMine(@UserSession final Session session) {
-        final List<ReservationResponse> reservations = reservationFacade.getAllByUserId(session.id().getValue());
+    public ResponseEntity<List<ReservationResponse>> getMine(@SignInUser final UserSession userSession) {
+        final List<ReservationResponse> reservations = reservationFacade.getAllByUserId(userSession.id().getValue());
         return ResponseEntity.ok(reservations);
     }
 
@@ -48,11 +48,11 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
             @RequestBody final CreateReservationWebRequest request,
-            @UserSession final Session session) {
+            @SignInUser final UserSession userSession) {
         final ReservationResponse reservationResponse =
                 reservationFacade.create(
-                        request.toRequestWithUserId(session.id().getValue()),
-                        session);
+                        request.toRequestWithUserId(userSession.id().getValue()),
+                        userSession);
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.reservationId()));
         return ResponseEntity.created(location)
                 .body(reservationResponse);

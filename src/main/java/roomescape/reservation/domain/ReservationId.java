@@ -1,8 +1,8 @@
 package roomescape.reservation.domain;
 
-import roomescape.common.domain.DomainId;
+import roomescape.common.domain.EntityId;
 
-public class ReservationId extends DomainId {
+public class ReservationId extends EntityId {
 
     private ReservationId(final Long value) {
         super(value);

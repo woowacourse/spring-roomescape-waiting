@@ -2,7 +2,7 @@ package roomescape.user.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.common.domain.DomainId;
+import roomescape.common.domain.EntityId;
 import roomescape.common.domain.Email;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
@@ -34,7 +34,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> findAllByIds(final List<UserId> ids) {
-        final List<Long> longIds = ids.stream().map(DomainId::getValue).toList();
+        final List<Long> longIds = ids.stream().map(EntityId::getValue).toList();
         return jpaUserRepository.findAllByIdIn(longIds);
     }
 

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.aop.RequiredRoles;
-import roomescape.auth.session.Session;
-import roomescape.auth.session.annotation.UserSession;
+import roomescape.auth.session.UserSession;
+import roomescape.auth.session.annotation.SignInUser;
 import roomescape.common.uri.UriFactory;
 import roomescape.reservation.application.ReservationFacade;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
@@ -59,8 +59,8 @@ public class AdminReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
             @RequestBody final CreateReservationWithUserIdWebRequest request,
-            @UserSession final Session session) {
-        final ReservationResponse reservationResponse = reservationFacade.create(request, session);
+            @SignInUser final UserSession userSession) {
+        final ReservationResponse reservationResponse = reservationFacade.create(request, userSession);
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.reservationId()));
         return ResponseEntity.created(location)
                 .body(reservationResponse);

@@ -1,8 +1,8 @@
 package roomescape.theme.domain;
 
-import roomescape.common.domain.DomainId;
+import roomescape.common.domain.EntityId;
 
-public class ThemeId extends DomainId {
+public class ThemeId extends EntityId {
 
     private ThemeId(final Long value) {
         super(value);

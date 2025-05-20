@@ -13,18 +13,18 @@ import roomescape.common.validate.Validator;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @MappedSuperclass
 @EqualsAndHashCode
-public abstract class DomainId {
+public abstract class EntityId {
 
     private Long value;
 
-    protected DomainId(final Long value) {
+    protected EntityId(final Long value) {
         validate(value);
 
         this.value = value;
     }
 
     private void validate(final Long value) {
-        Validator.of(DomainId.class)
+        Validator.of(EntityId.class)
                 .validateNotNull(Fields.value, value, DomainTerm.DOMAIN_ID.label());
     }
 
