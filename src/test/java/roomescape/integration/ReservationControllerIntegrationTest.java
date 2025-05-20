@@ -209,7 +209,7 @@ class ReservationControllerIntegrationTest {
                 .queryParam("date", formattedFutureDate)
                 .queryParam("themeId", themeId)
                 .when()
-                .get("/available-times")
+                .get("/reservations/available-times")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2))
