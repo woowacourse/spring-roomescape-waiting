@@ -6,6 +6,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import roomescape.exception.auth.AuthenticationException;
 
+import java.util.Arrays;
+
 import static org.springframework.boot.web.server.Cookie.SameSite;
 import static roomescape.exception.SecurityErrorCode.TOKEN_NOT_EXIST;
 
@@ -16,16 +18,16 @@ public record AuthToken(
 
     public static AuthToken extractFrom(final HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(TOKEN_NAME)) {
-                    return new AuthToken(cookie.getValue());
-                }
-            }
+        
+        if (cookies == null) {
+            throw new AuthenticationException(TOKEN_NOT_EXIST);
         }
 
-        throw new AuthenticationException(TOKEN_NOT_EXIST);
+        return Arrays.stream(cookies)
+                .filter(cookie -> TOKEN_NAME.equals(cookie.getName()))
+                .map(cookie -> new AuthToken(cookie.getValue()))
+                .findFirst()
+                .orElseThrow(() -> new AuthenticationException(TOKEN_NOT_EXIST));
     }
 
     public HttpHeaders toHttpHeaders() {
