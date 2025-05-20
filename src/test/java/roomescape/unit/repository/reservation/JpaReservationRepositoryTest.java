@@ -35,10 +35,19 @@ class JpaReservationRepositoryTest {
         jpaReservationRepository.save(new Reservation(null, "user", date, reservationTime, theme));
 
         // When & Then
-        assertAll(() -> {
-            assertThat(jpaReservationRepository.existsByTimeId(reservationTime.getId())).isTrue();
-            assertThat(jpaReservationRepository.existsByTimeId(5000L)).isFalse();
-        });
+        assertThat(jpaReservationRepository.existsByTimeId(reservationTime.getId())).isTrue();
+    }
+
+    @Test
+    void 잘못된_예약시간의_id로는_저장된_예약이_존재하지_않는다는_응답을_받아야_한다() {
+        // Given
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime reservationTime = jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.now().plusMinutes(1)));
+        Theme theme = jpaThemeRepository.save(new Theme(null, "themeName", "themeDescription", "thumbnailUrl"));
+        jpaReservationRepository.save(new Reservation(null, "user", date, reservationTime, theme));
+
+        // When & Then
+        assertThat(jpaReservationRepository.existsByTimeId(5000L)).isFalse();
     }
 
     @Test

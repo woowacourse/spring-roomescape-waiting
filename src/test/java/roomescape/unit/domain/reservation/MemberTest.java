@@ -33,9 +33,15 @@ class MemberTest {
         Member member = new Member(null, "user@user.com", "password", "user", Role.USER);
 
         // When & Then
-        assertAll(() -> {
-            assertThat(member.isSameUsername("user@user.com")).isTrue();
-            assertThat(member.isSameUsername("user2@user.com")).isFalse();
-        });
+        assertThat(member.isSameUsername("user@user.com")).isTrue();
+    }
+
+    @Test
+    void 다른_username으로_비교하는_경우에는_다른_username이라는_응답을_받아야_한다() {
+        // Given
+        Member member = new Member(null, "user@user.com", "password", "user", Role.USER);
+
+        // When & Then
+        assertThat(member.isSameUsername("invalid@user.com")).isFalse();
     }
 }

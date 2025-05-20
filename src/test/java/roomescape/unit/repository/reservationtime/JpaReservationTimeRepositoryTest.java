@@ -24,9 +24,16 @@ class JpaReservationTimeRepositoryTest {
         jpaReservationTimeRepository.save(new ReservationTime(null, startAt));
 
         // When & Then
-        assertAll(() -> {
-            assertThat(jpaReservationTimeRepository.existsByTime(startAt)).isTrue();
-            assertThat(jpaReservationTimeRepository.existsByTime(LocalTime.now().plusMinutes(5))).isFalse();
-        });
+        assertThat(jpaReservationTimeRepository.existsByTime(startAt)).isTrue();
+    }
+
+    @Test
+    void 잘못된_시간으로는_저장된_예약시간이_존재하지_않는다는_응답을_받아야_한다() {
+        // Given
+        LocalTime startAt = LocalTime.now();
+        jpaReservationTimeRepository.save(new ReservationTime(null, startAt));
+
+        // When & Then
+        assertThat(jpaReservationTimeRepository.existsByTime(LocalTime.now().plusMinutes(5))).isFalse();
     }
 }

@@ -33,9 +33,16 @@ class JpaMemberRepositoryTest {
         jpaMemberRepository.save(new Member(null, username, "password", "user", Role.USER));
 
         // When & Then
-        assertAll(() -> {
-            assertThat(jpaMemberRepository.existsByUsername(username)).isTrue();
-            assertThat(jpaMemberRepository.existsByUsername("invalid")).isFalse();
-        });
+        assertThat(jpaMemberRepository.existsByUsername(username)).isTrue();
+    }
+
+    @Test
+    void 잘못된_username으로는_멤버가_존재하지_않는다는_응답을_받아야_한다() {
+        // Given
+        String username = "user@user.com";
+        jpaMemberRepository.save(new Member(null, username, "password", "user", Role.USER));
+
+        // When & Then
+        assertThat(jpaMemberRepository.existsByUsername("invalid")).isFalse();
     }
 }
