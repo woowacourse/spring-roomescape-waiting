@@ -33,7 +33,7 @@ class AvailableReservationTimeIntegratedTest extends IntegrationTest {
 
     @BeforeEach
     void setup() {
-        todayDateString = LocalDate.now().plusDays(1).toString();
+        todayDateString = LocalDate.now().plusDays(2).toString();
 
         requestFixture.reqeustSignup("투다", "reservation-add@email.com", "password");
         cookies = requestFixture.requestLogin("reservation-add@email.com", "password");

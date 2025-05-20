@@ -63,7 +63,7 @@ class ReservationTimeServiceTest {
                 new AddReservationTimeDto(startAt));
         ReservationTime reservationTime = new ReservationTime(id, startAt);
         Theme theme = new Theme(0L, "공포", "공포테마입니다.", "ㅁㄴㅇㄹ");
-        Reservation reservation = new Reservation(null, "praisebak", LocalDate.now().plusDays(1), reservationTime,
+        Reservation reservation = new Reservation(null, "praisebak", LocalDate.now().plusDays(2), reservationTime,
                 theme);
         reservationRepository.save(reservation);
 

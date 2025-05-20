@@ -121,7 +121,7 @@ class AdminControllerTest extends IntegrationTest {
                 .extract().header("Set-Cookie");
 
         Map<String, String> timeParam = new HashMap<>();
-        LocalTime afterTime = LocalTime.now().plusHours(1L);
+        LocalTime afterTime = LocalTime.of(23, 59);
         timeParam.put("startAt", afterTime.toString());
 
         Map<String, String> themeParam = new HashMap<>();
@@ -145,7 +145,7 @@ class AdminControllerTest extends IntegrationTest {
 
         String token = header.split("token=")[1];
 
-        AdminReservationAddDto adminReservationAddDto = new AdminReservationAddDto(LocalDate.now().plusDays(1L), 1L, 1L,
+        AdminReservationAddDto adminReservationAddDto = new AdminReservationAddDto(LocalDate.now().plusDays(2L), 1L, 1L,
                 1L);
 
         RestAssured.given()

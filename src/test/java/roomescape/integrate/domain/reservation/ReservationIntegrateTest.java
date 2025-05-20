@@ -46,13 +46,13 @@ class ReservationIntegrateTest extends IntegrationTest {
         requestFixture.reqeustSignup("투다", "test@email.com", "testtest");
         cookies = requestFixture.requestLogin("test@email.com", "testtest");
         themeId = requestFixture.requestAddTheme("테마 명", "description", "thumbnail");
-        LocalTime afterTime = LocalTime.now().plusHours(1L);
+        LocalTime afterTime = LocalTime.of(23, 59);
         timeId = requestFixture.requestAddTime(afterTime.toString());
     }
 
     @Test
     void 예약_추가_테스트() {
-        requestFixture.requestAddReservation("예약", LocalDate.now().toString(), themeId, timeId, cookies);
+        requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(2L).toString(), themeId, timeId, cookies);
 
         RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -63,7 +63,8 @@ class ReservationIntegrateTest extends IntegrationTest {
 
     @Test
     void 예약_삭제_테스트() {
-        long reservationId = requestFixture.requestAddReservation("예약", LocalDate.now().toString(), themeId, timeId,
+        long reservationId = requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(2L).toString(),
+                themeId, timeId,
                 cookies);
 
         RestAssured.given().log().all()
@@ -123,8 +124,8 @@ class ReservationIntegrateTest extends IntegrationTest {
 
     @Test
     void 유저의_예약을_가져올_수_있다() {
-        requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(1).toString(), themeId, timeId, cookies);
-        requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
+        requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
+        requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(3).toString(), themeId, timeId, cookies);
 
         RestAssured.given().log().all()
                 .cookies(cookies)
@@ -136,8 +137,8 @@ class ReservationIntegrateTest extends IntegrationTest {
 
     @Test
     void 유저의_예약은_예약_상태를_가진다() {
-        requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(1).toString(), themeId, timeId, cookies);
-        requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
+        requestFixture.requestAddReservation("예약", LocalDate.now().plusDays(2).toString(), themeId, timeId, cookies);
+        requestFixture.requestAddReservation("예약2", LocalDate.now().plusDays(3).toString(), themeId, timeId, cookies);
 
         Response response = RestAssured.given().log().all()
                 .cookies(cookies)

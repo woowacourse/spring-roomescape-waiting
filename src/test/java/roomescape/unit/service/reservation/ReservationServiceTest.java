@@ -48,7 +48,7 @@ class ReservationServiceTest {
                 new AddReservationTimeDto(LocalTime.now().plusHours(1L)).toEntity());
         Theme theme = themeRepository.save(new AddThemeDto("공포의 숲", "무서운 테마", "image.png").toEntity());
 
-        AddReservationDto request = new AddReservationDto("praisebak", LocalDate.now().plusDays(1L),
+        AddReservationDto request = new AddReservationDto("praisebak", LocalDate.now().plusDays(2L),
                 reservationTime.getId(), theme.getId());
 
         reservationService.addReservation(request);
@@ -85,7 +85,7 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(new AddThemeDto("미래의 방", "SF 컨셉", "future.png").toEntity());
 
         assertThatCode(() -> reservationService.addReservation(
-                new AddReservationDto("투다", LocalDate.now().plusDays(1), reservationTime.getId(), theme.getId())))
+                new AddReservationDto("투다", LocalDate.now().plusDays(3), reservationTime.getId(), theme.getId())))
                 .doesNotThrowAnyException();
     }
 
@@ -107,7 +107,7 @@ class ReservationServiceTest {
         Theme theme = themeRepository.save(new AddThemeDto("삭제의 방", "삭제 가능", "delete.png").toEntity());
 
         long reservationId = reservationService.addReservation(
-                new AddReservationDto("praisebak", LocalDate.now().plusDays(1L), reservationTime.getId(),
+                new AddReservationDto("praisebak", LocalDate.now().plusDays(3L), reservationTime.getId(),
                         theme.getId()));
         assertThat(reservationService.allReservations().size()).isEqualTo(1);
         reservationService.deleteReservation(reservationId);
@@ -167,13 +167,12 @@ class ReservationServiceTest {
             reservationTimeRepository.save(new ReservationTime(null, localTime));
         }
 
-        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(1), 1L, 1L));
-        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(1), 2L, 1L));
-        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(1), 3L, 1L));
-
-        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(1), 1L, 2L));
-        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(1), 2L, 2L));
-        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(1), 1L, 3L));
+        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 1L, 1L));
+        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 2L, 1L));
+        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 1L, 2L));
+        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 2L, 2L));
+        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 3L, 1L));
+        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 1L, 3L));
 
         List<Theme> top10Theme = reservationService.getRankingThemes(LocalDate.now().plusDays(6), 1, 7);
         assertAll(() -> {

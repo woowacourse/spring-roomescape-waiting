@@ -134,7 +134,7 @@ class ReserveTicketServiceTest {
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
         long firstId = reserveTicketService.addReservation(
-                new AddReservationDto("name", LocalDate.now().plusDays(1), timeId, themeId), memberId);
+                new AddReservationDto("name", LocalDate.now().plusDays(3), timeId, themeId), memberId);
         long secondId = reserveTicketService.addReservation(
                 new AddReservationDto("name", LocalDate.now().plusDays(2), timeId, themeId), memberId);
 
