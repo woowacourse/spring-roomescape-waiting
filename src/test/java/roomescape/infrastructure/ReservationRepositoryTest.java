@@ -311,6 +311,34 @@ class ReservationRepositoryTest {
     }
 
     @Test
+    void 사용자_ID로_예약을_조회할_수_있다() {
+        // given
+        String themeId = generateId();
+        String timeId = generateId();
+        String userId1 = generateId();
+        String userId2 = generateId();
+        String reservationId1 = generateId();
+        String reservationId2 = generateId();
+        String reservationId3 = generateId();
+
+        testUtil.insertTheme(themeId, "호러");
+        testUtil.insertReservationTime(timeId, TIME);
+        testUtil.insertUser(userId1, "돔푸");
+        testUtil.insertUser(userId2, "레몬");
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId1);
+        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId2);
+
+        // when
+        final List<Reservation> result = sut.findAllByUserId(Id.create(userId1));
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(r -> r.getId().value()).containsExactlyInAnyOrder(reservationId1, reservationId2);
+        assertThat(result).extracting(r -> r.getUser().getId().value()).containsOnly(userId1);
+    }
+
+    @Test
     void ID_기준으로_예약을_찾을_수_있다() {
         // given
         String themeId = generateId();

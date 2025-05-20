@@ -30,6 +30,8 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
             @Param("dateTo") LocalDate dateTo
     );
 
+    List<Reservation> findAllByUserId(Id userId);
+
     boolean existsByDateValueAndTimeStartTimeValueAndThemeId(LocalDate date, LocalTime time, Id themeId);
 
     boolean existsByTimeId(Id timeId);

@@ -2,6 +2,7 @@ package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationTime;
@@ -27,6 +28,7 @@ import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final UserRepository userRepository;
@@ -56,6 +58,12 @@ public class ReservationService {
         return ReservationDto.fromEntities(reservations);
     }
 
+    public List<ReservationDto> getMyReservations(final String userIdValue) {
+        List<Reservation> reservations = reservationRepository.findAllByUserId(Id.create(userIdValue));
+        return ReservationDto.fromEntities(reservations);
+    }
+
+    @Transactional
     public void delete(final String reservationIdValue, final String userIdValue) {
         Id reservationId = Id.create(reservationIdValue);
         final Reservation reservation = reservationRepository.findById(reservationId)
@@ -64,11 +72,5 @@ public class ReservationService {
             throw new AuthorizationException(AUTHORITY_LACK);
         }
         reservationRepository.deleteById(reservationId);
-    }
-
-    public List<ReservationDto> getMyReservations(final String userIdValue) {
-        Id userId = Id.create(userIdValue);
-        List<Reservation> myReservations = reservationRepository.findAllWithFilter(null, userId, null, null);
-        return ReservationDto.fromEntities(myReservations);
     }
 }

@@ -37,6 +37,11 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findAllByUserId(Id userId) {
+        return dao.findAllByUserId(userId);
+    }
+
+    @Override
     public Optional<Reservation> findById(Id id) {
         return dao.findById(id);
     }

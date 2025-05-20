@@ -16,6 +16,8 @@ public interface ReservationRepository {
 
     List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo);
 
+    List<Reservation> findAllByUserId(Id userId);
+
     Optional<Reservation> findById(Id id);
 
     boolean existById(Id reservationId);

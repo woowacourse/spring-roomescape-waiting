@@ -121,6 +121,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findAllByUserId(final Id userId) {
+        return findAllWithFilter(null, userId, null, null);
+    }
+
+    @Override
     public Optional<Reservation> findById(final Id reservationId) {
         try {
             final String sql = FIND_ALL_QUERY + " AND r.id = ?";
