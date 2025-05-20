@@ -2,8 +2,8 @@ package roomescape.user.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.common.domain.EntityId;
 import roomescape.common.domain.Email;
+import roomescape.common.domain.EntityId;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserRepository;

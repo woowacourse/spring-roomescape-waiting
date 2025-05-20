@@ -26,13 +26,13 @@ class UserQueryServiceTest {
 
     @Autowired
     private UserQueryService userQueryService;
-    
+
     @Autowired
     private UserCommandService userCommandService;
-    
+
     private User user1;
     private User user2;
-    
+
     @BeforeEach
     void setUp() {
         // 테스트용 사용자 생성
@@ -41,7 +41,7 @@ class UserQueryServiceTest {
         final Password password1 = Password.fromEncoded("encodedPassword1");
         final CreateUserRequest request1 = new CreateUserRequest(userName1, email1, password1);
         user1 = userCommandService.create(request1);
-        
+
         final UserName userName2 = UserName.from("사용자2");
         final Email email2 = Email.from("user2@example.com");
         final Password password2 = Password.fromEncoded("encodedPassword2");

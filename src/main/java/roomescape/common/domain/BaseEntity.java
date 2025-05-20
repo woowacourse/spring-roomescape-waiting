@@ -24,7 +24,7 @@ public abstract class BaseEntity {
         }
         this.id = id;
     }
-    
+
     // 프록시 객체도 같은 타입 계열로 간주
     @Override
     public boolean equals(final Object o) {

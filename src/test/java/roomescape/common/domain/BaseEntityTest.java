@@ -67,7 +67,7 @@ class BaseEntityTest {
         // when & then
         assertThat(entity).isNotEqualTo(differentType);
     }
-    
+
     @Test
     @DisplayName("null과 비교시 equals에서 false를 반환한다")
     void equalsWithNull() {
@@ -125,7 +125,7 @@ class BaseEntityTest {
         entity.setId(null);
 
         // when & then
-        assertThatThrownBy(()->entity.hashCode())
+        assertThatThrownBy(() -> entity.hashCode())
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("hashCode() called on entity without ID");
     }
@@ -161,7 +161,7 @@ class BaseEntityTest {
             assertThat(originalEntity).isEqualTo(proxyEntity);
             assertThat(proxyEntity).isEqualTo(originalEntity);
             assertThat(originalEntity.hashCode()).isEqualTo(proxyEntity.hashCode());
-            
+
             // HashSet에서도 동일하게 취급
             final Set<BaseEntity> entities = new HashSet<>();
             entities.add(originalEntity);
@@ -182,9 +182,9 @@ class BaseEntityTest {
 
     // ID를 null로 설정하는 테스트 지원 메서드
 
-
     // 테스트용 구현 클래스
     private static class TestEntity extends BaseEntity {
+
         public TestEntity(final Long id) {
             super(id);
         }
@@ -193,13 +193,14 @@ class BaseEntityTest {
             this.id = id;
         }
     }
-    
+
     // JPA 프록시 시뮬레이션
     private static class TestEntityProxy extends TestEntity {
+
+        private final boolean initialized = false;
+
         public TestEntityProxy(final Long id) {
             super(id);
         }
-
-        private final boolean initialized = false;
     }
 } 

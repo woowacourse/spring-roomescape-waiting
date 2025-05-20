@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
-import lombok.extern.slf4j.Slf4j;
 import roomescape.common.validate.InvalidArgumentException;
 import roomescape.common.validate.ValidationType;
 import roomescape.common.validate.Validator;
