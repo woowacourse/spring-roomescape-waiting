@@ -7,8 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import roomescape.auth.session.Session;
-import roomescape.auth.session.annotation.UserSession;
+import roomescape.auth.session.UserSession;
+import roomescape.auth.session.annotation.SignInUser;
 import roomescape.auth.sign.application.SignFacade;
 import roomescape.auth.sign.ui.dto.SignInWebRequest;
 import roomescape.auth.sign.ui.dto.SignUpWebRequest;
@@ -24,25 +24,24 @@ public class SignController {
     private final SignFacade signFacade;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<Void> signIn(@RequestBody final SignInWebRequest signInWebRequest,
-                                       final HttpServletResponse response) {
-        signFacade.signIn(signInWebRequest, response);
+    public ResponseEntity<Void> signIn(@RequestBody final SignInWebRequest request,
+                                       final HttpServletResponse httpServletResponse) {
+        signFacade.signIn(request.toServiceRequest(), httpServletResponse::addCookie);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/sign-in/check")
-    public ResponseEntity<UserSessionResponse> checkSignIn(@UserSession final Session session) {
+    public ResponseEntity<UserSessionResponse> checkSignIn(@SignInUser final UserSession userSession) {
         return ResponseEntity.ok(
-                UserSessionResponse.from(session));
+                UserSessionResponse.from(userSession));
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserSessionResponse> create(@RequestBody final SignUpWebRequest request) {
-        final UserSessionResponse response = signFacade.signUp(request);
+    public ResponseEntity<Long> create(@RequestBody final SignUpWebRequest request) {
+        final Long userId = signFacade.signUp(request.toServiceRequest()).getValue();
 
         // TODO add UserController
-        final URI location = UriFactory.buildPath("/users", String.valueOf(response.userId()));
-        return ResponseEntity.created(location)
-                .body(response);
+        final URI location = UriFactory.buildPath("/users", String.valueOf(userId));
+        return ResponseEntity.created(location).body(userId);
     }
 }

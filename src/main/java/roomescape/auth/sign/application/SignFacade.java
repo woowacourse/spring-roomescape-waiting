@@ -1,13 +1,16 @@
 package roomescape.auth.sign.application;
 
-import jakarta.servlet.http.HttpServletResponse;
-import roomescape.auth.sign.ui.dto.SignInWebRequest;
-import roomescape.auth.sign.ui.dto.SignUpWebRequest;
+import jakarta.servlet.http.Cookie;
+import roomescape.auth.sign.application.dto.SignInRequest;
 import roomescape.auth.sign.ui.dto.UserSessionResponse;
+import roomescape.user.application.dto.SignUpRequest;
+import roomescape.user.domain.UserId;
+
+import java.util.function.Consumer;
 
 public interface SignFacade {
 
-    void signIn(SignInWebRequest request, HttpServletResponse response);
+    void signIn(SignInRequest request, Consumer<Cookie> cookieSetter);
 
-    UserSessionResponse signUp(SignUpWebRequest request);
+    UserId signUp(SignUpRequest request);
 }
