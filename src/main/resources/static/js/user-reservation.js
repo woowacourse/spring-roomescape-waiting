@@ -160,12 +160,6 @@ function onReservationButtonClick() {
   const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
 
   if (selectedDate && selectedThemeId && selectedTimeId) {
-
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 요청 API 호출 - 완료
-          [5단계] 예약 생성 기능 변경 - 사용자
-          request 명세에 맞게 설정
-    */
     const reservationData = {
       date: selectedDate,
       themeId: selectedThemeId,
@@ -180,11 +174,10 @@ function onReservationButtonClick() {
       body: JSON.stringify(reservationData)
     })
         .then(response => {
-          if (!response.ok) throw new Error('Reservation failed');
-          return response.json();
+          if (response.status !== 201) throw new Error('Reservation failed');
         })
-        .then(data => {
-          alert("Reservation successful!");
+        .then(() => {
+          alert("예약이 완료되었습니다.");
           location.reload();
         })
         .catch(error => {
@@ -220,7 +213,7 @@ function onWaitButtonClick() {
         })
         .then(() => {
           alert('예약 대기가 완료되었습니다.');
-          window.location.href = "/";
+          window.location.href = "/reservation-mine";
         })
         .catch(error => {
           alert("An error occurred while making the reservation waiting.");

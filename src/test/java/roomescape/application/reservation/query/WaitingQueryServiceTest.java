@@ -75,4 +75,29 @@ class WaitingQueryServiceTest extends AbstractServiceIntegrationTest {
                 () -> assertThat(waitingResults.get(0).waitingCount()).isEqualTo(1)
         );
     }
+
+    @Test
+    void 전체_대기신청을_조회할_수_있다() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).plusDays(1);
+        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
+        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        reservationRepository.save(new Reservation(member, now.toLocalDate(), time, theme));
+        Reservation reservation = reservationRepository.findById(1L).orElseThrow();
+        Waiting waiting = new Waiting(member, reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        Long waitingId = waitingRepository.save(waiting).getId();
+
+        // when
+        var waitingResults = waitingQueryService.findAll();
+
+        // then
+        assertAll(
+                () -> assertThat(waitingResults).hasSize(1),
+                () -> assertThat(waitingResults.get(0).waitingId()).isEqualTo(waitingId),
+                () -> assertThat(waitingResults.get(0).reservationDate()).isEqualTo(reservation.getDate()),
+                () -> assertThat(waitingResults.get(0).reservationTime()).isEqualTo(reservation.getTime().getStartAt()),
+                () -> assertThat(waitingResults.get(0).themeName()).isEqualTo(reservation.getTheme().getName())
+        );
+    }
 }

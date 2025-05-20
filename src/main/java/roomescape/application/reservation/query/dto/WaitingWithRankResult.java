@@ -4,21 +4,21 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Waiting;
 
-public record WaitingResult(
+public record WaitingWithRankResult(
         Long waitingId,
-        String memberName,
         String themeName,
         LocalDate reservationDate,
-        LocalTime reservationTime
+        LocalTime reservationTime,
+        Long waitingCount
 ) {
 
-    public static WaitingResult from(Waiting waiting) {
-        return new WaitingResult(
+    public static WaitingWithRankResult from(Waiting waiting, Long waitingCount) {
+        return new WaitingWithRankResult(
                 waiting.getId(),
-                waiting.getMember().getName(),
                 waiting.getTheme().getName(),
                 waiting.getDate(),
-                waiting.getTime().getStartAt()
+                waiting.getTime().getStartAt(),
+                waitingCount
         );
     }
 }

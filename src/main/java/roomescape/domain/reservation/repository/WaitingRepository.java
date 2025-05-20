@@ -1,6 +1,7 @@
 package roomescape.domain.reservation.repository;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.reservation.Waiting;
@@ -21,4 +22,8 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                  WHERE w.member.id = :memberId
             """)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+
+    @Query("SELECT w FROM Waiting w")
+    @EntityGraph(attributePaths = {"member", "theme", "time"})
+    List<Waiting> findAllWithMemberAndThemeAndTime();
 }
