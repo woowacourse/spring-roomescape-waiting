@@ -1,46 +1,50 @@
 package roomescape.auth.controller;
 
+import static org.mockito.Mockito.when;
+
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.infrastructure.AuthorizationPayload;
 import roomescape.auth.infrastructure.AuthorizationPrincipal;
 import roomescape.auth.infrastructure.provider.AuthorizationProvider;
+import roomescape.auth.service.AuthServiceFacade;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.fixture.MemberFixture;
-import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.MemberService;
-import roomescape.repository.fake.FakeMemberRepository;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthControllerTest {
-
-    @Autowired
-    private MemberRepository memberRepository;
 
     @Autowired
     private AuthorizationProvider authorizationProvider;
 
+    @MockitoBean
+    private AuthServiceFacade authService;
+
+    @LocalServerPort
+    private int port;
+
     @Test
-    void login() {
+    void 로그인을_할_수_있다() {
         // given
         Member member = MemberFixture.createMember(MemberRole.USER);
 
-        Member savedMember = memberRepository.save(member);
+        LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
 
-        LoginRequest request = new LoginRequest(savedMember.getEmail(), savedMember.getPassword());
+        when(authService.login(request))
+            .thenReturn(new AuthorizationPrincipal("AuthorizationPrincipal"));
 
         // when
         RestAssured.given().log().all()
             .contentType("application/json")
+            .port(port)
             .body(request)
             .when().post("/login")
             .then().log().all()
@@ -49,16 +53,15 @@ class AuthControllerTest {
     }
 
     @Test
-    void loginCheck() {
+    void 로그인_정보를_통해_이름을_알_수_있다() {
         // given
         Member member = MemberFixture.createMember(MemberRole.USER);
 
-        Member savedMember = memberRepository.save(member);
-
-        AuthorizationPrincipal principal = getAuthorizationPrincipal(savedMember);
+        AuthorizationPrincipal principal = getAuthorizationPrincipal(member);
 
         // when
         RestAssured.given().log().all()
+            .port(port)
             .cookie("token", principal.value())
             .when().get("/login/check")
             .then().log().all()
@@ -66,16 +69,15 @@ class AuthControllerTest {
     }
 
     @Test
-    void logout() {
+    void 로그아웃을_할_수_있다() {
         // given
         Member member = MemberFixture.createMember(MemberRole.USER);
 
-        Member savedMember = memberRepository.save(member);
-
-        AuthorizationPrincipal principal = getAuthorizationPrincipal(savedMember);
+        AuthorizationPrincipal principal = getAuthorizationPrincipal(member);
 
         // when
         RestAssured.given().log().all()
+            .port(port)
             .contentType("application/json")
             .cookie("token", principal.value())
             .when().post("/logout")
@@ -91,18 +93,5 @@ class AuthControllerTest {
                 member.getRole()
             )
         );
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public MemberService memberService() {
-            return new MemberService(memberRepository());
-        }
-
-        @Bean
-        public MemberRepository memberRepository() {
-            return new FakeMemberRepository();
-        }
     }
 }
