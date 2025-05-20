@@ -32,7 +32,7 @@ CREATE TABLE reservation (
     member_id  BIGINT,
     time_id    BIGINT,
     theme_id   BIGINT,
-    status     ENUM('RESERVED') NOT NULL,
+    status     ENUM('BOOKED') NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id)   REFERENCES reservation_time (id),

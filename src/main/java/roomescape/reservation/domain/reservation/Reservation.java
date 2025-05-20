@@ -40,7 +40,7 @@ public class Reservation {
     private Theme theme;
 
     @Enumerated(EnumType.STRING)
-    private final ReservationStatus status = ReservationStatus.RESERVED;
+    private final ReservationStatus status = ReservationStatus.BOOKED;
 
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme) {
