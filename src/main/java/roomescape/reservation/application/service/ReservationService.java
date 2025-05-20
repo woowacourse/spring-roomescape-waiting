@@ -64,7 +64,7 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(request.getTimeId());
         Theme theme = getTheme(request.getThemeId());
         LocalDate date = request.getDate();
-        validateReservationDateTime(date, reservationTime);
+        validateIsPast(LocalDateTime.of(date, reservationTime.getStartAt()));
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
@@ -114,7 +114,7 @@ public class ReservationService {
     public List<UserReservationsResponse> getUserReservations(final Long memberId) {
         findMemberById(memberId);
 
-        return reservationRepository.findByMemberId(memberId).stream()
+        return reservationRepository.findReservationsWithRankByMemberId(memberId).stream()
                 .map(UserReservationsResponse::new)
                 .toList();
     }
