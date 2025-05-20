@@ -23,7 +23,6 @@
 | DELETE      | /themes/{id}                  | ADMIN         | 204 NO_CONTENT   | id(PK)에 해당하는 테마 삭제                                                         |
 | GET         | /themes                       | PUBLIC        | 200 OK           | 모든 테마 목록 조회                                                                |
 | GET         | /themes/popular-list          | PUBLIC        | 200 OK           | 인기 테마 목록 조회                                                                |
-| POST        | /admin/reservations           | ADMIN         | 201 CREATED      | 관리자의 예약 추가                                                                 |
 | POST        | /reservations                 | ADMIN, MEMBER | 201 CREATED      | 일반 회원의 예약 추가                                                               |
 | DELETE      | /reservations/{id}            | ADMIN, MEMBER | 204 NO_CONTENT   | id(PK)에 해당하는 예약 삭제(본인의 예약만 삭제 가능)                                          |
 | GET         | /reservations/mine            | ADMIN, MEMBER | 200 OK           | 내 예약 목록 조회                                                                 |
