@@ -15,5 +15,3 @@ public class WaitingWithRank {
         this.rank = Long.valueOf(rank);
     }
 }
-
-

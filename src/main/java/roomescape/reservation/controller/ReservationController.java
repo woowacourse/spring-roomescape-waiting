@@ -60,7 +60,7 @@ public class ReservationController {
             @PathVariable("id") long id
     ) {
         reservationService.deleteReservation(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/filtered")

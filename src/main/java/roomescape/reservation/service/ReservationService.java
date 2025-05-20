@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.entity.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -95,7 +97,22 @@ public class ReservationService {
         return ReservationWaitingReadMemberResponse.of(reservations, waitingWithRanks);
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
+
+        if (waitingRepository.existsByDateAndThemeAndTime(
+                reservation.getDate(), reservation.getTheme(), reservation.getTime())) {
+            Waiting waiting = waitingRepository.findFirstByDateAndThemeAndTime(
+                    reservation.getDate(), reservation.getTheme(), reservation.getTime())
+                    .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
+            waitingRepository.delete(waiting);
+            Reservation reservationByWaiting = new Reservation(
+                    waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember());
+            reservationRepository.save(reservationByWaiting);
+        }
+
         reservationRepository.deleteById(id);
     }
 
