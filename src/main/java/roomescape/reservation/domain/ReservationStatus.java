@@ -1,0 +1,15 @@
+package roomescape.reservation.domain;
+
+public enum ReservationStatus {
+    RESERVED("예약");
+
+    private final String name;
+
+    ReservationStatus(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}
