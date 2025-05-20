@@ -1,22 +1,25 @@
 package roomescape.auth.infrastructure;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CookieManager {
 
-    public Cookie makeCookie(final String name, final String value) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        return cookie;
+    public ResponseCookie makeCookie(final String name, final String value) {
+        return ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .path("/")
+                .build();
     }
 
     public void deleteCookie(final HttpServletResponse response, final String name) {
-        Cookie cookie = makeCookie(name, null);
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .path("/")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
