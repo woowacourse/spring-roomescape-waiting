@@ -54,6 +54,28 @@ class ReservationRepositoryTest {
         );
     }
 
+    @Test
+    @DisplayName("날짜, 시간, 테마가 같은 최근 WAITING 상태 예약 정보를 반환한다")
+    void findFirstWaitingReservationTest() {
+        // given
+        Member member = createAndSaveMemberFixture();
+        LocalDate date = LocalDate.of(2025, 5, 5);
+        ReservationTime reservationTime = createAndSaveReservationTimeFixture();
+        Theme theme = createAndSaveThemeFixture();
+
+        createAndSaveReservedReservationFixture(member, theme, date, reservationTime);
+        Reservation waitingReservation = createAndSaveWaitingReservationFixture(member, theme, date,
+                reservationTime);
+        createAndSaveWaitingReservationFixture(member, theme, date, reservationTime);
+
+        // when
+        Reservation result = reservationRepository.findFirstWaitingReservation(date, reservationTime,
+                theme);
+
+        // then
+        assertThat(result.getId()).isEqualTo(waitingReservation.getId());
+    }
+
     private TestData setUpTestData() {
         Member member1 = createAndSaveMemberFixture();
         Member member2 = createAndSaveMemberFixture();
@@ -61,10 +83,10 @@ class ReservationRepositoryTest {
         Theme theme2 = createAndSaveThemeFixture();
         ReservationTime reservationTime = createAndSaveReservationTimeFixture();
 
-        createAndSaveReservationFixture(member1, theme1, LocalDate.now(), reservationTime);
-        createAndSaveReservationFixture(member1, theme2, LocalDate.now().minusDays(1), reservationTime);
-        createAndSaveReservationFixture(member2, theme1, LocalDate.now().minusDays(2), reservationTime);
-        createAndSaveReservationFixture(member2, theme2, LocalDate.now().minusDays(3), reservationTime);
+        createAndSaveReservedReservationFixture(member1, theme1, LocalDate.now(), reservationTime);
+        createAndSaveReservedReservationFixture(member1, theme2, LocalDate.now().minusDays(1), reservationTime);
+        createAndSaveReservedReservationFixture(member2, theme1, LocalDate.now().minusDays(2), reservationTime);
+        createAndSaveReservedReservationFixture(member2, theme2, LocalDate.now().minusDays(3), reservationTime);
         return new TestData(member1, member2, theme1, theme2);
     }
 
@@ -76,10 +98,18 @@ class ReservationRepositoryTest {
     ) {
     }
 
-    private void createAndSaveReservationFixture(Member member, Theme theme, LocalDate date,
-                                                 ReservationTime reservationTime) {
+    private void createAndSaveReservedReservationFixture(Member member, Theme theme, LocalDate date,
+                                                         ReservationTime reservationTime) {
         Reservation reservation = Reservation.createReserved(member, theme, date, reservationTime);
         entityManager.persist(reservation);
+    }
+
+    private Reservation createAndSaveWaitingReservationFixture(Member member, Theme theme, LocalDate date,
+                                                               ReservationTime reservationTime) {
+        Reservation reservation = Reservation.createWaiting(member, theme, date, reservationTime);
+        entityManager.persist(reservation);
+
+        return reservation;
     }
 
     private Member createAndSaveMemberFixture() {
