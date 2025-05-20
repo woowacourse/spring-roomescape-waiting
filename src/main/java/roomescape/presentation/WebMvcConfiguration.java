@@ -1,6 +1,7 @@
 package roomescape.presentation;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -9,14 +10,11 @@ import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.presentation.auth.AuthenticationInfoArgumentResolver;
 import roomescape.presentation.auth.CheckAdminInterceptor;
 
+@RequiredArgsConstructor
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     private final AuthenticationTokenHandler authenticationTokenHandler;
-
-    public WebMvcConfiguration(final AuthenticationTokenHandler authenticationTokenHandler) {
-        this.authenticationTokenHandler = authenticationTokenHandler;
-    }
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {

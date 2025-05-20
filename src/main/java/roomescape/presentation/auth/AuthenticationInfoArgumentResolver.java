@@ -1,6 +1,7 @@
 package roomescape.presentation.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -10,13 +11,10 @@ import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.auth.AuthenticationTokenHandler;
 import roomescape.exception.AuthenticationException;
 
+@RequiredArgsConstructor
 public class AuthenticationInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthenticationTokenHandler tokenHandler;
-
-    public AuthenticationInfoArgumentResolver(final AuthenticationTokenHandler tokenHandler) {
-        this.tokenHandler = tokenHandler;
-    }
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {

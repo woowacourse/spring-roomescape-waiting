@@ -2,16 +2,14 @@ package roomescape.presentation.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.auth.AuthenticationTokenHandler;
 
+@RequiredArgsConstructor
 public class CheckAdminInterceptor implements HandlerInterceptor {
 
     private final AuthenticationTokenHandler tokenProvider;
-
-    public CheckAdminInterceptor(final AuthenticationTokenHandler tokenProvider) {
-        this.tokenProvider = tokenProvider;
-    }
 
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {

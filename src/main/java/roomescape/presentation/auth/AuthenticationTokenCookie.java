@@ -17,6 +17,14 @@ public class AuthenticationTokenCookie extends Cookie {
         this.hasToken = hasToken;
     }
 
+    public String token() {
+        return token;
+    }
+
+    public boolean hasToken() {
+        return hasToken;
+    }
+
     public static AuthenticationTokenCookie fromRequest(final HttpServletRequest request) {
         var cookies = request.getCookies();
         if (cookies == null) {
@@ -42,13 +50,5 @@ public class AuthenticationTokenCookie extends Cookie {
         var cookie = new AuthenticationTokenCookie("", true);
         cookie.setMaxAge(0);
         return cookie;
-    }
-
-    public String token() {
-        return token;
-    }
-
-    public boolean hasToken() {
-        return hasToken;
     }
 }
