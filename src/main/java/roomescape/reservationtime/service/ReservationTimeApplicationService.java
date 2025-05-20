@@ -8,8 +8,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
-import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
-import roomescape.reservationtime.exception.ReservationTimeInUseException;
 
 @Service
 public class ReservationTimeApplicationService {
@@ -24,18 +22,16 @@ public class ReservationTimeApplicationService {
     }
 
     public List<ReservationTimeResponse> getReservationTimes() {
-        return reservationTimeDomainService.getReservationTimes();
+        return reservationTimeDomainService.findAll().stream()
+                .map(ReservationTimeResponse::from)
+                .toList();
     }
 
     public void delete(Long id) {
-        if (reservationDomainService.existsByTimeId(id)) {
-            throw new ReservationTimeInUseException("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
-        }
-        reservationTimeDomainService.deleteById(id);
+        reservationTimeDomainService.delete(id);
     }
 
     public ReservationTimeResponse create(final ReservationTimeCreateRequest request) {
-        validateIsTimeUnique(request);
         ReservationTime newReservationTime = reservationTimeDomainService.save(request.toReservationTime());
         return ReservationTimeResponse.from(newReservationTime);
     }
@@ -43,11 +39,5 @@ public class ReservationTimeApplicationService {
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date,
                                                                                final Long themeId) {
         return reservationDomainService.findBookedTimesByDateAndThemeId(date, themeId);
-    }
-
-    private void validateIsTimeUnique(final ReservationTimeCreateRequest request) {
-        if (reservationTimeDomainService.existsByStartAt(request.startAt())) {
-            throw new ReservationTimeAlreadyExistsException("중복된 예약 시간을 생성할 수 없습니다.");
-        }
     }
 }

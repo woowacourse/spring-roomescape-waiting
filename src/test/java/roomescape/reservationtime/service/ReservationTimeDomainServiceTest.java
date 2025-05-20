@@ -57,9 +57,9 @@ class ReservationTimeDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationTimeDomainService reservationTimeDomainService = new ReservationTimeDomainService(
-                reservationTimeRepository, reservationRepository);
         ReservationDomainService reservationDomainService = new ReservationDomainService(reservationRepository);
+        ReservationTimeDomainService reservationTimeDomainService = new ReservationTimeDomainService(
+                reservationTimeRepository, reservationDomainService);
         reservationTimeApplicationService = new ReservationTimeApplicationService(reservationTimeDomainService,
                 reservationDomainService);
         ThemeDomainService themeDomainService = new ThemeDomainService(themeRepository, reservationRepository);
@@ -94,7 +94,7 @@ class ReservationTimeDomainServiceTest {
     }
 
     @Test
-    void getReservationTimes_shouldReturnAllCreatedTimes() {
+    void findAll() {
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
 

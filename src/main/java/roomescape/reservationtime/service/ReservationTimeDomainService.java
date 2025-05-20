@@ -1,13 +1,11 @@
 package roomescape.reservationtime.service;
 
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.ReservationDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -16,31 +14,28 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 public class ReservationTimeDomainService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationDomainService reservationDomainService;
 
     public ReservationTimeDomainService(final ReservationTimeRepository reservationTimeRepository,
-                                        final ReservationRepository reservationRepository) {
+                                        final ReservationDomainService reservationDomainService) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+        this.reservationDomainService = reservationDomainService;
     }
 
-    public List<ReservationTimeResponse> getReservationTimes() {
-        return reservationTimeRepository.findAll().stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
+    public List<ReservationTime> findAll() {
+        return reservationTimeRepository.findAll();
     }
 
     public void delete(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationDomainService.existsByTimeId(id)) {
             throw new ReservationTimeInUseException("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);
     }
 
-    public ReservationTimeResponse create(final ReservationTimeCreateRequest request) {
+    public ReservationTime create(final ReservationTimeCreateRequest request) {
         validateIsTimeUnique(request);
-        ReservationTime newReservationTime = reservationTimeRepository.save(request.toReservationTime());
-        return ReservationTimeResponse.from(newReservationTime);
+        return reservationTimeRepository.save(request.toReservationTime());
     }
 
     public ReservationTime findReservationTime(final Long reservationTimeId) {
@@ -48,21 +43,16 @@ public class ReservationTimeDomainService {
                 .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
     }
 
+    public ReservationTime save(final ReservationTime reservationTime) {
+        if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
+            throw new ReservationTimeAlreadyExistsException("중복된 예약 시간을 생성할 수 없습니다.");
+        }
+        return reservationTimeRepository.save(reservationTime);
+    }
+
     private void validateIsTimeUnique(final ReservationTimeCreateRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new ReservationTimeAlreadyExistsException("중복된 예약 시간을 생성할 수 없습니다.");
         }
-    }
-
-    public void deleteById(final Long id) {
-        reservationTimeRepository.deleteById(id);
-    }
-
-    public ReservationTime save(final ReservationTime reservationTime) {
-        return reservationTimeRepository.save(reservationTime);
-    }
-
-    public boolean existsByStartAt(final LocalTime startAt) {
-        return reservationTimeRepository.existsByStartAt(startAt);
     }
 }

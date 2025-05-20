@@ -36,8 +36,4 @@ public class MemberApplicationService {
                 .map(member -> new MemberResponse(member.getId(), member.getName()))
                 .toList();
     }
-
-    public Member getMember(Long memberId) {
-        return memberDomainService.getMember(memberId);
-    }
 }

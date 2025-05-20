@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import roomescape.theme.exception.InvalidThemeException;
 
 @Entity
@@ -62,6 +63,21 @@ public class Theme {
         if (value.length() > 100) {
             throw new InvalidThemeException("썸네일은 100글자 이내여야 합니다.");
         }
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof final Theme theme)) {
+            return false;
+        }
+        return Objects.equals(getId(), theme.getId()) && Objects.equals(getName(), theme.getName())
+                && Objects.equals(getDescription(), theme.getDescription()) && Objects.equals(
+                getThumbnail(), theme.getThumbnail());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getName(), getDescription(), getThumbnail());
     }
 
     public Long getId() {

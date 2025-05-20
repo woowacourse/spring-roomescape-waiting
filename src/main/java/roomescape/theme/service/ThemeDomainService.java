@@ -10,7 +10,6 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
-import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
@@ -36,22 +35,18 @@ public class ThemeDomainService {
         themeRepository.deleteById(id);
     }
 
-    public ThemeResponse create(final ThemeCreateRequest request) {
-        Theme theme = themeRepository.save(request.toTheme());
-        return ThemeResponse.from(theme);
+    public Theme create(final ThemeCreateRequest request) {
+        return themeRepository.save(request.toTheme());
     }
 
-    public List<ThemeResponse> getPopularThemes(int days, int limit) {
+    public Page<Theme> getPopularThemes(int days, int limit) {
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = endDate.minusDays(days);
-        Page<Theme> popularThemes = themeRepository.findPopularThemes(
+        return themeRepository.findPopularThemes(
                 startDate,
                 endDate,
                 PageRequest.of(0, limit)
         );
-        return popularThemes.getContent().stream()
-                .map(ThemeResponse::from)
-                .toList();
     }
 
     public Theme findTheme(final Long request) {
@@ -67,9 +62,10 @@ public class ThemeDomainService {
         return themeRepository.save(theme);
     }
 
-    public Page<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate,
-                                         final PageRequest pageRequest) {
-        return themeRepository.findPopularThemes(startDate, endDate, pageRequest);
+    public Page<Theme> findPopularThemes(final int days, final int limit) {
+        LocalDate endDate = LocalDate.now().minusDays(1);
+        LocalDate startDate = endDate.minusDays(days);
+        return themeRepository.findPopularThemes(startDate, endDate, PageRequest.of(0, limit));
     }
 
     public Theme findById(final Long themeId) {

@@ -54,9 +54,10 @@ class ReservationDomainServiceTest {
 
     @BeforeEach
     void setUp() {
+        ReservationDomainService reservationDomainService = new ReservationDomainService(reservationRepository);
         reservationApplicationService = new ReservationApplicationService(
-                new ReservationDomainService(reservationRepository),
-                new ReservationTimeDomainService(reservationTimeRepository, reservationRepository),
+                reservationDomainService,
+                new ReservationTimeDomainService(reservationTimeRepository, reservationDomainService),
                 new ThemeDomainService(themeRepository, reservationRepository),
                 new MemberDomainService(memberRepository));
 

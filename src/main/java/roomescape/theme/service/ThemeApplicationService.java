@@ -1,9 +1,7 @@
 package roomescape.theme.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.service.ReservationDomainService;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
@@ -42,13 +40,7 @@ public class ThemeApplicationService {
     }
 
     public List<ThemeResponse> getPopularThemes(int days, int limit) {
-        LocalDate endDate = LocalDate.now().minusDays(1);
-        LocalDate startDate = endDate.minusDays(days);
-        Page<Theme> popularThemes = themeDomainService.findPopularThemes(
-                startDate,
-                endDate,
-                PageRequest.of(0, limit)
-        );
+        Page<Theme> popularThemes = themeDomainService.findPopularThemes(days, limit);
         return popularThemes.getContent().stream()
                 .map(ThemeResponse::from)
                 .toList();
