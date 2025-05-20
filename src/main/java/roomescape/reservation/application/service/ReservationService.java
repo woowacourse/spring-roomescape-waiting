@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.repository.MemberRepository;
@@ -14,6 +15,7 @@ import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
@@ -118,12 +120,27 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(final Long id) {
-
-        reservationRepository.findById(id)
+    public void deleteReservationByUser(final Long reservationId, final Long memberId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
-        reservationRepository.deleteById(id);
+        if (!Objects.equals(reservation.getMember().getId(), memberId)) {
+            throw new IllegalStateException("다른 사람의 예약을 삭제할 수 없습니다.");
+        }
+
+        if (reservation.getStatus().equals(Status.RESERVED)) {
+            throw new IllegalStateException("이미 예약된 상태 내역은 삭제할 수 없습니다.");
+        }
+
+        reservationRepository.delete(reservation);
+    }
+
+    @Transactional
+    public void deleteReservationByAdmin(final Long reservationId) {
+        reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
+
+        reservationRepository.deleteById(reservationId);
     }
 
     private ReservationTime getReservationTime(Long timeId) {

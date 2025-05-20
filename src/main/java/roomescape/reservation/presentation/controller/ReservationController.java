@@ -69,7 +69,7 @@ public class ReservationController {
     }
 
     @Auth(Role.USER)
-    @GetMapping("mine")
+    @GetMapping("/mine")
     public ResponseEntity<List<UserReservationsResponse>> getUserReservations(
             final Long memberId
     ) {
@@ -81,9 +81,10 @@ public class ReservationController {
     @Auth(Role.USER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(
-            final @PathVariable Long id
+            final @PathVariable("id") Long reservationId,
+            final Long memberId
     ) {
-        reservationService.deleteReservation(id);
+        reservationService.deleteReservationByUser(reservationId, memberId);
         return ResponseEntity.noContent().build();
     }
 

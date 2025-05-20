@@ -139,7 +139,7 @@ public class ReservationServiceTest {
 
     @Test
     @DisplayName("예약 삭제 테스트")
-    void deleteReservationTest() {
+    void deleteReservationByUserTest() {
         // given
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 40)));
 
@@ -155,7 +155,7 @@ public class ReservationServiceTest {
         ReservationResponse reservation = reservationService.createReservation(adminReservationRequest);
 
         // when
-        reservationService.deleteReservation(reservation.getId());
+        reservationService.deleteReservationByAdmin(reservation.getId());
 
         // then
         assertThat(reservationService.getReservations(null, null, null, null).size()).isEqualTo(0);
@@ -164,7 +164,7 @@ public class ReservationServiceTest {
     @Test
     @DisplayName("저장되어 있지 않은 id로 요청을 보내면 예외가 발생한다.")
     void deleteExceptionTest() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
+        assertThatThrownBy(() -> reservationService.deleteReservationByAdmin(1L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 삭제되어 있는 리소스입니다.");
     }
