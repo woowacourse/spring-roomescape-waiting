@@ -57,12 +57,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleIllegalStateException(IllegalStateException e) {
-        log.error("예상치 못한 예외 발생: ", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-    }
-
-    @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnexpectedException(Exception e) {
         log.error("예상치 못한 예외 발생: ", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
