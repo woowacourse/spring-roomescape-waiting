@@ -2,8 +2,8 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.auth.dto.MemberInfo;
-import roomescape.global.auth.service.MyPasswordEncoder;
+import roomescape.auth.dto.MemberInfo;
+import roomescape.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.dto.request.SignupRequest;

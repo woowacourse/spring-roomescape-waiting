@@ -1,6 +1,6 @@
 package roomescape.reservation.exception;
 
-import roomescape.global.common.exception.ValidationException;
+import roomescape.exception.ValidationException;
 
 public class InvalidReservationException extends ValidationException {
 

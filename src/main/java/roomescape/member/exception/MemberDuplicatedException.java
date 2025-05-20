@@ -1,6 +1,6 @@
 package roomescape.member.exception;
 
-import roomescape.global.common.exception.DuplicatedException;
+import roomescape.exception.DuplicatedException;
 
 public class MemberDuplicatedException extends DuplicatedException {
 

@@ -1,6 +1,6 @@
 package roomescape.reservationtime.exception;
 
-import roomescape.global.common.exception.AlreadyExistsException;
+import roomescape.exception.AlreadyExistsException;
 
 public class ReservationTimeAlreadyExistsException extends AlreadyExistsException {
 

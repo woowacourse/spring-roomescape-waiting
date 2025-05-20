@@ -54,7 +54,7 @@ public class Reservation {
         this.reservationStatus = reservationStatus;
     }
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public static Reservation createUpcomingReservationWithUnassignedId(final Member member, final LocalDate date,

@@ -2,7 +2,7 @@ package roomescape.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import roomescape.global.auth.service.MyPasswordEncoder;
+import roomescape.auth.service.MyPasswordEncoder;
 import roomescape.member.repository.JpaMemberRepository;
 import roomescape.member.repository.JpaMemberRepositoryAdapter;
 import roomescape.member.repository.MemberRepository;

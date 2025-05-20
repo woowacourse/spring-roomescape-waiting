@@ -20,8 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.fixture.IntegrationFixture;
-import roomescape.global.auth.dto.CheckLoginResponse;
-import roomescape.global.auth.dto.LoginRequest;
+import roomescape.auth.dto.CheckLoginResponse;
+import roomescape.auth.dto.LoginRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)

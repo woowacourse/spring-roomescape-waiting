@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.global.auth.dto.MemberInfo;
+import roomescape.auth.dto.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.exception.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;

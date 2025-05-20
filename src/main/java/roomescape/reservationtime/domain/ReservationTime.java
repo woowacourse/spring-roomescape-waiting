@@ -18,12 +18,12 @@ public class ReservationTime {
     @Column(name = "start_at", nullable = false, unique = true)
     private LocalTime startAt;
 
-    public ReservationTime() {
-    }
-
     public ReservationTime(final Long id, final LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
+    }
+
+    protected ReservationTime() {
     }
 
     private ReservationTime(final LocalTime startAt) {
