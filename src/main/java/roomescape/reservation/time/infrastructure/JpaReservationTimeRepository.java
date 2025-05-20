@@ -1,7 +1,7 @@
-package roomescape.time.infrastructure;
+package roomescape.reservation.time.infrastructure;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTime;
 
 import java.time.LocalTime;
 

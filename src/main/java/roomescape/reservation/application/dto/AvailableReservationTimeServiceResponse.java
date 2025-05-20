@@ -5,7 +5,7 @@ import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.domain.BookedStatus;
-import roomescape.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTime;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public record AvailableReservationTimeServiceResponse(

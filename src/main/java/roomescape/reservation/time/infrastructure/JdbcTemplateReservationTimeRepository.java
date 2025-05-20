@@ -1,4 +1,4 @@
-package roomescape.time.infrastructure;
+package roomescape.reservation.time.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,8 +7,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.common.jdbc.JdbcUtils;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeId;
 
 import java.sql.PreparedStatement;
 import java.sql.Time;

@@ -7,7 +7,7 @@ import roomescape.common.validate.Validator;
 import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.ReservationTimeId;
+import roomescape.reservation.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;

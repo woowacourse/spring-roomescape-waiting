@@ -6,7 +6,7 @@ import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.ui.dto.ThemeResponse;
-import roomescape.time.ui.dto.ReservationTimeResponse;
+import roomescape.reservation.time.ui.dto.ReservationTimeResponse;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
 import roomescape.user.ui.dto.UserResponse;
@@ -35,7 +35,7 @@ public record ReservationResponse(Long reservationId,
                 UserResponse.from(user),
                 domain.getDate().getValue(),
                 domain.getStatus().getSequence(),
-                roomescape.time.ui.dto.ReservationTimeResponse.from(domain.getTime()),
+                ReservationTimeResponse.from(domain.getTime()),
                 ThemeResponse.from(domain.getTheme()));
     }
 

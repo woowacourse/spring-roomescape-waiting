@@ -8,8 +8,8 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)

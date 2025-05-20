@@ -1,21 +1,27 @@
-package roomescape.time.ui.dto;
+package roomescape.reservation.time.application.dto;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
+import roomescape.reservation.time.domain.ReservationTime;
 
 import java.time.LocalTime;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record CreateReservationTimeWebRequest(LocalTime startAt) {
+public record CreateReservationTimeServiceRequest(LocalTime startAt) {
 
-    public CreateReservationTimeWebRequest {
+    public CreateReservationTimeServiceRequest {
         validate(startAt);
     }
 
+    public ReservationTime toDomain() {
+        return ReservationTime.withoutId(
+                startAt);
+    }
+
     private void validate(final LocalTime startAt) {
-        Validator.of(CreateReservationTimeWebRequest.class)
+        Validator.of(CreateReservationTimeServiceRequest.class)
                 .validateNotNull(Fields.startAt, startAt, DomainTerm.RESERVATION_TIME.label());
     }
 }

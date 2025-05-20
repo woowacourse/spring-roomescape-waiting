@@ -1,13 +1,13 @@
-package roomescape.time.application;
+package roomescape.reservation.time.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.time.application.dto.CreateReservationTimeServiceRequest;
-import roomescape.time.application.service.ReservationTimeCommandService;
-import roomescape.time.application.service.ReservationTimeQueryService;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.ui.dto.CreateReservationTimeWebRequest;
-import roomescape.time.ui.dto.ReservationTimeResponse;
+import roomescape.reservation.time.application.dto.CreateReservationTimeServiceRequest;
+import roomescape.reservation.time.application.service.ReservationTimeCommandService;
+import roomescape.reservation.time.application.service.ReservationTimeQueryService;
+import roomescape.reservation.time.domain.ReservationTimeId;
+import roomescape.reservation.time.ui.dto.CreateReservationTimeWebRequest;
+import roomescape.reservation.time.ui.dto.ReservationTimeResponse;
 
 import java.util.List;
 

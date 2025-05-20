@@ -1,7 +1,7 @@
-package roomescape.time.application;
+package roomescape.reservation.time.application;
 
-import roomescape.time.ui.dto.CreateReservationTimeWebRequest;
-import roomescape.time.ui.dto.ReservationTimeResponse;
+import roomescape.reservation.time.ui.dto.CreateReservationTimeWebRequest;
+import roomescape.reservation.time.ui.dto.ReservationTimeResponse;
 
 import java.util.List;
 

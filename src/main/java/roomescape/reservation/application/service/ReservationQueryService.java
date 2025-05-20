@@ -13,9 +13,9 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.ui.ReservationSearchRequest;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.application.service.ReservationTimeQueryService;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
+import roomescape.reservation.time.application.service.ReservationTimeQueryService;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.HashSet;

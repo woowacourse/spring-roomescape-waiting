@@ -1,10 +1,10 @@
-package roomescape.time.infrastructure;
+package roomescape.reservation.time.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeId;
+import roomescape.reservation.time.domain.ReservationTimeRepository;
 
 import java.time.LocalTime;
 import java.util.List;

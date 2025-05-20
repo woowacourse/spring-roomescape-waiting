@@ -8,8 +8,8 @@ import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.List;

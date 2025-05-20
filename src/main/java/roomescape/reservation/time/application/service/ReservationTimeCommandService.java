@@ -1,4 +1,4 @@
-package roomescape.time.application.service;
+package roomescape.reservation.time.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -8,10 +8,10 @@ import roomescape.common.exception.ConstraintConflictException;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.application.service.ReservationQueryService;
-import roomescape.time.application.dto.CreateReservationTimeServiceRequest;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.reservation.time.application.dto.CreateReservationTimeServiceRequest;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeId;
+import roomescape.reservation.time.domain.ReservationTimeRepository;
 
 @Service
 @RequiredArgsConstructor

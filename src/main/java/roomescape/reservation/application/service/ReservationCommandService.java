@@ -13,8 +13,8 @@ import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
-import roomescape.time.application.service.ReservationTimeQueryService;
-import roomescape.time.domain.ReservationTime;
+import roomescape.reservation.time.application.service.ReservationTimeQueryService;
+import roomescape.reservation.time.domain.ReservationTime;
 
 @Service
 @RequiredArgsConstructor

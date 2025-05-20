@@ -3,6 +3,8 @@ package roomescape.time.domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.validate.InvalidArgumentException;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeId;
 
 import java.time.LocalTime;
 
