@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,8 +16,10 @@ public class Member {
 
     @Embedded
     private Name name;
+
     @Embedded
     private Email email;
+
     @Embedded
     private Password password;
 

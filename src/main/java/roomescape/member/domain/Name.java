@@ -1,11 +1,14 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
 import roomescape.member.exception.NameException;
 
 @Embeddable
-public record Name(String name) {
+public record Name(@Column(length = MAX_NAME_LENGTH, nullable = false) String name) {
+
+    public static final int MAX_NAME_LENGTH = 5;
 
     public Name {
         validateNameIsNonEmpty(name);
@@ -19,7 +22,7 @@ public record Name(String name) {
     }
 
     private void validateNameLength(String name) {
-        if (name.isEmpty() || name.length() > 5) {
+        if (name.isEmpty() || name.length() > MAX_NAME_LENGTH) {
             throw new NameException("이름은 1-5글자 사이여야 합니다.");
         }
     }
