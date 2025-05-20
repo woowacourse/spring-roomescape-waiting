@@ -173,4 +173,25 @@ public class WaitingIntegrationTest {
         assertThatCode(() -> waitingService.deleteWaiting(savedWaiting.getId(), loginMember))
                 .doesNotThrowAnyException();
     }
+
+    @DisplayName("예약이 존재할 때, 예약 대기를 승인한다.")
+    @Test
+    void acceptWaitingWhenAlreadyReserved() {
+        //given
+        // 타인의 예약 생성
+        var otherMember = memberRepository.save(new Member("미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        var date = LocalDate.now().plusDays(1);
+        var reservation = new Reservation(date, time, theme, otherMember);
+        reservationRepository.save(reservation);
+
+        var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
+        var waiting = new Waiting(date, theme, time, member);
+        var savedWaiting = waitingRepository.save(waiting);
+
+        //when & then
+        assertThatCode(() -> waitingService.acceptWaiting(savedWaiting.getId()))
+                .doesNotThrowAnyException();
+    }
 }

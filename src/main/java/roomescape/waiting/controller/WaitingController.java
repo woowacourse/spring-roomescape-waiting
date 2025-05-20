@@ -46,6 +46,13 @@ public class WaitingController {
         return ResponseEntity.ok(responses);
     }
 
+    @PostMapping("/accept/{id}")
+    @RoleRequired(roleType = RoleType.ADMIN)
+    public ResponseEntity<Void> acceptWaiting(@PathVariable Long id) {
+        waitingService.acceptWaiting(id);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     @RoleRequired(roleType = {RoleType.ADMIN, RoleType.USER})
     public ResponseEntity<Void> deleteWaitingById(
