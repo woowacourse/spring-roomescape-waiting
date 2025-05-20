@@ -6,15 +6,15 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.business.domain.Member;
-import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Reservation;
+import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
 import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
@@ -27,8 +27,10 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository,
-                              final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final MemberRepository memberRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
@@ -109,7 +111,9 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
-        return reservationRepository.findByMemberId(memberId)
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId)))
+                .getReservations()
                 .stream()
                 .map(ReservationMineResponse::from)
                 .toList();
