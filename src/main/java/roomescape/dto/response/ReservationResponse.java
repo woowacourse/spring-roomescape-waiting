@@ -12,7 +12,10 @@ public record ReservationResponse(
 ) {
     public static ReservationResponse from(Reservation reservation) {
         ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getReservationTime());
-        return new ReservationResponse(reservation.getId(), reservation.getMember().getName(), reservation.getDate(),
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getMember().getName(),
+                reservation.getDate(),
                 dto,
                 reservation.getTheme().getName());
     }

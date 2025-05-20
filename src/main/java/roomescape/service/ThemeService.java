@@ -18,6 +18,7 @@ import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ExistedThemeException;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private static final int TOP_THEMES_COUNT = 10;
@@ -63,7 +64,6 @@ public class ThemeService {
                 .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()));
     }
 
-    @Transactional
     public ThemeResponse createTheme(ThemeRequest themeRequest) {
         Optional<Theme> optionalTheme = themeRepository.findByName(themeRequest.name());
         if (optionalTheme.isPresent()) {
@@ -76,7 +76,6 @@ public class ThemeService {
                 themeWithId.getThumbnail());
     }
 
-    @Transactional
     public void deleteThemeById(long id) {
         List<Reservation> reservations = reservationRepository.findByThemeId(id);
         if (!reservations.isEmpty()) {

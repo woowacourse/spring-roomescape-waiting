@@ -11,18 +11,17 @@ import roomescape.exception.MemberNotFoundException;
 import roomescape.infrastructure.JwtTokenProvider;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final JwtTokenProvider tokenProvider;
     private final MemberRepository memberRepository;
-
 
     public AuthService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
         this.tokenProvider = jwtTokenProvider;
         this.memberRepository = memberRepository;
     }
 
-    @Transactional(readOnly = true)
     public String createToken(LoginRequest loginRequest) {
         Member member = memberRepository.findByEmail(loginRequest.email())
                 .orElseThrow(LoginFailedException::new);
@@ -31,7 +30,6 @@ public class AuthService {
         return tokenProvider.createToken(String.valueOf(member.getId()), member.getRole());
     }
 
-    @Transactional(readOnly = true)
     public AuthenticatedUserResponse getAuthenticatedUser(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);

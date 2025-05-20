@@ -11,6 +11,7 @@ import roomescape.dto.response.MemberResponse;
 import roomescape.exception.DuplicatedEmailException;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -27,7 +28,6 @@ public class MemberService {
                 .toList();
     }
 
-    @Transactional
     public MemberResponse createMember(MemberRequest memberRequest) {
         Optional<Member> optionalMember = memberRepository.findByEmail(memberRequest.email());
         if (optionalMember.isPresent()) {

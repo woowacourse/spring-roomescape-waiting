@@ -22,6 +22,7 @@ import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 
 @Service
+@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -56,7 +57,6 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional
     public ReservationResponse createReservation(Long memberId, Long timeId, Long themeId, LocalDate date) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(ReservationTimeNotFoundException::new);
@@ -75,7 +75,6 @@ public class ReservationService {
         }
     }
 
-    @Transactional
     public void deleteReservationById(Long id) {
         reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.deleteById(id);
