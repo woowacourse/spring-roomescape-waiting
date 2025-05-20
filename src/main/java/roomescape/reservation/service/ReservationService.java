@@ -45,13 +45,10 @@ public class ReservationService {
     }
 
     public ReservationResponse saveReservation(final ReservationRequest request, final LoginMember loginMember) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
-            throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
-        }
+
+        final ReservationTime reservationTime = findReservationTimeById(request.timeId());
+        final Theme theme = findThemeById(request.themeId());
+        validateReservationAvailability(request.date(), reservationTime, theme);
 
         final Member member = Member.from(loginMember);
         final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
@@ -60,15 +57,11 @@ public class ReservationService {
     }
 
     public ReservationResponse saveAdminReservation(final AdminReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+        final ReservationTime reservationTime = findReservationTimeById(request.timeId());
+        final Theme theme = findThemeById(request.themeId());
         final Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
-        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
-            throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
-        }
+        validateReservationAvailability(request.date(), reservationTime, theme);
         final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
@@ -86,5 +79,19 @@ public class ReservationService {
         return reservationRepository.findAllByMember(member).stream()
                 .map(MyReservationResponse::new)
                 .toList();
+    }
+
+    private ReservationTime findReservationTimeById(Long timeId) {
+        return reservationTimeRepository.findById(timeId).orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
+    }
+
+    private Theme findThemeById(Long themeId) {
+        return themeRepository.findById(themeId).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private void validateReservationAvailability(LocalDate date, ReservationTime time, Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
+            throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
+        }
     }
 }
