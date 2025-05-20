@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,75 +43,91 @@ class MemberServiceTest {
         memberService = new MemberService(jwtTokenProvider, memberRepository);
     }
 
-    @DisplayName("회원 목록을 조회하는 기능을 구현한다")
-    @Test
-    void findAll() {
-        String hashedPassword = passwordEncoder.encode("password123");
-        Member member = new Member(1L, "admin", "admin@email.com", hashedPassword, Role.ADMIN);
-        when(memberRepository.findAll()).thenReturn(List.of(member));
+    @Nested
+    @DisplayName("회원 조회 관련 기능 테스트")
+    class FindMemberTest {
 
-        List<MemberResponse> members = memberService.findAll();
+        private Member member;
 
-        assertThat(members).hasSize(1);
-        verify(memberRepository, times(1)).findAll();
+        @BeforeEach
+        void setUp() {
+            String hashedPassword = passwordEncoder.encode("password123");
+            member = new Member(1L, "admin", "admin@email.com", hashedPassword, Role.ADMIN);
+        }
+
+        @DisplayName("회원 목록을 조회하는 기능을 구현한다")
+        @Test
+        void findAll() {
+            when(memberRepository.findAll()).thenReturn(List.of(member));
+
+            List<MemberResponse> members = memberService.findAll();
+
+            assertThat(members).hasSize(1);
+            verify(memberRepository, times(1)).findAll();
+        }
+
+        @DisplayName("회원을 이메일로 조회하는 기능을 구현한다")
+        @Test
+        void findByEmail() {
+            when(memberRepository.findByEmail("admin@email.com")).thenReturn(Optional.of(member));
+
+            MemberResponse foundMember = memberService.findByEmail("admin@email.com");
+
+            assertThat(foundMember.email()).isEqualTo("admin@email.com");
+            verify(memberRepository, times(1)).findByEmail("admin@email.com");
+        }
+
+        @DisplayName("회원을 토큰으로 조회하는 기능을 구현한다")
+        @Test
+        void findByToken() {
+            when(jwtTokenProvider.getPayloadEmail("valid-token")).thenReturn("admin@email.com");
+            when(memberRepository.findByEmail("admin@email.com")).thenReturn(Optional.of(member));
+
+            MemberResponse foundMember = memberService.findByToken("valid-token");
+
+            assertThat(foundMember.id()).isEqualTo(1L);
+            verify(jwtTokenProvider, times(1)).getPayloadEmail("valid-token");
+            verify(memberRepository, times(1)).findByEmail("admin@email.com");
+        }
     }
 
-    @DisplayName("회원을 이메일로 조회하는 기능을 구현한다")
-    @Test
-    void findByEmail() {
-        String hashedPassword = passwordEncoder.encode("password123");
-        Member member = new Member(1L, "admin", "admin@email.com", hashedPassword, Role.ADMIN);
-        when(memberRepository.findByEmail("admin@email.com")).thenReturn(Optional.of(member));
+    @Nested
+    @DisplayName("회원 로그인 관련 기능 테스트")
+    class LoginMemberTest {
 
-        MemberResponse foundMember = memberService.findByEmail("admin@email.com");
+        private Member member;
 
-        assertThat(foundMember.email()).isEqualTo("admin@email.com");
-        verify(memberRepository, times(1)).findByEmail("admin@email.com");
-    }
+        @BeforeEach
+        void setUp() {
+            String hashedPassword = passwordEncoder.encode("password123");
+            member = new Member(1L, "admin", "admin@email.com", hashedPassword, Role.ADMIN);
+        }
 
-    @DisplayName("회원을 토큰으로 조회하는 기능을 구현한다")
-    @Test
-    void findByToken() {
-        String hashedPassword = passwordEncoder.encode("password123");
-        Member member = new Member(1L, "admin", "admin@email.com", hashedPassword, Role.ADMIN);
-        when(jwtTokenProvider.getPayloadEmail("valid-token")).thenReturn("admin@email.com");
-        when(memberRepository.findByEmail("admin@email.com")).thenReturn(Optional.of(member));
+        @DisplayName("로그인 토큰을 생성하는 기능을 구현한다")
+        @Test
+        void createToken() {
+            when(memberRepository.findByEmail("admin@email.com")).thenReturn(Optional.of(member));
+            when(jwtTokenProvider.createToken("admin@email.com", "admin")).thenReturn("access-token");
 
-        MemberResponse foundMember = memberService.findByToken("valid-token");
+            MemberLoginRequest loginRequest = new MemberLoginRequest("admin@email.com", "password123");
+            MemberTokenResponse tokenResponse = memberService.createToken(loginRequest);
 
-        assertThat(foundMember.id()).isEqualTo(1L);
-        verify(jwtTokenProvider, times(1)).getPayloadEmail("valid-token");
-        verify(memberRepository, times(1)).findByEmail("admin@email.com");
-    }
+            assertThat(tokenResponse.accessToken()).isEqualTo("access-token");
+            verify(memberRepository, times(2)).findByEmail("admin@email.com");
+            verify(jwtTokenProvider, times(1)).createToken("admin@email.com", "admin");
+        }
 
-    @DisplayName("로그인 토큰을 생성하는 기능을 구현한다")
-    @Test
-    void createToken() {
-        String hashedPassword = passwordEncoder.encode("password123");
-        Member member = new Member(1L, "admin", "admin@email.com", hashedPassword, Role.ADMIN);
-        when(memberRepository.findByEmail("admin@email.com")).thenReturn(Optional.of(member));
-        when(jwtTokenProvider.createToken("admin@email.com", "admin")).thenReturn("access-token");
+        @DisplayName("로그인 시 비밀번호가 일치하지 않는 경우 예외를 발생시킨다")
+        @Test
+        void exception_invalid_password() {
+            when(memberRepository.findByEmail("wooteco@gmail.com")).thenReturn(Optional.of(member));
 
-        MemberLoginRequest loginRequest = new MemberLoginRequest("admin@email.com", "password123");
-        MemberTokenResponse tokenResponse = memberService.createToken(loginRequest);
+            MemberLoginRequest loginRequest = new MemberLoginRequest("wooteco@gmail.com", "1234");
+            assertThatThrownBy(() -> memberService.createToken(loginRequest))
+                    .isInstanceOf(AuthenticationException.class);
 
-        assertThat(tokenResponse.accessToken()).isEqualTo("access-token");
-        verify(memberRepository, times(2)).findByEmail("admin@email.com");
-        verify(jwtTokenProvider, times(1)).createToken("admin@email.com", "admin");
-    }
-
-    @DisplayName("로그인 시 비밀번호가 일치하지 않는 경우 예외를 발생시킨다")
-    @Test
-    void exception_invalid_password() {
-        String hashedPassword = passwordEncoder.encode("1234A");
-        Member member = new Member(1L, "admin", "wooteco@gmail.com", hashedPassword, Role.ADMIN);
-        when(memberRepository.findByEmail("wooteco@gmail.com")).thenReturn(Optional.of(member));
-
-        MemberLoginRequest loginRequest = new MemberLoginRequest("wooteco@gmail.com", "1234");
-        assertThatThrownBy(() -> memberService.createToken(loginRequest))
-                .isInstanceOf(AuthenticationException.class);
-
-        verify(memberRepository, times(1)).findByEmail("wooteco@gmail.com");
+            verify(memberRepository, times(1)).findByEmail("wooteco@gmail.com");
+        }
     }
 
     @DisplayName("회원가입 시 이미 존재하는 이메일인 경우 예외를 발생시킨다")

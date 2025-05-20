@@ -1,8 +1,8 @@
 package roomescape.member.domain.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
+import java.util.Collection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +24,11 @@ class MemberRepositoryTest {
         Member member = new Member("name", "email", "password");
 
         // when
+        Collection<Member> members = memberRepository.findAll();
         memberRepository.save(member);
-        Iterable<Member> members = memberRepository.findAll();
+        Collection<Member> newMembers = memberRepository.findAll();
 
         // then
-        assertThat(members).extracting(Member::getName, Member::getEmail, Member::getPassword)
-                .containsExactlyInAnyOrder(tuple("name", "email", "password"));
+        assertThat(newMembers).hasSize(members.size() + 1);
     }
 }

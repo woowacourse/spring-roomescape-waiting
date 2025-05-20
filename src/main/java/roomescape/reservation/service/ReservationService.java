@@ -63,7 +63,7 @@ public class ReservationService {
         LocalDate dateFrom = request.dateFrom();
         LocalDate dateTo = request.dateTo();
 
-        return reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, dateFrom, dateTo)
+        return reservationRepository.findAllBySearchFilter(memberId, themeId, dateFrom, dateTo)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();

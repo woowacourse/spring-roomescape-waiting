@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
     @Query("""
             SELECT r FROM Reservation r
             WHERE (:memberId IS NULL OR r.member.id = :memberId)
@@ -19,6 +20,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("themeId") Long themeId,
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
+
+    default Collection<Reservation> findAllBySearchFilter(Long memberId, Long themeId, LocalDate from, LocalDate to) {
+        return findAllByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
+    }
 
     boolean existsByDateAndTimeId(LocalDate reservationDate, Long id);
 
