@@ -11,6 +11,7 @@ import static roomescape.fixture.domain.ThemeFixture.notSavedTheme1;
 import static roomescape.fixture.domain.ThemeFixture.notSavedTheme2;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.ReservationsByFilterRequest;
+import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -222,5 +224,14 @@ class AdminReservationServiceTest {
             softly.assertThat(adminReservationService.findAllByFilter(request4))
                     .hasSize(0);
         });
+    }
+
+    @Test
+    void 예약_상태_목록을_조회한다() {
+        // when
+        final List<ReservationStatusResponse> responses = adminReservationService.findAllReservationStatuses();
+
+        // then
+        assertThat(responses).hasSize(ReservationStatus.values().length);
     }
 }

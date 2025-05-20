@@ -23,7 +23,6 @@ import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
-import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -72,12 +71,5 @@ public class ReservationRestController {
                 reservationService.findAvailableReservationTimes(request);
 
         return ResponseEntity.ok(availableReservationTimes);
-    }
-
-    @GetMapping("/statuses")
-    @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<ReservationStatusResponse>> findAllReservationStatuses() {
-        return ResponseEntity.ok()
-                .body(reservationService.findAllReservationStatuses());
     }
 }

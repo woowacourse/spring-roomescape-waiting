@@ -1,5 +1,6 @@
 package roomescape.reservation.ui;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.ui.LoginApiFixture.adminLoginAndGetCookies;
 import static roomescape.fixture.ui.LoginApiFixture.memberLoginAndGetCookies;
@@ -24,8 +25,10 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.ui.dto.LoginRequest;
+import roomescape.fixture.ui.LoginApiFixture;
 import roomescape.member.ui.dto.SignUpRequest;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -175,6 +178,22 @@ class AdminReservationRestControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", is(2));
+    }
+
+    @Test
+    void 예약_상태_목록을_조회한다() {
+        final Map<String, String> adminCookies = LoginApiFixture.adminLoginAndGetCookies();
+
+        final List<ReservationStatusResponse> responses =
+                RestAssured.given().log().all()
+                        .contentType(ContentType.JSON)
+                        .cookies(adminCookies)
+                        .when().get("/admin/reservations/statuses")
+                        .then().log().all()
+                        .extract().jsonPath()
+                        .getList(".", ReservationStatusResponse.class);
+
+        assertThat(responses).hasSize(ReservationStatus.values().length);
     }
 
     private Map<String, String> confirmedReservationParams() {

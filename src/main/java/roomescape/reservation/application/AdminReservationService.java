@@ -3,6 +3,7 @@ package roomescape.reservation.application;
 import static roomescape.auth.domain.AuthRole.ADMIN;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.ReservationsByFilterRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
+import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -101,6 +103,12 @@ public class AdminReservationService {
                 )
                 .stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationStatusResponse> findAllReservationStatuses() {
+        return Arrays.stream(ReservationStatus.values())
+                .map(ReservationStatusResponse::from)
                 .toList();
     }
 }

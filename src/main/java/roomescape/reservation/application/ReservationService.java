@@ -3,7 +3,6 @@ package roomescape.reservation.application;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
-import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -138,12 +136,6 @@ public class ReservationService {
     public List<ReservationResponse.ForMember> findReservationsByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(ReservationResponse.ForMember::from)
-                .toList();
-    }
-
-    public List<ReservationStatusResponse> findAllReservationStatuses() {
-        return Arrays.stream(ReservationStatus.values())
-                .map(ReservationStatusResponse::from)
                 .toList();
     }
 }

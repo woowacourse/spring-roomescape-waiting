@@ -21,6 +21,7 @@ import roomescape.reservation.application.AdminReservationService;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.ReservationsByFilterRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
+import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -64,5 +65,12 @@ public class AdminReservationRestController {
         final List<ReservationResponse> reservationResponses = adminReservationService.findAllByFilter(request);
 
         return ResponseEntity.ok(reservationResponses);
+    }
+
+    @GetMapping("/statuses")
+    @RequiresRole(authRoles = {ADMIN})
+    public ResponseEntity<List<ReservationStatusResponse>> findAllReservationStatuses() {
+        return ResponseEntity.ok()
+                .body(adminReservationService.findAllReservationStatuses());
     }
 }
