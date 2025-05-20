@@ -19,15 +19,15 @@ import roomescape.reservation.dto.request.AdminReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationApplicationService;
 
 @RestController
 public class ReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationApplicationService reservationApplicationService;
 
-    public ReservationController(final ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public ReservationController(final ReservationApplicationService reservationApplicationService) {
+        this.reservationApplicationService = reservationApplicationService;
     }
 
     @GetMapping("/reservations")
@@ -37,7 +37,7 @@ public class ReservationController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        return ResponseEntity.ok(reservationService.findReservations(themeId, memberId, dateFrom, dateTo));
+        return ResponseEntity.ok(reservationApplicationService.findReservations(themeId, memberId, dateFrom, dateTo));
     }
 
     @RequireRole(MemberRole.USER)
@@ -46,7 +46,8 @@ public class ReservationController {
             @RequestBody ReservationCreateRequest request,
             MemberInfo memberInfo
     ) {
-        ReservationResponse dto = reservationService.create(request.date(), request.timeId(), request.themeId(),
+        ReservationResponse dto = reservationApplicationService.create(request.date(), request.timeId(),
+                request.themeId(),
                 memberInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
@@ -56,7 +57,8 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody AdminReservationCreateRequest request
     ) {
-        ReservationResponse dto = reservationService.create(request.date(), request.timeId(), request.themeId(),
+        ReservationResponse dto = reservationApplicationService.create(request.date(), request.timeId(),
+                request.themeId(),
                 request.memberId(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
@@ -66,14 +68,14 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservations(
             @PathVariable("id") Long id
     ) {
-        reservationService.delete(id);
+        reservationApplicationService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @RequireRole(MemberRole.USER)
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(MemberInfo memberInfo) {
-        List<MyReservationResponse> myReservations = reservationService.findMyReservations(memberInfo);
+        List<MyReservationResponse> myReservations = reservationApplicationService.findMyReservations(memberInfo);
         return ResponseEntity.ok().body(myReservations);
     }
 

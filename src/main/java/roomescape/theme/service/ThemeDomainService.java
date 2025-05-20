@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
@@ -13,12 +14,13 @@ import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
-public class ThemeService {
+public class ThemeDomainService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
+    public ThemeDomainService(final ThemeRepository themeRepository,
+                              final ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -52,5 +54,10 @@ public class ThemeService {
         return popularThemes.getContent().stream()
                 .map(ThemeResponse::from)
                 .toList();
+    }
+
+    public Theme findTheme(final Long request) {
+        return themeRepository.findById(request)
+                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
     }
 }

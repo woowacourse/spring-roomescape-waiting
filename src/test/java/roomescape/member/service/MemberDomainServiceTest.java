@@ -9,9 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
-import roomescape.config.TestConfig;
 import roomescape.auth.service.MyPasswordEncoder;
+import roomescape.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.dto.request.SignupRequest;
 import roomescape.member.dto.response.MemberResponse;
@@ -20,12 +19,9 @@ import roomescape.member.repository.MemberRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-@TestPropertySource(properties = {
-        "spring.sql.init.data-locations="
-})
-public class MemberServiceTest {
+public class MemberDomainServiceTest {
 
-    private MemberService memberService;
+    private MemberApplicationService memberApplicationService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -35,12 +31,14 @@ public class MemberServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberService = new MemberService(memberRepository, myPasswordEncoder);
+        memberApplicationService = new MemberApplicationService(new MemberDomainService(memberRepository),
+                myPasswordEncoder);
     }
 
     @Test
     void signUpTest() {
-        SignUpResponse response = memberService.signup(new SignupRequest("userr@gmail.com", "password", "userr"));
+        SignUpResponse response = memberApplicationService.signup(
+                new SignupRequest("userr@gmail.com", "password", "userr"));
 
         Optional<Member> optionalMember = memberRepository.findById(response.id());
         assertThat(optionalMember.get().getName()).isEqualTo("userr");
@@ -48,10 +46,10 @@ public class MemberServiceTest {
 
     @Test
     void findAllUsersTest() {
-        memberService.signup(new SignupRequest("user1@gmail.com", "password", "user1"));
-        memberService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
-        memberService.signup(new SignupRequest("user3@gmail.com", "password", "user3"));
-        List<MemberResponse> memberResponses = memberService.findAllUsers();
+        memberApplicationService.signup(new SignupRequest("user1@gmail.com", "password", "user1"));
+        memberApplicationService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
+        memberApplicationService.signup(new SignupRequest("user3@gmail.com", "password", "user3"));
+        List<MemberResponse> memberResponses = memberApplicationService.findAllUsers();
         assertThat(memberResponses.size()).isEqualTo(3);
     }
 }

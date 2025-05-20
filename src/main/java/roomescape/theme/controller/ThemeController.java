@@ -14,7 +14,7 @@ import roomescape.auth.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.ThemeDomainService;
 
 @RestController
 @RequestMapping("/themes")
@@ -23,20 +23,20 @@ public class ThemeController {
     private static final int POPULAR_THEMES_DAYS = 7;
     private static final int POPULAR_THEMES_LIMIT = 10;
 
-    private final ThemeService themeService;
+    private final ThemeDomainService themeDomainService;
 
-    public ThemeController(final ThemeService themeService) {
-        this.themeService = themeService;
+    public ThemeController(final ThemeDomainService themeDomainService) {
+        this.themeDomainService = themeDomainService;
     }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getThemes() {
-        return ResponseEntity.ok(themeService.getThemes());
+        return ResponseEntity.ok(themeDomainService.getThemes());
     }
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
-        return ResponseEntity.ok(themeService.getPopularThemes(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
+        return ResponseEntity.ok(themeDomainService.getPopularThemes(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -44,7 +44,7 @@ public class ThemeController {
     public ResponseEntity<ThemeResponse> createTheme(
             @RequestBody ThemeCreateRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(themeService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(themeDomainService.create(request));
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -52,7 +52,7 @@ public class ThemeController {
     public ResponseEntity<Void> deleteTheme(
             @PathVariable("id") Long id
     ) {
-        themeService.delete(id);
+        themeDomainService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

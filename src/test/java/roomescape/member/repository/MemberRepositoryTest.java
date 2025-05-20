@@ -8,12 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
+import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.fixture.TestFixture;
 
 @DataJpaTest
 @Import(TestConfig.class)
