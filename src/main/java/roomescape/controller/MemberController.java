@@ -12,15 +12,15 @@ import roomescape.dto.MemberRegisterResponse;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.MyPageReservationResponse;
 import roomescape.service.MemberService;
-import roomescape.service.ReservationServiceV2;
+import roomescape.service.ReservationService;
 
 @Controller
 public class MemberController {
 
     private final MemberService memberService;
-    private final ReservationServiceV2 reservationService;
+    private final ReservationService reservationService;
 
-    public MemberController(final MemberService memberService, ReservationServiceV2 reservationService) {
+    public MemberController(final MemberService memberService, ReservationService reservationService) {
         this.memberService = memberService;
         this.reservationService = reservationService;
     }

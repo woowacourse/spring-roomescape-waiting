@@ -40,10 +40,7 @@ public class ReservationThemeService {
     }
 
     public void removeReservationTheme(final long id) {
-        int deleteCounts = reservationThemeRepository.deleteById(id);
-        if (deleteCounts == DELETE_FAILED_COUNT) {
-            throw new IllegalArgumentException(String.format("[ERROR] 예약테마 %d번은 존재하지 않습니다.", id));
-        }
+        reservationThemeRepository.deleteById(id);
     }
 
     private void validateUniqueThemes(final ReservationTheme reservationTheme) {

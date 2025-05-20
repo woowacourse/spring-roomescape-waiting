@@ -27,10 +27,7 @@ public class ReservationTimeService {
     }
 
     public void removeReservationTime(final long id) {
-        int deleteCounts = reservationTimeRepository.deleteById(id);
-        if (deleteCounts == DELETE_FAILED_COUNT) {
-            throw new IllegalArgumentException(String.format("[ERROR] 예약시간 %d번은 존재하지 않습니다.", id));
-        }
+        reservationTimeRepository.deleteById(id);
     }
 
     public List<ReservationTimeResponse> findReservationTimes() {

@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.AdminReservationRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.service.ReservationServiceV2;
+import roomescape.service.ReservationService;
 
 @RestController
 public class AdminController {
 
-    private final ReservationServiceV2 reservationServiceV2;
+    private final ReservationService reservationServiceV2;
 
-    public AdminController(final ReservationServiceV2 reservationServiceV2) {
+    public AdminController(final ReservationService reservationServiceV2) {
         this.reservationServiceV2 = reservationServiceV2;
     }
 

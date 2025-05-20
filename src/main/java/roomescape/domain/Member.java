@@ -53,4 +53,8 @@ public class Member {
         this.sessionId = sessionId;
         this.role = role;
     }
+
+    public void updateSessionId(final String sessionId) {
+        this.sessionId = sessionId;
+    }
 }

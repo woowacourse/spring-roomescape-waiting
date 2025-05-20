@@ -1,74 +1,66 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class Reservation {
 
-    private final long id;
-    private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final ReservationTheme theme;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    private Long id;
 
-    private Reservation(final long id, final String name, final LocalDate date, final ReservationTime time,
-                        final ReservationTheme theme) {
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Column(nullable = false)
+    private LocalDate date;
+
+    @ManyToOne
+    @JoinColumn(name = "time_id")
+    private ReservationTime time;
+
+    @ManyToOne
+    @JoinColumn(name = "theme_id")
+    private ReservationTheme theme;
+
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, ReservationTheme theme) {
         this.id = id;
-        this.name = name;
+        this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public Reservation(final long id, final String name, final String date, final ReservationTime time,
-                       final ReservationTheme theme) {
-        this(id, name, LocalDate.parse(date), time, theme);
-    }
-
-    public Reservation(final String name, final LocalDate date, final ReservationTime time,
-                       final ReservationTheme theme) {
-        validateFutureDateTime(date, time.getStartAt());
-        this.id = 0L;
-        this.name = name;
+    @Builder
+    public Reservation(Member member, LocalDate date, ReservationTime time, ReservationTheme theme) {
+        validateLocalDate(date, time);
+        this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public Reservation toEntity(long id) {
-        return new Reservation(id, name, date, time, theme);
-    }
-
-    public boolean isDuplicateReservation(Reservation reservation) {
-        return this.date.equals(reservation.date) && this.time.isSameTime(reservation.time);
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public ReservationTheme getTheme() {
-        return theme;
-    }
-
-    private void validateFutureDateTime(final LocalDate date, final LocalTime time) {
-        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
+    private void validateLocalDate(final LocalDate date, final ReservationTime time) {
         final LocalDateTime now = LocalDateTime.now();
-        if ( reservationDateTime.isBefore(now) || reservationDateTime.isEqual(now)) {
-            throw new IllegalArgumentException("[ERROR] 이전 시각으로 예약할 수 없습니다.");
+        final LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
+        if (dateTime.isBefore(now) || dateTime.isEqual(now)) {
+            throw new IllegalArgumentException("[ERROR] 예약시간은 과거일 수 없습니다.");
         }
     }
+
 }

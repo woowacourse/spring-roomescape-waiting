@@ -15,27 +15,6 @@ INSERT INTO reservation_time (start_at)
 VALUES ('15:40'),
        ('16:30'),
        ('17:50');
-INSERT INTO reservation (name, date, time_id, theme_id)
-VALUES ('김민준', '2025-04-30', 1, 8),
-       ('이서연', '2025-04-30', 2, 3),
-       ('박지후', '2025-04-30', 3, 11),
-       ('최예린', '2025-04-30', 1, 5),
-       ('정우진', '2025-04-30', 2, 1),
-       ('한수아', '2025-04-30', 3, 12),
-       ('윤도현', '2025-04-30', 1, 6),
-       ('장하윤', '2025-04-30', 2, 9),
-       ('서지호', '2025-04-30', 3, 2),
-       ('배예준', '2025-04-30', 1, 10),
-       ('임하람', '2025-04-30', 2, 4),
-       ('권지민', '2025-04-30', 3, 7),
-       ('조유진', '2025-04-30', 1, 2),
-       ('백승현', '2025-04-30', 2, 12),
-       ('노하은', '2025-04-30', 3, 6),
-       ('하준서', '2025-04-30', 1, 3),
-       ('문다연', '2025-04-30', 2, 5),
-       ('송지후', '2025-04-30', 3, 8),
-       ('남시우', '2025-04-30', 1, 11),
-       ('오예린', '2025-04-30', 2, 1);
 
 INSERT INTO member (email, password, name, role, session_id)
 VALUES ('admin@email.com', 'MTIzNA==', '어드민', 'ADMIN', NULL),
@@ -43,7 +22,7 @@ VALUES ('admin@email.com', 'MTIzNA==', '어드민', 'ADMIN', NULL),
        ('phk1148@naver.com', 'MTIzNA==', '호떡', 'USER', NULL),
        ('phk1158@naver.com', 'MTIzNA==', '한스', 'USER', NULL);
 
-INSERT INTO reservation_v2 (member_id, date, time_id, theme_id)
+INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, '2025-05-07', 1, 8),
     (3, '2025-05-06', 3, 6),
     (4, '2025-05-05', 1, 7),

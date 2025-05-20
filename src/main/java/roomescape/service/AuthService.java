@@ -1,6 +1,8 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.util.Base64;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.dto.LoginRequest;
@@ -8,6 +10,7 @@ import roomescape.repository.MemberRepository;
 
 
 @Service
+@Transactional
 public class AuthService {
 
     private final MemberRepository memberRepository;
@@ -26,7 +29,10 @@ public class AuthService {
     }
 
     public void updateSessionId(final Member member, final String sessionId) {
-        memberRepository.updateSessionId(member.getId(), sessionId);
+        final Member foundMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 회원을 찾을 수 없습니다."));
+        foundMember.updateSessionId(sessionId);
+        memberRepository.save(foundMember);
     }
 
     private String encode(final String rawPassword) {

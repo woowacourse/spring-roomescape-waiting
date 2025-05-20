@@ -14,7 +14,7 @@ public interface ReservationThemeRepository {
 
     ReservationTheme save(final ReservationTheme reservationTheme);
 
-    int deleteById(final long id);
+    void deleteById(final long id);
 
     boolean existsByName(final String name);
 }
