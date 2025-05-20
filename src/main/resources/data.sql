@@ -45,6 +45,7 @@ values ('10:00'),
 insert into reservation (member_id, theme_id, date, reservation_time_id, status)
 values
     -- theme_id = 1 (10개 예약)
+    (1, 1, TIMESTAMPADD(DAY, 1, CURRENT_DATE()), 1, 'RESERVED'),
     (2, 1, TIMESTAMPADD(DAY, 1, CURRENT_DATE()), 1, 'WAITING'),
     (3, 1, TIMESTAMPADD(DAY, 1, CURRENT_DATE()), 1, 'WAITING'),
     (4, 1, TIMESTAMPADD(DAY, 1, CURRENT_DATE()), 1, 'WAITING'),
