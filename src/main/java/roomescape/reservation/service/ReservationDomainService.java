@@ -64,4 +64,8 @@ public class ReservationDomainService {
                                                                                   final Long themeId) {
         return reservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
     }
+
+    public boolean existsByThemeId(final Long themeId) {
+        return reservationRepository.existsByThemeId(themeId);
+    }
 }

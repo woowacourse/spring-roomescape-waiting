@@ -45,10 +45,6 @@ public class ReservationTimeApplicationService {
         return reservationDomainService.findBookedTimesByDateAndThemeId(date, themeId);
     }
 
-    public ReservationTime findReservationTime(final Long reservationTimeId) {
-        return reservationTimeDomainService.findReservationTime(reservationTimeId);
-    }
-
     private void validateIsTimeUnique(final ReservationTimeCreateRequest request) {
         if (reservationTimeDomainService.existsByStartAt(request.startAt())) {
             throw new ReservationTimeAlreadyExistsException("중복된 예약 시간을 생성할 수 없습니다.");

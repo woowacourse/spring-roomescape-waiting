@@ -1,6 +1,5 @@
 package roomescape.reservationtime.service;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -8,7 +7,6 @@ import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
@@ -43,11 +41,6 @@ public class ReservationTimeDomainService {
         validateIsTimeUnique(request);
         ReservationTime newReservationTime = reservationTimeRepository.save(request.toReservationTime());
         return ReservationTimeResponse.from(newReservationTime);
-    }
-
-    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date,
-                                                                               final Long themeId) {
-        return reservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
     }
 
     public ReservationTime findReservationTime(final Long reservationTimeId) {

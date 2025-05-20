@@ -14,7 +14,7 @@ import roomescape.auth.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.service.ThemeDomainService;
+import roomescape.theme.service.ThemeApplicationService;
 
 @RestController
 @RequestMapping("/themes")
@@ -23,20 +23,20 @@ public class ThemeController {
     private static final int POPULAR_THEMES_DAYS = 7;
     private static final int POPULAR_THEMES_LIMIT = 10;
 
-    private final ThemeDomainService themeDomainService;
+    private final ThemeApplicationService themeApplicationService;
 
-    public ThemeController(final ThemeDomainService themeDomainService) {
-        this.themeDomainService = themeDomainService;
+    public ThemeController(final ThemeApplicationService themeApplicationService) {
+        this.themeApplicationService = themeApplicationService;
     }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getThemes() {
-        return ResponseEntity.ok(themeDomainService.getThemes());
+        return ResponseEntity.ok(themeApplicationService.getThemes());
     }
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
-        return ResponseEntity.ok(themeDomainService.getPopularThemes(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
+        return ResponseEntity.ok(themeApplicationService.getPopularThemes(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -44,7 +44,7 @@ public class ThemeController {
     public ResponseEntity<ThemeResponse> createTheme(
             @RequestBody ThemeCreateRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(themeDomainService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(themeApplicationService.create(request));
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -52,7 +52,7 @@ public class ThemeController {
     public ResponseEntity<Void> deleteTheme(
             @PathVariable("id") Long id
     ) {
-        themeDomainService.delete(id);
+        themeApplicationService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

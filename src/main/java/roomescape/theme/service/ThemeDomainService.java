@@ -25,10 +25,8 @@ public class ThemeDomainService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ThemeResponse> getThemes() {
-        return themeRepository.findAll().stream()
-                .map(ThemeResponse::from)
-                .toList();
+    public List<Theme> getThemes() {
+        return themeRepository.findAll();
     }
 
     public void delete(Long id) {
@@ -58,6 +56,24 @@ public class ThemeDomainService {
 
     public Theme findTheme(final Long request) {
         return themeRepository.findById(request)
+                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
+    }
+
+    public void deleteById(final Long id) {
+        themeRepository.deleteById(id);
+    }
+
+    public Theme save(final Theme theme) {
+        return themeRepository.save(theme);
+    }
+
+    public Page<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate,
+                                         final PageRequest pageRequest) {
+        return themeRepository.findPopularThemes(startDate, endDate, pageRequest);
+    }
+
+    public Theme findById(final Long themeId) {
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
     }
 }
