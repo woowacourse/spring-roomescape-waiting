@@ -20,16 +20,15 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public Object resolveArgument(
-        MethodParameter parameter,
-        ModelAndViewContainer mavContainer,
-        NativeWebRequest webRequest,
-        WebDataBinderFactory binderFactory
+            MethodParameter parameter,
+            ModelAndViewContainer mavContainer,
+            NativeWebRequest webRequest,
+            WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        System.out.println("request = " + request.getRequestURI());
 
         AuthorizationPayload authorizationPayload =
-            (AuthorizationPayload) request.getAttribute("authorizationPayload");
+                (AuthorizationPayload) request.getAttribute("authorizationPayload");
         if (request.getAttribute("authorizationPayload") == null) {
             throw new UnauthorizedException("로그인 정보가 없습니다.");
         }
