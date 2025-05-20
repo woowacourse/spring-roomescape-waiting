@@ -1,7 +1,7 @@
 INSERT INTO member (name, email, password, role)
 VALUES
-    ('김준영', 'admin@gmail.com', 'qwer!', 'ADMIN'),
-    ('유저',   'user@gmail.com',  'qwer!', 'USER');
+    ('이연후', 'river@email.com', 'qwer!', 'ADMIN'),
+    ('유저', 'user@gmail.com', 'qwer!', 'USER');
 
 INSERT INTO reservation_time (start_at)
 VALUES

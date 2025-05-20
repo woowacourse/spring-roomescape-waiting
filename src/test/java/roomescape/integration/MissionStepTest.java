@@ -27,7 +27,7 @@ import roomescape.reservation.ui.web.ReservationController;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(
         value = "/schema.sql",
-        statements = "insert into member(name, email, password, role) values('레오', 'admin@gmail.com', 'qwer!', 'ADMIN')"
+        statements = "insert into member(name, email, password, role) values('리버', 'river@email.com', 'qwer!', 'ADMIN')"
 )
 public class MissionStepTest {
 
@@ -175,7 +175,7 @@ public class MissionStepTest {
 
     private String getAdminToken() {
         final Map<String, String> loginParams = new HashMap<>();
-        loginParams.put("email", "admin@gmail.com");
+        loginParams.put("email", "river@email.com");
         loginParams.put("password", "qwer!");
 
         return RestAssured.given().log().all()

@@ -68,7 +68,7 @@ public class ReservationServiceIntegrationTest {
         // then
         assertAll(
                 () -> assertThat(result.id()).isNotNull(),
-                () -> assertThat(result.member().name()).isEqualTo("레오"),
+                () -> assertThat(result.member().name()).isEqualTo("리버"),
                 () -> assertThat(result.date()).isEqualTo(date),
                 () -> assertThat(result.time().id()).isNotNull(),
                 () -> assertThat(result.time().startAt()).isEqualTo(LocalTime.of(10, 0))

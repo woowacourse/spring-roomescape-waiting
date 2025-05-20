@@ -52,7 +52,7 @@ public class AdminRoleInterceptorMockMvcTest {
                         .contentType("application/json")
                         .content("""
                                 {
-                                    "email": "admin@gmail.com",
+                                    "email": "river@email.com",
                                     "password": "qwer!"
                                 }
                                 """)
