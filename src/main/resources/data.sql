@@ -1,8 +1,8 @@
-insert into member (email, password, name, role)
-values ('user@user.com', 'user', '유저', 'USER'),
-       ('admin@admin.com', 'admin', '어드민', 'ADMIN'),
-       ('user@user2.com', 'user2', '유저2', 'USER'),
-       ('admin@admin2.com', 'admin2', '어드민2', 'ADMIN');
+insert into member (id, email, password, name, role)
+values (1, 'user@user.com', 'user', '유저', 'USER'),
+       (2, 'admin@admin.com', 'admin', '어드민', 'ADMIN'),
+       (3, 'user@user2.com', 'user2', '유저2', 'USER'),
+       (4, 'admin@admin2.com', 'admin2', '어드민2', 'ADMIN');
 
 insert into theme (name, description, thumbnail)
 values ('theme1', 'description', 'thumbnail'),
@@ -45,6 +45,9 @@ values ('10:00'),
 insert into reservation (member_id, theme_id, date, reservation_time_id, status)
 values
     -- theme_id = 1 (10개 예약)
+    (2, 1, TIMESTAMPADD(DAY, 1, CURRENT_DATE()), 1, 'WAITING'),
+    (3, 1, TIMESTAMPADD(DAY, 1, CURRENT_DATE()), 1, 'WAITING'),
+    (4, 1, TIMESTAMPADD(DAY, 1, CURRENT_DATE()), 1, 'WAITING'),
     (1, 1, TIMESTAMPADD(DAY, -7, CURRENT_DATE()), 1, 'RESERVED'),
     (2, 1, TIMESTAMPADD(DAY, -7, CURRENT_DATE()), 2, 'RESERVED'),
     (3, 1, TIMESTAMPADD(DAY, -7, CURRENT_DATE()), 3, 'RESERVED'),
