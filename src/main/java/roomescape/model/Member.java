@@ -31,6 +31,7 @@ public class Member {
     private String password;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
     public Member(final String name, final String email, final String password, final Role role) {
