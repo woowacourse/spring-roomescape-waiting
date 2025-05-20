@@ -28,7 +28,7 @@ class PasswordTest {
 
     @Test
     @DisplayName("비밀번호가 일치하는 지 알 수 있다.")
-    void matches() {
+    void matchesPassword() {
         var password = new Password("abcd");
 
         var matchPassword = new Password("abcd");

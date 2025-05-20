@@ -21,14 +21,14 @@ import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserName;
 import roomescape.domain.user.UserRole;
-import roomescape.presentation.StubAuthInfoArgumentResolver;
+import roomescape.presentation.StubAuthenticationInfoArgumentResolver;
 
 class UserControllerTest {
 
     private final UserService userService = Mockito.mock(UserService.class);
     private final MockMvc mockMvc = MockMvcBuilders
         .standaloneSetup(new UserController(userService))
-        .setCustomArgumentResolvers(new StubAuthInfoArgumentResolver(new AuthenticationInfo(1L, UserRole.USER)))
+        .setCustomArgumentResolvers(new StubAuthenticationInfoArgumentResolver(new AuthenticationInfo(1L, UserRole.USER)))
         .build();
 
     @Test

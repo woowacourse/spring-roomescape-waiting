@@ -53,12 +53,12 @@ class ThemeControllerTest {
     @Test
     @DisplayName("방 테마 조회 요청시, 존재하는 모든 방 테마와 OK를 응답한다.")
     void getAllThemes() throws Exception {
-        var expectedList = List.of(anyThemeWithId(), anyThemeWithId(), anyThemeWithId());
-        Mockito.when(themeService.findAllThemes()).thenReturn(expectedList);
+        var expectedThemes = List.of(anyThemeWithId(), anyThemeWithId(), anyThemeWithId());
+        Mockito.when(themeService.findAllThemes()).thenReturn(expectedThemes);
 
         mockMvc.perform(get("/themes"))
             .andExpect(jsonPath("$..['id','name','description','thumbnail']").exists())
-            .andExpect(jsonPath("$", hasSize(expectedList.size())))
+            .andExpect(jsonPath("$", hasSize(expectedThemes.size())))
             .andExpect(status().isOk());
     }
 

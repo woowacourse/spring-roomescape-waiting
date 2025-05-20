@@ -16,7 +16,7 @@ class ThemeServiceTest {
     private ThemeService service;
 
     @Test
-    @DisplayName("테마를 추가할 수 있다.")
+    @DisplayName("테마를 추가한다.")
     void register() {
         // given
         var name = "포포는 힘들다";
@@ -32,7 +32,7 @@ class ThemeServiceTest {
     }
 
     @Test
-    @DisplayName("테마를 삭제할 수 있다.")
+    @DisplayName("테마를 삭제한다.")
     void removeById() {
         // given
         var name = "포포는 힘들다";

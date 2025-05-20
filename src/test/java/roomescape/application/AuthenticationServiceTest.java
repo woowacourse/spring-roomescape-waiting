@@ -37,7 +37,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    @DisplayName("올바른 이메일과 비밀번호로 토큰을 발행할 수 있다.")
+    @DisplayName("올바른 이메일과 비밀번호로 토큰을 발행한다.")
     void issueToken() {
         // given
         var email = "razel@email.com";
@@ -51,7 +51,6 @@ class AuthenticationServiceTest {
     @Test
     @DisplayName("토큰 발행 시 이메일로 유저를 못 찾으면 예외가 발생한다.")
     void issueTokenWithWrongEmail() {
-        // when & then
         var wrongEmail = "xxxx@email.com";
         var password = "password";
         assertThatThrownBy(() -> service.issueToken(wrongEmail, password))
@@ -61,7 +60,6 @@ class AuthenticationServiceTest {
     @Test
     @DisplayName("토큰 발행 시 비밀번호가 틀리면 예외가 발생한다.")
     void issueTokenWithWrongPassword() {
-        // when & then
         var email = "poopo@email.com";
         var wrongPassword = "xxxx";
         assertThatThrownBy(() -> service.issueToken(email, wrongPassword))

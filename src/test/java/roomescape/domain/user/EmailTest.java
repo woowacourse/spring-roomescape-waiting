@@ -12,7 +12,7 @@ class EmailTest {
     @ParameterizedTest
     @DisplayName("이메일 형식이 맞지 않으면 예외가 발생한다.")
     @ValueSource(strings = {"abc@email", "abc@email.", "abc@.com", "abc@.", "@email.com", "@email"})
-    void emailFormatException(final String invalidEmail) {
+    void emailFormatShouldValid(final String invalidEmail) {
         assertThatThrownBy(() -> new Email(invalidEmail)).isInstanceOf(InvalidInputException.class);
     }
 }

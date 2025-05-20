@@ -21,7 +21,7 @@ class UserServiceTest {
     private TestRepositoryHelper repositoryHelper;
 
     @Test
-    @DisplayName("사용자를 추가할 수 있다.")
+    @DisplayName("사용자를 추가한다.")
     void registerUser() {
         // given
         var email = "user@email.com";
@@ -37,12 +37,13 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("사용자의 예약을 조회할 수 있다.")
+    @DisplayName("사용자의 예약을 조회한다.")
     void getReservations() {
         // given
         var savedTimeSlot = repositoryHelper.saveAnyTimeSlot();
         var savedTheme = repositoryHelper.saveAnyTheme();
         var user = service.register("popo@email.com", "pw", "popo");
+
         var savedReservation = repositoryHelper.saveReservation(new Reservation(user, tomorrow(), savedTimeSlot, savedTheme));
         repositoryHelper.flushAndClear();
 

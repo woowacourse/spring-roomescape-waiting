@@ -24,14 +24,14 @@ import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.user.UserRole;
 import roomescape.exception.NotFoundException;
 import roomescape.presentation.GlobalExceptionHandler;
-import roomescape.presentation.StubAuthInfoArgumentResolver;
+import roomescape.presentation.StubAuthenticationInfoArgumentResolver;
 
 class ReservationControllerTest {
 
     private final ReservationService reservationService = Mockito.mock(ReservationService.class);
     private final MockMvc mockMvc = MockMvcBuilders
         .standaloneSetup(new ReservationController(reservationService))
-        .setCustomArgumentResolvers(new StubAuthInfoArgumentResolver(new AuthenticationInfo(99L, UserRole.USER)))
+        .setCustomArgumentResolvers(new StubAuthenticationInfoArgumentResolver(new AuthenticationInfo(99L, UserRole.USER)))
         .setControllerAdvice(new GlobalExceptionHandler())
         .build();
 
@@ -57,12 +57,12 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 조회 요청시, 조건에 맞는 모든 예약과 OK를 응답한다.")
     void getAllReservations() throws Exception {
-        var expectedList = List.of(anyReservationWithId(), anyReservationWithId(), anyReservationWithId());
-        Mockito.when(reservationService.findAllReservations(any())).thenReturn(expectedList);
+        var expectedReservations = List.of(anyReservationWithId(), anyReservationWithId(), anyReservationWithId());
+        Mockito.when(reservationService.findAllReservations(any())).thenReturn(expectedReservations);
 
         mockMvc.perform(get("/reservations"))
             .andExpect(jsonPath("$..['id','user','date','time','theme']").exists())
-            .andExpect(jsonPath("$", hasSize(expectedList.size())))
+            .andExpect(jsonPath("$", hasSize(expectedReservations.size())))
             .andExpect(status().isOk());
     }
 

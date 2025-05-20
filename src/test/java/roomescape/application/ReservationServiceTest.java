@@ -45,7 +45,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약을 추가할 수 있다.")
+    @DisplayName("예약을 추가한다.")
     void reserve() {
         var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
@@ -54,7 +54,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약을 삭제할 수 있다.")
+    @DisplayName("예약을 삭제한다.")
     void deleteReservation() {
         // given
         var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
@@ -68,7 +68,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("검색 필터로 예약을 조회할 수 있다.")
+    @DisplayName("검색 필터로 예약을 조회한다.")
     void findAllReservationsWithFilter() {
         // given
         var afterOneDay = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
@@ -80,6 +80,7 @@ class ReservationServiceTest {
         var fromToday_toTomorrow = new ReservationSearchFilter(theme.id(), user.id(), today(), tomorrow());
         var fromTomorrow_toThreeDays = new ReservationSearchFilter(theme.id(), user.id(), tomorrow(), afterThreeDay.dateTime().date());
 
+        // then
         assertAll(
                 () -> assertThat(service.findAllReservations(fromYesterday_toToday)).isEmpty(),
                 () -> assertThat(service.findAllReservations(fromToday_toTomorrow)).containsOnly(afterOneDay),

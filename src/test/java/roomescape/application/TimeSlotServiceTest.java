@@ -25,7 +25,7 @@ class TimeSlotServiceTest {
     private TestRepositoryHelper repositoryHelper;
 
     @Test
-    @DisplayName("예약 시간을 추가할 수 있다.")
+    @DisplayName("예약 시간을 추가한다.")
     void registerTimeSlot() {
         // given
         var startAt = LocalTime.of(11, 0);
@@ -39,7 +39,7 @@ class TimeSlotServiceTest {
     }
 
     @Test
-    @DisplayName("예약 시간을 삭제할 수 있다.")
+    @DisplayName("예약 시간을 삭제한다.")
     void deleteTimeSlot() {
         // given
         var startAt = LocalTime.of(11, 0);
@@ -60,6 +60,7 @@ class TimeSlotServiceTest {
         var user = repositoryHelper.saveAnyUser();
         var theme = repositoryHelper.saveAnyTheme();
         var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
+
         var reservationWithTheTimeSlot = new Reservation(user, DateUtils.tomorrow(), timeSlotToBeRemoved, theme);
         repositoryHelper.saveReservation(reservationWithTheTimeSlot);
 

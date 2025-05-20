@@ -12,10 +12,12 @@ class TimeSlotTest {
     @DisplayName("타임 슬롯이 주어진 시간보다 이전인지 확인한다.")
     void isTimeBefore() {
         // given
-        TimeSlot timeSlot = new TimeSlot(1L, LocalTime.of(10, 0));
+        var _10_00 = LocalTime.of(10, 0);
+        var timeSlot = new TimeSlot(1L, _10_00);
 
         // when
-        boolean isBefore = timeSlot.isTimeBefore(LocalTime.of(11, 0));
+        var _11_00 = LocalTime.of(11, 0);
+        var isBefore = timeSlot.isTimeBefore(_11_00);
 
         // then
         assertThat(isBefore).isTrue();

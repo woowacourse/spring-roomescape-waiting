@@ -16,8 +16,13 @@ class JwtTokenHandlerTest {
     @Test
     @DisplayName("인증 정보로부터 토큰을 생성한다.")
     void createToken() {
+        // given
         var authenticationInfo = new AuthenticationInfo(1L, UserRole.ADMIN);
+
+        // when
         var token = tokenProvider.createToken(authenticationInfo);
+
+        // then
         assertThat(token).isNotNull();
     }
 
@@ -43,12 +48,12 @@ class JwtTokenHandlerTest {
         var token = tokenProvider.createToken(authenticationInfo);
 
         // when
-        AuthenticationInfo extracted = tokenProvider.extractAuthenticationInfo(token);
+        var extractedAuthInfo = tokenProvider.extractAuthenticationInfo(token);
 
         // then
         assertAll(
-                () -> assertThat(extracted.id()).isEqualTo(1L),
-                () -> assertThat(extracted.role()).isEqualTo(UserRole.ADMIN)
+                () -> assertThat(extractedAuthInfo.id()).isEqualTo(1L),
+                () -> assertThat(extractedAuthInfo.role()).isEqualTo(UserRole.ADMIN)
         );
     }
 
@@ -60,7 +65,7 @@ class JwtTokenHandlerTest {
         var token = tokenProvider.createToken(authenticationInfo);
 
         // when
-        boolean isValidToken = tokenProvider.isValidToken(token);
+        var isValidToken = tokenProvider.isValidToken(token);
 
         // then
         assertThat(isValidToken).isTrue();
@@ -68,14 +73,14 @@ class JwtTokenHandlerTest {
 
     @Test
     @DisplayName("유효하지 않은 토큰에 대한 유효성 여부를 검사한다.")
-    void isValidToken2() {
+    void isValidTokenWithInvalidToken() {
         // given
         var authenticationInfo = new AuthenticationInfo(1L, UserRole.ADMIN);
         var token = tokenProvider.createToken(authenticationInfo);
         var forgedToken = token.substring(0, token.length() - 1);
 
         // when
-        boolean isValidToken = tokenProvider.isValidToken(forgedToken);
+        var isValidToken = tokenProvider.isValidToken(forgedToken);
 
         // then
         assertThat(isValidToken).isFalse();

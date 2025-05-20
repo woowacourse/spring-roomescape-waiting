@@ -7,11 +7,11 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.domain.auth.AuthenticationInfo;
 
-public class StubAuthInfoArgumentResolver implements HandlerMethodArgumentResolver {
+public class StubAuthenticationInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthenticationInfo stub;
 
-    public StubAuthInfoArgumentResolver(final AuthenticationInfo stub) {
+    public StubAuthenticationInfoArgumentResolver(final AuthenticationInfo stub) {
         this.stub = stub;
     }
 

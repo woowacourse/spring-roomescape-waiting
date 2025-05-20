@@ -34,6 +34,7 @@ class CheckAdminInterceptorTest {
         request.setCookies(tokenCookie);
         boolean actual = interceptor.preHandle(request, response, new TestController());
 
+        // then
         assertThat(actual).isTrue();
     }
 
@@ -49,6 +50,7 @@ class CheckAdminInterceptorTest {
         request.setCookies(tokenCookie);
         boolean actual = interceptor.preHandle(request, response, new TestController());
 
+        // then
         assertThat(actual).isFalse();
     }
 
@@ -73,6 +75,7 @@ class CheckAdminInterceptorTest {
         request.setCookies(forgedTokenCookie);
         boolean actual = interceptor.preHandle(request, response, new TestController());
 
+        // then
         assertThat(actual).isFalse();
     }
 
