@@ -22,10 +22,12 @@ import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.repository.WaitingRepository;
 import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.reservation.presentation.dto.WaitingRequest;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -33,6 +35,8 @@ import roomescape.reservation.presentation.dto.ReservationResponse;
 class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private WaitingService waitingService;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -136,10 +140,18 @@ class ReservationServiceTest {
         );
         reservationService.createAdminReservation(adminReservationRequest);
 
+        WaitingRequest waitingRequest = new WaitingRequest(
+                LocalDate.of(2025, 8, 5),
+                theme.getId(),
+                reservationTime.getId()
+        );
+
+        waitingService.createWaiting(waitingRequest, 2L);
+
         // when - then
         assertAll(
                 () -> assertThat(reservationService.getUserReservations(1L).size()).isEqualTo(0),
-                () -> assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(1)
+                () -> assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(2)
         );
     }
 
@@ -188,6 +200,16 @@ class ReservationServiceTest {
                     waitingRepository, reservationRepository, reservationTimeRepository, themeRepository,
                     memberRepository
             );
+        }
+
+        @Bean
+        public WaitingService waitingService(
+                ReservationTimeRepository reservationTimeRepository,
+                ThemeRepository themeRepository,
+                MemberRepository memberRepository,
+                WaitingRepository waitingRepository
+        ) {
+            return new WaitingService(waitingRepository, reservationTimeRepository, themeRepository, memberRepository);
         }
     }
 }

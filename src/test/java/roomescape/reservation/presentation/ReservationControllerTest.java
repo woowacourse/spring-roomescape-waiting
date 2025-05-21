@@ -236,6 +236,8 @@ class ReservationControllerTest {
         reservationFixture.createReservation(LocalDate.of(2025, 8, 5), 1L, 1L, adminCookies);
         reservationFixture.createReservation(LocalDate.of(2025, 8, 12), 1L, 1L, userCookies);
 
+        reservationFixture.createWaiting(LocalDate.of(2025, 8, 12), 1L, 1L, adminCookies);
+
         // when - then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -243,6 +245,6 @@ class ReservationControllerTest {
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 }
