@@ -1,6 +1,6 @@
 INSERT INTO MEMBER (NAME, ROLE, EMAIL, PASSWORD)
 VALUES ('admin', 'ADMIN', 'admin@email.com', 'Admin123!@#'),
-       ('제프리', 'USER', 'jeffrey@email.com', 'jeffrey123!@#');
+       ('제프리', 'USER', 'jeffrey@email.com', 'Jeffrey123!@#');
 
 INSERT INTO RESERVATION_TIME(START_AT)
 values ('12:30'),
