@@ -39,16 +39,6 @@ public class ThemeDomainService {
         return themeRepository.save(request.toTheme());
     }
 
-    public Page<Theme> getPopularThemes(int days, int limit) {
-        LocalDate endDate = LocalDate.now().minusDays(1);
-        LocalDate startDate = endDate.minusDays(days);
-        return themeRepository.findPopularThemes(
-                startDate,
-                endDate,
-                PageRequest.of(0, limit)
-        );
-    }
-
     public Theme findTheme(final Long request) {
         return themeRepository.findById(request)
                 .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
