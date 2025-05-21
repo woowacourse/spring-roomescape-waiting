@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,28 +14,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
+import roomescape.dto.query.WaitingWithRank;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.entity.Reservation;
 import roomescape.global.Role;
+import roomescape.service.ReservationFacade;
 import roomescape.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationFacade reservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationFacade reservationService) {
         this.reservationService = reservationService;
     }
 
     @GetMapping
     @CheckRole(Role.ADMIN)
     public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<Reservation> reservations = reservationService.findAll();
+        List<Reservation> reservations = reservationService.findAllReservation();
         List<ReservationResponse> responses = reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -46,9 +49,21 @@ public class ReservationController {
     @CheckRole({Role.USER, Role.ADMIN})
     public ResponseEntity<List<MyReservationResponse>> getMyReservation(LoginMemberRequest loginMemberRequest) {
         List<Reservation> reservations = reservationService.findAllReservationByMember(loginMemberRequest.id());
-        List<MyReservationResponse> responses = reservations.stream()
-                .map(MyReservationResponse::from).toList();
-        return ResponseEntity.ok(responses);
+
+        List<WaitingWithRank> allWaitingWithRank = reservationService.findALlWaitingWithRank(loginMemberRequest.id());
+
+        List<MyReservationResponse> reservationResponses = reservations.stream()
+                .map(MyReservationResponse::from)
+                .toList();
+
+        List<MyReservationResponse> waitingResponses = allWaitingWithRank.stream()
+                .map(MyReservationResponse::from)
+                .toList();
+
+        List<MyReservationResponse> combinedResponses = new ArrayList<>(reservationResponses);
+        combinedResponses.addAll(waitingResponses);
+
+        return ResponseEntity.ok(combinedResponses);
     }
 
     @PostMapping
