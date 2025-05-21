@@ -5,7 +5,7 @@ import java.util.List;
 import roomescape.domain.ReservationTime;
 
 public record TimeServiceResponse(
-        Long id,
+        long id,
         LocalTime startAt
 ) {
 

@@ -6,7 +6,7 @@ import java.util.List;
 import roomescape.application.dto.TimeServiceResponse;
 
 public record TimeResponse(
-        Long id,
+        long id,
         @JsonFormat(pattern = "HH:mm")
         LocalTime startAt
 ) {

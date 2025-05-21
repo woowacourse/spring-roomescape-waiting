@@ -3,7 +3,7 @@ package roomescape.domain.repository.dto;
 import java.time.LocalTime;
 
 public record TimeDataWithBookingInfo(
-        Long id,
+        long id,
         LocalTime startAt,
         boolean alreadyBooked
 ) {

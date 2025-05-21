@@ -5,7 +5,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Role;
 
 public record MemberServiceResponse(
-        Long id,
+        long id,
         String name,
         String email,
         String password,

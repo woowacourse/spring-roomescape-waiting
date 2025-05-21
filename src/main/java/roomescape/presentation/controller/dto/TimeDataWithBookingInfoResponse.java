@@ -6,7 +6,7 @@ import java.util.List;
 import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
 
 public record TimeDataWithBookingInfoResponse(
-        Long id,
+        long id,
         @JsonFormat(pattern = "HH:mm")
         LocalTime startAt,
         boolean alreadyBooked
