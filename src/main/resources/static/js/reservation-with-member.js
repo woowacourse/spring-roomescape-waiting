@@ -37,6 +37,7 @@ function render(data) {
         row.insertCell(3).textContent = item.date;            // date
         row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
 
+
         const actionCell = row.insertCell(row.cells.length);
         actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
     });
