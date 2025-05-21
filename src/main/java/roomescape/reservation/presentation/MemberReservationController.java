@@ -16,7 +16,7 @@ import roomescape.common.exception.handler.dto.ExceptionResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationFacadeService;
+import roomescape.reservation.application.ReservationFacadeService;
 
 @RestController
 public class MemberReservationController {

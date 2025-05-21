@@ -16,8 +16,8 @@ import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
-import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 
 @DataJpaTest

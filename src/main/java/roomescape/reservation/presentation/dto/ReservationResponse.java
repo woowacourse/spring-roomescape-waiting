@@ -3,7 +3,7 @@ package roomescape.reservation.presentation.dto;
 import java.time.LocalDate;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
+import roomescape.reservation.time.presentation.dto.ReservationTimeResponse;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 public record ReservationResponse(Long id, LocalDate date, ReservationTimeResponse time, ThemeResponse theme, MemberResponse member) {

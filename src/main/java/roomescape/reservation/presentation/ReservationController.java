@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.service.ReservationFacadeService;
+import roomescape.reservation.application.ReservationFacadeService;
 
 @RestController
 public class ReservationController {

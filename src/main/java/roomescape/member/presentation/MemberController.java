@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.presentation.dto.MemberRequest;
 import roomescape.member.presentation.dto.MemberResponse;
-import roomescape.member.service.MemberFacadeService;
+import roomescape.member.application.MemberFacadeService;
 
 @RestController
 public class MemberController {

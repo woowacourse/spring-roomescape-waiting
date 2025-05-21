@@ -2,13 +2,13 @@ package roomescape.auth.login.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.admin.domain.Admin;
-import roomescape.admin.service.AdminQueryService;
+import roomescape.admin.application.AdminQueryService;
 import roomescape.auth.exception.UnauthorizedException;
 import roomescape.auth.login.presentation.dto.LoginRequest;
 import roomescape.auth.token.JwtTokenManager;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
-import roomescape.member.service.MemberQueryService;
+import roomescape.member.application.service.MemberQueryService;
 
 @Service
 public class LoginService {

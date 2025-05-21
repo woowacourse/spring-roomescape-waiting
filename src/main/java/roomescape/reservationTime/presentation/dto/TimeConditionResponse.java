@@ -1,6 +1,0 @@
-package roomescape.reservationTime.presentation.dto;
-
-import java.time.LocalTime;
-
-public record TimeConditionResponse(Long id, LocalTime startAt, boolean alreadyBooked) {
-}
