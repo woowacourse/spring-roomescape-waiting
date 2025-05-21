@@ -41,6 +41,11 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.waiting = waiting;
+        addReservationInTime();
+    }
+
+    private void addReservationInTime() {
+        this.time.addReservation(this);
     }
 
     protected Reservation() {
@@ -72,16 +77,24 @@ public class Reservation {
         return reservationDateTime.isBefore(comparedDateTime);
     }
 
+    public void deleteReservationInTime() {
+        this.time.removeReservation(this);
+    }
+
     public boolean isDuplicated(Reservation other) {
         return this.date.equals(other.date)
-                && this.time.equals(other.time)
-                && this.theme.equals(other.theme);
+                && this.time.compareEqualId(other.time)
+                && this.theme.compareEqualId(other.theme);
     }
 
     public boolean isAlreadyBookedTime(LocalDate date, Long themeId, Long timeId) {
         return this.date.equals(date)
                 && this.theme.getId().equals(themeId)
                 && this.time.getId().equals(timeId);
+    }
+
+    public void setTime(ReservationTime time) {
+        this.time = time;
     }
 
     public Long getId() {

@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 public class ReservationTime {
@@ -55,16 +54,17 @@ public class ReservationTime {
         return reservations;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ReservationTime that)) {
-            return false;
-        }
-        return Objects.equals(id, that.id);
+    protected void addReservation(Reservation reservation) {
+        this.reservations.add(reservation);
+        reservation.setTime(this);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
+    protected void removeReservation(Reservation reservation) {
+        this.reservations.remove(reservation);
+        reservation.setTime(null);
+    }
+
+    public boolean compareEqualId(ReservationTime time) {
+        return this.id.equals(time.id);
     }
 }
