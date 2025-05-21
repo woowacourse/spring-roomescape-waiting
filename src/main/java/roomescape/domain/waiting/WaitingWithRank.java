@@ -6,7 +6,7 @@ public class WaitingWithRank {
     private Waiting waiting;
     private Long rank;
 
-    public WaitingWithRank(Waiting waiting, Long rank) {
+    public WaitingWithRank(Waiting waiting, long rank) {
         this.waiting = waiting;
         this.rank = rank;
     }

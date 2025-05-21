@@ -2,16 +2,13 @@ package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
-import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MyReservationResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+
 
 @Service
 public class ReservationQueryService {
@@ -40,8 +37,8 @@ public class ReservationQueryService {
                 .toList();
     }
 
-    public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
-        List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
-        return reservations.stream().map(reservation -> new MyReservationResponseDto(reservation)).toList();
+    public List<MyReservationResponseDto> findMyReservations(long memberId) {
+        List<Reservation> reservations = reservationRepository.findReservationsByMemberId(memberId);
+        return reservations.stream().map(MyReservationResponseDto::new).toList();
     }
 }

@@ -20,15 +20,18 @@ public class WaitingCommandService {
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
     private final JpaMemberRepository memberRepository;
+    private final JpaReservationRepository reservationRepository;
 
     public WaitingCommandService(JpaWaitingRepository waitingRepository,
                                  JpaReservationTimeRepository reservationTimeRepository,
                                  JpaThemeRepository themeRepository,
-                                 JpaMemberRepository memberRepository) {
+                                 JpaMemberRepository memberRepository,
+                                 JpaReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public WaitingResponseDto registerWaiting(WaitingCreateDto dto) {
@@ -50,6 +53,11 @@ public class WaitingCommandService {
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId, long memberId) {
+        boolean reservationExist = reservationRepository.existsFor(date, timeId, themeId, memberId);
+        if(reservationExist) {
+            throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다.");
+        }
+
         boolean exists = waitingRepository.existsFor(date, timeId, themeId, memberId);
         if (exists) {
             throw new DuplicateContentException("[ERROR] 이미 예약 대기가 존재합니다.");
