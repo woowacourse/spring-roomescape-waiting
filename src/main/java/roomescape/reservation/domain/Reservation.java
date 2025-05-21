@@ -90,17 +90,12 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Reservation that)) {
             return false;
         }
-        Reservation that = (Reservation) o;
-        if (id == null && that.id == null) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
+        return Objects.equals(id, that.id) && Objects.equals(date, that.date)
+            && Objects.equals(time, that.time) && Objects.equals(theme, that.theme)
+            && Objects.equals(member, that.member);
     }
 
     @Override
