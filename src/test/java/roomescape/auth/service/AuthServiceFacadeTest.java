@@ -30,7 +30,7 @@ class AuthServiceFacadeTest {
     void 로그인을_할_수_있다() {
 
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
         LoginRequest loginRequest = new LoginRequest(member.getEmail(), member.getPassword());
 
         when(memberService.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
@@ -46,7 +46,7 @@ class AuthServiceFacadeTest {
     void 멤버가_존재하는지_확인할_수_있다() {
 
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
         when(memberService.existsByName(member.getName())).thenReturn(true);
 
         // when & then

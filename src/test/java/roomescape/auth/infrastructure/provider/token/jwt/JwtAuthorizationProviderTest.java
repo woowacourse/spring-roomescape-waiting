@@ -20,7 +20,7 @@ class JwtAuthorizationProviderTest {
 
     private static final String NAME_KEY = "name";
     private static final String ROLE_KEY = "role";
-    private static final Member USER = MemberFixture.createMember(MemberRole.USER);
+    private static final Member USER = MemberFixture.create(MemberRole.USER);
 
     @Autowired
     private JwtAuthorizationProvider jwtAuthorizationProvider;

@@ -9,7 +9,7 @@ import roomescape.member.domain.MemberRole;
 public class MemberFixture {
     private static final AtomicLong identifier = new AtomicLong(1L);
 
-    public static Member createMember(MemberRole role) {
+    public static Member create(MemberRole role) {
         long id = identifier.getAndIncrement();
         return new Member(
             id,
@@ -20,7 +20,7 @@ public class MemberFixture {
         );
     }
 
-    public static Member createMemberWithoutId(MemberRole role) {
+    public static Member createWithoutId(MemberRole role) {
         long id = identifier.getAndIncrement();
         return new Member(
             "testUser" + id,
@@ -32,7 +32,7 @@ public class MemberFixture {
 
     public static List<Member> createMembers(int count, MemberRole role) {
         return IntStream.range(0, count)
-            .mapToObj(i -> createMember(role))
+            .mapToObj(i -> create(role))
             .toList();
     }
 }

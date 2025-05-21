@@ -30,7 +30,7 @@ class MemberServiceTest {
     void 멤버를__추가할_수_있다() {
 
         // given
-        Member member = MemberFixture.createMemberWithoutId(MemberRole.USER);
+        Member member = MemberFixture.createWithoutId(MemberRole.USER);
         MemberSignUpRequest signUpRequest = new MemberSignUpRequest(
             member.getName(),
             member.getEmail(),
@@ -49,7 +49,7 @@ class MemberServiceTest {
     void id를_통해_존재하는_멤버를_찾는다() {
 
         // given
-        Member member = MemberFixture.createMemberWithoutId(MemberRole.USER);
+        Member member = MemberFixture.createWithoutId(MemberRole.USER);
         memberRepository.save(member);
 
         // when
@@ -63,7 +63,7 @@ class MemberServiceTest {
     void principal을_통해_존재하는_멤버를_찾는다() {
 
         // given
-        Member member = MemberFixture.createMemberWithoutId(MemberRole.USER);
+        Member member = MemberFixture.createWithoutId(MemberRole.USER);
         memberRepository.save(member);
 
         // when
@@ -77,7 +77,7 @@ class MemberServiceTest {
     void email을_통해_존재하는_멤버를_찾는다() {
 
         // given
-        Member member = MemberFixture.createMemberWithoutId(MemberRole.USER);
+        Member member = MemberFixture.createWithoutId(MemberRole.USER);
         memberRepository.save(member);
 
         // when
@@ -91,7 +91,7 @@ class MemberServiceTest {
     void id를_통해_존재하는_멤버가_존재하는지_확인한다() {
 
         // given
-        Member member = MemberFixture.createMemberWithoutId(MemberRole.USER);
+        Member member = MemberFixture.createWithoutId(MemberRole.USER);
         memberRepository.save(member);
 
         // when
@@ -105,8 +105,8 @@ class MemberServiceTest {
     void 모든_멤버의_이름을_조회한다() {
 
         // given
-        Member member1 = MemberFixture.createMemberWithoutId(MemberRole.USER);
-        Member member2 = MemberFixture.createMemberWithoutId(MemberRole.USER);
+        Member member1 = MemberFixture.createWithoutId(MemberRole.USER);
+        Member member2 = MemberFixture.createWithoutId(MemberRole.USER);
         memberRepository.save(member1);
         memberRepository.save(member2);
 
@@ -126,7 +126,7 @@ class MemberServiceTest {
     void 이름을_통해_멤버가_존재하는지_확인한다() {
 
         // given
-        Member member = MemberFixture.createMemberWithoutId(MemberRole.USER);
+        Member member = MemberFixture.createWithoutId(MemberRole.USER);
         memberRepository.save(member);
 
         // when

@@ -31,7 +31,7 @@ class MemberTest {
     void 같은_이메일을_가지는지_확인한다() {
 
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
 
         // when
         boolean result = member.hasSameEmail(member.getEmail());
@@ -44,7 +44,7 @@ class MemberTest {
     void 같은_비밀번호를_가지는지_확인한다() {
 
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
 
         // when
         boolean result = member.hasSamePassword(member.getPassword());

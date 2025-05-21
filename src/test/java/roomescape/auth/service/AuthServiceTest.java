@@ -21,7 +21,7 @@ class AuthServiceTest {
     void 로그인을_할_수_있다() {
 
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
         LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
 
         // when
