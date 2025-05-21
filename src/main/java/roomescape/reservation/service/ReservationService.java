@@ -7,17 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.web.exception.NotAuthorizationException;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.member.domain.Member;
-import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.service.ThemeService;
-import roomescape.time.service.ReservationTimeService;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.service.WaitingManager;
 
@@ -26,10 +19,8 @@ import roomescape.waiting.service.WaitingManager;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeService reservationTimeService;
-    private final ThemeService themeService;
-    private final MemberService memberService;
     private final WaitingManager waitingManager;
+    private final ReservationManager reservationManager;
 
     @Transactional
     public ReservationResponse reserve(ReserveCommand reserveCommand) {
@@ -38,24 +29,10 @@ public class ReservationService {
 
         isAlreadyReservedTime(date, timeId);
 
-        Reservation reserved = reservationFrom(reserveCommand, date, timeId);
+        Reservation reserved = reservationManager.getReservation(reserveCommand);
         Reservation saved = reservationRepository.save(reserved);
 
         return ReservationResponse.from(saved);
-    }
-
-    private Reservation reservationFrom(ReserveCommand reserveCommand, LocalDate date, Long timeId) {
-        ReservationDateTime reservationDateTime = ReservationDateTime.create(new ReservationDate(date),
-                reservationTimeService.getReservationTime(timeId));
-
-        Theme theme = themeService.getTheme(reserveCommand.themeId());
-        Member reserver = memberService.getMember(reserveCommand.memberId());
-
-        return Reservation.builder()
-                .reservationDateTime(reservationDateTime)
-                .reserver(reserver)
-                .theme(theme)
-                .build();
     }
 
     private void isAlreadyReservedTime(LocalDate date, Long timeId) {
