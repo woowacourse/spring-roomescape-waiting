@@ -1,10 +1,10 @@
 package roomescape.business.model.entity;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.business.InvalidCreateArgumentException;
-
-import static org.assertj.core.api.Assertions.*;
 
 class ThemeTest {
 

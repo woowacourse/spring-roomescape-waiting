@@ -1,10 +1,9 @@
 package roomescape.business.model.repository;
 
-import roomescape.business.model.entity.User;
-import roomescape.business.model.vo.Id;
-
 import java.util.List;
 import java.util.Optional;
+import roomescape.business.model.entity.User;
+import roomescape.business.model.vo.Id;
 
 public interface UserRepository {
 

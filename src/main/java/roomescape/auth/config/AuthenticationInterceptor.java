@@ -15,20 +15,23 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     private final JwtUtil jwtUtil;
 
-    @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {
-        if (isAuthenticationNotRequired(handler)) return true;
-        AuthToken authToken = AuthToken.extractFrom(request);
-        LoginInfo loginInfo = jwtUtil.validateAndResolveToken(authToken);
-        request.setAttribute("authorization", loginInfo);
-        return true;
-    }
-
     private static boolean isAuthenticationNotRequired(final Object handler) {
         if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
         }
         AuthRequired authRequired = handlerMethod.getMethodAnnotation(AuthRequired.class);
         return authRequired == null;
+    }
+
+    @Override
+    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response,
+                             final Object handler) {
+        if (isAuthenticationNotRequired(handler)) {
+            return true;
+        }
+        AuthToken authToken = AuthToken.extractFrom(request);
+        LoginInfo loginInfo = jwtUtil.validateAndResolveToken(authToken);
+        request.setAttribute("authorization", loginInfo);
+        return true;
     }
 }

@@ -1,6 +1,14 @@
 package roomescape.infrastructure;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +26,9 @@ import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.Status;
 import roomescape.test_util.JpaTestUtil;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-
 @DataJpaTest
-@Import({JpaReservationRepository.class, JpaTestUtil.class, JpaReservationTimeRepository.class, JpaThemeRepository.class, JpaUserRepository.class})
+@Import({JpaReservationRepository.class, JpaTestUtil.class, JpaReservationTimeRepository.class,
+        JpaThemeRepository.class, JpaUserRepository.class})
 class ReservationRepositoryTest {
 
     private static final LocalDate DATE1 = LocalDate.now().plusDays(3);
@@ -69,7 +69,8 @@ class ReservationRepositoryTest {
         userRepository.save(user);
 
         // when, then
-        assertThatCode(() -> sut.save(Reservation.create(user, DATE1, time, theme, Status.RESERVED, LocalDateTime.now())))
+        assertThatCode(
+                () -> sut.save(Reservation.create(user, DATE1, time, theme, Status.RESERVED, LocalDateTime.now())))
                 .doesNotThrowAnyException();
     }
 

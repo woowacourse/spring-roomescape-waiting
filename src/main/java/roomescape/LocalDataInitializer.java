@@ -1,6 +1,9 @@
 package roomescape;
 
 import jakarta.annotation.PostConstruct;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,21 +21,17 @@ import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Status;
 import roomescape.business.model.vo.UserRole;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
 @Component
 @Profile("local")
 @RequiredArgsConstructor
 public class LocalDataInitializer {
 
+    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final Logger logger = LoggerFactory.getLogger(LocalDataInitializer.class);
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
-    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @PostConstruct
     public void init() {

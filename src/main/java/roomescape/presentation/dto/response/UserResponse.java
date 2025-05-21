@@ -1,9 +1,8 @@
 package roomescape.presentation.dto.response;
 
-import roomescape.business.dto.UserDto;
-
 import java.util.Comparator;
 import java.util.List;
+import roomescape.business.dto.UserDto;
 
 public record UserResponse(
         String id,

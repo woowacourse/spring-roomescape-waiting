@@ -1,6 +1,9 @@
 package roomescape.infrastructure;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,10 +15,6 @@ import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 import roomescape.business.model.vo.Status;
 import roomescape.presentation.dto.response.ReservationWithAhead;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
 
 public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
 
@@ -66,24 +65,24 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
     @Transactional
     @Modifying
     @Query("""
-      UPDATE Reservation r
-         SET r.status = roomescape.business.model.vo.Status.RESERVED
-       WHERE r.date       = :date
-         AND r.time       = :time
-         AND r.theme      = :theme
-         AND r.status     = roomescape.business.model.vo.Status.WAITING
-         AND r.createdAt  = (
-             SELECT MIN(r2.createdAt)
-               FROM Reservation r2
-              WHERE r2.date    = :date
-                AND r2.time    = :time
-                AND r2.theme   = :theme
-                AND r2.status  = roomescape.business.model.vo.Status.WAITING
-         )
-    """)
+              UPDATE Reservation r
+                 SET r.status = roomescape.business.model.vo.Status.RESERVED
+               WHERE r.date       = :date
+                 AND r.time       = :time
+                 AND r.theme      = :theme
+                 AND r.status     = roomescape.business.model.vo.Status.WAITING
+                 AND r.createdAt  = (
+                     SELECT MIN(r2.createdAt)
+                       FROM Reservation r2
+                      WHERE r2.date    = :date
+                        AND r2.time    = :time
+                        AND r2.theme   = :theme
+                        AND r2.status  = roomescape.business.model.vo.Status.WAITING
+                 )
+            """)
     void updateFirstWaiting(
-            @Param("date")  ReservationDate date,
-            @Param("time")  ReservationTime time,
+            @Param("date") ReservationDate date,
+            @Param("time") ReservationTime time,
             @Param("theme") Theme theme
     );
 }

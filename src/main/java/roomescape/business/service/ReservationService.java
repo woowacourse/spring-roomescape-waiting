@@ -1,6 +1,13 @@
 package roomescape.business.service;
 
-import jakarta.transaction.Transactional;
+import static roomescape.exception.ErrorCode.RESERVATION_DUPLICATED;
+import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
+import static roomescape.exception.ErrorCode.THEME_NOT_EXIST;
+import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.business.dto.ReservationDto;
@@ -18,12 +25,6 @@ import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
 import roomescape.presentation.dto.response.ReservationResponse;
 import roomescape.presentation.dto.response.ReservationWithAhead;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static roomescape.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor

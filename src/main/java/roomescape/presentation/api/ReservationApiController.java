@@ -1,9 +1,18 @@
 package roomescape.presentation.api;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthRequired;
 import roomescape.auth.LoginInfo;
 import roomescape.auth.Role;
@@ -17,10 +26,6 @@ import roomescape.presentation.dto.response.ReservationMineResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
 import roomescape.presentation.dto.response.ReservationWithAhead;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 public class ReservationApiController {
@@ -29,8 +34,10 @@ public class ReservationApiController {
 
     @PostMapping("/reservations")
     @AuthRequired
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationRequest request, LoginInfo loginInfo) {
-        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(), request.themeId(), loginInfo.id(), request.status());
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationRequest request,
+                                                                 LoginInfo loginInfo) {
+        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(),
+                request.themeId(), loginInfo.id(), request.status());
         ReservationResponse response = ReservationResponse.from(reservationDto);
         return ResponseEntity.created(URI.create("/reservations")).body(response);
     }
@@ -38,8 +45,10 @@ public class ReservationApiController {
     @PostMapping("/admin/reservations")
     @AuthRequired
     @Role(UserRole.ADMIN)
-    public ResponseEntity<ReservationResponse> adminCreateReservation(@RequestBody @Valid AdminReservationRequest request) {
-        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(), request.themeId(), request.userId(),
+    public ResponseEntity<ReservationResponse> adminCreateReservation(
+            @RequestBody @Valid AdminReservationRequest request) {
+        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(),
+                request.themeId(), request.userId(),
                 Status.RESERVED);
         ReservationResponse response = ReservationResponse.from(reservationDto);
         return ResponseEntity.created(URI.create("/reservations")).body(response);

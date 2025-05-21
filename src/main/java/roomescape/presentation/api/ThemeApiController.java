@@ -1,6 +1,8 @@
 package roomescape.presentation.api;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,9 +19,6 @@ import roomescape.business.model.vo.UserRole;
 import roomescape.business.service.ThemeService;
 import roomescape.presentation.dto.request.ThemeCreateRequest;
 import roomescape.presentation.dto.response.ThemeResponse;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,7 +44,8 @@ public class ThemeApiController {
 
     @GetMapping("/themes/popular")
     @AuthRequired
-    public ResponseEntity<List<ThemeResponse>> getPopularThemes(@RequestParam(value = "size", defaultValue = "10") int size) {
+    public ResponseEntity<List<ThemeResponse>> getPopularThemes(
+            @RequestParam(value = "size", defaultValue = "10") int size) {
         List<ThemeDto> popularThemeDtos = themeService.getPopular(size);
         List<ThemeResponse> responses = ThemeResponse.from(popularThemeDtos);
         return ResponseEntity.ok(responses);

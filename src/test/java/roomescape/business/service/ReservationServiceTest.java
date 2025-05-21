@@ -1,6 +1,20 @@
 package roomescape.business.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,19 +35,8 @@ import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 import roomescape.business.model.vo.Status;
-import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -209,12 +212,18 @@ class ReservationServiceTest {
         Theme theme2 = Theme.restore("theme-id-2", "Theme Two", "Description Two", "thumbnail2.jpg");
 
         List<Reservation> reservationData = Arrays.asList(
-                Reservation.restore("reservation-id-1", user1, dateFrom, time1, theme1,Status.RESERVED,LocalDateTime.now()),
-                Reservation.restore("reservation-id-2", user2, dateFrom.plusDays(1), time2, theme2,Status.RESERVED,LocalDateTime.now())
+                Reservation.restore("reservation-id-1", user1, dateFrom, time1, theme1, Status.RESERVED,
+                        LocalDateTime.now()),
+                Reservation.restore("reservation-id-2", user2, dateFrom.plusDays(1), time2, theme2, Status.RESERVED,
+                        LocalDateTime.now())
         );
         List<ReservationDto> expectedReservations = Arrays.asList(
-                new ReservationDto(Id.create("reservation-id-1"), UserDto.fromEntity(user1), new ReservationDate(dateFrom), ReservationTimeDto.fromEntity(time1), ThemeDto.fromEntity(theme1), Status.RESERVED),
-                new ReservationDto(Id.create("reservation-id-2"), UserDto.fromEntity(user2), new ReservationDate(dateFrom.plusDays(1)), ReservationTimeDto.fromEntity(time2), ThemeDto.fromEntity(theme2), Status.RESERVED)
+                new ReservationDto(Id.create("reservation-id-1"), UserDto.fromEntity(user1),
+                        new ReservationDate(dateFrom), ReservationTimeDto.fromEntity(time1),
+                        ThemeDto.fromEntity(theme1), Status.RESERVED),
+                new ReservationDto(Id.create("reservation-id-2"), UserDto.fromEntity(user2),
+                        new ReservationDate(dateFrom.plusDays(1)), ReservationTimeDto.fromEntity(time2),
+                        ThemeDto.fromEntity(theme2), Status.RESERVED)
         );
 
         when(reservationRepository.findAllWithFilter(themeId, userId, dateFrom, dateTo))
@@ -237,7 +246,7 @@ class ReservationServiceTest {
                 LocalDate.now().plusDays(5),
                 ReservationTime.create(LocalTime.of(10, 0)),
                 Theme.create("theme", "", ""),
-                Status.RESERVED,LocalDateTime.now()
+                Status.RESERVED, LocalDateTime.now()
         );
 
         // when

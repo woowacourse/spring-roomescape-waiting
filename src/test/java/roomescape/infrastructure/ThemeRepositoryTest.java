@@ -1,5 +1,12 @@
 package roomescape.infrastructure;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +16,6 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.vo.Id;
 import roomescape.test_util.JpaTestUtil;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DataJpaTest
 @Import({JpaThemeRepository.class, JpaTestUtil.class})

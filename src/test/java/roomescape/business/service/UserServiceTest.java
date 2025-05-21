@@ -1,5 +1,15 @@
 package roomescape.business.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,14 +24,6 @@ import roomescape.business.model.vo.UserName;
 import roomescape.business.model.vo.UserRole;
 import roomescape.exception.business.InvalidCreateArgumentException;
 import roomescape.exception.business.NotFoundException;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -71,7 +73,8 @@ class UserServiceTest {
         // given
         String email = "test@example.com";
         User userData = User.restore("user-id", "USER", "Test User", email, "password123");
-        UserDto expectedUser = new UserDto(Id.create("user-id"), UserRole.USER, new UserName("Test User"), new Email(email));
+        UserDto expectedUser = new UserDto(Id.create("user-id"), UserRole.USER, new UserName("Test User"),
+                new Email(email));
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(userData));
 
@@ -105,8 +108,10 @@ class UserServiceTest {
                 User.restore("user-id-2", "USER", "User Two", "user2@example.com", "password2")
         );
         List<UserDto> expectedUsers = Arrays.asList(
-                new UserDto(Id.create("user-id-1"), UserRole.USER, new UserName("User One"), new Email("user1@example.com")),
-                new UserDto(Id.create("user-id-2"), UserRole.USER, new UserName("User Two"), new Email("user2@example.com"))
+                new UserDto(Id.create("user-id-1"), UserRole.USER, new UserName("User One"),
+                        new Email("user1@example.com")),
+                new UserDto(Id.create("user-id-2"), UserRole.USER, new UserName("User Two"),
+                        new Email("user2@example.com"))
         );
 
         when(userRepository.findAll()).thenReturn(userData);

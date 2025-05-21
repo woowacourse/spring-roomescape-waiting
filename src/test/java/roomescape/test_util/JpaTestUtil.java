@@ -1,6 +1,8 @@
 package roomescape.test_util;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import roomescape.business.model.entity.Reservation;
@@ -13,9 +15,6 @@ import roomescape.infrastructure.JpaReservationDao;
 import roomescape.infrastructure.JpaReservationTimeDao;
 import roomescape.infrastructure.JpaThemeDao;
 import roomescape.infrastructure.JpaUserDao;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Component
 public class JpaTestUtil {
