@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.reservation.domain.BookingStatus;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -19,6 +19,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.member
             """)
     List<Reservation> findAllWithAssociations();
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            JOIN FETCH r.member
+            WHERE r.member.id = :memberId
+            """)
+    List<Reservation> findByMemberIdWithAssociations(@Param("memberId") Long memberId);
 
     @Query("""
             SELECT r FROM Reservation r
@@ -39,57 +48,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
               AND (:memberId IS NULL OR r.member.id = :memberId)
               AND (:from IS NULL OR r.date >= :from)
               AND (:to IS NULL OR r.date <= :to)
-              AND (:status IS NULL OR r.bookingStatus = :status)
             """)
     List<Reservation> findByFilteringWithAssociations(
             @Param("themeId") Long themeId,
             @Param("memberId") Long memberId,
             @Param("from") LocalDate from,
-            @Param("to") LocalDate to,
-            @Param("status") BookingStatus status
+            @Param("to") LocalDate to
     );
 
-    @Query("""
-            SELECT r FROM Reservation r
-            JOIN FETCH r.theme
-            JOIN FETCH r.time
-            WHERE r.member.id = :memberId
-            """)
-    List<Reservation> findByMemberIdWithAssociations(@Param("memberId") Long memberId);
+    boolean existsByTime_Id(Long timeId);
 
-    @Query("""
-            SELECT r FROM Reservation r
-            JOIN FETCH r.time
-            JOIN FETCH r.theme
-            JOIN FETCH r.member
-            WHERE r.bookingStatus = :status
-            """)
-    List<Reservation> findByStatusWithAssociations(@Param("status") BookingStatus status);
+    boolean existsByTheme_Id(Long themeId);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 
-    boolean existsByThemeId(Long themeId);
-
-    boolean existsByIdAndMemberId(Long reservationId, Long memberId);
-
-    boolean existsByDateAndThemeAndTimeAndBookingStatus(LocalDate date, Theme theme, ReservationTime time,
-                                                        BookingStatus bookingStatus);
-
-    @Query("""
-              SELECT COUNT(r)
-              FROM Reservation r
-              WHERE r.theme = :theme
-                AND r.date = :date
-                AND r.time = :time
-                AND r.id < :id
-            """)
-    Long countByThemeAndDateAndTimeAndIdLessThan(
-            @Param("theme") Theme theme,
-            @Param("date") LocalDate date,
-            @Param("time") ReservationTime time,
-            @Param("id") Long id
-    );
-
-    boolean existsByDateAndThemeAndTimeAndMemberId(final LocalDate date, final Theme theme, final ReservationTime time,
-                                                   final Long member_id);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 }

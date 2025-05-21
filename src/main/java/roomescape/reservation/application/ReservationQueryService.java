@@ -1,20 +1,21 @@
 package roomescape.reservation.application;
 
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
-import roomescape.reservation.application.dto.MyReservationResponse;
+import roomescape.reservation.application.dto.MyHistoryResponse;
 import roomescape.reservation.application.dto.ReservationResponse;
-import roomescape.reservation.domain.BookingStatus;
+import roomescape.reservation.application.dto.WaitingResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -25,33 +26,37 @@ public class ReservationQueryService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationQueryService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository
-    ) {
+            final ThemeRepository themeRepository,
+            final WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findReservedReservations() {
-        return reservationRepository.findByStatusWithAssociations(BookingStatus.RESERVED)
+        return reservationRepository.findAllWithAssociations()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<ReservationResponse> findWaitingReservations() {
-        return reservationRepository.findByStatusWithAssociations(BookingStatus.WAITING)
+    public List<WaitingResponse> findWaitingReservations() {
+        return waitingRepository.findAllWithAssociations()
                 .stream()
-                .map(ReservationResponse::from)
+                .map(WaitingResponse::from)
                 .toList();
     }
 
-    public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId,
-                                                                               final LocalDate date) {
+    public List<AvailableReservationTimeResponse> findAvailableReservationTime(
+            final Long themeId,
+            final LocalDate date
+    ) {
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("선택한 테마가 존재하지 않습니다."));
         final List<ReservationTime> times = reservationTimeRepository.findAll();
@@ -72,28 +77,30 @@ public class ReservationQueryService {
             final LocalDate start,
             final LocalDate end
     ) {
-        return reservationRepository.findByFilteringWithAssociations(themeId, memberId, start, end,
-                        BookingStatus.RESERVED)
+        return reservationRepository.findByFilteringWithAssociations(themeId, memberId, start, end)
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    public List<MyReservationResponse> findByMemberId(final Long memberId) {
+    public List<MyHistoryResponse> findMyHistory(final Long memberId) {
         final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
-        final Map<Reservation, Long> waitingReservations = new HashMap<>();
-        for (Reservation reservation : reservations) {
-            Long count = reservationRepository.countByThemeAndDateAndTimeAndIdLessThan(
-                    reservation.getTheme(),
-                    reservation.getDate(),
-                    reservation.getTime(),
-                    reservation.getId()
-            );
-            waitingReservations.put(reservation, count);
-        }
-        return reservations.stream()
-                .map(reservation -> MyReservationResponse.from(reservation, waitingReservations.get(reservation)))
-                .toList();
+        final List<Waiting> waitings = waitingRepository.findByMemberIdWithAssociations(memberId);
+        final List<MyHistoryResponse> responses = new ArrayList<>();
+
+        reservations.forEach(r -> responses.add(MyHistoryResponse.ofReservation(r)));
+        waitings.forEach(w -> responses.add(MyHistoryResponse.ofWaiting(w, countsWaiting(w))));
+
+        return responses;
+    }
+
+    private Long countsWaiting(final Waiting waiting) {
+        return waitingRepository.countByThemeAndDateAndTimeAndIdLessThan(
+                waiting.getTheme(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getId()
+        );
     }
 }
 

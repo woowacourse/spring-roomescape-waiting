@@ -13,14 +13,13 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.theme.domain.Theme;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(of = "id")
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +36,7 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public Reservation(
+    public Waiting(
             final Long id,
             final LocalDate date,
             final ReservationTime time,
@@ -51,7 +50,7 @@ public class Reservation {
         this.member = member;
     }
 
-    public Reservation(
+    public Waiting(
             final LocalDate date,
             final ReservationTime time,
             final Theme theme,
@@ -60,14 +59,8 @@ public class Reservation {
         this(null, date, time, theme, member);
     }
 
-    public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
-        final LocalTime startAt = time.getStartAt();
-        return this.theme.equals(theme) &&
-                reservationTime.hasConflict(theme.getDuration(), startAt);
-    }
-
-    public MemberName getName() {
-        return member.getName();
+    public Long getMemberId() {
+        return member.getId();
     }
 
     public String getThemeName() {
@@ -76,10 +69,6 @@ public class Reservation {
 
     public LocalTime getStartAt() {
         return time.getStartAt();
-    }
-
-    public Long getMemberId() {
-        return member.getId();
     }
 
     public Long getThemeId() {

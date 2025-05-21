@@ -18,9 +18,10 @@ import roomescape.reservation.application.ReservationCommandService;
 import roomescape.reservation.application.ReservationQueryService;
 import roomescape.reservation.application.dto.AdminReservationRequest;
 import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.application.dto.WaitingResponse;
 
 @RestController
-@RequestMapping("/admin/reservations")
+@RequestMapping("/admin")
 public class AdminReservationController {
 
     private final ReservationCommandService reservationCommandService;
@@ -34,17 +35,17 @@ public class AdminReservationController {
         this.reservationQueryService = reservationQueryService;
     }
 
-    @GetMapping
+    @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> findAllReserved() {
         return ResponseEntity.ok(reservationQueryService.findReservedReservations());
     }
 
-    @GetMapping("/waiting")
-    public ResponseEntity<List<ReservationResponse>> findAllWaiting() {
+    @GetMapping("/waitings")
+    public ResponseEntity<List<WaitingResponse>> findAllWaiting() {
         return ResponseEntity.ok(reservationQueryService.findWaitingReservations());
     }
 
-    @GetMapping("/search")
+    @GetMapping("/reservations/search")
     public ResponseEntity<List<ReservationResponse>> getFilteredReservations(
             @RequestParam(required = false, name = "themeId") final Long themeId,
             @RequestParam(required = false, name = "memberId") final Long memberId,
@@ -56,7 +57,7 @@ public class AdminReservationController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> add(
             @Valid @RequestBody final AdminReservationRequest request
     ) {
@@ -65,13 +66,20 @@ public class AdminReservationController {
                 .body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
-        reservationCommandService.deleteById(id);
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id) {
+        reservationCommandService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/waiting/{id}")
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") final Long id) {
+        reservationCommandService.deleteWaitingById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/waitings/{id}")
     public ResponseEntity<Void> confirmReservation(@PathVariable("id") final Long id) {
         reservationCommandService.confirmReservation(id);
         return ResponseEntity.ok().build();

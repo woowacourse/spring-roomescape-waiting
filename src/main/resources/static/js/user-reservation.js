@@ -150,7 +150,6 @@ function onReservationButtonClick() {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
-            status: "RESERVED"
         };
 
         fetch('/reservations', {
@@ -195,10 +194,9 @@ function onWaitButtonClick() {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
-            status: "WAITING"
         };
 
-        fetch('/reservations', {
+        fetch('/waitings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

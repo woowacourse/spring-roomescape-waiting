@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    fetch('reservations/mine') // 내 예약 목록 조회 API 호출
+    fetch('/mine') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -42,7 +42,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-    return fetch(`/reservations/${id}`, {
+    return fetch(`/waitings/${id}`, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;

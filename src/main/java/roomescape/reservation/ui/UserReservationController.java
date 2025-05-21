@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.login.application.dto.LoginCheckRequest;
@@ -18,11 +17,12 @@ import roomescape.reservation.application.ReservationCommandService;
 import roomescape.reservation.application.ReservationQueryService;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
-import roomescape.reservation.application.dto.MyReservationResponse;
+import roomescape.reservation.application.dto.MemberWaitingRequest;
+import roomescape.reservation.application.dto.MyHistoryResponse;
 import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.application.dto.WaitingResponse;
 
 @RestController
-@RequestMapping("/reservations")
 public class UserReservationController {
 
     private final ReservationCommandService reservationCommandService;
@@ -37,12 +37,12 @@ public class UserReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> findMyReservations(final LoginCheckRequest request) {
-        List<MyReservationResponse> response = reservationQueryService.findByMemberId(request.id());
+    public ResponseEntity<List<MyHistoryResponse>> findMyHistory(final LoginCheckRequest request) {
+        List<MyHistoryResponse> response = reservationQueryService.findMyHistory(request.id());
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/themes/{themeId}/times")
+    @GetMapping("/reservations/themes/{themeId}/times")
     public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailableReservationTime(
             @PathVariable final Long themeId,
             @RequestParam final LocalDate date
@@ -50,7 +50,7 @@ public class UserReservationController {
         return ResponseEntity.ok(reservationQueryService.findAvailableReservationTime(themeId, date));
     }
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> add(
             @Valid @RequestBody final MemberReservationRequest request,
             final LoginCheckRequest loginCheckRequest
@@ -60,12 +60,22 @@ public class UserReservationController {
         return new ResponseEntity<>(reservationResponse, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(
+    @PostMapping("/waitings")
+    public ResponseEntity<WaitingResponse> add(
+            @Valid @RequestBody final MemberWaitingRequest request,
+            final LoginCheckRequest loginCheckRequest
+    ) {
+        final WaitingResponse waitingResponse = reservationCommandService.addMemberWaiting(request,
+                loginCheckRequest.id());
+        return new ResponseEntity<>(waitingResponse, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(
             @PathVariable("id") final Long id,
             final LoginCheckRequest request
     ) {
-        reservationCommandService.deleteById(id, request.id());
+        reservationCommandService.deleteOwnWaitingById(id, request.id());
         return ResponseEntity.noContent().build();
     }
 }
