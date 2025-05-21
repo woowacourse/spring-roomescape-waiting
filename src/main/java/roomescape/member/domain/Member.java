@@ -6,12 +6,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import java.util.regex.Pattern;
 
 @Entity
-@Table(name = "member")
 public class Member {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
@@ -22,14 +19,10 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     private String name;
 
-    @NotBlank
-//    @Column(unique = true)
     private String email;
 
-    @NotBlank
     private String password;
 
     @Enumerated(value = EnumType.STRING)

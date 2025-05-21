@@ -7,13 +7,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import java.time.LocalDate;
 import java.util.Objects;
+import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.member.domain.Member;
 
 @Entity
 public class Reservation {
@@ -22,11 +20,10 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private LocalDate date;
+
     @ManyToOne
     private Member member;
-
-    @Temporal(TemporalType.DATE)
-    private LocalDate date;
 
     @ManyToOne
     private ReservationTime time;
