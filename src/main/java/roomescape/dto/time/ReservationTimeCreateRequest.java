@@ -7,6 +7,6 @@ import roomescape.domain.ReservationTime;
 public record ReservationTimeCreateRequest(@JsonFormat(pattern = "HH:mm") LocalTime startAt) {
 
     public ReservationTime createWithoutId() {
-        return new ReservationTime(null, startAt);
+        return ReservationTime.createWithoutId(startAt);
     }
 }

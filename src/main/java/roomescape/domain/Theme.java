@@ -5,7 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Table(name= "theme")
 @Entity
 public class Theme {
     @Id
@@ -36,6 +38,10 @@ public class Theme {
     }
 
     public Theme() {
+    }
+
+    public static Theme createWithoutId(String name, String description, String thumbnail) {
+        return new Theme(null, name, description, thumbnail);
     }
 
     private void validateName(String name) {
