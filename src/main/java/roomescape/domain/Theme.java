@@ -16,14 +16,14 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    private Theme() {
-    }
-
     private Theme(Long id, String name, String description, String thumbnail) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    protected Theme() {
     }
 
     public static Theme of(Long id, String name, String description, String thumbnail) {

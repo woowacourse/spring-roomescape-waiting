@@ -27,7 +27,7 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    private ReservationTime() {
+    protected ReservationTime() {
     }
 
     public static ReservationTime of(Long id, LocalTime startAt) {

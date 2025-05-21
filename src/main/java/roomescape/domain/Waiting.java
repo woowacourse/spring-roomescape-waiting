@@ -29,7 +29,7 @@ public class Waiting {
     @OneToOne(mappedBy = "waiting")
     private Reservation reservation;
 
-    private Waiting() {
+    protected Waiting() {
     }
 
     public Waiting(ReservationStatus status) {

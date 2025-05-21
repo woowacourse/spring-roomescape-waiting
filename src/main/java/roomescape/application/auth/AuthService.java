@@ -52,6 +52,6 @@ public class AuthService {
 
     public boolean isAdminAuthorized(MemberIdDto memberIdDto) {
         Member member = memberService.getMemberEntityById(memberIdDto.id());
-        return member.getRole() == Role.ADMIN;
+        return member.isAdmin();
     }
 }

@@ -27,7 +27,7 @@ public class Member {
         this.role = role;
     }
 
-    private Member() {
+    protected Member() {
     }
 
     public static Member of(Long id, String name, String email, String password, Role role) {
@@ -64,5 +64,9 @@ public class Member {
 
     public boolean matchPassword(String password) {
         return this.password.equals(password);
+    }
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 }

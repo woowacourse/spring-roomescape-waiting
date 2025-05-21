@@ -43,7 +43,7 @@ public class Reservation {
         this.waiting = waiting;
     }
 
-    private Reservation() {
+    protected Reservation() {
     }
 
     public static Reservation of(
@@ -74,14 +74,14 @@ public class Reservation {
 
     public boolean isDuplicated(Reservation other) {
         return this.date.equals(other.date)
-               && this.time.equals(other.time)
-               && this.theme.equals(other.theme);
+                && this.time.equals(other.time)
+                && this.theme.equals(other.theme);
     }
 
     public boolean isAlreadyBookedTime(LocalDate date, Long themeId, Long timeId) {
         return this.date.equals(date)
-               && this.theme.getId().equals(themeId)
-               && this.time.getId().equals(timeId);
+                && this.theme.getId().equals(themeId)
+                && this.time.getId().equals(timeId);
     }
 
     public Long getId() {
