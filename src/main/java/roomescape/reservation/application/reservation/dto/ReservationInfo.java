@@ -23,7 +23,7 @@ public record ReservationInfo(
                 reservation.date(),
                 new ReservationTimeInfo(reservation.time()),
                 new ThemeInfo(reservation.theme()),
-                reservation.status()
+                ReservationStatus.BOOKED
         );
     }
 }

@@ -1,14 +1,14 @@
-INSERT INTO member (name, email, password, role)
+INSERT INTO MEMBER (NAME, EMAIL, PASSWORD, ROLE)
 VALUES
     ('리버', 'river@email.com', 'qwer!', 'ADMIN');
 
-INSERT INTO reservation_time (start_at)
+INSERT INTO RESERVATION_TIME (START_AT)
 VALUES
     ('10:00'),
     ('15:00'),
     ('16:00');
 
-INSERT INTO theme (name, description, thumbnail)
+INSERT INTO THEME (NAME, DESCRIPTION, THUMBNAIL)
 VALUES
     ('테마1',  '테마1입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마2',  '테마2입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
@@ -22,18 +22,18 @@ VALUES
     ('테마10', '테마10입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마11', '테마11입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO reservation (date, member_id, time_id, theme_id, status)
+INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID)
 VALUES
-    ('2025-04-30', 1, 1, 11, 'BOOKED'),
-    ('2025-04-30', 1, 2, 11, 'BOOKED'),
-    ('2025-04-29', 1, 1, 11, 'BOOKED'),
-    ('2025-04-29', 1, 2,  9, 'BOOKED'),
-    ('2025-04-28', 1, 2,  9, 'BOOKED'),
-    ('2025-04-28', 1, 1,  8, 'BOOKED'),
-    ('2025-04-27', 1, 1,  1, 'BOOKED'),
-    ('2025-04-27', 1, 2,  2, 'BOOKED'),
-    ('2025-04-26', 1, 1,  3, 'BOOKED'),
-    ('2025-04-26', 1, 2,  4, 'BOOKED'),
-    ('2025-04-25', 1, 1,  5, 'BOOKED'),
-    ('2025-04-25', 1, 2,  6, 'BOOKED'),
-    ('2025-04-24', 1, 1,  7, 'BOOKED');
+    (1, '2025-04-30', 1, 11),
+    (1, '2025-04-30', 2, 11),
+    (1, '2025-04-29', 1, 11),
+    (1, '2025-04-29', 2,  9),
+    (1, '2025-04-28', 2,  9),
+    (1, '2025-04-28', 1,  8),
+    (1, '2025-04-27', 1,  1),
+    (1, '2025-04-27', 2,  2),
+    (1, '2025-04-26', 1,  3),
+    (1, '2025-04-26', 2,  4),
+    (1, '2025-04-25', 1,  5),
+    (1, '2025-04-25', 2,  6),
+    (1, '2025-04-24', 1,  7);

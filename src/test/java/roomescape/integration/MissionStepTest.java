@@ -129,7 +129,7 @@ public class MissionStepTest {
         insertDummyDataExceptReservation();
 
         // when & then
-        jdbcTemplate.update("INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID, STATUS) VALUES (?, ?, ?, ?, ?)", 1, DateUtil.tomorrow().toString(), 1, 1, "BOOKED");
+        jdbcTemplate.update("INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID) VALUES (?, ?, ?, ?)", 1, DateUtil.tomorrow().toString(), 1, 1);
 
         final List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -255,7 +255,6 @@ public class MissionStepTest {
         params.put("date", DateUtil.tomorrow().toString());
         params.put("timeId", "1");
         params.put("themeId", "1");
-        params.put("status", "BOOKED");
         return params;
     }
 

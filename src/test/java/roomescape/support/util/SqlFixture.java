@@ -35,16 +35,16 @@ public class SqlFixture {
     """;
 
     public static final String INSERT_RESERVATIONS = """
-       INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID, STATUS)
+       INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID)
        VALUES
-           (1, CURRENT_DATE, 1, 2, 'BOOKED'),
-           (2, CURRENT_DATE, 2, 2, 'BOOKED'),
-           (3, CURRENT_DATE, 3, 2, 'BOOKED'),
-           (1, CURRENT_DATE, 4, 1, 'BOOKED'),
-           (2, CURRENT_DATE, 5, 1, 'BOOKED'),
-           (3, CURRENT_DATE - 1, 3, 3, 'BOOKED'),
-           (1, CURRENT_DATE - 1, 4, 4, 'BOOKED'),
-           (2, CURRENT_DATE - 1, 5, 5, 'BOOKED');
+           (1, CURRENT_DATE, 1, 2),
+           (2, CURRENT_DATE, 2, 2),
+           (3, CURRENT_DATE, 3, 2),
+           (1, CURRENT_DATE, 4, 1),
+           (2, CURRENT_DATE, 5, 1),
+           (3, CURRENT_DATE - 1, 3, 3),
+           (1, CURRENT_DATE - 1, 4, 4),
+           (2, CURRENT_DATE - 1, 5, 5);
     """;
 
     public static final List<String> INSERT_ALL = List.of(
