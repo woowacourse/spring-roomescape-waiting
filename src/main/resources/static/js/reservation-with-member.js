@@ -28,7 +28,7 @@ function render(data) {
         const row = tableBody.insertRow();
 
         row.insertCell(0).textContent = item.id;              // 예약 id
-        row.insertCell(1).textContent = item.user.name;     // 사용자 name
+        row.insertCell(1).textContent = item.member.name;     // 사용자 name
         row.insertCell(2).textContent = item.theme.name;      // 테마 name
         row.insertCell(3).textContent = item.date;            // date
         row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
@@ -194,7 +194,7 @@ function applyFilter(event) {
 
     const params = new URLSearchParams();
 
-    if (memberId) params.append('userId', memberId);
+    if (memberId) params.append('memberId', memberId);
     if (themeId) params.append('themeId', themeId);
     if (dateFrom) params.append('from', dateFrom);
     if (dateTo) params.append('to', dateTo);
