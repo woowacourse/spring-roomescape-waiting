@@ -11,7 +11,7 @@
 ### 내 예약 목록 조회
 request
 ```json
-GET /reservations-mine HTTP/1.1
+GET /member/reservations HTTP/1.1
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 host: localhost:8080
 ```
