@@ -2,6 +2,7 @@ package roomescape.unit.admin.presentation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -116,6 +117,17 @@ class AdminControllerTest {
         given(tokenProvider.extractRole("accessToken")).willReturn(Role.ADMIN);
         // when & then
         mockMvc.perform(post("/api/admin/waitings/1")
+                        .cookie(new Cookie("token", "accessToken"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void 관리자가_대기를_거절한다() throws Exception {
+        // given
+        given(tokenProvider.extractRole("accessToken")).willReturn(Role.ADMIN);
+        // when & then
+        mockMvc.perform(delete("/api/admin/waitings/1")
                         .cookie(new Cookie("token", "accessToken"))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
