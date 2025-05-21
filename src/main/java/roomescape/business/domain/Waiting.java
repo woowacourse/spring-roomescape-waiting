@@ -8,8 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "waiting")
@@ -32,21 +32,45 @@ public class Waiting {
     private ReservationTime reservationTime;
 
     @Column(nullable = false)
-    private Date reservationDate;
+    private LocalDate reservationDate;
 
     @Column(nullable = false)
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     public Waiting() {
 
     }
 
     public Waiting(final Member member, final Theme theme, final ReservationTime reservationTime,
-                   final Date reservationDate) {
+                   final LocalDate reservationDate) {
         this.member = member;
         this.theme = theme;
         this.reservationTime = reservationTime;
         this.reservationDate = reservationDate;
-        this.createAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public ReservationTime getReservationTime() {
+        return reservationTime;
+    }
+
+    public LocalDate getReservationDate() {
+        return reservationDate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
