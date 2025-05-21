@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
@@ -19,6 +20,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
               AND m.id = :memberId    
               AND r.date BETWEEN :startDate AND :endDate 
             """)
+
     List<Reservation> findFilteredReservations(Long themeId,
                                                Long memberId,
                                                LocalDate startDate,
@@ -42,14 +44,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             """)
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(LocalDate date, Long themeId);
 
-    @Query("""
-            SELECT  r
-            FROM Reservation r
-            JOIN FETCH r.theme th
-            JOIN FETCH r.time t
-            JOIN r.member m
-            WHERE m.id = :memberId
-            """
-    )
+    @EntityGraph(attributePaths = {"theme", "time"})
     List<Reservation> findByMemberId(Long memberId);
 }
