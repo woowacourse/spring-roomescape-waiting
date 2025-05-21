@@ -1,5 +1,6 @@
 package roomescape.service.reservation;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -8,6 +9,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
@@ -16,12 +18,14 @@ import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
 import roomescape.exception.reservation.ReservationInPastException;
+import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
+import roomescape.repository.waiting.WaitingRepsitory;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -30,14 +34,16 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepsitory waitingRepsitory;
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
                                   ReservationTimeRepository timeRepository, ThemeRepository themeRepository,
-                                  MemberRepository memberRepository) {
+                                  MemberRepository memberRepository, WaitingRepsitory waitingRepsitory) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepsitory = waitingRepsitory;
     }
 
     public ReservationResponse create(ReservationRequest request, Member member) {
@@ -65,8 +71,31 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationResponse.from(reservationRepository.findAll());
     }
 
+    @Transactional
     public void deleteById(Long id) {
+
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(() -> {
+            throw new ReservationNotFoundException(id);
+        });
+
         reservationRepository.deleteById(id);
+
+        if (waitingRepsitory.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId())) {
+            promoteFirstWaitingToReservation(reservation);
+        }
+    }
+
+    private void promoteFirstWaitingToReservation(Reservation reservation) {
+        Waiting waiting = waitingRepsitory.findFirstWaitingByDateAndTimeIdAndThemeId(reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId());
+
+        Reservation newReservation = new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme(),
+                waiting.getMember());
+
+        reservationRepository.save(newReservation);
+        waitingRepsitory.deleteById(waiting.getId());
+
     }
 
     @Override
