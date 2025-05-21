@@ -1,4 +1,4 @@
-package roomescape.member.application.repository;
+package roomescape.member.application;
 
 import java.util.Optional;
 import org.springframework.data.repository.ListCrudRepository;

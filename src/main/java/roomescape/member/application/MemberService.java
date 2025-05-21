@@ -1,11 +1,10 @@
-package roomescape.member.application.service;
+package roomescape.member.application;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.jwt.TokenProvider;
-import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.presentation.dto.MemberResponse;

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.AdminReservationRequest;
 import roomescape.admin.AdminWaitingReservationResponse;
-import roomescape.member.application.repository.MemberRepository;
+import roomescape.member.application.MemberRepository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
