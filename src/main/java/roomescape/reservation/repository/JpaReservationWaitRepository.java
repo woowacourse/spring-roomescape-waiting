@@ -9,5 +9,5 @@ import roomescape.reservation.domain.ReservationWait;
 public interface JpaReservationWaitRepository extends JpaRepository<ReservationWait, Long>, ReservationWaitRepository {
 
     @Override
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(ReservationDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByInfoDateAndInfoTimeIdAndInfoThemeIdAndInfoMemberId(ReservationDate date, Long timeId, Long themeId, Long memberId);
 }

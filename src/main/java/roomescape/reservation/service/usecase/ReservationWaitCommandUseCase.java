@@ -60,7 +60,7 @@ public class ReservationWaitCommandUseCase {
     private void validateReservationWaitNotExistsForMember(
             final CreateReservationServiceRequest createReservationServiceRequest
     ) {
-        if (reservationWaitRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+        if (reservationWaitRepository.existsByInfoDateAndInfoTimeIdAndInfoThemeIdAndInfoMemberId(
                 ReservationDate.from(createReservationServiceRequest.date()),
                 createReservationServiceRequest.timeId(),
                 createReservationServiceRequest.themeId(),

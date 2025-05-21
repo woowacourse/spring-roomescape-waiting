@@ -10,16 +10,16 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+    Optional<Reservation> findByInfoDateAndInfoTimeIdAndInfoThemeId(ReservationDate date, Long timeId, Long themeId);
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByMemberId(Long memberId);
+    List<Reservation> findAllByInfoMemberId(Long memberId);
 
-    List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId);
+    List<Reservation> findByInfoDateAndInfoThemeId(ReservationDate date, Long themeId);
 
-    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
-                                                             ReservationDate to);
+    List<Reservation> findByInfoMemberIdAndInfoThemeIdAndInfoDateBetween(Long memberId, Long themeId, ReservationDate from,
+                                                                         ReservationDate to);
 
     List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit);
 
@@ -27,7 +27,7 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByInfoTimeId(Long timeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+    boolean existsByInfoDateAndInfoTimeIdAndInfoThemeId(ReservationDate date, Long timeId, Long themeId);
 }

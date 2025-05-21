@@ -7,5 +7,5 @@ public interface ReservationWaitRepository {
 
     ReservationWait save(ReservationWait reservationWait);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(ReservationDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByInfoDateAndInfoTimeIdAndInfoThemeIdAndInfoMemberId(ReservationDate date, Long timeId, Long themeId, Long memberId);
 }

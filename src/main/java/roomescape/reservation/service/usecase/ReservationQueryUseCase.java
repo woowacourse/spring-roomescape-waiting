@@ -28,14 +28,14 @@ public class ReservationQueryUseCase {
     }
 
     public List<Reservation> getByMemberId(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId);
+        return reservationRepository.findAllByInfoMemberId(memberId);
     }
 
     public List<AvailableReservationTimeServiceResponse> getTimesWithAvailability(
             final AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest) {
         final List<ReservationTime> allTimes = reservationTimeQueryUseCase.getAll();
 
-        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findByDateAndThemeId(
+        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findByInfoDateAndInfoThemeId(
                         ReservationDate.from(availableReservationTimeServiceRequest.date()),
                         availableReservationTimeServiceRequest.themeId()).stream()
                 .map(reservation -> reservation.getTime().getId())
@@ -67,24 +67,24 @@ public class ReservationQueryUseCase {
     public Reservation getByParams(final ReservationDate date,
                                    final Long timeId,
                                    final Long themeId) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+        return reservationRepository.findByInfoDateAndInfoTimeIdAndInfoThemeId(date, timeId, themeId)
                 .orElseThrow(NotFoundException::new);
     }
 
     public boolean existsByTimeId(final Long timeId) {
-        return reservationRepository.existsByTimeId(timeId);
+        return reservationRepository.existsByInfoTimeId(timeId);
     }
 
     public boolean existsByParams(final ReservationDate date,
                                   final Long timeId,
                                   final Long themeId) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return reservationRepository.existsByInfoDateAndInfoTimeIdAndInfoThemeId(date, timeId, themeId);
     }
 
     public List<Reservation> search(final Long memberId,
                                     final Long themeId,
                                     final ReservationDate from,
                                     final ReservationDate to) {
-        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
+        return reservationRepository.findByInfoMemberIdAndInfoThemeIdAndInfoDateBetween(memberId, themeId, from, to);
     }
 }
