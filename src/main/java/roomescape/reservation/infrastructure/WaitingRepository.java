@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.member.domain.Member;
@@ -13,6 +14,8 @@ import roomescape.reservation.dto.response.WaitingWithRankResponse;
 public interface WaitingRepository extends Repository<Waiting, Long> {
 
     Waiting save(Waiting waiting);
+
+    Optional<Waiting> findById(Long id);
 
     boolean existsByDateAndMemberAndThemeAndTimeSlot(LocalDate date, Member member, Theme theme, TimeSlot timeSlot);
 
@@ -29,4 +32,6 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
             WHERE w.member.id = :memberId
             """)
     List<WaitingWithRankResponse> findByMemberIdWithRank(Long memberId);
+
+    void delete(Waiting waiting);
 }

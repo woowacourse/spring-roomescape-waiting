@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.exception.ArgumentNullException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.member.domain.Member;
@@ -67,6 +68,10 @@ public class Waiting {
         if (theme == null) {
             throw new ArgumentNullException("theme");
         }
+    }
+
+    public boolean isSameMember(Member member) {
+        return Objects.equals(this.member, member);
     }
 
     public void validateDateTime() {

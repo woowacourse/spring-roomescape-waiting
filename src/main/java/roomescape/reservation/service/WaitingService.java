@@ -6,8 +6,10 @@ import roomescape.exception.CannotWaitWithoutReservationException;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ExistedWaitingException;
 import roomescape.exception.MemberNotFoundException;
+import roomescape.exception.NotMyWaitingException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.exception.TimeSlotNotFoundException;
+import roomescape.exception.WaitingNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Theme;
@@ -68,5 +70,14 @@ public class WaitingService {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         return waitingRepository.findByMemberIdWithRank(member.getId());
 
+    }
+
+    public void deleteWaitingById(Long memberId, Long waitingId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
+        if (!waiting.isSameMember(member)) {
+            throw new NotMyWaitingException();
+        }
+        waitingRepository.delete(waiting);
     }
 }
