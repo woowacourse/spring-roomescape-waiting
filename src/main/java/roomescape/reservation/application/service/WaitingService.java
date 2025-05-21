@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.repository.WaitingRepository;
@@ -22,16 +21,14 @@ import roomescape.reservation.presentation.dto.WaitingResponse;
 @Service
 public class WaitingService {
 
-    private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public WaitingService(final ReservationRepository reservationRepository, final WaitingRepository waitingRepository,
+    public WaitingService(final WaitingRepository waitingRepository,
                           final ReservationTimeRepository reservationTimeRepository,
                           final ThemeRepository themeRepository, final MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -87,19 +84,11 @@ public class WaitingService {
         final LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate, reservationTime.getStartAt());
 
         validateIsPast(reservationDateTime);
-        validateIsDuplicate(reservationDate, reservationTime);
     }
 
     private static void validateIsPast(LocalDateTime reservationDateTime) {
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
             throw new DateTimeException("지난 일시에 대한 예약 생성은 불가능합니다.");
-        }
-    }
-
-    private void validateIsDuplicate(final LocalDate reservationDate, final ReservationTime reservationTime) {
-        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservationDate,
-                reservationTime.getStartAt())) {
-            throw new IllegalStateException("중복된 일시의 예약은 불가능합니다.");
         }
     }
 
