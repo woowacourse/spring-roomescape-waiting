@@ -22,7 +22,7 @@ public class AuthorizationExtractor {
 
     public String extract(final HttpServletRequest httpServletRequest) {
         Enumeration<String> headers = httpServletRequest.getHeaders(COOKIE);
-        while (headers.hasMoreElements()) {
+        while (headers != null && headers.hasMoreElements()) {
             String cookie = headers.nextElement();
             if (cookie.startsWith(AUTHORIZATION_KEY)) {
                 return extractToken(cookie);
