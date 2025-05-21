@@ -10,6 +10,8 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+
     List<Reservation> findAll();
 
     List<Reservation> findAllByMemberId(Long memberId);

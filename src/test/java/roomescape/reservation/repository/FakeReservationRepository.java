@@ -14,8 +14,8 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 
 public class FakeReservationRepository implements ReservationRepository {
-
     private final List<Reservation> reservations = new CopyOnWriteArrayList<>();
+
     private final AtomicLong index = new AtomicLong(1L);
 
     @Override
@@ -30,6 +30,13 @@ public class FakeReservationRepository implements ReservationRepository {
                 .anyMatch(reservation -> Objects.equals(reservation.getDate(), date)
                                          && Objects.equals(reservation.getTime().getId(), timeId)
                                          && Objects.equals(reservation.getTheme().getId(), themeId));
+    }
+
+    @Override
+    public Optional<Reservation> findByDateAndTimeIdAndThemeId(final ReservationDate date, final Long timeId,
+                                                               final Long themeId) {
+        // TODO: 수정 필요
+        return Optional.empty();
     }
 
     @Override

@@ -38,6 +38,10 @@
   예약 생성
 
 
+- [ ] `POST /reservations/wait`  
+  예약 대기 생성
+
+
 - [x] `DELETE /reservations/{id}`  
   예약 삭제
   - 예약에서 참조 중인 시간은 삭제 불가능

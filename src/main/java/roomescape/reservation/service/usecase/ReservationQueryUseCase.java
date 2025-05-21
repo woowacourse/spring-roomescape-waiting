@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.ReservationRepository;
@@ -61,6 +62,13 @@ public class ReservationQueryUseCase {
         return reservationRepository.findThemesWithReservationCount(startDate, endDate, bookCount).stream()
                 .map(ThemeToBookCountServiceResponse::new)
                 .toList();
+    }
+
+    public Reservation getByParams(final ReservationDate date,
+                                   final Long timeId,
+                                   final Long themeId) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseThrow(NotFoundException::new);
     }
 
     public boolean existsByTimeId(final Long timeId) {

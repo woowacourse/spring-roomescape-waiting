@@ -42,7 +42,8 @@ public class ReservationCommandUseCase {
         final Member member = memberQueryUseCase.get(createReservationServiceRequest.memberId());
 
         return reservationRepository.save(
-                ReservationConverter.toDomain(createReservationServiceRequest, member, reservationTime, theme));
+                ReservationConverter.toDomain(createReservationServiceRequest, member, reservationTime, theme)
+        );
     }
 
     public void delete(final Long id) {

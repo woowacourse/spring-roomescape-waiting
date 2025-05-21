@@ -17,6 +17,7 @@ import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
 import roomescape.reservation.service.usecase.ReservationCommandUseCase;
 import roomescape.reservation.service.usecase.ReservationQueryUseCase;
+import roomescape.reservation.service.usecase.ReservationWaitCommandUseCase;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class ReservationService {
 
     private final ReservationQueryUseCase reservationQueryUseCase;
     private final ReservationCommandUseCase reservationCommandUseCase;
+    private final ReservationWaitCommandUseCase reservationWaitCommandUseCase;
 
     public List<ReservationWebResponse> getAll() {
         return ReservationConverter.toDto(
@@ -62,8 +64,10 @@ public class ReservationService {
                                 createReservationByAdminWebRequest.themeId())));
     }
 
-    public ReservationWebResponse create(final CreateReservationWebRequest createReservationWebRequest,
-                                         final MemberInfo memberInfo) {
+    public ReservationWebResponse create(
+            final CreateReservationWebRequest createReservationWebRequest,
+            final MemberInfo memberInfo
+    ) {
         return ReservationConverter.toDto(
                 reservationCommandUseCase.create(
                         new CreateReservationServiceRequest(
@@ -71,6 +75,22 @@ public class ReservationService {
                                 createReservationWebRequest.date(),
                                 createReservationWebRequest.timeId(),
                                 createReservationWebRequest.themeId())));
+    }
+
+    public ReservationWebResponse createReservationWait(
+            final CreateReservationWebRequest createReservationWebRequest,
+            final MemberInfo memberInfo
+    ) {
+        return ReservationConverter.toDto(
+                reservationWaitCommandUseCase.create(
+                        new CreateReservationServiceRequest(
+                                memberInfo.id(),
+                                createReservationWebRequest.date(),
+                                createReservationWebRequest.timeId(),
+                                createReservationWebRequest.themeId()
+                        )
+                )
+        );
     }
 
     public void delete(final Long id) {
