@@ -82,7 +82,7 @@ public class WaitingService {
 
     private Long getWaitingRank(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         final List<Reservation> waitings = reservationRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatus(date, reservationTime, theme, ReservationStatus.WAITING);
-        return (long) (waitings.size() + 1);
+        return (long) waitings.size();
     }
 
     private void validatePastDateTime(final LocalDate date, ReservationTime reservationTime) {

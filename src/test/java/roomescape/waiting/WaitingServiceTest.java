@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.*;
@@ -91,7 +92,7 @@ class WaitingServiceTest {
                 .willReturn(waitings);
         Waiting waiting = new Waiting(RESERVATION, (long) waitings.size() + 1);
         Waiting createdWaiting = waitingWithId(1L, waiting);
-        given(waitingRepository.save(waiting))
+        given(waitingRepository.save(any()))
                 .willReturn(createdWaiting);
 
         // when
