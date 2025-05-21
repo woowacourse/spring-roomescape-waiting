@@ -1,0 +1,72 @@
+package roomescape.domain;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Member {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    private Member(Long id, String name, String email, String password, Role role) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
+    protected Member() {
+    }
+
+    public static Member of(Long id, String name, String email, String password, Role role) {
+        return new Member(id, name, email, password, role);
+    }
+
+    public static Member of(Long id, String name, String email, String password) {
+        return of(id, name, email, password, Role.USER);
+    }
+
+    public static Member withoutId(String name, String email, String password, Role role) {
+        return of(null, name, email, password, role);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public boolean matchPassword(String password) {
+        return this.password.equals(password);
+    }
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
+}
