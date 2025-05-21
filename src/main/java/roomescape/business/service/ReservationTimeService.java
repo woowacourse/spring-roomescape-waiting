@@ -12,7 +12,7 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
 
@@ -63,13 +63,13 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
-    public List<ReservationAvailableTimeResponse> findAvailableTimes(final LocalDate date, final Long themeId) {
+    public List<AvailableReservationTimeResponse> findAvailableTimes(final LocalDate date, final Long themeId) {
         final List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(reservationTime -> {
                     boolean isAlreadyBooked = containPlayTime(reservations, reservationTime);
-                    return ReservationAvailableTimeResponse.from(reservationTime, isAlreadyBooked);
+                    return AvailableReservationTimeResponse.from(reservationTime, isAlreadyBooked);
                 })
                 .collect(Collectors.toList());
     }
