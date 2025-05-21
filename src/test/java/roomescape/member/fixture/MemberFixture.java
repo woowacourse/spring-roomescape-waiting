@@ -1,21 +1,32 @@
 package roomescape.member.fixture;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 
 public class MemberFixture {
-    private static Long identifier = 1L;
+    private static final AtomicLong identifier = new AtomicLong(1L);
 
     public static Member createMember(MemberRole role) {
-        identifier++;
+        long id = identifier.getAndIncrement();
         return new Member(
-            identifier,
-            "testUser" + identifier,
-            identifier + "testEmail@naver.com",
+            id,
+            "testUser" + id,
+            id + "testEmail@naver.com",
             role,
-            "testPassword" + identifier
+            "testPassword" + id
+        );
+    }
+
+    public static Member createMemberWithoutId(MemberRole role) {
+        long id = identifier.getAndIncrement();
+        return new Member(
+            "testUser" + id,
+            id + "testEmail@naver.com",
+            role,
+            "testPassword" + id
         );
     }
 
