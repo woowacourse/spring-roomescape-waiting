@@ -40,11 +40,10 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+    public boolean equals(final Object o) {
+        if (!(o instanceof ReservationTime that)) {
             return false;
         }
-        ReservationTime that = (ReservationTime) o;
         return Objects.equals(getId(), that.getId());
     }
 

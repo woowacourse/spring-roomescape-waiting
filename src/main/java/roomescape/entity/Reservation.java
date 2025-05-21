@@ -137,10 +137,9 @@ public class Reservation {
 
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Reservation that)) {
             return false;
         }
-        Reservation that = (Reservation) o;
         return Objects.equals(getId(), that.getId());
     }
 

@@ -84,7 +84,11 @@ public class Member {
 
     private void validateDuplicateReservation(Reservation target) {
         boolean exist = reservations.stream()
-                .anyMatch(target::equals);
+                .anyMatch(reservation ->
+                        reservation.getReservationTime().equals(target.getReservationTime())
+                                && reservation.getTheme().equals(target.getTheme())
+                                && reservation.getMember().equals(target.getMember())
+                                && reservation.getDate().equals(target.getDate()));
         if (exist) {
             throw new InvalidReservationException("중복된 예약신청입니다");
         }
@@ -124,12 +128,12 @@ public class Member {
         return Collections.unmodifiableList(reservations);
     }
 
+
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Member member)) {
             return false;
         }
-        Member member = (Member) o;
         return Objects.equals(getId(), member.getId());
     }
 
