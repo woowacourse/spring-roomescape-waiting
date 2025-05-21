@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +55,12 @@ public class AdminController {
     @PostMapping("/waitings/{waitingId}")
     public ResponseEntity<Void> convertToReservation(@PathVariable("waitingId") Long waitingId) {
         waitingService.convertWaitingToReservation(waitingId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waitings/{waitingId}")
+    public ResponseEntity<Void> denyWaiting(@PathVariable("waitingId") Long waitingId) {
+        waitingService.deleteWaitingById(waitingId);
         return ResponseEntity.noContent().build();
     }
 }

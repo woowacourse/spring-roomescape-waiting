@@ -82,6 +82,11 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    public void deleteWaitingById(Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
+        waitingRepository.delete(waiting);
+    }
+
     public List<WaitingResponse> findAllWaitings() {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::from)
