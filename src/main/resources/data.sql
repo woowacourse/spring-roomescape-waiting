@@ -25,7 +25,7 @@ values ('16:00');
 
 insert into reservation (theme_id, member_id, date, time_slot_id)
 values (1, 1, '2025-05-13', 1);
-insert into reservation (theme_id, member_id, date, reservation_time_id)
+insert into reservation (theme_id, member_id, date, time_slot_id)
 values (1, 1, '2025-05-12', 1);
 insert into reservation (theme_id, member_id, date, time_slot_id)
 values (1, 1, '2025-05-11', 1);
