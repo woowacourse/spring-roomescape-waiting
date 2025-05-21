@@ -14,7 +14,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsByDateAndTime(LocalDate date, ReservationTime time);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
 
@@ -30,14 +30,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Modifying
     @Query("UPDATE ReservationStatus s " +
-           "SET s.priority = s.priority - 1 " +
-           "WHERE s.id IN (" +
-           "   SELECT r.status.id FROM Reservation r " +
-           "   WHERE r.date = :date " +
-           "   AND r.time = :time " +
-           "   AND r.theme = :theme " +
-           "   AND s.priority > :priority" +
-           ")")
+            "SET s.priority = s.priority - 1 " +
+            "WHERE s.id IN (" +
+            "   SELECT r.status.id FROM Reservation r " +
+            "   WHERE r.date = :date " +
+            "   AND r.time = :time " +
+            "   AND r.theme = :theme " +
+            "   AND s.priority > :priority" +
+            ")")
     void updateAllWaitingReservationsAfterPriority(LocalDate date, ReservationTime time, Theme theme,
                                                    Long priority);
 }

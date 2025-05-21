@@ -111,12 +111,13 @@ class ReservationServiceTest {
 
         // when
         ReservationTime time = new ReservationTime(timeId, LocalTime.now().plusHours(1));
+        Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
+
         when(timeRepository.findById(timeId)).thenReturn(
                 Optional.of(time));
 
-        when(themeRepository.findById(themeId)).thenReturn(
-                Optional.of(new Theme(themeId, "test", "test", "test")));
-        when(reservationRepository.existsByDateAndTime(today, time)).thenReturn(true);
+        when(themeRepository.findById(themeId)).thenReturn(Optional.of(theme));
+        when(reservationRepository.existsByDateAndTimeAndTheme(today, time, theme)).thenReturn(true);
 
         //then
         assertThatThrownBy(() -> reservationService.create(request, new Member(1L, "슬링키", "이메일", "비밀번호", Role.ADMIN)))

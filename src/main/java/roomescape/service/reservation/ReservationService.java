@@ -62,7 +62,7 @@ public class ReservationService {
             throw new ReservationInPastException();
         }
 
-        if (reservationRepository.existsByDateAndTime(request.date(), reservationTime)) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
             throw new ReservationAlreadyExistsException();
         }
 
