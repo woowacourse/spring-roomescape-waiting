@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +43,12 @@ public class AdminReservationController {
     }
 
     @PatchMapping("/{id}")
-    public void approveReservation(@PathVariable @NotNull final Long id) {
-        reservationService.approveReservation(id);
+    public void approveWaitingReservation(@PathVariable @NotNull final Long id) {
+        reservationService.approveWaitingReservation(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteWaitingReservation(@PathVariable @NotNull final Long id) {
+        reservationService.deleteReservation(id);
     }
 }

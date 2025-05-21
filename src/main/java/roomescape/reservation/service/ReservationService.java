@@ -100,7 +100,7 @@ public class ReservationService {
         return waitingReservations.stream().map(ReservationResponse::new).toList();
     }
 
-    public void approveReservation(final Long id) {
+    public void approveWaitingReservation(final Long id) {
         final Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
 
