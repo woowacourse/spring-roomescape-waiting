@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.BaseTest;
 import roomescape.member.controller.request.TokenLoginCreateRequest;
 import roomescape.member.domain.Email;
@@ -34,7 +33,6 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
-@Sql("/test-data.sql")
 public class ReservationTest extends BaseTest {
 
     @LocalServerPort
