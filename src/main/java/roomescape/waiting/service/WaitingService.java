@@ -1,6 +1,5 @@
 package roomescape.waiting.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -8,90 +7,45 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.web.exception.NotAuthorizationException;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.member.domain.Member;
-import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.exception.InAlreadyReservationException;
-import roomescape.reservation.service.ReservationQueryManager;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.command.ReserveCommand;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.service.ThemeQueryService;
-import roomescape.time.service.ReservationTimeQueryService;
 import roomescape.waiting.controller.response.WaitingInfoResponse;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.exception.InAlreadyWaitingException;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
-public class WaitingService implements WaitingQueryService {
+public class WaitingService {
 
-    private final ThemeQueryService themeQueryService;
-    private final MemberQueryService memberQueryService;
-    private final ReservationTimeQueryService timeQueryService;
     private final WaitingRepository waitingRepository;
-    private final ReservationQueryManager reservationQueryManager;
+    private final ReservationQueryService reservationQueryService;
+    private final WaitingManager waitingManager;
+    private final WaitingQueryService waitingQueryService;
 
     @Transactional
     public ReservationResponse waiting(ReserveCommand reserveCommand) {
         validateAvailableWaiting(reserveCommand);
 
-        Waiting waiting = reservationWaitingFrom(reserveCommand);
+        Waiting waiting = waitingManager.getWaiting(reserveCommand);
         Waiting saved = waitingRepository.save(waiting);
 
         return ReservationResponse.from(saved);
     }
 
     private void validateAvailableWaiting(ReserveCommand reserveCommand) {
-        if (!reservationQueryManager.existsReservation(reserveCommand.date(), reserveCommand.timeId())) {
+        if (!reservationQueryService.existsReservation(reserveCommand.date(), reserveCommand.timeId())) {
             throw new InvalidArgumentException("예약 대기를 할 수 없습니다!");
         }
     }
 
-    private Waiting reservationWaitingFrom(ReserveCommand reserveCommand) {
-        Long memberId = reserveCommand.memberId();
-        LocalDate date = reserveCommand.date();
-        Long timeId = reserveCommand.timeId();
-        validateWaiting(memberId, date, timeId);
-
-        ReservationDateTime reservationDateTime = ReservationDateTime.create(new ReservationDate(date),
-                timeQueryService.getReservationTime(timeId));
-        Theme theme = themeQueryService.getTheme(reserveCommand.themeId());
-        Member reserver = memberQueryService.getMember(memberId);
-
-        return Waiting.builder()
-                .reservationDateTime(reservationDateTime)
-                .reserver(reserver)
-                .theme(theme)
-                .build();
-    }
-
-    private void validateWaiting(Long memberId, LocalDate date, Long timeId) {
-        if (waitingRepository.existsByMemberIdAndDateAndTimeId(memberId, date, memberId)) {
-            throw new InAlreadyWaitingException("이미 예약된 시간입니다.");
-        }
-
-        if (reservationQueryManager.existReservation(memberId, date, timeId)) {
-            throw new InAlreadyReservationException("해당 유저는 이미 예약했습니다.");
-        }
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public List<MyReservationResponse> getWaitingReservations(Long memberId) {
-        return waitingRepository.findWithRankByMemberId(memberId)
-                .stream()
-                .map(MyReservationResponse::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
     public List<WaitingInfoResponse> getAllInfo() {
-        return waitingRepository.getAll();
+        return waitingQueryService.getAllInfo();
+    }
+
+    public List<MyReservationResponse> getWaitingReservations(Long memberId) {
+        return waitingQueryService.getWaitingReservations(memberId);
     }
 
     @Transactional

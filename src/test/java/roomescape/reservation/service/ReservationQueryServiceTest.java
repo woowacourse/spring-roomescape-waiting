@@ -138,7 +138,7 @@ public class ReservationQueryServiceTest {
         Reservation reservation1 = reservationRepository.save(Reservation.reserve(member1, reservationDateTime, theme));
         reservationRepository.save(Reservation.reserve(member2, reservationDateTime, theme));
 
-        List<MyReservationResponse> myReservations = reservationQueryService.getReservations(member1.getId());
+        List<MyReservationResponse> myReservations = reservationQueryService.getAllReservations(member1.getId());
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(myReservations).hasSize(1);
@@ -150,7 +150,7 @@ public class ReservationQueryServiceTest {
 
     @Test
     void 존재하지_않는_회원의_예약목록을_조회하면_빈_리스트를_반환한다() {
-        List<MyReservationResponse> myReservations = reservationQueryService.getReservations(999L);
+        List<MyReservationResponse> myReservations = reservationQueryService.getAllReservations(999L);
 
         assertThat(myReservations).isEmpty();
     }

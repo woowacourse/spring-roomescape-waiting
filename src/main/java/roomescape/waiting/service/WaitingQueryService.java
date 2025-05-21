@@ -1,15 +1,30 @@
 package roomescape.waiting.service;
 
-import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.waiting.controller.response.WaitingInfoResponse;
-import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
-public interface WaitingQueryService {
+@Service
+@Transactional(readOnly = true)
+@RequiredArgsConstructor
+public class WaitingQueryService {
 
-    List<WaitingInfoResponse> getAllInfo();
+    private final WaitingRepository waitingRepository;
 
-    List<MyReservationResponse> getWaitingReservations(Long memberId);
+    @Transactional(readOnly = true)
+    public List<WaitingInfoResponse> getAllInfo() {
+        return waitingRepository.getAll();
+    }
 
+    @Transactional(readOnly = true)
+    public List<MyReservationResponse> getWaitingReservations(Long memberId) {
+        return waitingRepository.findWithRankByMemberId(memberId)
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
+    }
 }
