@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
@@ -22,16 +23,18 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(length = 30)
+    @Column(length = 30, nullable = false)
     private String name;
+    @Column(nullable = false)
     private LocalDate date;
     @ManyToOne
+    @JoinColumn(nullable = false)
     private ReservationTime time;
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Theme theme;
-
     @Enumerated(EnumType.STRING)
-    @Column(length = 15)
+    @Column(length = 15, nullable = false)
     private ReservationStatus reservationStatus;
 
     protected Reservation() {

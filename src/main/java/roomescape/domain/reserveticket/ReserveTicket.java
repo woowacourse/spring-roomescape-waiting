@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,9 +21,11 @@ public class ReserveTicket {
     private Long id;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(nullable = false)
     private Reservation reservation;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Member member;
 
     protected ReserveTicket() {
