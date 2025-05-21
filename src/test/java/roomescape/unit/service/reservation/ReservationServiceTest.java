@@ -13,6 +13,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
@@ -52,7 +53,8 @@ class ReservationServiceTest {
         AddReservationDto request = new AddReservationDto("praisebak", LocalDate.now().plusDays(2L),
                 reservationTime.getId(), theme.getId());
 
-        reservationService.addReservation(request, new ReservationDuplicateCheckStrategy(reservationRepository));
+        reservationService.addReservation(request, new ReservationDuplicateCheckStrategy(reservationRepository),
+                ReservationStatus.RESERVATION);
 
         assertThat(reservationService.allReservations().size()).isEqualTo(1);
     }
@@ -65,7 +67,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservation(
                 new AddReservationDto("투다", LocalDate.now().minusDays(1), reservationTime.getId(), theme.getId()),
-                new ReservationDuplicateCheckStrategy(reservationRepository)))
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -77,7 +79,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservation(
                 new AddReservationDto("투다", LocalDate.now(), reservationTime.getId(), theme.getId()),
-                new ReservationDuplicateCheckStrategy(reservationRepository)))
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -89,7 +91,7 @@ class ReservationServiceTest {
 
         assertThatCode(() -> reservationService.addReservation(
                 new AddReservationDto("투다", LocalDate.now().plusDays(3), reservationTime.getId(), theme.getId()),
-                new ReservationDuplicateCheckStrategy(reservationRepository)))
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION))
                 .doesNotThrowAnyException();
     }
 
@@ -101,7 +103,7 @@ class ReservationServiceTest {
 
         assertThatCode(() -> reservationService.addReservation(
                 new AddReservationDto("투다", LocalDate.now(), reservationTime.getId(), theme.getId()),
-                new ReservationDuplicateCheckStrategy(reservationRepository)))
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION))
                 .doesNotThrowAnyException();
     }
 
@@ -113,7 +115,8 @@ class ReservationServiceTest {
 
         long reservationId = reservationService.addReservation(
                 new AddReservationDto("praisebak", LocalDate.now().plusDays(3L), reservationTime.getId(),
-                        theme.getId()), new ReservationDuplicateCheckStrategy(reservationRepository));
+                        theme.getId()), new ReservationDuplicateCheckStrategy(reservationRepository),
+                ReservationStatus.RESERVATION);
         assertThat(reservationService.allReservations().size()).isEqualTo(1);
         reservationService.deleteReservation(reservationId);
         assertThat(reservationService.allReservations().size()).isEqualTo(0);
@@ -128,11 +131,11 @@ class ReservationServiceTest {
 
         reservationService.addReservation(
                 new AddReservationDto("투다", LocalDate.now(), reservationTime.getId(), theme.getId()),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
 
         assertThatThrownBy(() -> reservationService.addReservation(
                 new AddReservationDto("투다", LocalDate.now(), reservationTime.getId(), theme.getId()),
-                new ReservationDuplicateCheckStrategy(reservationRepository)))
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -150,7 +153,7 @@ class ReservationServiceTest {
 
         reservationService.addReservation(
                 new AddReservationDto("투다", today, firstReservationTime.getId(), theme.getId()),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
 
         AvailableTimeRequestDto availableTimeRequestDto = new AvailableTimeRequestDto(today, theme.getId());
         List<ReservationSlot> reservationAvailabilities = reservationService.availableReservationTimes(
@@ -176,17 +179,17 @@ class ReservationServiceTest {
         }
 
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 1L, 1L),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 2L, 1L),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 1L, 2L),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 2L, 2L),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 3L, 1L),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2), 1L, 3L),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
 
         List<Theme> top10Theme = reservationService.getRankingThemes(LocalDate.now().plusDays(6), 1, 7);
         assertAll(() -> {

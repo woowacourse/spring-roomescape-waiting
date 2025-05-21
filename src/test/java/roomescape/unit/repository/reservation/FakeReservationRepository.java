@@ -24,7 +24,8 @@ public class FakeReservationRepository implements ReservationRepository {
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getReservationTime(),
-                reservation.getTheme()
+                reservation.getTheme(),
+                reservation.getReservationStatus()
         );
         reservations.add(newReservation);
         return newReservation;

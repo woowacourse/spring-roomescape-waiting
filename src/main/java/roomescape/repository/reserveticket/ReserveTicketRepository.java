@@ -17,13 +17,13 @@ public interface ReserveTicketRepository extends Repository<ReserveTicket, Long>
 
     List<ReserveTicket> findAll();
 
+    //TODO 추후에 id로 검색하는 기능 추가하기
     @Query("""
                 SELECT rt
                 FROM ReserveTicket rt
                 WHERE rt.reservation.date = :date
                   AND rt.reservation.time.id = :timeId
                   AND rt.reservation.theme.id = :themeId
-                  AND rt.wait >= : minWeight
             """)
-    int countSameWaitingReservation(long themeId, LocalDate date, long timeId, int minWeight);
+    int countSameWaitingReservation(long themeId, LocalDate date, long timeId);
 }

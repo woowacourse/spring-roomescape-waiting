@@ -45,12 +45,12 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
     }
 
     @Override
-    public int countSameWaitingReservation(long themeId, LocalDate date, long timeId, int minWeight) {
+    public int countSameWaitingReservation(long themeId, LocalDate date, long timeId) {
         return (int) reserveTickets.stream()
                 .filter(rt -> rt.getReservation().getTheme().getId() == themeId)
                 .filter(rt -> rt.getReservation().getDate().equals(date))
                 .filter(rt -> rt.getReservation().getReservationTime().getId() == timeId)
-                .filter(rt -> rt.getWait() >= minWeight)
-                .count();
+                .toList()
+                .size();
     }
 }

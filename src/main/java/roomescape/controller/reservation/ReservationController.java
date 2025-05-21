@@ -56,7 +56,7 @@ public class ReservationController {
         boolean isFilterMode = true;
         if (themeId == null && memberId == null && dateFrom == null && dateTo == null) {
             isFilterMode = false;
-            reserveTickets = reserveTicketService.allReservations();
+            reserveTickets = reserveTicketService.allReservationTickets();
         }
 
         if (isFilterMode) {
@@ -127,7 +127,7 @@ public class ReservationController {
                         reservationMember.getThemeName(),
                         reservationMember.getDate(),
                         reservationMember.getStartAt(),
-                        reservationMember.getStatus()))
+                        reservationMember.getReservationStatus().getStatus()))
                 .toList();
         return ResponseEntity.ok(reservationDtos);
     }

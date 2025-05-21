@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 
 @Entity
 public class ReserveTicket {
@@ -27,16 +28,8 @@ public class ReserveTicket {
     @ManyToOne(optional = false)
     private Reserver reserver;
 
-    private Integer wait = 0;
-
     public ReserveTicket() {
 
-    }
-
-    public ReserveTicket(Reservation reservation, Reserver reserver, int wait) {
-        this.reservation = reservation;
-        this.reserver = reserver;
-        this.wait = wait;
     }
 
     public ReserveTicket(Long id, Reservation reservation, Reserver reserver) {
@@ -65,7 +58,7 @@ public class ReserveTicket {
         return reserver.getName();
     }
 
-    public String getStatus() {
+    public ReservationStatus getReservationStatus() {
         return reservation.getReservationStatus();
     }
 
@@ -83,10 +76,6 @@ public class ReserveTicket {
 
     public Reserver getMember() {
         return reserver;
-    }
-
-    public int getWait() {
-        return wait;
     }
 
     @Override

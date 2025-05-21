@@ -6,11 +6,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.strategy.NonDuplicateCheckStrategy;
 import roomescape.service.reservation.strategy.ReservationValidateStrategy;
 
 @Service
@@ -33,17 +35,15 @@ public class ReserveTicketService {
     @Transactional
     public long addReservation(AddReservationDto newReservationDto, Long memberId) {
         Reserver reserver = memberService.getMemberById(memberId);
-        long reservationId = reservationService.addReservation(newReservationDto, reservationRepository);
+        long reservationId = reservationService.addReservation(newReservationDto, reservationRepository,
+                ReservationStatus.RESERVATION);
         Reservation reservation = reservationService.getReservationById(reservationId);
-        Long themeId = reservation.getTheme().getId();
-        int countSameThemeDateTimeReservation = reservationService.countSameThemeDateTimeReservation(themeId,
-                reservation.getDate(), reservation.getReservationTime().getId());
 
         return reserveTicketRepository.save(
-                new ReserveTicket(reservation, reserver, countSameThemeDateTimeReservation)).getId();
+                new ReserveTicket(null, reservation, reserver)).getId();
     }
 
-    public List<ReserveTicket> allReservations() {
+    public List<ReserveTicket> allReservationTickets() {
         return reserveTicketRepository.findAll();
     }
 
@@ -69,11 +69,15 @@ public class ReserveTicketService {
         return reserveTicketRepository.findAllByReserverId(memberId);
     }
 
-    public void addWaitingReservation(long themeId, LocalDate date, long timeId, int minWeight, long memberId) {
-        int count = reserveTicketRepository.countSameWaitingReservation(themeId, date, timeId, minWeight);
-        reservationService.addReservation(new AddReservationDto(""))
-        new ReserveTicket()
-        reserveTicketRepository.save()
-
+    @Transactional
+    public void addWaitingReservation(AddReservationDto addReservationDto, Long memberId) {
+//        int nextWeightNumber = reserveTicketRepository.countSameWaitingReservation(addReservationDto.themeId(),
+//                addReservationDto.date(), addReservationDto.timeId(), minWeight) + 1;
+        long reservationId = reservationService.addReservation(addReservationDto, new NonDuplicateCheckStrategy(),
+                ReservationStatus.PREPARE);
+        Reservation reservation = reservationService.getReservationById(reservationId);
+        Reserver reserver = memberService.getMemberById(memberId);
+        ReserveTicket reserveTicket = new ReserveTicket(null, reservation, reserver);
+        reserveTicketRepository.save(reserveTicket);
     }
 }

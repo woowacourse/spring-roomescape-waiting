@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AddReservationTimeDto;
@@ -74,7 +75,7 @@ class ThemeServiceTest {
 
         Long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.now()));
         reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2L), timeId, 1L),
-                new ReservationDuplicateCheckStrategy(reservationRepository));
+                new ReservationDuplicateCheckStrategy(reservationRepository), ReservationStatus.RESERVATION);
         assertThatThrownBy(() -> themeService.deleteThemeById(1L)).isInstanceOf(IllegalArgumentException.class);
     }
 

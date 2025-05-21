@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.dto.member.SignupRequestDto;
 import roomescape.dto.reservation.AddReservationDto;
@@ -100,7 +101,7 @@ class ReserveTicketServiceTest {
         long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
         long reservationId = reserveTicketService.addReservation(addReservationDto, memberId);
 
-        List<ReserveTicket> reserveTickets = reserveTicketService.allReservations();
+        List<ReserveTicket> reserveTickets = reserveTicketService.allReservationTickets();
 
         assertAll(
                 () -> assertThat(reserveTickets.get(0).getReservationId()).isEqualTo(reservationId),
@@ -151,29 +152,32 @@ class ReserveTicketServiceTest {
     }
 
     @Test
-    void 예약은_순번이_존재한다() {
+    void 예약_대기시_대기상태를_가진다() {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
-        reserveTicketService.addReservation(new AddReservationDto("name", LocalDate.now().plusDays(3), timeId, themeId),
+        reserveTicketService.addWaitingReservation(
+                new AddReservationDto("name", LocalDate.now().plusDays(3), timeId, themeId),
                 memberId);
 
-        List<ReserveTicket> reserveTickets = reserveTicketService.allReservations();
+        List<ReserveTicket> reserveTickets = reserveTicketService.allReservationTickets();
         ReserveTicket first = reserveTickets.getFirst();
-        assertThat(first.getWait()).isEqualTo(0L);
+        assertThat(first.getReservationStatus()).isEqualTo(ReservationStatus.PREPARE);
     }
 
     @Test
-    void 같은_테마_날짜_시간의_이미_존재하는_예약이면_대기순번이_1이상이다() {
+    void 예약_대기일시_예약_순번을_알_수_있다() {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
         LocalDate reservationDate = LocalDate.now().plusDays(1L);
 
-        reserveTicketService.addWaitingReservation(themeId, reservationDate, timeId, 1, memberId);
-        reserveTicketService.addWaitingReservation(themeId, reservationDate, timeId, 1, memberId);
-        List<ReserveTicket> reserveTickets = reserveTicketService.allReservations();
+        reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+        reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+
+        List<ReserveTicket> reserveTickets = reserveTicketService.allReservationTickets();
         ReserveTicket first = reserveTickets.getFirst();
-        assertThat(first.getWait()).isEqualTo(1L);
     }
 }
