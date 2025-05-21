@@ -17,8 +17,10 @@ import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AddReservationTimeDto;
 import roomescape.dto.theme.AddThemeDto;
 import roomescape.infrastructure.auth.jwt.JwtTokenProvider;
+import roomescape.repository.reservation.ReservationRepository;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.strategy.ReservationDuplicateCheckStrategy;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.reserveticket.ReserveTicketService;
 import roomescape.service.theme.ThemeService;
@@ -32,6 +34,7 @@ import roomescape.unit.repository.reserveticket.FakeReserveTicketRepository;
 class ReserveTicketServiceTest {
 
     private ReserveTicketService reserveTicketService;
+    private ReservationRepository reservationRepository;
     private ReservationTimeService reservationTimeService;
     private ThemeService themeService;
     private MemberService memberService;
@@ -43,6 +46,7 @@ class ReserveTicketServiceTest {
         FakeThemeRepository fakeThemeRepository = ServiceFixture.fakeThemeRepository();
         ReservationService reservationService = new ReservationService(fakeReservationRepository,
                 fakeReservationTimeRepository, fakeThemeRepository);
+        reservationRepository = new FakeReservationRepository();
 
         reservationTimeService = new ReservationTimeService(fakeReservationRepository, fakeReservationTimeRepository);
         themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository);
@@ -54,7 +58,7 @@ class ReserveTicketServiceTest {
 
         FakeReserveTicketRepository reservationMemberRepository = ServiceFixture.fakeReservationMemberRepository();
         reserveTicketService = new ReserveTicketService(memberService, reservationService,
-                reservationMemberRepository);
+                reservationMemberRepository, new ReservationDuplicateCheckStrategy(reservationRepository));
     }
 
     @Test
@@ -144,5 +148,32 @@ class ReserveTicketServiceTest {
                 .toList();
 
         assertThat(reservationMemberIds).containsAnyElementsOf(List.of(firstId, secondId));
+    }
+
+    @Test
+    void 예약은_순번이_존재한다() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        reserveTicketService.addReservation(new AddReservationDto("name", LocalDate.now().plusDays(3), timeId, themeId),
+                memberId);
+
+        List<ReserveTicket> reserveTickets = reserveTicketService.allReservations();
+        ReserveTicket first = reserveTickets.getFirst();
+        assertThat(first.getWait()).isEqualTo(0L);
+    }
+
+    @Test
+    void 같은_테마_날짜_시간의_이미_존재하는_예약이면_대기순번이_1이상이다() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        LocalDate reservationDate = LocalDate.now().plusDays(1L);
+
+        reserveTicketService.addWaitingReservation(themeId, reservationDate, timeId, 1, memberId);
+        reserveTicketService.addWaitingReservation(themeId, reservationDate, timeId, 1, memberId);
+        List<ReserveTicket> reserveTickets = reserveTicketService.allReservations();
+        ReserveTicket first = reserveTickets.getFirst();
+        assertThat(first.getWait()).isEqualTo(1L);
     }
 }

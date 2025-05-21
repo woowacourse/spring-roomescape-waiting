@@ -20,15 +20,23 @@ public class ReserveTicket {
     private Long id;
 
     @JoinColumn(name = "reservation_id", unique = true)
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Reservation reservation;
 
     @JoinColumn(name = "reserver_id")
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Reserver reserver;
+
+    private Integer wait = 0;
 
     public ReserveTicket() {
 
+    }
+
+    public ReserveTicket(Reservation reservation, Reserver reserver, int wait) {
+        this.reservation = reservation;
+        this.reserver = reserver;
+        this.wait = wait;
     }
 
     public ReserveTicket(Long id, Reservation reservation, Reserver reserver) {
@@ -75,6 +83,10 @@ public class ReserveTicket {
 
     public Reserver getMember() {
         return reserver;
+    }
+
+    public int getWait() {
+        return wait;
     }
 
     @Override

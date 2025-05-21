@@ -82,6 +82,15 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public int countByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId) {
+        return (int) reservations.stream()
+                .filter(r -> r.getTheme().isSameTheme(themeId))
+                .filter(r -> r.getDate().isEqual(date))
+                .filter(r -> r.getReservationTime().getId().equals(timeId))
+                .count();
+    }
+
+    @Override
     public List<Reservation> findAllByDateBetween(LocalDate start, LocalDate end) {
         return reservations.stream()
                 .filter(r -> !r.getDate().isBefore(start) && !r.getDate().isAfter(end))

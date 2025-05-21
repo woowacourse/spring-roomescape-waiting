@@ -1,5 +1,6 @@
 package roomescape.unit.repository.reserveticket;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,5 +42,15 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
         return reserveTickets.stream()
                 .filter(currentReservationMember -> currentReservationMember.getMemberId() == id)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int countSameWaitingReservation(long themeId, LocalDate date, long timeId, int minWeight) {
+        return (int) reserveTickets.stream()
+                .filter(rt -> rt.getReservation().getTheme().getId() == themeId)
+                .filter(rt -> rt.getReservation().getDate().equals(date))
+                .filter(rt -> rt.getReservation().getReservationTime().getId() == timeId)
+                .filter(rt -> rt.getWait() >= minWeight)
+                .count();
     }
 }

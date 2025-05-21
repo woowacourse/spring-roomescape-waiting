@@ -1,6 +1,8 @@
 package roomescape.repository.reserveticket;
 
+import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.domain.reserveticket.ReserveTicket;
 
@@ -14,4 +16,14 @@ public interface ReserveTicketRepository extends Repository<ReserveTicket, Long>
     List<ReserveTicket> findAllByReserverId(Long reserverId);
 
     List<ReserveTicket> findAll();
+
+    @Query("""
+                SELECT rt
+                FROM ReserveTicket rt
+                WHERE rt.reservation.date = :date
+                  AND rt.reservation.time.id = :timeId
+                  AND rt.reservation.theme.id = :themeId
+                  AND rt.wait >= : minWeight
+            """)
+    int countSameWaitingReservation(long themeId, LocalDate date, long timeId, int minWeight);
 }

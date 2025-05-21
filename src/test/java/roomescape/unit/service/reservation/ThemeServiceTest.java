@@ -11,8 +11,10 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AddReservationTimeDto;
 import roomescape.dto.theme.AddThemeDto;
+import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.theme.ThemeRepository;
 import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.strategy.ReservationDuplicateCheckStrategy;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 import roomescape.unit.repository.reservation.FakeReservationRepository;
@@ -25,6 +27,7 @@ class ThemeServiceTest {
     private ThemeRepository themeRepository;
     private ReservationService reservationService;
     private ReservationTimeService reservationTimeService;
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
@@ -32,6 +35,7 @@ class ThemeServiceTest {
         FakeReservationTimeRepository fakeReservationTimeRepository = new FakeReservationTimeRepository();
         FakeReservationRepository fakeReservationRepository = new FakeReservationRepository();
 
+        reservationRepository = new FakeReservationRepository();
         reservationTimeService = new ReservationTimeService(fakeReservationRepository, fakeReservationTimeRepository);
         reservationService = new ReservationService(fakeReservationRepository,
                 fakeReservationTimeRepository,
@@ -69,7 +73,8 @@ class ThemeServiceTest {
         themeRepository.save(theme);
 
         Long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.now()));
-        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2L), timeId, 1L));
+        reservationService.addReservation(new AddReservationDto("praisebak", LocalDate.now().plusDays(2L), timeId, 1L),
+                new ReservationDuplicateCheckStrategy(reservationRepository));
         assertThatThrownBy(() -> themeService.deleteThemeById(1L)).isInstanceOf(IllegalArgumentException.class);
     }
 
