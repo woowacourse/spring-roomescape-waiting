@@ -50,7 +50,7 @@ public class ReservationController {
     @GetMapping("reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMyReservations(Member member) {
         List<MemberReservationResponse> memberReservationResponses = reservationService.getReservationByMember(member);
-        List<MemberReservationResponse> memberWaitingResponses = waitingService.getWaitingByMember(member);
+        List<MemberReservationResponse> memberWaitingResponses = waitingService.findWaitingWithRankByMember(member);
 
         List<MemberReservationResponse> combined = new ArrayList<>();
         combined.addAll(memberReservationResponses);

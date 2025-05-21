@@ -11,7 +11,7 @@ import roomescape.domain.WaitingWithRank;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.waiting.WaitingResponse;
-import roomescape.dto.waiting.WaitingWithRankResponse;
+import roomescape.dto.waiting.WaitingWithMemberNameResponse;
 import roomescape.exception.reservation.ReservationInPastException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
@@ -64,7 +64,7 @@ public class WaitingService {
         return WaitingResponse.from(waitingRepsitory.save(waiting));
     }
 
-    public List<MemberReservationResponse> getWaitingByMember(Member member) {
+    public List<MemberReservationResponse> findWaitingWithRankByMember(Member member) {
 
         List<WaitingWithRank> waitings = waitingRepsitory.findWaitingsWithRankByMemberId(member.getId());
 
@@ -78,11 +78,11 @@ public class WaitingService {
         waitingRepsitory.deleteById(id);
     }
 
-    public List<WaitingWithRankResponse> findAllWaitings() {
+    public List<WaitingWithMemberNameResponse> findAllWaitings() {
 
-        List<WaitingWithRank> waitings = waitingRepsitory.findAllWithRank();
+        List<Waiting> waitings = waitingRepsitory.findAll();
         return waitings.stream()
-                .map(WaitingWithRankResponse::from)
+                .map(WaitingWithMemberNameResponse::from)
                 .toList();
     }
 }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Member;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.waiting.WaitingResponse;
-import roomescape.dto.waiting.WaitingWithRankResponse;
+import roomescape.dto.waiting.WaitingWithMemberNameResponse;
 import roomescape.service.waiting.WaitingService;
 
 @RestController
@@ -28,7 +28,7 @@ public class WaitingController {
     }
 
     @GetMapping
-    public ResponseEntity<List<WaitingWithRankResponse>> findAllWaitings() {
+    public ResponseEntity<List<WaitingWithMemberNameResponse>> findAllWaitings() {
 
         return ResponseEntity.ok().body(waitingService.findAllWaitings());
     }
