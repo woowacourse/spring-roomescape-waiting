@@ -7,6 +7,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
@@ -17,26 +18,23 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.FakeReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.usecase.ReservationQueryUseCase;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.theme.repository.FakeThemeRepository;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
-import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ThemeQueryUseCaseTest {
 
     private ThemeQueryUseCase themeQueryUseCase;
-    private ThemeRepository themeRepository;
-    private ReservationRepository reservationRepository;
+    private FakeThemeRepository themeRepository;
     private ReservationTimeRepository reservationTimeRepository;
+    private ReservationRepository reservationRepository;
     private MemberRepository memberRepository;
 
     @BeforeEach
@@ -45,13 +43,7 @@ class ThemeQueryUseCaseTest {
         reservationRepository = new FakeReservationRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         memberRepository = new FakeMemberRepository();
-
-        ReservationTimeQueryUseCase reservationTimeQueryUseCase = new ReservationTimeQueryUseCase(
-                reservationTimeRepository);
-        ReservationQueryUseCase reservationQueryUseCase = new ReservationQueryUseCase(reservationRepository,
-                reservationTimeQueryUseCase);
-
-        themeQueryUseCase = new ThemeQueryUseCase(themeRepository, reservationQueryUseCase);
+        themeQueryUseCase = new ThemeQueryUseCase(themeRepository);
     }
 
     @Test
@@ -169,20 +161,29 @@ class ThemeQueryUseCaseTest {
         for (int i = 0; i < themes.length; i++) {
             if (i == 3) {
                 for (int j = 0; j < 20; j++) {
-                    reservationRepository.save(Reservation.withoutId(
-                            member,
-                            ReservationDate.from(date.getValue().plusDays(j)),
-                            time,
-                            themes[i]));
+                    themeRepository.addReservation(
+                            reservationRepository.save(
+                                    Reservation.withoutId(
+                                            member,
+                                            ReservationDate.from(date.getValue().plusDays(j)),
+                                            time,
+                                            themes[i]
+                                    )
+                            )
+                    );
                 }
             } else {
                 for (int j = 0; j < 11 - i; j++) {
-                    reservationRepository.save(Reservation.withoutId(
-                            member,
-                            ReservationDate.from(date.getValue().plusDays(j)),
-                            time,
-                            themes[i]
-                    ));
+                    themeRepository.addReservation(
+                            reservationRepository.save(
+                                    Reservation.withoutId(
+                                            member,
+                                            ReservationDate.from(date.getValue().plusDays(j)),
+                                            time,
+                                            themes[i]
+                                    )
+                            )
+                    );
                 }
             }
         }
@@ -192,7 +193,7 @@ class ThemeQueryUseCaseTest {
         final List<Theme> rankedThemes = themeQueryUseCase.getRanking(
                 date,
                 ReservationDate.from(date.getValue().plusDays(30)),
-                count);
+                PageRequest.of(0, count));
 
         // then
         SoftAssertions.assertSoftly(softAssertions -> {

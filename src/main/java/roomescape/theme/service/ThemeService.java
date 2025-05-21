@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.controller.dto.CreateThemeWebRequest;
@@ -32,7 +33,7 @@ public class ThemeService {
                 themeQueryUseCase.getRanking(
                         ReservationDate.from(startDate),
                         ReservationDate.from(endDate),
-                        count));
+                        PageRequest.of(0, count)));
     }
 
     public ThemeWebResponse create(final CreateThemeWebRequest createThemeWebRequest) {

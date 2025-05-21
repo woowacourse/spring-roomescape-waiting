@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository {
 
@@ -18,8 +17,6 @@ public interface ReservationRepository {
     List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId);
 
     List<Reservation> findAllByMemberId(Long memberId);
-
-    List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit);
 
     Reservation save(Reservation reservation);
 

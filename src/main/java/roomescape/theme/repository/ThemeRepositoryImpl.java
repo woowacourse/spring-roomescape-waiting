@@ -3,7 +3,9 @@ package roomescape.theme.repository;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 
 @Repository
@@ -31,5 +33,10 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     @Override
     public void deleteById(Long id) {
         jpaThemeRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Theme> getRanking(ReservationDate startDate, ReservationDate endDate, Pageable pageable) {
+        return jpaThemeRepository.findPopularThemes(startDate, endDate, pageable);
     }
 }

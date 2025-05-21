@@ -60,8 +60,7 @@ class ReservationCommandUseCaseTest {
                 new ReservationQueryUseCase(reservationRepository,
                         new ReservationTimeQueryUseCase(reservationTimeRepository)),
                 new ReservationTimeQueryUseCase(reservationTimeRepository),
-                new ThemeQueryUseCase(themeRepository, new ReservationQueryUseCase(reservationRepository,
-                        new ReservationTimeQueryUseCase(reservationTimeRepository))),
+                new ThemeQueryUseCase(themeRepository),
                 new MemberQueryUseCase(memberRepository)
         );
     }

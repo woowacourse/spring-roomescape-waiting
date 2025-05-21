@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.theme.domain.Theme;
 
 @Repository
 @RequiredArgsConstructor
@@ -39,11 +38,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public List<Reservation> findAllByMemberId(Long memberId) {
         return jpaReservationRepository.findAllByMemberId(memberId);
-    }
-
-    @Override
-    public List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit) {
-        return jpaReservationRepository.findThemesWithReservationCount(startDate, endDate, limit);
     }
 
     @Override

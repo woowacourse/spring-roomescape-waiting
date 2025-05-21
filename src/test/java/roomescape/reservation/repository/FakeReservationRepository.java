@@ -2,16 +2,13 @@ package roomescape.reservation.repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.theme.domain.Theme;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -57,25 +54,6 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getMember().getId(), memberId))
                 .toList();
-    }
-
-    @Override
-    public List<Theme> findThemesWithReservationCount(ReservationDate startDate, ReservationDate endDate, int limit) {
-        return reservations.stream()
-                .filter(reservation -> (reservation.getDate().getValue().isEqual(startDate.getValue()) ||
-                        reservation.getDate().getValue().isAfter(startDate.getValue()))
-                        && (reservation.getDate().getValue().isEqual(endDate.getValue()) ||
-                        reservation.getDate().getValue().isBefore(endDate.getValue())))
-                .collect(Collectors.groupingBy(
-                        Reservation::getTheme,
-                        Collectors.summingInt(reservation -> 1)
-                ))
-                .entrySet().stream()
-                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
-                .map(Entry::getKey)
-                .limit(limit)
-                .toList();
-
     }
 
     @Override

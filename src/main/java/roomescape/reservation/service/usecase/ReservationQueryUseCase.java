@@ -11,7 +11,6 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceResponse;
-import roomescape.reservation.service.dto.ThemeToBookCountServiceResponse;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
 
@@ -52,15 +51,6 @@ public class ReservationQueryUseCase {
         }
 
         return responses;
-    }
-
-    public List<ThemeToBookCountServiceResponse> getRanking(final ReservationDate startDate,
-                                                            final ReservationDate endDate,
-                                                            final int bookCount) {
-
-        return reservationRepository.findThemesWithReservationCount(startDate, endDate, bookCount).stream()
-                .map(ThemeToBookCountServiceResponse::new)
-                .toList();
     }
 
     public boolean existsByTimeId(final Long timeId) {
