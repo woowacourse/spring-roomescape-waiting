@@ -15,7 +15,7 @@ import roomescape.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationInfo;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
@@ -56,7 +56,7 @@ class ReservationRepositoryTest {
         reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme(1L));
         reservationRepository.save(
-                new Reservation(member, futureDate, reservationTime, theme, ReservationStatus.RESERVED));
+                new Reservation(new ReservationInfo(member, futureDate, reservationTime, theme)));
     }
 
     @Test
@@ -66,8 +66,7 @@ class ReservationRepositoryTest {
         ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
         reservationTime2 = reservationTimeRepository.save(reservationTime2);
 
-        Reservation reservation2 = new Reservation(member, futureDate, reservationTime2, theme2,
-                ReservationStatus.RESERVED);
+        Reservation reservation2 = new Reservation(new ReservationInfo(member, futureDate, reservationTime, theme2));
         reservationRepository.save(reservation2);
 
         List<Reservation> filteredReservations = reservationRepository.findFilteredReservations(theme.getId(),
@@ -108,9 +107,9 @@ class ReservationRepositoryTest {
                 ReservationTime.withUnassignedId(LocalTime.of(12, 0)));
 
         reservationRepository.save(
-                new Reservation(member, futureDate, reservationTime2, theme, ReservationStatus.RESERVED));
+                new Reservation(new ReservationInfo(member, futureDate, reservationTime2, theme)));
         reservationRepository.save(
-                new Reservation(member, futureDate, reservationTime3, theme, ReservationStatus.RESERVED));
+                new Reservation(new ReservationInfo(member, futureDate, reservationTime3, theme)));
 
         List<AvailableReservationTimeResponse> bookedTimesByDateAndThemeId = reservationRepository.findBookedTimesByDateAndThemeId(
                 futureDate, theme.getId());

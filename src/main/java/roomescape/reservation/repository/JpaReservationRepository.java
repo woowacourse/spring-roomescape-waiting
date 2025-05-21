@@ -13,12 +13,12 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
     @Query("""
             SELECT r
             FROM Reservation r
-            JOIN FETCH r.time t
-            JOIN FETCH r.theme th
-            JOIN FETCH r.member m
+            JOIN FETCH r.info.time t
+            JOIN FETCH r.info.theme th
+            JOIN FETCH r.info.member m
             WHERE th.id        = :themeId
             AND m.id         = :memberId
-            AND r.date BETWEEN :startDate AND :endDate
+            AND r.info.date BETWEEN :startDate AND :endDate
             """)
     List<Reservation> findFilteredReservations(Long themeId,
                                                Long memberId,
@@ -29,7 +29,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             SELECT EXISTS (
               SELECT 1
               FROM Reservation r
-              WHERE r.time.id = :timeId)
+              WHERE r.info.time.id = :timeId)
             """)
     boolean existsByTimeId(Long timeId);
 
@@ -37,7 +37,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             SELECT EXISTS (
                 SELECT 1
                 FROM Reservation r
-                WHERE r.theme.id = :themeId
+                WHERE r.info.theme.id = :themeId
             )
             """)
     boolean existsByThemeId(@Param("themeId") Long themeId);
@@ -46,7 +46,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             SELECT EXISTS (
                 SELECT 1
                 FROM Reservation r
-                WHERE (r.date, r.time.id, r.theme.id) = (:date, :timeId, :themeId)
+                WHERE (r.info.date, r.info.time.id, r.info.theme.id) = (:date, :timeId, :themeId)
             )
             """)
     boolean existsByDateAndTimeIdAndThemeId(
@@ -63,9 +63,9 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             )
             FROM ReservationTime AS rt
             LEFT JOIN Reservation r
-              ON rt.id = r.time.id
-             AND r.date = :date
-             AND r.theme.id = :themeId
+              ON rt.id = r.info.time.id
+             AND r.info.date = :date
+             AND r.info.theme.id = :themeId
             ORDER BY rt.startAt
             """)
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(
@@ -76,7 +76,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
     @Query("""
             SELECT r
             FROM Reservation r
-            JOIN FETCH r.member m
+            JOIN FETCH r.info.member m
             WHERE m.id = :memberId
             """)
     List<Reservation> findAllByMemberId(@Param("memberId") Long memberId);
