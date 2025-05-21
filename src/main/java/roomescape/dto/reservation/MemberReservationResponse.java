@@ -3,9 +3,9 @@ package roomescape.dto.reservation;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
-import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 
-public record MemberReservationResponse(Long reservationId,
+public record MemberReservationResponse(Long id,
                                         String theme,
                                         LocalDate date,
                                         LocalTime time,
@@ -21,13 +21,13 @@ public record MemberReservationResponse(Long reservationId,
         );
     }
 
-    public static MemberReservationResponse from(Waiting waiting) {
+    public static MemberReservationResponse from(WaitingWithRank waitingWithRank) {
         return new MemberReservationResponse(
-                waiting.getId(),
-                waiting.getTheme().getName(),
-                waiting.getDate(),
-                waiting.getTime().getStartAt(),
-                "대기"
+                waitingWithRank.getWaiting().getId(),
+                waitingWithRank.getWaiting().getTheme().getName(),
+                waitingWithRank.getWaiting().getDate(),
+                waitingWithRank.getWaiting().getTime().getStartAt(),
+                waitingWithRank.getRank() + 1 + "번째 대기"
         );
     }
 }
