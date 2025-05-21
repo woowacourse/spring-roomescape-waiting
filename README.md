@@ -10,6 +10,33 @@
 
 [Quick Start](#quick-start) 섹션으로 이동하여 애플리케이션을 실행하고 기능을 체험할 수 있습니다.
 
+# 추가된 화면 및 기능
+
+## 예약 대기 요청 기능
+
+![waitingPage.png](images/waitingPage.png)
+
+- 이미 예약된 방탈출에 대해 예약 대기를 요청할 수 있습니다.
+- 예약 대기 요청 시 대기 순번이 부여됩니다.
+- 예약 대기 요청은 과거 일시로는 요청할 수 없습니다.
+
+![myWaiting.png](images/myWaiting.png)
+
+- 내 예약 목록에서 예약과 함께 예약 대기를 요청한 내역(순번 포함)을 확인할 수 있습니다.
+
+## 예약 대기 관리 기능 (관리자)
+
+![adminWaitingListPage.png](images/adminWaitingListPage.png)
+
+- 관리자는 예약 대기 목록을 확인할 수 있습니다.
+- 예약 대기 목록에서 예약 대기를 승인하거나 취소할 수 있습니다.
+- 예약 대기를 승인하면 예약 목록에 추가됩니다.
+- 예약 대기를 취소하면 예약 대기 목록에서 삭제됩니다.
+
+![validateAdminWaiting.png](images/validateAdminWaiting.png)
+
+- 예약 대기를 승인할 때는 기존 예약이 취소된 후 첫 번째 대기인 경우에만 승인할 수 있습니다.
+
 ## 요구사항 (변경 사항)
 
 - 예약 대기 요청 기능
@@ -47,4 +74,7 @@
 비밀번호: password
 사용자 계정: normal@email.com
 비밀번호: password
+사용자 계정: jihun@email.com
+비밀번호: password
+-- 더 많은 계정은 data.sql 파일을 참고하세요.
 ```
