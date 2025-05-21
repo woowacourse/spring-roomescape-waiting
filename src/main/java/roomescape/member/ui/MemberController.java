@@ -1,4 +1,4 @@
-package roomescape.member.controller;
+package roomescape.member.ui;
 
 import jakarta.validation.Valid;
 import java.util.List;

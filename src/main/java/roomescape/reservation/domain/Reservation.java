@@ -46,7 +46,7 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return spec.getDate();
+        return spec.getDate().getValue();
     }
 
     public ReservationTime getTime() {

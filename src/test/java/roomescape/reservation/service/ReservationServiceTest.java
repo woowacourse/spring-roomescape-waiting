@@ -20,9 +20,10 @@ import roomescape.common.exception.InvalidTimeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.dto.AdminReservationRequest;
+import roomescape.reservation.application.dto.UserReservationRequest;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.dto.admin.AdminReservationRequest;
-import roomescape.reservation.dto.user.UserReservationRequest;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.theme.domain.repository.ThemeRepository;
@@ -60,7 +61,7 @@ class ReservationServiceTest {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.createByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidTimeException.class);
 
         verify(timeRepository, times(1)).findById(1L);
@@ -76,7 +77,7 @@ class ReservationServiceTest {
         when(reservationRepository.existsByDateAndTimeId(LocalDate.now(), 1L)).thenReturn(true);
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.createByUser(1L, userReservationRequest))
                 .isInstanceOf(DuplicateException.class);
 
         verify(timeRepository, times(1)).findById(1L);
@@ -91,7 +92,7 @@ class ReservationServiceTest {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 2L, 1L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.createByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
         verify(timeRepository, times(1)).findById(2L);
@@ -107,7 +108,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(2L)).thenReturn(Optional.empty());
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 2L);
-        assertThatThrownBy(() -> reservationService.add(1L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.createByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
         verify(timeRepository, times(1)).findById(1L);
@@ -120,7 +121,7 @@ class ReservationServiceTest {
         when(memberRepository.findById(2L)).thenReturn(Optional.empty());
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
-        assertThatThrownBy(() -> reservationService.add(2L, userReservationRequest))
+        assertThatThrownBy(() -> reservationService.createByUser(2L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
         verify(memberRepository, times(1)).findById(2L);
@@ -135,7 +136,7 @@ class ReservationServiceTest {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
         AdminReservationRequest adminReservationRequest = new AdminReservationRequest(LocalDate.now(), 1L, 1L, 1L);
-        assertThatThrownBy(() -> reservationService.addByAdmin(adminReservationRequest))
+        assertThatThrownBy(() -> reservationService.createByAdmin(adminReservationRequest))
                 .isInstanceOf(InvalidTimeException.class);
 
         verify(timeRepository, times(1)).findById(1L);
@@ -151,7 +152,7 @@ class ReservationServiceTest {
         when(reservationRepository.existsByDateAndTimeId(LocalDate.now(), 1L)).thenReturn(true);
 
         AdminReservationRequest adminReservationRequest = new AdminReservationRequest(LocalDate.now(), 1L, 1L, 1L);
-        assertThatThrownBy(() -> reservationService.addByAdmin(adminReservationRequest))
+        assertThatThrownBy(() -> reservationService.createByAdmin(adminReservationRequest))
                 .isInstanceOf(DuplicateException.class);
 
         verify(timeRepository, times(1)).findById(1L);

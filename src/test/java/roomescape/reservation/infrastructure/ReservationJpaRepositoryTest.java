@@ -110,7 +110,7 @@ class ReservationJpaRepositoryTest {
         entityManager.persist(r12);
 
         // when
-        Collection<Reservation> reservations = reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+        Collection<Reservation> reservations = reservationJpaRepository.findFiltered(
                 member1.getId(), null, null, null);
 
         // then
@@ -173,7 +173,7 @@ class ReservationJpaRepositoryTest {
         entityManager.persist(r12);
 
         // when
-        Collection<Reservation> reservations = reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+        Collection<Reservation> reservations = reservationJpaRepository.findFiltered(
                 member1.getId(), theme2.getId(), null, null);
 
         // then
@@ -182,7 +182,7 @@ class ReservationJpaRepositoryTest {
 
     @Test
     @DisplayName("회원 ID, 테마 ID, 날짜 기간으로 예약 목록을 조회한다")
-    void findAllByMemberIdAndThemeIdAndDateBetween() {
+    void findFiltered() {
         // given
         ReservationTime time1 = new ReservationTime(LocalTime.now());
         ReservationTime time2 = new ReservationTime(LocalTime.now().plusHours(1));
@@ -238,7 +238,7 @@ class ReservationJpaRepositoryTest {
         // when
         LocalDate from = LocalDate.now().plusDays(1);
         LocalDate to = LocalDate.now().plusDays(3);
-        Collection<Reservation> reservations = reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(
+        Collection<Reservation> reservations = reservationJpaRepository.findFiltered(
                 member2.getId(), theme2.getId(), from, to);
 
         // then

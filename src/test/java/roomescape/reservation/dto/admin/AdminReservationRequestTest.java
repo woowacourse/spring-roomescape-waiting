@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.InvalidDateException;
 import roomescape.common.exception.InvalidIdException;
+import roomescape.reservation.application.dto.AdminReservationRequest;
 
 class AdminReservationRequestTest {
 

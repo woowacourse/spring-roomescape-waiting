@@ -30,19 +30,20 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.application.dto.UserReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSpec;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.user.UserReservationRequest;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.ui.ReservationController;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 
-@WebMvcTest(ReservationApiController.class)
+@WebMvcTest(ReservationController.class)
 @Import({WebMvcConfiguration.class, GlobalExceptionHandler.class})
-class ReservationApiControllerTest {
+class ReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -105,7 +106,7 @@ class ReservationApiControllerTest {
                 .thenReturn("test-token");
         when(memberService.findByToken("test-token"))
                 .thenReturn(memberResponse);
-        when(reservationService.add(1L, reservationRequest))
+        when(reservationService.createByUser(1L, reservationRequest))
                 .thenReturn(reservationResponse);
 
         mockMvc.perform(post(URI)

@@ -24,12 +24,13 @@ import roomescape.common.exception.GlobalExceptionHandler;
 import roomescape.common.security.TokenAuthorizationHandler;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.member.ui.MemberReservationApiController;
+import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.dto.MyReservationResponse;
 
 @WebMvcTest(MemberReservationApiController.class)
 @Import({WebMvcConfiguration.class, GlobalExceptionHandler.class})
-class MemberReservationApiControllerTest {
+class MemberReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

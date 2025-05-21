@@ -6,13 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
-import java.util.Objects;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode
 public class ReservationTime {
 
     @Id
@@ -23,25 +24,15 @@ public class ReservationTime {
     private LocalTime startAt;
 
     public ReservationTime(LocalTime startAt) {
-        this.startAt = Objects.requireNonNull(startAt);
+        this.startAt = startAt;
     }
 
     public ReservationTime(Long id, LocalTime startAt) {
-        this.id = Objects.requireNonNull(id);
-        this.startAt = Objects.requireNonNull(startAt);
+        this.id = id;
+        this.startAt = startAt;
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other == null || getClass() != other.getClass()) {
-            return false;
-        }
-        ReservationTime that = (ReservationTime) other;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
+    public boolean isBeforeNow() {
+        return startAt.isBefore(LocalTime.now());
     }
 }

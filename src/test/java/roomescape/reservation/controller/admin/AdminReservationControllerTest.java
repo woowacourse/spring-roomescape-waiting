@@ -22,17 +22,18 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.admin.AdminReservationRequest;
-import roomescape.reservation.dto.admin.AdminReservationSearchRequest;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.dto.AdminReservationRequest;
+import roomescape.reservation.application.dto.AdminReservationSearchRequest;
+import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.ui.AdminReservationController;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 
-@WebMvcTest(AdminReservationApiController.class)
-class AdminReservationApiControllerTest {
+@WebMvcTest(AdminReservationController.class)
+class AdminReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -64,7 +65,7 @@ class AdminReservationApiControllerTest {
                 }
                 """;
 
-        when(reservationService.addByAdmin(any(AdminReservationRequest.class)))
+        when(reservationService.createByAdmin(any(AdminReservationRequest.class)))
                 .thenReturn(new ReservationResponse(1L, MemberResponse.from(member), ThemeResponse.from(theme),
                         LocalDate.of(2026, 5, 5), ReservationTimeResponse.from(time)));
 
@@ -77,7 +78,7 @@ class AdminReservationApiControllerTest {
     @DisplayName("관리자가 회원, 테마, 날짜 범위로 예약 내역을 조회한다")
     @Test
     void findAllByMemberAndThemeAndDate() throws Exception {
-        when(reservationService.findAllByMemberAndThemeAndDate(
+        when(reservationService.findFiltered(
                 any(AdminReservationSearchRequest.class)))
                 .thenReturn(List.of());
 

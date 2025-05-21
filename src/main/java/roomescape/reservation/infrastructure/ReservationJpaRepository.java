@@ -19,7 +19,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
               AND (:from IS NULL OR r.spec.date >= :from)
               AND (:to IS NULL OR r.spec.date <= :to)
             """)
-    List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
+    List<Reservation> findFiltered(
             @Param("memberId") Long memberId,
             @Param("themeId") Long themeId,
             @Param("from") LocalDate from,

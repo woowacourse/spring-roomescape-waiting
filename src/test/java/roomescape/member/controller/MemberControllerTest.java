@@ -19,6 +19,7 @@ import roomescape.common.security.TokenAuthorizationHandler;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
+import roomescape.member.ui.MemberController;
 
 @WebMvcTest(MemberController.class)
 class MemberControllerTest {

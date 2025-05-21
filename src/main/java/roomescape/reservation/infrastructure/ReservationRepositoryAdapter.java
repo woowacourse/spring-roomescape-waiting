@@ -15,9 +15,9 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     private final ReservationJpaRepository reservationJpaRepository;
 
     @Override
-    public List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long id, Long themeId, LocalDate from,
-                                                                       LocalDate to) {
-        return reservationJpaRepository.findAllByMemberIdAndThemeIdAndDateBetween(id, themeId, from, to);
+    public List<Reservation> findFiltered(Long id, Long themeId, LocalDate from,
+                                          LocalDate to) {
+        return reservationJpaRepository.findFiltered(id, themeId, from, to);
     }
 
     @Override
