@@ -18,6 +18,7 @@ import roomescape.exception.NotFoundException;
 public class ThemeService {
 
     public static final int RANKING_LIMIT_COUNT = 10;
+
     private final ThemeRepository themeRepository;
     private final ClockProvider clockProvider;
 
