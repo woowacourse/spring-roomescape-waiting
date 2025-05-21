@@ -12,6 +12,7 @@ import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.exception.WaitingNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -85,5 +86,19 @@ public class WaitingService {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::from)
                 .toList();
+    }
+
+    public void convertWaitingToReservation(Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
+        reservationRepository.findByDateAndTimeSlotAndTheme(
+                waiting.getDate(), waiting.getTimeSlot(), waiting.getTheme()
+        ).ifPresent(reservationRepository::delete);
+        Reservation reservation = Reservation.builder()
+                .date(waiting.getDate())
+                .theme(waiting.getTheme())
+                .member(waiting.getMember())
+                .timeSlot(waiting.getTimeSlot()).build();
+        reservationRepository.save(reservation);
+        waitingRepository.delete(waiting);
     }
 }

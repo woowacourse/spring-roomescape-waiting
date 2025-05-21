@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,5 +49,11 @@ public class AdminController {
     @GetMapping("/waitings")
     public List<WaitingResponse> getAllWaiting() {
         return waitingService.findAllWaitings();
+    }
+
+    @PostMapping("/waitings/{waitingId}")
+    public ResponseEntity<Void> convertToReservation(@PathVariable("waitingId") Long waitingId) {
+        waitingService.convertWaitingToReservation(waitingId);
+        return ResponseEntity.noContent().build();
     }
 }
