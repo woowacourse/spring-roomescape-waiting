@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.TestFixtures.anyTimeSlotWithId;
+import static roomescape.TestFixtures.anyTimeSlotWithNewId;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +35,7 @@ class TimeSlotControllerTest {
     @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다.")
     void register() throws Exception {
         Mockito.when(timeSlotService.register(any()))
-            .thenReturn(anyTimeSlotWithId());
+            .thenReturn(anyTimeSlotWithNewId());
 
         mockMvc.perform(post("/times")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -51,7 +51,7 @@ class TimeSlotControllerTest {
     @Test
     @DisplayName("예약 시간 조회 요청시, 존재하는 모든 예약 시간과 OK를 응답한다.")
     void getAllTimeSlots() throws Exception{
-        var expectedList = List.of(anyTimeSlotWithId(), anyTimeSlotWithId(), anyTimeSlotWithId());
+        var expectedList = List.of(anyTimeSlotWithNewId(), anyTimeSlotWithNewId(), anyTimeSlotWithNewId());
         Mockito.when(timeSlotService.findAllTimeSlots()).thenReturn(expectedList);
 
         mockMvc.perform(get("/times"))

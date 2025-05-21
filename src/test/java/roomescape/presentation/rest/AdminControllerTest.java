@@ -23,7 +23,7 @@ class AdminControllerTest {
 
     private final ReservationService reservationService = Mockito.mock(ReservationService.class);
     private final UserService userService = Mockito.mock(UserService.class);
-    private final User admin = TestFixtures.anyAdminWithId();
+    private final User admin = TestFixtures.anyAdminWithNewId();
     private final MockMvc mockMvc = MockMvcBuilders
         .standaloneSetup(new AdminController(reservationService, userService))
         .build();
@@ -31,7 +31,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("어드민 페이지에서 예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다.")
     void reserve() throws Exception {
-        var reservation = TestFixtures.anyReservationWithId();
+        var reservation = TestFixtures.anyReservationWithNewId();
         Mockito.when(reservationService.reserve(anyLong(), any(), anyLong(), anyLong())).thenReturn(reservation);
 
         mockMvc.perform(post("/admin/reservations")

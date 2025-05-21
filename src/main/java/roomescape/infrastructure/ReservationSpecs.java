@@ -14,6 +14,11 @@ public class ReservationSpecs {
             criteriaBuilder.equal(root.get("dateTime").get("date"), date);
     }
 
+    public static Specification<Reservation> byDateBetween(final LocalDate from, final LocalDate to) {
+        return (root, query, criteriaBuilder) ->
+            criteriaBuilder.between(root.get("dateTime").get("date"), from, to);
+    }
+
     public static Specification<Reservation> byTimeSlotId(final long id) {
         return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("dateTime").get("timeSlot").get("id"), id);

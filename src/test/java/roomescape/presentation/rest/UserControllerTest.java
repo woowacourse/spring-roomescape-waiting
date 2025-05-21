@@ -4,7 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.TestFixtures.anyReservationWithId;
+import static roomescape.TestFixtures.anyReservationWithNewId;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -58,7 +58,8 @@ class UserControllerTest {
     @Test
     @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다.")
     void getAllReservationsByUser() throws Exception {
-        Mockito.when(userService.getReservations(Mockito.anyLong())).thenReturn(List.of(anyReservationWithId()));
+        Mockito.when(userService.getReservations(Mockito.anyLong())).thenReturn(List.of(
+            anyReservationWithNewId()));
 
         mockMvc.perform(get("/users/reservations")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.TestFixtures.anyReservationWithId;
+import static roomescape.TestFixtures.anyReservationWithNewId;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,7 @@ class ReservationControllerTest {
     @DisplayName("예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다.")
     void reserve() throws Exception {
         Mockito.when(reservationService.reserve(anyLong(), any(), anyLong(), anyLong()))
-            .thenReturn(anyReservationWithId());
+            .thenReturn(anyReservationWithNewId());
 
         mockMvc.perform(post("/reservations")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -57,7 +57,7 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 조회 요청시, 조건에 맞는 모든 예약과 OK를 응답한다.")
     void getAllReservations() throws Exception {
-        var expectedReservations = List.of(anyReservationWithId(), anyReservationWithId(), anyReservationWithId());
+        var expectedReservations = List.of(anyReservationWithNewId(), anyReservationWithNewId(), anyReservationWithNewId());
         Mockito.when(reservationService.findAllReservations(any())).thenReturn(expectedReservations);
 
         mockMvc.perform(get("/reservations"))
