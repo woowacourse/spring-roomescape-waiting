@@ -72,6 +72,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
+    public void delete(final Reservation target) {
+        jpaReservationRepository.delete(target);
+    }
+
+    @Override
     public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
         return jdbcTemplateReservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, count);
     }

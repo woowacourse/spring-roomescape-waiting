@@ -9,17 +9,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.aop.RequiredRoles;
 import roomescape.common.uri.UriFactory;
 import roomescape.reservation.time.application.ReservationTimeFacade;
 import roomescape.reservation.time.application.dto.ReservationTimeResponse;
 import roomescape.reservation.time.domain.ReservationTimeId;
 import roomescape.reservation.time.ui.dto.CreateReservationTimeWebRequest;
+import roomescape.user.domain.UserRole;
 
 import java.net.URI;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@RequiredRoles(UserRole.ADMIN)
 @RequestMapping(ReservationTimeController.BASE_PATH)
 public class ReservationTimeController {
 

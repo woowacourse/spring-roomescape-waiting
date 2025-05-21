@@ -1,9 +1,8 @@
 package roomescape;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,18 +10,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.jwt.domain.TokenType;
-import roomescape.auth.jwt.manager.JwtManager;
-import roomescape.auth.session.UserSession;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
+import roomescape.reservation.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.reservation.domain.Reservation;
 import roomescape.reservation.reservation.domain.ReservationDate;
 import roomescape.reservation.reservation.domain.ReservationRepository;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
 import roomescape.reservation.reservation.ui.ReservationController;
 import roomescape.reservation.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.reservation.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
@@ -54,9 +51,6 @@ public class MissionStepTest {
     private ReservationController reservationController;
 
     @Autowired
-    private JwtManager jwtManager;
-
-    @Autowired
     private ThemeRepository themeRepository;
 
     @Autowired
@@ -68,24 +62,47 @@ public class MissionStepTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @Test
-    @DisplayName("1단계: localhost:8080/admin 요청 시 어드민 메인 페이지가 성공적으로 응답된다")
-    void first() {
-        final User user = userRepository.save(
+    @Autowired
+    private TestTokenGenerator testTokenGenerator;
+
+    private User adminUser;
+    private User normalUser;
+    private Theme theme;
+    private ReservationTime reservationTime;
+
+    @BeforeEach
+    void setUp() {
+        adminUser = userRepository.save(
+                User.withoutId(
+                        UserName.from("admin"),
+                        Email.from("admin@email.com"),
+                        Password.fromEncoded("1234"),
+                        UserRole.ADMIN));
+
+        normalUser = userRepository.save(
                 User.withoutId(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
-                        UserRole.ADMIN));
+                        UserRole.NORMAL));
 
-        final Claims claims = Jwts.claims()
-                .add(UserSession.Fields.id, user.getId().getValue())
-                .add(UserSession.Fields.name, user.getName().getValue())
-                .add(UserSession.Fields.role, user.getRole().name())
-                .build();
+        theme = themeRepository.save(
+                Theme.withoutId(
+                        ThemeName.from("공포 제목"),
+                        ThemeDescription.from("공포 설명"),
+                        ThemeThumbnail.from("gongpo.com/image/1")
+                ));
 
+        reservationTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(
+                        LocalTime.now()));
+    }
+
+    @Test
+    @DisplayName("1단계: localhost:8080/admin 요청 시 어드민 메인 페이지가 성공적으로 응답된다")
+    void first() {
         RestAssured.given().log().all()
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
                 .when().get("/admin")
                 .then().log().all()
                 .statusCode(200);
@@ -95,27 +112,14 @@ public class MissionStepTest {
     @DisplayName("2단계: localhost:8080/admin/reservation 요청 시 예약 관리 페이지가 성공적으로 응답된다, " +
             "예약들을 조회할 수 있다")
     void second() {
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.ADMIN));
-
-        final Claims claims = Jwts.claims()
-                .add(UserSession.Fields.id, user.getId().getValue())
-                .add(UserSession.Fields.name, user.getName().getValue())
-                .add(UserSession.Fields.role, user.getRole().name())
-                .build();
-
         RestAssured.given().log().all()
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
                 .when().get("/admin/reservation")
                 .then().log().all()
                 .statusCode(200);
 
         RestAssured.given().log().all()
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
@@ -126,64 +130,40 @@ public class MissionStepTest {
     @DisplayName("3단계: localhost:8080/reservations 에 POST 요청 시 예약이 추가되고, DELETE 요청 시 각각 예약이 취소된다")
     void third() {
         // given
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.now())
-        );
-
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(
-                        ThemeName.from("공포 제목"),
-                        ThemeDescription.from("공포 설명"),
-                        ThemeThumbnail.from("gongpo.com/image/1")
-                )
-        );
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.ADMIN));
-
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
+                reservationTime.getId().getValue(),
                 theme.getId().getValue(),
-                user.getId().getValue()
+                normalUser.getId().getValue()
         );
-
-        final Claims claims = Jwts.claims()
-                .add(UserSession.Fields.id, user.getId().getValue())
-                .add(UserSession.Fields.name, user.getName().getValue())
-                .add(UserSession.Fields.role, user.getRole().name())
-                .build();
 
         // when
         // then
-        RestAssured.given().log().all()
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+        final int reservationId = RestAssured.given().log().all()
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(normalUser))
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("user.id", is(user.getId().getValue().intValue()));
+                .body("user.id", is(normalUser.getId().getValue().intValue()))
+                .extract().jsonPath().getInt("reservationId");
 
         RestAssured.given().log().all()
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/1")
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
+                .when().delete("/admin/reservations/%d".formatted(reservationId))
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
@@ -208,43 +188,18 @@ public class MissionStepTest {
     @DisplayName("데이터베이스에 예약 하나 추가 후 예약 조회 API를 통해 조회한 예약 수와 데이터베이스 쿼리를 통해 조회한 예약 수가 같은지 비교할 수 있다")
     void fifth() {
         // given
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.now()));
-
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(
-                        ThemeName.from("공포 제목"),
-                        ThemeDescription.from("공포 설명"),
-                        ThemeThumbnail.from("gongpo.com/image/1")
-                ));
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.ADMIN));
-
         final Reservation reservation = reservationRepository.save(
                 Reservation.withoutId(
-                        user.getId(),
+                        normalUser.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        reservationTime,
                         theme
                 ));
 
-        final Claims claims = Jwts.claims()
-                .add(UserSession.Fields.id, user.getId().getValue())
-                .add(UserSession.Fields.name, user.getName().getValue())
-                .add(UserSession.Fields.role, user.getRole().name())
-                .build();
-
         // when
         // then
-
         final List<ReservationResponse> reservations = RestAssured.given().log().all()
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
@@ -259,42 +214,18 @@ public class MissionStepTest {
     @DisplayName("예약 추가/삭제 API를 활용하고, 조회로 확인할 수 있다")
     void sixth() {
         // given
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.now()));
-
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(
-                        ThemeName.from("공포 제목"),
-                        ThemeDescription.from("공포 설명"),
-                        ThemeThumbnail.from("gongpo.com/image/1")
-                ));
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
-
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
+                reservationTime.getId().getValue(),
                 theme.getId().getValue(),
-                user.getId().getValue()
+                normalUser.getId().getValue()
         );
-
-        final Claims claims = Jwts.claims()
-                .add(UserSession.Fields.id, user.getId().getValue())
-                .add(UserSession.Fields.name, user.getName().getValue())
-                .add(UserSession.Fields.role, user.getRole().name())
-                .build();
 
         // when
         // then
         final ReservationResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(normalUser))
                 .body(request)
                 .when().post(ReservationController.BASE_PATH)
                 .then().log().all()
@@ -305,7 +236,8 @@ public class MissionStepTest {
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/%d".formatted(response.reservationId()))
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
+                .when().delete("/admin/reservations/%d".formatted(response.reservationId()))
                 .then().log().all()
                 .statusCode(204);
 
@@ -317,18 +249,16 @@ public class MissionStepTest {
     @Test
     @DisplayName("시간으로 API를 관리할 수 있다")
     void seventh() {
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.now()));
-
         RestAssured.given().log().all()
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/times/%d".formatted(time.getId().getValue()))
+                .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
+                .when().delete("/times/%d".formatted(reservationTime.getId().getValue()))
                 .then().log().all()
                 .statusCode(204);
     }

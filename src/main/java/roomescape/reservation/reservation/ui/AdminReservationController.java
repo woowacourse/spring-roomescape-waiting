@@ -58,9 +58,10 @@ public class AdminReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable final Long id) {
+    public ResponseEntity<Void> delete(@PathVariable final Long id,
+                                       @SignInUser final UserSession userSession) {
         reservationFacade.delete(
-                ReservationId.from(id));
+                ReservationId.from(id), userSession);
         return ResponseEntity.noContent().build();
     }
 }

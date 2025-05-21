@@ -2,6 +2,7 @@ package roomescape.reservation.time.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.time.application.dto.CreateReservationTimeRequest;
 import roomescape.reservation.time.application.dto.ReservationTimeResponse;
 import roomescape.reservation.time.application.service.ReservationTimeCommandService;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReservationTimeFacadeImpl implements ReservationTimeFacade {
 
     private final ReservationTimeQueryService reservationTimeQueryService;

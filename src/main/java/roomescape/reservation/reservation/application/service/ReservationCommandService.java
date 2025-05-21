@@ -60,4 +60,8 @@ public class ReservationCommandService {
 
         throw new NotFoundException(DomainTerm.RESERVATION, id);
     }
+
+    public void delete(final Reservation target) {
+        reservationRepository.delete(target);
+    }
 }

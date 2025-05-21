@@ -32,4 +32,6 @@ public interface ReservationRepository {
     Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(ReservationDate startDate, ReservationDate endDate, int count);
 
     List<Reservation> findAllByParams(UserId userId, ThemeId themeId, ReservationDate reservationDate, ReservationDate reservationDate1);
+
+    void delete(Reservation target);
 }

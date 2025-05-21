@@ -2,6 +2,7 @@ package roomescape.theme.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.reservation.domain.ReservationDate;
 import roomescape.theme.application.dto.CreateThemeRequest;
 import roomescape.theme.application.dto.ThemeResponse;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ThemeFacadeImpl implements ThemeFacade {
 
     private final ThemeQueryService themeQueryService;

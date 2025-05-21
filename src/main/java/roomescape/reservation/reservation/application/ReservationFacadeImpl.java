@@ -2,6 +2,8 @@ package roomescape.reservation.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.auth.aop.ForbiddenException;
 import roomescape.auth.session.UserSession;
 import roomescape.reservation.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.reservation.application.dto.ReservationResponse;
@@ -18,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReservationFacadeImpl implements ReservationFacade {
 
     private final ReservationQueryService reservationQueryService;
@@ -63,7 +66,12 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public void delete(final ReservationId id) {
-        reservationCommandService.delete(id);
+    public void delete(final ReservationId id, final UserSession userSession) {
+        final Reservation target = reservationQueryService.getById(id);
+        if (userSession.canManage(target.getUserId())) {
+            reservationCommandService.delete(id);
+            return;
+        }
+        throw new ForbiddenException(userSession.id(), userSession.role(), target.getUserId());
     }
 }

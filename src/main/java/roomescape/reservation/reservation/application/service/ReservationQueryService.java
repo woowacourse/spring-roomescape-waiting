@@ -3,18 +3,21 @@ package roomescape.reservation.reservation.application.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.domain.DomainTerm;
+import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.reservation.application.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.reservation.application.dto.AvailableReservationTimeResponse;
+import roomescape.reservation.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.reservation.application.dto.ThemeToBookCountResponse;
 import roomescape.reservation.reservation.domain.BookedCount;
 import roomescape.reservation.reservation.domain.BookedStatus;
 import roomescape.reservation.reservation.domain.Reservation;
 import roomescape.reservation.reservation.domain.ReservationDate;
+import roomescape.reservation.reservation.domain.ReservationId;
 import roomescape.reservation.reservation.domain.ReservationRepository;
 import roomescape.reservation.time.application.service.ReservationTimeQueryService;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeId;
-import roomescape.reservation.reservation.application.dto.ReservationSearchRequest;
 import roomescape.theme.domain.ThemeId;
 import roomescape.user.domain.UserId;
 
@@ -29,6 +32,11 @@ public class ReservationQueryService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeQueryService reservationTimeQueryService;
+
+    public Reservation getById(final ReservationId id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(DomainTerm.RESERVATION, id));
+    }
 
     public List<Reservation> getAll() {
         return reservationRepository.findAll();
