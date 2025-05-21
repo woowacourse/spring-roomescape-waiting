@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // TODO: [2단계] url 수정
-
     fetch('/members/reservations-mine') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
@@ -17,12 +15,6 @@ function render(data) {
 
     data.forEach(item => {
         const row = tableBody.insertRow();
-
-        /*
-        TODO: [2단계] 내 예약 목록 조회 기능
-              response 명세에 맞춰 값 설정
-         */
-
         const theme = item.theme.name;
         const date = item.date;
         const time = item.time.startAt;
