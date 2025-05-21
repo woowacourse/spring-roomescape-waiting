@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
 import roomescape.exception.UnauthorizedException;
-import roomescape.persistence.repository.MemberRepository;
+import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.presentation.dto.LoginMember;
 
 @Service

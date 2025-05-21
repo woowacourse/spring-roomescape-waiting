@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.UnauthorizedException;
-import roomescape.persistence.repository.MemberRepository;
+import roomescape.infrastructure.repository.MemberRepository;
 
 @DataJpaTest
 @Sql("classpath:data-authService.sql")

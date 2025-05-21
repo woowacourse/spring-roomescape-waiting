@@ -16,10 +16,10 @@ import roomescape.business.domain.Reservation;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.MemberRepository;
+import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
@@ -39,14 +39,12 @@ public class ReservationServiceTest {
 
     @Autowired
     public ReservationServiceTest(final MemberRepository memberRepository,
-                                  final ReservationTimeRepository reservationTimeRepository,
                                   final ThemeRepository themeRepository,
+                                  final ReservationTimeRepository reservationTimeRepository,
                                   final ReservationRepository reservationRepository) {
 
         this.reservationService = new ReservationService(reservationRepository,
-                memberRepository,
-                reservationTimeRepository,
-                themeRepository);
+                memberRepository, reservationTimeRepository, themeRepository);
         this.reservationRepository = reservationRepository;
     }
 
