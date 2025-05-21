@@ -4,17 +4,19 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.ReservationTime;
 import roomescape.infrastructure.JpaReservationTimeRepository;
 import roomescape.infrastructure.ReservationTimeRepositoryAdaptor;
 
 @DataJpaTest
-@Sql(value = "/sql/testReservationTime.sql")
+@Sql(value = "/sql/testReservationTime.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationTimeRepositoryAdaptorTest {
 
     @Autowired
@@ -22,24 +24,23 @@ class ReservationTimeRepositoryAdaptorTest {
 
     private ReservationTimeRepositoryAdaptor reservationTimeRepositoryAdaptor;
 
+    private List<ReservationTime> reservationTimes;
+
     @BeforeEach
     void setUp() {
         reservationTimeRepositoryAdaptor = new ReservationTimeRepositoryAdaptor(jpaReservationTimeRepository);
+        reservationTimes = reservationTimeRepositoryAdaptor.findAll();
     }
 
     @Test
     void 모든_예약시간_조회_테스트() {
-        //given
-        List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
-
-        //when & then
         assertThat(reservationTimes.size()).isEqualTo(3);
     }
 
     @Test
-    void deleteById() {
+    void id로_삭제_테스트() {
         //given
-        Long id = 1L;
+        Long id = reservationTimes.getFirst().getId();
         reservationTimeRepositoryAdaptor.deleteById(id);
         List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
 
@@ -48,23 +49,23 @@ class ReservationTimeRepositoryAdaptorTest {
     }
 
     @Test
-    void findById() {
+    void id로_찾기_테스트() {
         //given
-        Long id = 1L;
-        ReservationTime reservationTime = reservationTimeRepositoryAdaptor.findById(id).get();
+        Long id = reservationTimes.getFirst().getId();
 
         //when & then
-        assertThat(reservationTime.getId()).isEqualTo(id);
+        Optional<ReservationTime> reservationTime = reservationTimeRepositoryAdaptor.findById(id);
+        assertThat(reservationTime).isPresent();
     }
 
     @Test
-    void save() {
+    void 저장_테스트() {
         //given
         ReservationTime reservationTime = ReservationTime.createWithoutId(LocalTime.of(18, 0));
-        reservationTimeRepositoryAdaptor.save(reservationTime);
-        List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
 
         //when & then
+        reservationTimeRepositoryAdaptor.save(reservationTime);
+        List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
         assertThat(reservationTimes.size()).isEqualTo(4);
     }
 }

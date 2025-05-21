@@ -115,6 +115,7 @@ public class ThemeApiTest {
         // given
         Member member1 = memberRepository.findById(1L).get();
         ReservationTime time1 = timeRepository.findById(1L).get();
+
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
         Theme theme3 = themeRepository.findById(3L).get();
@@ -127,6 +128,7 @@ public class ThemeApiTest {
         reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time1, theme2));
 
         reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(3), time1, theme3));
+
         // when & then
         RestAssured.given()
                 .contentType(ContentType.JSON)

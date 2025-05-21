@@ -8,13 +8,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.auth.Role;
 import roomescape.domain.Member;
 import roomescape.infrastructure.JpaMemberRepository;
 import roomescape.infrastructure.MemberRepositoryAdapter;
 
 @DataJpaTest
-@Sql(value = "/sql/testMember.sql")
+@Sql(value = "/sql/testMember.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class MemberRepositoryAdapterTest {
 
     @Autowired
@@ -52,9 +53,9 @@ class MemberRepositoryAdapterTest {
         //given
         String email = "harden@google.com";
         String expectedName = "제임스하든";
-        Member member = memberRepositoryAdapter.findByEmail(email).get();
 
         //when & then
+        Member member = memberRepositoryAdapter.findByEmail(email).get();
         assertThat(member.getName()).isEqualTo(expectedName);
     }
 
@@ -62,10 +63,11 @@ class MemberRepositoryAdapterTest {
     void 멤버_저장_테스트() {
         //given
         Member member = Member.createWithoutId("르브론제임스", "james@yahoo.com", "1234", Role.MEMBER);
-        memberRepositoryAdapter.save(member);
 
-        List<Member> allMember = memberRepositoryAdapter.findAll();
         //when & then
+        memberRepositoryAdapter.save(member);
+        List<Member> allMember = memberRepositoryAdapter.findAll();
+        
         assertThat(allMember.size()).isEqualTo(5);
     }
 }
