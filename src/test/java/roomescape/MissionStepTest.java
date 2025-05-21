@@ -48,6 +48,19 @@ class MissionStepTest {
 
     @DisplayName("일단계")
     @Test
+    void loginWithNotEmailFormatTest() {
+        final LoginRequest loginRequest = new LoginRequest("adminemail.com", "1234");
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when()
+                .post("/login")
+                .then()
+                .statusCode(400);
+    }
+
+    @DisplayName("일단계")
+    @Test
     void level1() {
         RestAssured.given().log().all()
                 .sessionId(sessionId)

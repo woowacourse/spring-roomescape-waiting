@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,7 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody final LoginRequest loginRequest, final HttpSession session) {
+    public ResponseEntity<Void> login(@RequestBody @Valid final LoginRequest loginRequest, final HttpSession session) {
         final Long memberId = authService.authenticate(loginRequest);
 
         session.setAttribute(SESSION_KEY, memberId);
