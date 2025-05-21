@@ -2,6 +2,7 @@ package roomescape.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.member.Member;
@@ -25,6 +26,11 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
     }
 
     @Override
+    public Optional<Reservation> findById(final Long id) {
+        return reservationRepository.findById(id);
+    }
+
+    @Override
     public List<Reservation> findAllByMember(final Member member) {
         return reservationRepository.findAllByMember(member);
     }
@@ -42,13 +48,23 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
     }
 
     @Override
-    public void deleteById(final Long id) {
-        reservationRepository.deleteById(id);
+    public List<Reservation> findAllByReservationStatus(final ReservationStatus reservationStatus) {
+        return reservationRepository.findAllByReservationStatus(reservationStatus);
     }
 
     @Override
-    public boolean existsById(final Long id) {
-        return reservationRepository.existsById(id);
+    public List<Reservation> findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByAsc(final LocalDate date,
+                                                                                         final ReservationTime reservationTime,
+                                                                                         final Theme theme,
+                                                                                         final ReservationStatus reservationStatus) {
+        return reservationRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByIdAsc(date, reservationTime,
+                theme,
+                reservationStatus);
+    }
+
+    @Override
+    public void deleteById(final Long id) {
+        reservationRepository.deleteById(id);
     }
 
     @Override

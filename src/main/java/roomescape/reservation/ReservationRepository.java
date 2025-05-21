@@ -8,14 +8,19 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
     List<Reservation> findAllByThemeAndDate(Theme theme, LocalDate date);
-
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
-
     List<Reservation> findAllByMember(Member member);
+    List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
+    List<Reservation> findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByIdAsc(
+            LocalDate date,
+            ReservationTime reservationTime,
+            Theme theme,
+            ReservationStatus reservationStatus
+    );
 
     boolean existsByReservationTime(ReservationTime reservationTime);
-
     boolean existsByTheme(Theme theme);
     boolean existsByDateAndReservationTimeAndThemeAndMember(
             LocalDate date,

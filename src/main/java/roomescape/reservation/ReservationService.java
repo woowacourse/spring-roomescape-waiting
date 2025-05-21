@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
@@ -103,12 +104,38 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> readAllWaiting() {
+        return reservationRepositoryFacade.findAllByReservationStatus(ReservationStatus.WAITING).stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    @Transactional
     public void deleteById(final Long id) {
-        if (!reservationRepositoryFacade.existsById(id)) {
-            throw new ReservationNotFoundException();
-        }
+        final Reservation reservation = reservationRepositoryFacade.findById(id)
+                .orElseThrow(ReservationNotFoundException::new);
+
+        pendingNextReservation(reservation);
 
         reservationRepositoryFacade.deleteById(id);
+    }
+
+    private void pendingNextReservation(final Reservation reservation) {
+        if (reservation.isWaiting()) {
+            return;
+        }
+
+        final List<Reservation> waitingReservations = reservationRepositoryFacade.findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByAsc(
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme(),
+                ReservationStatus.WAITING
+        );
+        if (!waitingReservations.isEmpty()) {
+            final Reservation nextReservation = waitingReservations.getFirst();
+            nextReservation.pending();
+            reservationRepositoryFacade.save(nextReservation);
+        }
     }
 
     private void validatePastDateTime(final LocalDate date, final ReservationTime reservationTime) {
@@ -133,7 +160,7 @@ public class ReservationService {
             final Theme theme
     ) {
         if (reservationRepositoryFacade.existsByReservationTimeAndDateAndThemeAndReservationStatus(
-                        reservationTime, date, theme, ReservationStatus.PENDING)) {
+                reservationTime, date, theme, ReservationStatus.PENDING)) {
             throw new ReservationConflictException();
         }
     }
@@ -158,9 +185,10 @@ public class ReservationService {
                 .orElseThrow(ReservationNotExistsMemberException::new);
     }
 
-    private void validateDuplicateReservation(final ReservationRequest request, final ReservationTime reservationTime, final Theme theme,
+    private void validateDuplicateReservation(final ReservationRequest request, final ReservationTime reservationTime,
+                                              final Theme theme,
                                               final Member member) {
-        if(reservationRepositoryFacade.existsByDateAndReservationTimeAndThemeAndMember(
+        if (reservationRepositoryFacade.existsByDateAndReservationTimeAndThemeAndMember(
                 request.date(), reservationTime, theme, member)) {
             throw new ReservationConflictException();
         }

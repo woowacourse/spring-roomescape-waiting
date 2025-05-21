@@ -62,4 +62,12 @@ public class Reservation {
     ) {
         this(null, date, member, reservationTime, theme, reservationStatus);
     }
+
+    public boolean isWaiting() {
+        return reservationStatus == ReservationStatus.WAITING;
+    }
+
+    public void pending(){
+        this.reservationStatus = ReservationStatus.PENDING;
+    }
 }

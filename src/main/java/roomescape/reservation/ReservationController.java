@@ -57,6 +57,12 @@ public class ReservationController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationResponse>> readAllWaiting() {
+        final List<ReservationResponse> response = reservationService.readAllWaiting();
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(
             @PathVariable("id") final Long id
