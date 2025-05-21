@@ -7,12 +7,16 @@ import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.waiting.WaitingResponse;
 import roomescape.exception.reservation.ReservationInPastException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
+import roomescape.exception.waiting.ReservationWaitingDuplicateException;
+import roomescape.exception.waiting.WaitingAlreadyExistException;
+import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
 import roomescape.repository.waiting.WaitingRepsitory;
@@ -23,12 +27,14 @@ public class WaitingService {
     private final WaitingRepsitory waitingRepsitory;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(WaitingRepsitory waitingRepsitory, ReservationTimeRepository timeRepository,
-                          ThemeRepository themeRepository) {
+                          ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.waitingRepsitory = waitingRepsitory;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public WaitingResponse create(ReservationRequest request, Member member) {
@@ -42,6 +48,16 @@ public class WaitingService {
             throw new ReservationInPastException();
         }
 
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(request.date(), request.timeId(),
+                request.themeId(), member.getId())) {
+            throw new ReservationWaitingDuplicateException();
+        }
+
+        if (waitingRepsitory.existsByDateAndTimeIdAndThemeIdAndMemberId(request.date(), request.timeId(),
+                request.themeId(), member.getId())) {
+            throw new WaitingAlreadyExistException();
+        }
+
         Waiting waiting = new Waiting(null, request.date(), reservationTime, theme, member);
 
         return WaitingResponse.from(waitingRepsitory.save(waiting));
@@ -49,10 +65,16 @@ public class WaitingService {
 
     public List<MemberReservationResponse> getWaitingByMember(Member member) {
 
-        List<Waiting> waitings = waitingRepsitory.findAllByMember(member);
+        List<WaitingWithRank> waitings = waitingRepsitory.findWaitingsWithRankByMemberId(member.getId());
 
         return waitings.stream()
                 .map(MemberReservationResponse::from)
                 .toList();
+    }
+
+    public void deleteWaitingById(Long id) {
+
+        waitingRepsitory.deleteById(id);
+
     }
 }

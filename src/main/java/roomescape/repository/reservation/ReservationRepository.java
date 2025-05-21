@@ -1,5 +1,6 @@
 package roomescape.repository.reservation;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                          LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, @NotNull Long timeId, @NotNull Long themeId,
+                                                       Long memberId);
 }
