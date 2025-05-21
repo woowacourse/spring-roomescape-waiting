@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import roomescape.auth.dto.LoginMember;
-import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -51,10 +50,8 @@ public class ReservationService {
     }
 
     public ReservationResponse saveReservation(final ReservationRequest request, final LoginMember loginMember) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+        final ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
+        final Theme theme = themeRepository.getById(request.themeId());
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)
                 && !request.isWaiting()) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
@@ -81,12 +78,9 @@ public class ReservationService {
     }
 
     public ReservationResponse saveAdminReservation(final AdminReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-        final Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
+        final ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
+        final Theme theme = themeRepository.getById(request.themeId());
+        final Member member = memberRepository.getById(request.memberId());
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
@@ -97,8 +91,7 @@ public class ReservationService {
     }
 
     public void deleteReservation(final Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다. id: " + id));
+        Reservation reservation = reservationRepository.getById(id);
         Long deleteRank = reservation.getWaiting().getRank();
         if (reservation.getWaiting().getStatus() == ReservationStatus.BOOKED) {
             deleteRank = 0L;

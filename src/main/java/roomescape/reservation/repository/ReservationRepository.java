@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
@@ -16,6 +17,10 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    default Reservation getById(Long id) {
+        return findById(id).orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다. id: " + id));
+    }
 
     @EntityGraph(attributePaths = {"theme", "member", "time"})
     @Query("""

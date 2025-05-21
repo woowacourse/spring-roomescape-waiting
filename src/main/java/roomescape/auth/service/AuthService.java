@@ -1,12 +1,14 @@
 package roomescape.auth.service;
 
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginCheckResponse;
 import roomescape.auth.dto.LoginMember;
 import roomescape.auth.dto.LoginRequest;
@@ -28,8 +30,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
 
     public String createToken(final LoginRequest loginRequest) {
-        final Member member = memberRepository.findByEmailAndPassword(loginRequest.email(), loginRequest.password())
-                .orElseThrow(() -> new UnauthorizedException("이메일 또는 패스워드가 올바르지 않습니다."));
+        final Member member = memberRepository.getByEmailAndPassword(loginRequest.email(), loginRequest.password());
         return jwtTokenProvider.createToken(createClaims(member));
     }
 
