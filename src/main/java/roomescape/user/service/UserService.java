@@ -78,6 +78,19 @@ public class UserService {
         return dtos;
     }
 
+    @Transactional
+    public void deleteReservationByMember(Long waitingId, User member) {
+        validateExistsUser(member.getId());
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기입니다."));
+
+        if (!waiting.getMember().equals(member)) {
+            throw new IllegalArgumentException("본인의 예약 대기만 삭제할 수 있습니다.");
+        }
+
+        waitingRepository.deleteById(waitingId);
+    }
+
     private void validateExistsUser(Long id) {
         findByIdOrThrow(id);
     }

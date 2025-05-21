@@ -61,4 +61,8 @@ public class Waiting {
     public Theme getTheme() {
         return theme;
     }
+
+    public User getMember() {
+        return member;
+    }
 }
