@@ -2,8 +2,11 @@ package roomescape.waiting;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
+import roomescape.exception.custom.reason.auth.AuthorizationException;
 import roomescape.exception.custom.reason.reservation.*;
+import roomescape.exception.custom.reason.waiting.WaitingNotFoundException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
 import roomescape.reservation.Reservation;
@@ -45,26 +48,49 @@ public class WaitingService {
         return WaitingResponse.of(savedWaiting, reservationResponse);
     }
 
-    private Long getWaitingRank(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
-        final List<Reservation> waitings = reservationRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatus(date, reservationTime, theme, ReservationStatus.WAITING);
-        final Long rank = (long) (waitings.size() + 1);
-        return rank;
+    @Transactional
+    public void deleteById(final Long reservationId, final LoginMember member) {
+        Reservation reservation = getReservationById(reservationId);
+        Waiting waiting = getWaitingByReservation(reservation);
+
+        Member waitingMember = reservation.getMember();
+        if (!isAuthorized(member, waitingMember)) {
+            throw new AuthorizationException();
+        }
+
+        waitingRepository.delete(waiting);
+        reservationRepository.delete(reservation);
+
+        Long rank = waiting.getRank();
+        List<Waiting> waitingsAfterRank = waitingRepository.findWaitingGreaterThanRank(
+                waiting.getReservation().getDate(),
+                waiting.getReservation().getReservationTime(),
+                waiting.getReservation().getTheme(),
+                rank);
+        waitingsAfterRank.forEach(Waiting::decrementRank);
     }
 
     private Reservation saveReservation(final WaitingRequest request, final ReservationTime reservationTime, final Member member, final Theme theme) {
         validatePastDateTime(request.date(), reservationTime);
         final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme, ReservationStatus.WAITING);
-        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
-        return savedReservation;
+        return reservationRepository.save(notSavedReservation);
+    }
+
+    private boolean isAuthorized(final LoginMember member, final Member waitingMember) {
+        return member.role().isAdmin() || waitingMember.isEmailEquals(member.email());
+    }
+
+    private Long getWaitingRank(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
+        final List<Reservation> waitings = reservationRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatus(date, reservationTime, theme, ReservationStatus.WAITING);
+        return (long) (waitings.size() + 1);
     }
 
     private void validatePastDateTime(final LocalDate date, ReservationTime reservationTime) {
         final LocalDate today = LocalDate.now();
-        final LocalDate reservationDate = date;
-        if (reservationDate.isBefore(today)) {
+        if (date.isBefore(today)) {
             throw new ReservationPastDateException();
         }
-        if (reservationDate.isEqual(today)) {
+        if (date.isEqual(today)) {
             validatePastTime(reservationTime);
         }
     }
@@ -88,5 +114,15 @@ public class WaitingService {
     private Member getMemberByEmail(final String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(ReservationNotExistsMemberException::new);
+    }
+
+    private Reservation getReservationById(final Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    private Waiting getWaitingByReservation(final Reservation reservation) {
+        return waitingRepository.findByReservation(reservation)
+                .orElseThrow(WaitingNotFoundException::new);
     }
 }

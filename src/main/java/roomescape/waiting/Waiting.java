@@ -27,4 +27,8 @@ public class Waiting {
         this.reservation = reservation;
         this.rank = rank;
     }
+
+    public void decrementRank() {
+        rank = rank - 1;
+    }
 }

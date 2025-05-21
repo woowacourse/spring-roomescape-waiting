@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.auth.AuthenticationPrincipal;
 import roomescape.auth.dto.LoginMember;
 import roomescape.waiting.dto.WaitingRequest;
@@ -27,5 +24,14 @@ public class WaitingController {
     ) {
         final WaitingResponse response = waitingService.create(request, member);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(
+            @PathVariable("id") final Long id,
+            @AuthenticationPrincipal final LoginMember member
+    ) {
+        waitingService.deleteById(id, member);
+        return ResponseEntity.noContent().build();
     }
 }
