@@ -54,6 +54,15 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
 
     @Query("""
+            select exists(
+            select w from Waiting w
+            where w.reservationDatetime.reservationDate.date = :date
+            and w.reservationDatetime.reservationTime.id = :timeId
+            )
+            """)
+    boolean existsByDateAndTimeId(@Param("date") LocalDate date, @Param("timeId") Long timeId);
+
+    @Query("""
             select  exists (
                 select w
                 from Waiting w
@@ -63,5 +72,17 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     boolean existsByIdAndReserverId(@Param("id") Long id, @Param("memberId") Long memberId);
 
-    boolean existsById(Long id);
+    @Query("""
+                select w
+                from Waiting w
+                join fetch w.reserver
+                where w.reservationDatetime.reservationDate.date = :date
+                  and w.reservationDatetime.reservationTime.id = :timeId
+                order by w.id asc
+            """)
+    List<Waiting> findByDateAndTimeId(
+            @Param("date") LocalDate date,
+            @Param("timeId") Long timeId
+    );
+
 }

@@ -53,4 +53,8 @@ public class ReservationDateTime {
     public LocalTime getStartAt() {
         return reservationTime.getStartAt();
     }
+
+    public Long getTimeId() {
+        return reservationTime.getId();
+    }
 }

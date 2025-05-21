@@ -18,7 +18,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     boolean existsByDateAndTimeId(@Param(value = "date") LocalDate date, @Param(value = "timeId") Long timeId);
 
-
     @Query("""
             select exists
             (select r from Reservation r
@@ -32,6 +31,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param(value = "date") LocalDate date,
             @Param(value = "timeId") Long timeId
     );
+
     @Query("""
              select exists
                 (select r from Reservation r
@@ -40,6 +40,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByTimeId(@Param(value = "timeId") Long timeId);
 
     boolean existsByTheme_Id(Long themeId);
+
+    @Query("""
+            select exists(
+            select r from Reservation r
+            where r.id = :id and r.reserver.id = :memberId)
+            """)
+    boolean existsByIdAndMemberId(Long id, Long memberId);
 
     @Query("""
             select count(*) from Reservation r

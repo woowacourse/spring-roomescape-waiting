@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,8 @@ import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ReservationServiceTest {
@@ -45,6 +48,8 @@ class ReservationServiceTest {
 
     @Autowired
     private CleanUp cleanUp;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -104,14 +109,14 @@ class ReservationServiceTest {
 
         Reservation reservation = reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
 
-        reservationService.deleteById(reservation.getId());
+        reservationService.delete(reservation.getId());
 
         assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
     }
 
     @Test
     void 존재하지_않는_예약을_삭제할_수_없다() {
-        assertThatThrownBy(() -> reservationService.deleteById(1L))
+        assertThatThrownBy(() -> reservationService.delete(1L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
     }
@@ -169,5 +174,41 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("예약 시간을 찾을 수 없습니다.");
+    }
+
+    @Test
+    void 예약자가_취소하면_대기_예약자가_예약이_된다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Member 유저2 = memberDbFixture.유저2_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        // 유저1이 예약
+        reservationRepository.save(
+                Reservation.builder()
+                        .reserver(유저1)
+                        .reservationDateTime(내일_열시)
+                        .theme(공포)
+                        .build()
+        );
+
+        waitingRepository.save(Waiting.builder()
+                .reservationDatetime(내일_열시)
+                .reserver(유저2)
+                .theme(공포)
+                .build());
+
+        // when: 유저1의 예약 취소(삭제)
+        reservationService.delete(유저1.getId());
+
+        // then: 유저2의 대기 예약이 예약으로 승격되었는지 확인
+        System.out.println("====검색===");
+        List<Reservation> reservations = reservationRepository.findAll();
+        assertThat(reservations)
+                .anyMatch(r -> r.getReserver().getId().equals(유저2.getId())
+                        && r.getReservationDatetime().getTimeId().equals(내일_열시.getTimeId())
+                        && r.getReservationDatetime().getDate().equals(내일_열시.getDate())
+                        && r.getTheme().getId().equals(공포.getId()));
     }
 }

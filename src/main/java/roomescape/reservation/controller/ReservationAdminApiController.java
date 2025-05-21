@@ -60,7 +60,7 @@ public class ReservationAdminApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteById(id);
+        reservationService.delete(id);
 
         return ResponseEntity
                 .status(NO_CONTENT)

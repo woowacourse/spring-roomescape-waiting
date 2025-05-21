@@ -25,7 +25,7 @@ public class WaitingAdminApiController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<WaitingInfoResponse>>> readAll() {
-        List<WaitingInfoResponse> responses = waitingService.getAll();
+        List<WaitingInfoResponse> responses = waitingService.getAllInfo();
 
         return ResponseEntity.ok(ApiResponse.success(READ_WAITING_SUCCESS_CODE, responses));
     }

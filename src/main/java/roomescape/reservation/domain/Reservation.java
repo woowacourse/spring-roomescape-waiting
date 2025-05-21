@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+import roomescape.waiting.domain.Waiting;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -56,6 +57,14 @@ public class Reservation {
                 .build();
     }
 
+    public static Reservation from(Waiting waiting){
+        return Reservation.builder()
+                .reserver(waiting.getReserver())
+                .reservationDateTime(waiting.getReservationDatetime())
+                .theme(waiting.getTheme())
+                .build();
+    }
+
     public String getReserverName() {
         return reserver.getName();
     }
@@ -73,6 +82,6 @@ public class Reservation {
     }
 
     public Long getTimeId() {
-        return reservationDatetime.getReservationTime().getId();
+        return reservationDatetime.getTimeId();
     }
 }

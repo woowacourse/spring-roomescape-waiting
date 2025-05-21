@@ -43,4 +43,8 @@ public class ReservationQueryManager {
     public boolean existReservation(Long memberId, LocalDate date, Long timeId) {
         return reservationRepository.existsByMemberIdAndDateAndTimeId(memberId, date, timeId);
     }
+
+    public boolean existsReservation(LocalDate date, Long timeId) {
+        return reservationRepository.existsByDateAndTimeId(date, timeId);
+    }
 }

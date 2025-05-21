@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.web.exception.NotAuthorizationException;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberQueryService;
@@ -36,11 +37,18 @@ public class WaitingService implements WaitingQueryService {
 
     @Transactional
     public ReservationResponse waiting(ReserveCommand reserveCommand) {
-        Waiting waiting = reservationWaitingFrom(reserveCommand);
+        validateAvailableWaiting(reserveCommand);
 
+        Waiting waiting = reservationWaitingFrom(reserveCommand);
         Waiting saved = waitingRepository.save(waiting);
 
         return ReservationResponse.from(saved);
+    }
+
+    private void validateAvailableWaiting(ReserveCommand reserveCommand) {
+        if (!reservationQueryManager.existsReservation(reserveCommand.date(), reserveCommand.timeId())) {
+            throw new InvalidArgumentException("예약 대기를 할 수 없습니다!");
+        }
     }
 
     private Waiting reservationWaitingFrom(ReserveCommand reserveCommand) {
@@ -72,6 +80,7 @@ public class WaitingService implements WaitingQueryService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public List<MyReservationResponse> getWaitingReservations(Long memberId) {
         return waitingRepository.findWithRankByMemberId(memberId)
                 .stream()
@@ -80,14 +89,27 @@ public class WaitingService implements WaitingQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<WaitingInfoResponse> getAll() {
+    @Override
+    public List<WaitingInfoResponse> getAllInfo() {
         return waitingRepository.getAll();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Waiting getFirstWaiting(LocalDate date, Long timeId) {
+        return waitingRepository.findByDateAndTimeId(date, timeId).getFirst();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean existsWaiting(LocalDate date, Long timeId) {
+        return waitingRepository.existsByDateAndTimeId(date, timeId);
     }
 
     @Transactional
     public void deleteByUser(Long id, Long memberId) {
         if (!waitingRepository.existsByIdAndReserverId(id, memberId)) {
-            throw new NotAuthorizationException("해당 예약자가 아닙니다.");
+            throw new NotAuthorizationException("해당 예약 대기자가 아닙니다.");
         }
 
         delete(id);
