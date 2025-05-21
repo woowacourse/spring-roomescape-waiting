@@ -48,6 +48,7 @@ public class ReservationCommandService {
         final Member member = getMember(memberId);
 
         validatePastDateTime(request.date(), time.getStartAt());
+        validateHasSameReservation(request, memberId, theme, time);
 
         final Reservation reservation = new Reservation(request.date(), time, theme, member, request.status());
         return ReservationResponse.from(reservationRepository.save(reservation));
@@ -92,7 +93,16 @@ public class ReservationCommandService {
         }
     }
 
-    private void validateHasConflict(
+    private void validateHasSameReservation(final MemberReservationRequest request, final Long memberId,
+                                            final Theme theme,
+                                            final ReservationTime time) {
+        if (request.status() == BookingStatus.WAITING && reservationRepository.existsByDateAndThemeAndTimeAndMemberId(
+                request.date(), theme, time, memberId)) {
+            throw new ConflictException("이미 예약 확정 및 대기 건수가 있습니다.");
+        }
+    }
+
+    private void validateHasTimeConflict(
             final AdminReservationRequest request,
             final ReservationTime time,
             final Theme theme
