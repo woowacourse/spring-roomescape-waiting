@@ -52,8 +52,8 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/mine")
-    public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
+    @GetMapping("/member")
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
         List<ReservationResult> reservationResults = reservationService.findMemberReservationsById(loginMemberInfo.id());
         return ResponseEntity.ok(MemberReservationResponse.from(reservationResults));
     }
