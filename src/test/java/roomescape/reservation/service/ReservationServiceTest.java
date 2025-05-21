@@ -143,16 +143,6 @@ class ReservationServiceTest {
         }
     }
 
-    @DisplayName("예약 목록을 조회할 수 있다.")
-    @Test
-    void testFindAll() {
-        // given
-        // when
-        List<ReservationResponse> reservations = reservationService.getReservations();
-        // then
-        assertThat(reservations).hasSize(2);
-    }
-
     @DisplayName("예약을 삭제할 수 있다.")
     @Test
     void testCancelById() {
@@ -160,7 +150,7 @@ class ReservationServiceTest {
         // when
         reservationService.cancelReservationById(1L);
         // then
-        assertThat(reservationService.getReservations()).hasSize(1);
+        assertThat(reservationDao.findAll()).hasSize(1);
     }
 
     @DisplayName("나의 예약 목록을 조회할 수 있다.")
