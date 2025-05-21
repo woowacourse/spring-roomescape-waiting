@@ -106,14 +106,12 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Member member)) {
             return false;
         }
-        Member member = (Member) o;
-        if (member.getId() == null || id == null) {
-            return false;
-        }
-        return Objects.equals(id, member.id);
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name)
+            && Objects.equals(email, member.email) && role == member.role && Objects.equals(password,
+            member.password);
     }
 
     @Override
