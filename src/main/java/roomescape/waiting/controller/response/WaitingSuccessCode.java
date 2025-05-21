@@ -10,6 +10,7 @@ public enum WaitingSuccessCode implements SuccessCode {
 
     WAITING_SUCCESS_CODE("RW001", "대기열에 성공적으로 추가되었습니다."),
     DELETE_WAITING_SUCCESS_CODE("RW002", "대기열에서 성공적으로 삭제되었습니다."),
+    READ_WAITING_SUCCESS_CODE("RW003", "대기열을 성공적으로 조회하였습니다."),
     ;
 
     private final String value;

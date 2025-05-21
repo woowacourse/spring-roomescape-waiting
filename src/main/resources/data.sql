@@ -11,6 +11,12 @@ INSERT INTO member (name, role, email, password)
 VALUES ("유저1", "USER", "user1@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
 INSERT INTO member (name, role, email, password)
 VALUES ("유저2", "USER", "user2@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
+INSERT INTO member (name, role, email, password)
+VALUES ("유저3", "USER", "user3@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
+INSERT INTO member (name, role, email, password)
+VALUES ("유저4", "USER", "user4@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
+INSERT INTO member (name, role, email, password)
+VALUES ("유저5", "USER", "user5@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
 
 -- reservation_time
 INSERT INTO reservation_time (start_at)
@@ -69,3 +75,25 @@ INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, '2025-05-15', 2, 2);
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, '2025-05-21', 2, 2);
+
+INSERT INTO reservation (member_id, date, time_id, theme_id)
+VALUES (1, '2025-05-22', 2, 1); -- 유저1, 레벨2 탈출, 11:00
+
+-- waiting
+INSERT INTO waiting (member_id, date, theme_id, time_id)
+VALUES (2, '2025-05-22', 1, 2); -- 유저2, 레벨2 탈출, 11:00
+
+INSERT INTO waiting (member_id, date, theme_id, time_id)
+VALUES (3, '2025-05-22', 1, 2); -- 유저3, 레벨2 탈출, 11:00
+
+INSERT INTO waiting (member_id, date, theme_id, time_id)
+VALUES (4, '2025-05-22', 1, 2); -- 유저4, 레벨2 탈출, 11:00
+
+INSERT INTO waiting (member_id, date, theme_id, time_id)
+VALUES (3, '2025-05-16', 2, 3); -- 유저3, 지하 감옥, 12:00
+
+INSERT INTO waiting (member_id, date, theme_id, time_id)
+VALUES (4, '2025-05-15', 2, 2); -- 유저4, 지하 감옥, 11:00
+
+INSERT INTO waiting (member_id, date, theme_id, time_id)
+VALUES (5, '2025-05-14', 1, 1); -- 유저5, 레벨2 탈출, 10:00

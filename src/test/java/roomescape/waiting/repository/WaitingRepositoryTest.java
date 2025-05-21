@@ -10,6 +10,7 @@ import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.waiting.controller.response.WaitingInfoResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingWithRank;
 import roomescape.theme.domain.Theme;
@@ -62,6 +63,41 @@ class WaitingRepositoryTest {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.getFirst().waiting().getId()).isEqualTo(savedWaitingByUser1.getId());
             softly.assertThat(result.getFirst().rank()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    void 대기_정보를_모두_반환한다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Member 유저2 = memberDbFixture.유저2_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Waiting waiting1 = Waiting.builder()
+                .reserver(유저1)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+        Waiting waiting2 = Waiting.builder()
+                .reserver(유저2)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+
+        waitingRepository.save(waiting1);
+        waitingRepository.save(waiting2);
+
+        List<WaitingInfoResponse> result = waitingRepository.getAll();
+
+        // then
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(2);
+            softly.assertThat(result.get(0).theme()).isEqualTo(공포.getName());
+            softly.assertThat(result.get(1).theme()).isEqualTo(공포.getName());
+            softly.assertThat(result)
+                    .extracting(WaitingInfoResponse::name)
+                    .containsExactlyInAnyOrder(유저1.getName(), 유저2.getName());
         });
     }
 

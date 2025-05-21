@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin/waiting")
 public class WaitingAdminViewController {
 
-    @GetMapping()
+    @GetMapping
     public String getWaiting() {
         return "admin/waiting";
     }

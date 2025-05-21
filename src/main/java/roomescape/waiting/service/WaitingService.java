@@ -19,6 +19,7 @@ import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeQueryService;
 import roomescape.time.service.ReservationTimeQueryService;
+import roomescape.waiting.controller.response.WaitingInfoResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.exception.InAlreadyWaitingException;
 import roomescape.waiting.repository.WaitingRepository;
@@ -76,6 +77,11 @@ public class WaitingService implements WaitingQueryService {
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingInfoResponse> getAll() {
+        return waitingRepository.getAll();
     }
 
     @Transactional

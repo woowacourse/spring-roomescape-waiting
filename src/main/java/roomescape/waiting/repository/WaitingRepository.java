@@ -5,10 +5,23 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.waiting.controller.response.WaitingInfoResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
+
+    @Query("""
+                    select new roomescape.waiting.controller.response.WaitingInfoResponse(
+                        w.id,
+                        w.reserver.name,
+                        w.theme.name,
+                        w.reservationDatetime.reservationDate.date,
+                        w.reservationDatetime.reservationTime.startAt
+                    )
+                    from Waiting w
+            """)
+    List<WaitingInfoResponse> getAll();
 
     @Query("""
             select new roomescape.waiting.dto.WaitingWithRank(
