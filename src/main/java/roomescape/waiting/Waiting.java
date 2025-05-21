@@ -15,7 +15,7 @@ public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private Long id;
 
     @OneToOne
