@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.TestFixtures;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.timeslot.TimeSlotBookStatus;
 import roomescape.domain.user.User;
 
 class ReservationsTest {
@@ -20,9 +21,28 @@ class ReservationsTest {
 
     private static final User user = TestFixtures.anyUserWithNewId();
     private static final LocalDate date = LocalDate.of(2025, 5, 1);
-    private static final TimeSlot time1 = new TimeSlot(LocalTime.of(10, 0));
-    private static final TimeSlot time2 = new TimeSlot(LocalTime.of(11, 0));
-    private static final TimeSlot time3 = new TimeSlot(LocalTime.of(12, 0));
+    private static final Theme theme = TestFixtures.anyThemeWithNewId();
+    private static final TimeSlot time1 = new TimeSlot(1L, LocalTime.of(10, 0));
+    private static final TimeSlot time2 = new TimeSlot(2L, LocalTime.of(11, 0));
+    private static final TimeSlot time3 = new TimeSlot(3L, LocalTime.of(12, 0));
+
+    @Test
+    @DisplayName("주어진 타임 슬롯들에 대해 예약되었는 지 여부를 확인한다.")
+    void checkBookStatuses() {
+        // given
+        var timeSlots = List.of(time1, time2, time3);
+        var reservations = new Reservations(List.of(reservationOf(time1), reservationOf(time2)));
+
+        // when
+        var bookStatuses = reservations.checkBookStatuses(timeSlots);
+
+        // then
+        assertThat(bookStatuses).containsExactly(
+            new TimeSlotBookStatus(time1, true),
+            new TimeSlotBookStatus(time2, true),
+            new TimeSlotBookStatus(time3, false)
+        );
+    }
 
     @Test
     @DisplayName("가지고 있는 예약들에 대해 예약 횟수를 기준으로 최대 주어진 개수만큼 인기 테마를 찾는다.")
@@ -51,6 +71,16 @@ class ReservationsTest {
         assertAll(
             () -> assertThat(popularThemes).containsSequence(theme1, theme2, theme3),
             () -> assertThat(popularThemes).doesNotContain(neverReservedTheme)
+        );
+    }
+
+    private Reservation reservationOf(final TimeSlot timeSlot) {
+        return new Reservation(
+            DUMMY_ID_GENERATOR.incrementAndGet(),
+            user,
+            ReservationDateTime.of(date, timeSlot),
+            theme,
+            ReservationStatus.RESERVED
         );
     }
 

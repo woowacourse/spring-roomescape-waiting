@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.timeslot.TimeSlotBookStatus;
 
 public class Reservations {
 
@@ -16,6 +18,26 @@ public class Reservations {
 
     public Reservations(final List<Reservation> reservations) {
         this.reservations = reservations;
+    }
+
+    public List<TimeSlotBookStatus> checkBookStatuses(final List<TimeSlot> timeSlotsToCheck) {
+        return checkBookStatus(timeSlotsToCheck, reservedTimeSlots());
+    }
+
+    private List<TimeSlot> reservedTimeSlots() {
+        return reservations.stream()
+            .map(Reservation::dateTime)
+            .map(ReservationDateTime::timeSlot)
+            .toList();
+    }
+
+    private List<TimeSlotBookStatus> checkBookStatus(final List<TimeSlot> timeSlots, final List<TimeSlot> reservedTimeSlots) {
+        return timeSlots.stream()
+            .map(timeSlot -> {
+                var alreadyBooked = reservedTimeSlots.contains(timeSlot);
+                return new TimeSlotBookStatus(timeSlot, alreadyBooked);
+            })
+            .toList();
     }
 
     public List<Theme> findPopularThemes(final int maxCount) {

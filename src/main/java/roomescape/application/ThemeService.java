@@ -40,9 +40,9 @@ public class ThemeService {
         themeRepository.deleteByIdOrElseThrow(id);
     }
 
-    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {
+    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int maxCount) {
         var foundReservations = reservationRepository.findAll(byDateBetween(startDate, endDate));
         var reservations = new Reservations(foundReservations);
-        return reservations.findPopularThemes(count);
+        return reservations.findPopularThemes(maxCount);
     }
 }

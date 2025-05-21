@@ -1,6 +1,6 @@
 package roomescape.domain.timeslot;
 
-public record AvailableTimeSlot(
+public record TimeSlotBookStatus(
         TimeSlot timeSlot,
         boolean alreadyBooked
 ) {
