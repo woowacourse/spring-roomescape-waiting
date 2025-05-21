@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -40,6 +42,9 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme, final ReservationStatus status) {
         this.id = id;
@@ -48,10 +53,11 @@ public class Reservation {
         this.time = Objects.requireNonNull(time, "예약 시간은 null일 수 없습니다.");
         this.theme = Objects.requireNonNull(theme, "예약 테마는 null일 수 없습니다.");
         this.status = Objects.requireNonNull(status, "예약 상태는 null일 수 없습니다.");
+        this.createdAt = LocalDateTime.now();
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme,
-                       final ReservationStatus status) {
+    public Reservation(final Member member, final LocalDate date, final ReservationTime time,
+                       final Theme theme, final ReservationStatus status) {
         this(null, member, date, time, theme, status);
     }
 
