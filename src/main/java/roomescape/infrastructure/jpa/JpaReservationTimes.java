@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.infrastructure.jpa;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -7,6 +7,7 @@ import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 import roomescape.business.model.vo.StartTime;
+import roomescape.infrastructure.jpa.dao.JpaReservationTimeDao;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

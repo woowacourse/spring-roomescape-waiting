@@ -1,4 +1,4 @@
-package roomescape.infrastructure;
+package roomescape.infrastructure.jpa;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;
@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.jpa.dao.JpaThemeDao;
 
 import java.time.LocalDate;
 import java.util.List;

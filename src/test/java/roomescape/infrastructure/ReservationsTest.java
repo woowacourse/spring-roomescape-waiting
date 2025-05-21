@@ -14,6 +14,10 @@ import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.jpa.JpaReservationTimes;
+import roomescape.infrastructure.jpa.JpaReservations;
+import roomescape.infrastructure.jpa.JpaThemes;
+import roomescape.infrastructure.jpa.JpaUsers;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;

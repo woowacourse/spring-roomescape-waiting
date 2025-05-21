@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.jpa.JpaThemes;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;

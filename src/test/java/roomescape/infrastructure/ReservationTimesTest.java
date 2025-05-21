@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.jpa.JpaReservationTimes;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;
