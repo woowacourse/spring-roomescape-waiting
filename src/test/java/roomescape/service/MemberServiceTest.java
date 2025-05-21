@@ -14,11 +14,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
-import roomescape.dto.business.UserCreationContent;
-import roomescape.dto.response.UserProfileResponse;
+import roomescape.dto.business.MemberCreationContent;
+import roomescape.dto.response.MemberProfileResponse;
 import roomescape.exception.local.DuplicatedEmailException;
-import roomescape.exception.local.NotFoundUserException;
-import roomescape.repository.UserRepository;
+import roomescape.exception.local.NotFoundMemberException;
+import roomescape.repository.MemberRepository;
 
 @DataJpaTest
 class MemberServiceTest {
@@ -26,13 +26,13 @@ class MemberServiceTest {
     @Autowired
     private TestEntityManager entityManager;
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
-    private UserService userService;
+    private MemberService memberService;
 
     @BeforeEach
     void setup() {
-        userService = new UserService(userRepository);
+        memberService = new MemberService(memberRepository);
     }
 
     @Nested
@@ -41,7 +41,7 @@ class MemberServiceTest {
 
         @DisplayName("ID를 통해 유저를 조회할 수 있다.")
         @Test
-        void canGetUserById() {
+        void canGetMemberById() {
             // given
             Member expectedMember = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
@@ -49,7 +49,7 @@ class MemberServiceTest {
             entityManager.flush();
 
             // when
-            Member actualMember = userService.getUserById(expectedMember.getId());
+            Member actualMember = memberService.getMemberById(expectedMember.getId());
 
             // then
             assertThat(actualMember).isEqualTo(expectedMember);
@@ -57,20 +57,20 @@ class MemberServiceTest {
 
         @DisplayName("유저가 없는 경우 유저를 조회할 수 없다.")
         @Test
-        void cannotGetUserById() {
+        void cannotGetMemberById() {
             // given
-            long wrongUserId = 100L;
+            long wrongMemberId = 100L;
 
             // when & then
-            assertThatThrownBy(() -> userService.getUserById(wrongUserId))
-                    .isInstanceOf(NotFoundUserException.class)
+            assertThatThrownBy(() -> memberService.getMemberById(wrongMemberId))
+                    .isInstanceOf(NotFoundMemberException.class)
                     .hasMessage("해당 유저를 찾을 수 없습니다.");
         }
     }
 
     @DisplayName("모든 유저의 프로필을 조회할 수 있다.")
     @Test
-    void canFindAllUserProfile() {
+    void canFindAllMemberProfile() {
         // given
         Member firstMember = entityManager.persist(
                 Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123"));
@@ -80,11 +80,11 @@ class MemberServiceTest {
         entityManager.flush();
 
         // when
-        List<UserProfileResponse> allUserProfile = userService.findAllUserProfile();
+        List<MemberProfileResponse> allMemberProfile = memberService.findAllMemberProfile();
 
         // then
-        assertThat(allUserProfile)
-                .extracting(UserProfileResponse::id)
+        assertThat(allMemberProfile)
+                .extracting(MemberProfileResponse::id)
                 .containsExactlyInAnyOrder(firstMember.getId(), secondMember.getId());
     }
 
@@ -94,13 +94,13 @@ class MemberServiceTest {
 
         @DisplayName("유저를 추가할 수 있다.")
         @Test
-        void canAddUser() {
+        void canAddMember() {
             // given
-            UserCreationContent creationContent =
-                    new UserCreationContent(Role.GENERAL, "회원", "test@test.com", "qwer1234!");
+            MemberCreationContent creationContent =
+                    new MemberCreationContent(Role.GENERAL, "회원", "test@test.com", "qwer1234!");
 
             // when
-            UserProfileResponse response = userService.addUser(creationContent);
+            MemberProfileResponse response = memberService.addMember(creationContent);
 
             // then
             Member expectedMember = entityManager.find(Member.class, response.id());
@@ -113,18 +113,18 @@ class MemberServiceTest {
 
         @DisplayName("이메일이 중복인 경우 회원 추가가 불가능하다.")
         @Test
-        void cannotAddUser() {
+        void cannotAddMember() {
             // given
             Member alreadySavedMember = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123"));
 
-            UserCreationContent creationContent =
-                    new UserCreationContent(Role.GENERAL, "회원", alreadySavedMember.getEmail(), "qwer1234!");
+            MemberCreationContent creationContent =
+                    new MemberCreationContent(Role.GENERAL, "회원", alreadySavedMember.getEmail(), "qwer1234!");
 
             entityManager.flush();
 
             // when & then
-            assertThatThrownBy(() -> userService.addUser(creationContent))
+            assertThatThrownBy(() -> memberService.addMember(creationContent))
                     .isInstanceOf(DuplicatedEmailException.class)
                     .hasMessage("중복된 이메일입니다.");
         }

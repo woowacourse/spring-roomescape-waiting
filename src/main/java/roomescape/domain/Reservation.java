@@ -83,7 +83,7 @@ public class Reservation {
         return theme;
     }
 
-    public Member getUser() {
+    public Member getMember() {
         return member;
     }
 

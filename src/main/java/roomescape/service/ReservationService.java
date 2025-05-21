@@ -12,15 +12,15 @@ import roomescape.domain.Theme;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.local.DuplicateReservationException;
+import roomescape.exception.local.NotFoundMemberException;
 import roomescape.exception.local.NotFoundReservationException;
 import roomescape.exception.local.NotFoundReservationTimeException;
 import roomescape.exception.local.NotFoundThemeException;
-import roomescape.exception.local.NotFoundUserException;
 import roomescape.exception.local.PastReservationCreationException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.UserRepository;
 
 @Service
 @Transactional
@@ -29,17 +29,17 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository, UserRepository userRepository
+            ThemeRepository themeRepository, MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.userRepository = userRepository;
+        this.memberRepository = memberRepository;
     }
 
     public List<ReservationResponse> findAllReservations() {
@@ -49,8 +49,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllReservationsByMember(long userId) {
-        Member savedMember = getUserById(userId);
+    public List<ReservationResponse> findAllReservationsByMember(long memberId) {
+        Member savedMember = getMemberById(memberId);
         List<Reservation> reservations = reservationRepository.findByMember(savedMember);
         return reservations.stream()
                 .map(ReservationResponse::new)
@@ -58,16 +58,16 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findReservationsByFilter(
-            long userId, long themeId, LocalDate from, LocalDate to
+            long memberId, long themeId, LocalDate from, LocalDate to
     ) {
-        List<Reservation> reservations = reservationRepository.findReservationsByFilter(userId, themeId, from, to);
+        List<Reservation> reservations = reservationRepository.findReservationsByFilter(memberId, themeId, from, to);
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
-    public ReservationResponse addReservation(long userId, ReservationCreationContent request) {
-        Member member = getUserById(userId);
+    public ReservationResponse addReservation(long memberId, ReservationCreationContent request) {
+        Member member = getMemberById(memberId);
         Theme theme = getThemeById(request.themeId());
         ReservationTime time = getReservationTimeById(request.timeId());
 
@@ -100,9 +100,9 @@ public class ReservationService {
         }
     }
 
-    private Member getUserById(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(NotFoundUserException::new);
+    private Member getMemberById(long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(NotFoundMemberException::new);
     }
 
     private Theme getThemeById(long themeId) {

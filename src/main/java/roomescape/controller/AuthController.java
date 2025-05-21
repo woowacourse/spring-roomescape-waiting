@@ -12,7 +12,7 @@ import roomescape.config.annotation.RequiredAccessToken;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
-import roomescape.dto.response.UserProfileResponse;
+import roomescape.dto.response.MemberProfileResponse;
 import roomescape.service.AuthService;
 
 @RestController
@@ -42,10 +42,10 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public UserProfileResponse checkLogin(
+    public MemberProfileResponse checkLogin(
             @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
-        return new UserProfileResponse(accessTokenContent);
+        return new MemberProfileResponse(accessTokenContent);
     }
 
     @PostMapping("/logout")

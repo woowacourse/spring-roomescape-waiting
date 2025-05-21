@@ -37,11 +37,11 @@ public class AdminController {
 
     @GetMapping("/search")
     public List<ReservationResponse> searchReservationsByFilter(
-            @RequestParam("userId") Long userId,
+            @RequestParam("memberId") Long memberId,
             @RequestParam("themeId") Long themeId,
             @RequestParam("from") LocalDate from,
             @RequestParam("to") LocalDate to
     ) {
-        return reservationService.findReservationsByFilter(userId, themeId, from, to);
+        return reservationService.findReservationsByFilter(memberId, themeId, from, to);
     }
 }

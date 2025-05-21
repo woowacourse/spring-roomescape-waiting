@@ -1,5 +1,5 @@
 INSERT INTO member(role, name, email, password)
-VALUES ('GENERAL', 'member', 'user@email.com', 'qwer1234!'),
+VALUES ('GENERAL', 'member', 'member@email.com', 'qwer1234!'),
        ('ADMIN', 'admin', 'admin@email.com', 'qwer1234!');
 
 INSERT INTO reservation_time(start_at)

@@ -7,8 +7,8 @@ import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
 import roomescape.exception.global.AuthorizationException;
-import roomescape.exception.local.NotFoundUserException;
-import roomescape.repository.UserRepository;
+import roomescape.exception.local.NotFoundMemberException;
+import roomescape.repository.MemberRepository;
 import roomescape.utility.JwtTokenProvider;
 
 @Service
@@ -16,24 +16,24 @@ import roomescape.utility.JwtTokenProvider;
 public class AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
 
-    public AuthService(JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
+    public AuthService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
         this.jwtTokenProvider = jwtTokenProvider;
-        this.userRepository = userRepository;
+        this.memberRepository = memberRepository;
     }
 
     public AccessTokenResponse login(LoginRequest loginRequest) {
-        Member member = getUserByEmail(loginRequest.email());
+        Member member = getMemberByEmail(loginRequest.email());
         validatePasswordForLogin(member, loginRequest.password());
         String accessToken = jwtTokenProvider.createAccessToken(
                 new AccessTokenContent(member.getId(), member.getRole(), member.getName()));
         return new AccessTokenResponse(accessToken);
     }
 
-    private Member getUserByEmail(String email) {
-        return userRepository.findOneByEmail(email)
-                .orElseThrow(NotFoundUserException::new);
+    private Member getMemberByEmail(String email) {
+        return memberRepository.findOneByEmail(email)
+                .orElseThrow(NotFoundMemberException::new);
     }
 
     private void validatePasswordForLogin(Member member, String password) {

@@ -27,13 +27,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                     INNER JOIN ReservationTime AS rt ON r.reservationTime.id = rt.id
                     INNER JOIN Theme AS t ON r.theme.id = t.id
                     INNER JOIN Member AS m ON r.member.id = m.id
-                    WHERE m.id = :userId
+                    WHERE m.id = :memberId
                     AND t.id = :themeId
                     AND r.date BETWEEN :fromDate AND :toDate
                     ORDER BY r.id
                     """)
     List<Reservation> findReservationsByFilter(
-            @Param("userId") Long userId,
+            @Param("memberId") Long memberId,
             @Param("themeId") Long themeId,
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate);

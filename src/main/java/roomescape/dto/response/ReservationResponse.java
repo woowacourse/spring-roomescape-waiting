@@ -9,7 +9,7 @@ public record ReservationResponse(
         String bookState,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        UserProfileResponse user
+        MemberProfileResponse member
 ) {
 
     public ReservationResponse(Reservation reservation) {
@@ -19,7 +19,7 @@ public record ReservationResponse(
                 reservation.getStatus().toString(),
                 new ReservationTimeResponse(reservation.getReservationTime()),
                 new ThemeResponse(reservation.getTheme()),
-                new UserProfileResponse(reservation.getUser())
+                new MemberProfileResponse(reservation.getMember())
         );
     }
 }

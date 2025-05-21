@@ -16,8 +16,8 @@ import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
 import roomescape.exception.global.AuthorizationException;
-import roomescape.exception.local.NotFoundUserException;
-import roomescape.repository.UserRepository;
+import roomescape.exception.local.NotFoundMemberException;
+import roomescape.repository.MemberRepository;
 import roomescape.utility.JwtTokenProvider;
 
 @DataJpaTest
@@ -26,7 +26,7 @@ public class AuthServiceTest {
     @Autowired
     private TestEntityManager entityManager;
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
     private JwtTokenProvider jwtTokenProvider;
     private AuthService authService;
@@ -36,7 +36,7 @@ public class AuthServiceTest {
         jwtTokenProvider = new JwtTokenProvider(
                 "test_secret_key_test_secret_key_test_secret_key_test_secret_key",
                 60000);
-        authService = new AuthService(jwtTokenProvider, userRepository);
+        authService = new AuthService(jwtTokenProvider, memberRepository);
     }
 
     @Nested
@@ -77,7 +77,7 @@ public class AuthServiceTest {
 
             // when & then
             assertThatThrownBy(() -> authService.login(wrongLoginRequest))
-                    .isInstanceOf(NotFoundUserException.class)
+                    .isInstanceOf(NotFoundMemberException.class)
                     .hasMessage("해당 유저를 찾을 수 없습니다.");
         }
 

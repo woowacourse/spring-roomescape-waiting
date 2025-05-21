@@ -55,7 +55,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<ReservationResponse> findAllReservationsByUser(
+    public List<ReservationResponse> findAllReservationsByMember(
             @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
         return reservationService.findAllReservationsByMember(accessTokenContent.id());

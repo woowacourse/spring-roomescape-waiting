@@ -23,19 +23,19 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.dto.business.ReservationCreationContent;
+import roomescape.dto.response.MemberProfileResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.dto.response.UserProfileResponse;
 import roomescape.exception.local.DuplicateReservationException;
+import roomescape.exception.local.NotFoundMemberException;
 import roomescape.exception.local.NotFoundReservationException;
 import roomescape.exception.local.NotFoundReservationTimeException;
 import roomescape.exception.local.NotFoundThemeException;
-import roomescape.exception.local.NotFoundUserException;
 import roomescape.exception.local.PastReservationCreationException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.UserRepository;
 
 @DataJpaTest
 class ReservationServiceTest {
@@ -49,7 +49,7 @@ class ReservationServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
 
     private ReservationService reservationService;
 
@@ -63,7 +63,7 @@ class ReservationServiceTest {
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
-                userRepository);
+                memberRepository);
 
         reservationTime = entityManager.persist(
                 ReservationTime.createWithoutId(LocalTime.of(10, 0)));
@@ -93,8 +93,8 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(allReservations).hasSize(3),
                 () -> assertThat(allReservations)
-                        .extracting(ReservationResponse::user)
-                        .extracting(UserProfileResponse::id)
+                        .extracting(ReservationResponse::member)
+                        .extracting(MemberProfileResponse::id)
                         .containsExactly(member.getId(), member.getId(), member.getId())
         );
     }
@@ -125,8 +125,8 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(allReservations).hasSize(3),
                 () -> assertThat(allReservations)
-                        .extracting(ReservationResponse::user)
-                        .extracting(UserProfileResponse::id)
+                        .extracting(ReservationResponse::member)
+                        .extracting(MemberProfileResponse::id)
                         .containsExactly(member.getId(), member.getId(), member.getId())
         );
     }
@@ -137,7 +137,7 @@ class ReservationServiceTest {
 
         @Test
         @DisplayName("필터 조건으로 특정 유저의 예약을 조회할 수 있다")
-        void canFindReservationsByUserFilter() {
+        void canFindReservationsByMemberFilter() {
             // given
             entityManager.persist(Reservation.createWithoutId(
                     TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
@@ -160,8 +160,8 @@ class ReservationServiceTest {
             assertAll(
                     () -> assertThat(reservations).hasSize(2),
                     () -> assertThat(reservations)
-                            .extracting(ReservationResponse::user)
-                            .extracting(UserProfileResponse::id)
+                            .extracting(ReservationResponse::member)
+                            .extracting(MemberProfileResponse::id)
                             .containsExactly(otherMember.getId(), otherMember.getId())
             );
         }
@@ -243,7 +243,7 @@ class ReservationServiceTest {
             Reservation expectedReservation = entityManager.find(Reservation.class, reservationResponse.id());
             assertAll(
                     () -> assertThat(reservationResponse.id()).isEqualTo(expectedReservation.getId()),
-                    () -> assertThat(reservationResponse.user().id()).isEqualTo(member.getId()),
+                    () -> assertThat(reservationResponse.member().id()).isEqualTo(member.getId()),
                     () -> assertThat(reservationResponse.date()).isEqualTo(creationContent.date()),
                     () -> assertThat(reservationResponse.theme().id()).isEqualTo(creationContent.themeId()),
                     () -> assertThat(reservationResponse.bookState()).isEqualTo(ReservationStatus.BOOKED.toString())
@@ -252,7 +252,7 @@ class ReservationServiceTest {
 
         @DisplayName("유저가 존재하지 않을 경우 예약을 추가할 수 없다.")
         @Test
-        void cannotAddReservationByInvalidUser() {
+        void cannotAddReservationByInvalidMember() {
             // given
             long wrongMemberId = member.getId() + 100;
             ReservationCreationContent creationContent =
@@ -260,7 +260,7 @@ class ReservationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationService.addReservation(wrongMemberId, creationContent))
-                    .isInstanceOf(NotFoundUserException.class)
+                    .isInstanceOf(NotFoundMemberException.class)
                     .hasMessage("해당 유저를 찾을 수 없습니다.");
         }
 

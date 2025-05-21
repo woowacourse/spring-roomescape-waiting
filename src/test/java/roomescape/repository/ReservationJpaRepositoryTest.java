@@ -50,7 +50,7 @@ public class ReservationJpaRepositoryTest {
 
         @Test
         @DisplayName("필터 조건으로 특정 유저의 예약을 조회할 수 있다")
-        void canFindReservationsByUserFilter() {
+        void canFindReservationsByMemberFilter() {
             // given
             Member otherMember = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123"));
@@ -67,7 +67,7 @@ public class ReservationJpaRepositoryTest {
             // then
             assertAll(
                     () -> assertThat(reservations).hasSize(1),
-                    () -> assertThat(reservations.getFirst().getUser()).isEqualTo(member)
+                    () -> assertThat(reservations.getFirst().getMember()).isEqualTo(member)
             );
         }
 
