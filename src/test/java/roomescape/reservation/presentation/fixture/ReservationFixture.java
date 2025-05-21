@@ -9,10 +9,12 @@ import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.presentation.dto.ThemeRequest;
+import roomescape.reservation.presentation.dto.WaitingRequest;
 
 public class ReservationFixture {
 
-    public AdminReservationRequest createAdminReservationRequest(LocalDate date, Long themeId, Long timeId, Long memberId) {
+    public AdminReservationRequest createAdminReservationRequest(LocalDate date, Long themeId, Long timeId,
+                                                                 Long memberId) {
         return new AdminReservationRequest(date, themeId, timeId, memberId);
     }
 
@@ -26,6 +28,19 @@ public class ReservationFixture {
 
     public ThemeRequest createThemeRequest(String name, String description, String thumbnail) {
         return new ThemeRequest(name, description, thumbnail);
+    }
+
+    public WaitingRequest createWaitingRequest(final LocalDate date, final Long themeId, final Long timeId) {
+        return new WaitingRequest(date, themeId, timeId);
+    }
+
+    public void createWaiting(LocalDate date, Long themeId, Long timeId, Map<String, String> cookies) {
+        final WaitingRequest waitingRequest = createWaitingRequest(date, themeId, timeId);
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .body(waitingRequest)
+                .when().post("/reservations");
     }
 
     public void createReservation(LocalDate date, Long themeId, Long timeId, Map<String, String> cookies) {
