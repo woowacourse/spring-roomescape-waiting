@@ -46,7 +46,7 @@ function renderReservation(data) {
 
 function renderWaiting(data) {
     const tableBody = document.getElementById('waiting-table-body');
-    
+
     tableBody.innerHTML = '';
 
     data.forEach(item => {
@@ -84,7 +84,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = `/api/waiting/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
