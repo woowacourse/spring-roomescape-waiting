@@ -25,7 +25,9 @@ import roomescape.auth.presentation.AuthorizationExtractor;
 import roomescape.member.domain.Role;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 
 @WebMvcTest(value = {AdminController.class, AuthorizationExtractor.class})
 class AdminControllerTest {
@@ -40,7 +42,10 @@ class AdminControllerTest {
     private ReservationService reservationService;
 
     @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
+    private WaitingService waitingService;
+
+    @MockitoBean
+    private JwtTokenProvider tokenProvider;
 
     @Test
     void 관리자가_예약을_생성한다() throws Exception {
@@ -54,7 +59,7 @@ class AdminControllerTest {
                 "themeName1"
         );
         given(reservationService.createReservation(1L, 1L, 1L, LocalDate.of(2025, 1, 1))).willReturn(response);
-        given(jwtTokenProvider.extractRole("token")).willReturn(Role.ADMIN);
+        given(tokenProvider.extractRole("token")).willReturn(Role.ADMIN);
         // when & then
         mockMvc.perform(post("/api/admin/reservations")
                         .cookie(new Cookie("token", "token"))
@@ -76,10 +81,30 @@ class AdminControllerTest {
         );
         List<ReservationResponse> response = List.of(reservationResponse);
         given(reservationService.findReservations(any())).willReturn(response);
-        given(jwtTokenProvider.extractRole("token")).willReturn(Role.ADMIN);
+        given(tokenProvider.extractRole("token")).willReturn(Role.ADMIN);
         // when & then
         mockMvc.perform(get("/api/admin/reservations")
                         .cookie(new Cookie("token", "token"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(response)));
+    }
+
+    @Test
+    void 대기목록을_조회한다() throws Exception {
+        // given
+        given(tokenProvider.extractRole("accessToken")).willReturn(Role.ADMIN);
+        List<WaitingResponse> response = List.of(new WaitingResponse(
+                1L,
+                "member1",
+                LocalDate.of(2025, 1, 1),
+                new ReservationTimeResponse(1L, LocalTime.of(9, 0)),
+                "theme1"
+        ));
+        given(waitingService.findAllWaitings()).willReturn(response);
+        // when & then
+        mockMvc.perform(get("/api/admin/waitings")
+                        .cookie(new Cookie("token", "accessToken"))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(objectMapper.writeValueAsString(response)));
