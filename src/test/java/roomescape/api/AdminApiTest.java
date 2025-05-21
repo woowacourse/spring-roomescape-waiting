@@ -20,9 +20,11 @@ import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
 import roomescape.reservation.infrastructure.TimeSlotRepository;
+import roomescape.reservation.infrastructure.WaitingRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -42,6 +44,8 @@ public class AdminApiTest {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @Test
     void 예약_전체_조회() {
@@ -123,5 +127,30 @@ public class AdminApiTest {
                 .when().post("/api/admin/reservations")
                 .then().log().all()
                 .statusCode(403);
+    }
+
+    @Test
+    void 관리자가_모든_대기를_조회한다() {
+        Member member = memberRepository.save(
+                new Member(null, "member1", "member1@domain.com", "password1", Role.ADMIN)
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
+        waitingRepository.save(
+                Waiting.builder()
+                        .date(LocalDate.of(2025, 1, 1))
+                        .theme(theme)
+                        .timeSlot(timeSlot)
+                        .member(member).build()
+        );
+        String token = tokenProvider.createToken(member.getId().toString(), member.getRole());
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().get("/api/admin/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
     }
 }
