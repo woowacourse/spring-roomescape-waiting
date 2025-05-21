@@ -137,4 +137,61 @@ public class WaitingApiTest {
                 .statusCode(200)
                 .body("size()", is(1));
     }
+
+    @Test
+    void 대기를_삭제한다() {
+        // given
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).bulid()
+        );
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.builder()
+                        .theme(theme)
+                        .member(member1)
+                        .timeSlot(timeSlot)
+                        .date(LocalDate.now().plusDays(1)).build()
+        );
+        String token = tokenProvider.createToken("1", Role.MEMBER);
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().delete("/api/waiting/{waitingId}", waiting.getId())
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    void 삭제할_대기가_존재하지_않는_경우_NotFound_에러가_발생한다() {
+        // given
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).bulid()
+        );
+        String token = tokenProvider.createToken(member1.getId().toString(), Role.MEMBER);
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().delete("/api/waiting/{waitingId}", 1000000L)
+                .then().log().all()
+                .statusCode(404);
+    }
 }
