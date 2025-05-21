@@ -11,9 +11,9 @@ public class PublicController {
         return "index";
     }
 
-    @GetMapping("/reservation")
-    public String reservation() {
-        return "reservation";
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 
     @GetMapping("/signup")
@@ -21,9 +21,9 @@ public class PublicController {
         return "signup";
     }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
+    @GetMapping("/reservation")
+    public String reservation() {
+        return "reservation";
     }
 
     @GetMapping("/reservation-mine")
