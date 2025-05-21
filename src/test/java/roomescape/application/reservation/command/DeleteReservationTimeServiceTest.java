@@ -39,7 +39,10 @@ class DeleteReservationTimeServiceTest extends AbstractServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        deleteReservationTimeService = new DeleteReservationTimeService(reservationTimeRepository, reservationRepository);
+        deleteReservationTimeService = new DeleteReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository
+        );
     }
 
     @Test

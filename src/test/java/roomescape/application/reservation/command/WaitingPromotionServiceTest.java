@@ -132,9 +132,10 @@ class WaitingPromotionServiceTest extends AbstractServiceIntegrationTest {
     void 대기_정보가_존재하지_않으면_예외가_발생한다() {
         // given
         Member admin = memberRepository.save(new Member("admin", new Email("admin@email.com"), "pw", MemberRole.ADMIN));
+        long invalidId = 999L;
 
         // when & then
-        assertThatCode(() -> waitingPromotionService.approve(999L, admin.getId()))
+        assertThatCode(() -> waitingPromotionService.approve(invalidId, admin.getId()))
                 .isInstanceOf(WaitingException.class)
                 .hasMessage("대기 정보가 존재하지 않습니다.");
     }

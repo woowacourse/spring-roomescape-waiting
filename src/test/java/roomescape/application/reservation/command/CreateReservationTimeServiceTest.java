@@ -28,7 +28,9 @@ class CreateReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 운영시간_내의_예약시간을_생성할_수_있다() {
         // given
-        CreateReservationTimeCommand createReservationTimeCommand = new CreateReservationTimeCommand(LocalTime.of(12, 0));
+        CreateReservationTimeCommand createReservationTimeCommand = new CreateReservationTimeCommand(
+                LocalTime.of(12, 0)
+        );
 
         // when
         Long timeId = createReservationTimeService.register(createReservationTimeCommand);
@@ -42,7 +44,9 @@ class CreateReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 운영시간_외의_예약시간을_생성할_수_없다() {
         // given
-        CreateReservationTimeCommand createReservationTimeCommand = new CreateReservationTimeCommand(LocalTime.of(4, 0));
+        CreateReservationTimeCommand createReservationTimeCommand = new CreateReservationTimeCommand(
+                LocalTime.of(4, 0)
+        );
 
         // when
         // then
@@ -55,7 +59,9 @@ class CreateReservationTimeServiceTest extends AbstractServiceIntegrationTest {
     void 이미_존재하는_예약시간을_추가하는_경우_예외가_발생한다() {
         // given
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        CreateReservationTimeCommand createReservationTimeCommand = new CreateReservationTimeCommand(LocalTime.of(12, 0));
+        CreateReservationTimeCommand createReservationTimeCommand = new CreateReservationTimeCommand(
+                LocalTime.of(12, 0)
+        );
 
         // when
         // then

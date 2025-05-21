@@ -9,8 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
-import roomescape.application.reservation.query.dto.ReservationTimeResult;
 import roomescape.application.reservation.query.dto.AvailableReservationTimeResult;
+import roomescape.application.reservation.query.dto.ReservationTimeResult;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
@@ -46,16 +46,16 @@ class ReservationTimeQueryServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 모든_예약시간을_조회할_수_있다() {
         // given
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
 
         // when
         List<ReservationTimeResult> results = reservationTimeQueryService.findAll();
 
         // then
         assertThat(results).containsExactlyInAnyOrder(
-                new ReservationTimeResult(1L, LocalTime.of(12, 0)),
-                new ReservationTimeResult(2L, LocalTime.of(13, 0))
+                new ReservationTimeResult(reservationTime1.getId(), LocalTime.of(12, 0)),
+                new ReservationTimeResult(reservationTime2.getId(), LocalTime.of(13, 0))
         );
     }
 
@@ -65,7 +65,7 @@ class ReservationTimeQueryServiceTest extends AbstractServiceIntegrationTest {
         Member member = memberRepository.save(new Member("test", new Email("test@test.com"), "test", MemberRole.ADMIN));
         Theme theme = themeRepository.save(new Theme("test", "test", "test"));
         ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         reservationRepository.save(new Reservation(member, LocalDate.now().plusDays(1), reservationTime1, theme));
 
         // when
@@ -76,8 +76,8 @@ class ReservationTimeQueryServiceTest extends AbstractServiceIntegrationTest {
 
         // then
         assertThat(availableTimesByThemeIdAndDate).containsExactlyInAnyOrder(
-                new AvailableReservationTimeResult(1L, LocalTime.of(12, 0), true),
-                new AvailableReservationTimeResult(2L, LocalTime.of(13, 0), false)
+                new AvailableReservationTimeResult(reservationTime1.getId(), LocalTime.of(12, 0), true),
+                new AvailableReservationTimeResult(reservationTime2.getId(), LocalTime.of(13, 0), false)
         );
     }
 }

@@ -60,7 +60,9 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         reservationRepository.save(new Reservation(member, now.toLocalDate(), time, theme));
-        Member requestMember = memberRepository.save(new Member("서프", new Email("sf@email.com"), "pw", MemberRole.NORMAL));
+        Member requestMember = memberRepository.save(
+                new Member("서프", new Email("sf@email.com"), "pw", MemberRole.NORMAL)
+        );
         CreateWaitingCommand command = new CreateWaitingCommand(
                 now.toLocalDate(),
                 theme.getId(),
@@ -153,7 +155,9 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         reservationRepository.save(new Reservation(member, now.toLocalDate(), time, theme));
-        Member requestMember = memberRepository.save(new Member("서프", new Email("sf@email.com"), "pw", MemberRole.NORMAL));
+        Member requestMember = memberRepository.save(
+                new Member("서프", new Email("sf@email.com"), "pw", MemberRole.NORMAL)
+        );
         CreateWaitingCommand command = new CreateWaitingCommand(
                 now.toLocalDate(),
                 theme.getId(),

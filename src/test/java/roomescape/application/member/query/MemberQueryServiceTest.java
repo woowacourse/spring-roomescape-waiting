@@ -28,8 +28,12 @@ class MemberQueryServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 모든_회원_조회가_가능하다() {
         // given
-        memberRepository.save(new Member("벨로", new Email("test1@email.com"), "1234", MemberRole.NORMAL));
-        memberRepository.save(new Member("서프", new Email("test2@email.com"), "1234", MemberRole.NORMAL));
+        Member member1 = memberRepository.save(
+                new Member("벨로", new Email("test1@email.com"), "1234", MemberRole.NORMAL)
+        );
+        Member member2 = memberRepository.save(
+                new Member("서프", new Email("test2@email.com"), "1234", MemberRole.NORMAL)
+        );
 
         // when
         List<MemberResult> results = memberQueryService.findAll();
@@ -37,8 +41,8 @@ class MemberQueryServiceTest extends AbstractServiceIntegrationTest {
         // then
         assertThat(results)
                 .isEqualTo(List.of(
-                        new MemberResult(1L, "벨로"),
-                        new MemberResult(2L, "서프")
+                        new MemberResult(member1.getId(), "벨로"),
+                        new MemberResult(member2.getId(), "서프")
                 ));
     }
 }

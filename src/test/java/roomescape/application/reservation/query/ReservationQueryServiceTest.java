@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.member.query.dto.MemberResult;
-import roomescape.application.reservation.query.dto.ReservationTimeResult;
 import roomescape.application.reservation.query.dto.ReservationResult;
 import roomescape.application.reservation.query.dto.ReservationSearchCondition;
+import roomescape.application.reservation.query.dto.ReservationTimeResult;
 import roomescape.application.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.application.reservation.query.dto.ThemeResult;
 import roomescape.domain.member.Email;
@@ -55,8 +55,10 @@ class ReservationQueryServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time1, theme));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time2, theme));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(clock), time1, theme));
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(clock), time2, theme));
 
         // when
         List<ReservationResult> reservationResults = reservationQueryService.findAll();
@@ -65,14 +67,14 @@ class ReservationQueryServiceTest extends AbstractServiceIntegrationTest {
         assertThat(reservationResults)
                 .isEqualTo(List.of(
                                 new ReservationResult(
-                                        1L,
+                                        reservation1.getId(),
                                         new MemberResult(1L, "벨로"),
                                         LocalDate.now(clock),
                                         new ReservationTimeResult(1L, LocalTime.of(13, 0)),
                                         new ThemeResult(1L, "테마", "설명", "이미지")
                                 ),
                                 new ReservationResult(
-                                        2L,
+                                        reservation2.getId(),
                                         new MemberResult(1L, "벨로"),
                                         LocalDate.now(clock),
                                         new ReservationTimeResult(2L, LocalTime.of(14, 0)),
@@ -89,8 +91,12 @@ class ReservationQueryServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time1, theme));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock).plusDays(1), time2, theme));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(clock), time1, theme)
+        );
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(clock).plusDays(1), time2, theme)
+        );
         ReservationSearchCondition reservationSearchCondition = new ReservationSearchCondition(
                 theme.getId(),
                 member.getId(),
@@ -107,7 +113,7 @@ class ReservationQueryServiceTest extends AbstractServiceIntegrationTest {
         assertThat(reservationResults)
                 .isEqualTo(List.of(
                                 new ReservationResult(
-                                        1L,
+                                        reservation1.getId(),
                                         new MemberResult(1L, "벨로"),
                                         LocalDate.now(clock),
                                         new ReservationTimeResult(1L, LocalTime.of(13, 0)),
@@ -124,8 +130,12 @@ class ReservationQueryServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         ReservationTime time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock), time1, theme));
-        reservationRepository.save(new Reservation(member, LocalDate.now(clock).plusDays(1), time2, theme));
+        Reservation reservation1 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(clock), time1, theme)
+        );
+        Reservation reservation2 = reservationRepository.save(
+                new Reservation(member, LocalDate.now(clock).plusDays(1), time2, theme)
+        );
 
         // when
         List<ReservationWithStatusResult> reservationsWithStatus = reservationQueryService.findReservationsWithStatus(
@@ -136,14 +146,14 @@ class ReservationQueryServiceTest extends AbstractServiceIntegrationTest {
         assertThat(reservationsWithStatus)
                 .isEqualTo(List.of(
                         new ReservationWithStatusResult(
-                                1L,
+                                reservation1.getId(),
                                 "테마",
                                 LocalDate.now(clock),
                                 LocalTime.of(13, 0),
                                 ReservationStatus.RESERVE
                         ),
                         new ReservationWithStatusResult(
-                                2L,
+                                reservation2.getId(),
                                 "테마",
                                 LocalDate.now(clock).plusDays(1),
                                 LocalTime.of(14, 0),
