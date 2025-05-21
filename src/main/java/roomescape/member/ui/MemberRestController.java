@@ -23,8 +23,8 @@ import roomescape.member.ui.dto.MemberResponse.IdName;
 import roomescape.member.ui.dto.SignUpRequest;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/members")
+@RequiredArgsConstructor
 public class MemberRestController {
 
     private final MemberService memberService;

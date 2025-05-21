@@ -20,8 +20,8 @@ import roomescape.theme.ui.dto.CreateThemeRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/themes")
+@RequiredArgsConstructor
 public class ThemeRestController {
 
     private final ThemeService themeService;

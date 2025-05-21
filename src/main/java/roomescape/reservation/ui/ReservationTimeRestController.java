@@ -20,8 +20,8 @@ import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 import roomescape.reservation.ui.dto.response.ReservationTimeResponse;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/times")
+@RequiredArgsConstructor
 public class ReservationTimeRestController {
 
     private final ReservationTimeService reservationTimeService;
