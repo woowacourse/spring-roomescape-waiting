@@ -3,6 +3,7 @@ package roomescape.reservation.application.service;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,8 +40,7 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse createWaiting(final WaitingRequest waitingRequest, final Long memberId) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+        Member member = findMemberById(memberId);
 
         ReservationTime reservationTime = getReservationTime(waitingRequest.getTimeId());
         Theme theme = getTheme(waitingRequest.getThemeId());
@@ -55,6 +55,22 @@ public class WaitingService {
         );
 
         return new WaitingResponse(waitingRepository.save(waiting));
+    }
+
+    public List<WaitingResponse> getWaitings(final Long memberId) {
+        findMemberById(memberId);
+
+        return waitingRepository.findByMemberId(memberId).stream()
+                .map(WaitingResponse::new)
+                .toList();
+    }
+
+    @Transactional
+    public void deleteWaiting(final Long id) {
+        final Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
+
+        waitingRepository.delete(waiting);
     }
 
     private ReservationTime getReservationTime(Long timeId) {
@@ -85,5 +101,10 @@ public class WaitingService {
                 reservationTime.getStartAt())) {
             throw new IllegalStateException("중복된 일시의 예약은 불가능합니다.");
         }
+    }
+
+    private Member findMemberById(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
     }
 }

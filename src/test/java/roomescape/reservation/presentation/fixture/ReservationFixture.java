@@ -40,7 +40,7 @@ public class ReservationFixture {
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
                 .body(waitingRequest)
-                .when().post("/reservations");
+                .when().post("/reservations/waiting");
     }
 
     public void createReservation(LocalDate date, Long themeId, Long timeId, Map<String, String> cookies) {
