@@ -18,15 +18,17 @@ public class CreateMemberService {
         this.memberRepository = memberRepository;
     }
 
-    public void register(RegisterCommand registerCommand) {
-        if (memberRepository.existsByEmail(new Email(registerCommand.email()))) {
+    public Long register(RegisterCommand registerCommand) {
+        Email email = new Email(registerCommand.email());
+        validateDuplicateEmail(email);
+        Member member = new Member(registerCommand.name(), email, registerCommand.password());
+        Member savedMember = memberRepository.save(member);
+        return savedMember.getId();
+    }
+
+    private void validateDuplicateEmail(Email email) {
+        if (memberRepository.existsByEmail(email)) {
             throw new MemberException("이미 같은 이메일을 가진 사용자가 존재합니다.");
         }
-        Member member = new Member(
-                registerCommand.name(),
-                new Email(registerCommand.email()),
-                registerCommand.password()
-        );
-        memberRepository.save(member);
     }
 }

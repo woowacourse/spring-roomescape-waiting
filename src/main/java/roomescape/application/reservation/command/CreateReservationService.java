@@ -29,8 +29,8 @@ public class CreateReservationService {
     private final MemberRepository memberRepository;
     private final Clock clock;
 
-    public CreateReservationService(ReservationTimeRepository reservationTimeRepository,
-                                    ReservationRepository reservationRepository,
+    public CreateReservationService(ReservationRepository reservationRepository,
+                                    ReservationTimeRepository reservationTimeRepository,
                                     ThemeRepository themeRepository,
                                     MemberRepository memberRepository,
                                     Clock clock) {
@@ -48,7 +48,8 @@ public class CreateReservationService {
         validateDuplicateReservation(command.date(), time, theme);
         Reservation reservation = new Reservation(member, command.date(), time, theme);
         reservation.validateReservable(LocalDateTime.now(clock));
-        return reservationRepository.save(reservation).getId();
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return savedReservation.getId();
     }
 
     private Member getMember(Long memberId) {

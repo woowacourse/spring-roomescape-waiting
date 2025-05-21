@@ -33,27 +33,26 @@ public class ReservationTimeQueryService {
                 .toList();
     }
 
-    public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId,
-                                                                                   LocalDate reservationDate) {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findByThemeIdAndDate(
-                themeId,
-                reservationDate
-        );
-        DailyThemeReservations dailyThemeReservations = new DailyThemeReservations(
-                reservations,
-                themeId,
-                reservationDate
-        );
-        Set<ReservationTime> bookedTimes = dailyThemeReservations.calculateBookedTimes();
-        return reservationTimes.stream()
-                .map(reservationTime ->
-                        new AvailableReservationTimeResult(
-                                reservationTime.getId(),
-                                reservationTime.getStartAt(),
-                                bookedTimes.contains(reservationTime)
-                        )
-                )
+    public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId, LocalDate date) {
+        List<ReservationTime> timeSlots = reservationTimeRepository.findAll();
+        Set<ReservationTime> bookedTimes = getBookedTimes(themeId, date);
+        return timeSlots.stream()
+                .map(reservationTime -> toAvailableTimeResult(reservationTime, bookedTimes))
                 .toList();
+    }
+
+    private Set<ReservationTime> getBookedTimes(Long themeId, LocalDate date) {
+        List<Reservation> reservations = reservationRepository.findByThemeIdAndDate(themeId, date);
+        return new DailyThemeReservations(reservations, themeId, date)
+                .calculateBookedTimes();
+    }
+
+    private AvailableReservationTimeResult toAvailableTimeResult(ReservationTime time,
+                                                                 Set<ReservationTime> bookedTimes) {
+        return new AvailableReservationTimeResult(
+                time.getId(),
+                time.getStartAt(),
+                bookedTimes.contains(time)
+        );
     }
 }

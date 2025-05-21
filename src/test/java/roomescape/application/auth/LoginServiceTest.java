@@ -18,12 +18,12 @@ import roomescape.infrastructure.error.exception.LoginAuthException;
 import roomescape.infrastructure.security.JwtProperties;
 import roomescape.infrastructure.security.JwtProvider;
 
-class AuthServiceTest extends AbstractServiceIntegrationTest {
+class LoginServiceTest extends AbstractServiceIntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
 
-    private AuthService authService;
+    private LoginService loginService;
 
     private JwtProvider jwtProvider;
 
@@ -35,7 +35,7 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
                         Duration.ofHours(1L)
                 ),
                 clock);
-        authService = new AuthService(memberRepository, jwtProvider);
+        loginService = new LoginService(memberRepository, jwtProvider);
     }
 
     @Test
@@ -45,7 +45,7 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
         LoginCommand loginCommand = new LoginCommand("test@email.com", "pw");
 
         // when
-        LoginResult loginResult = authService.login(loginCommand);
+        LoginResult loginResult = loginService.login(loginCommand);
 
         // then
         assertThat(loginResult)
@@ -59,7 +59,7 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatCode(() -> authService.login(loginCommand))
+        assertThatCode(() -> loginService.login(loginCommand))
                 .isInstanceOf(LoginAuthException.class)
                 .hasMessage("invalid@email.com에 해당하는 멤버가 존재하지 않습니다.");
     }
@@ -72,8 +72,8 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
 
         // when
         // then
-        assertThatCode(() -> authService.login(loginCommand))
+        assertThatCode(() -> loginService.login(loginCommand))
                 .isInstanceOf(LoginAuthException.class)
-                .hasMessage("test@email.com 사용자의 비밀번호가 같지 않습니다.");
+                .hasMessage("비밀번호가 일치하지 않습니다.");
     }
 }

@@ -31,17 +31,14 @@ public class WaitingPromotionService {
         this.clock = clock;
     }
 
-    public void approve(Long waitingId, Long memberId) {
+    public Long approve(Long waitingId, Long memberId) {
         Member member = getMember(memberId);
-        if (!member.isAdmin()) {
-            throw new WaitingException("대기 승인 권한이 없습니다.");
-        }
         Waiting waiting = getWaiting(waitingId);
+        validateControlPermission(member, waiting);
         validateReservationIsAvailable(waiting);
         validateWaitingIsFirst(waiting);
-        Reservation reservation = createReservationFromWaiting(waiting);
-        waitingRepository.delete(waiting);
-        reservationRepository.save(reservation);
+        Reservation savedReservation = promoteWaitingToReservation(waiting);
+        return savedReservation.getId();
     }
 
     private Member getMember(Long memberId) {
@@ -52,6 +49,23 @@ public class WaitingPromotionService {
     private Waiting getWaiting(Long waitingId) {
         return waitingRepository.findByIdWithThemeAndTime(waitingId)
                 .orElseThrow(() -> new WaitingException("대기 정보가 존재하지 않습니다."));
+    }
+
+    private void validateControlPermission(Member member, Waiting waiting) {
+        if (!waiting.hasControlPermission(member)) {
+            throw new WaitingException("대기 승인 권한이 없습니다.");
+        }
+    }
+
+    private void validateReservationIsAvailable(Waiting waiting) {
+        boolean alreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
+                waiting.getDate(),
+                waiting.getTime().getId(),
+                waiting.getTheme().getId()
+        );
+        if (alreadyReserved) {
+            throw new WaitingException("예약이 이미 존재하여 승인할 수 없습니다.");
+        }
     }
 
     private void validateWaitingIsFirst(Waiting waiting) {
@@ -66,25 +80,19 @@ public class WaitingPromotionService {
         }
     }
 
-    private Reservation createReservationFromWaiting(Waiting waiting) {
-        Reservation reservation = new Reservation(
+    private Reservation promoteWaitingToReservation(Waiting waiting) {
+        waitingRepository.delete(waiting);
+        Reservation reservation = createReservationBy(waiting);
+        reservation.validateReservable(LocalDateTime.now(clock));
+        return reservationRepository.save(reservation);
+    }
+
+    private Reservation createReservationBy(Waiting waiting) {
+        return new Reservation(
                 waiting.getMember(),
                 waiting.getDate(),
                 waiting.getTime(),
                 waiting.getTheme()
         );
-        reservation.validateReservable(LocalDateTime.now(clock));
-        return reservationRepository.save(reservation);
-    }
-
-    private void validateReservationIsAvailable(Waiting waiting) {
-        boolean alreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId()
-        );
-        if (alreadyReserved) {
-            throw new WaitingException("예약이 이미 존재하여 승인할 수 없습니다.");
-        }
     }
 }

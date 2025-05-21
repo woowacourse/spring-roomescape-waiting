@@ -1,8 +1,8 @@
 package roomescape.presentation.api.member;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +17,8 @@ import roomescape.application.member.query.dto.MemberResult;
 @RequestMapping("/members")
 public class MemberController {
 
+    private static final String MEMBERS_URL = "/members/%d";
+
     private final CreateMemberService createMemberService;
     private final MemberQueryService memberQueryService;
 
@@ -27,9 +29,8 @@ public class MemberController {
 
     @PostMapping
     public ResponseEntity<Void> createMember(@Valid @RequestBody SignupRequest signupRequest) {
-        createMemberService.register(signupRequest.toRegisterParameter());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .build();
+        Long id = createMemberService.register(signupRequest.toRegisterParameter());
+        return ResponseEntity.created(URI.create(MEMBERS_URL.formatted(id))).build();
     }
 
     @GetMapping

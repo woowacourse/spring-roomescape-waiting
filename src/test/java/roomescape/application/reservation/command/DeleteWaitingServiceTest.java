@@ -57,6 +57,7 @@ class DeleteWaitingServiceTest extends AbstractServiceIntegrationTest {
         // given
         LocalDateTime now = LocalDateTime.now(clock).plusDays(1);
         Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
+        Member admin = memberRepository.save(new Member("관리자", new Email("admin@email.com"), "pw", MemberRole.ADMIN));
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         reservationRepository.save(new Reservation(member, now.toLocalDate(), time, theme));
@@ -65,7 +66,7 @@ class DeleteWaitingServiceTest extends AbstractServiceIntegrationTest {
         Long waitingId = waitingRepository.save(waiting).getId();
 
         // when
-        deleteWaitingService.cancel(waitingId, member.getId());
+        deleteWaitingService.cancel(waitingId, admin.getId());
 
         // then
         assertThat(waitingRepository.findById(waitingId))

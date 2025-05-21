@@ -59,7 +59,8 @@ class WaitingPromotionServiceTest extends AbstractServiceIntegrationTest {
         // given
         Member admin = memberRepository.save(new Member("admin", new Email("admin@email.com"), "pw", MemberRole.ADMIN));
         Member member = memberRepository.save(
-                new Member("member", new Email("member@email.com"), "pw", MemberRole.NORMAL));
+                new Member("member", new Email("member@email.com"), "pw", MemberRole.NORMAL)
+        );
         LocalDate reservationDate = LocalDate.now(clock).plusDays(1);
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
@@ -80,7 +81,8 @@ class WaitingPromotionServiceTest extends AbstractServiceIntegrationTest {
     void 관리자가_아니면_대기를_승인할_수_없다() {
         // given
         Member member = memberRepository.save(
-                new Member("member", new Email("member@email.com"), "pw", MemberRole.NORMAL));
+                new Member("member", new Email("member@email.com"), "pw", MemberRole.NORMAL)
+        );
         LocalDate date = LocalDate.now(clock).plusDays(1);
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
@@ -97,7 +99,8 @@ class WaitingPromotionServiceTest extends AbstractServiceIntegrationTest {
         // given
         Member admin = memberRepository.save(new Member("admin", new Email("admin@email.com"), "pw", MemberRole.ADMIN));
         Member member = memberRepository.save(
-                new Member("member", new Email("member@email.com"), "pw", MemberRole.NORMAL));
+                new Member("member", new Email("member@email.com"), "pw", MemberRole.NORMAL)
+        );
         LocalDate date = LocalDate.now(clock).plusDays(1);
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));

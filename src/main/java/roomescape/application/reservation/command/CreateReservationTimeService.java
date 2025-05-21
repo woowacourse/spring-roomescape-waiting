@@ -17,13 +17,16 @@ public class CreateReservationTimeService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    public Long register(CreateReservationTimeCommand createReservationTimeCommand) {
+    public Long register(CreateReservationTimeCommand createCommand) {
+        validateAlreadyExistsReservationTime(createCommand);
+        ReservationTime reservationTime = new ReservationTime(createCommand.startAt());
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        return savedReservationTime.getId();
+    }
+
+    private void validateAlreadyExistsReservationTime(CreateReservationTimeCommand createReservationTimeCommand) {
         if (reservationTimeRepository.existsByStartAt(createReservationTimeCommand.startAt())) {
             throw new ReservationTimeException("이미 존재하는 얘약시간입니다.");
         }
-        ReservationTime reservationTime = reservationTimeRepository.save(
-                new ReservationTime(createReservationTimeCommand.startAt())
-        );
-        return reservationTime.getId();
     }
 }

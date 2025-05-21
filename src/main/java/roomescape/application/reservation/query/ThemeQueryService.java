@@ -7,7 +7,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.query.dto.ThemeResult;
-import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.repository.ThemeRepository;
 
 @Service
@@ -25,8 +24,8 @@ public class ThemeQueryService {
     }
 
     public List<ThemeResult> findAll() {
-        List<Theme> themes = themeRepository.findAll();
-        return themes.stream()
+        return themeRepository.findAll()
+                .stream()
                 .map(ThemeResult::from)
                 .toList();
     }

@@ -1,5 +1,6 @@
 package roomescape.presentation.api.reservation;
 
+import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,8 @@ import roomescape.presentation.support.methodresolver.AuthPrincipal;
 @RestController
 @RequestMapping("/admin/waitings")
 public class AdminWaitingController {
+
+    private static final String WAITINGS_URL = "/waitings/%d";
 
     private final WaitingQueryService waitingQueryService;
     private final WaitingPromotionService waitingPromotionService;
@@ -42,8 +45,8 @@ public class AdminWaitingController {
 
     @PostMapping("/{id}")
     public ResponseEntity<Void> approveWaiting(@AuthPrincipal AuthInfo authInfo, @PathVariable("id") Long waitingId) {
-        waitingPromotionService.approve(waitingId, authInfo.memberId());
-        return ResponseEntity.noContent().build();
+        Long id = waitingPromotionService.approve(waitingId, authInfo.memberId());
+        return ResponseEntity.created(URI.create(WAITINGS_URL.formatted(id))).build();
     }
 
     @DeleteMapping("/{id}")

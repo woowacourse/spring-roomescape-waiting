@@ -44,8 +44,8 @@ class CreateReservationServiceTest extends AbstractServiceIntegrationTest {
     @BeforeEach
     void setUp() {
         createReservationService = new CreateReservationService(
-                reservationTimeRepository,
                 reservationRepository,
+                reservationTimeRepository,
                 themeRepository,
                 memberRepository,
                 clock

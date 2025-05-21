@@ -7,12 +7,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.domain.BaseEntity;
 import roomescape.domain.member.Member;
-import roomescape.infrastructure.error.exception.ReservationException;
 import roomescape.infrastructure.error.exception.WaitingException;
 
 @Entity
@@ -58,8 +56,8 @@ public class Waiting extends BaseEntity {
         }
     }
 
-    public boolean isOwner(Member member) {
-        return this.member.equals(member);
+    public boolean hasControlPermission(Member member) {
+        return member.isAdmin();
     }
 
     public Long getId() {

@@ -1,6 +1,6 @@
 package roomescape.application.auth.dto;
 
-public record LoginParam(
+public record LoginCommand(
         String email,
         String password
 ) {

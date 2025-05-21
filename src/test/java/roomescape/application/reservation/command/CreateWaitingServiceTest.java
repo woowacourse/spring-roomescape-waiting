@@ -48,6 +48,8 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
         createWaitingService = new CreateWaitingService(
                 waitingRepository,
                 reservationRepository,
+                reservationTimeRepository,
+                themeRepository,
                 memberRepository,
                 clock
         );

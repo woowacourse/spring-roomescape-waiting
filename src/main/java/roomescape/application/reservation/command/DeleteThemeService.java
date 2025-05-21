@@ -19,9 +19,13 @@ public class DeleteThemeService {
     }
 
     public void removeById(Long themeId) {
+        validateThemeIsNotReserved(themeId);
+        themeRepository.deleteById(themeId);
+    }
+
+    private void validateThemeIsNotReserved(Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
             throw new ThemeException("해당 테마로 예약된 예약이 존재합니다.");
         }
-        themeRepository.deleteById(themeId);
     }
 }

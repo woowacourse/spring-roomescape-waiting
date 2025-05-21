@@ -13,12 +13,12 @@ import roomescape.infrastructure.security.JwtProvider;
 
 @Service
 @Transactional(readOnly = true)
-public class AuthService {
+public class LoginService {
 
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
 
-    public AuthService(MemberRepository memberRepository, JwtProvider jwtProvider) {
+    public LoginService(MemberRepository memberRepository, JwtProvider jwtProvider) {
         this.memberRepository = memberRepository;
         this.jwtProvider = jwtProvider;
     }

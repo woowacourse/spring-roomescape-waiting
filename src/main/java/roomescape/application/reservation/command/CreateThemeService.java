@@ -17,17 +17,16 @@ public class CreateThemeService {
         this.themeRepository = themeRepository;
     }
 
-    public Long register(CreateThemeCommand createThemeCommand) {
-        if (themeRepository.existsByName(createThemeCommand.name())) {
+    public Long register(CreateThemeCommand createCommand) {
+        validateDuplicateThemeName(createCommand);
+        Theme theme = new Theme(createCommand.name(), createCommand.description(), createCommand.thumbnail());
+        Theme savedTheme = themeRepository.save(theme);
+        return savedTheme.getId();
+    }
+
+    private void validateDuplicateThemeName(CreateThemeCommand createCommand) {
+        if (themeRepository.existsByName(createCommand.name())) {
             throw new ThemeException("이미 같은 이름의 테마가 존재합니다.");
         }
-        Theme theme = themeRepository.save(
-                new Theme(
-                        createThemeCommand.name(),
-                        createThemeCommand.description(),
-                        createThemeCommand.thumbnail()
-                )
-        );
-        return theme.getId();
     }
 }

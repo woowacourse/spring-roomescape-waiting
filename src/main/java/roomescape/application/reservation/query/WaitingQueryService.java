@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.query.dto.WaitingResult;
 import roomescape.application.reservation.query.dto.WaitingWithRankResult;
-import roomescape.domain.reservation.WaitingWithRank;
 import roomescape.domain.reservation.repository.WaitingRepository;
 
 @Service
@@ -19,8 +18,8 @@ public class WaitingQueryService {
     }
 
     public List<WaitingWithRankResult> findWaitingByMemberId(Long memberId) {
-        List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(memberId);
-        return waitings.stream()
+        return waitingRepository.findWaitingsWithRankByMemberId(memberId)
+                .stream()
                 .map(w -> WaitingWithRankResult.from(w.waiting(), oneBasedRank(w.rank())))
                 .toList();
     }

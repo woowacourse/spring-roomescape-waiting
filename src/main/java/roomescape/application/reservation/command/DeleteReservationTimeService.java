@@ -20,9 +20,13 @@ public class DeleteReservationTimeService {
     }
 
     public void removeById(Long reservationTimeId) {
+        validateReservationTimeIsNotReserved(reservationTimeId);
+        reservationTimeRepository.deleteById(reservationTimeId);
+    }
+
+    private void validateReservationTimeIsNotReserved(Long reservationTimeId) {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new ReservationTimeException("해당 예약 시간으로 예약된 예약이 존재합니다.");
         }
-        reservationTimeRepository.deleteById(reservationTimeId);
     }
 }
