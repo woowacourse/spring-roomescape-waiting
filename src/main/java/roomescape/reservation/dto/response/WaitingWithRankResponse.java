@@ -8,7 +8,7 @@ public class WaitingWithRankResponse {
     private final Long id;
     private final String memberName;
     private final LocalDate date;
-    private final ReservationTimeResponse time;
+    private final TimeSlotResponse time;
     private final String themeName;
     private final Long rank;
 
@@ -16,7 +16,7 @@ public class WaitingWithRankResponse {
         this.id = waiting.getId();
         this.memberName = waiting.getMember().getName();
         this.date = waiting.getDate();
-        this.time = ReservationTimeResponse.from(waiting.getTimeSlot());
+        this.time = TimeSlotResponse.from(waiting.getTimeSlot());
         this.themeName = waiting.getTheme().getName();
         this.rank = rank;
     }
@@ -33,7 +33,7 @@ public class WaitingWithRankResponse {
         return date;
     }
 
-    public ReservationTimeResponse getTime() {
+    public TimeSlotResponse getTime() {
         return time;
     }
 

@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.dto.request.ReservationTimeRequest;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.request.TimeSlotRequest;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
 import roomescape.reservation.service.TimeSlotService;
 
@@ -29,15 +29,15 @@ public class TimeSlotController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationTimeResponse>> getAllReservationTimes() {
-        List<ReservationTimeResponse> all = timeSlotService.findAllTimes();
+    public ResponseEntity<List<TimeSlotResponse>> getAllReservationTimes() {
+        List<TimeSlotResponse> all = timeSlotService.findAllTimes();
         return ResponseEntity.ok(all);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> createNewReservationTime(
-            @Valid @RequestBody ReservationTimeRequest reservationTimeRequest) {
-        ReservationTimeResponse reservationTime = timeSlotService.createTime(reservationTimeRequest);
+    public ResponseEntity<TimeSlotResponse> createNewReservationTime(
+            @Valid @RequestBody TimeSlotRequest timeSlotRequest) {
+        TimeSlotResponse reservationTime = timeSlotService.createTime(timeSlotRequest);
         return ResponseEntity
                 .created(URI.create("/api/times/" + reservationTime.id()))
                 .body(reservationTime);

@@ -20,7 +20,7 @@ import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
@@ -46,13 +46,13 @@ public class TimeSlotApiTest {
         params.put("startAt", "10:00");
 
         // when
-        ReservationTimeResponse response = RestAssured.given().log().all()
+        TimeSlotResponse response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("api/times")
                 .then().log().all()
                 .statusCode(201)
-                .extract().as(ReservationTimeResponse.class);
+                .extract().as(TimeSlotResponse.class);
 
         // then
         List<TimeSlot> allTimeSlots = timeSlotRepository.findAll();
@@ -67,11 +67,11 @@ public class TimeSlotApiTest {
         // given
         timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(10, 0)));
         // when
-        List<ReservationTimeResponse> response = RestAssured.given().log().all()
+        List<TimeSlotResponse> response = RestAssured.given().log().all()
                 .when().get("/api/times")
                 .then().log().all()
                 .statusCode(200)
-                .extract().jsonPath().getList(".", ReservationTimeResponse.class);
+                .extract().jsonPath().getList(".", TimeSlotResponse.class);
         // then
         SoftAssertions soft = new SoftAssertions();
         soft.assertThat(response).hasSize(1);

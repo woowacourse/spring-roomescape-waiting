@@ -20,10 +20,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.presentation.AuthorizationExtractor;
-import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.ReservationWithStatusResponse;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.presentation.ReservationController;
 import roomescape.reservation.service.ReservationService;
 
@@ -45,9 +45,9 @@ class ReservationControllerTest {
     @Test
     void 사용자가_예약을_생성한다() throws Exception {
         // given
-        ReservationCreateRequest request = new ReservationCreateRequest(LocalDate.of(2025, 1, 1), 1L, 1L);
+        ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 1, 1), 1L, 1L);
         ReservationResponse response = new ReservationResponse(1L, "memberName1", LocalDate.of(2025, 1, 1),
-                new ReservationTimeResponse(1L, LocalTime.of(9, 0)), "themeName1");
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)), "themeName1");
         given(reservationService.createReservation(1L, request.timeId(), request.themeId(), request.date())).willReturn(
                 response);
         given(tokenProvider.extractSubject("accessToken")).willReturn("1");
@@ -66,7 +66,7 @@ class ReservationControllerTest {
 
         ReservationWithStatusResponse response = new ReservationWithStatusResponse(1L, "memberName1",
                 LocalDate.of(2025, 1, 1),
-                new ReservationTimeResponse(1L, LocalTime.of(9, 0)), "themeName1", "예약");
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)), "themeName1", "예약");
 
         given(reservationService.findReservationByMemberId(1L)).willReturn(List.of(response));
         given(tokenProvider.extractSubject("accessToken")).willReturn("1");

@@ -7,7 +7,7 @@ public record ReservationWithStatusResponse(
         Long id,
         String memberName,
         LocalDate date,
-        ReservationTimeResponse time,
+        TimeSlotResponse time,
         String themeName,
         String status
 ) {
@@ -16,7 +16,7 @@ public record ReservationWithStatusResponse(
                 reservation.getId(),
                 reservation.getMember().getName(),
                 reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getTimeSlot()),
+                TimeSlotResponse.from(reservation.getTimeSlot()),
                 reservation.getTheme().getName(),
                 "예약"
         );

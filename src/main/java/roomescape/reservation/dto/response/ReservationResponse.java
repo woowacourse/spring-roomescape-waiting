@@ -7,11 +7,11 @@ public record ReservationResponse(
         Long id,
         String memberName,
         LocalDate date,
-        ReservationTimeResponse time,
+        TimeSlotResponse time,
         String themeName
 ) {
     public static ReservationResponse from(Reservation reservation) {
-        ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getTimeSlot());
+        TimeSlotResponse dto = TimeSlotResponse.from(reservation.getTimeSlot());
         return new ReservationResponse(reservation.getId(), reservation.getMember().getName(), reservation.getDate(),
                 dto,
                 reservation.getTheme().getName());

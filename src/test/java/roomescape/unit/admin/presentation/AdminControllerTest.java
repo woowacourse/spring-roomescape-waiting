@@ -19,13 +19,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.admin.dto.request.AdminReservationCreateRequest;
+import roomescape.admin.dto.request.AdminReservationRequest;
 import roomescape.admin.presentation.AdminController;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.presentation.AuthorizationExtractor;
 import roomescape.member.domain.Role;
 import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingService;
@@ -51,12 +51,12 @@ class AdminControllerTest {
     @Test
     void 관리자가_예약을_생성한다() throws Exception {
         // given
-        AdminReservationCreateRequest request = new AdminReservationCreateRequest(1L, LocalDate.of(2025, 1, 1), 1L, 1L);
+        AdminReservationRequest request = new AdminReservationRequest(1L, LocalDate.of(2025, 1, 1), 1L, 1L);
         ReservationResponse response = new ReservationResponse(
                 1L,
                 "name1",
                 LocalDate.of(2025, 1, 1),
-                new ReservationTimeResponse(1L, LocalTime.of(9, 0)),
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)),
                 "themeName1"
         );
         given(reservationService.createReservation(1L, 1L, 1L, LocalDate.of(2025, 1, 1))).willReturn(response);
@@ -77,7 +77,7 @@ class AdminControllerTest {
                 1L,
                 "name1",
                 LocalDate.of(2025, 1, 1),
-                new ReservationTimeResponse(1L, LocalTime.of(9, 0)),
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)),
                 "themeName1"
         );
         List<ReservationResponse> response = List.of(reservationResponse);
@@ -99,7 +99,7 @@ class AdminControllerTest {
                 1L,
                 "member1",
                 LocalDate.of(2025, 1, 1),
-                new ReservationTimeResponse(1L, LocalTime.of(9, 0)),
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)),
                 "theme1"
         ));
         given(waitingService.findAllWaitings()).willReturn(response);

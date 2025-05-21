@@ -26,7 +26,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingRequest;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.dto.response.WaitingWithRankResponse;
 import roomescape.reservation.presentation.WaitingController;
@@ -50,7 +50,7 @@ public class WaitingControllerTest {
     @Test
     void 대기_생성에_성공한다() throws Exception {
         // given
-        ReservationTimeResponse timeResponse = new ReservationTimeResponse(1L, LocalTime.of(9, 0));
+        TimeSlotResponse timeResponse = new TimeSlotResponse(1L, LocalTime.of(9, 0));
         WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), 1L, 1L);
         WaitingResponse response = new WaitingResponse(1L, "member1", LocalDate.of(2025, 1, 1), timeResponse, "theme1");
         given(tokenProvider.extractSubject("accessToken")).willReturn("1");

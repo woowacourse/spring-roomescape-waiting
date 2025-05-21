@@ -9,8 +9,8 @@ import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
-import roomescape.reservation.dto.request.ReservationTimeRequest;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.request.TimeSlotRequest;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
@@ -30,18 +30,18 @@ public class TimeSlotService {
         this.themeRepository = themeRepository;
     }
 
-    public List<ReservationTimeResponse> findAllTimes() {
+    public List<TimeSlotResponse> findAllTimes() {
         List<TimeSlot> timeSlotDaoAll = timeSlotRepository.findAll();
 
         return timeSlotDaoAll.stream()
-                .map(ReservationTimeResponse::from)
+                .map(TimeSlotResponse::from)
                 .toList();
     }
 
-    public ReservationTimeResponse createTime(ReservationTimeRequest reservationTimeRequest) {
-        TimeSlot timeSlot = reservationTimeRequest.toTime();
+    public TimeSlotResponse createTime(TimeSlotRequest timeSlotRequest) {
+        TimeSlot timeSlot = timeSlotRequest.toTime();
         TimeSlot savedTimeSlot = timeSlotRepository.save(timeSlot);
-        return ReservationTimeResponse.from(savedTimeSlot);
+        return TimeSlotResponse.from(savedTimeSlot);
     }
 
     public void deleteTimeById(Long id) {

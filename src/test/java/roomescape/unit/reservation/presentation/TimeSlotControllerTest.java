@@ -18,8 +18,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.presentation.AuthorizationExtractor;
-import roomescape.reservation.dto.request.ReservationTimeRequest;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.request.TimeSlotRequest;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.presentation.TimeSlotController;
 import roomescape.reservation.service.TimeSlotService;
 
@@ -44,8 +44,8 @@ class TimeSlotControllerTest {
     @Test
     void 예약시간을_전체_조회하는데_성공한다() throws Exception {
         // given
-        ReservationTimeResponse time = new ReservationTimeResponse(1L, LocalTime.of(9, 0));
-        List<ReservationTimeResponse> response = List.of(time);
+        TimeSlotResponse time = new TimeSlotResponse(1L, LocalTime.of(9, 0));
+        List<TimeSlotResponse> response = List.of(time);
         given(timeSlotService.findAllTimes()).willReturn(response);
         // when & then
         mockMvc.perform(get("/api/times")
@@ -57,8 +57,8 @@ class TimeSlotControllerTest {
     @Test
     void 예약시간을_추가하는데_성공한다() throws Exception {
         // given
-        ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(9, 0));
-        ReservationTimeResponse response = new ReservationTimeResponse(1L, LocalTime.of(9, 0));
+        TimeSlotRequest request = new TimeSlotRequest(LocalTime.of(9, 0));
+        TimeSlotResponse response = new TimeSlotResponse(1L, LocalTime.of(9, 0));
         given(timeSlotService.createTime(request)).willReturn(response);
         // when & then
         mockMvc.perform(post("/api/times")

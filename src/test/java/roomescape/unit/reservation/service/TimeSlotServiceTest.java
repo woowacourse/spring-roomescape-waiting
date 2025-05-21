@@ -15,8 +15,8 @@ import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
-import roomescape.reservation.dto.request.ReservationTimeRequest;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.dto.request.TimeSlotRequest;
+import roomescape.reservation.dto.response.TimeSlotResponse;
 import roomescape.reservation.dto.response.TimeWithBookedResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
@@ -52,7 +52,7 @@ class TimeSlotServiceTest {
         timeSlotRepository.save(timeSlot1);
         timeSlotRepository.save(timeSlot2);
         // when
-        List<ReservationTimeResponse> allTimes = timeSlotService.findAllTimes();
+        List<TimeSlotResponse> allTimes = timeSlotService.findAllTimes();
 
         // then
         SoftAssertions soft = new SoftAssertions();
@@ -65,9 +65,9 @@ class TimeSlotServiceTest {
     @Test
     void 예약_시간을_추가할_수_있다() {
         // given & when
-        ReservationTimeRequest newTime = new ReservationTimeRequest(LocalTime.of(2, 0));
+        TimeSlotRequest newTime = new TimeSlotRequest(LocalTime.of(2, 0));
         timeSlotService.createTime(newTime);
-        List<ReservationTimeResponse> all = timeSlotService.findAllTimes();
+        List<TimeSlotResponse> all = timeSlotService.findAllTimes();
 
         // then
         assertThat(all.size()).isEqualTo(1);
@@ -83,7 +83,7 @@ class TimeSlotServiceTest {
         timeSlotRepository.save(timeSlot2);
         // when
         timeSlotService.deleteTimeById(2L);
-        List<ReservationTimeResponse> all = timeSlotService.findAllTimes();
+        List<TimeSlotResponse> all = timeSlotService.findAllTimes();
 
         // then
         assertThat(all.size()).isEqualTo(1);

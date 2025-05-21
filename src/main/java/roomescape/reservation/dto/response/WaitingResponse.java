@@ -7,11 +7,11 @@ public record WaitingResponse(
         Long id,
         String memberName,
         LocalDate date,
-        ReservationTimeResponse time,
+        TimeSlotResponse time,
         String themeName
 ) {
     public static WaitingResponse from(Waiting waiting) {
-        ReservationTimeResponse dto = ReservationTimeResponse.from(waiting.getTimeSlot());
+        TimeSlotResponse dto = TimeSlotResponse.from(waiting.getTimeSlot());
         return new WaitingResponse(waiting.getId(), waiting.getMember().getName(), waiting.getDate(),
                 dto,
                 waiting.getTheme().getName());
