@@ -51,11 +51,11 @@ public class WaitingManager {
     }
 
     private void validateWaiting(Long memberId, LocalDate date, Long timeId) {
-        if (waitingRepository.existsByMemberIdAndDateAndTimeId(memberId, date, memberId)) {
+        if (waitingRepository.existsByMemberIdAndDateAndTimeId(memberId, date, timeId)) {
             throw new InAlreadyWaitingException("이미 예약된 시간입니다.");
         }
 
-        if (reservationQueryService.existReservation(memberId, date, timeId)) {
+        if (reservationQueryService.existsReservation(memberId, date, timeId)) {
             throw new InAlreadyReservationException("해당 유저는 이미 예약했습니다.");
         }
     }

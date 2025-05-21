@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.infrastructure.jwt.JwtProvider;
-import roomescape.auth.stub.StubTokenProvider;
 import roomescape.common.CleanUp;
 import roomescape.config.AuthServiceTestConfig;
 import roomescape.fixture.db.MemberDbFixture;
@@ -74,7 +73,6 @@ class WaitingApiTest {
                 .reservationDateTime(reservationDateTime)
                 .build());
 
-
         HashMap<String, Object> request = new HashMap<>();
         request.put("themeId", themeId);
         request.put("timeId", timeId);
@@ -92,6 +90,8 @@ class WaitingApiTest {
     @Test
     void 본인_대기_예약을_삭제한다() {
         Member 유저1 = memberDbFixture.유저1_생성();
+        Member 유저2 = memberDbFixture.유저2_생성();
+
         Theme 공포 = themeDbFixture.공포();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         String token = jwtProvider.issue(유저1);
@@ -99,7 +99,7 @@ class WaitingApiTest {
         // 예약이 이미 존재해야 대기 등록 가능
         reservationRepository.save(Reservation.builder()
                 .theme(공포)
-                .reserver(유저1)
+                .reserver(유저2)
                 .reservationDateTime(reservationDateTime)
                 .build());
 

@@ -28,7 +28,7 @@ public class ReservationQueryService {
 
         List<Reservation> reservations = reservationRepository.findFilteredReservations(themeId, memberId, from, to);
 
-        return roomescape.reservation.controller.response.ReservationResponse.from(reservations);
+        return ReservationResponse.from(reservations);
     }
 
     private List<ReservationResponse> getAllReservations() {
@@ -52,7 +52,7 @@ public class ReservationQueryService {
         return MyReservationResponse.from(reservations);
     }
 
-    public boolean existReservation(Long memberId, LocalDate date, Long timeId) {
+    public boolean existsReservation(Long memberId, LocalDate date, Long timeId) {
         return reservationRepository.existsByMemberIdAndDateAndTimeId(memberId, date, timeId);
     }
 
