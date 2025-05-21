@@ -49,6 +49,14 @@ public class Reservation {
         this.member = member;
     }
 
+    Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validate(date, time, theme, member);
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.member = member;
+    }
+
     public static Reservation generateWithPrimaryKey(Reservation reservation, Long newPrimaryKey) {
         return new Reservation(newPrimaryKey, reservation.date, reservation.time, reservation.theme,
             reservation.member);

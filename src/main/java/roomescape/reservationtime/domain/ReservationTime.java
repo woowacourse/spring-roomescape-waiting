@@ -22,6 +22,11 @@ public class ReservationTime {
     public ReservationTime() {
     }
 
+    ReservationTime(LocalTime startAt) {
+        validate(startAt);
+        this.startAt = startAt;
+    }
+
     public ReservationTime(Long id, LocalTime startAt) {
         validate(startAt);
         this.id = id;

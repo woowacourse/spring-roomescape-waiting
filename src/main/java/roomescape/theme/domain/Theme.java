@@ -33,6 +33,13 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
+    Theme(String name, String description, String thumbnail) {
+        validate(name);
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
+    }
+
     public static Theme generateWithPrimaryKey(Theme theme, Long newPrimaryKey) {
         return new Theme(newPrimaryKey, theme.name, theme.description, theme.thumbnail);
     }
