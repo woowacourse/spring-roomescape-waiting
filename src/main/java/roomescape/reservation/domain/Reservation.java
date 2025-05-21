@@ -26,7 +26,7 @@ import roomescape.theme.domain.Theme;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Reservation {
+public class Reservation extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +49,7 @@ public class Reservation {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status = ReservationStatus.BOOKED;
+    private ReservationStatus status;
 
     @Builder
     private Reservation(
@@ -81,6 +81,22 @@ public class Reservation {
                 .theme(theme)
                 .member(member)
                 .status(ReservationStatus.BOOKED)
+                .build();
+    }
+
+    public static Reservation waiting(
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final Theme theme,
+            final Member member
+    ) {
+        return builder()
+                .id(null)
+                .date(date)
+                .time(reservationTime)
+                .theme(theme)
+                .member(member)
+                .status(ReservationStatus.WAITING)
                 .build();
     }
 

@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
-public record MyReservationResponse(
+public record WaitingReservationWithRank(
         Long reservationId,
         String theme,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
@@ -13,26 +13,14 @@ public record MyReservationResponse(
         String status,
         Long rank
 ) {
-
-    public MyReservationResponse(final Reservation reservation) {
+    public WaitingReservationWithRank(final Reservation reservation, final Long rank) {
         this(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
                 reservation.getStatus().getOutput(),
-                null
-        );
-    }
-
-    public MyReservationResponse(final WaitingReservationWithRank reservation) {
-        this(
-                reservation.reservationId(),
-                reservation.theme(),
-                reservation.date(),
-                reservation.time(),
-                reservation.status(),
-                reservation.rank()
+                rank
         );
     }
 }

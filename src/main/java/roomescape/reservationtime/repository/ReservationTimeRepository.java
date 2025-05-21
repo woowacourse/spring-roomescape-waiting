@@ -11,7 +11,7 @@ import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 public interface ReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
     @Query("""
-            select
+            select distinct 
               new roomescape.reservationtime.dto.AvailableReservationTimeResponse(
                 rt.id, rt.startAt, (r.id is not null) as alreadyBooked
               )

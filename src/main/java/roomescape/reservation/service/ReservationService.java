@@ -2,14 +2,15 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
-import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
@@ -45,23 +46,30 @@ public class ReservationService {
     }
 
     public ReservationResponse saveReservation(final ReservationRequest request, final LoginMember loginMember) {
-
         final ReservationTime reservationTime = findReservationTimeById(request.timeId());
-        final Theme theme = findThemeById(request.themeId());
-        validateReservationAvailability(request.date(), reservationTime, theme);
-
         final Member member = findMemberById(loginMember.id());
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
-        final Reservation newReservation = reservationRepository.save(reservation);
-        return new ReservationResponse(newReservation);
+        final Theme theme = findThemeById(request.themeId());
+        return saveReservationInternal(request.date(), reservationTime, theme, member);
     }
 
     public ReservationResponse saveAdminReservation(final AdminReservationRequest request) {
         final ReservationTime reservationTime = findReservationTimeById(request.timeId());
         final Theme theme = findThemeById(request.themeId());
         final Member member = findMemberById(request.memberId());
-        validateReservationAvailability(request.date(), reservationTime, theme);
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
+        return saveReservationInternal(request.date(), reservationTime, theme, member);
+    }
+
+    private ReservationResponse saveReservationInternal(
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final Theme theme, Member member
+    ) {
+        Reservation reservation;
+        if (hasReservation(date, reservationTime, theme)) {
+            reservation = Reservation.waiting(date, reservationTime, theme, member);
+        } else {
+            reservation = Reservation.booked(date, reservationTime, theme, member);
+        }
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
     }
@@ -79,11 +87,19 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
-        final Member member = Member.from(loginMember);
-        return reservationRepository.findAllByMember(member).stream()
+        final Member member = findMemberById(loginMember.id());
+        final List<MyReservationResponse> bookedReservations = reservationRepository.findByMemberAndStatus(member,
+                        ReservationStatus.BOOKED).stream()
                 .map(MyReservationResponse::new)
                 .toList();
+        final List<MyReservationResponse> waitingReservations = reservationRepository.findWaitingReservationByMemberWithRank(
+                        member).stream()
+                .map(MyReservationResponse::new)
+                .toList();
+        return Stream.concat(bookedReservations.stream(), waitingReservations.stream())
+                .toList();
     }
+
 
     private ReservationTime findReservationTimeById(final Long timeId) {
         return reservationTimeRepository.findById(timeId).orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
@@ -93,9 +109,7 @@ public class ReservationService {
         return themeRepository.findById(themeId).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 
-    private void validateReservationAvailability(final LocalDate date, final ReservationTime time, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
-            throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
-        }
+    private boolean hasReservation(final LocalDate date, final ReservationTime time, final Theme theme) {
+        return reservationRepository.existsByDateAndTimeAndTheme(date, time, theme);
     }
 }
