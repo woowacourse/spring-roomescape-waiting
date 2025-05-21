@@ -17,17 +17,20 @@ import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.ReservationCondition;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationWithStatusResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
 import roomescape.reservation.infrastructure.TimeSlotRepository;
+import roomescape.reservation.infrastructure.WaitingRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.unit.fake.FakeMemberRepository;
 import roomescape.unit.fake.FakeReservationRepository;
 import roomescape.unit.fake.FakeThemeRepository;
 import roomescape.unit.fake.FakeTimeSlotRepository;
+import roomescape.unit.fake.FakeWaitingRepository;
 
 class ReservationServiceTest {
 
@@ -36,6 +39,7 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     private MemberRepository memberRepository;
     private ReservationService reservationService;
+    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -43,8 +47,14 @@ class ReservationServiceTest {
         timeSlotRepository = new FakeTimeSlotRepository();
         themeRepository = new FakeThemeRepository();
         memberRepository = new FakeMemberRepository();
-        reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository,
-                memberRepository);
+        waitingRepository = new FakeWaitingRepository();
+        reservationService = new ReservationService(
+                reservationRepository,
+                timeSlotRepository,
+                themeRepository,
+                memberRepository,
+                waitingRepository
+        );
     }
 
     @Test
@@ -169,5 +179,29 @@ class ReservationServiceTest {
                 () -> reservationService.createReservation(1L, savedTime.getId(), savedTheme.getId(),
                         LocalDate.of(2025, 7, 25)))
                 .isInstanceOf(ExistedReservationException.class);
+    }
+
+    @Test
+    void 예약을_삭제하면_가장_빠른_대기가_예약으로_전환된다() {
+        // given
+        TimeSlot timeSlot1 = timeSlotRepository.save(new TimeSlot(1L, LocalTime.of(10, 0)));
+        Theme theme1 = themeRepository.save(new Theme(1L, "themeName1", "des", "th"));
+        Member member1 = memberRepository.save(
+                new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER));
+        Member member2 = memberRepository.save(
+                new Member(null, "name2", "email2@domain.com", "password2", Role.MEMBER));
+        Reservation reservation = reservationRepository.save(
+                Reservation.of(null, member1, LocalDate.of(2025, 7, 25), timeSlot1, theme1)
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.of(null, member2, LocalDate.of(2025, 7, 25), timeSlot1, theme1)
+        );
+        // when
+        reservationService.deleteReservationById(reservation.getId());
+
+        // then
+        List<Reservation> reservations = reservationRepository.findAll();
+        assertThat(reservations.size()).isEqualTo(1);
+        assertThat(reservations.get(0).getMember().getId()).isEqualTo(member2.getId());
     }
 }

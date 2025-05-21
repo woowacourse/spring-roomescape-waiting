@@ -133,4 +133,9 @@ public class FakeReservationRepository implements ReservationRepository {
                 .filter(reservation -> reservation.getTimeSlot().equals(timeSlot))
                 .anyMatch(reservation -> reservation.getTheme().equals(theme));
     }
+
+    @Override
+    public void delete(Reservation reservation) {
+        reservations.remove(reservation);
+    }
 }

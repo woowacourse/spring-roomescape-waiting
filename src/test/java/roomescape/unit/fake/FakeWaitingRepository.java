@@ -2,6 +2,7 @@ package roomescape.unit.fake;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -68,5 +69,20 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public void delete(Waiting waiting) {
         waitings.remove(waiting);
+    }
+
+    @Override
+    public Optional<Waiting> findFirstByDateAndTimeSlotAndThemeOrderById(LocalDate date, TimeSlot timeSlot,
+                                                                         Theme theme) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTimeSlot().equals(timeSlot))
+                .filter(waiting -> waiting.getTheme().equals(theme))
+                .min(Comparator.comparingLong(Waiting::getId));
+    }
+
+    @Override
+    public List<Waiting> findAll() {
+        return List.of();
     }
 }
