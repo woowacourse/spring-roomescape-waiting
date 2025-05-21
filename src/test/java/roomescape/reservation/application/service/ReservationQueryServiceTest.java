@@ -7,18 +7,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
-import roomescape.reservation.reservation.application.service.ReservationQueryService;
-import roomescape.reservation.reservation.domain.Reservation;
-import roomescape.reservation.reservation.domain.ReservationDate;
-import roomescape.reservation.reservation.domain.ReservationRepository;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
-import roomescape.reservation.reservation.application.dto.ReservationSearchRequest;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationRepository;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.TimeValue;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
@@ -59,7 +59,7 @@ class ReservationQueryServiceTest {
         // given
         final ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+                        TimeValue.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -77,13 +77,13 @@ class ReservationQueryServiceTest {
         final Reservation given1 = Reservation.withoutId(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                reservationTime,
+                reservationTime.getStartAt(),
                 theme);
 
         final Reservation given2 = Reservation.withoutId(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                reservationTime,
+                reservationTime.getStartAt(),
                 theme);
 
         final Reservation saved1 = reservationRepository.save(given1);
@@ -127,7 +127,7 @@ class ReservationQueryServiceTest {
 
         final ReservationTime time = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+                        TimeValue.from(LocalTime.of(10, 0))));
 
         final Theme theme1 = themeRepository.save(
                 Theme.withoutId(ThemeName.from("공포1"),
@@ -148,7 +148,7 @@ class ReservationQueryServiceTest {
                 Reservation.withoutId(
                         me.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme1
                 )
         );
@@ -157,7 +157,7 @@ class ReservationQueryServiceTest {
                 Reservation.withoutId(
                         notMe.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme2
                 )
         );
@@ -166,7 +166,7 @@ class ReservationQueryServiceTest {
                 Reservation.withoutId(
                         me.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme3
                 )
         );
@@ -194,7 +194,7 @@ class ReservationQueryServiceTest {
 
         final ReservationTime time = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+                        TimeValue.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(ThemeName.from("공포1"),
@@ -205,7 +205,7 @@ class ReservationQueryServiceTest {
                 Reservation.withoutId(
                         user.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme
                 )
         );

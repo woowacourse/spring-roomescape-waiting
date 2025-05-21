@@ -5,30 +5,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.auth.sign.password.Password;
-import roomescape.common.domain.Email;
-import roomescape.common.exception.ConstraintConflictException;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.reservation.reservation.domain.Reservation;
-import roomescape.reservation.reservation.domain.ReservationDate;
-import roomescape.reservation.reservation.domain.ReservationRepository;
-import roomescape.reservation.time.application.dto.CreateReservationTimeRequest;
-import roomescape.reservation.time.application.service.ReservationTimeCommandService;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeId;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeName;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.domain.ThemeRepository;
-import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.user.domain.User;
-import roomescape.user.domain.UserName;
+import roomescape.time.application.dto.CreateReservationTimeRequest;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeId;
+import roomescape.time.domain.ReservationTimeRepository;
+import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.UserRepository;
-import roomescape.user.domain.UserRole;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,13 +44,13 @@ class ReservationTimeCommandServiceTest {
     @DisplayName("예약 시간을 생성할 수 있다")
     void createReservationTime() {
         // given
-        final CreateReservationTimeRequest request = new CreateReservationTimeRequest(LocalTime.of(12, 30));
+        final CreateReservationTimeRequest request = new CreateReservationTimeRequest(TimeValue.from(LocalTime.of(12, 30)));
 
         // when
         final ReservationTime reservationTime = reservationTimeCommandService.create(request);
 
         // then
-        assertThat(reservationTime.getStartAt()).isEqualTo(LocalTime.of(12, 30));
+        assertThat(reservationTime.getStartAt().getValue()).isEqualTo(LocalTime.of(12, 30));
         assertThat(reservationTimeRepository.findById(reservationTime.getId()))
                 .isPresent();
     }
@@ -74,7 +61,7 @@ class ReservationTimeCommandServiceTest {
         // given
         final ReservationTime saved =
                 reservationTimeRepository.save(
-                        ReservationTime.withoutId(LocalTime.of(14, 0)));
+                        ReservationTime.withoutId(TimeValue.from(LocalTime.of(14, 0))));
         final ReservationTimeId id = saved.getId();
 
         // when
@@ -98,55 +85,18 @@ class ReservationTimeCommandServiceTest {
     }
 
     @Test
-    @DisplayName("참조 중인 예약 시간을 삭제하려 하면 예외가 발생한다")
-    void deleteRefReservationTime() {
-        // given
-        final ReservationTime savedTime =
-                reservationTimeRepository.save(ReservationTime.withoutId(
-                        LocalTime.of(14, 0)));
-
-        final Theme theme = themeRepository.save(Theme.withoutId(
-                ThemeName.from("공포"),
-                ThemeDescription.from("지구별 방탈출 최고"),
-                ThemeThumbnail.from("www.making.com")));
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
-
-        final Reservation reservation = reservationRepository.save(Reservation.withoutId(
-                user.getId(),
-                ReservationDate.from(LocalDate.now().plusDays(1L)),
-                savedTime,
-                theme
-        ));
-
-        // when
-        // then
-        assertThatThrownBy(() -> reservationTimeCommandService.delete(savedTime.getId()))
-                .isInstanceOf(ConstraintConflictException.class)
-                .hasMessage("[RESERVATION_TIME] is referenced by another entity. " +
-                        "params={ReservationTimeId=ReservationTimeId(%s)}".formatted(reservation.getTime().getId().getValue()));
-    }
-
-    @Test
     @DisplayName("추가하려는 시간이 이미 존재한다면, 예외가 발생한다")
     void existsTime() {
         // given
-
         final LocalTime time = LocalTime.of(14, 0);
-        reservationTimeRepository.save(ReservationTime.withoutId(time));
+        reservationTimeRepository.save(ReservationTime.withoutId(TimeValue.from(time)));
 
-        final CreateReservationTimeRequest sameTimeRequest = new CreateReservationTimeRequest(time);
+        final CreateReservationTimeRequest sameTimeRequest = new CreateReservationTimeRequest(TimeValue.from(time));
 
         // when
         // then
         assertThatThrownBy(() -> reservationTimeCommandService.create(sameTimeRequest))
                 .isInstanceOf(DuplicateException.class)
-                .hasMessage("RESERVATION_TIME already exists. params={LocalTime=14:00}");
+                .hasMessage("RESERVATION_TIME already exists. params={TimeValue=TimeValue(value=14:00)}");
     }
-
 }

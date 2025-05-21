@@ -8,17 +8,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
-import roomescape.reservation.reservation.domain.Reservation;
-import roomescape.reservation.reservation.domain.ReservationDate;
-import roomescape.reservation.reservation.domain.ReservationRepository;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationRepository;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -152,7 +153,7 @@ class ThemeQueryServiceTest {
 
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1L));
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(LocalTime.of(12, 0)));
+                ReservationTime.withoutId(TimeValue.from(LocalTime.of(12, 0))));
 
         final Theme[] themes = {
                 theme1, theme2, theme3, theme4, theme5, theme6,
@@ -165,7 +166,7 @@ class ThemeQueryServiceTest {
                     reservationRepository.save(Reservation.withoutId(
                             user.getId(),
                             ReservationDate.from(date.getValue().plusDays(j)),
-                            time,
+                            time.getStartAt(),
                             themes[i]));
                 }
             } else {
@@ -173,7 +174,7 @@ class ThemeQueryServiceTest {
                     reservationRepository.save(Reservation.withoutId(
                             user.getId(),
                             ReservationDate.from(date.getValue().plusDays(j)),
-                            time,
+                            time.getStartAt(),
                             themes[i]
                     ));
                 }

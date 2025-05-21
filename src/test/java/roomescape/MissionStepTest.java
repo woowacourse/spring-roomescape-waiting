@@ -12,19 +12,20 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
-import roomescape.reservation.reservation.application.dto.ReservationResponse;
-import roomescape.reservation.reservation.domain.Reservation;
-import roomescape.reservation.reservation.domain.ReservationDate;
-import roomescape.reservation.reservation.domain.ReservationRepository;
-import roomescape.reservation.reservation.ui.ReservationController;
-import roomescape.reservation.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
+import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.ui.ReservationController;
+import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -94,8 +95,7 @@ public class MissionStepTest {
                 ));
 
         reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.now()));
+                ReservationTime.withoutId(TimeValue.from(LocalTime.now())));
     }
 
     @Test
@@ -192,7 +192,7 @@ public class MissionStepTest {
                 Reservation.withoutId(
                         normalUser.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        reservationTime,
+                        reservationTime.getStartAt(),
                         theme
                 ));
 

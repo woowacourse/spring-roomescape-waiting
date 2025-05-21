@@ -5,18 +5,16 @@ import org.junit.jupiter.api.Test;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
 import roomescape.common.validate.InvalidArgumentException;
-import roomescape.reservation.reservation.domain.Reservation;
-import roomescape.reservation.reservation.domain.ReservationDate;
-import roomescape.reservation.reservation.domain.ReservationId;
-import roomescape.reservation.reservation.exception.PastDateReservationException;
-import roomescape.reservation.reservation.exception.PastTimeReservationException;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeId;
+import roomescape.reservation.exception.PastDateReservationException;
+import roomescape.reservation.exception.PastTimeReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeId;
+import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
@@ -38,7 +36,7 @@ class ReservationTest {
         // given
         final UserId userId = UserId.from(1L);
         final ReservationDate date = ReservationDate.from(LocalDate.now());
-        final ReservationTime time = ReservationTime.withId(ReservationTimeId.from(1L), LocalTime.of(10, 0));
+        final TimeValue time = TimeValue.from(LocalTime.of(10, 0));
         final Theme theme = Theme.withId(
                 ThemeId.from(1L),
                 ThemeName.from("테마 이름"),
@@ -76,7 +74,7 @@ class ReservationTest {
         // given
         final UserId userId = UserId.from(1L);
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
-        final ReservationTime time = ReservationTime.withId(ReservationTimeId.from(1L), LocalTime.of(10, 0));
+        final ReservationTime time = ReservationTime.withId(ReservationTimeId.from(1L), TimeValue.from(LocalTime.of(10, 0)));
         final Theme theme = Theme.withId(
                 ThemeId.from(1L),
                 ThemeName.from("테마 이름"),
@@ -84,14 +82,14 @@ class ReservationTest {
                 ThemeThumbnail.from("https://example.com/image.jpg"));
 
         // when
-        final Reservation reservation = Reservation.withoutId(userId, date, time, theme);
+        final Reservation reservation = Reservation.withoutId(userId, date, time.getStartAt(), theme);
 
         // then
         assertAll(() -> {
             assertThat(reservation).isNotNull();
             assertThat(reservation.getUserId()).isEqualTo(userId);
             assertThat(reservation.getDate()).isEqualTo(date);
-            assertThat(reservation.getTime()).isEqualTo(time);
+            assertThat(reservation.getTime()).isEqualTo(time.getStartAt());
             assertThat(reservation.getTheme()).isEqualTo(theme);
             assertThat(reservation.getStatus().isBooked()).isTrue();
         });
@@ -120,13 +118,13 @@ class ReservationTest {
         final Reservation minusDay = Reservation.withoutId(
                 savedUser.getId(),
                 ReservationDate.from(nowDate.minusDays(1L)),
-                ReservationTime.withoutId(nowTime),
+                TimeValue.from(nowTime),
                 savedTheme);
 
         final Reservation minusTime = Reservation.withoutId(
                 savedUser.getId(),
                 ReservationDate.from(nowDate),
-                ReservationTime.withoutId(nowTime.minusMinutes(1L)),
+                TimeValue.from(nowTime.minusMinutes(1L)),
                 savedTheme);
 
         assertAll(() -> {

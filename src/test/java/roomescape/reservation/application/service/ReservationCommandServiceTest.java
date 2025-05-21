@@ -10,21 +10,21 @@ import roomescape.common.domain.Email;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
-import roomescape.reservation.reservation.application.dto.CreateReservationRequest;
-import roomescape.reservation.reservation.application.service.ReservationCommandService;
-import roomescape.reservation.reservation.domain.Reservation;
-import roomescape.reservation.reservation.domain.ReservationDate;
-import roomescape.reservation.reservation.domain.ReservationId;
-import roomescape.reservation.reservation.domain.ReservationRepository;
-import roomescape.reservation.reservation.exception.PastDateReservationException;
-import roomescape.reservation.reservation.exception.PastTimeReservationException;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
+import roomescape.reservation.application.dto.CreateReservationRequest;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationId;
+import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.exception.PastDateReservationException;
+import roomescape.reservation.exception.PastTimeReservationException;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -67,7 +67,7 @@ class ReservationCommandServiceTest {
         // given
         final ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+                        TimeValue.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -109,7 +109,7 @@ class ReservationCommandServiceTest {
         // given
         final ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+                        TimeValue.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -144,7 +144,7 @@ class ReservationCommandServiceTest {
                 .hasMessageContainingAll(
                         "RESERVATION already exists.",
                         "params={ReservationDate=ReservationDate(value=",
-                        "ReservationTimeId=ReservationTimeId(",
+                        "TimeValue=TimeValue(value=",
                         "ThemeId=ThemeId("
                 );
     }
@@ -155,7 +155,7 @@ class ReservationCommandServiceTest {
         // given
         final ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+                        TimeValue.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -174,7 +174,7 @@ class ReservationCommandServiceTest {
                 Reservation.withoutId(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        reservationTime,
+                        reservationTime.getStartAt(),
                         theme));
 
         // when
@@ -192,11 +192,11 @@ class ReservationCommandServiceTest {
 
         final ReservationTime validReservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        now.toLocalTime().plusNanos(1)));
+                        TimeValue.from(now.toLocalTime().plusNanos(1))));
 
         final ReservationTime pastReservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(
-                        now.toLocalTime().minusNanos(1)));
+                        TimeValue.from(now.toLocalTime().minusNanos(1))));
 
         final User user = userRepository.save(
                 User.withoutId(

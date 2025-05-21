@@ -3,8 +3,6 @@ package roomescape.time.domain;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.validate.InvalidArgumentException;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeId;
 
 import java.time.LocalTime;
 
@@ -35,12 +33,12 @@ class ReservationTimeTest {
         final LocalTime time = LocalTime.of(10, 0);
 
         // when
-        final ReservationTime reservationTime = ReservationTime.withoutId(time);
+        final ReservationTime reservationTime = ReservationTime.withoutId(TimeValue.from(time));
 
         // then
         assertAll(() -> {
             assertThat(reservationTime).isNotNull();
-            assertThat(reservationTime.getStartAt()).isEqualTo(time);
+            assertThat(reservationTime.getStartAt().getValue()).isEqualTo(time);
         });
     }
 
@@ -49,7 +47,7 @@ class ReservationTimeTest {
     void testIsBefore() {
         // given
         final LocalTime time = LocalTime.of(10, 0);
-        final ReservationTime reservationTime = ReservationTime.withoutId(time);
+        final ReservationTime reservationTime = ReservationTime.withoutId(TimeValue.from(time));
 
         // when & then
         assertAll(() -> {

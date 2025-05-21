@@ -3,7 +3,7 @@ package roomescape.theme.application;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.application.dto.CreateThemeRequest;
 import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.theme.application.service.ThemeCommandService;
