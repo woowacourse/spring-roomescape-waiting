@@ -7,15 +7,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import roomescape.dto.auth.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MyReservationResponseDto;
-import roomescape.service.ReservationService;
+import roomescape.service.reservation.ReservationQueryService;
 
 @Controller
 public class MemberReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
 
-    public MemberReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public MemberReservationController(ReservationQueryService reservationQueryService) {
+        this.reservationQueryService = reservationQueryService;
     }
 
     @GetMapping("/reservation-mine")
@@ -28,7 +28,7 @@ public class MemberReservationController {
     public ResponseEntity<List<MyReservationResponseDto>> getMyReservations(
             @CurrentMember LoginInfo loginInfo
     ) {
-        List<MyReservationResponseDto> myReservations = reservationService.findMyReservations(loginInfo);
+        List<MyReservationResponseDto> myReservations = reservationQueryService.findMyReservations(loginInfo);
         return ResponseEntity.ok(myReservations);
     }
 }

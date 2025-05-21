@@ -14,22 +14,25 @@ import roomescape.dto.auth.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MemberReservationCreateRequestDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.service.ReservationService;
 import roomescape.service.dto.ReservationCreateDto;
+import roomescape.service.reservation.ReservationCommandService;
+import roomescape.service.reservation.ReservationQueryService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
+    private final ReservationCommandService reservationCommandService;
 
-    public ReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public ReservationController(ReservationQueryService reservationQueryService, ReservationCommandService reservationCommandService) {
+        this.reservationQueryService = reservationQueryService;
+        this.reservationCommandService = reservationCommandService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDto>> getAllReservations() {
-        List<ReservationResponseDto> allReservations = reservationService.findAllReservationResponses();
+        List<ReservationResponseDto> allReservations = reservationQueryService.findAllReservationResponses();
         return ResponseEntity.ok(allReservations);
     }
 
@@ -38,13 +41,13 @@ public class ReservationController {
                                                                  @RequestBody final MemberReservationCreateRequestDto requestDto) {
         ReservationCreateDto reservationCreateDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
                 requestDto.themeId(), loginInfo.id());
-        ReservationResponseDto responseDto = reservationService.createReservation(reservationCreateDto);
+        ReservationResponseDto responseDto = reservationCommandService.createReservation(reservationCreateDto);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id) {
-        reservationService.deleteReservation(id);
+        reservationCommandService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 }
