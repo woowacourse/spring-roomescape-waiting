@@ -37,8 +37,8 @@ public class WaitingPromotionService {
             throw new WaitingException("대기 승인 권한이 없습니다.");
         }
         Waiting waiting = getWaiting(waitingId);
-        validateWaitingIsFirst(waiting);
         validateReservationIsAvailable(waiting);
+        validateWaitingIsFirst(waiting);
         Reservation reservation = createReservationFromWaiting(waiting);
         waitingRepository.delete(waiting);
         reservationRepository.save(reservation);
@@ -55,25 +55,14 @@ public class WaitingPromotionService {
     }
 
     private void validateWaitingIsFirst(Waiting waiting) {
-        int rank = waitingRepository.countWaitingsBeforeId(
+        int rank = waitingRepository.countWaitingsBeforeCreatedAt(
                 waiting.getDate(),
                 waiting.getTime().getId(),
                 waiting.getTheme().getId(),
-                waiting.getId()
+                waiting.getCreatedAt()
         );
         if (rank > 0) {
             throw new WaitingException("승인 가능한 첫 번째 대기가 아닙니다.");
-        }
-    }
-
-    private void validateReservationIsAvailable(Waiting waiting) {
-        boolean alreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId()
-        );
-        if (alreadyReserved) {
-            throw new WaitingException("예약이 이미 존재하여 승인할 수 없습니다.");
         }
     }
 
@@ -86,5 +75,16 @@ public class WaitingPromotionService {
         );
         reservation.validateReservable(LocalDateTime.now(clock));
         return reservationRepository.save(reservation);
+    }
+
+    private void validateReservationIsAvailable(Waiting waiting) {
+        boolean alreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
+                waiting.getDate(),
+                waiting.getTime().getId(),
+                waiting.getTheme().getId()
+        );
+        if (alreadyReserved) {
+            throw new WaitingException("예약이 이미 존재하여 승인할 수 없습니다.");
+        }
     }
 }

@@ -8,10 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import roomescape.domain.BaseEntity;
 import roomescape.domain.member.Member;
 
 @Entity
-public class Waiting {
+public class Waiting extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

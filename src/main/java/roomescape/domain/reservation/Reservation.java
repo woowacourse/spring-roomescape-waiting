@@ -13,11 +13,12 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.BaseEntity;
 import roomescape.infrastructure.error.exception.ReservationException;
 import roomescape.domain.member.Member;
 
 @Entity
-public class Reservation {
+public class Reservation extends BaseEntity {
 
     private static final int MIN_TIME_BEFORE_RESERVATION = 10;
 

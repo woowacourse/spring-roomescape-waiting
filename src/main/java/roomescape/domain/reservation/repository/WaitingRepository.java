@@ -1,6 +1,7 @@
 package roomescape.domain.reservation.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -40,15 +41,15 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             WHERE w.theme.id = :themeId
               AND w.time.id = :timeId
               AND w.date = :date
-              AND w.id < :waitingId
+              AND w.createdAt < :waitingCreatedAt
             """)
-    int countWaitingsBeforeId(@Param("date") LocalDate date,
-                              @Param("timeId") Long timeId,
-                              @Param("themeId") Long themeId,
-                              @Param("waitingId") Long waitingId);
+    int countWaitingsBeforeCreatedAt(@Param("date") LocalDate date,
+                                     @Param("timeId") Long timeId,
+                                     @Param("themeId") Long themeId,
+                                     @Param("waitingCreatedAt") LocalDateTime waitingCreatedAt);
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(@Param("date") LocalDate date,
-                                                      @Param("timeId") Long timeId,
-                                                      @Param("themeId") Long themeId,
-                                                      @Param("memberId") Long memberId);
+                                                       @Param("timeId") Long timeId,
+                                                       @Param("themeId") Long themeId,
+                                                       @Param("memberId") Long memberId);
 }
