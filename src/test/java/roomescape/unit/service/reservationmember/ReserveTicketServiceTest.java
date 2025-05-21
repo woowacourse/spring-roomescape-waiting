@@ -24,6 +24,7 @@ import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.strategy.ReservationDuplicateCheckStrategy;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.reserveticket.ReserveTicketService;
+import roomescape.service.reserveticket.ReserveTicketWaiting;
 import roomescape.service.theme.ThemeService;
 import roomescape.unit.config.ServiceFixture;
 import roomescape.unit.repository.member.FakeMemberRepository;
@@ -101,10 +102,10 @@ class ReserveTicketServiceTest {
         long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
         long reservationId = reserveTicketService.addReservation(addReservationDto, memberId);
 
-        List<ReserveTicket> reserveTickets = reserveTicketService.allReservationTickets();
+        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.allReservationTickets();
 
         assertAll(
-                () -> assertThat(reserveTickets.get(0).getReservationId()).isEqualTo(reservationId),
+                () -> assertThat(reserveTickets.get(0).getId()).isEqualTo(reservationId),
                 () -> assertThat(reserveTickets.get(0).getName()).isEqualTo("test")
         );
     }
@@ -127,7 +128,7 @@ class ReserveTicketServiceTest {
         reserveTicketService.addReservation(addReservationDto, memberId);
         reserveTicketService.addReservation(addReservationDto2, memberId);
 
-        List<ReserveTicket> searchedReservations = reserveTicketService.searchReservations(themeId, memberId,
+        List<ReserveTicketWaiting> searchedReservations = reserveTicketService.searchReservations(themeId, memberId,
                 today, today.plusDays(1L));
 
         assertThat(searchedReservations).hasSize(1);
@@ -160,9 +161,8 @@ class ReserveTicketServiceTest {
                 new AddReservationDto("name", LocalDate.now().plusDays(3), timeId, themeId),
                 memberId);
 
-        List<ReserveTicket> reserveTickets = reserveTicketService.allReservationTickets();
-        ReserveTicket first = reserveTickets.getFirst();
-        assertThat(first.getReservationStatus()).isEqualTo(ReservationStatus.PREPARE);
+        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.allReservationTickets();
+        assertThat(reserveTickets.getFirst().getReservationStatus()).isEqualTo(ReservationStatus.PREPARE);
     }
 
     @Test
@@ -177,7 +177,11 @@ class ReserveTicketServiceTest {
         reserveTicketService.addWaitingReservation(
                 new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
 
-        List<ReserveTicket> reserveTickets = reserveTicketService.allReservationTickets();
-        ReserveTicket first = reserveTickets.getFirst();
+        List<ReserveTicketWaiting> reserveTicketWaitings = reserveTicketService.allReservationTickets();
+
+        ReserveTicketWaiting ticketWaiting = reserveTicketWaitings.getFirst();
+        ReserveTicketWaiting secondTicketWaiting = reserveTicketWaitings.getLast();
+        assertThat(ticketWaiting.getWaitRank()).isEqualTo(1L);
+        assertThat(secondTicketWaiting.getWaitRank()).isEqualTo(2L);
     }
 }

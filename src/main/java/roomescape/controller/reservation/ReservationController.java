@@ -22,7 +22,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
-import roomescape.dto.reservationmember.ReservationMemberResponseDto;
+import roomescape.dto.reservationmember.ReservationTicketResponseDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
@@ -30,6 +30,7 @@ import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reserveticket.ReserveTicketService;
+import roomescape.service.reserveticket.ReserveTicketWaiting;
 
 @RestController
 @RequestMapping("/reservations")
@@ -48,11 +49,11 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationMemberResponseDto>> reservations(@RequestParam(required = false) Long themeId,
+    public ResponseEntity<List<ReservationTicketResponseDto>> reservations(@RequestParam(required = false) Long themeId,
                                                                            @RequestParam(required = false) Long memberId,
                                                                            @RequestParam(required = false) LocalDate dateFrom,
                                                                            @RequestParam(required = false) LocalDate dateTo) {
-        List<ReserveTicket> reserveTickets = null;
+        List<ReserveTicketWaiting> reserveTickets = null;
         boolean isFilterMode = true;
         if (themeId == null && memberId == null && dateFrom == null && dateTo == null) {
             isFilterMode = false;
@@ -63,12 +64,12 @@ public class ReservationController {
             reserveTickets = reserveTicketService.searchReservations(themeId, memberId, dateFrom, dateTo);
         }
 
-        List<ReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reservationMember) -> new ReservationMemberResponseDto(reservationMember.getId(),
-                        reservationMember.getName(),
-                        reservationMember.getThemeName(),
-                        reservationMember.getDate(),
-                        reservationMember.getStartAt()))
+        List<ReservationTicketResponseDto> reservationDtos = reserveTickets.stream()
+                .map((reservationTicketWaiting) -> new ReservationTicketResponseDto(reservationTicketWaiting.getId(),
+                        reservationTicketWaiting.getName(),
+                        reservationTicketWaiting.getThemeName(),
+                        reservationTicketWaiting.getDate(),
+                        reservationTicketWaiting.getStartAt()))
                 .toList();
         return ResponseEntity.ok(reservationDtos);
     }

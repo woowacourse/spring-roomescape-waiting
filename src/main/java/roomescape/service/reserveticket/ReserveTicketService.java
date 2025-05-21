@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reserveticket.ReservationTicketWaitings;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
@@ -43,8 +44,21 @@ public class ReserveTicketService {
                 new ReserveTicket(null, reservation, reserver)).getId();
     }
 
-    public List<ReserveTicket> allReservationTickets() {
-        return reserveTicketRepository.findAll();
+    public List<ReserveTicketWaiting> allReservationTickets() {
+        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAll();
+        ReservationTicketWaitings reservationTicketWaitings = new ReservationTicketWaitings(reserveTickets);
+        return reservationTicketWaitings.reserveTicketWaitings();
+    }
+
+    public List<ReserveTicketWaiting> memberReservationTickets(Long memberId) {
+        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByReserverId(memberId);
+
+        return reserveTickets.stream()
+                .map((reserveTicket -> new ReserveTicketWaiting(reserveTicket.getId(), reserveTicket.getName(),
+                        reserveTicket.getDate(),
+                        reserveTicket.getStartAt(), reserveTicket.getReservationStatus(), 1,
+                        reserveTicket.getThemeName())))
+                .toList();
     }
 
     @Transactional
@@ -52,8 +66,8 @@ public class ReserveTicketService {
         reserveTicketRepository.deleteById(id);
     }
 
-    public List<ReserveTicket> searchReservations(Long themeId, Long memberId, LocalDate dateFrom,
-                                                  LocalDate dateTo) {
+    public List<ReserveTicketWaiting> searchReservations(Long themeId, Long memberId, LocalDate dateFrom,
+                                                         LocalDate dateTo) {
         List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByReserverId(memberId);
 
         reserveTickets.removeIf(reservationMember ->
@@ -62,7 +76,12 @@ public class ReserveTicketService {
                 ).isEmpty()
         );
 
-        return reserveTickets;
+        return reserveTickets.stream()
+                .map((reserveTicket -> new ReserveTicketWaiting(reserveTicket.getId(), reserveTicket.getName(),
+                        reserveTicket.getDate(),
+                        reserveTicket.getStartAt(), reserveTicket.getReservationStatus(), 1,
+                        reserveTicket.getThemeName())))
+                .toList();
     }
 
     public List<ReserveTicket> memberReservations(Long memberId) {
