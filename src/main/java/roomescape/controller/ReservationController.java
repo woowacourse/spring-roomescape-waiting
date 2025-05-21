@@ -22,15 +22,15 @@ import roomescape.service.ReservationService;
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationService service;
+    private final ReservationService reservationService;
 
-    public ReservationController(ReservationService service) {
-        this.service = service;
+    public ReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @GetMapping
     public List<ReservationResponse> findAllReservations() {
-        return service.findAllReservations();
+        return reservationService.findAllReservations();
     }
 
     @PostMapping
@@ -39,7 +39,8 @@ public class ReservationController {
             @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
         ReservationCreationContent creationContent = new ReservationCreationContent(request);
-        ReservationResponse reservationResponse = service.addReservation(accessTokenContent.id(), creationContent);
+        ReservationResponse reservationResponse = reservationService.addReservation(accessTokenContent.id(),
+                creationContent);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(URI.create("/reservation/" + reservationResponse.id()))
                 .body(reservationResponse);
@@ -49,7 +50,14 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservationById(
             @PathVariable("reservationId") Long id
     ) {
-        service.deleteReservationById(id);
+        reservationService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/mine")
+    public List<ReservationResponse> findAllReservationsByUser(
+            @RequiredAccessToken AccessTokenContent accessTokenContent
+    ) {
+        return reservationService.findAllReservationsByMember(accessTokenContent.id());
     }
 }

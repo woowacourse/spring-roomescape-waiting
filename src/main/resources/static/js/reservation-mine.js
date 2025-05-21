@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // TODO: [2단계] url 수정
 
-    fetch('/members/reservations-mine') // 내 예약 목록 조회 API 호출
+    fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');

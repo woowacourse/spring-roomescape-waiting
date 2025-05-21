@@ -4,9 +4,6 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.config.annotation.RequiredAccessToken;
-import roomescape.dto.business.AccessTokenContent;
-import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.UserProfileResponse;
 import roomescape.service.ReservationService;
 import roomescape.service.UserService;
@@ -26,12 +23,5 @@ public class MemberController {
     @GetMapping
     public List<UserProfileResponse> findAllUser() {
         return memberService.findAllUserProfile();
-    }
-
-    @GetMapping("/reservations-mine")
-    public List<ReservationResponse> findAllReservationsByUser(
-            @RequiredAccessToken AccessTokenContent accessTokenContent
-    ) {
-        return reservationService.findAllReservationsByMember(accessTokenContent.id());
     }
 }
