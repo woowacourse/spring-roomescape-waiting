@@ -41,7 +41,7 @@ class WaitingRepositoryTest {
 
         Waiting waitingByUser2 = Waiting.builder().
                 reserver(유저2)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         // 유저2가 먼저 예약
@@ -50,7 +50,7 @@ class WaitingRepositoryTest {
         // 유저1 예약
         Waiting waitingByUser1 = Waiting.builder().
                 reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
 
@@ -77,12 +77,12 @@ class WaitingRepositoryTest {
 
         Waiting waiting1 = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         Waiting waiting2 = Waiting.builder()
                 .reserver(유저2)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
 
@@ -111,7 +111,7 @@ class WaitingRepositoryTest {
 
         Waiting waiting = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         waitingRepository.save(waiting);
@@ -145,14 +145,14 @@ class WaitingRepositoryTest {
 
         Waiting waiting = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         // when
-        boolean 소유자_확인 = waitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저1.getId());
-        boolean 다른_회원_확인 = waitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저2.getId());
+        boolean 소유자_확인 = waitingRepository.existsByIdAndMemberId(savedWaiting.getId(), 유저1.getId());
+        boolean 다른_회원_확인 = waitingRepository.existsByIdAndMemberId(savedWaiting.getId(), 유저2.getId());
 
         // then
         SoftAssertions.assertSoftly(softly -> {
@@ -170,7 +170,7 @@ class WaitingRepositoryTest {
 
         Waiting waiting = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         waitingRepository.save(waiting);
@@ -206,7 +206,7 @@ class WaitingRepositoryTest {
 
         Waiting waiting1 = Waiting.builder()
                 .reserver(유저2)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
 
@@ -214,7 +214,7 @@ class WaitingRepositoryTest {
 
         Waiting waiting2 = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
 
@@ -222,7 +222,7 @@ class WaitingRepositoryTest {
 
         Waiting waiting3 = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열한시)
+                .reservationDateTime(내일_열한시)
                 .theme(공포)
                 .build();
 

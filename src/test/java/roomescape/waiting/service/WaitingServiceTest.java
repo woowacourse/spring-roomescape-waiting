@@ -257,7 +257,7 @@ class WaitingServiceTest {
 
         Waiting waitingByUser2 = Waiting.builder().
                 reserver(유저2)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         // 유저2가 먼저 예약
@@ -266,7 +266,7 @@ class WaitingServiceTest {
         // 유저1 예약
         Waiting waitingByUser1 = Waiting.builder().
                 reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
 
@@ -292,12 +292,12 @@ class WaitingServiceTest {
 
         Waiting waiting1 = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         Waiting waiting2 = Waiting.builder()
                 .reserver(유저2)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
 
@@ -327,7 +327,7 @@ class WaitingServiceTest {
 
         Waiting waiting = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         Waiting savedWaiting = waitingRepository.save(waiting);
@@ -356,7 +356,7 @@ class WaitingServiceTest {
 
         Waiting waiting = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         Waiting savedWaiting = waitingRepository.save(waiting);
@@ -378,7 +378,7 @@ class WaitingServiceTest {
 
         Waiting waiting = Waiting.builder()
                 .reserver(유저1)
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .theme(공포)
                 .build();
         Waiting savedWaiting = waitingRepository.save(waiting);

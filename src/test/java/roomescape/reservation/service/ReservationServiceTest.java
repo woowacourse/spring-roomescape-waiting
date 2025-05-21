@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.auth.web.exception.NotAuthorizationException;
 import roomescape.common.CleanUp;
 import roomescape.fixture.db.MemberDbFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
@@ -194,21 +195,73 @@ class ReservationServiceTest {
         );
 
         waitingRepository.save(Waiting.builder()
-                .reservationDatetime(내일_열시)
+                .reservationDateTime(내일_열시)
                 .reserver(유저2)
                 .theme(공포)
                 .build());
 
-        // when: 유저1의 예약 취소(삭제)
+        // when
         reservationService.delete(유저1.getId());
 
-        // then: 유저2의 대기 예약이 예약으로 승격되었는지 확인
-        System.out.println("====검색===");
+        // then
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations)
                 .anyMatch(r -> r.getReserver().getId().equals(유저2.getId())
                         && r.getReservationDatetime().getTimeId().equals(내일_열시.getTimeId())
                         && r.getReservationDatetime().getDate().equals(내일_열시.getDate())
                         && r.getTheme().getId().equals(공포.getId()));
+    }
+
+    @Test
+    void 사용자가_예약한_예약을_삭제한다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Reservation reservation = reservationRepository.save(
+                Reservation.builder()
+                        .reserver(유저1)
+                        .reservationDateTime(내일_열시)
+                        .theme(공포)
+                        .build()
+        );
+
+        // when
+        reservationService.deleteByUser(reservation.getId(), 유저1.getId());
+
+        // then
+        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
+    }
+
+    @Test
+    void 사용자가_예약한_예약이_없으면_예외가_발생한다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteByUser(1L, 유저1.getId()))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void 해당_예약자가_아닌_유저가_삭제하면_예외를_발생한다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Member 유저2 = memberDbFixture.유저2_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Reservation reservation = reservationRepository.save(
+                Reservation.builder()
+                        .reserver(유저1)
+                        .reservationDateTime(내일_열시)
+                        .theme(공포)
+                        .build()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteByUser(reservation.getId(), 유저2.getId()))
+                .isInstanceOf(NotAuthorizationException.class);
     }
 }

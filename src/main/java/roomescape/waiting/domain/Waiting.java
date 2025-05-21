@@ -38,9 +38,9 @@ public class Waiting {
     private Theme theme;
 
     @Builder
-    public Waiting(Member reserver, ReservationDateTime reservationDatetime, Theme theme) {
+    public Waiting(Member reserver, ReservationDateTime reservationDateTime, Theme theme) {
         this.reserver = reserver;
-        this.reservationDatetime = reservationDatetime;
+        this.reservationDatetime = reservationDateTime;
         this.theme = theme;
     }
 

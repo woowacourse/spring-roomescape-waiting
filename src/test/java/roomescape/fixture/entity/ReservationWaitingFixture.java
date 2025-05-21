@@ -10,7 +10,7 @@ public class ReservationWaitingFixture {
     public static Waiting create() {
         return Waiting.builder()
                 .reserver(MemberFixture.createUser())
-                .reservationDatetime(ReservationDateTimeFixture.create())
+                .reservationDateTime(ReservationDateTimeFixture.create())
                 .theme(ThemeFixture.create())
                 .build();
     }
@@ -18,7 +18,7 @@ public class ReservationWaitingFixture {
     public static Waiting create(Member member, ReservationDateTime dateTime, Theme theme) {
         return Waiting.builder()
                 .reserver(member)
-                .reservationDatetime(dateTime)
+                .reservationDateTime(dateTime)
                 .theme(theme)
                 .build();
     }

@@ -66,11 +66,11 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             select  exists (
                 select w
                 from Waiting w
-                where w.reserver.id = :memberId and
-                w.id = :id
+                where w.reserver.id = :memberId
+                and w.id = :id
             )
             """)
-    boolean existsByIdAndReserverId(@Param("id") Long id, @Param("memberId") Long memberId);
+    boolean existsByIdAndMemberId(@Param("id") Long id, @Param("memberId") Long memberId);
 
     @Query("""
                 select w
