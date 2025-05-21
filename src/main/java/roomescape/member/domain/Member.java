@@ -18,15 +18,20 @@ public class Member {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "name", nullable = false)
     private String name;
+
     @Column(name = "email", nullable = false)
     private String email;
+
     @Column(name = "password", nullable = false)
     private String password;
+
     @Enumerated(value = EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
