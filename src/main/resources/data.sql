@@ -117,4 +117,10 @@ values
     (2, 9, TIMESTAMPADD(DAY, -9, CURRENT_DATE()), 5, 'RESERVED'),
 
     -- theme_id = 10 (1개 예약)
-    (3, 10, TIMESTAMPADD(DAY, -10, CURRENT_DATE()), 8, 'RESERVED')
+    (3, 10, TIMESTAMPADD(DAY, -10, CURRENT_DATE()), 8, 'RESERVED');
+
+-- 예약 대기
+insert into waiting (member_id, theme_id, date, reservation_time_id)
+values
+    -- theme_id = 1 (10개 예약)
+    (1, 1, TIMESTAMPADD(DAY, +1, CURRENT_DATE()), 1);

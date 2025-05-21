@@ -56,6 +56,7 @@ public class WaitingController {
     public ResponseEntity<Void> deleteWaiting(
             final @PathVariable Long id
     ) {
+        System.out.println("=======================================id = " + id);
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }

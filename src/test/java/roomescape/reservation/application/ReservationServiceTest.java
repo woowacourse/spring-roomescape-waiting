@@ -20,6 +20,7 @@ import roomescape.reservation.application.ReservationServiceTest.ReservationConf
 import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
+import roomescape.reservation.application.repository.WaitingRepository;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -180,10 +181,12 @@ class ReservationServiceTest {
                 ReservationRepository reservationRepository,
                 ReservationTimeRepository reservationTimeRepository,
                 ThemeRepository themeRepository,
-                MemberRepository memberRepository
+                MemberRepository memberRepository,
+                WaitingRepository waitingRepository
         ) {
             return new ReservationService(
-                    reservationRepository, reservationTimeRepository, themeRepository, memberRepository
+                    waitingRepository, reservationRepository, reservationTimeRepository, themeRepository,
+                    memberRepository
             );
         }
     }

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.repository.MemberRepository;
@@ -12,6 +13,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
+import roomescape.reservation.application.repository.WaitingRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -23,15 +25,18 @@ import roomescape.reservation.presentation.dto.UserReservationsResponse;
 @Service
 public class ReservationService {
 
+    private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
+    public ReservationService(final WaitingRepository waitingRepository,
+                              final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
                               final MemberRepository memberRepository) {
+        this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -94,9 +99,19 @@ public class ReservationService {
     public List<UserReservationsResponse> getUserReservations(final Long memberId) {
         findMemberById(memberId);
 
-        return reservationRepository.findByMemberId(memberId).stream()
+        final List<UserReservationsResponse> reservations = reservationRepository.findByMemberId(memberId).stream()
                 .map(UserReservationsResponse::new)
                 .toList();
+
+        final List<UserReservationsResponse> waitings = waitingRepository.findWaitingsWithRankByMemberId(
+                        memberId).stream()
+                .map(UserReservationsResponse::new)
+                .toList();
+
+        return Stream.concat(
+                reservations.stream(),
+                waitings.stream()
+        ).toList();
     }
 
     @Transactional

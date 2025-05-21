@@ -52,11 +52,11 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
+    console.log(id)
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '/reservations/waiting';
-    return fetch(endpoint, {
+    return fetch(`/reservations/waiting/${id}`, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;

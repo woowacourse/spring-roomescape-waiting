@@ -3,10 +3,12 @@ package roomescape.reservation.presentation.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingWithRank;
 
 public class UserReservationsResponse {
 
-    private Long reservationId;
+    private Long id;
     private String theme;
     private LocalDate date;
     private LocalTime time;
@@ -16,15 +18,24 @@ public class UserReservationsResponse {
     }
 
     public UserReservationsResponse(final Reservation reservation) {
-        this.reservationId = reservation.getId();
+        this.id = reservation.getId();
         this.theme = reservation.getTheme().getName();
         this.date = reservation.getDate();
         this.time = reservation.getReservationTime().getStartAt();
         this.status = reservation.getStatus().getStatus();
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public UserReservationsResponse(final WaitingWithRank reservation) {
+        Waiting waiting = reservation.getWaiting();
+        this.id = waiting.getId();
+        this.theme = waiting.getTheme().getName();
+        this.date = waiting.getDate();
+        this.time = waiting.getReservationTime().getStartAt();
+        this.status = reservation.getRank() + "번째 예약대기";
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getTheme() {
