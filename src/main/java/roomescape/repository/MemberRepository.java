@@ -11,7 +11,7 @@ import roomescape.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    @Query("select m from Member m join fetch m.reservations where m.id = :memberId")
+    @Query("select m from Member m left join fetch m.reservations where m.id = :memberId")
     Optional<Member> findFetchById(@Param("memberId") Long memberId);
 
     Optional<Member> findByEmailAndPassword(String email, String password);
