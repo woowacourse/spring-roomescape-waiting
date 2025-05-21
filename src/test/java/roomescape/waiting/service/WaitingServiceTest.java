@@ -26,15 +26,15 @@ import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
-import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.exception.InAlreadyWaitingException;
-import roomescape.waiting.repository.ReservationWaitingRepository;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-class ReservationWaitingServiceTest {
+class WaitingServiceTest {
 
     @Autowired
-    private ReservationWaitingService reservationWaitingService;
+    private WaitingService waitingService;
     @Autowired
     private MemberDbFixture memberDbFixture;
     @Autowired
@@ -42,7 +42,7 @@ class ReservationWaitingServiceTest {
     @Autowired
     private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
     @Autowired
-    private ReservationWaitingRepository reservationWaitingRepository;
+    private WaitingRepository waitingRepository;
     @Autowired
     private CleanUp cleanUp;
     @Autowired
@@ -68,7 +68,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when
-        ReservationResponse response = reservationWaitingService.waiting(command);
+        ReservationResponse response = waitingService.waiting(command);
 
         // then
         SoftAssertions.assertSoftly(softly -> {
@@ -108,7 +108,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.waiting(command))
+        assertThatThrownBy(() -> waitingService.waiting(command))
                 .isInstanceOf(InAlreadyReservationException.class);
     }
 
@@ -126,7 +126,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.waiting(command))
+        assertThatThrownBy(() -> waitingService.waiting(command))
                 .isInstanceOf(InvalidArgumentException.class)
                 .hasMessage("존재하지 않는 멤버입니다.");
     }
@@ -145,7 +145,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.waiting(command))
+        assertThatThrownBy(() -> waitingService.waiting(command))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -163,7 +163,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.waiting(command))
+        assertThatThrownBy(() -> waitingService.waiting(command))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -182,7 +182,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.waiting(command))
+        assertThatThrownBy(() -> waitingService.waiting(command))
                 .isInstanceOf(PastReservationException.class);
     }
 
@@ -200,10 +200,10 @@ class ReservationWaitingServiceTest {
                 유저1.getId()
         );
 
-        reservationWaitingService.waiting(command);
+        waitingService.waiting(command);
 
         // when & then
-        assertThatThrownBy(() -> reservationWaitingService.waiting(command))
+        assertThatThrownBy(() -> waitingService.waiting(command))
                 .isInstanceOf(InAlreadyWaitingException.class);
     }
 
@@ -215,25 +215,25 @@ class ReservationWaitingServiceTest {
         Theme 공포 = themeDbFixture.공포();
         ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
 
-        ReservationWaiting waitingByUser2 = ReservationWaiting.builder().
+        Waiting waitingByUser2 = Waiting.builder().
                 reserver(유저2)
                 .reservationDatetime(내일_열시)
                 .theme(공포)
                 .build();
         // 유저2가 먼저 예약
-        reservationWaitingRepository.save(waitingByUser2);
+        waitingRepository.save(waitingByUser2);
 
         // 유저1 예약
-        ReservationWaiting waitingByUser1 = ReservationWaiting.builder().
+        Waiting waitingByUser1 = Waiting.builder().
                 reserver(유저1)
                 .reservationDatetime(내일_열시)
                 .theme(공포)
                 .build();
 
-        reservationWaitingRepository.save(waitingByUser1);
+        waitingRepository.save(waitingByUser1);
 
         // when
-        List<MyReservationResponse> result = reservationWaitingService.getWaitingReservations(유저1.getId());
+        List<MyReservationResponse> result = waitingService.getWaitingReservations(유저1.getId());
 
         // then
         SoftAssertions.assertSoftly(softly -> {

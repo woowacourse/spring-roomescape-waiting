@@ -5,19 +5,19 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingWithRank;
 
-public interface ReservationWaitingRepository extends JpaRepository<ReservationWaiting, Long> {
+public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
             select new roomescape.waiting.dto.WaitingWithRank(
                 w,
                 count(w2)
             )
-            from ReservationWaiting w
+            from Waiting w
             join ReservationTime rt on rt = w.reservationDatetime.reservationTime
-            join ReservationWaiting w2 on
+            join Waiting w2 on
                 w2.reservationDatetime.reservationTime = rt
                 and w2.reservationDatetime.reservationDate.date = w.reservationDatetime.reservationDate.date
                 and w2.id <= w.id
@@ -29,7 +29,7 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
 
     @Query("""
             select exists
-            (select w from ReservationWaiting w
+            (select w from Waiting w
                 where w.reserver.id = :memberId
                 and w.reservationDatetime.reservationDate.date = :date
                 and w.reservationDatetime.reservationTime.id = :timeId
@@ -43,7 +43,7 @@ public interface ReservationWaitingRepository extends JpaRepository<ReservationW
     @Query("""
             select  exists (
                 select w
-                from ReservationWaiting w
+                from Waiting w
                 where w.reserver.id = :memberId and
                 w.id = :id
             )

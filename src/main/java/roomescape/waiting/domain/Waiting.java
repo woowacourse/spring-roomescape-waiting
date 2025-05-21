@@ -22,7 +22,7 @@ import roomescape.time.domain.ReservationTime;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class ReservationWaiting {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,7 @@ public class ReservationWaiting {
     private Theme theme;
 
     @Builder
-    public ReservationWaiting(Member reserver, ReservationDateTime reservationDatetime, Theme theme) {
+    public Waiting(Member reserver, ReservationDateTime reservationDatetime, Theme theme) {
         this.reserver = reserver;
         this.reservationDatetime = reservationDatetime;
         this.theme = theme;

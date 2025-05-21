@@ -1,6 +1,6 @@
 package roomescape.waiting.dto;
 
-import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.domain.Waiting;
 
-public record WaitingWithRank(ReservationWaiting reservationWaiting, long rank) {
+public record WaitingWithRank(Waiting waiting, long rank) {
 }

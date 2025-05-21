@@ -19,30 +19,30 @@ import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeQueryService;
 import roomescape.time.service.ReservationTimeQueryService;
-import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.exception.InAlreadyWaitingException;
-import roomescape.waiting.repository.ReservationWaitingRepository;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationWaitingService implements ReservationWaitingQueryService {
+public class WaitingService implements WaitingQueryService {
 
     private final ThemeQueryService themeQueryService;
     private final MemberQueryService memberQueryService;
     private final ReservationTimeQueryService timeQueryService;
-    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final WaitingRepository waitingRepository;
     private final ReservationQueryManager reservationQueryManager;
 
     @Transactional
     public ReservationResponse waiting(ReserveCommand reserveCommand) {
-        ReservationWaiting reservationWaiting = reservationWaitingFrom(reserveCommand);
+        Waiting waiting = reservationWaitingFrom(reserveCommand);
 
-        ReservationWaiting saved = reservationWaitingRepository.save(reservationWaiting);
+        Waiting saved = waitingRepository.save(waiting);
 
         return ReservationResponse.from(saved);
     }
 
-    private ReservationWaiting reservationWaitingFrom(ReserveCommand reserveCommand) {
+    private Waiting reservationWaitingFrom(ReserveCommand reserveCommand) {
         Long memberId = reserveCommand.memberId();
         LocalDate date = reserveCommand.date();
         Long timeId = reserveCommand.timeId();
@@ -53,7 +53,7 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
         Theme theme = themeQueryService.getTheme(reserveCommand.themeId());
         Member reserver = memberQueryService.getMember(memberId);
 
-        return ReservationWaiting.builder()
+        return Waiting.builder()
                 .reservationDatetime(reservationDateTime)
                 .reserver(reserver)
                 .theme(theme)
@@ -61,7 +61,7 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
     }
 
     private void validateWaiting(Long memberId, LocalDate date, Long timeId) {
-        if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeId(memberId, date, memberId)) {
+        if (waitingRepository.existsByMemberIdAndDateAndTimeId(memberId, date, memberId)) {
             throw new InAlreadyWaitingException("이미 예약된 시간입니다.");
         }
 
@@ -72,7 +72,7 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
 
     @Transactional(readOnly = true)
     public List<MyReservationResponse> getWaitingReservations(Long memberId) {
-        return reservationWaitingRepository.findWithRankByMemberId(memberId)
+        return waitingRepository.findWithRankByMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
@@ -80,7 +80,7 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
 
     @Transactional
     public void deleteByUser(Long id, Long memberId) {
-        if (!reservationWaitingRepository.existsByIdAndReserverId(id, memberId)) {
+        if (!waitingRepository.existsByIdAndReserverId(id, memberId)) {
             throw new NotAuthorizationException("해당 예약자가 아닙니다.");
         }
 
@@ -89,10 +89,10 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
 
     @Transactional
     public void delete(Long id) {
-        if (!reservationWaitingRepository.existsById(id)) {
+        if (!waitingRepository.existsById(id)) {
             throw new NotFoundException("해당 예약 대기를 찾을 수 없습니다.");
         }
 
-        reservationWaitingRepository.deleteById(id);
+        waitingRepository.deleteById(id);
     }
 }

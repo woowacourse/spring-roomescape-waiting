@@ -19,16 +19,16 @@ import roomescape.global.response.ApiResponse;
 import roomescape.reservation.controller.request.ReserveByUserRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.service.command.ReserveCommand;
-import roomescape.waiting.service.ReservationWaitingService;
+import roomescape.waiting.service.WaitingService;
 
 @RestController
 @RequestMapping("/reservations/waiting")
-public class ReservationWaitingApiController {
+public class WaitingApiController {
 
-    private final ReservationWaitingService waitingService;
+    private final WaitingService waitingService;
 
     @Autowired
-    public ReservationWaitingApiController(final ReservationWaitingService waitingService) {
+    public WaitingApiController(final WaitingService waitingService) {
         this.waitingService = waitingService;
     }
 

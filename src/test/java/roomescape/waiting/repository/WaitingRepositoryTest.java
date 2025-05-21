@@ -10,15 +10,15 @@ import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.WaitingWithRank;
 import roomescape.theme.domain.Theme;
 
 @CustomJpaTest
-class ReservationWaitingRepositoryTest {
+class WaitingRepositoryTest {
 
     @Autowired
-    private ReservationWaitingRepository reservationWaitingRepository;
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
@@ -37,30 +37,30 @@ class ReservationWaitingRepositoryTest {
         Theme 공포 = themeDbFixture.공포();
         ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
 
-        ReservationWaiting waitingByUser2 = ReservationWaiting.builder().
+        Waiting waitingByUser2 = Waiting.builder().
                 reserver(유저2)
                 .reservationDatetime(내일_열시)
                 .theme(공포)
                 .build();
         // 유저2가 먼저 예약
-        reservationWaitingRepository.save(waitingByUser2);
+        waitingRepository.save(waitingByUser2);
 
         // 유저1 예약
-        ReservationWaiting waitingByUser1 = ReservationWaiting.builder().
+        Waiting waitingByUser1 = Waiting.builder().
                 reserver(유저1)
                 .reservationDatetime(내일_열시)
                 .theme(공포)
                 .build();
 
-        ReservationWaiting savedWaitingByUser1 = reservationWaitingRepository.save(waitingByUser1);
+        Waiting savedWaitingByUser1 = waitingRepository.save(waitingByUser1);
 
         // when
-        List<WaitingWithRank> result = reservationWaitingRepository.findWithRankByMemberId(유저1.getId());
+        List<WaitingWithRank> result = waitingRepository.findWithRankByMemberId(유저1.getId());
 
         // then
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.getFirst().reservationWaiting().getId()).isEqualTo(savedWaitingByUser1.getId());
+            softly.assertThat(result.getFirst().waiting().getId()).isEqualTo(savedWaitingByUser1.getId());
             softly.assertThat(result.getFirst().rank()).isEqualTo(2);
         });
     }
@@ -72,20 +72,20 @@ class ReservationWaitingRepositoryTest {
         Theme 공포 = themeDbFixture.공포();
         ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
 
-        ReservationWaiting waiting = ReservationWaiting.builder()
+        Waiting waiting = Waiting.builder()
                 .reserver(유저1)
                 .reservationDatetime(내일_열시)
                 .theme(공포)
                 .build();
-        reservationWaitingRepository.save(waiting);
+        waitingRepository.save(waiting);
 
         // when
-        boolean 존재함 = reservationWaitingRepository.existsByMemberIdAndDateAndTimeId(
+        boolean 존재함 = waitingRepository.existsByMemberIdAndDateAndTimeId(
                 유저1.getId(),
                 내일_열시.getDate(),
                 내일_열시.getReservationTime().getId()
         );
-        boolean 존재하지않음 = reservationWaitingRepository.existsByMemberIdAndDateAndTimeId(
+        boolean 존재하지않음 = waitingRepository.existsByMemberIdAndDateAndTimeId(
                 유저1.getId(),
                 내일_열시.getDate().plusDays(1),
                 내일_열시.getReservationTime().getId()
@@ -106,16 +106,16 @@ class ReservationWaitingRepositoryTest {
         Theme 공포 = themeDbFixture.공포();
         ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
 
-        ReservationWaiting waiting = ReservationWaiting.builder()
+        Waiting waiting = Waiting.builder()
                 .reserver(유저1)
                 .reservationDatetime(내일_열시)
                 .theme(공포)
                 .build();
-        ReservationWaiting savedWaiting = reservationWaitingRepository.save(waiting);
+        Waiting savedWaiting = waitingRepository.save(waiting);
 
         // when
-        boolean 소유자_확인 = reservationWaitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저1.getId());
-        boolean 다른_회원_확인 = reservationWaitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저2.getId());
+        boolean 소유자_확인 = waitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저1.getId());
+        boolean 다른_회원_확인 = waitingRepository.existsByIdAndReserverId(savedWaiting.getId(), 유저2.getId());
 
         // then
         SoftAssertions.assertSoftly(softly -> {

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.waiting.service.ReservationWaitingQueryService;
+import roomescape.waiting.service.WaitingQueryService;
 
 @Service
 @Transactional(readOnly = true)
@@ -16,7 +16,7 @@ import roomescape.waiting.service.ReservationWaitingQueryService;
 public class ReservationQueryService {
 
     private final ReservationQueryManager reservationQueryManager;
-    private final ReservationWaitingQueryService waitingQueryService;
+    private final WaitingQueryService waitingQueryService;
 
     public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate from,
                                                              LocalDate to) {

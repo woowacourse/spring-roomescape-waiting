@@ -26,8 +26,8 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
-import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.waiting.repository.ReservationWaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class ReservationQueryServiceTest {
@@ -45,7 +45,7 @@ public class ReservationQueryServiceTest {
     @Autowired
     private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
     @Autowired
-    private ReservationWaitingRepository reservationWaitingRepository;
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private CleanUp cleanUp;
@@ -242,12 +242,12 @@ public class ReservationQueryServiceTest {
         reservationRepository.save(예약);
 
         // 대기 예약 생성
-        ReservationWaiting 대기 = ReservationWaiting.builder()
+        Waiting 대기 = Waiting.builder()
                 .reserver(유저1)
                 .reservationDatetime(내일_열한시)
                 .theme(공포)
                 .build();
-        reservationWaitingRepository.save(대기);
+        waitingRepository.save(대기);
 
         // when
         List<MyReservationResponse> 결과 = reservationQueryService.getReservations(유저1.getId());
