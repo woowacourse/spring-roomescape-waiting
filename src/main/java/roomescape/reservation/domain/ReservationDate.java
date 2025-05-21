@@ -10,7 +10,7 @@ public class ReservationDate {
     @Column(nullable = false, unique = true)
     private LocalDate reservationDate;
 
-    public ReservationDate() {
+    protected ReservationDate() {
 
     }
 
