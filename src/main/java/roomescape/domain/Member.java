@@ -41,6 +41,10 @@ public class Member {
     protected Member() {
     }
 
+    public static Member createWithoutId(String name, String email, String password, Role role) {
+        return new Member(null, name, email, password, role);
+    }
+
     public Member withId(Long id) {
         return new Member(id, name, email, password, role);
     }
