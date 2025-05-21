@@ -63,7 +63,7 @@ public class WaitingService implements WaitingQueryService {
         Member reserver = memberQueryService.getMember(memberId);
 
         return Waiting.builder()
-                .reservationDatetime(reservationDateTime)
+                .reservationDateTime(reservationDateTime)
                 .reserver(reserver)
                 .theme(theme)
                 .build();
@@ -94,21 +94,9 @@ public class WaitingService implements WaitingQueryService {
         return waitingRepository.getAll();
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public Waiting getFirstWaiting(LocalDate date, Long timeId) {
-        return waitingRepository.findByDateAndTimeId(date, timeId).getFirst();
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public boolean existsWaiting(LocalDate date, Long timeId) {
-        return waitingRepository.existsByDateAndTimeId(date, timeId);
-    }
-
     @Transactional
     public void deleteByUser(Long id, Long memberId) {
-        if (!waitingRepository.existsByIdAndReserverId(id, memberId)) {
+        if (!waitingRepository.existsByIdAndMemberId(id, memberId)) {
             throw new NotAuthorizationException("해당 예약 대기자가 아닙니다.");
         }
 

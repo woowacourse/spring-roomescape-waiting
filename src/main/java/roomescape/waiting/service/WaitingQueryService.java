@@ -12,7 +12,4 @@ public interface WaitingQueryService {
 
     List<MyReservationResponse> getWaitingReservations(Long memberId);
 
-    Waiting getFirstWaiting(LocalDate date, Long timeId);
-
-    boolean existsWaiting(LocalDate date, Long timeId);
 }
