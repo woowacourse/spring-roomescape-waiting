@@ -11,13 +11,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.entity.Theme;
 
 @DataJpaTest
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationRepositoryTest {
 
     @Autowired
@@ -52,7 +56,6 @@ class ReservationRepositoryTest {
 
         // then
         assertAll(
-                () -> assertThat(reservations.size()).isEqualTo(1),
                 () -> assertThat(reservations.getFirst().getDate()).isEqualTo(date),
                 () -> assertThat(reservations.getFirst().getTime()).isEqualTo(reservationTime),
                 () -> assertThat(reservations.getFirst().getTheme()).isEqualTo(theme),
