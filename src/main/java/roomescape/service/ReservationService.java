@@ -139,7 +139,10 @@ public class ReservationService {
 
     private void checkStatusAndWaitRank(Reservation reservation, List<MyReservationResponse> responses) {
         if (reservation.getStatus() == ReservationStatus.WAIT) {
-            Long waitRank = reservationRepository.countRankById(reservation.getId());
+            Long waitRank = reservationRepository.countRankById(reservation.getId(),
+                    reservation.getDate(),
+                    reservation.getReservationTime().getId(),
+                    reservation.getTheme().getId());
             responses.add(MyReservationResponse.of(reservation, waitRank));
             return;
         }

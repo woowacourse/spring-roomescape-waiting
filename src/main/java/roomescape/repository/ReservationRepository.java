@@ -40,6 +40,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByThemeId(Long themeId);
 
-    @Query(value = "select count(r) from Reservation r where r.id < :id")
-    Long countRankById(@Param("id") Long reservationId);
+    @Query(value = """
+                select count(r)
+                from Reservation r
+                where r.id <= :id
+                and r.date = :date
+                and r.reservationTime.id = :timeId
+                and r.theme.id = :themeId
+                and r.status = 'WAIT'
+            """)
+    Long countRankById(@Param("id") Long reservationId,
+                       @Param("date") LocalDate date,
+                       @Param("timeId") Long timeId,
+                       @Param("themeId") Long themeId);
 }
