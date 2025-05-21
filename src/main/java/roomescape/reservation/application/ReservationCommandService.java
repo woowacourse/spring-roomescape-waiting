@@ -59,7 +59,7 @@ public class ReservationCommandService {
         final Theme theme = getTheme(request.themeId());
         final Member member = getMember(request.memberId());
 
-        validateHasConflict(request, time, theme);
+        validateHasTimeConflict(request, time, theme);
         validatePastDateTime(request.date(), time.getStartAt());
 
         final Reservation reservation = new Reservation(request.date(), time, theme, member, BookingStatus.RESERVED);
