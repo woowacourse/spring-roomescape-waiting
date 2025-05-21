@@ -22,31 +22,16 @@ public class ReservationTime {
     public ReservationTime() {
     }
 
-    private ReservationTime(final Long id, final LocalTime startAt) {
+    public ReservationTime(final LocalTime startAt) {
         validateIsNonNull(startAt);
 
-        this.id = id;
+        this.id = null;
         this.startAt = startAt;
     }
 
     private void validateIsNonNull(final Object object) {
         if (object == null) {
             throw new BusinessException("시간 정보는 null 일 수 없습니다.");
-        }
-    }
-
-    public static ReservationTime createWithoutId(final LocalTime startAt) {
-        return new ReservationTime(null, startAt);
-    }
-
-    public static ReservationTime createWithId(final Long id, final LocalTime startAt) {
-        validateIdIsNonNull(id);
-        return new ReservationTime(Objects.requireNonNull(id), startAt);
-    }
-
-    private static void validateIdIsNonNull(final Long id) {
-        if (id == null) {
-            throw new BusinessException("시간 id는 null 일 수 없습니다.");
         }
     }
 

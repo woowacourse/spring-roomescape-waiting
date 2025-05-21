@@ -42,12 +42,11 @@ public class Reservation {
     public Reservation() {
     }
 
-    private Reservation(final Long id,
-                        final LocalDate date,
-                        final ReservationTime time,
-                        final Theme theme,
-                        final Member member,
-                        final Status status
+    public Reservation(final LocalDate date,
+                       final ReservationTime time,
+                       final Theme theme,
+                       final Member member,
+                       final Status status
     ) {
         validateIsNonNull(date);
         validateIsNonNull(time);
@@ -55,7 +54,7 @@ public class Reservation {
         validateIsNonNull(member);
         validateIsNonNull(status);
 
-        this.id = id;
+        this.id = null;
         this.date = date;
         this.time = time;
         this.theme = theme;
@@ -67,15 +66,6 @@ public class Reservation {
         if (object == null) {
             throw new BusinessException("예약 정보는 null 일 수 없습니다.");
         }
-    }
-
-    public static Reservation createWithoutId(final LocalDate date,
-                                              final ReservationTime time,
-                                              final Theme theme,
-                                              final Member member,
-                                              final Status status
-    ) {
-        return new Reservation(null, date, time, theme, member, status);
     }
 
     public boolean isCannotReserveDateTime(final LocalDateTime dateTime) {

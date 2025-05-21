@@ -13,7 +13,7 @@ class MemberTest {
     @ParameterizedTest
     @ValueSource(strings = {".", "kang0@d", "kaw.com", "test@.com"})
     void validate_email_format(final String email) {
-        Assertions.assertThatThrownBy(() -> Member.createWithoutId("기석", email, "password"))
+        Assertions.assertThatThrownBy(() -> new Member(new Name("기석"), new Email(email), new Password("password")))
                 .isInstanceOf(EmailException.class);
     }
 
@@ -21,7 +21,7 @@ class MemberTest {
     @ParameterizedTest
     @ValueSource(strings = {"testtest", "testtd", "tdasjiopgrj2", ""})
     void validate_name_length(final String name) {
-        Assertions.assertThatThrownBy(() -> Member.createWithoutId(name, "k@email.com", "password"))
+        Assertions.assertThatThrownBy(() -> new Member(new Name(name), new Email("k@email.com"), new Password("password")))
                 .isInstanceOf(NameException.class);
     }
 }

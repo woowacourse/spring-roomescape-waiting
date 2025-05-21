@@ -1,6 +1,5 @@
 package roomescape.member.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,15 +25,11 @@ public class Member {
     public Member() {
     }
 
-    private Member(final Long id, final Name name, final Email email, final Password password) {
-        this.id = id;
+    public Member(final Name name, final Email email, final Password password) {
+        this.id = null;
         this.name = name;
         this.email = email;
         this.password = password;
-    }
-
-    public static Member createWithoutId(String name, String email, String password) {
-        return new Member(null, new Name(name), new Email(email), new Password(password));
     }
 
     public boolean isSamePassword(final String password) {

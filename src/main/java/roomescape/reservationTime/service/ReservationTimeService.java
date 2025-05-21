@@ -25,8 +25,7 @@ public class ReservationTimeService {
     }
 
     public ReservationTimeResponse createReservationTime(final ReservationTimeRequest request) {
-        ReservationTime reservationTime = reservationTimeRepository.save(
-            ReservationTime.createWithoutId(request.startAt()));
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(request.startAt()));
 
         return ReservationTimeResponse.from(reservationTime);
     }
@@ -39,7 +38,7 @@ public class ReservationTimeService {
     }
 
     private void validateExistsTime(Long id) {
-        if (reservationTimeRepository.existsById(id)) {
+        if (!reservationTimeRepository.existsById(id)) {
             throw new BusinessException("해당 시간은 존재하지 않습니다.");
         }
     }

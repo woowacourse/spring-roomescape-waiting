@@ -28,8 +28,7 @@ public class ThemeService {
     }
 
     public ThemeResponse createTheme(final ThemeRequest request) {
-        Theme theme = themeRepository.save(
-            Theme.createWithoutId(request.name(), request.description(), request.thumbnail()));
+        Theme theme = themeRepository.save(new Theme(request.name(), request.description(), request.thumbnail()));
 
         return ThemeResponse.from(theme);
     }

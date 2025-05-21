@@ -18,8 +18,8 @@ public class Admin {
     public Admin() {
     }
 
-    public Admin(Long id, String name, String email, String password) {
-        this.id = id;
+    public Admin(String name, String email, String password) {
+        this.id = null;
         this.name = name;
         this.email = email;
         this.password = password;

@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
+import roomescape.member.domain.Name;
+import roomescape.member.domain.Password;
 import roomescape.member.exception.EmailException;
 import roomescape.member.exception.MemberNotFound;
 import roomescape.member.presentation.dto.MemberRequest;
@@ -25,8 +27,9 @@ public class MemberService {
         boolean emailExist = memberRepository.existsByEmail(new Email(request.email()));
         validateEmailExists(emailExist);
 
-        Member member = memberRepository.save(
-            Member.createWithoutId(request.name(), request.email(), request.password()));
+        Member member = memberRepository.save(new Member(
+            new Name(request.name()), new Email(request.email()), new Password(request.password()))
+        );
 
         return new MemberResponse(member.getId(), member.getName());
     }

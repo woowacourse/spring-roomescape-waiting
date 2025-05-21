@@ -56,7 +56,7 @@ public class ReservationService {
         validateExistDuplicateReservation(reservations, time);
 
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = Reservation.createWithoutId(request.date(), time, theme, member, Status.RESERVED);
+        Reservation reservation = new Reservation(request.date(), time, theme, member, Status.RESERVED);
         validateCanReserveDateTime(reservation, now);
         reservation = reservationRepository.save(reservation);
 
@@ -90,7 +90,7 @@ public class ReservationService {
     }
 
     private void validateExistsReservation(Long id) {
-        if (reservationRepository.existsById(id)) {
+        if (!reservationRepository.existsById(id)) {
             throw new BusinessException("해당 예약이 존재하지 않습니다.");
         }
     }
