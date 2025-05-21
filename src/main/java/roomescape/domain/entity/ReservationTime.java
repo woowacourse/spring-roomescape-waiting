@@ -49,6 +49,10 @@ public class ReservationTime {
         }
     }
 
+    void removeReservation(Reservation reservation) {
+        reservations.remove(reservation);
+    }
+
     public Long getId() {
         return id;
     }

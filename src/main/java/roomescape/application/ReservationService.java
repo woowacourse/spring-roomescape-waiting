@@ -111,6 +111,9 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         try {
+            Reservation reservation = reservationRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id));
+            reservation.remove();
             reservationRepository.deleteById(id);
             reservationRepository.flush();
         } catch (EmptyResultDataAccessException e) {

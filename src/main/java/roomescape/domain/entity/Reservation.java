@@ -75,6 +75,12 @@ public class Reservation {
         return new Reservation(null, member, theme, reservationDate, reservationTime, status);
     }
 
+    public void remove() {
+        if (time != null) {
+            time.removeReservation(this);
+        }
+    }
+
     public boolean isPast() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
