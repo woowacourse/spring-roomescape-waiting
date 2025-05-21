@@ -127,6 +127,10 @@ public class ReservationService {
         reservationCommandUseCase.delete(id);
     }
 
+    public void deleteReservationWait(final Long id) {
+        reservationWaitCommandUseCase.delete(id);
+    }
+
     public List<ReservationWebResponse> search(
             final ReservationSearchWebRequest reservationSearchWebRequest
     ) {

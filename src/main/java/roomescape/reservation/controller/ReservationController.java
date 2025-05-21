@@ -109,4 +109,10 @@ public class ReservationController {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping(BASE_PATH + "/wait" + "/{id}")
+    public ResponseEntity<Void> deleteReservationWait(@PathVariable final Long id) {
+        reservationService.deleteReservationWait(id);
+        return ResponseEntity.noContent().build();
+    }
 }

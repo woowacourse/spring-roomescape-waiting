@@ -14,4 +14,5 @@ public interface ReservationWaitRepository {
 
     List<ReservationWaitWithRankResponse> findWithRankByInfoMemberId(Long memberId);
 
+    void deleteById(Long id);
 }

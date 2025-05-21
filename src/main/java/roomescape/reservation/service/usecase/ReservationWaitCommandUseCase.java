@@ -69,4 +69,8 @@ public class ReservationWaitCommandUseCase {
             throw new ConflictException("이미 해당 예약 대기를 한 사용자입니다.");
         }
     }
+
+    public void delete(final Long id) {
+        reservationWaitRepository.deleteById(id);
+    }
 }
