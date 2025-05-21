@@ -11,6 +11,10 @@ import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.member JOIN FETCH r.theme JOIN FETCH r.time")
+    List<Reservation> findAll();
+
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.member m JOIN FETCH r.theme JOIN FETCH r.time WHERE m.id = :memberId")
     List<Reservation> findAllByMemberId(Long memberId);
 
     Optional<Reservation> findById(Long id);
