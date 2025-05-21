@@ -19,8 +19,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(of = "id")
 public class Member {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Embedded
