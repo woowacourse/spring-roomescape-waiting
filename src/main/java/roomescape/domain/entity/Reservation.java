@@ -51,7 +51,7 @@ public class Reservation {
         this.time.addReservation(this);
     }
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public static Reservation of(

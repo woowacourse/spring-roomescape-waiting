@@ -28,7 +28,7 @@ public class Member {
         this.role = role;
     }
 
-    public Member() {
+    protected Member() {
     }
 
     public static Member of(Long id, String name, String email, String password, Role role) {
