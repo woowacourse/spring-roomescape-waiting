@@ -114,9 +114,9 @@ public class ReservationWaitIntegrateTest {
                 reservationTime.getId(), theme.getId());
 
         Member member = memberService.addMember(new SignupRequest("test", "wait@wait.com", "wait"));
-        jwtTokenProvider.createTokenByMember(member);
+        String waitToken = jwtTokenProvider.createTokenByMember(member);
 
-        LoginMemberRequest waitMemberRequest = authService.getLoginMemberByToken(token);
+        LoginMemberRequest waitMemberRequest = authService.getLoginMemberByToken(waitToken);
         reservationService.addWaitReservation(waitRequest, waitMemberRequest);
 
         Reservation reservation = reservationRepository.findById(2L).get();
