@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationWithRank;
-import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.ReservationStatus;
 
 public class UserReservationsResponse {
 
@@ -27,7 +27,7 @@ public class UserReservationsResponse {
     }
 
     private String setReservedStatus(ReservationWithRank reservationWithRank) {
-        if (reservationWithRank.reservation().getStatus().equals(Status.RESERVED)) {
+        if (reservationWithRank.reservation().getStatus().equals(ReservationStatus.RESERVED)) {
             return reservationWithRank.reservation().getStatus().getStatus();
         }
         return reservationWithRank.rank() + "번째 예약대기";

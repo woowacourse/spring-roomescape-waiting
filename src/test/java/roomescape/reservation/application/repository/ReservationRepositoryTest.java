@@ -15,9 +15,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.reservation.application.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @ActiveProfiles("test")
 @DataJpaTest

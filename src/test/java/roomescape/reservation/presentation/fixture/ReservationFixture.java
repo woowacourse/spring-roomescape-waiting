@@ -7,12 +7,13 @@ import java.time.LocalTime;
 import java.util.Map;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
-import roomescape.reservation.presentation.dto.ReservationTimeRequest;
-import roomescape.reservation.presentation.dto.ThemeRequest;
+import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
+import roomescape.theme.presentation.ThemeRequest;
 
 public class ReservationFixture {
 
-    public AdminReservationRequest createAdminReservationRequest(LocalDate date, Long themeId, Long timeId, Long memberId) {
+    public AdminReservationRequest createAdminReservationRequest(LocalDate date, Long themeId, Long timeId,
+                                                                 Long memberId) {
         return new AdminReservationRequest(date, themeId, timeId, memberId);
     }
 

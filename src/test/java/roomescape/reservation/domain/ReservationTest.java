@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 class ReservationTest {
 
@@ -20,6 +22,6 @@ class ReservationTest {
 
         Reservation reservation = Reservation.createReserved(member, theme, LocalDate.now(), reservationTime);
 
-        assertThat(reservation.getStatus()).isEqualTo(Status.RESERVED);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 }

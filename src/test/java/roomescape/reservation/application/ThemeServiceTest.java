@@ -14,15 +14,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.reservation.application.repository.ReservationRepository;
-import roomescape.reservation.application.service.ReservationTimeService;
-import roomescape.reservation.application.service.ThemeService;
+import roomescape.reservation.time.application.ReservationTimeService;
+import roomescape.theme.application.ThemeService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.presentation.dto.ReservationTimeRequest;
-import roomescape.reservation.presentation.dto.ThemeRequest;
-import roomescape.reservation.presentation.dto.ThemeResponse;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
+import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
+import roomescape.theme.presentation.ThemeRequest;
+import roomescape.theme.presentation.ThemeResponse;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)

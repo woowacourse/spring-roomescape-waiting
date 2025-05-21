@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.presentation.fixture.MemberFixture;
-import roomescape.reservation.presentation.dto.ThemeRequest;
+import roomescape.theme.presentation.ThemeRequest;
 import roomescape.reservation.presentation.fixture.ReservationFixture;
 
 @ActiveProfiles("test")

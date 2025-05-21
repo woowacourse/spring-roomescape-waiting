@@ -1,9 +1,9 @@
-package roomescape.reservation.application.repository;
+package roomescape.reservation.time.application;
 
 import java.time.LocalTime;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTime;
 
 @Repository
 public interface ReservationTimeRepository extends ListCrudRepository<ReservationTime, Long> {

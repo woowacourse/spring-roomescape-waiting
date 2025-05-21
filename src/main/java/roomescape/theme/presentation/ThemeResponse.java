@@ -1,6 +1,6 @@
-package roomescape.reservation.presentation.dto;
+package roomescape.theme.presentation;
 
-import roomescape.reservation.domain.Theme;
+import roomescape.theme.domain.Theme;
 
 public class ThemeResponse {
     private Long id;

@@ -1,4 +1,4 @@
-package roomescape.reservation.application.repository;
+package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -6,9 +6,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationWithRank;
-import roomescape.reservation.domain.Theme;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);

@@ -1,4 +1,4 @@
-package roomescape.reservation.presentation.dto;
+package roomescape.theme.presentation;
 
 import jakarta.validation.constraints.NotBlank;
 

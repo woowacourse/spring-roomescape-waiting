@@ -1,4 +1,4 @@
-package roomescape.reservation.application.service;
+package roomescape.reservation.application;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
@@ -10,13 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.reservation.application.repository.ReservationRepository;
-import roomescape.reservation.application.repository.ReservationTimeRepository;
-import roomescape.reservation.application.repository.ThemeRepository;
+import roomescape.reservation.time.application.ReservationTimeRepository;
+import roomescape.theme.application.ThemeRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.Theme;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.theme.domain.Theme;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.AdminWaitingReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
@@ -129,7 +128,7 @@ public class ReservationService {
             throw new IllegalStateException("다른 사람의 예약을 삭제할 수 없습니다.");
         }
 
-        if (reservation.getStatus().equals(Status.RESERVED)) {
+        if (reservation.getStatus().equals(ReservationStatus.RESERVED)) {
             throw new IllegalStateException("이미 예약된 상태 내역은 삭제할 수 없습니다.");
         }
 
