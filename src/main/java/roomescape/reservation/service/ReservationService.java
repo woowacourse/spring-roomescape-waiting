@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
@@ -43,13 +42,10 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        Optional<Member> findMember = memberRepository.findById(memberId);
-        if (findMember.isEmpty()) {
-            throw new IllegalArgumentException("존재 하지 않는 유저입니다.");
-        }
-
-        Reservation reservation = Reservation.createWithoutId(dateTime.now(), findMember.get(), request.date(), time,
+        Reservation reservation = Reservation.createWithoutId(dateTime.now(), member, request.date(), time,
                 theme);
 
         if (reservationRepository.hasSameReservation(reservation)) {
