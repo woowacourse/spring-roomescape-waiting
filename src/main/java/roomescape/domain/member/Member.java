@@ -2,8 +2,6 @@ package roomescape.domain.member;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,7 +26,6 @@ public class Member {
     @Embedded
     private MemberEncodedPassword password;
 
-    @Enumerated(EnumType.STRING)
     private MemberRole role;
 
     protected Member() {
