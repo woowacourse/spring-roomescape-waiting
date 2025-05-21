@@ -109,4 +109,15 @@ class AdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(objectMapper.writeValueAsString(response)));
     }
+
+    @Test
+    void 관리자가_대기를_승인한다() throws Exception {
+        // given
+        given(tokenProvider.extractRole("accessToken")).willReturn(Role.ADMIN);
+        // when & then
+        mockMvc.perform(post("/api/admin/waitings/1")
+                        .cookie(new Cookie("token", "accessToken"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
 }
