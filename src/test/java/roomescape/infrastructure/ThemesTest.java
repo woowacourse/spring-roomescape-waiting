@@ -8,18 +8,18 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.jpa.JpaReservationSlots;
 import roomescape.infrastructure.jpa.JpaThemes;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import({JpaThemes.class, JpaTestUtil.class})
+@Import({JpaThemes.class, JpaTestUtil.class, JpaReservationSlots.class})
 class ThemesTest {
 
     @Autowired
@@ -52,17 +52,23 @@ class ThemesTest {
     @Test
     void 예약이_많은_순으로_테마를_찾을_수_있다() {
         LocalDate date = LocalDate.now();
-        String reservationTimeId = testUtil.insertReservationTime(LocalTime.of(10, 0));
+        String reservationTimeId = testUtil.insertReservationTime();
         String themeId1 = testUtil.insertTheme();
         String themeId2 = testUtil.insertTheme();
         String themeId3 = testUtil.insertTheme();
+        String slotId1 = testUtil.insertSlot(date, reservationTimeId, themeId1);
+        String slotId2_1 = testUtil.insertSlot(date, reservationTimeId, themeId2);
+        String slotId2_2 = testUtil.insertSlot(date, reservationTimeId, themeId2);
+        String slotId3_1 = testUtil.insertSlot(date.minusDays(10), reservationTimeId, themeId3);
+        String slotId3_2 = testUtil.insertSlot(date.minusDays(10), reservationTimeId, themeId3);
+        String slotId3_3 = testUtil.insertSlot(date.plusDays(10), reservationTimeId, themeId3);
         String userId1 = testUtil.insertUser();
-        testUtil.insertReservation(date, reservationTimeId, themeId1, userId1);
-        testUtil.insertReservation(date, reservationTimeId, themeId2, userId1);
-        testUtil.insertReservation(date, reservationTimeId, themeId2, userId1);
-        testUtil.insertReservation(date.minusDays(10), reservationTimeId, themeId3, userId1);
-        testUtil.insertReservation(date.minusDays(10), reservationTimeId, themeId3, userId1);
-        testUtil.insertReservation(date.plusDays(10), reservationTimeId, themeId3, userId1);
+        testUtil.insertReservation(slotId1, userId1);
+        testUtil.insertReservation(slotId2_1, userId1);
+        testUtil.insertReservation(slotId2_2, userId1);
+        testUtil.insertReservation(slotId3_1, userId1);
+        testUtil.insertReservation(slotId3_2, userId1);
+        testUtil.insertReservation(slotId3_3, userId1);
 
         final List<Theme> result = sut.findPopularThemes(date.minusDays(5), date.plusDays(5), 2);
 

@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface JpaReservationSlotDao extends JpaRepository<ReservationSlot, Id> {
 
-    Optional<ReservationSlot> findByReservationDateAndReservationTime_IdAndTheme_Id(ReservationDate reservationDate, Id reservationTimeId, Id themeId);
+    Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(ReservationDate date, Id timeId, Id themeId);
 }

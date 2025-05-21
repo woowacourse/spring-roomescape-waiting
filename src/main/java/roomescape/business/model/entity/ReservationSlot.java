@@ -12,6 +12,8 @@ import lombok.ToString;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 
+import java.time.LocalDate;
+
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
@@ -22,21 +24,21 @@ public class ReservationSlot {
     @EmbeddedId
     private final Id id;
     @ManyToOne
-    private Theme theme;
-    @ManyToOne
-    private ReservationTime reservationTime;
+    private ReservationTime time;
     @Embedded
-    private ReservationDate reservationDate;
+    private ReservationDate date;
+    @ManyToOne
+    private Theme theme;
 
     protected ReservationSlot() {
         this.id = Id.issue();
     }
 
-    public static ReservationSlot create(final Theme theme, final ReservationTime time, final ReservationDate date) {
-        return new ReservationSlot(Id.issue(), theme, time, date);
+    public static ReservationSlot create(final ReservationTime time, final LocalDate date, final Theme theme) {
+        return new ReservationSlot(Id.issue(), time, new ReservationDate(date), theme);
     }
 
-    public static ReservationSlot restore(final String id, final Theme theme, final ReservationTime time, final ReservationDate date) {
-        return new ReservationSlot(Id.create(id), theme, time, date);
+    public static ReservationSlot restore(final String id, final ReservationTime time, final LocalDate date, final Theme theme) {
+        return new ReservationSlot(Id.create(id), time, new ReservationDate(date), theme);
     }
 }

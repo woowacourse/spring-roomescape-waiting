@@ -22,13 +22,14 @@ public class Reservation {
     @ManyToOne
     private User user;
     @ManyToOne
-    private ReservationSlot date;
+    private ReservationSlot slot;
 
     protected Reservation() {
         id = Id.issue();
     }
 
     public static Reservation create(final User user, final ReservationSlot reservationSlot) {
+        reservationSlot.getDate().validateFresh();
         return new Reservation(Id.issue(), user, reservationSlot);
     }
 

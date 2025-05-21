@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
@@ -14,6 +15,7 @@ import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.jpa.JpaReservationSlots;
 import roomescape.infrastructure.jpa.JpaReservationTimes;
 import roomescape.infrastructure.jpa.JpaReservations;
 import roomescape.infrastructure.jpa.JpaThemes;
@@ -45,6 +47,8 @@ class ReservationsTest {
     private Themes themes;
     @Autowired
     private Users users;
+    @Autowired
+    private JpaReservationSlots reservationSlots;
 
     @AfterEach
     void tearDown() {
@@ -57,12 +61,14 @@ class ReservationsTest {
         final ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
         final Theme theme = Theme.create("스릴러", "", "");
         final User user = User.create("돔푸", "dompoo@email.com", "password");
+        final ReservationSlot slot = ReservationSlot.create(time, DATE1, theme);
         reservationTimes.save(time);
         themes.save(theme);
         users.save(user);
+        reservationSlots.save(slot);
 
         // when, then
-        assertThatCode(() -> sut.save(Reservation.create(user, DATE1, time, theme)))
+        assertThatCode(() -> sut.save(Reservation.create(user, slot)))
                 .doesNotThrowAnyException();
     }
 
@@ -73,8 +79,10 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId2);
 
         // when
         final List<Reservation> result = sut.findAll();
@@ -91,8 +99,10 @@ class ReservationsTest {
         String themeId2 = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId1, userId);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId2, userId);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId1);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId2);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), null, null, null);
@@ -109,8 +119,10 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId2);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(null, Id.create(userId1), null, null);
@@ -126,9 +138,12 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId);
-        String reservationId3 = testUtil.insertReservation(DATE3, timeId, themeId, userId);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(null, null, DATE1, DATE2);
@@ -146,10 +161,14 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId1, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId1, userId1);
-        String reservationId3 = testUtil.insertReservation(DATE2, timeId, themeId2, userId2);
-        String reservationId4 = testUtil.insertReservation(DATE3, timeId, themeId2, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId1);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId1);
+        String slotId3 = testUtil.insertSlot(DATE2, timeId, themeId2);
+        String slotId4 = testUtil.insertSlot(DATE3, timeId, themeId2);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId1);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId2);
+        String reservationId4 = testUtil.insertReservation(slotId4, userId2);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId1), DATE1, DATE2);
@@ -166,8 +185,10 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId2);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(null, null, null, null);
@@ -184,8 +205,10 @@ class ReservationsTest {
         String themeId2 = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId1, userId);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId2, userId);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId1);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId2);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), null, null, null);
@@ -202,8 +225,10 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId2);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(null, Id.create(userId2), null, null);
@@ -219,9 +244,12 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId);
-        String reservationId3 = testUtil.insertReservation(DATE3, timeId, themeId, userId);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(null, null, DATE2, DATE3);
@@ -237,9 +265,12 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId);
-        String reservationId3 = testUtil.insertReservation(DATE3, timeId, themeId, userId);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(null, null, DATE2, null);
@@ -255,9 +286,12 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId);
-        String reservationId3 = testUtil.insertReservation(DATE3, timeId, themeId, userId);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(null, null, null, DATE2);
@@ -275,9 +309,12 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId1, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId1, userId2);
-        String reservationId3 = testUtil.insertReservation(DATE3, timeId, themeId2, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId1);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId1);
+        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId2);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId2);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId2);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId2), null, null);
@@ -295,10 +332,14 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId1, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId1, userId2);
-        String reservationId3 = testUtil.insertReservation(DATE3, timeId, themeId2, userId2);
-        String reservationId4 = testUtil.insertReservation(DATE3, timeId, themeId1, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId1);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId1);
+        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId2);
+        String slotId4 = testUtil.insertSlot(DATE3, timeId, themeId1);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId2);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId2);
+        String reservationId4 = testUtil.insertReservation(slotId4, userId2);
 
         // when
         final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId2), DATE2, DATE2);
@@ -315,9 +356,12 @@ class ReservationsTest {
         String timeId = testUtil.insertReservationTime();
         String userId1 = testUtil.insertUser();
         String userId2 = testUtil.insertUser();
-        String reservationId1 = testUtil.insertReservation(DATE1, timeId, themeId, userId1);
-        String reservationId2 = testUtil.insertReservation(DATE2, timeId, themeId, userId1);
-        String reservationId3 = testUtil.insertReservation(DATE3, timeId, themeId, userId2);
+        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
+        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
+        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId);
+        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
+        String reservationId2 = testUtil.insertReservation(slotId2, userId1);
+        String reservationId3 = testUtil.insertReservation(slotId3, userId2);
 
         // when
         final List<Reservation> result = sut.findAllByUserId(Id.create(userId1));
@@ -333,7 +377,8 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId = testUtil.insertReservation(DATE1, timeId, themeId, userId);
+        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
+        String reservationId = testUtil.insertReservation(slotId, userId);
 
         // when
         final Optional<Reservation> result = sut.findById(Id.create(reservationId));
@@ -349,7 +394,8 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId = testUtil.insertReservation(DATE1, timeId, themeId, userId);
+        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
+        String reservationId = testUtil.insertReservation(slotId, userId);
 
         // when
         final boolean result = sut.existById(Id.create(reservationId));
@@ -364,7 +410,8 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId = testUtil.insertReservation(DATE1, timeId, themeId, userId);
+        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
+        String reservationId = testUtil.insertReservation(slotId, userId);
 
         // when
         final boolean result = sut.existByTimeId(Id.create(timeId));
@@ -379,7 +426,8 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId = testUtil.insertReservation(DATE1, timeId, themeId, userId);
+        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
+        String reservationId = testUtil.insertReservation(slotId, userId);
 
         // when
         final boolean result = sut.existByThemeId(Id.create(themeId));
@@ -394,7 +442,8 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime(LocalTime.of(10, 0));
         String userId = testUtil.insertUser();
-        String reservationId = testUtil.insertReservation(DATE1, timeId, themeId, userId);
+        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
+        String reservationId = testUtil.insertReservation(slotId, userId);
 
         // when
         final boolean result = sut.isDuplicateDateAndTimeAndTheme(DATE1, LocalTime.of(10, 0), Id.create(themeId));
@@ -409,7 +458,8 @@ class ReservationsTest {
         String themeId = testUtil.insertTheme();
         String timeId = testUtil.insertReservationTime();
         String userId = testUtil.insertUser();
-        String reservationId = testUtil.insertReservation(DATE1, timeId, themeId, userId);
+        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
+        String reservationId = testUtil.insertReservation(slotId, userId);
 
         // when
         sut.deleteById(Id.create(reservationId));

@@ -15,8 +15,8 @@ public interface JpaThemeDao extends JpaRepository<Theme, Id> {
     @Query("""
             SELECT t
             FROM Reservation r
-            JOIN r.theme t
-            WHERE r.date.value BETWEEN :start AND :end
+            JOIN r.slot.theme t
+            WHERE r.slot.date.value BETWEEN :start AND :end
             GROUP BY t
             ORDER BY COUNT(r) DESC
             """)

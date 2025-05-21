@@ -25,33 +25,32 @@ class ReservationTest {
         void 정상적인_예약을_생성할_수_있다() {
             // given
             final User user = User.create(NAME, EMAIL, PASSWORD);
+            final ReservationSlot slot = ReservationSlot.create(RESERVATION_TIME, DATE, THEME);
 
             // when
-            final Reservation reservation = Reservation.create(user, DATE, RESERVATION_TIME, THEME);
+            final Reservation reservation = Reservation.create(user, slot);
 
             // then
             assertThat(reservation).isNotNull();
-            assertThat(reservation.getUser().getName().value()).isEqualTo(NAME);
-            assertThat(reservation.getDate().value()).isEqualTo(DATE);
-            assertThat(reservation.getTime()).isEqualTo(RESERVATION_TIME);
-            assertThat(reservation.getTheme()).isEqualTo(THEME);
+            assertThat(reservation.getUser()).isEqualTo(user);
+            assertThat(reservation.getSlot()).isEqualTo(slot);
         }
 
         @Test
         void 과거_날짜로_예약할_수_없다() {
-            final LocalDate pastDate = LocalDate.now().minusDays(1);
             final User user = User.create(NAME, EMAIL, PASSWORD);
+            final ReservationSlot slot = ReservationSlot.create(RESERVATION_TIME, LocalDate.now().minusDays(1), THEME);
 
-            assertThatThrownBy(() -> Reservation.create(user, pastDate, RESERVATION_TIME, THEME))
+            assertThatThrownBy(() -> Reservation.create(user, slot))
                     .isInstanceOf(InvalidCreateArgumentException.class);
         }
 
         @Test
         void 현재보다_일주일_이후로_예약할_수_없다() {
-            final LocalDate over7DaysDate = LocalDate.now().plusDays(8);
             final User user = User.create(NAME, EMAIL, PASSWORD);
+            final ReservationSlot slot = ReservationSlot.create(RESERVATION_TIME, LocalDate.now().plusDays(8), THEME);
 
-            assertThatThrownBy(() -> Reservation.create(user, over7DaysDate, RESERVATION_TIME, THEME))
+            assertThatThrownBy(() -> Reservation.create(user, slot))
                     .isInstanceOf(InvalidCreateArgumentException.class);
         }
     }

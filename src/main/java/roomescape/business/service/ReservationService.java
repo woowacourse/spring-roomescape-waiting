@@ -11,11 +11,13 @@ import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
 import roomescape.exception.auth.AuthorizationException;
+import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static roomescape.exception.ErrorCode.RESERVATION_DUPLICATED;
 import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
 import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
 import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
@@ -33,7 +35,12 @@ public class ReservationService {
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
         val user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
+
         ReservationSlot slot = slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, timeIdValue, themeIdValue);
+
+        if (!reservations.isSlotFreeFor(slot, user)) {
+            throw new DuplicatedException(RESERVATION_DUPLICATED);
+        }
 
         val reservation = Reservation.create(user, slot);
         reservations.save(reservation);

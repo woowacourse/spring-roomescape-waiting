@@ -3,6 +3,8 @@ package roomescape.infrastructure.jpa;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationSlot;
+import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
 import roomescape.infrastructure.jpa.dao.JpaReservationDao;
@@ -54,17 +56,22 @@ public class JpaReservations implements Reservations {
 
     @Override
     public boolean existByTimeId(Id timeId) {
-        return dao.existsByTimeId(timeId);
+        return dao.existsBySlotTimeId(timeId);
     }
 
     @Override
     public boolean existByThemeId(Id themeId) {
-        return dao.existsByThemeId(themeId);
+        return dao.existsBySlotThemeId(themeId);
     }
 
     @Override
     public boolean isDuplicateDateAndTimeAndTheme(LocalDate date, LocalTime time, Id themeId) {
-        return dao.existsByDateValueAndTimeStartTimeValueAndThemeId(date, time, themeId);
+        return dao.existsBySlotDateValueAndSlotTimeStartTimeValueAndSlotThemeId(date, time, themeId);
+    }
+
+    @Override
+    public boolean isSlotFreeFor(final ReservationSlot slot, final User user) {
+        return dao.existsBySlotAndUser(slot, user);
     }
 
     @Override

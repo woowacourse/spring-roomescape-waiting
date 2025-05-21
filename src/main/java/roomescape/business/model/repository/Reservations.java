@@ -1,6 +1,8 @@
 package roomescape.business.model.repository;
 
 import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationSlot;
+import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
 
 import java.time.LocalDate;
@@ -27,6 +29,8 @@ public interface Reservations {
     boolean existByThemeId(Id themeId);
 
     boolean isDuplicateDateAndTimeAndTheme(LocalDate date, LocalTime time, Id themeId);
+
+    boolean isSlotFreeFor(ReservationSlot slot, User user);
 
     void deleteById(Id reservationId);
 }

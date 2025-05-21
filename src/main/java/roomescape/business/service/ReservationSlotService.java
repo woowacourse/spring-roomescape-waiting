@@ -10,7 +10,6 @@ import roomescape.business.model.repository.ReservationSlots;
 import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.ReservationDate;
 import roomescape.exception.business.NotFoundException;
 
 import java.time.LocalDate;
@@ -34,7 +33,7 @@ public class ReservationSlotService {
         ReservationTime time = reservationTimes.findById(Id.create(reservationTimeIdValue))
                 .orElseThrow(() -> new NotFoundException(RESERVATION_TIME_NOT_EXIST));
 
-        ReservationSlot createdSlot = ReservationSlot.create(theme, time, ReservationDate.create(date));
+        ReservationSlot createdSlot = ReservationSlot.create(time, date, theme);
         reservationSlots.save(createdSlot);
         return createdSlot;
     }

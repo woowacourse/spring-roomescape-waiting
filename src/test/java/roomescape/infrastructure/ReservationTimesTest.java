@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.vo.Id;
+import roomescape.infrastructure.jpa.JpaReservationSlots;
 import roomescape.infrastructure.jpa.JpaReservationTimes;
 import roomescape.test_util.JpaTestUtil;
 
@@ -21,7 +22,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
-@Import({JpaReservationTimes.class, JpaTestUtil.class})
+@Import({JpaReservationTimes.class, JpaTestUtil.class, JpaReservationSlots.class})
 class ReservationTimesTest {
 
     @Autowired
@@ -62,7 +63,8 @@ class ReservationTimesTest {
         String timeId3 = testUtil.insertReservationTime();
         String themeId = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        testUtil.insertReservation(LocalDate.now().plusDays(10), timeId1, themeId, userId);
+        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId);
+        testUtil.insertReservation(slotId, userId);
 
         // when
         final List<ReservationTime> result = sut.findAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
@@ -80,7 +82,8 @@ class ReservationTimesTest {
         testUtil.insertReservationTime();
         String themeId = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        testUtil.insertReservation(LocalDate.now().plusDays(10), timeId1, themeId, userId);
+        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId);
+        testUtil.insertReservation(slotId, userId);
 
         // when
         final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
@@ -111,8 +114,9 @@ class ReservationTimesTest {
         String timeId1 = testUtil.insertReservationTime();
         testUtil.insertReservationTime();
         String themeId = testUtil.insertTheme();
+        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
         String userId = testUtil.insertUser();
-        testUtil.insertReservation(LocalDate.now().plusDays(5), timeId1, themeId, userId);
+        testUtil.insertReservation(slotId, userId);
 
         // when
         final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
@@ -129,7 +133,8 @@ class ReservationTimesTest {
         String themeId1 = testUtil.insertTheme();
         String themeId2 = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        testUtil.insertReservation(LocalDate.now().plusDays(10), timeId1, themeId1, userId);
+        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId1);
+        testUtil.insertReservation(slotId, userId);
 
         // when
         final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId2));
@@ -147,8 +152,10 @@ class ReservationTimesTest {
         testUtil.insertReservationTime();
         String themeId = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        testUtil.insertReservation(LocalDate.now().plusDays(10), timeId1, themeId, userId);
-        testUtil.insertReservation(LocalDate.now().plusDays(10), timeId3, themeId, userId);
+        String slotId1 = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId);
+        String slotId2 = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId3, themeId);
+        testUtil.insertReservation(slotId1, userId);
+        testUtil.insertReservation(slotId2, userId);
 
         // when
         final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));

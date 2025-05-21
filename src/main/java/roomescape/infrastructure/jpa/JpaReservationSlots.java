@@ -28,6 +28,6 @@ public class JpaReservationSlots implements ReservationSlots {
 
     @Override
     public Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(final LocalDate date, final Id reservationTimeId, final Id themeId) {
-        return dao.findByReservationDateAndReservationTime_IdAndTheme_Id(new ReservationDate(date), reservationTimeId, themeId);
+        return dao.findByDateAndTimeIdAndThemeId(new ReservationDate(date), reservationTimeId, themeId);
     }
 }
