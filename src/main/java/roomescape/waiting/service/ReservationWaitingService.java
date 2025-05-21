@@ -13,12 +13,14 @@ import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.exception.AlreadyWaitingException;
+import roomescape.reservation.exception.InAlreadyReservationException;
+import roomescape.reservation.service.ReservationQueryManager;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeQueryService;
 import roomescape.time.service.ReservationTimeQueryService;
 import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.exception.InAlreadyWaitingException;
 import roomescape.waiting.repository.ReservationWaitingRepository;
 
 @Service
@@ -29,6 +31,7 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
     private final MemberQueryService memberQueryService;
     private final ReservationTimeQueryService timeQueryService;
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationQueryManager reservationQueryManager;
 
     @Transactional
     public ReservationResponse waiting(ReserveCommand reserveCommand) {
@@ -43,9 +46,7 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
         Long memberId = reserveCommand.memberId();
         LocalDate date = reserveCommand.date();
         Long timeId = reserveCommand.timeId();
-        if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeId(memberId, date, memberId)) {
-            throw new AlreadyWaitingException("이미 예약된 시간입니다.");
-        }
+        validateWaiting(memberId, date, timeId);
 
         ReservationDateTime reservationDateTime = ReservationDateTime.create(new ReservationDate(date),
                 timeQueryService.getReservationTime(timeId));
@@ -57,6 +58,16 @@ public class ReservationWaitingService implements ReservationWaitingQueryService
                 .reserver(reserver)
                 .theme(theme)
                 .build();
+    }
+
+    private void validateWaiting(Long memberId, LocalDate date, Long timeId) {
+        if (reservationWaitingRepository.existsByMemberIdAndDateAndTimeId(memberId, date, memberId)) {
+            throw new InAlreadyWaitingException("이미 예약된 시간입니다.");
+        }
+
+        if (reservationQueryManager.existReservation(memberId, date, timeId)) {
+            throw new InAlreadyReservationException("해당 유저는 이미 예약했습니다.");
+        }
     }
 
     @Transactional(readOnly = true)

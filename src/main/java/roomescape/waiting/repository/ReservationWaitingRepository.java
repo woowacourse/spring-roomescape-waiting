@@ -10,22 +10,19 @@ import roomescape.waiting.dto.WaitingWithRank;
 
 public interface ReservationWaitingRepository extends JpaRepository<ReservationWaiting, Long> {
 
-    // TODO 현재 쿼리에서는 select 절이 3개 발사되는 문제가 있다. 자바 내에서 해결하는 것이 더 나을 수도 있다.
-
     @Query("""
             select new roomescape.waiting.dto.WaitingWithRank(
                 w,
-                (
-                    select count(w2)
-                    from ReservationWaiting w2
-                    where
-                        w2.reservationDatetime.reservationTime = w.reservationDatetime.reservationTime
-                        and w2.reservationDatetime.reservationDate.date = w.reservationDatetime.reservationDate.date
-                        and w2.id <= w.id
-                )
+                count(w2)
             )
             from ReservationWaiting w
+            join ReservationTime rt on rt = w.reservationDatetime.reservationTime
+            join ReservationWaiting w2 on
+                w2.reservationDatetime.reservationTime = rt
+                and w2.reservationDatetime.reservationDate.date = w.reservationDatetime.reservationDate.date
+                and w2.id <= w.id
             where w.reserver.id = :memberId
+            group by w
             """)
     List<WaitingWithRank> findWithRankByMemberId(@Param("memberId") Long memberId);
 

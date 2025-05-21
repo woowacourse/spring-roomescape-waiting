@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,12 +19,15 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.waiting.domain.ReservationWaiting;
-import roomescape.reservation.exception.AlreadyWaitingException;
+import roomescape.reservation.exception.InAlreadyReservationException;
 import roomescape.reservation.exception.PastReservationException;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.domain.ReservationWaiting;
+import roomescape.waiting.exception.InAlreadyWaitingException;
 import roomescape.waiting.repository.ReservationWaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
@@ -43,6 +45,8 @@ class ReservationWaitingServiceTest {
     private ReservationWaitingRepository reservationWaitingRepository;
     @Autowired
     private CleanUp cleanUp;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
@@ -78,6 +82,34 @@ class ReservationWaitingServiceTest {
             softly.assertThat(response.time().id()).isEqualTo(내일_열시.getReservationTime().getId());
             softly.assertThat(response.time().startAt()).isEqualTo(내일_열시.getStartAt());
         });
+    }
+
+    @Test
+    void 예약자는_예약_대기를_할_수_없다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        ReserveCommand command = new ReserveCommand(
+                내일_열시.getDate(),
+                공포.getId(),
+                내일_열시.getReservationTime().getId(),
+                유저1.getId()
+        );
+
+        // 이미 예약이 되어 있다.
+        reservationRepository.save(
+                Reservation.builder()
+                        .reserver(유저1)
+                        .reservationDateTime(내일_열시)
+                        .theme(공포)
+                        .build()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationWaitingService.waiting(command))
+                .isInstanceOf(InAlreadyReservationException.class);
     }
 
     @Test
@@ -132,7 +164,7 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.waiting(command))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -155,7 +187,7 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 같은_사용자가_동일한_예약을_할_수_없다() {
+    void 같은_사용자가_동일한_예약_대기를_할_수_없다() {
         // given
         Member 유저1 = memberDbFixture.유저1_생성();
         Theme 공포 = themeDbFixture.공포();
@@ -172,7 +204,7 @@ class ReservationWaitingServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationWaitingService.waiting(command))
-                .isInstanceOf(AlreadyWaitingException.class);
+                .isInstanceOf(InAlreadyWaitingException.class);
     }
 
     @Test

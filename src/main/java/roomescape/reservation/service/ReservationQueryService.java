@@ -8,8 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.service.ReservationWaitingQueryService;
 
 @Service
@@ -17,34 +15,20 @@ import roomescape.waiting.service.ReservationWaitingQueryService;
 @RequiredArgsConstructor
 public class ReservationQueryService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationQueryManager reservationQueryManager;
     private final ReservationWaitingQueryService waitingQueryService;
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> getFilteredReservations(Long themeId, Long memberId, LocalDate from,
                                                              LocalDate to) {
-        if (themeId == null && memberId == null && from == null && to == null) {
-            return getAllReservations();
-        }
-
-        List<Reservation> reservations = reservationRepository.findFilteredReservations(themeId, memberId, from, to);
-
-        return ReservationResponse.from(reservations);
+        return reservationQueryManager.getFilteredReservations(themeId, memberId, from, to);
     }
 
-    private List<ReservationResponse> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        return ReservationResponse.from(reservations);
-    }
-
-    @Transactional(readOnly = true)
     public List<MyReservationResponse> getReservations(Long memberId) {
         List<MyReservationResponse> responses = new ArrayList<>();
-        List<Reservation> myReservations = reservationRepository.findByMemberId(memberId);
 
-        responses.addAll(MyReservationResponse.from(myReservations));
+        responses.addAll(reservationQueryManager.getReservations(memberId));
         responses.addAll(waitingQueryService.getWaitingReservations(memberId));
+
         return responses;
     }
 }
