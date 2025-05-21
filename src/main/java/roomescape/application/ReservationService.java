@@ -9,8 +9,8 @@ import roomescape.domain.ReservationDateTime;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.repository.ReservationRepository;
-import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
+import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
@@ -48,46 +48,31 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse createReservation(ReservationCreateRequest request, LoginMember loginMember) {
-        ReservationDate reservationDate = new ReservationDate(request.date());
-        Long timeId = request.timeId();
-        Long themeId = request.themeId();
-        ReservationTime time = reservationTimeService.findReservationTimeById(timeId);
-        Theme theme = themeService.findThemeById(themeId);
-
-        validateExistsReservation(reservationDate, time, theme);
-
+    public ReservationResponse createMemberReservation(ReservationCreateRequest request, LoginMember loginMember) {
         Member member = memberService.findMemberByEmail(loginMember.email());
-        ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
-        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
-        reservation.reserve();
-        Reservation created = reservationRepository.save(reservation);
+        Reservation created = createReservation(request.date(), request.timeId(), request.themeId(), member);
 
         return ReservationResponse.from(created);
     }
 
     @Transactional
     public ReservationResponse createAdminReservation(AdminReservationCreateRequest request) {
-        ReservationDate reservationDate = new ReservationDate(request.date());
-        Long timeId = request.timeId();
-        Long themeId = request.themeId();
-        ReservationTime time = reservationTimeService.findReservationTimeById(timeId);
-        Theme theme = themeService.findThemeById(themeId);
-
-        validateExistsReservation(reservationDate, time, theme);
-
         Member member = memberService.findMemberById(request.memberId());
-        ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
-        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
-        reservation.reserve();
-        Reservation created = reservationRepository.save(reservation);
+        Reservation created = createReservation(request.date(), request.timeId(), request.themeId(), member);
 
         return ReservationResponse.from(created);
     }
 
-    private ReservationDateTime getReservationDateTime(Long timeId, ReservationDate reservationDate) {
+    private Reservation createReservation(LocalDate date, Long timeId, Long themeId, Member member) {
+        ReservationDate reservationDate = new ReservationDate(date);
         ReservationTime reservationTime = reservationTimeService.findReservationTimeById(timeId);
-        return ReservationDateTime.create(reservationDate, reservationTime, currentTimeService.now());
+        ReservationDateTime reservationDateTime = ReservationDateTime.create(reservationDate, reservationTime, currentTimeService.now());
+
+        Theme theme = themeService.findThemeById(themeId);
+        validateExistsReservation(reservationDate, reservationTime, theme);
+
+        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
+        return reservationRepository.save(reservation);
     }
 
     private void validateExistsReservation(ReservationDate reservationDate, ReservationTime time, Theme theme) {

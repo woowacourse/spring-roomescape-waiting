@@ -40,7 +40,7 @@ public class ReservationController {
             @RequestBody @Valid ReservationCreateRequest request,
             @AuthenticationPrincipal LoginMember loginMember
     ) {
-        ReservationResponse response = reservationService.createReservation(request, loginMember);
+        ReservationResponse response = reservationService.createMemberReservation(request, loginMember);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

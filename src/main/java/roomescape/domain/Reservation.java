@@ -46,11 +46,7 @@ public class Reservation {
             ReservationTime time,
             Theme theme
     ) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.NOT_RESERVED);
-    }
-
-    public void reserve() {
-        this.status = ReservationStatus.RESERVED;
+        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
     }
 
     @Override
