@@ -37,7 +37,7 @@ public class Reservation {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status;
+    private ReservationStatus reservationStatus;
 
     public Reservation() {
     }
@@ -46,20 +46,20 @@ public class Reservation {
                        final ReservationTime time,
                        final Theme theme,
                        final Member member,
-                       final Status status
+                       final ReservationStatus reservationStatus
     ) {
         validateIsNonNull(date);
         validateIsNonNull(time);
         validateIsNonNull(theme);
         validateIsNonNull(member);
-        validateIsNonNull(status);
+        validateIsNonNull(reservationStatus);
 
         this.id = null;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = status;
+        this.reservationStatus = reservationStatus;
     }
 
     private void validateIsNonNull(final Object object) {
@@ -100,8 +100,8 @@ public class Reservation {
         return member;
     }
 
-    public Status getStatus() {
-        return status;
+    public ReservationStatus getStatus() {
+        return reservationStatus;
     }
 
     @Override

@@ -18,7 +18,7 @@ import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -73,13 +73,13 @@ class ThemeServiceTest {
 
         LocalDate now = LocalDate.now();
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time1, theme1, member, Status.RESERVED)
+            new Reservation(now.minusDays(2), time1, theme1, member, ReservationStatus.RESERVED)
         );
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time2, theme1, member, Status.RESERVED)
+            new Reservation(now.minusDays(2), time2, theme1, member, ReservationStatus.RESERVED)
         );
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time1, theme3, member, Status.RESERVED)
+            new Reservation(now.minusDays(2), time1, theme3, member, ReservationStatus.RESERVED)
         );
 
         // when

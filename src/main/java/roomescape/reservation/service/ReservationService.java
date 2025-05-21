@@ -13,7 +13,7 @@ import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -56,7 +56,7 @@ public class ReservationService {
         validateExistDuplicateReservation(reservations, time);
 
         LocalDateTime now = LocalDateTime.now();
-        Reservation reservation = new Reservation(request.date(), time, theme, member, Status.RESERVED);
+        Reservation reservation = new Reservation(request.date(), time, theme, member, ReservationStatus.RESERVED);
         validateCanReserveDateTime(reservation, now);
         reservation = reservationRepository.save(reservation);
 

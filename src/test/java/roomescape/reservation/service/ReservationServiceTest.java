@@ -28,7 +28,7 @@ import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
 import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.presentation.dto.ReservationRequest;
@@ -74,10 +74,10 @@ class ReservationServiceTest {
         LocalDate nowLater4Days = LocalDate.now().plusDays(4);
 
         Reservation reservation1 = jpaReservationRepository.save(
-            new Reservation(nowLater4Days, time1, theme, member, Status.RESERVED)
+            new Reservation(nowLater4Days, time1, theme, member, ReservationStatus.RESERVED)
         );
         Reservation reservation2 = jpaReservationRepository.save(
-            new Reservation(nowLater4Days, time2, theme, member, Status.RESERVED)
+            new Reservation(nowLater4Days, time2, theme, member, ReservationStatus.RESERVED)
         );
 
         // when
