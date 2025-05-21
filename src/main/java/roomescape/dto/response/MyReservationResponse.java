@@ -2,8 +2,8 @@ package roomescape.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.dto.query.WaitingWithRank;
 import roomescape.entity.Reservation;
-import roomescape.entity.Waiting;
 import roomescape.global.ReservationStatus;
 
 public record MyReservationResponse(
@@ -22,13 +22,13 @@ public record MyReservationResponse(
         );
     }
 
-    public static MyReservationResponse from(Waiting waiting) {
+    public static MyReservationResponse from(WaitingWithRank waitingWithRank) {
 
         return new MyReservationResponse(
-                waiting.getThemeName(),
-                waiting.getDate(),
-                waiting.getStartAt(),
-                ReservationStatus.WAIT.getText()
+                waitingWithRank.getWaiting().getThemeName(),
+                waitingWithRank.getWaiting().getDate(),
+                waitingWithRank.getWaiting().getStartAt(),
+                waitingWithRank.getRank() + "번째 " + ReservationStatus.WAIT.getText()
         );
     }
 }

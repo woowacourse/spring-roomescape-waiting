@@ -14,15 +14,15 @@ import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.entity.Waiting;
 import roomescape.global.Role;
-import roomescape.service.WaitingService;
+import roomescape.service.ReservationFacade;
 
 @RestController
 @RequestMapping("waiting")
 public class WaitingController {
 
-    private final WaitingService waitingService;
+    private final ReservationFacade waitingService;
 
-    public WaitingController(WaitingService waitingService) {
+    public WaitingController(ReservationFacade waitingService) {
         this.waitingService = waitingService;
     }
 

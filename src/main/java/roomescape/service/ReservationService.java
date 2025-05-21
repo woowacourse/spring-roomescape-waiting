@@ -17,7 +17,6 @@ import roomescape.exception.custom.InvalidMemberException;
 import roomescape.exception.custom.InvalidReservationException;
 import roomescape.exception.custom.InvalidReservationTimeException;
 import roomescape.exception.custom.InvalidThemeException;
-import roomescape.global.ReservationStatus;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -54,26 +53,6 @@ public class ReservationService {
         return createReservation(request.memberId(), request.themeId(), request.date(), request.timeId());
     }
 
-    private Reservation createReservation(
-            long memberId,
-            long themeId,
-            LocalDate date,
-            long timeId
-    ) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new InvalidMemberException("존재하지 않는 멤버 ID입니다."));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new InvalidReservationTimeException("존재하지 않는 예약 시간입니다."));
-        Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마입니다."));
-
-        Reservation reservation = new Reservation(member, date, reservationTime, theme);
-
-        validateDuplicateReservation(reservation);
-        validateAddReservationDateTime(reservation);
-        return reservationRepository.save(reservation);
-    }
-
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
@@ -93,6 +72,26 @@ public class ReservationService {
 
     public List<Reservation> findAllReservationByMember(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId);
+    }
+
+    private Reservation createReservation(
+            long memberId,
+            long themeId,
+            LocalDate date,
+            long timeId
+    ) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new InvalidMemberException("존재하지 않는 멤버 ID입니다."));
+        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new InvalidReservationTimeException("존재하지 않는 예약 시간입니다."));
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마입니다."));
+
+        Reservation reservation = new Reservation(member, date, reservationTime, theme);
+
+        validateDuplicateReservation(reservation);
+        validateAddReservationDateTime(reservation);
+        return reservationRepository.save(reservation);
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
