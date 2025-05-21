@@ -1,5 +1,6 @@
 package roomescape.business.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.business.dto.ReservationDto;
@@ -13,9 +14,9 @@ import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.Status;
-import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
+import roomescape.presentation.dto.response.ReservationResponse;
 import roomescape.presentation.dto.response.ReservationWithAhead;
 
 import java.time.LocalDate;
@@ -23,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static roomescape.exception.ErrorCode.*;
-import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
 
 @Service
 @RequiredArgsConstructor
@@ -60,18 +60,30 @@ public class ReservationService {
         return ReservationDto.fromEntities(reservations);
     }
 
-    public void delete(final String reservationId, final String userIdValue) {
+    public void deleteAndUpdateWaiting(final String reservationId) {
         Id id = Id.create(reservationId);
-        final Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
-        if (!reservation.isSameReserver(userIdValue)) {
-            throw new AuthorizationException(AUTHORITY_LACK);
-        }
+        reservationRepository.deleteById(id);
+        reservationRepository.updateFirstWaiting(reservation.getDate(), reservation.getTime(), reservation.getTheme());
+
+    }
+
+    public void delete(final String reservationId) {
+        Id id = Id.create(reservationId);
         reservationRepository.deleteById(id);
     }
 
     public List<ReservationWithAhead> getMyReservations(final String userIdValue) {
         Id userId = Id.create(userIdValue);
         return reservationRepository.findReservationsWithAhead(userId);
+    }
+
+    public List<ReservationResponse> getAllWaitings() {
+        return ReservationResponse.from(
+                ReservationDto.fromEntities(
+                        reservationRepository.findAllWaitings()
+                )
+        );
     }
 }

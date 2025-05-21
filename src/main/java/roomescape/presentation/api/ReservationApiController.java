@@ -45,6 +45,14 @@ public class ReservationApiController {
         return ResponseEntity.created(URI.create("/reservations")).body(response);
     }
 
+    @GetMapping("/admin/reservations/waiting")
+    @AuthRequired
+    @Role(UserRole.ADMIN)
+    public ResponseEntity<List<ReservationResponse>> getWaitingReservations() {
+        List<ReservationResponse> responses = reservationService.getAllWaitings();
+        return ResponseEntity.ok(responses);
+    }
+
     @GetMapping("/reservations")
     @AuthRequired
     public ResponseEntity<List<ReservationResponse>> getReservations(
@@ -68,8 +76,9 @@ public class ReservationApiController {
 
     @DeleteMapping("/reservations/{id}")
     @AuthRequired
-    public ResponseEntity<Void> deleteReservation(@PathVariable String id, LoginInfo loginInfo) {
-        reservationService.delete(id, loginInfo.id());
+    @Role(UserRole.ADMIN)
+    public ResponseEntity<Void> deleteReservation(@PathVariable String id) {
+        reservationService.deleteAndUpdateWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }

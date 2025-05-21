@@ -60,11 +60,13 @@ public class LocalDataInitializer {
                 Status.RESERVED, LocalDateTime.now());
         final Reservation reservation7 = Reservation.restore("16", user1, LocalDate.now().plusDays(4), time2, theme2,
                 Status.RESERVED, LocalDateTime.now());
+        final Reservation reservation7_1 = Reservation.restore("17", user5, LocalDate.now().plusDays(4), time2, theme2,
+                Status.WAITING, LocalDateTime.now());
         insertThemes(theme1, theme2);
         insertTimes(time1, time2);
         insertUsers(user1, user5, user6, admin);
         insertReservations(reservation1, reservation2, reservation3, reservation4, reservation5, reservation6,
-                reservation7);
+                reservation7, reservation7_1);
         logger.info("local 테스트용 데이터 init 성공!");
     }
 

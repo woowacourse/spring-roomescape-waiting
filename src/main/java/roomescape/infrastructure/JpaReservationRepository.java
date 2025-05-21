@@ -3,8 +3,12 @@ package roomescape.infrastructure;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationTime;
+import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.ReservationRepository;
 import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ReservationDate;
+import roomescape.business.model.vo.Status;
 import roomescape.presentation.dto.response.ReservationWithAhead;
 
 import java.time.LocalDate;
@@ -70,5 +74,15 @@ public class JpaReservationRepository implements ReservationRepository {
     @Override
     public void deleteById(Id reservationId) {
         dao.deleteById(reservationId);
+    }
+
+    @Override
+    public List<Reservation> findAllWaitings() {
+        return dao.findAllByStatus(Status.WAITING);
+    }
+
+    @Override
+    public void updateFirstWaiting(ReservationDate date, ReservationTime time, Theme theme) {
+        dao.updateFirstWaiting(date, time, theme);
     }
 }

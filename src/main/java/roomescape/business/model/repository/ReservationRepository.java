@@ -1,7 +1,11 @@
 package roomescape.business.model.repository;
 
+import jakarta.transaction.Transactional;
 import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationTime;
+import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ReservationDate;
 import roomescape.presentation.dto.response.ReservationWithAhead;
 
 import java.time.LocalDate;
@@ -30,4 +34,8 @@ public interface ReservationRepository {
     boolean isDuplicateDateAndTimeAndTheme(LocalDate date, LocalTime time, Id themeId);
 
     void deleteById(Id reservationId);
+
+    List<Reservation> findAllWaitings();
+
+    void updateFirstWaiting(ReservationDate date, ReservationTime time, Theme theme);
 }
