@@ -7,6 +7,7 @@ import roomescape.domain.Reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import roomescape.domain.ReservationStatus;
 
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
@@ -16,6 +17,10 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
     boolean existsByThemeId(Long themeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId, ReservationStatus status);
 
     List<Reservation> findByThemeIdAndDate(Long themeId, LocalDate date);
 
