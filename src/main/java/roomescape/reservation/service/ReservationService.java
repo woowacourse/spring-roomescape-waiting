@@ -65,12 +65,13 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findByCondition(
-        ReservationSearchConditionRequest reservationSearchConditionRequest) {
+        ReservationSearchConditionRequest reservationSearchConditionRequest
+    ) {
         List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndVisitDateBetween(
-            reservationSearchConditionRequest.getThemeId(),
-            reservationSearchConditionRequest.getMemberId(),
-            reservationSearchConditionRequest.getDateFrom(),
-            reservationSearchConditionRequest.getDateTo()
+            reservationSearchConditionRequest.themeId(),
+            reservationSearchConditionRequest.memberId(),
+            reservationSearchConditionRequest.dateFrom(),
+            reservationSearchConditionRequest.dateTo()
         );
 
         return reservations.stream()
