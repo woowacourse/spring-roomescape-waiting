@@ -18,6 +18,11 @@ spring:
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
+
+cookie:
+  domain: localhost
+  max-age: 3600
+
 security:
   jwt:
     token:
