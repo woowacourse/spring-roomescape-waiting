@@ -1,10 +1,12 @@
 package roomescape.unit.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.CannotWaitWithoutReservationException;
 import roomescape.exception.ExistedReservationException;
@@ -17,6 +19,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingRequest;
+import roomescape.reservation.dto.response.WaitingWithRankResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
 import roomescape.reservation.infrastructure.TimeSlotRepository;
@@ -161,5 +164,54 @@ class WaitingServiceTest {
         // when
         assertThatThrownBy(() -> waitingService.createWaiting(savedMember.getId(), request))
                 .isInstanceOf(ExistedReservationException.class);
+    }
+
+    @Test
+    void 회원의_대기를_대기순서와_함께_조회한다() {
+        // given
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("name1")
+                        .email("email1@domain.com")
+                        .password("password1").bulid()
+        );
+        Member member2 = memberRepository.save(
+                Member.builder()
+                        .name("name2")
+                        .email("email2@domain.com")
+                        .password("password2").bulid()
+        );
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        waitingRepository.save(
+                Waiting.builder()
+                        .date(date)
+                        .member(member2)
+                        .theme(theme)
+                        .timeSlot(timeSlot)
+                        .build()
+        );
+        waitingRepository.save(
+                Waiting.builder()
+                        .date(date)
+                        .member(member1)
+                        .theme(theme)
+                        .timeSlot(timeSlot)
+                        .build()
+        );
+        // when
+        List<WaitingWithRankResponse> waitings = waitingService.findWaitingByMemberId(member1.getId());
+        // then
+        assertThat(waitings).hasSize(1);
+        assertThat(waitings.get(0).getRank()).isEqualTo(2);
     }
 }

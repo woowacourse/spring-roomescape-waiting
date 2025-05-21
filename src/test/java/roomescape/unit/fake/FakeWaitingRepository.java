@@ -8,6 +8,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.dto.response.WaitingWithRankResponse;
 import roomescape.reservation.infrastructure.WaitingRepository;
 
 public class FakeWaitingRepository implements WaitingRepository {
@@ -35,5 +36,24 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .filter(waiting -> waiting.getMember().equals(member))
                 .filter(waiting -> waiting.getTheme().equals(theme))
                 .anyMatch(waiting -> waiting.getTimeSlot().equals(timeSlot));
+    }
+
+    @Override
+    public List<WaitingWithRankResponse> findByMemberIdWithRank(Long memberId) {
+        List<Waiting> findWaitings = waitings.stream()
+                .filter(waiting -> waiting.getMember().getId().equals(memberId))
+                .toList();
+        return findWaitings.stream()
+                .map(w -> new WaitingWithRankResponse(w, countPreviousWaiting(w) + 1))
+                .toList();
+    }
+
+    private Long countPreviousWaiting(Waiting waiting) {
+        return waitings.stream()
+                .filter(w -> w.getTheme().equals(waiting.getTheme()))
+                .filter(w -> w.getTimeSlot().equals(waiting.getTimeSlot()))
+                .filter(w -> w.getDate().equals(waiting.getDate()))
+                .filter(w -> w.getId() < waiting.getId())
+                .count();
     }
 }
