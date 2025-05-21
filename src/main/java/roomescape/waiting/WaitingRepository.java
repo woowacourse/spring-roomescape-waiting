@@ -25,4 +25,12 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     List<Waiting> findWaitingGreaterThanRank(LocalDate date, ReservationTime time, Theme theme, Long rank);
 
+    @Query(value = """
+                SELECT w FROM Waiting w
+                WHERE w.reservation.date = :date
+                AND w.reservation.reservationTime = :reservationTime
+                AND w.reservation.theme = :theme
+                ORDER BY w.rank
+            """)
+    List<Waiting> findByReservationSlot(LocalDate date, ReservationTime reservationTime, Theme theme);
 }

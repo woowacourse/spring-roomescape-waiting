@@ -21,10 +21,10 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    private LocalDate date;
-
     @ManyToOne
     private Member member;
+
+    private LocalDate date;
 
     @ManyToOne
     private ReservationTime reservationTime;
@@ -47,5 +47,9 @@ public class Reservation {
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.reservationStatus = reservationStatus;
+    }
+
+    public void confirmReservation() {
+        this.reservationStatus = ReservationStatus.CONFIRMED;
     }
 }

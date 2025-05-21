@@ -23,9 +23,9 @@ public class WaitingTest {
 
         // when
         Long rank = 3L;
-        Waiting waiting = new Waiting(new Reservation(LocalDate.now(), member, reservationTime, theme, ReservationStatus.PENDING), rank);
+        Waiting waiting = new Waiting(new Reservation(LocalDate.now(), member, reservationTime, theme, ReservationStatus.CONFIRMED), rank);
         waiting.decrementRank();
-        
+
         // then
         Assertions.assertThat(waiting.getRank()).isEqualTo(rank - 1);
     }

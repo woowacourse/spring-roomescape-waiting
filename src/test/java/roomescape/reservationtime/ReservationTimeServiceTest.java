@@ -170,7 +170,7 @@ public class ReservationTimeServiceTest {
                     .willReturn(Optional.of(theme));
             given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of(
-                            new Reservation(null, null, savedTime, theme, ReservationStatus.PENDING))
+                            new Reservation(null, null, savedTime, theme, ReservationStatus.CONFIRMED))
                     );
 
             // when

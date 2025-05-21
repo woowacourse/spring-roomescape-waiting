@@ -78,7 +78,7 @@ public class ReservationServiceTest {
                     MEMBER.get(),
                     RESERVATION_TIME.get(),
                     THEME.get(),
-                    ReservationStatus.PENDING
+                    ReservationStatus.CONFIRMED
             ));
         }
 
@@ -96,7 +96,7 @@ public class ReservationServiceTest {
                     RESERVATION_TIME.get(), REQUEST.date(), THEME.get()))
                     .willReturn(false);
             given(reservationRepository.save(
-                    new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.PENDING)))
+                    new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.CONFIRMED)))
                     .willReturn(RESERVATION);
 
             // when
@@ -236,7 +236,7 @@ public class ReservationServiceTest {
                     MEMBER.get(),
                     RESERVATION_TIME.get(),
                     THEME.get(),
-                    ReservationStatus.PENDING
+                    ReservationStatus.CONFIRMED
             ));
         }
 
@@ -254,7 +254,7 @@ public class ReservationServiceTest {
                     RESERVATION_TIME.get(), REQUEST.date(), THEME.get()))
                     .willReturn(false);
             given(reservationRepository.save(
-                    new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.PENDING)))
+                    new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.CONFIRMED)))
                     .willReturn(RESERVATION);
 
             // when
@@ -403,7 +403,7 @@ public class ReservationServiceTest {
                     memberWithId(1L, new Member("boogie", "password", "boogie", MemberRole.MEMBER)),
                     reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))),
                     themeWithId(1L, new Theme("야당", "야당당", "123")),
-                    ReservationStatus.PENDING
+                    ReservationStatus.CONFIRMED
             );
             given(reservationRepository.findAll())
                     .willReturn(List.of(reservationWithId(1L, reservation)));
@@ -461,8 +461,8 @@ public class ReservationServiceTest {
             given(themeRepository.findById(request.themeId()))
                     .willReturn(Optional.of(theme));
             given(reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, request.from(), request.to())).willReturn(List.of(
-                    reservationWithId(1L, new Reservation(LocalDate.of(2024, 6, 15), member, reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))), theme, ReservationStatus.PENDING)),
-                    reservationWithId(2L, new Reservation(LocalDate.of(2024, 7, 20), member, reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))), theme, ReservationStatus.PENDING))
+                    reservationWithId(1L, new Reservation(LocalDate.of(2024, 6, 15), member, reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))), theme, ReservationStatus.CONFIRMED)),
+                    reservationWithId(2L, new Reservation(LocalDate.of(2024, 7, 20), member, reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40))), theme, ReservationStatus.CONFIRMED))
             ));
 
             // when

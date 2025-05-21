@@ -50,7 +50,7 @@ public class ReservationService {
         validateDuplicateDateTimeAndTheme(date, reservationTime, theme);
         validatePastDateTime(request, reservationTime);
 
-        final Reservation notSavedReservation = new Reservation(request, member, reservationTime, theme, ReservationStatus.PENDING);
+        final Reservation notSavedReservation = new Reservation(request, member, reservationTime, theme, ReservationStatus.CONFIRMED);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -71,14 +71,6 @@ public class ReservationService {
                 ).stream()
                 .map(ReservationResponse::from)
                 .toList();
-    }
-
-    public void deleteById(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new ReservationNotFoundException();
-        }
-
-        reservationRepository.deleteById(id);
     }
 
     private void validatePastDateTime(final LocalDate date, ReservationTime reservationTime) {

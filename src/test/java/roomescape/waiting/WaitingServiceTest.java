@@ -64,7 +64,7 @@ class WaitingServiceTest {
                 MEMBER.get(),
                 RESERVATION_TIME.get(),
                 THEME.get(),
-                ReservationStatus.PENDING
+                ReservationStatus.CONFIRMED
         ));
 
         waitingRepository = mock(WaitingRepository.class);
@@ -85,7 +85,7 @@ class WaitingServiceTest {
                 .willReturn(THEME);
         given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
                 .willReturn(MEMBER);
-        given(reservationRepository.save(new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.PENDING)))
+        given(reservationRepository.save(new Reservation(REQUEST.date(), MEMBER.get(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.CONFIRMED)))
                 .willReturn(RESERVATION);
         List<Reservation> waitings = List.of(RESERVATION, RESERVATION, RESERVATION);
         given(reservationRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatus(REQUEST.date(), RESERVATION_TIME.get(), THEME.get(), ReservationStatus.WAITING))
