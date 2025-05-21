@@ -57,7 +57,11 @@ public class Waiting extends BaseEntity {
     }
 
     public boolean hasControlPermission(Member member) {
-        return member.isAdmin();
+        return isOwner(member) || member.isAdmin();
+    }
+
+    private boolean isOwner(Member member) {
+        return this.member.equals(member);
     }
 
     public Long getId() {
