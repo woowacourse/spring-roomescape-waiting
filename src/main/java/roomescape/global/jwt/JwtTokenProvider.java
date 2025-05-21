@@ -20,7 +20,7 @@ import roomescape.member.domain.Role;
 public class JwtTokenProvider implements TokenProvider {
 
     private static final String JWT_EXCEPTION_MESSAGE = "잘못된 로그인 시도입니다. 다시 시도해 주세요.";
-    private static final String PREFIX = "token=";
+    private static final String PREFIX = "token";
 
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
