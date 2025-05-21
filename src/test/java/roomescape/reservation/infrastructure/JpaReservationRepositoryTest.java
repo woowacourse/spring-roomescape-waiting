@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -15,11 +16,11 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
@@ -113,5 +114,17 @@ class JpaReservationRepositoryTest {
                 futureDate, theme.getId());
 
         assertThat(bookedTimesByDateAndThemeId.size()).isEqualTo(3);
+    }
+
+    @Test
+    void findMemberById() {
+        // Given
+        Long memberId = member.getId();
+
+        // When
+        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
+
+        // Then
+        assertThat(reservations.size()).isEqualTo(1);
     }
 }

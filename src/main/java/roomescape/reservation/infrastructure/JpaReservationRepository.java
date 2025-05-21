@@ -43,10 +43,12 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query("""
-            SELECT  r 
-            FROM Reservation r 
-            JOIN FETCH r.member m 
-            WHERE m.id = :memberId 
+            SELECT  r
+            FROM Reservation r
+            JOIN FETCH r.theme th
+            JOIN FETCH r.time t
+            JOIN r.member m
+            WHERE m.id = :memberId
             """
     )
     List<Reservation> findByMemberId(Long memberId);
