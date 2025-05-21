@@ -118,8 +118,8 @@ public class MissionStepTest {
             createTheme("추리");
 
             jdbcTemplate.update(
-                    "INSERT INTO reservation (date, time_id, theme_id, member_id,reservation_status) VALUES (?, ?, ?, ?,?)",
-                    futureDate, "1", "1", "1", "RESERVED");
+                    "INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                    futureDate, "1", "1", "1");
 
             RestAssured.given().log().all()
                     .when().get("/reservations")

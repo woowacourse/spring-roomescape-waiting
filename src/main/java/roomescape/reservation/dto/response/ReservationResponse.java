@@ -18,7 +18,8 @@ public record ReservationResponse(
 ) {
     public static ReservationResponse of(Reservation reservation, ReservationTime reservationTime, Theme theme,
                                          Member member) {
-        return new ReservationResponse(reservation.getId(), MemberResponse.from(member), reservation.getDate(),
+        return new ReservationResponse(reservation.getId(), MemberResponse.from(member),
+                reservation.getInfo().getDate(),
                 ReservationTimeResponse.from(reservationTime), ThemeResponse.from(theme)
         );
     }

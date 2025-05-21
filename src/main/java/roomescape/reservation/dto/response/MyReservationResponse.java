@@ -1,16 +1,13 @@
 package roomescape.reservation.dto.response;
 
-import roomescape.reservation.domain.Reservation;
-
 public record MyReservationResponse(Long reservationId,
                                     String theme,
                                     String date,
                                     String time,
-                                    String status) {
+                                    String ReservedStatus) {
 
-    public static MyReservationResponse from(final Reservation reservation) {
-        return new MyReservationResponse(reservation.getId(), reservation.getTheme().getName(),
-                reservation.getDate().toString(),
-                reservation.getTime().getStartAt().toString(), reservation.getReservationStatus().getName());
+    public static MyReservationResponse from(final MyReservationOutput reservation) {
+        return new MyReservationResponse(reservation.reservationId(), reservation.theme(),
+                reservation.date(), reservation.time(), "예약");
     }
 }
