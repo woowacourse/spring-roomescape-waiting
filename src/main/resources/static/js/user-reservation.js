@@ -50,9 +50,9 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
-        if (booked) {
-            div.classList.add('disabled');
-        }
+        // if (booked) {
+        //     div.classList.add('disabled');
+        // }
     }
     return div;
 }
@@ -129,7 +129,7 @@ function checkDateAndThemeAndTime() {
         if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
             // 선택된 시간이 이미 예약된 경우
             reserveButton.classList.add("disabled");
-            waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
+            waitButton.classList.remove("disabled"); // 예re약 대기 버튼 활성화
         } else {
             // 선택된 시간이 예약 가능한 경우
             reserveButton.classList.remove("disabled");
@@ -195,14 +195,14 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
         /*
         TODO: [3단계] 예약 대기 생성 요청 API 호출
          */
-        fetch('', {
+        fetch('reservation-waiting', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
