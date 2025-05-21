@@ -1,3 +1,8 @@
+DELETE from reservation;
+DELETE from reservation_time;
+DELETE from theme;
+DELETE from member;
+
 INSERT INTO member(member_id, name, email, password, role)
 VALUES (1, '훌라', 'test@test.com', 'test', 'USER'),
        (2, '어드민', 'admin@admin.com', 'admin', 'ADMIN');

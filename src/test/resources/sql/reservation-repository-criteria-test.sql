@@ -1,4 +1,7 @@
-
+DELETE from reservation;
+DELETE from reservation_time;
+DELETE from theme;
+DELETE from member;
 
 INSERT INTO member(member_id, name, email, password, role) VALUES
 (10000, 'test', 'test@email.com', '1234', 'USER'),
