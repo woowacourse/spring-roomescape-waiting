@@ -1,18 +1,22 @@
 package roomescape.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
 import java.time.LocalTime;
 
 @Entity
+@Table(name = "RESERVATION_TIME")
 public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
+
+    @Column(name = "START_AT")
     private LocalTime startAt;
+
+    @Column(name = "ALREADY_BOOKED")
     private Boolean alreadyBooked;
 
     public ReservationTime() {

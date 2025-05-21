@@ -1,34 +1,36 @@
 package roomescape.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
+@Table(name = "RESERVATION")
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
-    @ManyToOne
-    private Member member;
-
+    @Column(name = "DATE")
     private LocalDate date;
 
     @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+
+    @ManyToOne
+    @JoinColumn(name = "TIME_ID")
     private ReservationTime time;
 
     @ManyToOne
+    @JoinColumn(name = "THEME_ID")
     private Theme theme;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "STATUS")
     private ReservationStatus status;
 
     public Reservation() {
