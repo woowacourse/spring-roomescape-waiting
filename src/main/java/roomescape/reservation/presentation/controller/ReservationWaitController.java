@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import roomescape.admin.AdminWaitingReservationResponse;
 import roomescape.global.auth.Auth;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.presentation.dto.AdminWaitingReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 

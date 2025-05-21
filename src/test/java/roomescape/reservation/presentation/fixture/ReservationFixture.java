@@ -5,7 +5,7 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
-import roomescape.reservation.presentation.dto.AdminReservationRequest;
+import roomescape.admin.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
 import roomescape.theme.presentation.ThemeRequest;

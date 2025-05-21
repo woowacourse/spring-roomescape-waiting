@@ -1,4 +1,4 @@
-package roomescape.reservation.presentation.controller;
+package roomescape.admin;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -13,11 +13,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.global.auth.Auth;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationService reservationService;
 
@@ -26,7 +25,7 @@ public class AdminReservationController {
     }
 
     @Auth(Role.ADMIN)
-    @PostMapping("/reservations")
+    @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             final @RequestBody @Valid AdminReservationRequest adminReservationRequest
     ) {
@@ -37,7 +36,7 @@ public class AdminReservationController {
     }
 
     @Auth(Role.ADMIN)
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(
             final @PathVariable Long id
     ) {

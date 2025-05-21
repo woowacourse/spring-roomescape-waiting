@@ -1,4 +1,4 @@
-package roomescape.reservation.presentation.dto;
+package roomescape.admin;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
