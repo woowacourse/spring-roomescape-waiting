@@ -9,6 +9,19 @@ CREATE TABLE IF NOT EXISTS member
     UNIQUE (email)
 );
 
+CREATE TABLE IF NOT EXISTS waiting
+(
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    created_at VARCHAR(255) NOT NULL,
+    member_id  BIGINT       NOT NULL,
+    time_id    BIGINT       NOT NULL,
+    theme_id   BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (member_id) REFERENCES member (id)
+);
+
 CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
