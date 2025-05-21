@@ -72,8 +72,8 @@ public class AdminReservationController {
     }
 
     @PutMapping("/waiting/{id}")
-    public ResponseEntity<Void> updateStatus(@PathVariable("id") final Long id) {
-        reservationCommandService.updateStatus(id);
+    public ResponseEntity<Void> confirmReservation(@PathVariable("id") final Long id) {
+        reservationCommandService.confirmReservation(id);
         return ResponseEntity.ok().build();
     }
 }

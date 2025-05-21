@@ -77,7 +77,7 @@ class ReservationCommandServiceTest {
                 LocalDate.now().plusDays(1), 1L, 1L, BookingStatus.WAITING);
         reservationCommandService.addMemberReservation(request, 1L);
 
-        assertThatCode(() -> reservationCommandService.updateStatus(12L))
+        assertThatCode(() -> reservationCommandService.confirmReservation(12L))
                 .doesNotThrowAnyException();
     }
 
@@ -87,7 +87,7 @@ class ReservationCommandServiceTest {
                 LocalDate.now().plusDays(1), 1L, 1L, BookingStatus.RESERVED);
         reservationCommandService.addMemberReservation(request, 1L);
 
-        assertThatThrownBy(() -> reservationCommandService.updateStatus(12L))
+        assertThatThrownBy(() -> reservationCommandService.confirmReservation(12L))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("대기 중인 예약이 아닙니다.");
     }
@@ -101,14 +101,14 @@ class ReservationCommandServiceTest {
         reservationCommandService.addMemberReservation(request1, 1L);
         reservationCommandService.addMemberReservation(request2, 2L);
 
-        assertThatThrownBy(() -> reservationCommandService.updateStatus(13L))
+        assertThatThrownBy(() -> reservationCommandService.confirmReservation(13L))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("이미 동일한 시간에 예약된 건이 있습니다.");
     }
 
     @Test
     void 존재하지_않는_예약은_상태를_변경할_수_없다() {
-        assertThatThrownBy(() -> reservationCommandService.updateStatus(999L))
+        assertThatThrownBy(() -> reservationCommandService.confirmReservation(999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("선택한 예약이 존재하지 않습니다.");
     }

@@ -79,11 +79,11 @@ public class ReservationCommandService {
         deleteById(reservationId);
     }
 
-    public void updateStatus(final Long id) {
+    public void confirmReservation(final Long id) {
         final Reservation reservation = getReservation(id);
         validateIsWaiting(reservation);
         validateIsBooked(reservation);
-        reservation.setStatus(BookingStatus.RESERVED);
+        reservation.confirm();
     }
 
     private void validatePastDateTime(final LocalDate date, final LocalTime time) {

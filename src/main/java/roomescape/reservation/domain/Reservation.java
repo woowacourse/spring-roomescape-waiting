@@ -92,11 +92,7 @@ public class Reservation {
         return time.getStartAt();
     }
 
-    public String getStatusValue() {
-        return bookingStatus.getValue();
-    }
-
-    public void setStatus(final BookingStatus bookingStatus) {
-        this.bookingStatus = bookingStatus;
+    public void confirm() {
+        this.bookingStatus = BookingStatus.RESERVED;
     }
 }
