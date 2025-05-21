@@ -7,9 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.BaseEntity;
 import roomescape.domain.member.Member;
+import roomescape.infrastructure.error.exception.ReservationException;
+import roomescape.infrastructure.error.exception.WaitingException;
 
 @Entity
 public class Waiting extends BaseEntity {
@@ -45,6 +49,13 @@ public class Waiting extends BaseEntity {
     }
 
     protected Waiting() {
+    }
+
+    public void validateWaitable(LocalDateTime currentDateTime) {
+        LocalDateTime waitingDateTime = LocalDateTime.of(date, time.getStartAt());
+        if (waitingDateTime.isBefore(currentDateTime)) {
+            throw new WaitingException("예약일이 지나 대기 신청을 할 수 없습니다.");
+        }
     }
 
     public boolean isOwner(Member member) {

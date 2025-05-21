@@ -1,6 +1,8 @@
 package roomescape.application.reservation.command;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.command.dto.CreateWaitingCommand;
@@ -20,20 +22,23 @@ public class CreateWaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
+    private final Clock clock;
 
     public CreateWaitingService(WaitingRepository waitingRepository,
                                 ReservationRepository reservationRepository,
-                                MemberRepository memberRepository) {
+                                MemberRepository memberRepository,
+                                Clock clock) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
+        this.clock = clock;
     }
 
     public Long request(CreateWaitingCommand createParameter) {
         validateNotAlreadyReservedOrWaiting(createParameter);
         Reservation reservation = getExistingReservation(createParameter);
         Member member = getMember(createParameter.memberId());
-        Waiting waiting = new Waiting(member, reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        Waiting waiting = createWaiting(member, reservation);
         return waitingRepository.save(waiting).getId();
     }
 
@@ -70,5 +75,11 @@ public class CreateWaitingService {
     private Member getMember(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException("존재하지 않는 회원입니다."));
+    }
+
+    private Waiting createWaiting(Member member, Reservation reservation) {
+        Waiting waiting = new Waiting(member, reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        waiting.validateWaitable(LocalDateTime.now(clock));
+        return waiting;
     }
 }

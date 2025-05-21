@@ -48,7 +48,8 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
         createWaitingService = new CreateWaitingService(
                 waitingRepository,
                 reservationRepository,
-                memberRepository
+                memberRepository,
+                clock
         );
     }
 
@@ -76,6 +77,31 @@ class CreateWaitingServiceTest extends AbstractServiceIntegrationTest {
         // then
         assertThat(waitingRepository.findById(waitingId))
                 .isPresent();
+    }
+
+    @Test
+    void 과거_예약일로_대기신청을_할_수_없다() {
+        // given
+        LocalDateTime now = LocalDateTime.now(clock).minusDays(1);
+        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
+        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        reservationRepository.save(new Reservation(member, now.toLocalDate(), time, theme));
+        Member requestMember = memberRepository.save(
+                new Member("서프", new Email("sf@email.com"), "pw", MemberRole.NORMAL)
+        );
+        CreateWaitingCommand command = new CreateWaitingCommand(
+                now.toLocalDate(),
+                theme.getId(),
+                time.getId(),
+                requestMember.getId()
+        );
+
+        // when
+        // then
+        assertThatCode(() -> createWaitingService.request(command))
+                .isInstanceOf(WaitingException.class)
+                .hasMessage("예약일이 지나 대기 신청을 할 수 없습니다.");
     }
 
     @Test
