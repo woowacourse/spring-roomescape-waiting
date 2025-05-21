@@ -13,6 +13,7 @@ import roomescape.reservation.controller.dto.ReservationWebResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.service.converter.ReservationConverter;
+import roomescape.reservation.service.converter.ReservationWaitConverter;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
 import roomescape.reservation.service.usecase.ReservationCommandUseCase;
@@ -81,7 +82,7 @@ public class ReservationService {
             final CreateReservationWebRequest createReservationWebRequest,
             final MemberInfo memberInfo
     ) {
-        return ReservationConverter.toDto(
+        return ReservationWaitConverter.toDto(
                 reservationWaitCommandUseCase.create(
                         new CreateReservationServiceRequest(
                                 memberInfo.id(),

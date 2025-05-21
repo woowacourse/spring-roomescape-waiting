@@ -1,55 +1,71 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
+@Getter
 @NoArgsConstructor
-public class ReservationWait extends Reservation {
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(of = "id")
+public class ReservationWait {
 
-    // TODO : 상속 시, 부모 테이블에서 조회를 하면 자식 테이블의 데이터까지 조회되는 문제 발생
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public ReservationWait(
-            final Long id,
-            final Member member,
-            final ReservationDate date,
-            final ReservationTime time,
-            final Theme theme
-    ) {
-        super(id, member, date, time, theme);
-    }
+    @Embedded
+    private ReservationInfo info;
 
-    private static ReservationWait of(
-            final Long id,
-            final Member member,
-            final ReservationDate date,
-            final ReservationTime time,
-            final Theme theme
-    ) {
-        return new ReservationWait(id, member, date, time, theme);
+    private static ReservationWait of(Long id, ReservationInfo info) {
+        return new ReservationWait(id, info);
     }
 
     public static ReservationWait withId(
-            final Long id,
-            final Member member,
-            final ReservationDate date,
-            final ReservationTime time,
-            final Theme theme
+            Long id,
+            Member member,
+            ReservationDate date,
+            ReservationTime time,
+            Theme theme
     ) {
-        validate(member, date, time, theme);
-        return of(id, member, date, time, theme);
+        return of(id, ReservationInfo.of(member, date, time, theme));
     }
 
     public static ReservationWait withoutId(
-            final Member member,
-            final ReservationDate date,
-            final ReservationTime time,
-            final Theme theme
+            Member member,
+            ReservationDate date,
+            ReservationTime time,
+            Theme theme
     ) {
-        validatePast(date, time);
-        return of(null, member, date, time, theme);
+        Reservation.validatePast(date, time);
+        final ReservationInfo info = ReservationInfo.of(member, date, time, theme);
+        return of(null, info);
+    }
+
+    public Member getMember() {
+        return info.getMember();
+    }
+
+    public ReservationDate getDate() {
+        return info.getDate();
+    }
+
+    public ReservationTime getTime() {
+        return info.getTime();
+    }
+
+    public Theme getTheme() {
+        return info.getTheme();
     }
 }
