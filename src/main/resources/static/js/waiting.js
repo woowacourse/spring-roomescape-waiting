@@ -64,26 +64,26 @@ function approve(event) {
 }
 
 function deny(event) {
-  const row = event.target.closest('tr');
-  const id = row.cells[0].textContent;
+    const row = event.target.closest('tr');
+    const id = row.cells[0].textContent;
 
-  /*
-  TODO: [4단계] 예약 대기 목록 관리 기능
-        예약 대기 거절 API 호출
-   */
-  const endpoint = '' + id;
-  return fetch(endpoint, {
-    method: ''
-  }).then(response => {
-    if (response.status === 200) return;
-    throw new Error('Delete failed');
-  }).then(() => location.reload());
+    /*
+    TODO: [4단계] 예약 대기 목록 관리 기능
+          예약 대기 거절 API 호출
+     */
+    const endpoint = '/admin/reservations/waiting/' + id;
+    return fetch(endpoint, {
+        method: 'DELETE'
+    }).then(response => {
+        if (response.status === 204) return;
+        throw new Error('Delete failed');
+    }).then(() => location.reload());
 }
 
 function createActionButton(label, className, eventListener) {
-  const button = document.createElement('button');
-  button.textContent = label;
-  button.classList.add('btn', className, 'mr-2');
-  button.addEventListener('click', eventListener);
-  return button;
+    const button = document.createElement('button');
+    button.textContent = label;
+    button.classList.add('btn', className, 'mr-2');
+    button.addEventListener('click', eventListener);
+    return button;
 }

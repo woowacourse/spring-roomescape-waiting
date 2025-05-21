@@ -80,6 +80,12 @@ public class ReservationService {
         waitReservation.changeStatusWaitToReserve();
     }
 
+    public void rejectWaitReservationByAdmin(long waitReservationId) {
+        Reservation waitReservation = reservationRepository.findById(waitReservationId)
+                .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약 대기입니다."));
+        waitReservation.cancel();
+    }
+
     private Reservation createReservation(long memberId,
                                           long themeId,
                                           LocalDate date,
