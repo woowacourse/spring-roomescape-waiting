@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.MemberNotFoundException;
@@ -14,12 +15,14 @@ import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.ReservationCondition;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationWithStatusResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
 import roomescape.reservation.infrastructure.TimeSlotRepository;
+import roomescape.reservation.infrastructure.WaitingRepository;
 
 @Service
 @Transactional
@@ -29,17 +32,19 @@ public class ReservationService {
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             TimeSlotRepository timeSlotRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository, WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findReservations(ReservationCondition cond) {
@@ -68,8 +73,20 @@ public class ReservationService {
     }
 
     public void deleteReservationById(Long id) {
-        reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
-        reservationRepository.deleteById(id);
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
+        reservationRepository.delete(reservation);
+        Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndTimeSlotAndThemeOrderById(
+                reservation.getDate(), reservation.getTimeSlot(), reservation.getTheme());
+        if (firstWaiting.isEmpty()) {
+            return;
+        }
+        Reservation newReservation = Reservation.builder()
+                .date(firstWaiting.get().getDate())
+                .theme(firstWaiting.get().getTheme())
+                .timeSlot(firstWaiting.get().getTimeSlot())
+                .member(firstWaiting.get().getMember()).build();
+        reservationRepository.save(newReservation);
+        waitingRepository.delete(firstWaiting.get());
     }
 
     public List<ReservationWithStatusResponse> findReservationByMemberId(Long memberId) {

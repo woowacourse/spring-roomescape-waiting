@@ -33,5 +33,7 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
     boolean existsByDateAndMemberAndThemeAndTimeSlot(LocalDate date, Member member, Theme theme, TimeSlot timeSlot);
 
     boolean existsByDateAndThemeAndTimeSlot(LocalDate date, Theme theme, TimeSlot timeSlot);
+
+    void delete(Reservation reservation);
 }
 
