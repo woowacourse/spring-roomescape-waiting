@@ -18,7 +18,7 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
 
@@ -142,22 +142,22 @@ class ReservationTimeServiceTest {
         // 2개의 방탈출 예약 시간, 1개의 테마, 1개의 예약이 주어진다.
 
         // when
-        final List<ReservationAvailableTimeResponse> availableTimeResponses = reservationTimeService.findAvailableTimes(
+        final List<AvailableReservationTimeResponse> availableReservationTimeRespons = reservationTimeService.findAvailableTimes(
                 LocalDate.parse("2025-05-10"),
                 100L
         );
 
         // then
-        final ReservationAvailableTimeResponse notAvailableTimeResponse = availableTimeResponses.stream()
-                        .filter(response -> response.reservationTimeResponse().id() == 100L)
+        final AvailableReservationTimeResponse notAvailableReservationTimeResponse = availableReservationTimeRespons.stream()
+                        .filter(response -> response.reservationTime().id() == 100L)
                 .findFirst().get();
-        final ReservationAvailableTimeResponse availableTimeResponse = availableTimeResponses.stream()
-                        .filter(response -> response.reservationTimeResponse().id() == 101L)
+        final AvailableReservationTimeResponse availableReservationTimeResponse = availableReservationTimeRespons.stream()
+                        .filter(response -> response.reservationTime().id() == 101L)
                 .findFirst().get();
         assertAll(
-                () -> assertThat(availableTimeResponses).hasSize(2),
-                ()-> assertThat(notAvailableTimeResponse.alreadyBooked()).isTrue(),
-                () -> assertThat(availableTimeResponse.alreadyBooked()).isFalse()
+                () -> assertThat(availableReservationTimeRespons).hasSize(2),
+                ()-> assertThat(notAvailableReservationTimeResponse.alreadyBooked()).isTrue(),
+                () -> assertThat(availableReservationTimeResponse.alreadyBooked()).isFalse()
         );
     }
 }
