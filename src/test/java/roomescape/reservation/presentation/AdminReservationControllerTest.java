@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.admin.AdminReservationRequest;
+import roomescape.admin.reservation.AdminReservationRequest;
 import roomescape.member.presentation.fixture.MemberFixture;
 import roomescape.reservation.presentation.fixture.ReservationFixture;
 

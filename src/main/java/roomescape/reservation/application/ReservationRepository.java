@@ -5,11 +5,13 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationWithRank;
+import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+@Repository
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
@@ -26,12 +28,6 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
             LocalDate fromDate,
             LocalDate endDate
     );
-
-    boolean existsByReservationTimeId(Long timeId);
-
-    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
-
-    boolean existsByThemeId(Long themeId);
 
     @Query("""
                     SELECT new roomescape.reservation.domain.ReservationWithRank(
@@ -71,4 +67,10 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                   LIMIT 1
             """)
     Reservation findFirstWaitingReservation(LocalDate date, ReservationTime reservationTime, Theme theme);
+
+    boolean existsByReservationTimeId(Long timeId);
+
+    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
+
+    boolean existsByThemeId(Long themeId);
 }

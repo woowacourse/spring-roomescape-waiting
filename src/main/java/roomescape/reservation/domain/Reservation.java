@@ -43,8 +43,8 @@ public class Reservation {
     public Reservation() {
     }
 
-    public Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime reservationTime, final ReservationStatus status) {
+    private Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
+                        final ReservationTime reservationTime, final ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.theme = theme;
