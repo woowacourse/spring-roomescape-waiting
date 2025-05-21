@@ -2,16 +2,19 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationSlots;
 import roomescape.dto.request.AvailableTimeRequest;
 import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.InvalidReservationTimeException;
+import roomescape.global.ReservationStatus;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final ReservationRepository reservationRepository;
@@ -45,8 +48,8 @@ public class ReservationTimeService {
     public ReservationSlots getReservationSlots(AvailableTimeRequest request) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
-        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndTheme_Id(request.date(),
-                request.themeId());
+        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndThemeIdAndStatus(
+                request.date(), request.themeId(), ReservationStatus.RESERVED);
 
         return new ReservationSlots(times, alreadyReservedReservations);
     }

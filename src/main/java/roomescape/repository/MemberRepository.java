@@ -1,6 +1,9 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +15,20 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findFetchById(@Param("memberId") Long memberId);
 
     Optional<Member> findByEmailAndPassword(String email, String password);
+
+    @Query(value = """
+            select m
+            from Member m
+            join Reservation r on r.member.id = m.id
+            where r.date = :date
+            and r.reservationTime.id = :timeId
+            and r.theme.id = :themeId
+            and r.status = 'WAIT'
+            """)
+    List<Member> findNextReserveMember(@Param("date") LocalDate date,
+                                       @Param("timeId") Long timeId,
+                                       @Param("themeId") Long themeId,
+                                       Pageable pageable);
 
     boolean existsByEmail(String email);
 }

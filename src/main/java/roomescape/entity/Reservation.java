@@ -85,6 +85,12 @@ public class Reservation {
         }
     }
 
+    public void changeStatusWaitToReserve() {
+        if (member != null) {
+            member.waitToReserve(date, reservationTime, theme);
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -123,6 +129,10 @@ public class Reservation {
 
     protected void setMember(Member member) {
         this.member = member;
+    }
+
+    protected void setStatus(ReservationStatus status) {
+        this.status = status;
     }
 
     @Override

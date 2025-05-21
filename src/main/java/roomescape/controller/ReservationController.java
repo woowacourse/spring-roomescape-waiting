@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
 import roomescape.dto.request.CreateReservationRequest;
+import roomescape.dto.request.CreateWaitReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -66,9 +67,33 @@ public class ReservationController {
         return ResponseEntity.created(location).body(response);
     }
 
+    @PostMapping("/waiting")
+    @CheckRole(value = {Role.ADMIN, Role.USER})
+    public ResponseEntity<ReservationWaitResponse> addWaitReservation(
+            @RequestBody @Valid CreateWaitReservationRequest request,
+            LoginMemberRequest loginMemberRequest) {
+        Reservation reservation = reservationService.addWaitReservation(request, loginMemberRequest);
+        ReservationWaitResponse response = ReservationWaitResponse.from(reservation);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(response);
+    }
+
     @DeleteMapping("/{id}")
     @CheckRole(value = {Role.ADMIN, Role.USER})
     public ResponseEntity<Void> deleteReservations(@PathVariable Long id) {
+        reservationService.deleteReservation(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    @CheckRole(value = {Role.ADMIN, Role.USER})
+    public ResponseEntity<Void> deleteWaitReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
 
         return ResponseEntity.noContent().build();

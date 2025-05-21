@@ -180,42 +180,38 @@ function onReservationButtonClick() {
 }
 
 function onWaitButtonClick() {
-  const selectedDate = document.getElementById("datepicker").value;
-  const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
-  const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+    const selectedDate = document.getElementById("datepicker").value;
+    const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
+    const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
 
-  if (selectedDate && selectedThemeId && selectedTimeId) {
-    const reservationData = {
-      date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
-    };
-
-    /*
-    TODO: [3단계] 예약 대기 생성 요청 API 호출
-     */
-    fetch('', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(reservationData)
-    })
-        .then(response => {
-          if (!response.ok) throw new Error('Reservation waiting failed');
-          return response.json();
+    if (selectedDate && selectedThemeId && selectedTimeId) {
+        const reservationData = {
+            date: selectedDate,
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
+        };
+        fetch('/reservations/waiting', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reservationData)
         })
-        .then(data => {
-          alert('Reservation waiting successful!');
-          window.location.href = "/";
-        })
-        .catch(error => {
-          alert("An error occurred while making the reservation waiting.");
-          console.error(error);
-        });
-  } else {
-    alert("Please select a date, theme, and time before making a reservation waiting.");
-  }
+            .then(response => {
+                if (response.status !== 201) throw new Error('Reservation waiting failed');
+                return response.json();
+            })
+            .then(data => {
+                alert('Reservation waiting successful!');
+                window.location.href = "/";
+            })
+            .catch(error => {
+                alert("An error occurred while making the reservation waiting.");
+                console.error(error);
+            });
+    } else {
+        alert("Please select a date, theme, and time before making a reservation waiting.");
+    }
 }
 
 function requestRead(endpoint) {

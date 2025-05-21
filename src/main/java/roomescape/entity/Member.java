@@ -60,14 +60,26 @@ public class Member {
         this(null, name, email, password, role);
     }
 
-    public Reservation reserve(LocalDate date, ReservationTime time, Theme theme) {
-        Reservation reservation = new Reservation(this, date, time, theme, ReservationStatus.RESERVED);
+    public Reservation reserve(LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+        Reservation reservation = new Reservation(this, date, time, theme, status);
 
         validateDuplicateReservation(reservation);
         validatePastDateTime(reservation);
 
         this.reservations.add(reservation);
         return reservation;
+    }
+
+    public void waitToReserve(LocalDate date, ReservationTime time, Theme theme) {
+        Reservation waitReservation = reservations.stream()
+                .filter(reservation -> reservation.getDate().equals(date)
+                        && reservation.getReservationTime().getId().equals(time.getId())
+                        && reservation.getTheme().getId().equals(theme.getId())
+                        && reservation.getStatus() == ReservationStatus.WAIT)
+                .findFirst()
+                .orElseThrow(() -> new InvalidReservationException("대기중인 예약이 없습니다"));
+
+        waitReservation.setStatus(ReservationStatus.RESERVED);
     }
 
     private void validateDuplicateReservation(Reservation target) {
