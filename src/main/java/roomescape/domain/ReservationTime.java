@@ -14,6 +14,7 @@ public class ReservationTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private LocalTime startAt;
 
@@ -21,6 +22,7 @@ public class ReservationTime {
     }
 
     public ReservationTime(Long id, LocalTime startAt) {
+        validate(startAt);
         this.id = id;
         this.startAt = startAt;
     }
@@ -52,5 +54,15 @@ public class ReservationTime {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    private void validate(LocalTime startAt) {
+        validateNullStartAt(startAt);
+    }
+
+    private void validateNullStartAt(LocalTime startAt) {
+        if (startAt == null) {
+            throw new IllegalArgumentException("비어있는 시작시간으로 예약 시간을 생성할 수 없습니다.");
+        }
     }
 }

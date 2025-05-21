@@ -20,6 +20,7 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     @Column(nullable = false)
     private LocalDate date;
     @Enumerated(value = EnumType.STRING)
@@ -43,6 +44,7 @@ public class Reservation {
             Long id, LocalDate date, ReservationStatus status,
             ReservationTime time, Theme theme, Member member
     ) {
+        validate(date, status, time, theme, member);
         this.id = id;
         this.date = date;
         this.status = status;
@@ -102,5 +104,43 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    private void validate(LocalDate date, ReservationStatus status, ReservationTime time, Theme theme, Member member) {
+        validateDate(date);
+        validateStatus(status);
+        validateTime(time);
+        validateTheme(theme);
+        validateMember(member);
+    }
+
+    private void validateDate(LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("비어있는 예약날짜로 예약을 생성할 수 없습니다.");
+        }
+    }
+
+    private void validateStatus(ReservationStatus status) {
+        if (status == null) {
+            throw new IllegalArgumentException("비어있는 예약상태로 예약을 생성할 수 없습니다.");
+        }
+    }
+
+    private void validateTime(ReservationTime reservationTime) {
+        if (reservationTime == null) {
+            throw new IllegalArgumentException("비어있는 예약시간으로는 예약을 생성할 수 없습니다.");
+        }
+    }
+
+    private void validateTheme(Theme theme) {
+        if (theme == null) {
+            throw new IllegalArgumentException("비어있는 테마로는 예약을 생성할 수 없습니다.");
+        }
+    }
+
+    private void validateMember(Member member) {
+        if (member == null) {
+            throw new IllegalArgumentException("비어있는 멤버로는 예약을 생성할 수 없습니다.");
+        }
     }
 }
