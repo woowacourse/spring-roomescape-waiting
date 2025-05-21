@@ -3,15 +3,12 @@ package roomescape.business.model.entity;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import roomescape.business.model.vo.Id;
 
 @ToString
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
 @Getter
 @Entity
@@ -28,6 +25,13 @@ public class Reservation {
         id = Id.issue();
     }
 
+    private Reservation(final Id id, final User user, final ReservationSlot slot) {
+        this.id = id;
+        this.user = user;
+        this.slot = slot;
+        slot.addReservation(this);
+    }
+
     public static Reservation create(final User user, final ReservationSlot reservationSlot) {
         reservationSlot.getDate().validateFresh();
         return new Reservation(Id.issue(), user, reservationSlot);
@@ -39,5 +43,9 @@ public class Reservation {
 
     public boolean isSameReserver(final String userId) {
         return user.isSameUser(userId);
+    }
+
+    public void cancel() {
+        slot.removeReservation(this);
     }
 }
