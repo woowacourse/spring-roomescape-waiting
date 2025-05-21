@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.web.exception.NotAuthorizationException;
 import roomescape.global.exception.InvalidArgumentException;
-import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.service.ReservationQueryService;
@@ -50,7 +49,8 @@ public class WaitingService {
 
     @Transactional
     public void deleteByUser(Long id, Long memberId) {
-        if (!waitingRepository.existsByIdAndMemberId(id, memberId)) {
+        Waiting waiting = waitingQueryService.getWaiting(id);
+        if (!waiting.isOwner(memberId)) {
             throw new NotAuthorizationException("해당 예약 대기자가 아닙니다.");
         }
 
@@ -59,10 +59,10 @@ public class WaitingService {
 
     @Transactional
     public void delete(Long id) {
-        if (!waitingRepository.existsById(id)) {
-            throw new NotFoundException("해당 예약 대기를 찾을 수 없습니다.");
-        }
+        Waiting waiting = waitingQueryService.getWaiting(id);
 
-        waitingRepository.deleteById(id);
+        waitingRepository.delete(waiting);
     }
+
+
 }

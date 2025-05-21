@@ -20,7 +20,6 @@ import roomescape.global.response.ApiResponse;
 import roomescape.reservation.controller.request.ReserveByUserRequest;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.command.ReserveCommand;
 
@@ -30,7 +29,6 @@ import roomescape.reservation.service.command.ReserveCommand;
 public class ReservationApiController {
 
     private final ReservationService reservationService;
-    private final ReservationQueryService reservationQueryService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> createReservation(
@@ -50,7 +48,7 @@ public class ReservationApiController {
     public ResponseEntity<ApiResponse<List<MyReservationResponse>>> getMyReservations(
             @Authenticated Long memberId
     ) {
-        List<MyReservationResponse> responses = reservationQueryService.getAllReservations(memberId);
+        List<MyReservationResponse> responses = reservationService.getAllReservations(memberId);
         return ResponseEntity.ok(
                 ApiResponse.success(GET_MY_RESERVATIONS, responses)
         );

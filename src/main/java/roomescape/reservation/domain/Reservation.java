@@ -57,12 +57,16 @@ public class Reservation {
                 .build();
     }
 
-    public static Reservation from(Waiting waiting){
+    public static Reservation from(Waiting waiting) {
         return Reservation.builder()
                 .reserver(waiting.getReserver())
                 .reservationDateTime(waiting.getReservationDatetime())
                 .theme(waiting.getTheme())
                 .build();
+    }
+
+    public boolean isOwner(Long userId) {
+        return reserver.getId().equals(userId);
     }
 
     public String getReserverName() {

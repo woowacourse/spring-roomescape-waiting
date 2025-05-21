@@ -343,8 +343,7 @@ class WaitingServiceTest {
     void 존재하지_않는_대기_예약을_삭제할_수_없다() {
         // when & then
         assertThatThrownBy(() -> waitingService.delete(999L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("해당 예약 대기를 찾을 수 없습니다.");
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test

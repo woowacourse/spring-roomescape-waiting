@@ -130,35 +130,6 @@ public class ReservationQueryServiceTest {
         });
     }
 
-
-    @Test
-    void 내_예약_목록을_조회한다() {
-        Member member1 = memberDbFixture.유저1_생성();
-        Member member2 = memberDbFixture.유저2_생성();
-
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Theme theme = themeDbFixture.공포();
-
-        Reservation reservation1 = reservationRepository.save(Reservation.reserve(member1, reservationDateTime, theme));
-        reservationRepository.save(Reservation.reserve(member2, reservationDateTime, theme));
-
-        List<MyReservationResponse> myReservations = reservationQueryService.getAllReservations(member1.getId());
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(myReservations).hasSize(1);
-            softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
-            softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
-            softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());
-        });
-    }
-
-    @Test
-    void 존재하지_않는_회원의_예약목록을_조회하면_빈_리스트를_반환한다() {
-        List<MyReservationResponse> myReservations = reservationQueryService.getAllReservations(999L);
-
-        assertThat(myReservations).isEmpty();
-    }
-
     @Test
     void 날짜가_범위를_벗어나는_필터_조건으로_조회하면_빈_리스트를_반환한다() {
         // given
@@ -223,34 +194,6 @@ public class ReservationQueryServiceTest {
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(horrorOnly).hasSize(1);
             softly.assertThat(horrorOnly.get(0).theme().name()).isEqualTo(horror.getName());
-        });
-    }
-
-    @Test
-    void 예약_대기와_함께_조회할_수_있다() {
-        // given
-        Member member = memberDbFixture.유저1_생성();
-        Theme theme = themeDbFixture.공포();
-        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
-
-        // 예약 등록
-        reservationRepository.save(Reservation.reserve(member, 내일_열시, theme));
-        // 대기 등록
-        Waiting waiting = Waiting.builder()
-                .reserver(member)
-                .reservationDateTime(내일_열시)
-                .theme(theme)
-                .build();
-        waitingRepository.save(waiting);
-
-        // when
-        List<MyReservationResponse> responses = reservationQueryService.getAllReservations(member.getId());
-
-        // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(responses).hasSize(2);
-            assertThat(responses).anyMatch(r -> r.status().equals("예약"));
-            assertThat(responses).anyMatch(r -> !r.status().equals("예약"));
         });
     }
 }

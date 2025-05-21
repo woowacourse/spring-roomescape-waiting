@@ -44,6 +44,10 @@ public class Waiting {
         this.theme = theme;
     }
 
+    public boolean isOwner(Long memberId) {
+        return reserver.getId().equals(memberId);
+    }
+
     public LocalDate getDate() {
         return reservationDatetime.getDate();
     }
