@@ -80,3 +80,15 @@
         - [x] Reservation과 Theme
 
     - [x] DAO 클래스를 JpaRepository를 상속받는 Repository로 대체
+
+
+6. 예약 대기 기능 관련
+    - [x] 예약 대기 요청 기능 구현
+        - 예약 요청 시, 이미 예약된 내역에 대해 예약 대기를 신청할 수 있게 한다
+        - 뷰 리소스: templates/reservation.html
+    - [x] 내 예약 목록에 대기 목록 포함 및 취소 기능 구현
+        - 내 예약 목록 조회 시, 나의 예약 내역과 함께 대기 내역을 조회할 수 있게 한다
+        - 내 예약 목록에서 삭제 시, 예약 대기 내역을 취소할 수 있게 한다
+        - 기존 뷰 리소스: templates/reservation-mine.html
+
+---

@@ -12,6 +12,7 @@ import roomescape.common.exception.message.ReservationExceptionMessage;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
@@ -69,6 +70,17 @@ public class ReservationService {
                 .toList();
     }
 
+    public ReservationResponse addWaiting(final Long memberId, final UserReservationRequest request) {
+        Member member = searchMember(memberId);
+        ReservationTime reservationTime = searchReservationTime(request.timeId());
+        validateFutureTime(request.date(), reservationTime);
+        Theme theme = searchTheme(request.themeId());
+
+        Reservation newReservation = new Reservation(member, request.date(), reservationTime, theme, Status.WAITING);
+        Reservation savedReservation = reservationRepository.save(newReservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
     public ReservationResponse addByUser(final Long memberId, final UserReservationRequest request) {
         return addReservation(memberId, request.date(), request.timeId(), request.themeId());
     }
@@ -83,7 +95,7 @@ public class ReservationService {
         validateRequest(date, reservationTime);
         Theme theme = searchTheme(themeId);
 
-        Reservation newReservation = new Reservation(member, date, reservationTime, theme);
+        Reservation newReservation = new Reservation(member, date, reservationTime, theme, Status.BOOKED);
         Reservation savedReservation = reservationRepository.save(newReservation);
         return ReservationResponse.from(savedReservation);
     }

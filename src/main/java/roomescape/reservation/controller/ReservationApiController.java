@@ -42,6 +42,18 @@ public class ReservationApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse);
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> addWaiting(
+            @RequestBody UserReservationRequest userReservationRequest,
+            @AuthenticationPrincipal MemberResponse memberResponse
+    ) {
+        ReservationResponse ReservationResponse = reservationService.addWaiting(
+                memberResponse.id(),
+                userReservationRequest
+        );
+        return ResponseEntity.ok(ReservationResponse);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
         reservationService.deleteById(id);

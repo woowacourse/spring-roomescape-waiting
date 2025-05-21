@@ -1,9 +1,12 @@
+const RESERVATION_MINE_API_ENDPOINT = '/reservations-mine';
+const RESERVATION_API_ENDPOINT = '/reservations';
+
 document.addEventListener('DOMContentLoaded', () => {
     /*
-    TODO: [2단계] 내 예약 목록 조회 기능
+    [2단계] 내 예약 목록 조회 기능
           endpoint 설정
      */
-    fetch('/reservations-mine') // 내 예약 목록 조회 API 호출
+    fetch(RESERVATION_MINE_API_ENDPOINT) // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -18,15 +21,15 @@ function render(data) {
 
     data.forEach(item => {
         const row = tableBody.insertRow();
-
         /*
-        TODO: [2단계] 내 예약 목록 조회 기능
+        [2단계] 내 예약 목록 조회 기능
               response 명세에 맞춰 값 설정
          */
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
         const status = item.status;
+        const reservationId = item.reservationId;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
@@ -34,15 +37,17 @@ function render(data) {
         row.insertCell(3).textContent = status;
 
         /*
-        TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
+        [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
          */
         if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
+
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
-                requestDeleteWaiting(item.id).then(() => window.location.reload());
+                requestDeleteWaiting(reservationId)
+                    .then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때
@@ -51,15 +56,17 @@ function render(data) {
     });
 }
 
-function requestDeleteWaiting(id) {
+function requestDeleteWaiting(reservationId) {
     /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
+    [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
-    return fetch(endpoint, {
-        method: 'DELETE'
-    }).then(response => {
-        if (response.status === 204) return;
-        throw new Error('Delete failed');
-    });
+    const requestOptions = {
+        method: 'DELETE',
+    };
+
+    return fetch(`${RESERVATION_API_ENDPOINT}/${reservationId}`, requestOptions)
+        .then(response => {
+            if (response.status === 204) return;
+            throw new Error('Delete failed');
+        });
 }
