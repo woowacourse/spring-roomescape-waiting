@@ -96,6 +96,11 @@ public class Member {
         private String password;
         private Role role;
 
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
         public Builder name(String name) {
             this.name = name;
             return this;
