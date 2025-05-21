@@ -1,10 +1,9 @@
 package roomescape.theme.presentation;
 
-import jakarta.validation.constraints.NotBlank;
+import roomescape.theme.domain.Theme;
 
 public class ThemeRequest {
 
-    @NotBlank
     private final String name;
     private final String description;
     private final String thumbnail;
@@ -13,6 +12,14 @@ public class ThemeRequest {
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
+    }
+
+    public Theme toTheme() {
+        return new Theme(
+                name,
+                description,
+                thumbnail
+        );
     }
 
     public String getName() {

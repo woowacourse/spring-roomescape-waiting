@@ -19,30 +19,15 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponse createTheme(final ThemeRequest themeRequest) {
-        Theme theme = new Theme(
-                themeRequest.getName(),
-                themeRequest.getDescription(),
-                themeRequest.getThumbnail()
-        );
+    public ThemeResponse createTheme(final ThemeRequest request) {
+        Theme theme = request.toTheme();
         return new ThemeResponse(themeRepository.save(theme));
     }
 
     public List<ThemeResponse> getThemes() {
-        List<Theme> themes = themeRepository.findAll();
-        return themes.stream()
+        return themeRepository.findAll().stream()
                 .map(ThemeResponse::new)
                 .toList();
-    }
-
-    @Transactional
-    public void deleteTheme(final Long id) {
-        validateIsDuplicated(id);
-
-        themeRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
-
-        themeRepository.deleteById(id);
     }
 
     public List<ThemeResponse> getPopularThemes() {
@@ -51,8 +36,18 @@ public class ThemeService {
                 .toList();
     }
 
-    private void validateIsDuplicated(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+    @Transactional
+    public void deleteTheme(final Long themeId) {
+        validateIsDuplicated(themeId);
+
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
+
+        themeRepository.delete(theme);
+    }
+
+    private void validateIsDuplicated(final Long themeId) {
+        if (reservationRepository.existsByThemeId(themeId)) {
             throw new IllegalStateException("예약이 이미 존재하는 테마입니다.");
         }
     }
