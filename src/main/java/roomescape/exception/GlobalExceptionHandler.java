@@ -19,6 +19,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlerIllegalArgument(
             final CustomException e
     ) {
+        e.printStackTrace();
         return ResponseEntity.status(e.getStatusValue())
                 .body(new ErrorResponse(e.getMessage()));
     }
@@ -51,7 +52,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotCaughtExceptions(
             final Exception e
     ) {
-        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("서버에서 예기치 못한 예외가 발생하였습니다."));
     }
