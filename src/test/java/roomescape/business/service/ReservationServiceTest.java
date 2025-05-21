@@ -128,7 +128,6 @@ public class ReservationServiceTest {
     @Test
     @DisplayName("예약 시간이 현재를 기준으로 과거라면 예외가 발생한다")
     void insertWhenDateAndTimeIsPast() {
-        // TODO: 현재 시간을 비교하는 유틸을 인터페이스로 구현하여 테스트 완성도 높이기
         // given
         final LocalDate pastDate = LocalDate.MIN;
 

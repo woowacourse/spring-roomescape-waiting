@@ -95,7 +95,6 @@ class ThemeControllerIntegrationTest {
         themeService.insert(new ThemeRequest("Popular 1", "Popular description 1", "썸네일"));
         themeService.insert(new ThemeRequest("Popular 2", "Popular description 2", "썸네일120"));
 
-        // TODO: reservation도 넣어보고 동작 확인하기!
         when()
                 .get("themes/popular")
                 .then()
