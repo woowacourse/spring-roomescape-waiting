@@ -219,7 +219,7 @@ class WaitingServiceTest {
     }
 
     @Test
-    void 대기id로_대기를_삭제한다() {
+    void 대기id로_자신의_대기를_삭제한다() {
         // given
         Theme theme = themeRepository.save(
                 Theme.builder()
@@ -353,4 +353,39 @@ class WaitingServiceTest {
         assertThat(waitingRepository.findById(waiting2.getId())).isEmpty();
         assertThat(reservationRepository.findByMemberId(member2.getId())).hasSize(1);
     }
+
+    @Test
+    void 대기id로_대기를_삭제한다() {
+        // given
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("name1")
+                        .email("email1@domain.com")
+                        .password("password1").bulid()
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.builder()
+                        .date(LocalDate.of(2025, 1, 1))
+                        .member(member1)
+                        .theme(theme)
+                        .timeSlot(timeSlot)
+                        .build()
+        );
+        // when
+        waitingService.deleteWaitingById(waiting.getId());
+        // then
+        Optional<Waiting> findWaiting = waitingRepository.findById(waiting.getId());
+        assertThat(findWaiting).isEmpty();
+    }
+
 }
