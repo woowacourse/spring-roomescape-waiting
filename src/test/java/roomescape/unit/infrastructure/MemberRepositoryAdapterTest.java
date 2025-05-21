@@ -14,6 +14,7 @@ import roomescape.infrastructure.JpaMemberRepository;
 import roomescape.infrastructure.MemberRepositoryAdapter;
 
 @DataJpaTest
+@Sql(value = "/sql/testMember.sql")
 class MemberRepositoryAdapterTest {
 
     @Autowired
@@ -27,7 +28,6 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @Sql(value = "/sql/testMember.sql")
     void 모든_멤버_조회_테스트() {
         //given
         List<Member> members = memberRepositoryAdapter.findAll();
@@ -37,7 +37,6 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @Sql(value = "/sql/testMember.sql")
     void id로_멤버_조회_테스트() {
         //given
         Long id = 4L;
@@ -49,7 +48,6 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @Sql(value = "/sql/testMember.sql")
     void email로_멤버_조회_테스트() {
         //given
         String email = "harden@google.com";
@@ -61,7 +59,6 @@ class MemberRepositoryAdapterTest {
     }
 
     @Test
-    @Sql(value = "/sql/testMember.sql")
     void 멤버_저장_테스트() {
         //given
         Member member = Member.createWithoutId("르브론제임스", "james@yahoo.com", "1234", Role.MEMBER);
