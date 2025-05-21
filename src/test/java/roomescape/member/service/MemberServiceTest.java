@@ -1,11 +1,14 @@
 package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.request.MemberSignUpRequest;
 import roomescape.auth.dto.response.MemberSignUpResponse;
@@ -23,19 +26,23 @@ class MemberServiceTest {
     @Autowired
     private MemberService memberService;
 
-    @Autowired
+    @MockitoBean
     private MemberRepository memberRepository;
 
     @Test
     void 멤버를__추가할_수_있다() {
 
         // given
-        Member member = MemberFixture.createWithoutId(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
         MemberSignUpRequest signUpRequest = new MemberSignUpRequest(
             member.getName(),
             member.getEmail(),
             member.getPassword()
         );
+        when(memberRepository.findByEmail(member.getEmail()))
+            .thenReturn(Optional.empty());
+        when(memberRepository.save(signUpRequest.toMember()))
+            .thenReturn(member);
 
         // when
         MemberSignUpResponse actual = memberService.signup(signUpRequest);
@@ -50,7 +57,8 @@ class MemberServiceTest {
 
         // given
         Member member = MemberFixture.createWithoutId(MemberRole.USER);
-        memberRepository.save(member);
+        when(memberRepository.findById(member.getId()))
+            .thenReturn(Optional.of(member));
 
         // when
         Member actual = memberService.findExistingMemberById(member.getId());
@@ -64,7 +72,8 @@ class MemberServiceTest {
 
         // given
         Member member = MemberFixture.createWithoutId(MemberRole.USER);
-        memberRepository.save(member);
+        when(memberRepository.findByName(member.getName()))
+            .thenReturn(Optional.of(member));
 
         // when
         Member actual = memberService.findExistingMemberByPrincipal(new MemberPrincipal(member.getName()));
@@ -77,8 +86,9 @@ class MemberServiceTest {
     void email을_통해_존재하는_멤버를_찾는다() {
 
         // given
-        Member member = MemberFixture.createWithoutId(MemberRole.USER);
-        memberRepository.save(member);
+        Member member = MemberFixture.create(MemberRole.USER);
+        when(memberRepository.findByEmail(member.getEmail()))
+            .thenReturn(Optional.of(member));
 
         // when
         Member actual = memberService.findByEmail(member.getEmail()).orElse(null);
@@ -91,8 +101,9 @@ class MemberServiceTest {
     void id를_통해_존재하는_멤버가_존재하는지_확인한다() {
 
         // given
-        Member member = MemberFixture.createWithoutId(MemberRole.USER);
-        memberRepository.save(member);
+        Member member = MemberFixture.create(MemberRole.USER);
+        when(memberRepository.findById(member.getId()))
+            .thenReturn(Optional.of(member));
 
         // when
         boolean actual = memberService.isExistMemberById(member.getId());
@@ -105,15 +116,16 @@ class MemberServiceTest {
     void 모든_멤버의_이름을_조회한다() {
 
         // given
-        Member member1 = MemberFixture.createWithoutId(MemberRole.USER);
-        Member member2 = MemberFixture.createWithoutId(MemberRole.USER);
-        memberRepository.save(member1);
-        memberRepository.save(member2);
+        Member member1 = MemberFixture.create(MemberRole.USER);
+        Member member2 = MemberFixture.create(MemberRole.USER);
 
         List<MemberNameSelectResponse> expected = List.of(
             new MemberNameSelectResponse(member1.getId(), member1.getName()),
             new MemberNameSelectResponse(member2.getId(), member2.getName())
         );
+
+        when(memberRepository.findAll())
+            .thenReturn(List.of(member1, member2));
 
         // when
         List<MemberNameSelectResponse> actual = memberService.findMemberNames();
@@ -126,8 +138,9 @@ class MemberServiceTest {
     void 이름을_통해_멤버가_존재하는지_확인한다() {
 
         // given
-        Member member = MemberFixture.createWithoutId(MemberRole.USER);
-        memberRepository.save(member);
+        Member member = MemberFixture.create(MemberRole.USER);
+        when(memberRepository.findByName(member.getName()))
+            .thenReturn(Optional.of(member));
 
         // when
         boolean actual = memberService.existsByName(member.getName());
