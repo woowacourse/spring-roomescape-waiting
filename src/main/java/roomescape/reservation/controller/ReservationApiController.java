@@ -1,8 +1,6 @@
 package roomescape.reservation.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static roomescape.reservation.controller.response.ReservationSuccessCode.CANCEL_RESERVATION;
 import static roomescape.reservation.controller.response.ReservationSuccessCode.GET_MY_RESERVATIONS;
 import static roomescape.reservation.controller.response.ReservationSuccessCode.RESERVE;
 
@@ -62,8 +60,6 @@ public class ReservationApiController {
     public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id, @Authenticated Long memberId) {
         reservationService.deleteByUser(id, memberId);
 
-        return ResponseEntity
-                .status(NO_CONTENT)
-                .body(ApiResponse.success(CANCEL_RESERVATION));
+        return ResponseEntity.noContent().build();
     }
 }

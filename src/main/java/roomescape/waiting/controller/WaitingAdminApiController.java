@@ -1,7 +1,5 @@
 package roomescape.waiting.controller;
 
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static roomescape.waiting.controller.response.WaitingSuccessCode.DELETE_WAITING_SUCCESS_CODE;
 import static roomescape.waiting.controller.response.WaitingSuccessCode.READ_WAITING_SUCCESS_CODE;
 
 import java.util.List;
@@ -34,8 +32,6 @@ public class WaitingAdminApiController {
     public ResponseEntity<ApiResponse<Void>> deleteWaiting(@PathVariable Long id) {
         waitingService.delete(id);
 
-        return ResponseEntity
-                .status(NO_CONTENT)
-                .body(ApiResponse.success(DELETE_WAITING_SUCCESS_CODE));
+        return ResponseEntity.noContent().build();
     }
 }

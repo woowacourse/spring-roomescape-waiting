@@ -1,9 +1,7 @@
 package roomescape.time.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static roomescape.time.controller.response.TimeSuccessCode.CREATE_TIME;
-import static roomescape.time.controller.response.TimeSuccessCode.DELETE_TIME;
 import static roomescape.time.controller.response.TimeSuccessCode.GET_AVAILABLE_TIMES;
 import static roomescape.time.controller.response.TimeSuccessCode.GET_TIMES;
 
@@ -58,9 +56,7 @@ public class ReservationTimeApiController {
     public ResponseEntity<ApiResponse<Void>> deleteTime(@PathVariable Long id) {
         reservationTimeService.deleteById(id);
 
-        return ResponseEntity
-                .status(NO_CONTENT)
-                .body(ApiResponse.success(DELETE_TIME));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/available")

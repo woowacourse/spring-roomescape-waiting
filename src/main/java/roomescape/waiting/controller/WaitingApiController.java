@@ -1,8 +1,6 @@
 package roomescape.waiting.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static roomescape.waiting.controller.response.WaitingSuccessCode.DELETE_WAITING_SUCCESS_CODE;
 import static roomescape.waiting.controller.response.WaitingSuccessCode.WAITING_SUCCESS_CODE;
 
 import jakarta.validation.Valid;
@@ -53,8 +51,6 @@ public class WaitingApiController {
     ) {
         waitingService.deleteByUser(id, memberId);
 
-        return ResponseEntity
-                .status(NO_CONTENT)
-                .body(ApiResponse.success(DELETE_WAITING_SUCCESS_CODE));
+        return ResponseEntity.noContent().build();
     }
 }

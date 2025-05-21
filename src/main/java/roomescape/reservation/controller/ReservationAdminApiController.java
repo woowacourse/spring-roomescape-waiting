@@ -1,7 +1,5 @@
 package roomescape.reservation.controller;
 
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static roomescape.reservation.controller.response.ReservationSuccessCode.CANCEL_RESERVATION;
 import static roomescape.reservation.controller.response.ReservationSuccessCode.RESERVE;
 import static roomescape.reservation.controller.response.ReservationSuccessCode.SEARCH_RESERVATION;
 
@@ -53,7 +51,8 @@ public class ReservationAdminApiController {
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to
     ) {
-        List<ReservationResponse> responses = reservationQueryService.getFilteredReservations(themeId, memberId, from, to);
+        List<ReservationResponse> responses = reservationQueryService.getFilteredReservations(themeId, memberId, from,
+                to);
         return ResponseEntity.ok(
                 ApiResponse.success(SEARCH_RESERVATION, responses));
     }
@@ -62,8 +61,6 @@ public class ReservationAdminApiController {
     public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id) {
         reservationService.delete(id);
 
-        return ResponseEntity
-                .status(NO_CONTENT)
-                .body(ApiResponse.success(CANCEL_RESERVATION));
+        return ResponseEntity.noContent().build();
     }
 }
