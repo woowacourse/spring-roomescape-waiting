@@ -34,7 +34,7 @@ class AuthServiceTest {
         // given
         String email = "test@example.com";
         String password = "password123";
-        User user = User.create("Test User", email, password);
+        User user = new User("Test User", email, password);
         AuthToken expectedAuth = mock(AuthToken.class);
 
         when(users.findByEmail(email)).thenReturn(Optional.of(user));
@@ -72,7 +72,7 @@ class AuthServiceTest {
         String wrongPassword = "wrongPassword";
         String correctPassword = "correctPassword";
         String encodedPassword = new BCryptPasswordEncoder().encode(correctPassword);
-        User user = User.create("Test User", email, encodedPassword);
+        User user = new User("Test User", email, encodedPassword);
 
         when(users.findByEmail(email)).thenReturn(Optional.of(user));
 

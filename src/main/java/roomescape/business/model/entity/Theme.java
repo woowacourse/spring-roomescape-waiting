@@ -4,32 +4,30 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ThemeName;
 
 @ToString
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
 public class Theme {
 
     @EmbeddedId
-    private final Id id;
+    private final Id id = Id.issue();
     @Embedded
     private ThemeName name;
     private String description;
     private String thumbnail;
 
-    protected Theme() {
-        id = Id.issue();
-    }
-
-    public static Theme create(final String name, final String description, final String thumbnail) {
-        return new Theme(Id.issue(), new ThemeName(name), description, thumbnail);
+    public Theme(final String name, final String description, final String thumbnail) {
+        this.name = new ThemeName(name);
+        this.description = description;
+        this.thumbnail = thumbnail;
     }
 }

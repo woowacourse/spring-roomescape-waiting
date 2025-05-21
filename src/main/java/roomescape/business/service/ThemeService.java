@@ -31,7 +31,7 @@ public class ThemeService {
 
     @Transactional
     public ThemeDto addAndGet(final String name, final String description, final String thumbnail) {
-        val theme = Theme.create(name, description, thumbnail);
+        val theme = new Theme(name, description, thumbnail);
         themes.save(theme);
         return ThemeDto.fromEntity(theme);
     }

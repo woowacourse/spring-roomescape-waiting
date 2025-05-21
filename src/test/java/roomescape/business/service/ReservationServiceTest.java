@@ -43,10 +43,10 @@ class ReservationServiceTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
 
-        User user = User.create("Test User", "test@example.com", "password");
-        ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
-        Theme theme = Theme.create("Test Theme", "Description", "thumbnail.jpg");
-        ReservationSlot slot = ReservationSlot.create(time, date, theme);
+        User user = new User("Test User", "test@example.com", "password");
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        Theme theme = new Theme("Test Theme", "Description", "thumbnail.jpg");
+        ReservationSlot slot = new ReservationSlot(time, date, theme);
 
         when(users.findById(user.getId())).thenReturn(Optional.of(user));
         when(slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
@@ -68,10 +68,10 @@ class ReservationServiceTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
 
-        User user = User.create("Test User", "test@example.com", "password");
-        ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
-        Theme theme = Theme.create("Test Theme", "Description", "thumbnail.jpg");
-        ReservationSlot slot = ReservationSlot.create(time, date, theme);
+        User user = new User("Test User", "test@example.com", "password");
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        Theme theme = new Theme("Test Theme", "Description", "thumbnail.jpg");
+        ReservationSlot slot = new ReservationSlot(time, date, theme);
 
         when(users.findById(user.getId())).thenReturn(Optional.of(user));
         when(slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
@@ -89,11 +89,11 @@ class ReservationServiceTest {
     @Test
     void 예약_삭제_성공() {
         // given
-        User user = User.create("Test User", "test@example.com", "password");
-        ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
-        Theme theme = Theme.create("Test Theme", "Description", "thumbnail.jpg");
-        ReservationSlot slot = ReservationSlot.create(time, LocalDate.now().plusDays(1), theme);
-        Reservation reservation = Reservation.create(user, slot);
+        User user = new User("Test User", "test@example.com", "password");
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        Theme theme = new Theme("Test Theme", "Description", "thumbnail.jpg");
+        ReservationSlot slot = new ReservationSlot(time, LocalDate.now().plusDays(1), theme);
+        Reservation reservation = new Reservation(user, slot);
 
         when(reservations.findById(reservation.getId())).thenReturn(Optional.of(reservation));
 

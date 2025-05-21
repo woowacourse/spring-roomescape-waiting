@@ -6,8 +6,10 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
@@ -21,12 +23,13 @@ import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
 
 @ToString
 @EqualsAndHashCode(of = "id")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
 public class ReservationSlot {
 
     @EmbeddedId
-    private final Id id;
+    private final Id id = Id.issue();
     @ManyToOne
     private ReservationTime time;
     @Embedded
@@ -36,19 +39,10 @@ public class ReservationSlot {
     @OneToMany(mappedBy = "slot", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
     private final List<Reservation> reservations = new ArrayList<>();
 
-    protected ReservationSlot() {
-        this.id = Id.issue();
-    }
-
-    private ReservationSlot(final Id id, final ReservationTime time, final ReservationDate date, final Theme theme) {
-        this.id = id;
+    public ReservationSlot(final ReservationTime time, final LocalDate date, final Theme theme) {
         this.time = time;
-        this.date = date;
+        this.date = new ReservationDate(date);
         this.theme = theme;
-    }
-
-    public static ReservationSlot create(final ReservationTime time, final LocalDate date, final Theme theme) {
-        return new ReservationSlot(Id.issue(), time, new ReservationDate(date), theme);
     }
 
     public void addReservation(final Reservation reservation) {

@@ -58,17 +58,17 @@ class ReservationsTest {
     @Test
     void 예약을_저장할_수_있다() {
         // given
-        final ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
-        final Theme theme = Theme.create("스릴러", "", "");
-        final User user = User.create("돔푸", "dompoo@email.com", "password");
-        final ReservationSlot slot = ReservationSlot.create(time, DATE1, theme);
+        final ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        final Theme theme = new Theme("스릴러", "", "");
+        final User user = new User("돔푸", "dompoo@email.com", "password");
+        final ReservationSlot slot = new ReservationSlot(time, DATE1, theme);
         reservationTimes.save(time);
         themes.save(theme);
         users.save(user);
         reservationSlots.save(slot);
 
         // when, then
-        assertThatCode(() -> sut.save(Reservation.create(user, slot)))
+        assertThatCode(() -> sut.save(new Reservation(user, slot)))
                 .doesNotThrowAnyException();
     }
 

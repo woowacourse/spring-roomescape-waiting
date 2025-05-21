@@ -36,27 +36,27 @@ public class LocalDataInitializer {
 
     @PostConstruct
     public void init() {
-        final Theme theme1 = Theme.create("미스터리 저택", "기묘한 사건이 벌어지는 저택을 탈출하라!", "mystery.jpg");
-        final Theme theme2 = Theme.create("사라진 시간", "시간을 거슬러 단서를 찾아라!", "time.jpg");
-        final ReservationTime time1 = ReservationTime.create(LocalTime.of(14, 0));
-        final ReservationTime time2 = ReservationTime.create(LocalTime.of(16, 0));
-        final User user1 = User.create("dompoo", "dompoo@gmail.com", encoder.encode("1234"));
-        final User user2 = User.create("lemon", "lemon@gmail.com", encoder.encode("1234"));
+        final Theme theme1 = new Theme("미스터리 저택", "기묘한 사건이 벌어지는 저택을 탈출하라!", "mystery.jpg");
+        final Theme theme2 = new Theme("사라진 시간", "시간을 거슬러 단서를 찾아라!", "time.jpg");
+        final ReservationTime time1 = new ReservationTime(LocalTime.of(14, 0));
+        final ReservationTime time2 = new ReservationTime(LocalTime.of(16, 0));
+        final User user1 = new User("dompoo", "dompoo@gmail.com", encoder.encode("1234"));
+        final User user2 = new User("lemon", "lemon@gmail.com", encoder.encode("1234"));
         final User admin = User.admin("admin", "admin@gmail.com", encoder.encode("1234"));
-        final ReservationSlot reservationSlot1 = ReservationSlot.create(time1, LocalDate.now().plusDays(1), theme1);
-        final ReservationSlot reservationSlot2 = ReservationSlot.create(time1, LocalDate.now().plusDays(2), theme2);
-        final ReservationSlot reservationSlot3 = ReservationSlot.create(time1, LocalDate.now().plusDays(3), theme1);
-        final ReservationSlot reservationSlot4 = ReservationSlot.create(time1, LocalDate.now().plusDays(3), theme2);
-        final ReservationSlot reservationSlot5 = ReservationSlot.create(time2, LocalDate.now().plusDays(1), theme2);
-        final ReservationSlot reservationSlot6 = ReservationSlot.create(time2, LocalDate.now().plusDays(2), theme1);
-        final ReservationSlot reservationSlot7 = ReservationSlot.create(time2, LocalDate.now().plusDays(4), theme2);
-        final Reservation reservation1 = Reservation.create(user1, reservationSlot1);
-        final Reservation reservation2 = Reservation.create(user1, reservationSlot2);
-        final Reservation reservation3 = Reservation.create(user1, reservationSlot3);
-        final Reservation reservation4 = Reservation.create(user1, reservationSlot4);
-        final Reservation reservation5 = Reservation.create(user2, reservationSlot5);
-        final Reservation reservation6 = Reservation.create(user2, reservationSlot6);
-        final Reservation reservation7 = Reservation.create(user2, reservationSlot7);
+        final ReservationSlot reservationSlot1 = new ReservationSlot(time1, LocalDate.now().plusDays(1), theme1);
+        final ReservationSlot reservationSlot2 = new ReservationSlot(time1, LocalDate.now().plusDays(2), theme2);
+        final ReservationSlot reservationSlot3 = new ReservationSlot(time1, LocalDate.now().plusDays(3), theme1);
+        final ReservationSlot reservationSlot4 = new ReservationSlot(time1, LocalDate.now().plusDays(3), theme2);
+        final ReservationSlot reservationSlot5 = new ReservationSlot(time2, LocalDate.now().plusDays(1), theme2);
+        final ReservationSlot reservationSlot6 = new ReservationSlot(time2, LocalDate.now().plusDays(2), theme1);
+        final ReservationSlot reservationSlot7 = new ReservationSlot(time2, LocalDate.now().plusDays(4), theme2);
+        final Reservation reservation1 = new Reservation(user1, reservationSlot1);
+        final Reservation reservation2 = new Reservation(user1, reservationSlot2);
+        final Reservation reservation3 = new Reservation(user1, reservationSlot3);
+        final Reservation reservation4 = new Reservation(user1, reservationSlot4);
+        final Reservation reservation5 = new Reservation(user2, reservationSlot5);
+        final Reservation reservation6 = new Reservation(user2, reservationSlot6);
+        final Reservation reservation7 = new Reservation(user2, reservationSlot7);
         insertThemes(theme1, theme2);
         insertTimes(time1, time2);
         insertSlots(reservationSlot1, reservationSlot2, reservationSlot3, reservationSlot4, reservationSlot5, reservationSlot6, reservationSlot7);

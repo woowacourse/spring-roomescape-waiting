@@ -42,43 +42,43 @@ public class JpaTestUtil {
     public String insertUser() {
         String name = generateRandomAlphabetString(5);
         String email = name + "@email.com";
-        User user = User.create(name, email, "password123");
+        User user = new User(name, email, "password123");
         return userDao.save(user).getId().value();
     }
 
     public String insertUser(final String name, final String email) {
-        User user = User.create(name, email, "password123");
+        User user = new User(name, email, "password123");
         return userDao.save(user).getId().value();
     }
 
     public String insertReservation(final String slotId, final String userId) {
         User user = userDao.findById(Id.create(userId)).orElseThrow();
         ReservationSlot slot = slotDao.findById(Id.create(slotId)).orElseThrow();
-        Reservation reservation = Reservation.create(user, slot);
+        Reservation reservation = new Reservation(user, slot);
         return reservationDao.save(reservation).getId().value();
     }
 
     public String insertSlot(final LocalDate date, final String timeId, final String themeId) {
         ReservationTime time = timeDao.findById(Id.create(timeId)).orElseThrow();
         Theme theme = themeDao.findById(Id.create(themeId)).orElseThrow();
-        ReservationSlot slot = ReservationSlot.create(time, date, theme);
+        ReservationSlot slot = new ReservationSlot(time, date, theme);
         return slotDao.save(slot).getId().value();
     }
 
     public String insertReservationTime() {
         LocalTime time = LocalTime.of(10, 0).plusSeconds((long) (Math.random() * 60));
-        ReservationTime reservationTime = ReservationTime.create(time);
+        ReservationTime reservationTime = new ReservationTime(time);
         return timeDao.save(reservationTime).getId().value();
     }
 
     public String insertReservationTime(final LocalTime time) {
-        ReservationTime reservationTime = ReservationTime.create(time);
+        ReservationTime reservationTime = new ReservationTime(time);
         return timeDao.save(reservationTime).getId().value();
     }
 
     public String insertTheme() {
         String name = generateRandomAlphabetString(5);
-        Theme theme = Theme.create(name, "", "");
+        Theme theme = new Theme(name, "", "");
         return themeDao.save(theme).getId().value();
     }
 

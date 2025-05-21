@@ -33,7 +33,7 @@ public class ReservationSlotService {
         ReservationTime time = reservationTimes.findById(Id.create(reservationTimeIdValue))
                 .orElseThrow(() -> new NotFoundException(RESERVATION_TIME_NOT_EXIST));
 
-        ReservationSlot createdSlot = ReservationSlot.create(time, date, theme);
+        ReservationSlot createdSlot = new ReservationSlot(time, date, theme);
         reservationSlots.save(createdSlot);
         return createdSlot;
     }

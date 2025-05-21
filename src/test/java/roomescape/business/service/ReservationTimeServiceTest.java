@@ -94,8 +94,8 @@ class ReservationTimeServiceTest {
     void 모든_예약_시간을_조회할_수_있다() {
         // given
         List<ReservationTime> dataTimes = Arrays.asList(
-                ReservationTime.create(LocalTime.of(10, 0)),
-                ReservationTime.create(LocalTime.of(14, 0))
+                new ReservationTime(LocalTime.of(10, 0)),
+                new ReservationTime(LocalTime.of(14, 0))
         );
 
         List<ReservationTimeDto> expectedTimes = List.of(
@@ -119,12 +119,12 @@ class ReservationTimeServiceTest {
         LocalDate date = LocalDate.now();
         Id themeId = Id.create("theme-id");
         List<ReservationTime> availableTimes = Arrays.asList(
-                ReservationTime.create(LocalTime.of(11, 0)),
-                ReservationTime.create(LocalTime.of(15, 0))
+                new ReservationTime(LocalTime.of(11, 0)),
+                new ReservationTime(LocalTime.of(15, 0))
         );
         List<ReservationTime> notAvailableTimes = Arrays.asList(
-                ReservationTime.create(LocalTime.of(12, 0)),
-                ReservationTime.create(LocalTime.of(16, 0))
+                new ReservationTime(LocalTime.of(12, 0)),
+                new ReservationTime(LocalTime.of(16, 0))
         );
         List<ReservableReservationTimeDto> expectedAvailableTimes = Arrays.asList(
                 new ReservableReservationTimeDto(availableTimes.get(0).getId(), new StartTime(LocalTime.of(11, 0)), true),

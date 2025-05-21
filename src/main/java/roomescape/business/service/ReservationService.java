@@ -42,7 +42,7 @@ public class ReservationService {
             throw new DuplicatedException(RESERVATION_DUPLICATED);
         }
 
-        val reservation = Reservation.create(user, slot);
+        val reservation = new Reservation(user, slot);
         reservations.save(reservation);
         return ReservationDto.fromEntity(reservation);
     }

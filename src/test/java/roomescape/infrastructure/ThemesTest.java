@@ -34,7 +34,7 @@ class ThemesTest {
 
     @Test
     void 테마를_저장할_수_있다() {
-        assertThatCode(() -> sut.save(Theme.create("주홍색 연구", "", "")))
+        assertThatCode(() -> sut.save(new Theme("주홍색 연구", "", "")))
                 .doesNotThrowAnyException();
     }
 

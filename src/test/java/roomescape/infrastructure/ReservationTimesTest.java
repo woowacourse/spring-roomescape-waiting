@@ -37,7 +37,7 @@ class ReservationTimesTest {
 
     @Test
     void 예약_시간을_저장할_수_있다() {
-        assertThatCode(() -> sut.save(ReservationTime.create(LocalTime.of(10, 0))))
+        assertThatCode(() -> sut.save(new ReservationTime(LocalTime.of(10, 0))))
                 .doesNotThrowAnyException();
     }
 

@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTimeDto addAndGet(final LocalTime time) {
-        val reservationTime = ReservationTime.create(time);
+        val reservationTime = new ReservationTime(time);
         validateNoDuplication(reservationTime);
         validateTimeInterval(reservationTime);
 
