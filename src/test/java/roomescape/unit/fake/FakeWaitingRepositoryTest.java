@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
@@ -114,5 +115,64 @@ class FakeWaitingRepositoryTest {
         List<WaitingWithRankResponse> waitingWithRank = waitingRepository.findByMemberIdWithRank(member1.getId());
         //then
         assertThat(waitingWithRank.get(0).getRank()).isEqualTo(2);
+    }
+
+    @Test
+    void id로_대기를_조회한다() {
+        // given
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
+        TimeSlot timeSlot = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .bulid();
+        Waiting waiting = Waiting.builder()
+                .date(LocalDate.of(2025, 1, 1))
+                .member(member)
+                .theme(theme)
+                .timeSlot(timeSlot)
+                .build();
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when
+        Optional<Waiting> optionalWaiting = waitingRepository.findById(savedWaiting.getId());
+
+        //then
+        assertThat(optionalWaiting).isPresent();
+    }
+
+    @Test
+    void 대기를_삭제한다() {
+        // given
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
+        TimeSlot timeSlot = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .bulid();
+        Waiting waiting = Waiting.builder()
+                .date(LocalDate.of(2025, 1, 1))
+                .member(member)
+                .theme(theme)
+                .timeSlot(timeSlot)
+                .build();
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when
+        waitingRepository.delete(savedWaiting);
+
+        //then
+        Optional<Waiting> optionalWaiting = waitingRepository.findById(savedWaiting.getId());
+        assertThat(optionalWaiting).isEmpty();
     }
 }

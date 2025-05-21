@@ -7,10 +7,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.CannotWaitWithoutReservationException;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ExistedWaitingException;
+import roomescape.exception.WaitingNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
@@ -213,5 +215,68 @@ class WaitingServiceTest {
         // then
         assertThat(waitings).hasSize(1);
         assertThat(waitings.get(0).getRank()).isEqualTo(2);
+    }
+
+    @Test
+    void 대기id로_대기를_삭제한다() {
+        // given
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("name1")
+                        .email("email1@domain.com")
+                        .password("password1").bulid()
+        );
+        Member member2 = memberRepository.save(
+                Member.builder()
+                        .name("name2")
+                        .email("email2@domain.com")
+                        .password("password2").bulid()
+        );
+        LocalDate date = LocalDate.of(2025, 1, 1);
+        waitingRepository.save(
+                Waiting.builder()
+                        .date(date)
+                        .member(member2)
+                        .theme(theme)
+                        .timeSlot(timeSlot)
+                        .build()
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.builder()
+                        .date(date)
+                        .member(member1)
+                        .theme(theme)
+                        .timeSlot(timeSlot)
+                        .build()
+        );
+        // when
+        waitingService.deleteWaitingById(member1.getId(), waiting.getId());
+        // then
+        Optional<Waiting> findWaiting = waitingRepository.findById(waiting.getId());
+        assertThat(findWaiting).isEmpty();
+    }
+
+    @Test
+    void 대기id에_해당하는_대기가_없으면_예외가_발생한다() {
+        // given
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("name1")
+                        .email("email1@domain.com")
+                        .password("password1").bulid()
+        );
+        // when & then
+        assertThatThrownBy(() -> waitingService.deleteWaitingById(member1.getId(), 1L))
+                .isInstanceOf(WaitingNotFoundException.class);
     }
 }

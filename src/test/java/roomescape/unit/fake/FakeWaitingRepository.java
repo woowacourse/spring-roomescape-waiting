@@ -3,6 +3,7 @@ package roomescape.unit.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Theme;
@@ -55,5 +56,17 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .filter(w -> w.getDate().equals(waiting.getDate()))
                 .filter(w -> w.getId() < waiting.getId())
                 .count();
+    }
+
+    @Override
+    public Optional<Waiting> findById(Long id) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
+    public void delete(Waiting waiting) {
+        waitings.remove(waiting);
     }
 }
