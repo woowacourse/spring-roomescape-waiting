@@ -38,9 +38,10 @@
 | HTTP Method | Endpoint           | AuthRole | Success | Description                                                               |
 |-------------|--------------------|----------|---------|---------------------------------------------------------------------------|
 | GET         | /                  | PUBLIC   | 200 OK  | 방탈출 사이트 메인 페이지를 렌더링하여 응답. 현재는 인기 테마 목록을 보여줌(일주일 이내 가장 예약이 많았던 인기 테마 10가지) |
-| GET         | /reservation       | PUBLIC   | 200 OK  | 일반 회원이 방탈출 예약을 할 수 있도록 도와주는 페이지를 렌더링하여 응답                                 |
-| GET         | /signup            | PUBLIC   | 200 OK  | 회원가입 페이지를 렌더링하여 응답                                                        |
 | GET         | /login             | PUBLIC   | 200 OK  | 로그인 페이지(login.html)을 렌더링하여 응답.                                            |
+| GET         | /signup            | PUBLIC   | 200 OK  | 회원가입 페이지를 렌더링하여 응답                                                        |
+| GET         | /reservation       | PUBLIC   | 200 OK  | 일반 회원이 방탈출 예약을 할 수 있도록 도와주는 페이지를 렌더링하여 응답                                 |
+| GET         | /reservation-mine  | PUBLIC   | 200 OK  | 일반 회원의 내 예약 목록 확인 페이지를 렌더링하여 응답                                           |
 | GET         | /admin             | ADMIN    | 200 OK  | 관리자 홈 화면을 렌더링하여 응답                                                        |
 | GET         | /admin/reservation | ADMIN    | 200 OK  | 관리자의 예약 내역 관리 페이지를 렌더링하여 응답                                               |
 | GET         | /admin/time        | ADMIN    | 200 OK  | 관리자의 예약 시간 관리 페이지를 렌더링하여 응답                                               |
