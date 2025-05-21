@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record WaitingResponse(
+        Long id,
         LoginMemberResponse member,
         LocalDate date,
         ReservationTimeResponse time,
@@ -13,6 +14,7 @@ public record WaitingResponse(
 ) {
     public static WaitingResponse from(WaitingResult waitingResult) {
         return new WaitingResponse(
+                waitingResult.id(),
                 LoginMemberResponse.from(waitingResult.member()),
                 waitingResult.date(),
                 ReservationTimeResponse.from(waitingResult.time()),

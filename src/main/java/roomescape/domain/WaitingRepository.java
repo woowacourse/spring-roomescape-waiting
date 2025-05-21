@@ -15,4 +15,6 @@ public interface WaitingRepository {
     void deleteById(Long id);
 
     boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
+
+    List<Waiting> findAll();
 }

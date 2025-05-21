@@ -10,6 +10,8 @@ import roomescape.controller.response.WaitingResponse;
 import roomescape.service.WaitingService;
 import roomescape.service.result.WaitingResult;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/waitings")
 public class WaitingController {
@@ -18,6 +20,12 @@ public class WaitingController {
 
     public WaitingController(final WaitingService waitingService) {
         this.waitingService = waitingService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WaitingResponse>> findWaitings() {
+        List<WaitingResult> waitingResults = waitingService.findAll();
+        return ResponseEntity.ok(WaitingResponse.from(waitingResults));
     }
 
     @PostMapping
@@ -29,8 +37,7 @@ public class WaitingController {
 
     @DeleteMapping("/{waitingId}")
     public ResponseEntity<Void> deleteWaiting(@LoginMember LoginMemberInfo loginMemberInfo, @PathVariable Long waitingId) {
-        waitingService.delete(loginMemberInfo.id(), waitingId); //TOOD: Service로 넘기는 포맷 고민
-
+        waitingService.delete(loginMemberInfo.id(), waitingId); //TODO: Service로 넘기는 포맷 고민
         return ResponseEntity.noContent().build();
     }
 }

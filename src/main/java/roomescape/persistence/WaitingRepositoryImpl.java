@@ -42,4 +42,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(final Long memberId, final LocalDate date, final Long timeId, final Long themeId) {
         return jpaWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId);
     }
+
+    @Override
+    public List<Waiting> findAll() {
+        return jpaWaitingRepository.findAll();
+    }
 }

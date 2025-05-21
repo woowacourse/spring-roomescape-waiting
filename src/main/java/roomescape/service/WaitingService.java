@@ -31,6 +31,10 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
+    public List<WaitingResult> findAll() {
+        return WaitingResult.from(waitingRepository.findAll());
+    }
+
     public List<WaitingWithRankResult> findWaitingsWithRankByMemberId(Long memberId) {
         return WaitingWithRankResult.from(waitingRepository.findWaitingWithRankByMemberId(memberId));
     }
