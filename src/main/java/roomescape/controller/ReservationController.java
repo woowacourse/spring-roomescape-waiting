@@ -17,6 +17,7 @@ import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationWaitResponse;
 import roomescape.entity.Reservation;
 import roomescape.global.Role;
 import roomescape.service.ReservationService;
@@ -34,10 +35,7 @@ public class ReservationController {
     @GetMapping
     @CheckRole(Role.ADMIN)
     public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<Reservation> reservations = reservationService.findAll();
-        List<ReservationResponse> responses = reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
+        List<ReservationResponse> responses = reservationService.findAll();
 
         return ResponseEntity.ok(responses);
     }
@@ -45,9 +43,9 @@ public class ReservationController {
     @GetMapping("/mine")
     @CheckRole({Role.USER, Role.ADMIN})
     public ResponseEntity<List<MyReservationResponse>> getMyReservation(LoginMemberRequest loginMemberRequest) {
-        List<Reservation> reservations = reservationService.findAllReservationByMember(loginMemberRequest.id());
-        List<MyReservationResponse> responses = reservations.stream()
-                .map(MyReservationResponse::from).toList();
+        List<MyReservationResponse> responses = reservationService.findAllReservationOfMember(
+                loginMemberRequest.id());
+
         return ResponseEntity.ok(responses);
     }
 

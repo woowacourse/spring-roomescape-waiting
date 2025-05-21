@@ -24,3 +24,8 @@ VALUES ('10:00'),
        ('12:00'),
        ('14:00'),
        ('16:00');
+
+-- reservation 데이터
+INSERT INTO reservation(member_id, date, time_id, theme_id, status)
+VALUES (1, '2025-07-01', 1, 1, 'RESERVED'),
+       (2, '2025-07-01', 1, 1, 'WAIT');

@@ -128,7 +128,7 @@ class ReservationIntegrateTest {
     }
 
     @Test
-    @Sql(scripts = "/ranking-test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/sql/ranking-test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
     void 테마_랭킹_테스트() {
         // given
         List<Theme> themes = themeService.findAll();
@@ -151,7 +151,7 @@ class ReservationIntegrateTest {
     }
 
     @Test
-    @Sql(scripts = "/mine-reservation-test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/sql/mine-reservation-test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
     void 대상_유저_예약조회_테스트() {
         //given
         Member member = memberRepository.findById(100L).get();
