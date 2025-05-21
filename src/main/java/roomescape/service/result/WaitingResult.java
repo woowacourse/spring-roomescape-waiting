@@ -5,21 +5,17 @@ import roomescape.domain.Waiting;
 import java.time.LocalDate;
 
 public record WaitingResult(
-        Long id,
         MemberResult member,
         LocalDate date,
         ReservationTimeResult time,
-        ThemeResult theme,
-        int order
+        ThemeResult theme
 ) {
-    public static WaitingResult from(final Waiting waiting) {
+    public static WaitingResult from(Waiting waiting) {
         return new WaitingResult(
-                waiting.getId(),
                 MemberResult.from(waiting.getMember()),
                 waiting.getDate(),
                 ReservationTimeResult.from(waiting.getTime()),
-                ThemeResult.from(waiting.getTheme()),
-                waiting.getOrder()
+                ThemeResult.from(waiting.getTheme())
         );
     }
 }

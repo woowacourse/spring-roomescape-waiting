@@ -66,7 +66,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResult> findMemberReservationsById(Long memberId) {
+    public List<ReservationResult> findReservationsByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         return ReservationResult.from(reservations);
     }

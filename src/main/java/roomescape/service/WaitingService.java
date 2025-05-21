@@ -47,8 +47,7 @@ public class WaitingService {
                         member,
                         createWaitingParam.date(),
                         reservationTime,
-                        theme,
-                        maxOrder + 1
+                        theme
                 )
         );
         return WaitingResult.from(waiting);
