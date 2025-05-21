@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
+import roomescape.application.WaitingService;
 import roomescape.presentation.AuthenticationPrincipal;
 import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.ReservationResponse;
+import roomescape.presentation.dto.response.WaitingResponse;
 
 import java.util.List;
 
@@ -23,9 +25,13 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 WaitingService waitingService
+    ) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -52,5 +58,17 @@ public class ReservationController {
         reservationService.deleteReservationById(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/waitings")
+    public ResponseEntity<WaitingResponse> createWaiting(
+            @RequestBody @Valid ReservationCreateRequest request,
+            @AuthenticationPrincipal LoginMember loginMember
+    ) {
+        WaitingResponse response = waitingService.createWaiting(request, loginMember);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 }

@@ -56,7 +56,7 @@
   - [2단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/849391b31f2dfa359e851e95f5f2a64e21650cc8)
 
 ### 3단계 - 예약 대기 기능
-- [ ] 예약 대기 요청 기능
+- [x] 예약 대기 요청 기능
   - request
     ```
     POST /reservations/waitings HTTP/1.1
