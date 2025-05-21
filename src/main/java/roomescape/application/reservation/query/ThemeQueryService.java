@@ -3,6 +3,7 @@ package roomescape.application.reservation.query;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.query.dto.ThemeResult;
@@ -30,13 +31,17 @@ public class ThemeQueryService {
                 .toList();
     }
 
-    public List<ThemeResult> findRankBetweenDate() {
-        LocalDate today = LocalDate.now(clock);
+    public List<ThemeResult> findWeeklyPopularThemes() {
+        LocalDate today = getToday();
         LocalDate startDate = today.minusDays(7);
         LocalDate endDate = today.minusDays(1);
-        List<Theme> rankForWeek = themeRepository.findRankBetweenDate(startDate, endDate, RANK_LIMIT);
-        return rankForWeek.stream()
+        return themeRepository.findRankBetweenDate(startDate, endDate, PageRequest.of(0, RANK_LIMIT))
+                .stream()
                 .map(ThemeResult::from)
                 .toList();
+    }
+
+    private LocalDate getToday() {
+        return LocalDate.now(clock);
     }
 }

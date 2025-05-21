@@ -70,7 +70,7 @@ class ThemeQueryServiceTest extends AbstractServiceIntegrationTest {
         reservationRepository.save(new Reservation(member, LocalDate.now(clock).minusDays(4), reservationTime, theme2));
 
         // when
-        List<ThemeResult> results = themeQueryService.findRankBetweenDate();
+        List<ThemeResult> results = themeQueryService.findWeeklyPopularThemes();
 
         // then
         assertThat(results).extracting(ThemeResult::name)

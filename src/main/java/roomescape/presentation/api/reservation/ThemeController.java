@@ -30,7 +30,7 @@ public class ThemeController {
 
     @GetMapping("/rank")
     public ResponseEntity<List<ThemeResponse>> findRankBetweenDate() {
-        List<ThemeResult> rank = themeQueryService.findRankBetweenDate();
+        List<ThemeResult> rank = themeQueryService.findWeeklyPopularThemes();
         List<ThemeResponse> themeResponses = rank.stream()
                 .map(ThemeResponse::from)
                 .toList();
