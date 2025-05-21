@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ThemeCreateServiceRequest;
 import roomescape.application.dto.ThemeServiceResponse;
-import roomescape.domain.Theme;
+import roomescape.domain.entity.Theme;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.NotFoundException;
 

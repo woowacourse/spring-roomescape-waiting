@@ -6,12 +6,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.application.dto.ReservationCreateServiceRequest;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.entity.Member;
+import roomescape.domain.entity.Reservation;
 import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.Role;
-import roomescape.domain.Theme;
+import roomescape.domain.entity.Theme;
 import roomescape.presentation.controller.dto.UserReservationCreateRequest;
 
 public class Fixture {

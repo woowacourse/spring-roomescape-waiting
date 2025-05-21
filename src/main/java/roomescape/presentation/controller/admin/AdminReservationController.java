@@ -26,7 +26,8 @@ public class AdminReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationServiceResponse> createReservation(@Valid @RequestBody ReservationCreateServiceRequest request) {
+    public ResponseEntity<ReservationServiceResponse> createReservation(
+            @Valid @RequestBody ReservationCreateServiceRequest request) {
         ReservationServiceResponse reservationServiceResponse = service.registerReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationServiceResponse);
     }

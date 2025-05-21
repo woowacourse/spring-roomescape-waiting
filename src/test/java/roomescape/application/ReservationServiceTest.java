@@ -22,10 +22,10 @@ import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.application.dto.ReservationStatusServiceResponse;
 import roomescape.application.dto.ThemeServiceResponse;
 import roomescape.application.dto.TimeServiceResponse;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.entity.Member;
+import roomescape.domain.entity.Reservation;
+import roomescape.domain.entity.ReservationTime;
+import roomescape.domain.entity.Theme;
 import roomescape.domain.repository.ReservationRepository;
 
 @ExtendWith(MockitoExtension.class)

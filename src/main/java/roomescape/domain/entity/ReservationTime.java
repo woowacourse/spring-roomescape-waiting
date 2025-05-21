@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -43,7 +43,7 @@ public class ReservationTime {
                 .anyMatch(reservation -> reservation.isAlreadyBookedTime(date, themeId, this.id));
     }
 
-    public void addReservation(Reservation reservation) {
+    void addReservation(Reservation reservation) {
         if (!reservations.contains(reservation)) {
             reservations.add(reservation);
         }

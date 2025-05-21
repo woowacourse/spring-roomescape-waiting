@@ -40,7 +40,8 @@ public class AuthService {
 
     private String createToken(LoginRequest loginRequest) {
         try {
-            MemberServiceResponse memberServiceResponse = memberService.getMemberBy(loginRequest.email(), loginRequest.password());
+            MemberServiceResponse memberServiceResponse = memberService.getMemberBy(loginRequest.email(),
+                    loginRequest.password());
             return jwtTokenProvider.createToken(new MemberIdDto(memberServiceResponse.id()));
         } catch (NotFoundException e) {
             throw new AuthorizationException("이메일 또는 비밀번호가 일치하지 않습니다.");

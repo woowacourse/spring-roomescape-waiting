@@ -8,11 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.application.dto.ReservationStatusServiceResponse;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.entity.Member;
+import roomescape.domain.entity.Reservation;
+import roomescape.domain.entity.ReservationTime;
+import roomescape.domain.entity.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.NotFoundException;
 

@@ -2,10 +2,10 @@ package roomescape.testFixture;
 
 import java.util.Arrays;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.entity.Member;
+import roomescape.domain.entity.Reservation;
+import roomescape.domain.entity.ReservationTime;
+import roomescape.domain.entity.Theme;
 
 public class JdbcHelper {
 

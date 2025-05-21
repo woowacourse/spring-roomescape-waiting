@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.application.dto.TimeServiceResponse;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.repository.TimeRepository;
 
 @ExtendWith(MockitoExtension.class)

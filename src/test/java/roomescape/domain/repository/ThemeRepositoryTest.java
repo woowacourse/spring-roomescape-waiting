@@ -13,11 +13,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.entity.Member;
+import roomescape.domain.entity.Reservation;
 import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.entity.ReservationTime;
+import roomescape.domain.entity.Theme;
 
 @DataJpaTest
 class ThemeRepositoryTest {

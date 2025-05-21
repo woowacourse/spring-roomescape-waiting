@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.MemberCreateServiceRequest;
 import roomescape.application.dto.MemberServiceResponse;
-import roomescape.domain.Member;
 import roomescape.domain.Role;
+import roomescape.domain.entity.Member;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.NotFoundException;
 

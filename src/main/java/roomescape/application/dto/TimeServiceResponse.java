@@ -2,7 +2,7 @@ package roomescape.application.dto;
 
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.entity.ReservationTime;
 
 public record TimeServiceResponse(
         long id,

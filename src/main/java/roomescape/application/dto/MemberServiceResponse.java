@@ -1,8 +1,8 @@
 package roomescape.application.dto;
 
 import java.util.List;
-import roomescape.domain.Member;
 import roomescape.domain.Role;
+import roomescape.domain.entity.Member;
 
 public record MemberServiceResponse(
         long id,

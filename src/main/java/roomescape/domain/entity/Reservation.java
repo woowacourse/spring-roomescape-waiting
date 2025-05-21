@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.ReservationStatus;
 
 @Entity
 public class Reservation {

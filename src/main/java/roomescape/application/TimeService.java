@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.TimeCreateServiceRequest;
 import roomescape.application.dto.TimeServiceResponse;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.repository.TimeRepository;
 import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
 import roomescape.exception.NotFoundException;
