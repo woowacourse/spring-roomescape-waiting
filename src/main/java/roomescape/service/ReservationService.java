@@ -132,4 +132,11 @@ public class ReservationService {
     ) {
         return reservationRepository.findAllByFilter(memberId, themeId, dateFrom, dateTo);
     }
+
+    public List<ReservationWaitResponse> findAllByStatus(ReservationStatus status) {
+        List<Reservation> waitReservations = reservationRepository.findAllByStatus(status);
+        return waitReservations.stream()
+                .map(ReservationWaitResponse::from)
+                .toList();
+    }
 }
