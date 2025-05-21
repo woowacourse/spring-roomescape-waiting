@@ -10,6 +10,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
 import roomescape.domain.enums.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
+import roomescape.dto.admin.AdminWaitingReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservation.WaitingReservationRequest;
@@ -216,5 +219,32 @@ class ReservationServiceTest {
         verify(reservationRepository).delete(targetReservation);
         verify(reservationRepository).updateAllWaitingReservationsAfterPriority(date, time, theme, priority);
         verify(reservationStatusRepository).delete(targetStatus);
+    }
+
+    @Test
+    @DisplayName("관리자가 예약 대기 목록을 조회할 수 있다.")
+    void getWaitingReservationsTest() {
+        // given
+        long timeId = 2L;
+        long themeId = 2L;
+        long memberId = 2L;
+        long priority = 3L;
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
+        Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
+        List<Reservation> reservations = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            reservations.add(new Reservation(99L + i, LocalDate.now(), time, theme, member,
+                    new ReservationStatus(Waiting.WAITING, priority)));
+        }
+
+        when(reservationRepository.findAllByStatus(Waiting.WAITING)).thenReturn(reservations);
+
+        // when
+        List<AdminWaitingReservationResponse> waitingReservations = reservationService.getWaitingReservations();
+
+        // then
+        assertThat(waitingReservations.size()).isEqualTo(3);
     }
 }

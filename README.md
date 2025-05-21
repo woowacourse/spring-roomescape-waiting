@@ -231,21 +231,21 @@ Content-Type: application/json
 
 [
     {
-        "reservationId": 1,
+        "id": 1,
         "theme": "테마1",
         "date": "2024-03-01",
         "time": "10:00",
         "status": "예약"
     },
     {
-        "reservationId": 2,
+        "id": 2,
         "theme": "테마2",
         "date": "2024-03-01",
         "time": "12:00",
         "status": "예약"
     },
     {
-        "reservationId": 3,
+        "id": 3,
         "theme": "테마3",
         "date": "2024-03-01",
         "time": "14:00",
@@ -289,3 +289,46 @@ host: localhost:8080
   ```http request
   HTTP/1.1 204
   ```
+
+## 4단계
+
+- [x] 예약 대기 목록 조회 기능 구현
+
+### Request
+
+```http request
+GET /admin/reservations/waiting HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+```
+
+### Response
+
+```http request
+HTTP/1.1 200
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "name": "사용자1",
+        "theme": "테마1",
+        "date": "2024-03-01",
+        "time": "10:00",
+    },
+    {
+        "id": 2,
+        "name": "사용자2",
+        "theme": "테마2",
+        "date": "2024-03-01",
+        "time": "12:00"
+    },
+    {
+        "id": 3,
+        "name": "사용자3",
+        "theme": "테마3",
+        "date": "2024-03-01",
+        "time": "14:00",
+    }
+]
+```

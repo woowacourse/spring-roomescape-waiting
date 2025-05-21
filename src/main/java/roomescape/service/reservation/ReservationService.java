@@ -12,6 +12,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
+import roomescape.dto.admin.AdminWaitingReservationResponse;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
@@ -156,5 +157,9 @@ public class ReservationService {
 
         ReservationStatus status = targetReservation.getStatus();
         statusRepository.delete(status);
+    }
+
+    public List<AdminWaitingReservationResponse> getWaitingReservations() {
+        return AdminWaitingReservationResponse.from(reservationRepository.findAllByStatus(Waiting.WAITING));
     }
 }
