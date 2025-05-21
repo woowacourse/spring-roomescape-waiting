@@ -2,14 +2,14 @@ package roomescape.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.member.Member;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFacade {
 
     private final ReservationRepository reservationRepository;
@@ -57,8 +57,21 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
     }
 
     @Override
-    public boolean existsByReservationTimeAndDateAndTheme(final ReservationTime reservationTime, final LocalDate date,
-                                                          final Theme theme) {
-        return reservationRepository.existsByReservationTimeAndDateAndTheme(reservationTime, date, theme);
+    public boolean existsByDateAndReservationTimeAndThemeAndMember(final LocalDate date,
+                                                                   final ReservationTime reservationTime,
+                                                                   final Theme theme, final Member member) {
+        return reservationRepository.existsByDateAndReservationTimeAndThemeAndMember(date, reservationTime, theme,
+                member);
+    }
+
+    @Override
+    public boolean existsByReservationTimeAndDateAndThemeAndReservationStatus(
+            final ReservationTime reservationTime,
+            final LocalDate date,
+            final Theme theme,
+            final ReservationStatus reservationStatus
+    ) {
+        return reservationRepository.existsByReservationTimeAndDateAndThemeAndReservationStatus(reservationTime, date,
+                theme, reservationStatus);
     }
 }

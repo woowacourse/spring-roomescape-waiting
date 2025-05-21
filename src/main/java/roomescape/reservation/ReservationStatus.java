@@ -6,7 +6,10 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum ReservationStatus {
-    PENDING("예약");
+    PENDING("예약"),
+    WAITING("대기"),
+
+    ;
 
     private final String message;
 }

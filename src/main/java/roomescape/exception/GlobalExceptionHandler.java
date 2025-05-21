@@ -19,7 +19,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlerIllegalArgument(
             final CustomException e
     ) {
-        e.printStackTrace();
         return ResponseEntity.status(e.getStatusValue())
                 .body(new ErrorResponse(e.getMessage()));
     }

@@ -52,11 +52,28 @@ public class ReservationService {
         final ReservationTime reservationTime = getReservationTimeById(request.timeId());
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberById(request.memberId());
+
         validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
         validatePastDateTime(request.date(), reservationTime);
 
         final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
                 ReservationStatus.PENDING);
+        final Reservation savedReservation = reservationRepositoryFacade.save(notSavedReservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
+    public ReservationResponse createWaiting(
+            final ReservationRequest request, final LoginMember loginMember
+    ) {
+        final ReservationTime reservationTime = getReservationTimeById(request.timeId());
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberByEmail(loginMember.email());
+
+        validateDuplicateReservation(request, reservationTime, theme, member);
+        validatePastDateTime(request.date(), reservationTime);
+
+        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
+                ReservationStatus.WAITING);
         final Reservation savedReservation = reservationRepositoryFacade.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -94,7 +111,7 @@ public class ReservationService {
         reservationRepositoryFacade.deleteById(id);
     }
 
-    private void validatePastDateTime(final LocalDate date, ReservationTime reservationTime) {
+    private void validatePastDateTime(final LocalDate date, final ReservationTime reservationTime) {
         final LocalDate today = LocalDate.now();
         final LocalDate reservationDate = date;
         if (reservationDate.isBefore(today)) {
@@ -111,9 +128,12 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicateDateTimeAndTheme(final LocalDate date, final ReservationTime reservationTime,
-                                                   final Theme theme) {
-        if (reservationRepositoryFacade.existsByReservationTimeAndDateAndTheme(reservationTime, date, theme)) {
+    private void validateDuplicateDateTimeAndTheme(
+            final LocalDate date, final ReservationTime reservationTime,
+            final Theme theme
+    ) {
+        if (reservationRepositoryFacade.existsByReservationTimeAndDateAndThemeAndReservationStatus(
+                        reservationTime, date, theme, ReservationStatus.PENDING)) {
             throw new ReservationConflictException();
         }
     }
@@ -136,5 +156,13 @@ public class ReservationService {
     private Member getMemberByEmail(final String email) {
         return memberRepositoryFacade.findByEmail(email)
                 .orElseThrow(ReservationNotExistsMemberException::new);
+    }
+
+    private void validateDuplicateReservation(final ReservationRequest request, final ReservationTime reservationTime, final Theme theme,
+                                              final Member member) {
+        if(reservationRepositoryFacade.existsByDateAndReservationTimeAndThemeAndMember(
+                request.date(), reservationTime, theme, member)) {
+            throw new ReservationConflictException();
+        }
     }
 }

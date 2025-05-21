@@ -18,5 +18,16 @@ public interface ReservationRepositoryFacade {
 
     boolean existsById(Long id);
     boolean existsByReservationTime(ReservationTime reservationTime);
-    boolean existsByReservationTimeAndDateAndTheme(ReservationTime reservationTime, LocalDate date, Theme theme);
+    boolean existsByDateAndReservationTimeAndThemeAndMember(
+            LocalDate date,
+            ReservationTime reservationTime,
+            Theme theme,
+            Member member
+    );
+    boolean existsByReservationTimeAndDateAndThemeAndReservationStatus(
+            ReservationTime reservationTime,
+            LocalDate date,
+            Theme theme,
+            ReservationStatus reservationStatus
+    );
 }
