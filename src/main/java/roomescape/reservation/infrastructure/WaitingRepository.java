@@ -34,4 +34,8 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
     List<WaitingWithRankResponse> findByMemberIdWithRank(Long memberId);
 
     void delete(Waiting waiting);
+
+    Optional<Waiting> findFirstByDateAndTimeSlotAndThemeOrderById(LocalDate date, TimeSlot timeSlot, Theme theme);
+
+    List<Waiting> findAll();
 }

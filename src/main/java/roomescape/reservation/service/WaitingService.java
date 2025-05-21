@@ -80,4 +80,10 @@ public class WaitingService {
         }
         waitingRepository.delete(waiting);
     }
+
+    public List<WaitingResponse> findAllWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
 }
