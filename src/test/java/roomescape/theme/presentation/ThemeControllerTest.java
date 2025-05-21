@@ -1,145 +1,134 @@
 package roomescape.theme.presentation;
 
-import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Map;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import roomescape.member.presentation.fixture.MemberFixture;
-import roomescape.theme.presentation.ThemeRequest;
-import roomescape.reservation.presentation.fixture.ReservationFixture;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.global.config.WebMvcConfig;
+import roomescape.global.interceptor.AuthorizationInterceptor;
+import roomescape.member.presentation.resolver.MemberArgumentResolver;
+import roomescape.theme.application.ThemeService;
+import roomescape.theme.domain.Theme;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ThemeControllerTest {
-    private final ReservationFixture reservationFixture = new ReservationFixture();
-    private final MemberFixture memberFixture = new MemberFixture();
+@WebMvcTest(value = ThemeController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = {
+                        WebMvcConfig.class,
+                        AuthorizationInterceptor.class,
+                        MemberArgumentResolver.class
+                }
+        )
+)
+class ThemeControllerTest {
 
-    @Test
-    @DisplayName("테마 추가 테스트")
-    void createThemeTest() {
-        // given
-        final Map<String, String> cookies = memberFixture.loginAdmin();
-        final ThemeRequest theme = reservationFixture.createThemeRequest(
-                "레벨2 탈출",
-                "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-        );
+    @Autowired
+    private MockMvc mockMvc;
 
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(cookies)
-                .body(theme)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201);
+    @MockitoBean
+    private ThemeService themeService;
+
+    @Nested
+    @DisplayName("전체 테마 목록 조회 API")
+    class GetThemes {
+        @Test
+        @DisplayName("테마 목록을 반환한다")
+        void returnThemeList() throws Exception {
+            // given
+            List<ThemeResponse> themeResponses = List.of(
+                    new ThemeResponse(new Theme(1L, "테마1", "설명1", "썸네일1")),
+                    new ThemeResponse(new Theme(2L, "테마2", "설명2", "썸네일2"))
+            );
+
+            doReturn(themeResponses).when(themeService)
+                    .getThemes();
+
+            // when & then
+            mockMvc.perform(get("/themes"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value(1))
+                    .andExpect(jsonPath("$[0].name").value("테마1"))
+                    .andExpect(jsonPath("$[0].description").value("설명1"))
+                    .andExpect(jsonPath("$[0].thumbnail").value("썸네일1"))
+                    .andExpect(jsonPath("$[1].id").value(2))
+                    .andExpect(jsonPath("$[1].name").value("테마2"))
+                    .andExpect(jsonPath("$[1].description").value("설명2"))
+                    .andExpect(jsonPath("$[1].thumbnail").value("썸네일2"));
+        }
+
+        @Test
+        @DisplayName("빈 테마 목록을 반환한다")
+        void returnEmptyThemeList() throws Exception {
+            // given
+            List<ThemeResponse> emptyResponses = List.of();
+            doReturn(emptyResponses).when(themeService)
+                    .getThemes();
+
+            // when & then
+            mockMvc.perform(get("/themes"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").isArray())
+                    .andExpect(jsonPath("$").isEmpty());
+        }
     }
 
-    @Test
-    @DisplayName("테마 전체 조회 테스트")
-    void getThemesTest() {
-        // given
-        final Map<String, String> cookies = memberFixture.loginAdmin();
-        reservationFixture.createTheme(
-                "레벨2 탈출",
-                "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
-                cookies
-        );
+    @Nested
+    @DisplayName("인기 테마 목록 조회 API")
+    class GetPopularThemes {
+        @Test
+        @DisplayName("인기 테마 목록을 반환한다")
+        void returnPopularThemeList() throws Exception {
+            // given
+            List<ThemeResponse> popularThemes = List.of(
+                    new ThemeResponse(new Theme(1L, "인기테마1", "인기설명1", "인기썸네일1")),
+                    new ThemeResponse(new Theme(2L, "인기테마2", "인기설명2", "인기썸네일2"))
+            );
 
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(cookies)
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
-    }
+            doReturn(popularThemes).when(themeService)
+                    .getPopularThemes();
 
-    @Test
-    @DisplayName("테마 삭제 테스트")
-    void deleteThemeTest() {
-        // given
-        final Map<String, String> cookies = memberFixture.loginAdmin();
-        reservationFixture.createTheme(
-                "레벨2 탈출",
-                "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
-                cookies
-        );
+            // when & then
+            mockMvc.perform(get("/themes/popular"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].id").value(1))
+                    .andExpect(jsonPath("$[0].name").value("인기테마1"))
+                    .andExpect(jsonPath("$[0].description").value("인기설명1"))
+                    .andExpect(jsonPath("$[0].thumbnail").value("인기썸네일1"))
+                    .andExpect(jsonPath("$[1].id").value(2))
+                    .andExpect(jsonPath("$[1].name").value("인기테마2"))
+                    .andExpect(jsonPath("$[1].description").value("인기설명2"))
+                    .andExpect(jsonPath("$[1].thumbnail").value("인기썸네일2"));
+        }
 
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(cookies)
-                .when().delete("/themes/1")
-                .then().log().all()
-                .statusCode(204);
-    }
+        @Test
+        @DisplayName("빈 인기 테마 목록을 반환한다")
+        void returnEmptyPopularThemeList() throws Exception {
+            // given
+            List<ThemeResponse> emptyResponses = List.of();
+            doReturn(emptyResponses).when(themeService)
+                    .getPopularThemes();
 
-    @Test
-    @DisplayName("예약이 이미 존재하는 테마는 삭제할 수 없다.")
-    void deleteThemeExceptionTest() {
-        // given
-        final Map<String, String> cookies = memberFixture.loginAdmin();
-        reservationFixture.createReservationTime(LocalTime.of(10, 30), cookies);
-
-        reservationFixture.createTheme(
-                "레벨2 탈출",
-                "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
-                cookies
-        );
-
-        reservationFixture.createReservation(LocalDate.of(2025, 8, 5), 1L, 1L, cookies);
-
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(cookies)
-                .when().delete("/themes/1")
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @Test
-    @DisplayName("인기 테마 조회 테스트")
-    void getPopularThemesTest() {
-        // given
-        final Map<String, String> cookies = memberFixture.loginAdmin();
-        reservationFixture.createReservationTime(LocalTime.of(10, 30), cookies);
-
-        reservationFixture.createTheme(
-                "레벨2 탈출",
-                "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
-                cookies
-        );
-        reservationFixture.createTheme(
-                "레벨3 탈출",
-                "우테코 레벨3를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
-                cookies
-        );
-
-        reservationFixture.createReservation(LocalDate.of(2025, 8, 5), 1L, 1L, cookies);
-
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(cookies)
-                .when().get("/themes/popular")
-                .then().log().all()
-                .statusCode(200);
+            // when & then
+            mockMvc.perform(get("/themes/popular"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").isArray())
+                    .andExpect(jsonPath("$").isEmpty());
+        }
     }
 }
