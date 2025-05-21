@@ -313,4 +313,44 @@ class WaitingServiceTest {
         // then
         assertThat(waitings).hasSize(2);
     }
+
+    @Test
+    void 대기를_예약으로_전환한다() {
+        // given
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
+        TimeSlot timeSlot = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
+        Member member1 = Member.builder()
+                .id(1L)
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1").bulid();
+        Member member2 = Member.builder()
+                .id(2L)
+                .name("name2")
+                .email("email2@domain.com")
+                .password("password2").bulid();
+        Reservation waiting1 = reservationRepository.save(
+                Reservation.builder()
+                        .date(LocalDate.of(2025, 1, 1))
+                        .member(member1)
+                        .theme(theme)
+                        .timeSlot(timeSlot).build()
+        );
+        Waiting waiting2 = waitingRepository.save(
+                Waiting.builder()
+                        .date(LocalDate.of(2025, 1, 1))
+                        .member(member2)
+                        .theme(theme)
+                        .timeSlot(timeSlot).build()
+        );
+        // when
+        waitingService.convertWaitingToReservation(waiting1.getId());
+        // then
+        assertThat(waitingRepository.findById(waiting2.getId())).isEmpty();
+        assertThat(reservationRepository.findByMemberId(member2.getId())).hasSize(1);
+    }
 }
