@@ -13,42 +13,37 @@ public class GlobalExceptionHandler {
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Void> handleNotFoundException(final NotFoundException e) {
+    public ResponseEntity<String> handleNotFoundException(final NotFoundException e) {
         logger.warn("NotFoundException occurred", e);
 
-        return ResponseEntity.notFound()
-                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 
     @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<Void> handleDuplicateException(final DuplicateException e) {
+    public ResponseEntity<String> handleDuplicateException(final DuplicateException e) {
         logger.warn("DuplicateException occurred", e);
 
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Void> handleIllegalArgumentException(final IllegalArgumentException e) {
+    public ResponseEntity<String> handleIllegalArgumentException(final IllegalArgumentException e) {
         logger.warn("IllegalArgumentException occurred", e);
 
-        return ResponseEntity.badRequest()
-                .build();
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<Void> handleUnauthorizedException(final UnauthorizedException e) {
+    public ResponseEntity<String> handleUnauthorizedException(final UnauthorizedException e) {
         logger.warn("UnauthorizedException occurred", e);
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 
     @ExceptionHandler(InvalidDateAndTimeException.class)
-    public ResponseEntity<Void> handleInvalidDateAndTimeException(final InvalidDateAndTimeException e) {
+    public ResponseEntity<String> handleInvalidDateAndTimeException(final InvalidDateAndTimeException e) {
         logger.warn("InvalidDateAndTimeException occurred", e);
 
-        return ResponseEntity.badRequest()
-                .build();
+        return ResponseEntity.badRequest().body(e.getMessage());
     }
 }

@@ -19,7 +19,7 @@ class GlobalExceptionHandlerTest {
         NotFoundException notFoundException = new NotFoundException("조회 결과가 없습니다.");
 
         // when
-        ResponseEntity<Void> responseEntity = globalExceptionHandler.handleNotFoundException(notFoundException);
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleNotFoundException(notFoundException);
 
         // then
         HttpStatusCode responseHttpStatusCode = responseEntity.getStatusCode();
@@ -33,7 +33,7 @@ class GlobalExceptionHandlerTest {
         DuplicateException duplicateException = new DuplicateException("중복되는 값입니다.");
 
         // when
-        ResponseEntity<Void> responseEntity = globalExceptionHandler.handleDuplicateException(duplicateException);
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleDuplicateException(duplicateException);
 
         // then
         HttpStatusCode responseHttpStatusCode = responseEntity.getStatusCode();
@@ -47,7 +47,7 @@ class GlobalExceptionHandlerTest {
         IllegalArgumentException illegalArgumentException = new IllegalArgumentException("유효하지 않은 값입니다.");
 
         // when
-        ResponseEntity<Void> responseEntity = globalExceptionHandler.handleIllegalArgumentException(
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleIllegalArgumentException(
                 illegalArgumentException);
 
         // then
@@ -62,7 +62,7 @@ class GlobalExceptionHandlerTest {
         UnauthorizedException unauthorizedException = new UnauthorizedException("인증, 인가 중 에러가 발생했습니다.");
 
         // when
-        ResponseEntity<Void> responseEntity = globalExceptionHandler.handleUnauthorizedException(
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleUnauthorizedException(
                 unauthorizedException);
 
         // then
@@ -77,7 +77,7 @@ class GlobalExceptionHandlerTest {
         InvalidDateAndTimeException invalidDateAndTimeException = new InvalidDateAndTimeException("과거 시간입니다.");
 
         // when
-        ResponseEntity<Void> responseEntity = globalExceptionHandler.handleInvalidDateAndTimeException(
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleInvalidDateAndTimeException(
                 invalidDateAndTimeException);
 
         // then
