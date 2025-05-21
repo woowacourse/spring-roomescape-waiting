@@ -6,21 +6,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.repository.ReservationTimes;
+import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.repository.Reservations;
-import roomescape.business.model.repository.Themes;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
 import roomescape.exception.auth.AuthorizationException;
-import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static roomescape.exception.ErrorCode.RESERVATION_DUPLICATED;
 import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
-import static roomescape.exception.ErrorCode.THEME_NOT_EXIST;
 import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
 import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
 
@@ -31,23 +27,15 @@ public class ReservationService {
 
     private final Users users;
     private final Reservations reservations;
-    private final ReservationTimes reservationTimes;
-    private final Themes themes;
+    private final ReservationSlotService slotService;
 
     @Transactional
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
         val user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
-        val reservationTime = reservationTimes.findById(Id.create(timeIdValue))
-                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
-        val theme = themes.findById(Id.create(themeIdValue))
-                .orElseThrow(() -> new NotFoundException(THEME_NOT_EXIST));
+        ReservationSlot slot = slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, timeIdValue, themeIdValue);
 
-        if (reservations.isDuplicateDateAndTimeAndTheme(date, reservationTime.startTimeValue(), theme.getId())) {
-            throw new DuplicatedException(RESERVATION_DUPLICATED);
-        }
-
-        val reservation = Reservation.create(user, date, reservationTime, theme);
+        val reservation = Reservation.create(user, slot);
         reservations.save(reservation);
         return ReservationDto.fromEntity(reservation);
     }
