@@ -1,0 +1,16 @@
+package roomescape.member.infrastructure;
+
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.repository.ListCrudRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
+
+public interface JpaMemberRepository extends ListCrudRepository<Member, Long> {
+
+    List<Member> findByMemberRole(MemberRole memberRole);
+
+    Optional<Member> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+}

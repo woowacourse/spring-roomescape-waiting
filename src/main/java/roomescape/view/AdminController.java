@@ -3,7 +3,7 @@ package roomescape.view;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import roomescape.auth.annotation.RequireRole;
+import roomescape.common.security.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 
 @Controller

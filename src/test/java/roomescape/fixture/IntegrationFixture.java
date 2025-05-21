@@ -7,7 +7,7 @@ import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.MediaType;
-import roomescape.auth.dto.LoginRequest;
+import roomescape.common.security.dto.request.LoginRequest;
 import roomescape.reservation.domain.ReservationStatus;
 
 public class IntegrationFixture {

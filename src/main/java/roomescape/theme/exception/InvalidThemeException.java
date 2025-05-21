@@ -1,6 +1,6 @@
 package roomescape.theme.exception;
 
-import roomescape.exception.ValidationException;
+import roomescape.common.exception.ValidationException;
 
 public class InvalidThemeException extends ValidationException {
 
