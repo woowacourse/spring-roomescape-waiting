@@ -21,8 +21,7 @@ public class AuthService {
     public String tokenLogin(final MemberLoginCommand command) {
         final Member loginMember = memberRepository.findByEmailAndPassword(command.email(), command.password())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일 혹은 비밀번호입니다."));
-        final Long memberId = loginMember.id();
-        return tokenProvider.createToken(memberId.toString());
+        return tokenProvider.createToken(String.valueOf(loginMember.id()));
     }
 
     public LoginMemberInfo getLoginMemberInfoByToken(final String token) {

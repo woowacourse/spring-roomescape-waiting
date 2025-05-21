@@ -2,8 +2,8 @@ package roomescape.reservation.application.reservation.dto;
 
 import java.time.LocalDate;
 import roomescape.member.application.dto.MemberInfo;
-import roomescape.reservation.application.time.dto.ReservationTimeInfo;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
+import roomescape.reservation.application.time.dto.ReservationTimeInfo;
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationStatus;
 

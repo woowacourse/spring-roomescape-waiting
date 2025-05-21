@@ -17,7 +17,6 @@ import roomescape.reservation.application.reservation.dto.ReservationCreateComma
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
 import roomescape.reservation.application.reservation.dto.ReservationSearchCondition;
 import roomescape.reservation.application.reservation.service.ReservationService;
-import roomescape.reservation.ui.reservation.dto.AdminReservationCreateRequest;
 import roomescape.reservation.ui.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.ui.reservation.dto.ReservationCreateRequest;
 import roomescape.reservation.ui.reservation.dto.ReservationResponse;

@@ -1,40 +1,34 @@
-INSERT INTO member (name, email, password, role)
-VALUES
-    ('이연후', 'river@email.com', 'qwer!', 'ADMIN'),
-    ('유저', 'user@gmail.com', 'qwer!', 'USER');
+INSERT INTO MEMBER (NAME, EMAIL, PASSWORD, ROLE)
+values
+    ('어드민1', 'admin1@email.com', 'adminpw1', 'ADMIN'),
+    ('어드민2', 'admin2@email.com', 'adminpw2', 'ADMIN'),
+    ('유저1', 'user1@email.com', 'userpw1', 'USER'),
+    ('유저2', 'user2email.com', 'userpw2', 'USER');
 
-INSERT INTO reservation_time (start_at)
+INSERT INTO RESERVATION_TIME (START_AT)
 VALUES
     ('10:00'),
-    ('15:00');
+    ('12:00'),
+    ('14:00'),
+    ('16:00'),
+    ('18:00'),
+    ('20:00');
 
-INSERT INTO theme (name, description, thumbnail)
+INSERT INTO THEME (NAME, DESCRIPTION, THUMBNAIL)
 VALUES
-    ('테마1',  '테마1입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마2',  '테마2입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마3',  '테마3입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마4',  '테마4입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마5',  '테마5입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마6',  '테마6입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마7',  '테마7입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마8',  '테마8입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마9',  '테마9입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마10', '테마10입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
-    ('테마11', '테마11입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-
-INSERT INTO reservation (date, member_id, time_id, theme_id, status)
+    ('레벨1 탈출', '우테코 레벨1을 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
+    ('레벨2 탈출', '우테코 레벨2를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
+    ('레벨3 탈출', '우테코 레벨3을 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
+    ('레벨4 탈출', '우테코 레벨4를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
+    ('레벨5 탈출', '우테코 레벨5를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+--
+INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID, STATUS)
 VALUES
-    (DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 11, 'BOOKED'),
-    (DATEADD('DAY', -1, CURRENT_DATE), 1, 2, 11, 'BOOKED'),
-    (DATEADD('DAY', -2, CURRENT_DATE), 1, 1, 11, 'BOOKED'),
-    (DATEADD('DAY', -2, CURRENT_DATE), 1, 2,  9, 'BOOKED'),
-    (DATEADD('DAY', -3, CURRENT_DATE), 1, 2,  9, 'BOOKED'),
-    (DATEADD('DAY', -3, CURRENT_DATE), 1, 1,  8, 'BOOKED'),
-    (DATEADD('DAY', -4, CURRENT_DATE), 1, 1,  1, 'BOOKED'),
-    (DATEADD('DAY', -4, CURRENT_DATE), 1, 2,  2, 'BOOKED'),
-    (DATEADD('DAY', -5, CURRENT_DATE), 1, 1,  3, 'BOOKED'),
-    (DATEADD('DAY', -5, CURRENT_DATE), 1, 2,  4, 'BOOKED'),
-    (DATEADD('DAY', -6, CURRENT_DATE), 1, 1,  5, 'BOOKED'),
-    (DATEADD('DAY', -6, CURRENT_DATE), 1, 2,  6, 'BOOKED'),
-    (DATEADD('DAY', -7, CURRENT_DATE), 1, 1,  7, 'BOOKED'),
-    (DATEADD('DAY', -7, CURRENT_DATE), 1, 2, 10, 'BOOKED');
+    (1, CURRENT_DATE, 1, 2, 'BOOKED'),
+    (2, CURRENT_DATE, 2, 2, 'BOOKED'),
+    (3, CURRENT_DATE, 3, 2, 'BOOKED'),
+    (1, CURRENT_DATE, 4, 1, 'BOOKED'),
+    (2, CURRENT_DATE, 5, 1, 'BOOKED'),
+    (3, CURRENT_DATE - 1, 3, 3, 'BOOKED'),
+    (1, CURRENT_DATE - 1, 4, 4, 'BOOKED'),
+    (2, CURRENT_DATE - 1, 5, 5, 'BOOKED');

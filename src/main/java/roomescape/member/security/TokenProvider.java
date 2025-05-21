@@ -2,7 +2,9 @@ package roomescape.member.security;
 
 public interface TokenProvider {
 
-    String createToken(final String payload);
+    String createToken(String payload);
 
-    String parsePayload(final String token);
+    String parsePayload(String token);
+
+    boolean validateToken(String token);
 }

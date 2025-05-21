@@ -29,7 +29,7 @@ import roomescape.support.util.TestCurrentDateTime;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql({"/schema.sql", "/test-data.sql"})
+@Sql(scripts = {"/schema.sql", "/test-data.sql"})
 public class ReservationServiceIntegrationTest {
 
     @Autowired
