@@ -13,7 +13,6 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
-import roomescape.business.model.vo.Id;
 import roomescape.exception.business.DuplicatedException;
 
 import java.time.LocalDate;
@@ -43,27 +42,23 @@ class ReservationServiceTest {
     void 사용자_ID로_예약을_추가하고_반환한다() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        String timeId = "time-id";
-        String themeId = "theme-id";
-        String userIdValue = "user-id";
-        Id userId = Id.create(userIdValue);
 
-        User user = User.restore(userIdValue, "USER", "Test User", "test@example.com", "password");
-        ReservationTime reservationTime = ReservationTime.restore(timeId, LocalTime.of(10, 0));
-        Theme theme = Theme.restore(themeId, "Test Theme", "Description", "thumbnail.jpg");
-        ReservationSlot slot = ReservationSlot.restore("slot-id", reservationTime, date, theme);
+        User user = User.create("Test User", "test@example.com", "password");
+        ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
+        Theme theme = Theme.create("Test Theme", "Description", "thumbnail.jpg");
+        ReservationSlot slot = ReservationSlot.create(time, date, theme);
 
-        when(users.findById(userId)).thenReturn(Optional.of(user));
-        when(slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, timeId, themeId)).thenReturn(slot);
+        when(users.findById(user.getId())).thenReturn(Optional.of(user));
+        when(slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
         when(reservations.isSlotFreeFor(slot, user)).thenReturn(true);
 
         // when
-        ReservationDto result = sut.addAndGet(date, timeId, themeId, userIdValue);
+        ReservationDto result = sut.addAndGet(date, time.getId().value(), theme.getId().value(), user.getId().value());
 
         // then
         assertThat(result).isNotNull();
-        verify(users).findById(userId);
-        verify(slotService).findByDateAndTimeIdAndThemeIdOrElseCreate(date, timeId, themeId);
+        verify(users).findById(user.getId());
+        verify(slotService).findByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value());
         verify(reservations).isSlotFreeFor(slot, user);
         verify(reservations).save(any(Reservation.class));
     }
@@ -72,26 +67,21 @@ class ReservationServiceTest {
     void 동일한_유저가_동일한_슬롯에_예약_시_예외가_발생한다() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        String timeIdValue = "time-id";
-        String themeIdValue = "theme-id";
-        String userIdValue = "user-id";
-        String slotIdValue = "slot-id";
-        Id userId = Id.create(userIdValue);
 
-        User user = User.restore(userIdValue, "USER", "Test User", "test@example.com", "password");
-        ReservationTime reservationTime = ReservationTime.restore(timeIdValue, LocalTime.of(10, 0));
-        Theme theme = Theme.restore(themeIdValue, "Test Theme", "Description", "thumbnail.jpg");
-        ReservationSlot slot = ReservationSlot.restore(slotIdValue, reservationTime, date, theme);
+        User user = User.create("Test User", "test@example.com", "password");
+        ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
+        Theme theme = Theme.create("Test Theme", "Description", "thumbnail.jpg");
+        ReservationSlot slot = ReservationSlot.create(time, date, theme);
 
-        when(users.findById(userId)).thenReturn(Optional.of(user));
-        when(slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, timeIdValue, themeIdValue)).thenReturn(slot);
+        when(users.findById(user.getId())).thenReturn(Optional.of(user));
+        when(slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
         when(reservations.isSlotFreeFor(slot, user)).thenReturn(false);
 
         // when, then
-        assertThatThrownBy(() -> sut.addAndGet(date, timeIdValue, themeIdValue, userIdValue))
+        assertThatThrownBy(() -> sut.addAndGet(date, time.getId().value(), theme.getId().value(), user.getId().value()))
                 .isInstanceOf(DuplicatedException.class);
 
-        verify(users).findById(userId);
+        verify(users).findById(user.getId());
         verify(reservations).isSlotFreeFor(slot, user);
         verify(reservations, never()).save(any(Reservation.class));
     }
@@ -99,26 +89,18 @@ class ReservationServiceTest {
     @Test
     void 예약_삭제_성공() {
         // given
-        String reservationId = "reservation-id";
-        String userId = "user-id";
+        User user = User.create("Test User", "test@example.com", "password");
+        ReservationTime time = ReservationTime.create(LocalTime.of(10, 0));
+        Theme theme = Theme.create("Test Theme", "Description", "thumbnail.jpg");
+        ReservationSlot slot = ReservationSlot.create(time, LocalDate.now().plusDays(1), theme);
+        Reservation reservation = Reservation.create(user, slot);
 
-        Reservation reservation = Reservation.restore(
-                reservationId,
-                User.restore(userId, "USER", "Test User", "test@example.com", "password"),
-                ReservationSlot.restore(
-                        "slot-id",
-                        ReservationTime.restore("time-id", LocalTime.of(10, 0)),
-                        LocalDate.now().plusDays(1),
-                        Theme.restore("theme-id", "Test Theme", "Description", "thumbnail.jpg")
-                )
-        );
-
-        when(reservations.findById(Id.create(reservationId))).thenReturn(Optional.of(reservation));
+        when(reservations.findById(reservation.getId())).thenReturn(Optional.of(reservation));
 
         // when
-        sut.delete(reservationId, userId);
+        sut.delete(reservation.getId().value(), user.getId().value());
 
         // then
-        verify(reservations).deleteById(Id.create(reservationId));
+        verify(reservations).deleteById(reservation.getId());
     }
 }

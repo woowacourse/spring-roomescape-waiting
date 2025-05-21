@@ -94,13 +94,13 @@ class ReservationTimeServiceTest {
     void 모든_예약_시간을_조회할_수_있다() {
         // given
         List<ReservationTime> dataTimes = Arrays.asList(
-                ReservationTime.restore("time-id-1", LocalTime.of(10, 0)),
-                ReservationTime.restore("time-id-2", LocalTime.of(14, 0))
+                ReservationTime.create(LocalTime.of(10, 0)),
+                ReservationTime.create(LocalTime.of(14, 0))
         );
 
         List<ReservationTimeDto> expectedTimes = List.of(
-                new ReservationTimeDto(Id.create("time-id-1"), new StartTime(LocalTime.of(10, 0))),
-                new ReservationTimeDto(Id.create("time-id-2"), new StartTime(LocalTime.of(14, 0)))
+                new ReservationTimeDto(dataTimes.get(0).getId(), new StartTime(LocalTime.of(10, 0))),
+                new ReservationTimeDto(dataTimes.get(1).getId(), new StartTime(LocalTime.of(14, 0)))
         );
 
         when(reservationTimes.findAll()).thenReturn(dataTimes);
@@ -119,18 +119,18 @@ class ReservationTimeServiceTest {
         LocalDate date = LocalDate.now();
         Id themeId = Id.create("theme-id");
         List<ReservationTime> availableTimes = Arrays.asList(
-                ReservationTime.restore("time-id-3", LocalTime.of(11, 0)),
-                ReservationTime.restore("time-id-4", LocalTime.of(15, 0))
+                ReservationTime.create(LocalTime.of(11, 0)),
+                ReservationTime.create(LocalTime.of(15, 0))
         );
         List<ReservationTime> notAvailableTimes = Arrays.asList(
-                ReservationTime.restore("time-id-5", LocalTime.of(12, 0)),
-                ReservationTime.restore("time-id-6", LocalTime.of(16, 0))
+                ReservationTime.create(LocalTime.of(12, 0)),
+                ReservationTime.create(LocalTime.of(16, 0))
         );
         List<ReservableReservationTimeDto> expectedAvailableTimes = Arrays.asList(
-                new ReservableReservationTimeDto(Id.create("time-id-3"), new StartTime(LocalTime.of(11, 0)), true),
-                new ReservableReservationTimeDto(Id.create("time-id-4"), new StartTime(LocalTime.of(15, 0)), true),
-                new ReservableReservationTimeDto(Id.create("time-id-5"), new StartTime(LocalTime.of(12, 0)), false),
-                new ReservableReservationTimeDto(Id.create("time-id-6"), new StartTime(LocalTime.of(16, 0)), false)
+                new ReservableReservationTimeDto(availableTimes.get(0).getId(), new StartTime(LocalTime.of(11, 0)), true),
+                new ReservableReservationTimeDto(availableTimes.get(1).getId(), new StartTime(LocalTime.of(15, 0)), true),
+                new ReservableReservationTimeDto(notAvailableTimes.get(0).getId(), new StartTime(LocalTime.of(12, 0)), false),
+                new ReservableReservationTimeDto(notAvailableTimes.get(1).getId(), new StartTime(LocalTime.of(16, 0)), false)
         );
 
         when(reservationTimes.findAvailableByDateAndThemeId(date, themeId))

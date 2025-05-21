@@ -35,10 +35,6 @@ public class ReservationTime {
         return new ReservationTime(Id.issue(), new StartTime(startTime));
     }
 
-    public static ReservationTime restore(final String id, final LocalTime startTime) {
-        return new ReservationTime(Id.create(id), new StartTime(startTime));
-    }
-
     public LocalTime startInterval() {
         return startTime.minusMinutes(MINUTE_INTERVAL);
     }

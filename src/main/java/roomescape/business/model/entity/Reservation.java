@@ -37,10 +37,6 @@ public class Reservation {
         return new Reservation(Id.issue(), user, reservationSlot);
     }
 
-    public static Reservation restore(final String id, final User user, final ReservationSlot reservationSlot) {
-        return new Reservation(Id.create(id), user, reservationSlot);
-    }
-
     public boolean isSameReserver(final String userId) {
         return user.isSameUser(userId);
     }

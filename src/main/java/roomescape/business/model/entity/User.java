@@ -41,8 +41,8 @@ public class User {
         return new User(Id.issue(), UserRole.USER, new UserName(name), new Email(email), Password.encode(password));
     }
 
-    public static User restore(final String id, final String userRole, final String name, final String email, final String password) {
-        return new User(Id.create(id), UserRole.valueOf(userRole), new UserName(name), new Email(email), Password.plain(password));
+    public static User admin(final String name, final String email, final String password) {
+        return new User(Id.issue(), UserRole.ADMIN, new UserName(name), new Email(email), Password.encode(password));
     }
 
     public boolean isPasswordCorrect(final String password) {

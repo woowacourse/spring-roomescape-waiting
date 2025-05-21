@@ -58,15 +58,13 @@ class UserTest {
         @Test
         void 저장_후_사용자_객체를_생성할_수_있다() {
             // when
-            User user = User.restore(VALID_ID, UserRole.ADMIN.name(), VALID_NAME, VALID_EMAIL, VALID_PASSWORD);
+            User user = User.create(VALID_NAME, VALID_EMAIL, VALID_PASSWORD);
 
             // then
             assertThat(user).isNotNull();
-            assertThat(user.getId().value()).isEqualTo(VALID_ID);
             assertThat(user.getName().value()).isEqualTo(VALID_NAME);
             assertThat(user.getEmail().value()).isEqualTo(VALID_EMAIL);
-            assertThat(user.getPassword().value()).isEqualTo(VALID_PASSWORD);
-            assertThat(user.getUserRole()).isEqualTo(UserRole.ADMIN);
+            assertThat(user.getUserRole()).isEqualTo(UserRole.USER);
         }
     }
 
@@ -95,28 +93,6 @@ class UserTest {
 
             // then
             assertThat(result).isFalse();
-        }
-    }
-
-    @Nested
-    class 사용자_역할_테스트 {
-
-        @Test
-        void 생성된_사용자의_기본_역할은_USER이다() {
-            // when
-            User user = User.create(VALID_NAME, VALID_EMAIL, VALID_PASSWORD);
-
-            // then
-            assertThat(user.getUserRole()).isEqualTo(UserRole.USER);
-        }
-
-        @Test
-        void 복구시에는_메서드로_ADMIN_역할의_사용자를_생성할_수_있다() {
-            // when
-            User adminUser = User.restore(VALID_ID, UserRole.ADMIN.name(), VALID_NAME, VALID_EMAIL, VALID_PASSWORD);
-
-            // then
-            assertThat(adminUser.getUserRole()).isEqualTo(UserRole.ADMIN);
         }
     }
 }

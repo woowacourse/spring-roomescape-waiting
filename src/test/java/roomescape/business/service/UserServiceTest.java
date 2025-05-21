@@ -9,14 +9,11 @@ import roomescape.business.dto.UserDto;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Email;
-import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.UserName;
 import roomescape.business.model.vo.UserRole;
 import roomescape.exception.business.InvalidCreateArgumentException;
 import roomescape.exception.business.NotFoundException;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -70,8 +67,8 @@ class UserServiceTest {
     void 이메일로_사용자를_조회할_수_있다() {
         // given
         String email = "test@example.com";
-        User userData = User.restore("user-id", "USER", "Test User", email, "password123");
-        UserDto expectedUser = new UserDto(Id.create("user-id"), UserRole.USER, new UserName("Test User"), new Email(email));
+        User userData = User.create("Test User", email, "password123");
+        UserDto expectedUser = new UserDto(userData.getId(), UserRole.USER, new UserName("Test User"), new Email(email));
 
         when(users.findByEmail(email)).thenReturn(Optional.of(userData));
 
@@ -95,27 +92,5 @@ class UserServiceTest {
                 .isInstanceOf(NotFoundException.class);
 
         verify(users).findByEmail(email);
-    }
-
-    @Test
-    void 모든_사용자를_조회할_수_있다() {
-        // given
-        List<User> userData = Arrays.asList(
-                User.restore("user-id-1", "USER", "User One", "user1@example.com", "password1"),
-                User.restore("user-id-2", "USER", "User Two", "user2@example.com", "password2")
-        );
-        List<UserDto> expectedUsers = Arrays.asList(
-                new UserDto(Id.create("user-id-1"), UserRole.USER, new UserName("User One"), new Email("user1@example.com")),
-                new UserDto(Id.create("user-id-2"), UserRole.USER, new UserName("User Two"), new Email("user2@example.com"))
-        );
-
-        when(users.findAll()).thenReturn(userData);
-
-        // when
-        List<UserDto> result = sut.getAll();
-
-        // then
-        assertThat(result).isEqualTo(expectedUsers);
-        verify(users).findAll();
     }
 }

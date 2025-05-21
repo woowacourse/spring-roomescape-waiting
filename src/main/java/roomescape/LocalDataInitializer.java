@@ -17,7 +17,6 @@ import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.repository.Users;
-import roomescape.business.model.vo.UserRole;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -43,7 +42,7 @@ public class LocalDataInitializer {
         final ReservationTime time2 = ReservationTime.create(LocalTime.of(16, 0));
         final User user1 = User.create("dompoo", "dompoo@gmail.com", encoder.encode("1234"));
         final User user2 = User.create("lemon", "lemon@gmail.com", encoder.encode("1234"));
-        final User admin = User.restore("1", UserRole.ADMIN.name(), "admin", "admin@gmail.com", encoder.encode("1234"));
+        final User admin = User.admin("admin", "admin@gmail.com", encoder.encode("1234"));
         final ReservationSlot reservationSlot1 = ReservationSlot.create(time1, LocalDate.now().plusDays(1), theme1);
         final ReservationSlot reservationSlot2 = ReservationSlot.create(time1, LocalDate.now().plusDays(2), theme2);
         final ReservationSlot reservationSlot3 = ReservationSlot.create(time1, LocalDate.now().plusDays(3), theme1);

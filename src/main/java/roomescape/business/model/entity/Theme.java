@@ -32,8 +32,4 @@ public class Theme {
     public static Theme create(final String name, final String description, final String thumbnail) {
         return new Theme(Id.issue(), new ThemeName(name), description, thumbnail);
     }
-
-    public static Theme restore(final String id, final String name, final String description, final String thumbnail) {
-        return new Theme(Id.create(id), new ThemeName(name), description, thumbnail);
-    }
 }

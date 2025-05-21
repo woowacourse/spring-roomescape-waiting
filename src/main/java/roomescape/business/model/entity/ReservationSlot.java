@@ -51,10 +51,6 @@ public class ReservationSlot {
         return new ReservationSlot(Id.issue(), time, new ReservationDate(date), theme);
     }
 
-    public static ReservationSlot restore(final String id, final ReservationTime time, final LocalDate date, final Theme theme) {
-        return new ReservationSlot(Id.create(id), time, new ReservationDate(date), theme);
-    }
-
     public void addReservation(final Reservation reservation) {
         reservations.add(reservation);
     }
