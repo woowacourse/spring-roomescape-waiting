@@ -1,7 +1,9 @@
 package roomescape.business.model.entity;
 
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import roomescape.business.model.vo.Status;
 import roomescape.exception.business.InvalidCreateArgumentException;
 
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ class ReservationTest {
     private static final String EMAIL = "test@example.com";
     private static final String PASSWORD = "password1234!";
 
+
     @Nested
     class 생성_테스트 {
 
@@ -27,7 +30,7 @@ class ReservationTest {
             final User user = User.create(NAME, EMAIL, PASSWORD);
 
             // when
-            final Reservation reservation = Reservation.create(user, DATE, RESERVATION_TIME, THEME);
+            final Reservation reservation = Reservation.create(user, DATE, RESERVATION_TIME, THEME, Status.RESERVED, LocalDateTime.now());
 
             // then
             assertThat(reservation).isNotNull();
@@ -42,7 +45,7 @@ class ReservationTest {
             final LocalDate pastDate = LocalDate.now().minusDays(1);
             final User user = User.create(NAME, EMAIL, PASSWORD);
 
-            assertThatThrownBy(() -> Reservation.create(user, pastDate, RESERVATION_TIME, THEME))
+            assertThatThrownBy(() -> Reservation.create(user, pastDate, RESERVATION_TIME, THEME, Status.RESERVED, LocalDateTime.now()))
                     .isInstanceOf(InvalidCreateArgumentException.class);
         }
 
@@ -51,7 +54,7 @@ class ReservationTest {
             final LocalDate over7DaysDate = LocalDate.now().plusDays(8);
             final User user = User.create(NAME, EMAIL, PASSWORD);
 
-            assertThatThrownBy(() -> Reservation.create(user, over7DaysDate, RESERVATION_TIME, THEME))
+            assertThatThrownBy(() -> Reservation.create(user, over7DaysDate, RESERVATION_TIME, THEME, Status.RESERVED, LocalDateTime.now()))
                     .isInstanceOf(InvalidCreateArgumentException.class);
         }
     }

@@ -214,7 +214,7 @@ class ReservationServiceTest {
         );
         List<ReservationDto> expectedReservations = Arrays.asList(
                 new ReservationDto(Id.create("reservation-id-1"), UserDto.fromEntity(user1), new ReservationDate(dateFrom), ReservationTimeDto.fromEntity(time1), ThemeDto.fromEntity(theme1), Status.RESERVED),
-                new ReservationDto(Id.create("reservation-id-2"), UserDto.fromEntity(user2), new ReservationDate(dateFrom.plusDays(1)), ReservationTimeDto.fromEntity(time2), ThemeDto.fromEntity(theme2), Status.WAITING)
+                new ReservationDto(Id.create("reservation-id-2"), UserDto.fromEntity(user2), new ReservationDate(dateFrom.plusDays(1)), ReservationTimeDto.fromEntity(time2), ThemeDto.fromEntity(theme2), Status.RESERVED)
         );
 
         when(reservationRepository.findAllWithFilter(themeId, userId, dateFrom, dateTo))
@@ -239,53 +239,12 @@ class ReservationServiceTest {
                 Theme.create("theme", "", ""),
                 Status.RESERVED,LocalDateTime.now()
         );
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
 
         // when
-        sut.delete(reservation.getId().value(), user.getId().value());
+        sut.delete(reservation.getId().value());
 
         // then
-        verify(reservationRepository).findById(reservation.getId());
         verify(reservationRepository).deleteById(reservation.getId());
     }
 
-    @Test
-    void 존재하지_않는_예약_삭제_시_예외가_발생한다() {
-        // given
-        String reservationIdValue = "nonexistent-id";
-        Id reservatinId = Id.create(reservationIdValue);
-
-        final User user = User.create("dompoo", "dompoo@email.com", "password");
-        when(reservationRepository.findById(reservatinId)).thenReturn(Optional.empty());
-
-        // when, then
-        assertThatThrownBy(() -> sut.delete(reservationIdValue, user.getId().value()))
-                .isInstanceOf(NotFoundException.class);
-
-        verify(reservationRepository).findById(reservatinId);
-        verify(reservationRepository, never()).deleteById(reservatinId);
-    }
-
-    @Test
-    void 예약자가_아닌_유저가_삭제_시도시_예외가_발생한다() {
-        // given
-        final User user1 = User.create("dompoo", "dompoo@email.com", "password");
-        final User user2 = User.create("lemon", "lemon@email.com", "password");
-        final Reservation reservation = Reservation.create(
-                user1,
-                LocalDate.now().plusDays(5),
-                ReservationTime.create(LocalTime.of(10, 0)),
-                Theme.create("theme", "", ""),
-                Status.RESERVED,LocalDateTime.now()
-        );
-
-        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
-
-        // when, then
-        assertThatThrownBy(() -> sut.delete(reservation.getId().value(), user2.getId().value()))
-                .isInstanceOf(AuthorizationException.class);
-
-        verify(reservationRepository).findById(reservation.getId());
-        verify(reservationRepository, never()).deleteById(any());
-    }
 }

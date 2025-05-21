@@ -1,5 +1,6 @@
 package roomescape.test_util;
 
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import roomescape.business.model.entity.Reservation;
@@ -7,6 +8,7 @@ import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.Status;
 import roomescape.infrastructure.JpaReservationDao;
 import roomescape.infrastructure.JpaReservationTimeDao;
 import roomescape.infrastructure.JpaThemeDao;
@@ -41,7 +43,7 @@ public class JpaTestUtil {
         User user = userDao.findById(Id.create(userId)).get();
         ReservationTime time = timeDao.findById(Id.create(timeId)).get();
         Theme theme = themeDao.findById(Id.create(themeId)).get();
-        reservationDao.save(Reservation.restore(id, user, date, time, theme));
+        reservationDao.save(Reservation.restore(id, user, date, time, theme, Status.RESERVED, LocalDateTime.now()));
     }
 
     public void insertReservationTime(final String id, final LocalTime time) {

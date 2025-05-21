@@ -1,5 +1,6 @@
 package roomescape.infrastructure;
 
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import roomescape.business.model.repository.ReservationTimeRepository;
 import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.Status;
 import roomescape.test_util.JpaTestUtil;
 
 import java.time.LocalDate;
@@ -67,7 +69,7 @@ class ReservationRepositoryTest {
         userRepository.save(user);
 
         // when, then
-        assertThatCode(() -> sut.save(Reservation.create(user, DATE1, time, theme)))
+        assertThatCode(() -> sut.save(Reservation.create(user, DATE1, time, theme, Status.RESERVED, LocalDateTime.now())))
                 .doesNotThrowAnyException();
     }
 
