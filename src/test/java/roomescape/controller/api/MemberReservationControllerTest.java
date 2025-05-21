@@ -37,10 +37,10 @@ class MemberReservationControllerTest {
     @DisplayName("자신의 예약 정보를 불러올 수 있다")
     @Test
     void myReservationTest() {
-        Member member = new Member(null, "가이온", "hello@woowa.com", Role.USER, "password");
-        ReservationTime time = new ReservationTime(null, LocalTime.now());
-        Theme theme = new Theme(null, "테마A", "", "");
-        Reservation reservation = new Reservation(null, member, LocalDate.now(), time, theme);
+        Member member = Member.createWithoutId("가이온", "hello@woowa.com", Role.USER, "password");
+        ReservationTime time = ReservationTime.createWithoutId(LocalTime.now());
+        Theme theme = Theme.createWithoutId("테마A", "", "");
+        Reservation reservation = Reservation.createWithoutId(member, LocalDate.now(), time, theme);
 
         memberRepository.save(member);
         reservationTimeRepository.save(time);

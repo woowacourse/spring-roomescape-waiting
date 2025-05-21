@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalTime;
 
-@Table(name= "reservation_time")
+@Table(name = "reservation_time")
 @Entity
 public class ReservationTime {
     @Id
@@ -18,8 +18,7 @@ public class ReservationTime {
     @Column(nullable = false, unique = true)
     private LocalTime startAt;
 
-    public ReservationTime(
-            Long id, LocalTime startAt) {
+    public ReservationTime(Long id, LocalTime startAt) {
         validateStartAt(startAt);
         this.id = id;
         this.startAt = startAt;

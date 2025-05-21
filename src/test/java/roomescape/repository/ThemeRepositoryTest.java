@@ -35,7 +35,7 @@ class ThemeRepositoryTest {
     @DisplayName("테마를 저장하고 ID로 조회할 수 있다")
     void saveAndFindById() {
         // given
-        Theme theme = new Theme(null, "테마1", "테마1 설명", "thumbnail1.jpg");
+        Theme theme = Theme.createWithoutId( "테마1", "테마1 설명", "thumbnail1.jpg");
 
         // when
         Theme savedTheme = themeRepository.save(theme);
@@ -52,8 +52,8 @@ class ThemeRepositoryTest {
     @DisplayName("모든 테마를 조회할 수 있다")
     void findAll() {
         // given
-        Theme theme1 = new Theme(null, "테마1", "테마1 설명", "thumbnail1.jpg");
-        Theme theme2 = new Theme(null, "테마2", "테마2 설명", "thumbnail2.jpg");
+        Theme theme1 = Theme.createWithoutId( "테마1", "테마1 설명", "thumbnail1.jpg");
+        Theme theme2 = Theme.createWithoutId( "테마2", "테마2 설명", "thumbnail2.jpg");
         themeRepository.saveAll(List.of(theme1, theme2));
 
         // when
@@ -68,7 +68,7 @@ class ThemeRepositoryTest {
     @DisplayName("테마를 삭제할 수 있다")
     void delete() {
         // given
-        Theme theme = new Theme(null, "테마1", "테마1 설명", "thumbnail1.jpg");
+        Theme theme = Theme.createWithoutId( "테마1", "테마1 설명", "thumbnail1.jpg");
         Theme savedTheme = themeRepository.save(theme);
 
         // when
@@ -83,16 +83,16 @@ class ThemeRepositoryTest {
     @DisplayName("인기 테마를 조회할 수 있다")
     void findPopular() {
         // given
-        Theme theme1 = new Theme(null, "테마1", "테마1 설명", "thumbnail1.jpg");
-        Theme theme2 = new Theme(null, "테마2", "테마2 설명", "thumbnail2.jpg");
-        Theme theme3 = new Theme(null, "테마3", "테마3 설명", "thumbnail3.jpg");
+        Theme theme1 = Theme.createWithoutId( "테마1", "테마1 설명", "thumbnail1.jpg");
+        Theme theme2 = Theme.createWithoutId( "테마2", "테마2 설명", "thumbnail2.jpg");
+        Theme theme3 = Theme.createWithoutId( "테마3", "테마3 설명", "thumbnail3.jpg");
 
         themeRepository.saveAll(List.of(theme1, theme2, theme3));
 
         Member member = Member.createWithoutId("사용자", "user@example.com", Role.USER, "password");
         memberRepository.save(member);
 
-        ReservationTime time = new ReservationTime(null, LocalTime.of(10, 0));
+        ReservationTime time = ReservationTime.createWithoutId( LocalTime.of(10, 0));
         reservationTimeRepository.save(time);
 
         LocalDate today = LocalDate.now();

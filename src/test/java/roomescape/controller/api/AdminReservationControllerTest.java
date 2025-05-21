@@ -54,7 +54,7 @@ class AdminReservationControllerTest {
                     .then().log().all()
                     .statusCode(201);
 
-            Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
+            Member admin = Member.createWithoutId("가이온", "hello@woowa.com", Role.ADMIN, "password");
             memberRepository.save(admin);
 
             LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
@@ -145,7 +145,7 @@ class AdminReservationControllerTest {
                     .then()
                     .statusCode(201);
 
-            Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
+            Member admin = Member.createWithoutId("가이온", "hello@woowa.com", Role.ADMIN, "password");
             memberRepository.save(admin);
 
             LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");

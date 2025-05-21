@@ -25,8 +25,8 @@ class AdminPageControllerTest {
 
     @BeforeEach
     void setUp() {
-        memberRepository.save(new Member(null, "가이온", "hello@woowa.com", Role.USER, "password"));
-        memberRepository.save(new Member(null, "가이온1", "hello1@woowa.com", Role.ADMIN, "password"));
+        memberRepository.save(Member.createWithoutId("가이온", "hello@woowa.com", Role.USER, "password"));
+        memberRepository.save(Member.createWithoutId("가이온1", "hello1@woowa.com", Role.ADMIN, "password"));
 
         LoginRequest loginRequest = new LoginRequest("hello@woowa.com", "password");
         Map<String, String> cookies = RestAssured.given().log().all()

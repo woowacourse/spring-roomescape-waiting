@@ -21,7 +21,7 @@ class ReservationTimeRepositoryTest {
     @DisplayName("예약 시간을 저장하고 ID로 조회할 수 있다")
     void saveAndFindById() {
         // given
-        ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(10, 0));
+        ReservationTime reservationTime = ReservationTime.createWithoutId(LocalTime.of(10, 0));
 
         // when
         ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
@@ -36,9 +36,9 @@ class ReservationTimeRepositoryTest {
     @DisplayName("모든 예약 시간을 조회할 수 있다")
     void findAll() {
         // given
-        ReservationTime time1 = new ReservationTime(null, LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(null, LocalTime.of(12, 0));
-        ReservationTime time3 = new ReservationTime(null, LocalTime.of(14, 0));
+        ReservationTime time1 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
+        ReservationTime time2 = ReservationTime.createWithoutId(LocalTime.of(12, 0));
+        ReservationTime time3 = ReservationTime.createWithoutId(LocalTime.of(14, 0));
         reservationTimeRepository.saveAll(List.of(time1, time2, time3));
 
         // when
@@ -58,7 +58,7 @@ class ReservationTimeRepositoryTest {
     @DisplayName("예약 시간을 삭제할 수 있다")
     void delete() {
         // given
-        ReservationTime time = new ReservationTime(null, LocalTime.of(10, 0));
+        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(10, 0));
         ReservationTime savedTime = reservationTimeRepository.save(time);
 
         // when
@@ -73,7 +73,7 @@ class ReservationTimeRepositoryTest {
     @DisplayName("예약 시간을 업데이트할 수 있다")
     void update() {
         // given
-        ReservationTime time = new ReservationTime(null, LocalTime.of(10, 0));
+        ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(10, 0));
         ReservationTime savedTime = reservationTimeRepository.save(time);
 
         // when
