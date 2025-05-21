@@ -14,10 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.application.dto.AvailableTimeInfo;
-import roomescape.reservation.application.dto.ReservationTimeCreateCommand;
-import roomescape.reservation.application.dto.ReservationTimeInfo;
-import roomescape.reservation.application.service.ReservationTimeService;
+import roomescape.reservation.application.time.dto.ReservationTimeAvailabilityInfo;
+import roomescape.reservation.application.time.dto.ReservationTimeCreateCommand;
+import roomescape.reservation.application.time.dto.ReservationTimeInfo;
+import roomescape.reservation.application.time.service.ReservationTimeService;
 import roomescape.reservation.domain.time.ReservationTime;
 import roomescape.reservation.domain.time.ReservationTimeRepository;
 
@@ -94,14 +94,14 @@ public class TimeServiceIntegrationTest {
     void findAvailableTimes() {
         // when
         final LocalDate date = LocalDate.of(2025, 4, 24);
-        final List<AvailableTimeInfo> result = reservationTimeService.findAvailableTimes(date, 7L);
+        final List<ReservationTimeAvailabilityInfo> result = reservationTimeService.findAvailableTimes(date, 7L);
         // then
         assertAll(
                 () -> assertThat(result).hasSize(3),
                 () -> assertThat(result).contains(
-                        new AvailableTimeInfo(1L, LocalTime.of(10, 0), true),
-                        new AvailableTimeInfo(2L, LocalTime.of(15, 0), false),
-                        new AvailableTimeInfo(3L, LocalTime.of(16, 0), false)
+                        new ReservationTimeAvailabilityInfo(1L, LocalTime.of(10, 0), true),
+                        new ReservationTimeAvailabilityInfo(2L, LocalTime.of(15, 0), false),
+                        new ReservationTimeAvailabilityInfo(3L, LocalTime.of(16, 0), false)
                 )
         );
     }

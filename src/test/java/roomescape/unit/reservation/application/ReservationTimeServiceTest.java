@@ -11,10 +11,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.application.dto.AvailableTimeInfo;
-import roomescape.reservation.application.dto.ReservationTimeCreateCommand;
-import roomescape.reservation.application.dto.ReservationTimeInfo;
-import roomescape.reservation.application.service.ReservationTimeService;
+import roomescape.reservation.application.time.dto.ReservationTimeAvailabilityInfo;
+import roomescape.reservation.application.time.dto.ReservationTimeCreateCommand;
+import roomescape.reservation.application.time.dto.ReservationTimeInfo;
+import roomescape.reservation.application.time.service.ReservationTimeService;
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
 import roomescape.reservation.domain.theme.Theme;
@@ -115,13 +115,13 @@ class ReservationTimeServiceTest {
         final LocalDate date = LocalDate.of(2025, 5, 1);
         reservationRepository.save(new Reservation(1L, member, date, savedTime1, theme));
         // when
-        final List<AvailableTimeInfo> result = reservationTimeService.findAvailableTimes(date, theme.id());
+        final List<ReservationTimeAvailabilityInfo> result = reservationTimeService.findAvailableTimes(date, theme.id());
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),
                 () -> assertThat(result).contains(
-                        new AvailableTimeInfo(savedTime1.id(), savedTime1.startAt(), true),
-                        new AvailableTimeInfo(savedTime2.id(), savedTime2.startAt(), false)
+                        new ReservationTimeAvailabilityInfo(savedTime1.id(), savedTime1.startAt(), true),
+                        new ReservationTimeAvailabilityInfo(savedTime2.id(), savedTime2.startAt(), false)
                 )
         );
     }
