@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,13 +23,13 @@ public class Reservation {
 
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-    
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
@@ -42,22 +43,28 @@ public class Reservation {
 
     public static Reservation register(final Member member, final LocalDate date,
                                        final ReservationTime time, final Theme theme) {
-        boolean isBefore = false;
-        final LocalDateTime other = LocalDateTime.now();
-        if (date.isBefore(other.toLocalDate())) {
-            isBefore = true;
-        }
-        if (date.equals(other.toLocalDate())) {
-            isBefore = time.isBeforeOrEqual(other.toLocalTime());
-        }
-        if (isBefore) {
+        Reservation reservation = new Reservation(null, member, date, time, theme);
+        if (reservation.isBefore(LocalDateTime.now())) {
             throw new BadRequestException("지나간 날짜와 시간은 예약 불가합니다.");
         }
-        return new Reservation(null, member, date, time, theme);
+        return reservation;
     }
 
     protected Reservation() {
+    }
 
+    public boolean isBefore(final LocalDateTime other) {
+        if (date.isBefore(other.toLocalDate())) {
+            return true;
+        }
+        if (date.equals(other.toLocalDate())) {
+            return time.isBeforeOrEqual(other.toLocalTime());
+        }
+        return false;
+    }
+
+    public boolean hasOwner(final Member other) {
+        return this.member.equals(other);
     }
 
     public Long getId() {

@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import roomescape.reservation.domain.Reservation;
 
@@ -13,6 +14,8 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
                                                                 LocalDate toDate);
 
     List<Reservation> findByDateBetween(LocalDate from, LocalDate to);
+
+    Optional<Reservation> findFirstByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId);
 
     boolean existsByTimeId(long id);
 
