@@ -1,6 +1,7 @@
 package roomescape.unit.reservation.presentation;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -90,5 +91,16 @@ public class WaitingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(objectMapper.writeValueAsString(response)));
+    }
+
+    @Test
+    void 자신_대기를_취소한다() throws Exception {
+        // given
+        given(tokenProvider.extractSubject("accessToken")).willReturn("1");
+        // when & then
+        mockMvc.perform(delete("/api/waiting/{waitingId}", 1L)
+                        .cookie(new Cookie("token", "accessToken"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
     }
 }
