@@ -66,6 +66,10 @@ public class ReservationService {
 
     @Transactional
     public void deleteByUser(Long id, Long userId) {
+        if (!reservationRepository.existsById(id)) {
+            throw new NotFoundException("예약을 찾을 수 없습니다.");
+        }
+
         if (!reservationRepository.existsByIdAndMemberId(id, userId)) {
             throw new NotAuthorizationException("해당 예약자가 아닙니다.");
         }
@@ -76,6 +80,11 @@ public class ReservationService {
     @Transactional
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
+        reservationRepository.delete(reservation);
+        waitingToReservation(reservation);
+    }
+
+    private void waitingToReservation(Reservation reservation) {
         LocalDate date = reservation.getDate();
         Long timeId = reservation.getTimeId();
 
@@ -84,8 +93,6 @@ public class ReservationService {
             Reservation newReservation = Reservation.from(waiting);
             reservationRepository.save(newReservation);
         }
-
-        reservationRepository.deleteById(reservation.getId());
     }
 
     private Reservation getReservation(Long id) {
