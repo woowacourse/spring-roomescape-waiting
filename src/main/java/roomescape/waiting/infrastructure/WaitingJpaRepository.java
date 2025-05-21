@@ -16,16 +16,6 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
             """)
     Collection<Waiting> findAllWithEagerLoading();
 
-
-    @Query("""
-                SELECT w FROM Waiting w
-                JOIN FETCH w.member
-                JOIN FETCH w.spec.theme
-                JOIN FETCH w.spec.time
-                WHERE w.member.id = :memberId
-            """)
-    Collection<Waiting> findAllByMemberId(Long memberId);
-
     @Query("""
             SELECT new roomescape.waiting.domain.WaitingWithRank(
                 w,

@@ -10,8 +10,6 @@ public interface WaitingRepository {
 
     Collection<Waiting> findAll();
 
-    Collection<Waiting> findAllByMemberId(Long memberId);
-
     Collection<WaitingWithRank> findWithRankByMemberId(Long memberId);
 
     Optional<WaitingWithRank> findWithRankById(Long id);

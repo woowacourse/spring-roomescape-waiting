@@ -50,10 +50,10 @@ public class Waiting {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-    
+
 
     public LocalDate getDate() {
-        return spec.getDate();
+        return spec.getDate().getValue();
     }
 
     public ReservationTime getTime() {

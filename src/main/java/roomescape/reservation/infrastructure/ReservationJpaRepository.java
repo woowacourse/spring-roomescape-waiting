@@ -25,14 +25,14 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
 
-    boolean existsBySpecDateAndSpecTimeId(LocalDate reservationDate, Long id);
+    boolean existsBySpecDateValueAndSpecTimeId(LocalDate reservationDate, Long id);
 
     default boolean existsBySpec(ReservationSpec spec) {
-        return existsBySpecDateAndSpecTimeIdAndSpecThemeId(spec.getDate(), spec.getTime().getId(),
+        return existsBySpecDateValueAndSpecTimeIdAndSpecThemeId(spec.getDate().getValue(), spec.getTime().getId(),
                 spec.getTheme().getId());
     }
 
-    boolean existsBySpecDateAndSpecTimeIdAndSpecThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsBySpecDateValueAndSpecTimeIdAndSpecThemeId(LocalDate date, Long timeId, Long themeId);
 
     @Query("""
             SELECT r FROM Reservation r

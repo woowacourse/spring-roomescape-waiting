@@ -22,7 +22,7 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
 
     @Override
     public boolean existsByDateAndTimeId(LocalDate reservationDate, Long id) {
-        return reservationJpaRepository.existsBySpecDateAndSpecTimeId(reservationDate, id);
+        return reservationJpaRepository.existsBySpecDateValueAndSpecTimeId(reservationDate, id);
     }
 
     @Override
