@@ -19,6 +19,12 @@
     - [x] 만약 해당 예약이 없다면 404 NOT FOUND 상태 코드가 반환된다.
 - [x] "/admin/reservations" post 요청 시 관리자 예약을 할 수 있다.
 - [x] "/reservation-mine" get 요청 시 특정 사용자의 예약을 조회 할 수 있다.
+
+### 예약 대기
+- [] "/reservations/waiting" post 요청으로 사용자 예약 대기를 할 수 있다.
+  - [] 같은 테마, 같은 날짜와 시간에 예약이 존재하지 않을 때
+  - [] 과거 날짜에 대한 예약 대기를 생성할 때
+
 ### 예약 시간
 
 - [x] "/times" post 요청으로 startAt 을 body로 전송하여 추가 할 수 있다.
