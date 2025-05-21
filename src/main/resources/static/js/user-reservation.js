@@ -39,11 +39,6 @@ function renderTheme(themes) {
     themes.forEach(theme => {
         const name = theme.name;
         const themeId = theme.id;
-        /*
-        TODO: [3단계] 사용자 예약 - 테마 목록 조회 API 호출 후 렌더링
-              response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-              createSlot('theme', theme name, theme id) 형태로 호출
-        */
         themeSlots.appendChild(createSlot('theme', name, themeId));
     });
 }
@@ -55,6 +50,9 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
+        if (booked) {
+            div.classList.add('disabled');
+        }
     }
     return div;
 }
@@ -85,15 +83,12 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
-          요청 포맷에 맞게 설정
-    */
     fetch(`/times/availability?themeId=${themeId}&date=${date}`, { // 예약 가능 시간 조회 API endpoint
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
+
     }).then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
@@ -114,10 +109,6 @@ function renderAvailableTimes(times) {
         return;
     }
     times.forEach(time => {
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
-              response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-        */
         const startAt = time.startAt;
         const timeId = time.id;
         const alreadyBooked = time.alreadyBooked;
@@ -155,20 +146,12 @@ function onReservationButtonClick() {
     const selectedDate = document.getElementById("datepicker").value;
     const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
     const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
-    const name = document.getElementById('user-name').value;
 
     if (selectedDate && selectedThemeId && selectedTimeId) {
-
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-              [5단계] 예약 생성 기능 변경 - 사용자
-              request 명세에 맞게 설정
-        */
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
             timeId: selectedTimeId,
-            name: name
         };
 
         fetch('/reservations', {
@@ -176,6 +159,7 @@ function onReservationButtonClick() {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify(reservationData)
         })
             .then(response => {
@@ -193,6 +177,14 @@ function onReservationButtonClick() {
     } else {
         alert("Please select a date, theme, and time before making a reservation.");
     }
+}
+
+function requestRead(endpoint) {
+    return fetch(endpoint)
+        .then(response => {
+            if (response.status === 200) return response.json();
+            throw new Error('Read failed');
+        });
 }
 
 function onWaitButtonClick() {
@@ -232,12 +224,4 @@ function onWaitButtonClick() {
     } else {
         alert("Please select a date, theme, and time before making a reservation waiting.");
     }
-}
-
-function requestRead(endpoint) {
-    return fetch(endpoint)
-        .then(response => {
-            if (response.status === 200) return response.json();
-            throw new Error('Read failed');
-        });
 }
