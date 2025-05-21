@@ -1,7 +1,10 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.member.auth.vo.MemberInfo;
@@ -19,6 +22,7 @@ import roomescape.reservation.service.dto.CreateReservationServiceRequest;
 import roomescape.reservation.service.usecase.ReservationCommandUseCase;
 import roomescape.reservation.service.usecase.ReservationQueryUseCase;
 import roomescape.reservation.service.usecase.ReservationWaitCommandUseCase;
+import roomescape.reservation.service.usecase.ReservationWaitQueryUseCase;
 
 @Service
 @RequiredArgsConstructor
@@ -27,22 +31,56 @@ public class ReservationService {
     private final ReservationQueryUseCase reservationQueryUseCase;
     private final ReservationCommandUseCase reservationCommandUseCase;
     private final ReservationWaitCommandUseCase reservationWaitCommandUseCase;
+    private final ReservationWaitQueryUseCase reservationWaitQueryUseCase;
 
     public List<ReservationWebResponse> getAll() {
         return ReservationConverter.toDto(
                 reservationQueryUseCase.getAll());
     }
 
-    public List<ReservationWithStatusResponse> getByMemberId(Long memberId) {
+    public List<ReservationWithStatusResponse> getWithReservationWaitByMemberId(final Long memberId) {
+        final List<ReservationWithStatusResponse> allReservations = new ArrayList<>();
+        allReservations.addAll(getByMemberId(memberId));
+        allReservations.addAll(getReservationWaitByMemberId(memberId));
+
+        return allReservations.stream()
+                .sorted(Comparator.comparing(ReservationWithStatusResponse::getDate)
+                        .thenComparing(ReservationWithStatusResponse::getTime))
+                .toList();
+    }
+
+    public List<ReservationWithStatusResponse> getByMemberId(final Long memberId) {
         return reservationQueryUseCase.getByMemberId(memberId).stream()
                 .map(reservation -> new ReservationWithStatusResponse(
                         reservation.getId(),
                         reservation.getTheme().getName().getValue(),
                         reservation.getDate().getValue(),
                         reservation.getTime().getStartAt(),
-                        "예약"
+                        Status.CONFIRMED.getTitle()
                 ))
                 .toList();
+    }
+
+    public List<ReservationWithStatusResponse> getReservationWaitByMemberId(final Long memberId) {
+        return reservationWaitQueryUseCase.getByMemberId(memberId).stream()
+                .map(reservationWaitWithRank -> new ReservationWithStatusResponse(
+                        reservationWaitWithRank.reservationWait().getId(),
+                        reservationWaitWithRank.reservationWait().getTheme().getName().getValue(),
+                        reservationWaitWithRank.reservationWait().getDate().getValue(),
+                        reservationWaitWithRank.reservationWait().getTime().getStartAt(),
+                        Status.PENDING.getTitle(),
+                        reservationWaitWithRank.rank()
+                ))
+                .toList();
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    private enum Status {
+        CONFIRMED("예약"),
+        PENDING("예약대기");
+
+        private final String title;
     }
 
     public List<AvailableReservationTimeWebResponse> getAvailable(final LocalDate date, final Long id) {

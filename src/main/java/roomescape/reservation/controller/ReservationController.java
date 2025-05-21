@@ -44,7 +44,7 @@ public class ReservationController {
 
     @GetMapping(BASE_PATH + "/mine")
     public List<ReservationWithStatusResponse> getAll(@LoginMember MemberInfo memberInfo) {
-        return reservationService.getByMemberId(memberInfo.id());
+        return reservationService.getWithReservationWaitByMemberId(memberInfo.id());
     }
 
     @GetMapping(BASE_PATH + "/times")
