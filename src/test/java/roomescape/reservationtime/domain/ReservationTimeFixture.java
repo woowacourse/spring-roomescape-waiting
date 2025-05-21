@@ -11,14 +11,14 @@ public class ReservationTimeFixture {
         long id = identifier.getAndIncrement();
         return new ReservationTime(
             id,
-            NOW.plusNanos(id)
+            NOW.plusSeconds(id)
         );
     }
 
     public static ReservationTime createWithoutId() {
         long id = identifier.getAndIncrement();
         return new ReservationTime(
-            NOW.plusNanos(id)
+            NOW.plusSeconds(id)
         );
     }
 }
