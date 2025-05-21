@@ -153,4 +153,41 @@ public class AdminApiTest {
                 .statusCode(200)
                 .body("size()", is(1));
     }
+
+    @Test
+    void 관리자가_대기를_승인한다() {
+        // given
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.ADMIN).bulid()
+        );
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.builder()
+                        .theme(theme)
+                        .member(member1)
+                        .timeSlot(timeSlot)
+                        .date(LocalDate.now().plusDays(1)).build()
+        );
+        String token = tokenProvider.createToken("1", Role.ADMIN);
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().post("/api/admin/waitings/{waitingId}", waiting.getId())
+                .then().log().all()
+                .statusCode(204);
+    }
 }
