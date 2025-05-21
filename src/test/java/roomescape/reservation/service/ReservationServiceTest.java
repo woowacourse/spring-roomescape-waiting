@@ -23,6 +23,7 @@ import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -90,9 +91,8 @@ class ReservationServiceTest {
         themeRepo.save(theme1);
         memberRepo.save(member);
         reservationRepository.save(r1);
-        ReservationRequest dupReq = new ReservationRequest(r1.getDate(), time1.getId(), theme1.getId());
-        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
-                member.getRole());
+        ReservationRequest dupReq = new ReservationRequest(r1.getDate(), time1.getId(), theme1.getId(), false);
+        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole());
         // when
         // then
         assertThatThrownBy(() -> service.saveReservation(dupReq, loginMember))
@@ -106,9 +106,8 @@ class ReservationServiceTest {
         timeRepo.save(time1);
         themeRepo.save(theme1);
         memberRepo.save(member);
-        ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time1.getId(), theme1.getId());
-        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
-                member.getRole());
+        ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time1.getId(), theme1.getId(), false);
+        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole());
 
         // when
         // then
@@ -123,10 +122,9 @@ class ReservationServiceTest {
         timeRepo.save(time1);
         themeRepo.save(theme1);
         memberRepo.save(member);
-        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
-                member.getRole());
+        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole());
 
-        ReservationRequest req = new ReservationRequest(LocalDate.of(2999, 4, 21), time1.getId(), theme1.getId());
+        ReservationRequest req = new ReservationRequest(LocalDate.of(2999, 4, 21), time1.getId(), theme1.getId(), false);
 
         // when
         ReservationResponse result = service.saveReservation(req, loginMember);
@@ -173,7 +171,7 @@ class ReservationServiceTest {
         // then
         assertThatThrownBy(() -> service.deleteReservation(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 예약입니다. id=999");
+                .hasMessage("존재하지 않는 예약입니다. id: 999");
     }
 
     @Test
@@ -214,5 +212,98 @@ class ReservationServiceTest {
         assertThat(myReservations)
                 .extracting(MyReservationResponse::time)
                 .allMatch(time -> time.equals(time1.getStartAt()));
+    }
+
+
+    @Test
+    void 예약_생성_성공() {
+        // given
+        memberRepo.save(member);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationRequest request = new ReservationRequest(date, time1.getId(), theme1.getId(), false);
+        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
+
+        // when
+        ReservationResponse response = service.saveReservation(request, loginMember);
+        Reservation reservation = reservationRepository.findById(response.id()).orElseThrow();
+
+        // then
+        assertThat(reservation.getId()).isNotNull();
+        assertThat(reservation.getDate()).isEqualTo(date);
+        assertThat(reservation.getTime()).isEqualTo(time1);
+        assertThat(reservation.getTheme()).isEqualTo(theme1);
+        assertThat(reservation.getMember().getId()).isEqualTo(member.getId());
+        assertThat(reservation.getWaiting().getStatus()).isEqualTo(ReservationStatus.BOOKED);
+    }
+
+    @Test
+    void 예약_시간_검증_실패() {
+        // given
+        memberRepo.save(member);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        LocalDate date = LocalDate.now().minusDays(1);
+        ReservationRequest request = new ReservationRequest(date, time1.getId(), theme1.getId(), false);
+        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
+
+        // when & then
+        assertThatThrownBy(() ->
+                service.saveReservation(request, loginMember)
+        )
+                .isInstanceOf(ReservationException.class)
+                .hasMessage("예약은 현재 시간 이후로 가능합니다.");
+    }
+
+    @Test
+    void 대기_목록_관리_성공() {
+        // given
+        memberRepo.save(member);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationRequest waitingRequest1 = new ReservationRequest(date, time1.getId(), theme1.getId(), false);
+        ReservationRequest waitingRequest2 = new ReservationRequest(date, time1.getId(), theme1.getId(), true);
+        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
+
+        ReservationResponse response1 = service.saveReservation(waitingRequest1, loginMember);
+        ReservationResponse response2 = service.saveReservation(waitingRequest2, loginMember);
+        Reservation waitingReservation1 = reservationRepository.findById(response1.id()).orElseThrow();
+        Reservation waitingReservation2 = reservationRepository.findById(response2.id()).orElseThrow();
+
+        // when
+        service.deleteReservation(waitingReservation1.getId());
+        Reservation updatedReservation2 = reservationRepository.findById(waitingReservation2.getId()).orElseThrow();
+
+        // then
+        assertThat(updatedReservation2.getWaiting().getStatus()).isEqualTo(ReservationStatus.BOOKED);
+        assertThat(updatedReservation2.getWaiting().getRank()).isEqualTo(0L);
+    }
+
+    @Test
+    void 예약_시간_중복_검증() {
+        // given
+        memberRepo.save(member);
+        timeRepo.save(time1);
+        themeRepo.save(theme1);
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationRequest request = new ReservationRequest(date, time1.getId(), theme1.getId(), false);
+        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+                member.getRole());
+
+        // 동일한 시간대에 예약 생성
+        ReservationResponse response = service.saveReservation(request, loginMember);
+        Reservation firstReservation = reservationRepository.findById(response.id()).orElseThrow();
+
+        // when & then
+        assertThatThrownBy(() ->
+                service.saveReservation(request, loginMember)
+        )
+                .isInstanceOf(ReservationException.class)
+                .hasMessage("해당 시간은 이미 예약되어있습니다.");
     }
 }
