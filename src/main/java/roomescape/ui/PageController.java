@@ -47,4 +47,9 @@ public class PageController {
     public String getMyReservationPage() {
         return "reservation-mine";
     }
+
+    @GetMapping("/admin/waiting")
+    public String getAdminWaitingPage() {
+        return "waiting";
+    }
 }
