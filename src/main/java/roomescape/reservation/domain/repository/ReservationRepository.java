@@ -7,10 +7,10 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 
 public interface ReservationRepository {
 
-    List<Reservation> findFilteredReservations(Long themeId,
-                                               Long memberId,
-                                               LocalDate startDate,
-                                               LocalDate endDate);
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId,
+                                                             Long memberId,
+                                                             LocalDate startDate,
+                                                             LocalDate endDate);
 
     boolean existsByTimeId(Long id);
 

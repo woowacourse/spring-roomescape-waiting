@@ -17,10 +17,10 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findFilteredReservations(final Long themeId, final Long memberId,
-                                                      final LocalDate startDate,
-                                                      final LocalDate endDate) {
-        return jpaReservationRepository.findFilteredReservations(themeId, memberId, startDate, endDate);
+    public List<Reservation> findByThemeIdAndMemberIdAndDateBetween(final Long themeId, final Long memberId,
+                                                                    final LocalDate startDate,
+                                                                    final LocalDate endDate) {
+        return jpaReservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, startDate, endDate);
     }
 
     @Override

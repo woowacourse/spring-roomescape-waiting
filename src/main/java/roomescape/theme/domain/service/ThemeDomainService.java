@@ -15,6 +15,8 @@ import roomescape.theme.domain.repository.ThemeRepository;
 @Service
 public class ThemeDomainService {
 
+    private static final int DAYS_TO_SUBTRACT = 1;
+
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -53,7 +55,7 @@ public class ThemeDomainService {
     }
 
     public Page<Theme> findPopularThemes(final int days, final int limit) {
-        LocalDate endDate = LocalDate.now().minusDays(1);
+        LocalDate endDate = LocalDate.now().minusDays(DAYS_TO_SUBTRACT);
         LocalDate startDate = endDate.minusDays(days);
         return themeRepository.findPopularThemes(startDate, endDate, PageRequest.of(0, limit));
     }

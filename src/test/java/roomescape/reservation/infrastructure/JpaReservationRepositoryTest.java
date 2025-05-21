@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -58,7 +57,7 @@ class JpaReservationRepositoryTest {
     }
 
     @Test
-    void findFilteredReservations() {
+    void findByThemeIdAndMemberIdAndDateBetween() {
         Theme theme2 = themeRepository.save(Theme.of("논리", "셜록 논리 게임 with Vector", "image.png"));
 
         ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
@@ -68,7 +67,7 @@ class JpaReservationRepositoryTest {
                 ReservationStatus.RESERVED);
         reservationRepository.save(reservation2);
 
-        List<Reservation> filteredReservations = reservationRepository.findFilteredReservations(theme.getId(),
+        List<Reservation> filteredReservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(theme.getId(),
                 member.getId(), futureDate,
                 futureDate.plusDays(1));
 
@@ -126,5 +125,16 @@ class JpaReservationRepositoryTest {
 
         // Then
         assertThat(reservations.size()).isEqualTo(1);
+    }
+
+    @Test
+    void findAll() {
+        // Given
+
+        // When
+        List<Reservation> reservations = reservationRepository.findAll();
+
+        // Then
+        assertThat(reservations.size()).isOne();
     }
 }

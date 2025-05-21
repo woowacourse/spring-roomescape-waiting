@@ -34,12 +34,12 @@ public class ReservationDomainService {
         }
     }
 
-    public List<Reservation> getReservations(final Long themeId, final Long memberId,
-                                             final LocalDate startDate, final LocalDate endDate) {
+    public List<Reservation> findFilteredReservations(final Long themeId, final Long memberId,
+                                                      final LocalDate startDate, final LocalDate endDate) {
         if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
             return reservationRepository.findAll();
         }
-        return reservationRepository.findFilteredReservations(themeId, memberId, startDate, endDate);
+        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, startDate, endDate);
     }
 
     public Reservation save(final Member member, final LocalDate date, final ReservationTime time, final Theme theme,

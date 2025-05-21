@@ -37,7 +37,7 @@ public class ReservationApplicationService {
     public List<ReservationResponse> findReservations(final Long themeId, final Long memberId,
                                                       final LocalDate startDate,
                                                       final LocalDate endDate) {
-        return reservationDomainService.getReservations(themeId, memberId, startDate, endDate)
+        return reservationDomainService.findFilteredReservations(themeId, memberId, startDate, endDate)
                 .stream()
                 .map(reservation -> {
                     ReservationTime time = reservation.getTime();

@@ -21,10 +21,10 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
               AND r.date BETWEEN :startDate AND :endDate 
             """)
 
-    List<Reservation> findFilteredReservations(Long themeId,
-                                               Long memberId,
-                                               LocalDate startDate,
-                                               LocalDate endDate);
+    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId,
+                                                             Long memberId,
+                                                             LocalDate startDate,
+                                                             LocalDate endDate);
 
     @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.time.id = :timeId) ")
     boolean existsByTimeId(Long timeId);

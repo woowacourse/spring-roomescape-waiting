@@ -81,7 +81,7 @@ class ReservationDomainServiceTest {
     }
 
     @Test
-    void getReservations_shouldReturnAllCreatedReservations() {
+    void findFilteredReservations_shouldReturnAllCreatedReservations() {
         Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
         reservationApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
         reservationApplicationService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
