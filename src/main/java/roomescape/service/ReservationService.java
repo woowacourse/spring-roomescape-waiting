@@ -44,23 +44,27 @@ public class ReservationService {
     @Transactional
     public Long create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId())
-                .orElseThrow(
-                        () -> new NotFoundReservationTimeException(
-                                createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
-        Theme theme = themeRepository.findById(createReservationParam.themeId()).orElseThrow(
-                () -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
-        Member member = memberRepository.findById(createReservationParam.memberId()).orElseThrow(
-                () -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
+                .orElseThrow(() -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
+        Theme theme = themeRepository.findById(createReservationParam.themeId())
+                .orElseThrow(() -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
+        Member member = memberRepository.findById(createReservationParam.memberId())
+                .orElseThrow(() -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
 
-        validateUniqueReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
+        validateDuplicateReservation(createReservationParam, reservationTime, theme);
+
+        ReservationStatus status = ReservationStatus.RESERVED;
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(createReservationParam.date(),
+                reservationTime.getId(), theme.getId(), ReservationStatus.RESERVED)) {
+            status = ReservationStatus.WAITING;
+        }
 
         Reservation reservation = new Reservation(
                 member,
                 createReservationParam.date(),
                 reservationTime,
                 theme,
-                ReservationStatus.RESERVED
+                status
         );
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -101,14 +105,6 @@ public class ReservationService {
                 .toList();
     }
 
-    private void validateUniqueReservation(final CreateReservationParam createReservationParam,
-                                           final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(),
-                reservationTime.getId(), theme.getId())) {
-            throw new UnableCreateReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
-        }
-    }
-
     private void validateReservationDateTime(final CreateReservationParam createReservationParam,
                                              final LocalDateTime currentDateTime,
                                              final ReservationTime reservationTime) {
@@ -120,6 +116,16 @@ public class ReservationService {
         Duration duration = Duration.between(currentDateTime, reservationDateTime);
         if (duration.toMinutes() < 10) {
             throw new UnableCreateReservationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
+        }
+    }
+
+    private void validateDuplicateReservation(final CreateReservationParam createReservationParam,
+                                              final ReservationTime reservationTime, final Theme theme) {
+
+        if (reservationRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+                createReservationParam.memberId(), createReservationParam.date(), reservationTime.getId(), theme.getId()
+        )) {
+            throw new UnableCreateReservationException("동일한 예약이 존재합니다.");
         }
     }
 }
