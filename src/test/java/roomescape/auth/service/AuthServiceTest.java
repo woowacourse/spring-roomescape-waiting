@@ -77,5 +77,4 @@ class AuthServiceTest {
             ).isInstanceOf(InvalidTokenException.class);
         }
     }
-
 }
