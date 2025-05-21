@@ -20,8 +20,9 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public Member getUserById(long id) {
-        return loadUserById(id);
+    public Member getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(NotFoundUserException::new);
     }
 
     public List<UserProfileResponse> findAllUserProfile() {
@@ -36,11 +37,6 @@ public class UserService {
         Member member = Member.createWithoutId(request.role(), request.name(), request.email(), request.password());
         Member savedMember = userRepository.save(member);
         return new UserProfileResponse(savedMember);
-    }
-
-    private Member loadUserById(long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(NotFoundUserException::new);
     }
 
     private void validateDuplicatedEmail(String email) {

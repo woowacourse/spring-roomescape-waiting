@@ -44,12 +44,12 @@ public class ThemeService {
     }
 
     public void deleteThemeById(Long id) {
-        Theme theme = loadThemeById(id);
+        Theme theme = getThemeById(id);
         validateReservationInTime(theme);
         themeRepository.deleteById(id);
     }
 
-    private Theme loadThemeById(Long themeId) {
+    private Theme getThemeById(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(NotFoundThemeException::new);
     }

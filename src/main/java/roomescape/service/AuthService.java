@@ -24,14 +24,14 @@ public class AuthService {
     }
 
     public AccessTokenResponse login(LoginRequest loginRequest) {
-        Member member = loadUserByEmail(loginRequest.email());
+        Member member = getUserByEmail(loginRequest.email());
         validatePasswordForLogin(member, loginRequest.password());
         String accessToken = jwtTokenProvider.createAccessToken(
                 new AccessTokenContent(member.getId(), member.getRole(), member.getName()));
         return new AccessTokenResponse(accessToken);
     }
 
-    private Member loadUserByEmail(String email) {
+    private Member getUserByEmail(String email) {
         return userRepository.findOneByEmail(email)
                 .orElseThrow(NotFoundUserException::new);
     }

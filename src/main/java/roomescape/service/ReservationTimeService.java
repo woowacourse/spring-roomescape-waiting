@@ -41,7 +41,7 @@ public class ReservationTimeService {
     public List<ReservationTimeWithBookState> findReservationTimesWithBookState(long themeId, LocalDate date) {
         List<ReservationTime> allTimes = timeRepository.findAllOrderByStartAt();
         List<ReservationTime> bookedTimes = timeRepository.findReservationTimesWithBookState(themeId, date);
-        return getAllTimesWithBookedState(allTimes, bookedTimes);
+        return calculateAllTimesWithBookedState(allTimes, bookedTimes);
     }
 
     public ReservationTimeResponse addReservationTime(ReservationTimeCreationContent request) {
@@ -52,7 +52,7 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTimeById(Long id) {
-        ReservationTime reservationTime = loadReservationTimeById(id);
+        ReservationTime reservationTime = getReservationTimeById(id);
         validateReservationInTime(reservationTime);
         timeRepository.deleteById(id);
     }
@@ -70,12 +70,12 @@ public class ReservationTimeService {
         }
     }
 
-    private ReservationTime loadReservationTimeById(Long reservationTimeId) {
+    private ReservationTime getReservationTimeById(Long reservationTimeId) {
         return timeRepository.findById(reservationTimeId)
                 .orElseThrow(NotFoundReservationTimeException::new);
     }
 
-    private List<ReservationTimeWithBookState> getAllTimesWithBookedState(
+    private List<ReservationTimeWithBookState> calculateAllTimesWithBookedState(
             List<ReservationTime> allTimes,
             List<ReservationTime> bookedTimes
     ) {

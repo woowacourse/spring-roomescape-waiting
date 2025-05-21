@@ -50,7 +50,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservationsByMember(long userId) {
-        Member savedMember = loadUserById(userId);
+        Member savedMember = getUserById(userId);
         List<Reservation> reservations = reservationRepository.findByMember(savedMember);
         return reservations.stream()
                 .map(ReservationResponse::new)
@@ -67,9 +67,9 @@ public class ReservationService {
     }
 
     public ReservationResponse addReservation(long userId, ReservationCreationContent request) {
-        Member member = loadUserById(userId);
-        Theme theme = loadThemeById(request.themeId());
-        ReservationTime time = loadReservationTimeById(request.timeId());
+        Member member = getUserById(userId);
+        Theme theme = getThemeById(request.themeId());
+        ReservationTime time = getReservationTimeById(request.timeId());
 
         Reservation reservation = Reservation.createWithoutId(
                 request.date(), ReservationStatus.BOOKED, time, theme, member);
@@ -82,7 +82,7 @@ public class ReservationService {
     }
 
     public void deleteReservationById(long reservationId) {
-        Reservation reservation = loadReservationById(reservationId);
+        Reservation reservation = getReservationById(reservationId);
         reservationRepository.delete(reservation);
     }
 
@@ -100,22 +100,22 @@ public class ReservationService {
         }
     }
 
-    private Member loadUserById(long userId) {
+    private Member getUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(NotFoundUserException::new);
     }
 
-    private Theme loadThemeById(long themeId) {
+    private Theme getThemeById(long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(NotFoundThemeException::new);
     }
 
-    private ReservationTime loadReservationTimeById(long timeId) {
+    private ReservationTime getReservationTimeById(long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(NotFoundReservationTimeException::new);
     }
 
-    private Reservation loadReservationById(long reservationId) {
+    private Reservation getReservationById(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(NotFoundReservationException::new);
     }
