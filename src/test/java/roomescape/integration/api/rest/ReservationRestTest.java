@@ -15,8 +15,8 @@ import roomescape.integration.api.RestLoginMember;
 
 class ReservationRestTest extends RestAssuredTestBase {
 
-    public static final LocalDate RESERVATION_DATE = LocalDate.now(FIXED_CLOCK).plusDays(1);
-    public static final String THEME_NAME = "어드벤처";
+    private static final LocalDate RESERVATION_DATE = LocalDate.now(FIXED_CLOCK).plusDays(1);
+    private static final String THEME_NAME = "어드벤처";
     private Integer timeId;
     private Integer themeId;
     private RestLoginMember restLoginMember;

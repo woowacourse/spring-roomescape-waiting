@@ -15,7 +15,7 @@ public record MemberEmail(
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );
-    public static final int MAXIMUM_EMAIL_LENGTH = 40;
+    private static final int MAXIMUM_EMAIL_LENGTH = 40;
 
     public MemberEmail(final String email) {
         this.email = Objects.requireNonNull(email, "email은 null이 아니어야 합니다.");

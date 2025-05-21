@@ -11,7 +11,7 @@ public record MemberName(
         @Size(max = MemberName.MAXIMUM_NAME_LENGTH)
         String name
 ) {
-    public static final int MAXIMUM_NAME_LENGTH = 5;
+    private static final int MAXIMUM_NAME_LENGTH = 5;
 
     public MemberName(final String name) {
         this.name = Objects.requireNonNull(name, "name은 null일 수 없습니다.");

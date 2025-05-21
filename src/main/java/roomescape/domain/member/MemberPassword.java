@@ -15,10 +15,11 @@ public record MemberPassword(
     private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
     private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[!@#$%^&*(),.?\":{}|<>]");
     private static final Pattern LETTER_PATTERN = Pattern.compile("[A-Za-z]");
-    public static final int MAXIMUM_PASSWORD_LENGTH = 30;
-    public static final int MINIMUM_DIGIT_COUNT = 2;
-    public static final int MINIMUM_SPECIAL_CHAR_COUNT = 1;
-    public static final int MINIMUM_LETTER_COUNT = 5;
+
+    private static final int MAXIMUM_PASSWORD_LENGTH = 30;
+    private static final int MINIMUM_DIGIT_COUNT = 2;
+    private static final int MINIMUM_SPECIAL_CHAR_COUNT = 1;
+    private static final int MINIMUM_LETTER_COUNT = 5;
 
     public MemberPassword(final String password) {
         this.password = Objects.requireNonNull(password, "password은 null일 수 없습니다.");
