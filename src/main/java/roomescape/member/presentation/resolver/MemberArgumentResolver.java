@@ -8,17 +8,16 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.global.jwt.AuthorizationExtractor;
-import roomescape.global.jwt.CookieAuthorizationExtractor;
 import roomescape.global.jwt.TokenProvider;
 
 @Component
 public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final AuthorizationExtractor authorizationExtractor;
     private final TokenProvider tokenProvider;
+    private final AuthorizationExtractor authorizationExtractor;
 
     public MemberArgumentResolver(TokenProvider tokenProvider,
-                                  CookieAuthorizationExtractor cookieAuthorizationExtractor) {
+                                  AuthorizationExtractor cookieAuthorizationExtractor) {
         this.tokenProvider = tokenProvider;
         this.authorizationExtractor = cookieAuthorizationExtractor;
     }
