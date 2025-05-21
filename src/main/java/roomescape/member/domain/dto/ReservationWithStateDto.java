@@ -5,7 +5,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.dto.ReservationTimeResponseDto;
 import roomescape.theme.domain.dto.ThemeResponseDto;
 
-public record ReservationWithBookStateDto(
+public record ReservationWithStateDto(
         Long id,
         LocalDate date,
         String statusText,
@@ -13,7 +13,7 @@ public record ReservationWithBookStateDto(
         ThemeResponseDto theme
 ) {
 
-    public ReservationWithBookStateDto(Reservation reservation) {
+    public ReservationWithStateDto(Reservation reservation) {
         this(reservation.getId(),
                 reservation.getDate(),
                 reservation.getStatus().getDisplayName(),

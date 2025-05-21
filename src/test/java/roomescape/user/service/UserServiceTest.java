@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.member.domain.dto.ReservationWithBookStateDto;
+import roomescape.member.domain.dto.ReservationWithStateDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.ReservationRepository;
@@ -59,7 +59,7 @@ class UserServiceTest {
             List<Reservation> savedReservations = reservationRepository.saveAll(reservations);
 
             // when
-            List<ReservationWithBookStateDto> allReservationByMember = service.findAllReservationByMember(savedMember);
+            List<ReservationWithStateDto> allReservationByMember = service.findAllReservationByMember(savedMember);
 
             // then
             Assertions.assertThat(allReservationByMember).hasSize(2);
@@ -70,7 +70,7 @@ class UserServiceTest {
         void findAllReservationByMember_success_byNonExistedReservation() {
             // given
             // when
-            List<ReservationWithBookStateDto> allReservationByMember = service.findAllReservationByMember(savedMember);
+            List<ReservationWithStateDto> allReservationByMember = service.findAllReservationByMember(savedMember);
 
             // then
             Assertions.assertThat(allReservationByMember).hasSize(0);

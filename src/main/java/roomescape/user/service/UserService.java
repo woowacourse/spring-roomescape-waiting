@@ -37,11 +37,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<ReservationWithBookStateDto> findAllReservationByMember(User member) {
+    public List<ReservationWithStateDto> findAllReservationByMember(User member) {
         validateExistsUser(member.getId());
         List<Reservation> reservations = reservationRepository.findByUser(member);
         return reservations.stream()
-                .map(ReservationWithBookStateDto::new)
+                .map(ReservationWithStateDto::new)
                 .toList();
     }
 
