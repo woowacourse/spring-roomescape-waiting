@@ -26,6 +26,8 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class ReservationQueryServiceTest {
@@ -45,6 +47,8 @@ public class ReservationQueryServiceTest {
 
     @Autowired
     private CleanUp cleanUp;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -223,7 +227,30 @@ public class ReservationQueryServiceTest {
     }
 
     @Test
-    void 예약_대기와_함께_조회할_수_있다(){
-        // TODO 작성할 것
+    void 예약_대기와_함께_조회할_수_있다() {
+        // given
+        Member member = memberDbFixture.유저1_생성();
+        Theme theme = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        // 예약 등록
+        reservationRepository.save(Reservation.reserve(member, 내일_열시, theme));
+        // 대기 등록
+        Waiting waiting = Waiting.builder()
+                .reserver(member)
+                .reservationDateTime(내일_열시)
+                .theme(theme)
+                .build();
+        waitingRepository.save(waiting);
+
+        // when
+        List<MyReservationResponse> responses = reservationQueryService.getAllReservations(member.getId());
+
+        // then
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(responses).hasSize(2);
+            assertThat(responses).anyMatch(r -> r.status().equals("예약"));
+            assertThat(responses).anyMatch(r -> !r.status().equals("예약"));
+        });
     }
 }
