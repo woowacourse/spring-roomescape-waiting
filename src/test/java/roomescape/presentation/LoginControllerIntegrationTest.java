@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.business.domain.Member;
-import roomescape.persistence.repository.MemberRepository;
+import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.presentation.dto.LoginRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

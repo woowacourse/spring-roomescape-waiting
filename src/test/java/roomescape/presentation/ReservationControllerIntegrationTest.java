@@ -23,10 +23,10 @@ import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
-import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.MemberRepository;
+import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.LoginRequest;
 import roomescape.presentation.dto.ReservationRequest;
 

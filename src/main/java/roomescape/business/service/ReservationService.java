@@ -13,10 +13,10 @@ import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.MemberRepository;
+import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
@@ -69,15 +69,15 @@ public class ReservationService {
         }
     }
 
-    private void validateTimeIdExists(final Long timeId) {
-        if (!reservationTimeRepository.existsById(timeId)) {
-            throw new NotFoundException("해당하는 방탈출 예약 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(timeId));
-        }
-    }
-
     private void validateThemeIdExists(final Long themeId) {
         if (!themeRepository.existsById(themeId)) {
             throw new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(themeId));
+        }
+    }
+
+    public void validateTimeIdExists(final Long timeId) {
+        if (!reservationTimeRepository.existsById(timeId)) {
+            throw new NotFoundException("해당하는 방탈출 예약 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(timeId));
         }
     }
 

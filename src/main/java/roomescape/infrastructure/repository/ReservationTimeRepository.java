@@ -1,4 +1,4 @@
-package roomescape.persistence.repository;
+package roomescape.infrastructure.repository;
 
 import java.time.LocalTime;
 import org.springframework.data.jpa.repository.JpaRepository;
