@@ -18,14 +18,14 @@ public class ReservationStatus {
     @Enumerated(value = EnumType.STRING)
     private Waiting status;
 
-    private Long rank;
+    private Long priority;
 
     protected ReservationStatus() {
     }
 
-    public ReservationStatus(Waiting status, Long rank) {
+    public ReservationStatus(Waiting status, Long priority) {
         this.status = status;
-        this.rank = rank;
+        this.priority = priority;
     }
 
     public Long getId() {
@@ -36,7 +36,7 @@ public class ReservationStatus {
         return status;
     }
 
-    public Long getRank() {
-        return rank;
+    public Long getPriority() {
+        return priority;
     }
 }

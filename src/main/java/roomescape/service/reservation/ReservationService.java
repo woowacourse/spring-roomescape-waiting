@@ -1,5 +1,6 @@
 package roomescape.service.reservation;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +20,7 @@ import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
 import roomescape.exception.reservation.ReservationInPastException;
+import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
@@ -64,7 +66,7 @@ public class ReservationService {
             throw new ReservationAlreadyExistsException();
         }
 
-        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
+        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, 1L);
         statusRepository.save(status);
 
         Reservation newReservation = new Reservation(request.date(),
@@ -91,7 +93,7 @@ public class ReservationService {
         Member member = memberRepository.findById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new MemberNotFoundException(adminReservationRequest.memberId()));
 
-        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
+        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, 1L);
         statusRepository.save(status);
 
         Reservation newReservation = new Reservation(adminReservationRequest.date(),
@@ -136,5 +138,23 @@ public class ReservationService {
         Reservation reservation = reservationRepository.save(new Reservation(request.date(),
                 time, theme, member, status));
         return ReservationResponse.from(reservation);
+    }
+
+    @Transactional
+    public void deleteWaitingReservation(Long reservationId, Member member) {
+        Reservation targetReservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException(reservationId));
+
+        reservationRepository.updateAllWaitingReservationsAfterPriority(
+                targetReservation.getDate(),
+                targetReservation.getTime(),
+                targetReservation.getTheme(),
+                targetReservation.getStatus().getPriority()
+        );
+
+        reservationRepository.delete(targetReservation);
+
+        ReservationStatus status = targetReservation.getStatus();
+        statusRepository.delete(status);
     }
 }

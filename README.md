@@ -272,3 +272,20 @@ host: localhost:8080
     "timeId": 1
 }
 ```
+
+- [x] 예약 대기 취소 기능 구현
+
+### Request
+
+```http request
+DELETE /reservations/waiting/1 HTTP/1.1
+content-type: application/json
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI
+host: localhost:8080
+```
+
+### Response
+
+  ```http request
+  HTTP/1.1 204
+  ```

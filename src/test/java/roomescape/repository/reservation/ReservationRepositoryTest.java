@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -154,6 +155,53 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("대기 예약 취소 시 이후 대기 예약들의 우선순위가 1씩 감소한다.")
+    void updateAllWaitingReservationsAfterPriority() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        entityManager.persist(time);
+        Theme theme = new Theme("테마", "설명", "이미지");
+        entityManager.persist(theme);
+        Member member = new Member(null, "이름", "이메일", "비밀번호", Role.USER);
+        entityManager.persist(member);
+
+        // 대기 예약들 생성 (우선순위: 1, 2, 3, 4)
+        List<Reservation> waitingReservations = new ArrayList<>();
+        for (int i = 1; i <= 4; i++) {
+            ReservationStatus status = new ReservationStatus(Waiting.WAITING, (long) i);
+            Reservation reservation = new Reservation(date, time, theme, member, status);
+            waitingReservations.add(reservation);
+        }
+
+        waitingReservations.forEach(reservation -> {
+            entityManager.persist(reservation.getStatus());
+            entityManager.persist(reservation);
+        });
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        reservationRepository.updateAllWaitingReservationsAfterPriority(date, time, theme, 2L); // 우선 순위 2번이던 예약이 취소됨
+        entityManager.flush();
+        entityManager.clear();
+
+        // then
+        List<Reservation> updatedReservations = reservationRepository.findAll();
+        assertThat(updatedReservations).hasSize(4);
+
+        Assertions.assertAll(
+                () -> {
+                    assertThat(updatedReservations.get(0).getStatus().getPriority()).isEqualTo(1L);
+                    assertThat(updatedReservations.get(1).getStatus().getPriority()).isEqualTo(2L);
+                    assertThat(updatedReservations.get(2).getStatus().getPriority()).isEqualTo(2L);
+                    assertThat(updatedReservations.get(3).getStatus().getPriority()).isEqualTo(3L);
+                }
+        );
     }
 
     private void createReservationsInRange(Theme theme, int count, LocalDate startDate, Member targetMember) {

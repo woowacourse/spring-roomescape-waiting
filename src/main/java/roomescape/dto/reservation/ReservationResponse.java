@@ -16,7 +16,7 @@ public record ReservationResponse(Long id, LocalDate date, ReservationTimeRespon
         String statusMessage = status.getStatus().getValue();
 
         if (status.getStatus().isWaiting()) {
-            statusMessage = String.format("%d번째 예약대기", status.getRank());
+            statusMessage = String.format("%d번째 예약대기", status.getPriority());
         }
         return new ReservationResponse(reservation.getId(), reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()), ThemeResponse.from(reservation.getTheme()),

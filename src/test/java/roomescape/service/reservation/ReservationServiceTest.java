@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -182,5 +184,36 @@ class ReservationServiceTest {
 
         // then
         assertThat(response.id()).isEqualTo(99L);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 취소할 수 있다.")
+    void deleteWaitingReservation() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        long timeId = 2L;
+        long themeId = 2L;
+        long memberId = 2L;
+        long priority = 3L;
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
+        Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
+
+        // 취소할 예약
+        ReservationStatus targetStatus = new ReservationStatus(Waiting.WAITING, priority);
+        Reservation targetReservation = new Reservation(99L, date, time, theme, member, targetStatus);
+
+        when(reservationRepository.findById(99L)).thenReturn(Optional.of(targetReservation));
+        doNothing().when(reservationRepository).updateAllWaitingReservationsAfterPriority(date, time, theme, priority);
+
+        // when
+        reservationService.deleteWaitingReservation(99L, member);
+
+        // then
+        // TODO: 순위 변동 사항은 repository의 메서드 책임이니까 그 부분은 mocking 하고 결과는 verify로만 검증을 할까?
+        verify(reservationRepository).delete(targetReservation);
+        verify(reservationRepository).updateAllWaitingReservationsAfterPriority(date, time, theme, priority);
+        verify(reservationStatusRepository).delete(targetStatus);
     }
 }

@@ -37,7 +37,7 @@ public class Reservation {
     private Member member;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "status_id")
+    @JoinColumn(name = "status_id", nullable = false)
     private ReservationStatus status;
 
     protected Reservation() {
