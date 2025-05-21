@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.common.Constant.예약날짜_내일;
 import static roomescape.member.role.Role.ADMIN;
 
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
@@ -119,6 +121,17 @@ class ReservationJpaRepositoryTest {
         assertThat(recentReservations).containsExactly(
                 theme, theme1
         );
+    }
+
+    @Test
+    void 같은_날짜_같은_시간에_중복_예약을_허용하지_않는다() {
+        //when - then
+        assertThatThrownBy(() ->
+                reservationRepository.save(
+                        Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member,
+                                ReservationStatus.RESERVATION)))
+                .isInstanceOf(DataIntegrityViolationException.class);
+
     }
 
 }
