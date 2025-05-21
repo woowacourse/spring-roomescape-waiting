@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +35,7 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -253,13 +253,43 @@ class ReservationServiceTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("예약을 삭제한다.")
     void deleteReservation() {
         // when
         reservationService.deleteReservation(1L);
 
         // then
+        verify(reservationRepository).deleteById(anyLong());
+    }
+
+    @DisplayName("예약을 삭제하고, 예약 대기를 예약으로 변환한다.")
+    @Test
+    void deleteAndChangeWaitingToReservation() {
+        //given
+        var otherMember = new Member("미소", "miso@email.com", "password", RoleType.USER);
+        var theme = new Theme("테마", "설명", "썸네일");
+        var time = new ReservationTime(LocalTime.of(10, 0));
+        var date = LocalDate.now().plusDays(1);
+        var reservation = new Reservation(1L, date, time, theme, otherMember);
+
+        var member = new Member("훌라", "hula@email.com", "password", RoleType.USER);
+        var waiting = new Waiting(date, theme, time, member);
+
+        when(reservationRepository.existsById(anyLong()))
+                .thenReturn(true);
+        when(reservationRepository.findById(anyLong()))
+                .thenReturn(Optional.of(reservation));
+        when(waitingRepository.existsByDateAndThemeAndTime(any(), any(), any()))
+                .thenReturn(true);
+        when(waitingRepository.findFirstByDateAndThemeAndTime(any(), any(), any()))
+                .thenReturn(Optional.of(waiting));
+
+        //when
+        reservationService.deleteReservation(reservation.getId());
+
+        //then
+        verify(reservationRepository).save(any(Reservation.class));
+        verify(waitingRepository).delete(any(Waiting.class));
         verify(reservationRepository).deleteById(anyLong());
     }
 

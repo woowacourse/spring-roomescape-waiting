@@ -21,11 +21,15 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.entity.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -42,6 +46,12 @@ class ReservationIntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("예약을 생성한다.")
@@ -194,6 +204,30 @@ class ReservationIntegrationTest {
         // then
         var reservations = reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
+    }
+
+    @DisplayName("예약을 삭제하고, 예약 대기를 예약으로 변환한다.")
+    @Test
+    void deleteAndChangeWaitingToReservation() {
+        //given
+        var otherMember = memberRepository.save(new Member("미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        var date = LocalDate.now().plusDays(1);
+        var reservation = new Reservation(date, time, theme, otherMember);
+        var savedReservation = reservationRepository.save(reservation);
+
+        var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
+        var waiting = new Waiting(date, theme, time, member);
+        var savedWaiting = waitingRepository.save(waiting);
+
+        //when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        //then
+        var found = reservationRepository.findByDateAndThemeAndTime(date, theme, time)
+                .orElse(null);
+        assertThat(found.getMember().getName()).isEqualTo(member.getName());
     }
 
     @Test

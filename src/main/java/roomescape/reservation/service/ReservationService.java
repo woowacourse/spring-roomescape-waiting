@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -40,35 +41,28 @@ public class ReservationService {
     private final WaitingRepository waitingRepository;
 
     public ReservationCreateResponse createReservation(Long memberId, ReservationCreateRequest request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
-        ReservationTime time = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간 입니다."));
-        Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
-
-        Reservation newReservation = new Reservation(request.date(), time, theme, member);
-        validateDateTime(newReservation);
-        validateDuplicated(newReservation);
-
-        Reservation saved = reservationRepository.save(newReservation);
-        return ReservationCreateResponse.from(saved, theme);
+        Reservation saved = create(memberId, request.timeId(), request.themeId(), request.date());
+        return ReservationCreateResponse.from(saved);
     }
 
     public ReservationAdminCreateResponse createReservationByAdmin(ReservationAdminCreateRequest request) {
-        Member member = memberRepository.findById(request.memberId())
+        Reservation saved = create(request.memberId(), request.timeId(), request.themeId(), request.date());
+        return ReservationAdminCreateResponse.from(saved);
+    }
+
+    private Reservation create(Long memberId, Long timeId, Long themeId, LocalDate date) {
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
-        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+        ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간 입니다."));
-        Theme theme = themeRepository.findById(request.themeId())
+        Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
 
-        Reservation newReservation = new Reservation(request.date(), time, theme, member);
-        validateDateTime(newReservation);
-        validateDuplicated(newReservation);
+        Reservation reservation = new Reservation(date, time, theme, member);
+        validateDateTime(reservation);
+        validateDuplicated(reservation);
 
-        Reservation reservation = reservationRepository.save(newReservation);
-        return ReservationAdminCreateResponse.from(reservation, theme);
+        return reservationRepository.save(reservation);
     }
 
     public List<ReservationReadResponse> getAllReservations() {
@@ -99,21 +93,30 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
+        if (reservationRepository.existsById(id)) {
+            Reservation reservation = reservationRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
 
-        if (waitingRepository.existsByDateAndThemeAndTime(
-                reservation.getDate(), reservation.getTheme(), reservation.getTime())) {
+            changeWaitingToReservation(reservation);
+        }
+
+        reservationRepository.deleteById(id);
+    }
+
+    private void changeWaitingToReservation(Reservation reservation) {
+        boolean existsWaiting = waitingRepository.existsByDateAndThemeAndTime(
+                reservation.getDate(), reservation.getTheme(), reservation.getTime());
+
+        if (existsWaiting) {
             Waiting waiting = waitingRepository.findFirstByDateAndThemeAndTime(
                     reservation.getDate(), reservation.getTheme(), reservation.getTime())
                     .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
             waitingRepository.delete(waiting);
+
             Reservation reservationByWaiting = new Reservation(
                     waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember());
             reservationRepository.save(reservationByWaiting);
         }
-
-        reservationRepository.deleteById(id);
     }
 
     private void validateDateTime(Reservation reservation) {

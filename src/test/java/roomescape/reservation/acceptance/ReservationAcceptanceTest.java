@@ -130,7 +130,7 @@ class ReservationAcceptanceTest {
         // when & then
         TestHelper.deleteWithToken("/reservations/1", token)
                 .then()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
         TestHelper.get("/reservations")
                 .then()
