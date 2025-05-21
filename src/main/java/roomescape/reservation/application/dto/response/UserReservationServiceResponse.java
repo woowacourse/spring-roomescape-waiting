@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.vo.ReservationStatus;
 
-public record MyReservationServiceResponse(
+public record UserReservationServiceResponse(
         Long reservationId,
         String themeName,
         LocalDate date,
@@ -13,8 +13,8 @@ public record MyReservationServiceResponse(
         ReservationStatus status
 ) {
 
-    public static MyReservationServiceResponse from(Reservation reservation, ReservationStatus reservationStatus) {
-        return new MyReservationServiceResponse(
+    public static UserReservationServiceResponse from(Reservation reservation, ReservationStatus reservationStatus) {
+        return new UserReservationServiceResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),

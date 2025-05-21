@@ -3,10 +3,10 @@ package roomescape.reservation.controller.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
+import roomescape.reservation.application.dto.response.UserReservationServiceResponse;
 import roomescape.reservation.model.vo.ReservationStatus;
 
-public record MyReservationResponse(
+public record UserReservationResponse(
         Long reservationId,
         String theme,
         LocalDate date,
@@ -14,8 +14,8 @@ public record MyReservationResponse(
         ReservationStatus status
 ) {
 
-    public static MyReservationResponse from(MyReservationServiceResponse response) {
-        return new MyReservationResponse(
+    public static UserReservationResponse from(UserReservationServiceResponse response) {
+        return new UserReservationResponse(
                 response.reservationId(),
                 response.themeName(),
                 response.date(),

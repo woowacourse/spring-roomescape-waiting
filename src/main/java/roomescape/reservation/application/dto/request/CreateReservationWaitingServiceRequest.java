@@ -2,23 +2,23 @@ package roomescape.reservation.application.dto.request;
 
 import java.time.LocalDate;
 import roomescape.member.model.Member;
-import roomescape.reservation.model.dto.ReservationDetails;
+import roomescape.reservation.model.dto.ReservationWaitingDetails;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
 
-public record  CreateReservationServiceRequest(
+public record CreateReservationWaitingServiceRequest(
         Long memberId,
         LocalDate date,
         Long timeId,
         Long themeId
 ) {
 
-    public ReservationDetails toReservationDetails(
+    public ReservationWaitingDetails toReservationWaitingDetails(
             ReservationTime reservationTime,
             ReservationTheme reservationTheme,
             Member member
     ) {
-        return ReservationDetails.builder()
+        return ReservationWaitingDetails.builder()
                 .date(date)
                 .reservationTime(reservationTime)
                 .reservationTheme(reservationTheme)

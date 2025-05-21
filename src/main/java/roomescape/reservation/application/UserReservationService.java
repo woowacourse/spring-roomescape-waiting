@@ -8,7 +8,7 @@ import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
 import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
-import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
+import roomescape.reservation.application.dto.response.UserReservationServiceResponse;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.model.dto.ReservationDetails;
 import roomescape.reservation.model.entity.Reservation;
@@ -43,7 +43,7 @@ public class UserReservationService {
         }
     }
 
-    public List<MyReservationServiceResponse> getAllByMemberId(Long memberId) {
+    public List<UserReservationServiceResponse> getAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         return reservations.stream()
                 .map(this::buildMyReservationServiceResponse)
@@ -57,10 +57,10 @@ public class UserReservationService {
         return request.toReservationDetails(reservationTime, reservationTheme, member);
     }
 
-    private MyReservationServiceResponse buildMyReservationServiceResponse(Reservation reservation) {
+    private UserReservationServiceResponse buildMyReservationServiceResponse(Reservation reservation) {
         ReservationStatus reservationStatus = ReservationStatus.getStatus(
                 reservation.getReservationDateTime(), LocalDateTime.now()
         );
-        return MyReservationServiceResponse.from(reservation, reservationStatus);
+        return UserReservationServiceResponse.from(reservation, reservationStatus);
     }
 }

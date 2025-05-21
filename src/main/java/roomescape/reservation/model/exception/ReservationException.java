@@ -14,6 +14,13 @@ public class ReservationException extends RuntimeException {
         }
     }
 
+    public static final class ReservationNotFoundException extends ReservationException {
+
+        public ReservationNotFoundException(String message) {
+            super(message);
+        }
+    }
+
     public static final class ReservationThemeInUseException extends ReservationException {
 
         public ReservationThemeInUseException(String message) {
