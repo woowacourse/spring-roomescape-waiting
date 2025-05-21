@@ -9,6 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import roomescape.reservation.domain.Reservation;
 
 @Entity
@@ -65,5 +67,17 @@ public class Member {
 
     public List<Reservation> getReservations() {
         return reservations;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password) && Objects.equals(reservations, member.reservations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email, password, reservations);
     }
 }

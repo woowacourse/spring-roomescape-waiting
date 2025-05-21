@@ -16,6 +16,7 @@ import roomescape.common.exception.handler.dto.ExceptionResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -34,6 +35,16 @@ public class MemberReservationController {
     {
         ReservationResponse response = reservationService.createReservation(request, memberInfo.id());
         return ResponseEntity.created(URI.create("/reservation")).body(response);
+    }
+
+    @PostMapping("/reservations/waiting")
+    public ResponseEntity<WaitingResponse> createWaiting(
+        @RequestBody final ReservationRequest request,
+        @LoginMember final LoginMemberInfo memberInfo
+    )
+    {
+        WaitingResponse response = reservationService.createWaiting(request, memberInfo.id());
+        return ResponseEntity.created(URI.create("/reservations/waiting")).body(response);
     }
 
     @GetMapping("/reservations-mine")

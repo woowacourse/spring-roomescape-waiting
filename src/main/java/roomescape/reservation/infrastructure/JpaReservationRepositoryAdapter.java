@@ -60,4 +60,9 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     public boolean existByThemeId(final Long themeId) {
         return jpaReservationRepository.existsByThemeId(themeId);
     }
+
+    @Override
+    public Optional<Reservation> findBy(LocalDate date, Long timeId, Long themeId) {
+        return jpaReservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
 }

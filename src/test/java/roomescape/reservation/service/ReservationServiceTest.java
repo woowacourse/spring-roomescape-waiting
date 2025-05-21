@@ -24,9 +24,12 @@ import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
 import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.WaitingRepository;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
+import roomescape.reservation.infrastructure.JpaWaitingRepository;
+import roomescape.reservation.infrastructure.JpaWaitingRepositoryAdapter;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.service.ReservationServiceTest.ReservationConfig;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
@@ -82,6 +85,56 @@ class ReservationServiceTest {
                 .isInstanceOf(ReservationException.class);
     }
 
+    @DisplayName("지나간 날짜와 시간에 대한 예약대기를 생성할 수 없다.")
+    @ParameterizedTest
+    @MethodSource
+    void cant_not_reserve_waiting_before_now(final LocalDate date, final Long timeId, final Long themeId, final Long memberId) {
+        Assertions.assertThatThrownBy(
+                () -> reservationService.createWaiting(new ReservationRequest(date, timeId, themeId), memberId))
+            .isInstanceOf(ReservationException.class)
+            .hasMessage("예약할 수 없는 날짜와 시간입니다.");
+    }
+
+    private static Stream<Arguments> cant_not_reserve_waiting_before_now() {
+        return Stream.of(
+            Arguments.of(LocalDate.of(2025, 4, 26), 1L, 3L, 1L),
+            Arguments.of(LocalDate.of(2025, 4, 18), 1L, 2L, 1L)
+        );
+    }
+
+    @DisplayName("예약한 멤버는 예약대기를 생성할 수 없다.")
+    @ParameterizedTest
+    @MethodSource
+    void cant_reserve_waiting_by_reservation_owner(final LocalDate date, final Long timeId, final Long themeId, final Long memberId) {
+        Assertions.assertThatThrownBy(
+                () -> reservationService.createWaiting(new ReservationRequest(date, timeId, themeId), memberId))
+            .isInstanceOf(ReservationException.class)
+            .hasMessage("예약자는 예약대기를 할 수 없습니다.");
+    }
+
+    private static Stream<Arguments> cant_reserve_waiting_by_reservation_owner() {
+        return Stream.of(
+            Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 1L),
+            Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, 1L)
+        );
+    }
+
+    @DisplayName("동일한 사용자가 중복 예약대기를 할 수 없다.")
+    @ParameterizedTest
+    @MethodSource
+    void cant_reserve_waiting_by_duplicate_member(final LocalDate date, final Long timeId, final Long themeId, final Long memberId) {
+        Assertions.assertThatThrownBy(
+                () -> reservationService.createWaiting(new ReservationRequest(date, timeId, themeId), memberId))
+            .isInstanceOf(ReservationException.class)
+            .hasMessage("이미 예약대기 중입니다.");
+    }
+
+    private static Stream<Arguments> cant_reserve_waiting_by_duplicate_member() {
+        return Stream.of(
+            Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 2L)
+        );
+    }
+
     static class ReservationConfig {
 
         @Bean
@@ -110,19 +163,26 @@ class ReservationServiceTest {
         }
 
         @Bean
+        public WaitingRepository waitingRepository(JpaWaitingRepository jpaWaitingRepository) {
+            return new JpaWaitingRepositoryAdapter(jpaWaitingRepository);
+        }
+
+        @Bean
         public ReservationService reservationService(
             DateTime dateTime,
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            WaitingRepository waitingRepository
         ) {
             return new ReservationService(
                 dateTime,
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
-                memberRepository);
+                memberRepository,
+                waitingRepository);
         }
     }
 }

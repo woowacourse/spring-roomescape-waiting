@@ -88,6 +88,10 @@ public class Reservation {
         return this.time.isEqual(time.getStartAt());
     }
 
+    public boolean isSameMember(Member member) {
+        return this.member.equals(member);
+    }
+
     public Long getId() {
         return id;
     }

@@ -2,6 +2,8 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.repository.CrudRepository;
 import roomescape.reservation.domain.Reservation;
 
@@ -18,4 +20,6 @@ public interface JpaReservationRepository extends CrudRepository<Reservation, Lo
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }
