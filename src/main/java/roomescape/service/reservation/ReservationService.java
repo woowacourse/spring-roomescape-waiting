@@ -5,12 +5,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlotTimes;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRanking;
@@ -22,6 +21,7 @@ import roomescape.exception.reservation.InvalidThemeException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
+import roomescape.service.reservation.strategy.ReservationValidateStrategy;
 
 @Service
 public class ReservationService {
@@ -39,27 +39,20 @@ public class ReservationService {
     }
 
     @Transactional
-    public long addReservation(AddReservationDto newReservation) {
+    public long addReservation(AddReservationDto newReservation,
+                               ReservationValidateStrategy reservationValidateStrategy,
+                               ReservationStatus reservationStatus) {
         ReservationTime reservationTime = reservationTimeRepository.findById(newReservation.timeId())
                 .orElseThrow(() -> new InvalidReservationTimeException("존재하지 않는 예약 시간 id입니다."));
         Theme theme = themeRepository.findById(newReservation.themeId())
                 .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마 id입니다."));
 
-        Reservation reservation = newReservation.toReservation(reservationTime, theme);
+        Reservation reservation = newReservation.toReservation(reservationTime, theme, reservationStatus);
+        reservationValidateStrategy.addReservationValidate(reservation);
 
-        validateDuplicateReservation(reservation);
         LocalDateTime currentDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.now());
         validateAddReservationDateTime(reservation, currentDateTime);
         return reservationRepository.save(reservation).getId();
-    }
-
-    private void validateDuplicateReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getReservationTime(),
-                reservation.getTheme())) {
-            throw new InvalidReservationException("중복된 예약신청입니다");
-        }
     }
 
     private void validateAddReservationDateTime(Reservation newReservation, LocalDateTime currentDateTime) {
@@ -112,5 +105,9 @@ public class ReservationService {
             return reservation;
         }
         return Optional.empty();
+    }
+
+    public int countSameThemeDateTimeReservation(Long themeId, LocalDate date, Long time) {
+        return reservationRepository.countByThemeIdAndDateAndTimeId(themeId, date, time);
     }
 }
