@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.global.response.ApiResponse;
-import roomescape.reservation.exception.AlreadyWaitingException;
+import roomescape.reservation.exception.InAlreadyReservationException;
 import roomescape.reservation.exception.PastReservationException;
 
 @RestControllerAdvice
@@ -21,8 +21,8 @@ public class ReservationExceptionHandler {
                 .body(ApiResponse.fail(PAST_RESERVATION));
     }
 
-    @ExceptionHandler(AlreadyWaitingException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAlreadyWaitingException(AlreadyWaitingException e) {
+    @ExceptionHandler(InAlreadyReservationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAlreadyWaitingException(InAlreadyReservationException e) {
         return ResponseEntity
                 .status(CONFLICT)
                 .body(ApiResponse.fail(PAST_RESERVATION));
