@@ -5,13 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.Table;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ExceptionCause;
 
 @Entity
+@Table(name = "theme")
 public class Theme {
 
     private static final String URL_REGEX = "^https://.*";
@@ -20,13 +21,13 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(nullable = false)
+    @Column(name = "thumbnail", nullable = false)
     private String thumbnail;
 
     protected Theme() {
