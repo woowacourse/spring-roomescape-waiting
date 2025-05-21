@@ -2,6 +2,7 @@ package roomescape.reservation.controller.exception;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
+import static roomescape.reservation.controller.response.ReservationErrorCode.ALREADY_RESERVATION;
 import static roomescape.reservation.controller.response.ReservationErrorCode.PAST_RESERVATION;
 
 import org.springframework.http.ResponseEntity;
@@ -15,16 +16,16 @@ import roomescape.reservation.exception.PastReservationException;
 public class ReservationExceptionHandler {
 
     @ExceptionHandler(PastReservationException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePastReservationException(PastReservationException e) {
+    public ResponseEntity<ApiResponse<Void>> handlePastReservationException() {
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(ApiResponse.fail(PAST_RESERVATION));
     }
 
     @ExceptionHandler(InAlreadyReservationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAlreadyWaitingException(InAlreadyReservationException e) {
+    public ResponseEntity<ApiResponse<Void>> handleAlreadyReservationException() {
         return ResponseEntity
                 .status(CONFLICT)
-                .body(ApiResponse.fail(PAST_RESERVATION));
+                .body(ApiResponse.fail(ALREADY_RESERVATION));
     }
 }

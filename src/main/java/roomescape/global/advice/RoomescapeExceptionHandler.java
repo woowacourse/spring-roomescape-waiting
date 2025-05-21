@@ -9,6 +9,7 @@ import static roomescape.global.response.GlobalErrorCode.NO_ELEMENTS;
 import static roomescape.global.response.GlobalErrorCode.ROOMESCAPE_SERVER_ERROR;
 import static roomescape.global.response.GlobalErrorCode.WRONG_ARGUMENT;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,6 +19,7 @@ import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.response.ApiResponse;
 
+@Slf4j
 @RestControllerAdvice
 public class RoomescapeExceptionHandler {
 
@@ -28,7 +30,7 @@ public class RoomescapeExceptionHandler {
     }
 
     @ExceptionHandler(InvalidArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidArgumentException(InvalidArgumentException e) {
+    public ResponseEntity<ApiResponse<Void>> handleInvalidArgumentException() {
         return ResponseEntity.status(BAD_REQUEST)
                 .body(ApiResponse.fail(WRONG_ARGUMENT));
     }
@@ -40,13 +42,14 @@ public class RoomescapeExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse<Void>> handleException() {
+    public ResponseEntity<ApiResponse<Void>> handleException(RuntimeException e) {
+        log.error("Unexpected error occurred : {}", e.getMessage(), e);
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.fail(ROOMESCAPE_SERVER_ERROR));
     }
 
     @ExceptionHandler(InAlreadyException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInAlreadyException(InAlreadyException e) {
+    public ResponseEntity<ApiResponse<Void>> handleInAlreadyException() {
         return ResponseEntity.status(CONFLICT)
                 .body(ApiResponse.fail(IN_ALREADY_EXCEPTION));
     }
