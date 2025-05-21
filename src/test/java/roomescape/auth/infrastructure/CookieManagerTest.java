@@ -1,14 +1,13 @@
 package roomescape.auth.infrastructure;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.Duration;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.util.ReflectionTestUtils;
+import roomescape.auth.config.CookieProperties;
 
 class CookieManagerTest {
 
@@ -21,24 +20,28 @@ class CookieManagerTest {
 
     @BeforeEach
     void setUp() {
-        cookieManager = new CookieManager();
-        ReflectionTestUtils.setField(cookieManager, "domain", DOMAIN);
-        ReflectionTestUtils.setField(cookieManager, "maxAge", MAX_AGE);
+        CookieProperties cookieProperties = new CookieProperties();
+        cookieProperties.setDomain(DOMAIN);
+        cookieProperties.setMaxAge(MAX_AGE);
+        cookieManager = new CookieManager(cookieProperties);
     }
 
     @Test
     @DisplayName("쿠키를 생성할 때 모든 보안 설정이 올바르게 적용된다.")
     void makeCookie_WithSecuritySettings() {
-        // when
+        // given & when
         ResponseCookie cookie = cookieManager.makeCookie(COOKIE_NAME, COOKIE_VALUE);
 
         // then
-        assertThat(cookie.getName()).isEqualTo(COOKIE_NAME);
-        assertThat(cookie.getValue()).isEqualTo(COOKIE_VALUE);
-        assertThat(cookie.getSameSite()).isEqualTo("Strict");
-        assertThat(cookie.getPath()).isEqualTo("/");
-        assertThat(cookie.getDomain()).isEqualTo(DOMAIN);
-        assertThat(cookie.getMaxAge()).isEqualTo(Duration.ofSeconds(MAX_AGE));
+        SoftAssertions.assertSoftly(softAssertions -> {
+                    softAssertions.assertThat(cookie.getName()).isEqualTo(COOKIE_NAME);
+                    softAssertions.assertThat(cookie.getValue()).isEqualTo(COOKIE_VALUE);
+                    softAssertions.assertThat(cookie.getSameSite()).isEqualTo("Strict");
+                    softAssertions.assertThat(cookie.getPath()).isEqualTo("/");
+                    softAssertions.assertThat(cookie.getDomain()).isEqualTo(DOMAIN);
+                    softAssertions.assertThat(cookie.getMaxAge()).isEqualTo(Duration.ofSeconds(MAX_AGE));
+                }
+        );
     }
 
     @Test
@@ -52,8 +55,10 @@ class CookieManagerTest {
 
         // then
         String setCookieHeader = response.getHeader("Set-Cookie");
-        assertThat(setCookieHeader).contains("Max-Age=0");
-        assertThat(setCookieHeader).contains("HttpOnly");
-        assertThat(setCookieHeader).contains("SameSite=Strict");
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(setCookieHeader).contains("Max-Age=0");
+            softAssertions.assertThat(setCookieHeader).contains("HttpOnly");
+            softAssertions.assertThat(setCookieHeader).contains("SameSite=Strict");
+        });
     }
 } 

@@ -1,28 +1,29 @@
 package roomescape.auth.infrastructure;
 
-import org.springframework.beans.factory.annotation.Value;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
-
-import jakarta.servlet.http.HttpServletResponse;
+import roomescape.auth.config.CookieProperties;
 
 @Component
+@EnableConfigurationProperties(CookieProperties.class)
 public class CookieManager {
 
-    @Value("${cookie.domain}")
-    private String domain;
+    private final CookieProperties cookieProperties;
 
-    @Value("${cookie.max-age}")
-    private long maxAge;
+    public CookieManager(final CookieProperties cookieProperties) {
+        this.cookieProperties = cookieProperties;
+    }
 
     public ResponseCookie makeCookie(final String name, final String value) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
                 .sameSite("Strict")
                 .path("/")
-                .domain(domain)
-                .maxAge(maxAge)
+                .domain(cookieProperties.getDomain())
+                .maxAge(cookieProperties.getMaxAge())
                 .build();
     }
 
@@ -31,7 +32,7 @@ public class CookieManager {
                 .httpOnly(true)
                 .sameSite("Strict")
                 .path("/")
-                .domain(domain)
+                .domain(cookieProperties.getDomain())
                 .maxAge(0)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

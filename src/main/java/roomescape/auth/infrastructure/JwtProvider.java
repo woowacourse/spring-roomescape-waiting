@@ -1,75 +1,77 @@
 package roomescape.auth.infrastructure;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import roomescape.auth.config.JwtProperties;
 import roomescape.auth.dto.MemberInfo;
+import roomescape.auth.exception.UnAuthorizedException;
 import roomescape.member.domain.MemberRole;
 
 @Component
+@EnableConfigurationProperties(JwtProperties.class)
 public class JwtProvider {
 
-    private static final String NAME = "name";
     private static final String ROLE = "role";
+    private static final int VALIDITY_IN_MILLISECONDS = 1000;
 
-    @Value("${security.jwt.token.secret-key}")
-    private String secretKey;
-    @Value("${security.jwt.token.expire-length}")
-    private long validityInMilliseconds;
+    private final JwtProperties jwtProperties;
+
+    public JwtProvider(final JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
+    }
 
     public String createToken(final MemberInfo memberInfo) {
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime validity = now.plusSeconds(jwtProperties.getExpireLength() / VALIDITY_IN_MILLISECONDS);
 
-        return Jwts.builder()
-                .setSubject(memberInfo.id().toString())
-                .claim(ROLE, memberInfo.memberRole().name())
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .signWith(SignatureAlgorithm.HS256, secretKey)
-                .compact();
-    }
-
-    public Claims getAllClaimsFromToken(final String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    public Long getMemberId(final String token) {
-        return Long.parseLong(Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject());
-    }
-
-    public String getName(final String token) {
-        return (String) Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .get(NAME);
-    }
-
-    public MemberRole getRole(final String token) {
-        return MemberRole.from((String) Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .get(ROLE));
+        Algorithm algorithm = Algorithm.HMAC256(jwtProperties.getSecretKey());
+        return JWT.create()
+                .withSubject(memberInfo.id().toString())
+                .withClaim(ROLE, memberInfo.memberRole().name())
+                .withIssuedAt(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()))
+                .withExpiresAt(Date.from(validity.atZone(ZoneId.systemDefault()).toInstant()))
+                .sign(algorithm);
     }
 
     public boolean isInvalidToken(final String token) {
         try {
-            return getAllClaimsFromToken(token).getExpiration()
-                    .before(new Date());
-        } catch (IllegalArgumentException e) {
-            return false;
+            DecodedJWT decodedJWT = verifyToken(token);
+            return decodedJWT.getExpiresAt().before(new Date());
+        } catch (TokenExpiredException e) {
+            throw new UnAuthorizedException("만료된 토큰입니다.");
+        } catch (JWTVerificationException e) {
+            throw new UnAuthorizedException("유효하지 않은 토큰입니다.");
         }
+    }
+
+    public Long getMemberId(final String token) {
+        try {
+            return Long.parseLong(verifyToken(token).getSubject());
+        } catch (JWTVerificationException e) {
+            throw new UnAuthorizedException("유효하지 않은 토큰입니다.");
+        }
+    }
+
+    public MemberRole getRole(final String token) {
+        try {
+            return MemberRole.valueOf(verifyToken(token).getClaim(ROLE).asString());
+        } catch (JWTVerificationException e) {
+            throw new UnAuthorizedException("유효하지 않은 토큰입니다.");
+        }
+    }
+
+    private DecodedJWT verifyToken(final String token) {
+        Algorithm algorithm = Algorithm.HMAC256(jwtProperties.getSecretKey());
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        return verifier.verify(token);
     }
 }
