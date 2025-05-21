@@ -11,7 +11,7 @@ document.getElementById('logout-btn').addEventListener('click', function (event)
       .then(response => {
         if(response.ok) {
           // 로그아웃 성공, 페이지 새로고침 또는 리다이렉트
-          window.location.reload();
+          location.href = '/'; // 홈 페이지로 리다이렉트
         } else {
           // 로그아웃 실패 처리
           console.error('Logout failed');
