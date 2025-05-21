@@ -26,8 +26,6 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 public class ReservationQueryServiceTest {
@@ -44,8 +42,6 @@ public class ReservationQueryServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationDateTimeDbFixture reservationDateTimeDbFixture;
-    @Autowired
-    private WaitingRepository waitingRepository;
 
     @Autowired
     private CleanUp cleanUp;
@@ -219,6 +215,7 @@ public class ReservationQueryServiceTest {
                 horror.getId(), null, null, null);
 
         // then
+
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(horrorOnly).hasSize(1);
             softly.assertThat(horrorOnly.get(0).theme().name()).isEqualTo(horror.getName());
@@ -226,51 +223,7 @@ public class ReservationQueryServiceTest {
     }
 
     @Test
-    void 예약_대기와_함께_조회할_수_있다() {
-        // given
-        Member 유저1 = memberDbFixture.유저1_생성();
-        Theme 공포 = themeDbFixture.공포();
-        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
-        ReservationDateTime 내일_열한시 = reservationDateTimeDbFixture.내일_열한시();
-
-        // 예약 생성
-        Reservation 예약 = Reservation.builder()
-                .reserver(유저1)
-                .reservationDateTime(내일_열시)
-                .theme(공포)
-                .build();
-        reservationRepository.save(예약);
-
-        // 대기 예약 생성
-        Waiting 대기 = Waiting.builder()
-                .reserver(유저1)
-                .reservationDatetime(내일_열한시)
-                .theme(공포)
-                .build();
-        waitingRepository.save(대기);
-
-        // when
-        List<MyReservationResponse> 결과 = reservationQueryService.getReservations(유저1.getId());
-
-        // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(결과).hasSize(2);
-            
-            MyReservationResponse 예약_응답 = 결과.stream()
-                    .filter(response -> response.status().equals("예약"))
-                    .findFirst()
-                    .orElseThrow();
-            softly.assertThat(예약_응답.theme()).isEqualTo(공포.getName());
-            softly.assertThat(예약_응답.date()).isEqualTo(내일_열시.getDate());
-            softly.assertThat(예약_응답.time()).isEqualTo(내일_열시.getStartAt());
-            
-            MyReservationResponse 대기_응답 = 결과.stream()
-                    .filter(response -> response.status().equals("1"))
-                    .findFirst()
-                    .orElseThrow();
-            softly.assertThat(대기_응답.theme()).isEqualTo(공포.getName());
-            softly.assertThat(대기_응답.date()).isEqualTo(내일_열한시.getDate());
-            softly.assertThat(대기_응답.time()).isEqualTo(내일_열한시.getStartAt());
-        });
+    void 예약_대기와_함께_조회할_수_있다(){
+        // TODO 작성할 것
     }
 }

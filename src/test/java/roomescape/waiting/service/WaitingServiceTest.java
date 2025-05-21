@@ -1,5 +1,6 @@
 package roomescape.waiting.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.auth.web.exception.NotAuthorizationException;
 import roomescape.common.CleanUp;
 import roomescape.fixture.db.MemberDbFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
@@ -26,6 +28,7 @@ import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.controller.response.WaitingInfoResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.exception.InAlreadyWaitingException;
 import roomescape.waiting.repository.WaitingRepository;
@@ -240,5 +243,111 @@ class WaitingServiceTest {
             softly.assertThat(result).hasSize(1);
             softly.assertThat(result.getFirst().status()).isEqualTo("2");
         });
+    }
+
+    @Test
+    void 대기_예약_목록을_모두_조회한다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Member 유저2 = memberDbFixture.유저2_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Waiting waiting1 = Waiting.builder()
+                .reserver(유저1)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+        Waiting waiting2 = Waiting.builder()
+                .reserver(유저2)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+
+        waitingRepository.save(waiting1);
+        waitingRepository.save(waiting2);
+
+        // when
+        List<WaitingInfoResponse> result = waitingService.getAll();
+
+        // then
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(result).hasSize(2);
+            softly.assertThat(result.get(0).theme()).isEqualTo(공포.getName());
+            softly.assertThat(result.get(1).theme()).isEqualTo(공포.getName());
+            softly.assertThat(result)
+                    .extracting(WaitingInfoResponse::name)
+                    .containsExactlyInAnyOrder(유저1.getName(), 유저2.getName());
+        });
+    }
+
+    @Test
+    void 대기_예약을_삭제한다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Waiting waiting = Waiting.builder()
+                .reserver(유저1)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when
+        waitingService.delete(savedWaiting.getId());
+
+        // then
+        assertThat(waitingRepository.existsById(savedWaiting.getId())).isFalse();
+    }
+
+    @Test
+    void 존재하지_않는_대기_예약을_삭제할_수_없다() {
+        // when & then
+        assertThatThrownBy(() -> waitingService.delete(999L))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("해당 예약 대기를 찾을 수 없습니다.");
+    }
+
+    @Test
+    void 본인의_대기_예약을_삭제한다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Waiting waiting = Waiting.builder()
+                .reserver(유저1)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when
+        waitingService.deleteByUser(savedWaiting.getId(), 유저1.getId());
+
+        // then
+        assertThat(waitingRepository.existsById(savedWaiting.getId())).isFalse();
+    }
+
+    @Test
+    void 다른_사용자의_대기_예약을_삭제할_수_없다() {
+        // given
+        Member 유저1 = memberDbFixture.유저1_생성();
+        Member 유저2 = memberDbFixture.유저2_생성();
+        Theme 공포 = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Waiting waiting = Waiting.builder()
+                .reserver(유저1)
+                .reservationDatetime(내일_열시)
+                .theme(공포)
+                .build();
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.deleteByUser(savedWaiting.getId(), 유저2.getId()))
+                .isInstanceOf(NotAuthorizationException.class);
     }
 }
