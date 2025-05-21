@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import roomescape.exception.waiting.WaitingFieldRequiredException;
 
 @Entity
 public class Waiting {
@@ -22,7 +23,11 @@ public class Waiting {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
+    public Waiting() {
+    }
+
     public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validate(date, time, theme, member);
         this.id = id;
         this.date = date;
         this.time = time;
@@ -30,8 +35,35 @@ public class Waiting {
         this.member = member;
     }
 
-    public Waiting() {
+    private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validateDate(date);
+        validateTime(time);
+        validateTheme(theme);
+        validateMember(member);
+    }
 
+    private void validateDate(LocalDate date) {
+        if (date == null) {
+            throw new WaitingFieldRequiredException("날짜");
+        }
+    }
+
+    private void validateTime(ReservationTime time) {
+        if (time == null) {
+            throw new WaitingFieldRequiredException("시간");
+        }
+    }
+
+    private void validateTheme(Theme theme) {
+        if (theme == null) {
+            throw new WaitingFieldRequiredException("테마");
+        }
+    }
+
+    private void validateMember(Member member) {
+        if (member == null) {
+            throw new WaitingFieldRequiredException("멤버");
+        }
     }
 
     public Long getId() {
