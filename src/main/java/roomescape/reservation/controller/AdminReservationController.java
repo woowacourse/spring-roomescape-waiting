@@ -1,8 +1,16 @@
 package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,16 +20,29 @@ import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
-@RequestMapping("/admin/reservations")
+
 @RestController
 @RequiredArgsConstructor
+@Validated
+@RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
+    private static final Log log = LogFactory.getLog(AdminReservationController.class);
     private final ReservationService reservationService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse saveReservation(@Valid @RequestBody final AdminReservationRequest request) {
         return reservationService.saveAdminReservation(request);
+    }
+
+    @GetMapping("/waiting")
+    public List<ReservationResponse> getWaitingReservations() {
+        return reservationService.findAllWaitingReservation();
+    }
+
+    @PatchMapping("/{id}")
+    public void approveReservation(@PathVariable @NotNull final Long id) {
+        reservationService.approveReservation(id);
     }
 }

@@ -108,4 +108,8 @@ public class Reservation extends BaseTimeEntity {
             throw new ReservationException("예약은 현재 시간 이후로 가능합니다.");
         }
     }
+
+    public void updateStatus(final ReservationStatus newStatus) {
+        this.status = newStatus;
+    }
 }

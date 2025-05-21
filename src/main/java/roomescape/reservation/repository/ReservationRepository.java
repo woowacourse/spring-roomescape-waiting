@@ -47,4 +47,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                   AND r.status = 'WAITING'
             """)
     List<WaitingReservationWithRank> findWaitingReservationByMemberWithRank(@Param("member") Member member);
+
+    List<Reservation> findAllByStatus(ReservationStatus status);
 }

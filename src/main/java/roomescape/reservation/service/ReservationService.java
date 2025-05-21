@@ -81,11 +81,6 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private Member findMemberById(final Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
-    }
-
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
         final Member member = findMemberById(loginMember.id());
         final List<MyReservationResponse> bookedReservations = reservationRepository.findByMemberAndStatus(member,
@@ -100,6 +95,24 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationResponse> findAllWaitingReservation() {
+        final List<Reservation> waitingReservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
+        return waitingReservations.stream().map(ReservationResponse::new).toList();
+    }
+
+    public void approveReservation(final Long id) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
+
+        reservation.updateStatus(ReservationStatus.BOOKED);
+
+        reservationRepository.save(reservation);
+    }
+
+    private Member findMemberById(final Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
+    }
 
     private ReservationTime findReservationTimeById(final Long timeId) {
         return reservationTimeRepository.findById(timeId).orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
