@@ -44,8 +44,7 @@ public class Reservation {
     private Member member;
 
     @Builder
-    public Reservation(Long id, LocalDate date, ReservationTime time, ReservationTheme theme, Member member) {
-        this.id = id;
+    public Reservation(LocalDate date, ReservationTime time, ReservationTheme theme, Member member) {
         this.date = date;
         this.time = time;
         this.theme = theme;
