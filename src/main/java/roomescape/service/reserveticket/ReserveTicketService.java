@@ -89,7 +89,7 @@ public class ReserveTicketService {
     }
 
     @Transactional
-    public void addWaitingReservation(AddReservationDto addReservationDto, Long memberId) {
+    public long addWaitingReservation(AddReservationDto addReservationDto, Long memberId) {
 //        int nextWeightNumber = reserveTicketRepository.countSameWaitingReservation(addReservationDto.themeId(),
 //                addReservationDto.date(), addReservationDto.timeId(), minWeight) + 1;
         long reservationId = reservationService.addReservation(addReservationDto, new NonDuplicateCheckStrategy(),
@@ -97,6 +97,6 @@ public class ReserveTicketService {
         Reservation reservation = reservationService.getReservationById(reservationId);
         Reserver reserver = memberService.getMemberById(memberId);
         ReserveTicket reserveTicket = new ReserveTicket(null, reservation, reserver);
-        reserveTicketRepository.save(reserveTicket);
+        return reserveTicketRepository.save(reserveTicket).getId();
     }
 }

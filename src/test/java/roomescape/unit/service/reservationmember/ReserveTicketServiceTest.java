@@ -184,4 +184,28 @@ class ReserveTicketServiceTest {
         assertThat(ticketWaiting.getWaitRank()).isEqualTo(1L);
         assertThat(secondTicketWaiting.getWaitRank()).isEqualTo(2L);
     }
+
+    @Test
+    void 중간에_있던_예약이_삭제되어도_순번이_제대로_출력된다() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        LocalDate reservationDate = LocalDate.now().plusDays(1L);
+
+        reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+        long middleWaitingId = reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+        long lastWaitingId = reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+
+        reserveTicketService.deleteReservation(middleWaitingId);
+        List<ReserveTicketWaiting> reserveTicketWaitings = reserveTicketService.allReservationTickets();
+
+        ReserveTicketWaiting lastTicketWaiting = reserveTicketWaitings.getLast();
+        Long id = lastTicketWaiting.getId();
+        int waitRank = lastTicketWaiting.getWaitRank();
+        assertThat(id).isEqualTo(lastWaitingId);
+        assertThat(waitRank).isEqualTo(2);
+    }
 }
