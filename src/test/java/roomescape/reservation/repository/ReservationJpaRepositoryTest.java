@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
@@ -71,8 +72,19 @@ class ReservationJpaRepositoryTest {
     }
 
     @Test
-    void 최근_일주일_예약을_가져온다() {
+    void 멤버별_예약을_조회한다() {
+        //when
+        List<Reservation> allByMemberId = reservationRepository.findAllByMemberId(member.getId());
+
+        //then
+        assertThat(allByMemberId.contains(reservation)).isTrue();
+    }
+
+    @Test
+    void 인기_테마_10개를_조회한다() {
         //given
+        Theme theme1 = themeRepository.save(new Theme("웃음", "aa", "aa"));
+        Theme theme2 = themeRepository.save(new Theme("슬픔", "bb", "bb"));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(2L), reservationTime, theme, member,
                 ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(3L), reservationTime, theme, member,
@@ -81,9 +93,9 @@ class ReservationJpaRepositoryTest {
                 ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(5L), reservationTime, theme, member,
                 ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(6L), reservationTime, theme, member,
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(6L), reservationTime, theme1, member,
                 ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(7L), reservationTime, theme, member,
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(7L), reservationTime, theme1, member,
                 ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(8L), reservationTime, theme, member,
                 ReservationStatus.RESERVATION));
@@ -91,28 +103,22 @@ class ReservationJpaRepositoryTest {
                 ReservationStatus.RESERVATION));
         reservationRepository.save(Reservation.create(LocalDate.now().minusDays(10L), reservationTime, theme, member,
                 ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(11L), reservationTime, theme, member,
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(11L), reservationTime, theme2, member,
                 ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(12L), reservationTime, theme, member,
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(12L), reservationTime, theme2, member,
                 ReservationStatus.RESERVATION));
 
+        // when
         LocalDate endDate = LocalDate.now().minusDays(1L);
         LocalDate startDate = LocalDate.now().minusDays(7L);
 
-        //when
-        List<Reservation> reservations = reservationRepository.findAllByReservationDateBetween(startDate, endDate);
+        List<Theme> recentReservations = reservationRepository.findTopThemesByReservationCount(startDate,
+                endDate, PageRequest.of(0, 10));
 
         //then
-        assertThat(reservations.size()).isEqualTo(7);
-    }
-
-    @Test
-    void 멤버별_예약을_조회한다() {
-        //when
-        List<Reservation> allByMemberId = reservationRepository.findAllByMemberId(member.getId());
-
-        //then
-        assertThat(allByMemberId.contains(reservation)).isTrue();
+        assertThat(recentReservations).containsExactly(
+                theme, theme1
+        );
     }
 
 }

@@ -3,8 +3,10 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository {
 
@@ -26,5 +28,5 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByMemberId(Long memberId);
 
-    List<Reservation> findAllByReservationDateBetween(LocalDate start, LocalDate end);
+    List<Theme> findTopThemesByReservationCount(LocalDate startDate, LocalDate endDate, Pageable pageable);
 }

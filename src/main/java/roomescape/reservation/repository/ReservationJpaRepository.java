@@ -3,10 +3,12 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>, ReservationRepository {
 
@@ -45,19 +47,6 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
                 join fetch r.reservationTime t
                 join fetch r.theme th
                 join fetch r.member m
-                where r.reservationDate.reservationDate between :startDate and :endDate
-            """)
-    List<Reservation> findAllByReservationDateBetween(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end
-    );
-
-    @Query("""
-                select r
-                from Reservation r
-                join fetch r.reservationTime t
-                join fetch r.theme th
-                join fetch r.member m
             """)
     List<Reservation> findAll(
     );
@@ -72,6 +61,20 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             """)
     Optional<Reservation> findById(
             @Param("reservationId") Long id
+    );
+
+    @Query("""
+                select th
+                from Reservation r
+                join r.theme th
+                where r.reservationDate.reservationDate between :startDate and :endDate
+                group by th
+                order by count(r) desc
+            """)
+    List<Theme> findTopThemesByReservationCount(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable
     );
 
 }
