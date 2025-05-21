@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
@@ -30,6 +31,7 @@ import roomescape.support.util.TestCurrentDateTime;
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/schema.sql", "/test-data.sql"})
+@Transactional
 public class ReservationServiceIntegrationTest {
 
     @Autowired
