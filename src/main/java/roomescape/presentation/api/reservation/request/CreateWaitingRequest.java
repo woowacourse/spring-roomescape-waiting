@@ -9,7 +9,7 @@ public record CreateWaitingRequest(
         LocalDate date,
         @NotNull(message = "themeId는 필수입니다.")
         Long theme,
-        @NotNull(message = "themeId는 필수입니다.")
+        @NotNull(message = "timeId는 필수입니다.")
         Long time
 ) {
 
