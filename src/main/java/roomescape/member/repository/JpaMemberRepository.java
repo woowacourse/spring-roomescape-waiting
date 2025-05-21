@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 
 @Repository
-public class JpaMemberRepository implements MemberRepository{
+public class JpaMemberRepository implements MemberRepository {
 
     private final MemberListCrudRepository memberListCrudRepository;
 
