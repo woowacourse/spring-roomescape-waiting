@@ -83,6 +83,7 @@ class WaitingPromotionServiceTest extends AbstractServiceIntegrationTest {
         Member member = memberRepository.save(
                 new Member("member", new Email("member@email.com"), "pw", MemberRole.NORMAL)
         );
+        Member admin = memberRepository.save(new Member("admin", new Email("admin@email.com"), "pw", MemberRole.ADMIN));
         LocalDate date = LocalDate.now(clock).plusDays(1);
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
         Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));

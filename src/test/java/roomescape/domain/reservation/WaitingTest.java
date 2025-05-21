@@ -17,16 +17,17 @@ class WaitingTest {
 
     private final Member member = new Member(1L, "벨로", new Email("test@email.com"), "password", MemberRole.NORMAL);
     private final Member other = new Member(2L, "벨로아님", new Email("other@email.com"), "password", MemberRole.NORMAL);
+    private final Member admin = new Member(3L, "관리자", new Email("admin@email.com"), "password", MemberRole.ADMIN);
     private final ReservationTime time = new ReservationTime(1L, LocalTime.of(13, 0));
     private final Theme theme = new Theme(1L, "테마", "설명", "이미지");
 
     @Test
-    void 본인의_대기라면_제어_권한이_있다() {
+    void 관리자만_대기_승인_권한이_있다() {
         // given
         Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
 
         // when
-        boolean hasPermission = waiting.hasControlPermission(member);
+        boolean hasPermission = waiting.hasApproveControlPermission(admin);
 
         // then
         assertThat(hasPermission)
@@ -34,12 +35,38 @@ class WaitingTest {
     }
 
     @Test
-    void 본인의_대기가_아니라면_제어_권한이_없다() {
+    void 관리자가_아니라면_대기_승인_권한이_없다() {
         // given
         Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
 
         // when
-        boolean hasPermission = waiting.hasControlPermission(other);
+        boolean hasPermission = waiting.hasCancelControlPermission(member);
+
+        // then
+        assertThat(hasPermission)
+                .isTrue();
+    }
+
+    @Test
+    void 본인의_대기라면_취소_권한이_있다() {
+        // given
+        Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
+
+        // when
+        boolean hasPermission = waiting.hasCancelControlPermission(member);
+
+        // then
+        assertThat(hasPermission)
+                .isTrue();
+    }
+
+    @Test
+    void 본인의_대기가_아니라면_취소_권한이_없다() {
+        // given
+        Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
+
+        // when
+        boolean hasPermission = waiting.hasCancelControlPermission(other);
 
         // then
         assertThat(hasPermission)
