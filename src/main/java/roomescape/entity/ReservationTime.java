@@ -19,7 +19,7 @@ public class ReservationTime {
     @Column(nullable = false)
     private LocalTime startAt;
 
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(Long id, LocalTime startAt) {
@@ -45,11 +45,11 @@ public class ReservationTime {
             return false;
         }
         ReservationTime that = (ReservationTime) o;
-        return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startAt);
+        return Objects.hashCode(getId());
     }
 }

@@ -42,7 +42,7 @@ public class Reservation {
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id,
@@ -121,7 +121,7 @@ public class Reservation {
         return status;
     }
 
-    public void setMember(Member member) {
+    protected void setMember(Member member) {
         this.member = member;
     }
 

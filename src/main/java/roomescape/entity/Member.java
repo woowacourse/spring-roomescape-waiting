@@ -45,7 +45,7 @@ public class Member {
             orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(Long id, String name, String email, String password, Role role) {
