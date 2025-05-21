@@ -11,9 +11,12 @@ import roomescape.common.exception.PastDateException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationWithStatus;
+import roomescape.reservation.domain.StatusType;
 import roomescape.reservation.dto.AvailableReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ReservationWithStatusRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -22,6 +25,7 @@ import roomescape.theme.repository.ThemeRepository;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationWithStatusRepository reservationWithStatusRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
@@ -38,7 +42,28 @@ public class ReservationService {
         }
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);
 
-        return reservationRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
+    ReservationWithStatus reservationWithStatus = new ReservationWithStatus(savedReservation, StatusType.RESERVED);
+        reservationWithStatusRepository.save(reservationWithStatus);
+
+        return savedReservation;
+    }
+
+    public Reservation saveWaiting(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
+        if (!date.isAfter(LocalDate.now())) {
+            throw new PastDateException("과거 시간은 예약 등록을 할 수 없습니다. date = " + date);
+        }
+        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
+        final Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
+        final Reservation reservation = new Reservation(member, date, reservationTime, theme);
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+        ReservationWithStatus reservationWithStatus = new ReservationWithStatus(savedReservation, StatusType.WAITING);
+        reservationWithStatusRepository.save(reservationWithStatus);
+
+        return savedReservation;
     }
 
     public void deleteById(final Long id) {
@@ -73,7 +98,7 @@ public class ReservationService {
         return availableReservationTimes;
     }
 
-    public List<Reservation> findByMember(final Member member) {
-        return reservationRepository.findByMember(member);
+    public List<ReservationWithStatus> findByMember(final Member member) {
+        return reservationWithStatusRepository.findByReservation_Member(member);
     }
 }

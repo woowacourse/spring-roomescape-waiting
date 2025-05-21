@@ -20,9 +20,11 @@ import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationWithStatus;
 import roomescape.reservation.dto.AvailableReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ReservationWithStatusRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -331,7 +333,7 @@ class ReservationServiceTest {
                                                 savedTheme));
 
                 // when
-                final List<Reservation> reservations = reservationService.findByMember(savedMember);
+                final List<ReservationWithStatus> reservations = reservationService.findByMember(savedMember);
 
                 // then
                 assertThat(reservations.size()).isEqualTo(1);
@@ -342,10 +344,11 @@ class ReservationServiceTest {
                 @Bean
                 public ReservationService themeService(
                                 final ReservationRepository reservationRepository,
+                                final ReservationWithStatusRepository reservationWithStatusRepository,
                                 final ReservationTimeRepository reservationTimeRepository,
                                 final ThemeRepository themeRepository) {
-                        return new ReservationService(reservationRepository, reservationTimeRepository,
-                                        themeRepository);
+                        return new ReservationService(reservationRepository, reservationWithStatusRepository,
+                                reservationTimeRepository, themeRepository);
                 }
         }
 }

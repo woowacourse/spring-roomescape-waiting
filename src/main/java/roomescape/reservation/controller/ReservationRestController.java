@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationWithStatus;
 import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
@@ -34,6 +35,20 @@ public class ReservationRestController {
             final Member member
     ) {
         final Reservation savedReservation = reservationService.save(
+                member,
+                createReservationRequest.date(),
+                createReservationRequest.timeId(),
+                createReservationRequest.themeId()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreateReservationResponse.from(savedReservation));
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<CreateReservationResponse> createWaitingReservation(
+            @RequestBody final CreateReservationRequest createReservationRequest,
+            final Member member
+    ) {
+        final Reservation savedReservation = reservationService.saveWaiting(
                 member,
                 createReservationRequest.date(),
                 createReservationRequest.timeId(),
@@ -76,7 +91,7 @@ public class ReservationRestController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
-        final List<Reservation> reservations = reservationService.findByMember(member);
+        final List<ReservationWithStatus> reservations = reservationService.findByMember(member);
         final List<ReservationMineResponse> reservationMineResponses = reservations.stream()
                 .map(ReservationMineResponse::from)
                 .toList();
