@@ -62,6 +62,24 @@ public class ReservationService {
                 ReservationStatus.WAIT);
     }
 
+    public void approveWaitReservationByAdmin(long waitReservationId) {
+        Reservation waitReservation = reservationRepository.findById(waitReservationId)
+                .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약 대기입니다."));
+
+        if (waitReservation.getStatus() == ReservationStatus.RESERVED) {
+            throw new InvalidReservationException("이미 예약 처리 되었습니다.");
+        }
+
+        Optional<Reservation> cancelTargetOptional = reservationRepository.findByDateAndReservationTimeAndThemeAndStatus(
+                waitReservation.getDate(),
+                waitReservation.getReservationTime(),
+                waitReservation.getTheme(),
+                ReservationStatus.RESERVED);
+        cancelTargetOptional.ifPresent(Reservation::cancel);
+
+        waitReservation.changeStatusWaitToReserve();
+    }
+
     private Reservation createReservation(long memberId,
                                           long themeId,
                                           LocalDate date,

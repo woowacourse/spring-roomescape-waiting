@@ -70,4 +70,10 @@ public class AdminController {
         
         return ResponseEntity.ok(responses);
     }
+
+    @GetMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> approveWaitReservation(@PathVariable("id") Long reservationId) {
+        reservationService.approveWaitReservationByAdmin(reservationId);
+        return ResponseEntity.ok().build();
+    }
 }
