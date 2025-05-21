@@ -18,7 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.login.application.TokenCookieService;
 import roomescape.login.application.dto.LoginRequest;
 import roomescape.reservation.application.dto.MemberReservationRequest;
-import roomescape.reservation.domain.BookingStatus;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -55,8 +54,7 @@ public class MemberReservationApiTest {
         final MemberReservationRequest request = new MemberReservationRequest(
                 LocalDate.now().plusDays(1),
                 1L,
-                1L,
-                BookingStatus.RESERVED
+                1L
         );
 
         RestAssured.given().log().all()
@@ -70,7 +68,7 @@ public class MemberReservationApiTest {
 
     @Test
     void 예약날짜는_null을_받을_수_없다() {
-        final MemberReservationRequest request = new MemberReservationRequest(null, 1L, 1L, BookingStatus.RESERVED);
+        final MemberReservationRequest request = new MemberReservationRequest(null, 1L, 1L);
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
@@ -84,8 +82,7 @@ public class MemberReservationApiTest {
 
     @Test
     void 예약_시간_id는_null을_받을_수_없다() {
-        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), null, 1L,
-                BookingStatus.RESERVED);
+        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), null, 1L);
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
@@ -101,8 +98,7 @@ public class MemberReservationApiTest {
         final MemberReservationRequest request = new MemberReservationRequest(
                 LocalDate.now().minusDays(10),
                 1L,
-                1L,
-                BookingStatus.RESERVED
+                1L
         );
 
         RestAssured.given().log().all()
@@ -120,7 +116,7 @@ public class MemberReservationApiTest {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
                 .contentType(ContentType.JSON)
-                .when().get("/reservations/mine")
+                .when().get("/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(4));
@@ -128,8 +124,7 @@ public class MemberReservationApiTest {
 
     @Test
     void 테마_id가_null이면_에러를_반환한다() {
-        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), 1L, null,
-                BookingStatus.RESERVED);
+        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), 1L, null);
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
@@ -144,7 +139,7 @@ public class MemberReservationApiTest {
     void 로그인을_안한상태로_본인의_예약을_조회하면_401를_반환한다() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().get("/reservations/mine")
+                .when().get("/mine")
                 .then().log().all()
                 .statusCode(401);
     }

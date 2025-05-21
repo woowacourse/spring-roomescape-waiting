@@ -56,6 +56,6 @@ VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 2);
 INSERT INTO waiting (date, time_id, theme_id, member_id)
 VALUES (DATEADD('DAY', +3, CURRENT_DATE), 2, 2, 1);
 INSERT INTO waiting (date, time_id, theme_id, member_id)
-VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 2);
+VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 3);
 INSERT INTO waiting (date, time_id, theme_id, member_id)
 VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 1);

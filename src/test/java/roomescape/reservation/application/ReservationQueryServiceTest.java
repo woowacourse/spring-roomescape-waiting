@@ -13,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
-import roomescape.reservation.application.dto.MyReservationResponse;
+import roomescape.reservation.application.dto.MyHistoryResponse;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -58,7 +58,7 @@ class ReservationQueryServiceTest {
     @Test
     void 멤버id로_예약기록을_조회한다() {
         final long memberId = 1L;
-        final List<MyReservationResponse> responses = reservationQueryService.findByMemberId(memberId);
+        final List<MyHistoryResponse> responses = reservationQueryService.findMyHistory(memberId);
 
         assertThat(responses).hasSize(4);
     }
@@ -93,6 +93,6 @@ class ReservationQueryServiceTest {
     void 존재하지_않는_멤버의_예약기록은_빈_목록을_반환한다() {
         final long nonExistingMemberId = 999L;
 
-        assertThat(reservationQueryService.findByMemberId(nonExistingMemberId)).isEmpty();
+        assertThat(reservationQueryService.findMyHistory(nonExistingMemberId)).isEmpty();
     }
 }

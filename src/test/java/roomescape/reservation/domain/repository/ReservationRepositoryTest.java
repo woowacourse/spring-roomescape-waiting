@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 
 @DataJpaTest
@@ -44,16 +43,13 @@ class ReservationRepositoryTest {
         Long memberId = 1L; // 엠제이
         LocalDate from = LocalDate.now().minusDays(5);
         LocalDate to = LocalDate.now().plusDays(5);
-        BookingStatus status = BookingStatus.RESERVED;
 
-        List<Reservation> result = reservationRepository.findByFilteringWithAssociations(themeId, memberId, from, to,
-                status);
+        List<Reservation> result = reservationRepository.findByFilteringWithAssociations(themeId, memberId, from, to);
 
         assertThat(result).isNotEmpty();
         assertThat(result).allSatisfy(reservation -> {
             assertThat(reservation.getTheme().getId()).isEqualTo(themeId);
             assertThat(reservation.getMember().getId()).isEqualTo(memberId);
-            assertThat(reservation.getBookingStatus()).isEqualTo(status);
         });
     }
 
@@ -68,21 +64,6 @@ class ReservationRepositoryTest {
             assertThat(reservation.getMember().getId()).isEqualTo(memberId);
             assertThat(reservation.getTheme()).isNotNull();
             assertThat(reservation.getTime()).isNotNull();
-        });
-    }
-
-    @Test
-    void 예약_상태로_예약을_조회한다() {
-        BookingStatus status = BookingStatus.WAITING;
-
-        List<Reservation> result = reservationRepository.findByStatusWithAssociations(status);
-
-        assertThat(result).isNotEmpty();
-        assertThat(result).allSatisfy(reservation -> {
-            assertThat(reservation.getBookingStatus()).isEqualTo(status);
-            assertThat(reservation.getTheme()).isNotNull();
-            assertThat(reservation.getTime()).isNotNull();
-            assertThat(reservation.getMember()).isNotNull();
         });
     }
 }

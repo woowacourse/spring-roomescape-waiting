@@ -101,9 +101,7 @@ class AdminReservationApiTest {
 
     @Test
     void 예약_상태를_RESERVED로_변경한다() {
-        // 기존 확정된 예약은 8개
-        // 예약대기를 확정으로 바꾸면, 확정된 예약은 9개
-
+        // 선행 예약 지움
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
                 .when().get("/admin/reservations")
@@ -113,7 +111,21 @@ class AdminReservationApiTest {
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().put("/admin/reservations/waiting/11")
+                .when().delete("/admin/reservations/8")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(7));
+
+        // 대기 예약을 확정으로 수정
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().put("/admin/waitings/2")
                 .then().log().all()
                 .statusCode(200);
 
@@ -122,6 +134,6 @@ class AdminReservationApiTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(9));
+                .body("size()", is(8));
     }
 }
