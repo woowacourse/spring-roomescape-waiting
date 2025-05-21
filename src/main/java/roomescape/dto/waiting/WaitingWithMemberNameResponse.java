@@ -11,5 +11,4 @@ public record WaitingWithMemberNameResponse(Long id, String name, String theme, 
                 getName(), waiting.getTheme().getName(), waiting.getDate(),
                 waiting.getTime().getStartAt());
     }
-
 }
