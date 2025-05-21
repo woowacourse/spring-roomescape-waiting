@@ -21,6 +21,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingRequest;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.dto.response.WaitingWithRankResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
@@ -278,5 +279,38 @@ class WaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> waitingService.deleteWaitingById(member1.getId(), 1L))
                 .isInstanceOf(WaitingNotFoundException.class);
+    }
+
+    @Test
+    void 모든_대기를_조회한다() {
+        // given
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
+        TimeSlot timeSlot = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1").bulid();
+        waitingRepository.save(
+                Waiting.builder()
+                        .date(LocalDate.of(2025, 1, 1))
+                        .member(member)
+                        .theme(theme)
+                        .timeSlot(timeSlot).build()
+        );
+        waitingRepository.save(
+                Waiting.builder()
+                        .date(LocalDate.of(2025, 1, 2))
+                        .member(member)
+                        .theme(theme)
+                        .timeSlot(timeSlot).build()
+        );
+        // when
+        List<WaitingResponse> waitings = waitingService.findAllWaitings();
+        // then
+        assertThat(waitings).hasSize(2);
     }
 }

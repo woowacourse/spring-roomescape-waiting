@@ -83,6 +83,6 @@ public class FakeWaitingRepository implements WaitingRepository {
 
     @Override
     public List<Waiting> findAll() {
-        return List.of();
+        return waitings;
     }
 }
