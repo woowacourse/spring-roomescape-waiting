@@ -60,6 +60,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     public List<Reservation> findAllByUserId(final UserId userId) {
         return jpaReservationRepository.findAllByUserId(userId);
     }
+
     @Override
     public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
         return jdbcTemplateReservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, count);

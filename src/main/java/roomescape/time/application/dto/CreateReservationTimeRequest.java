@@ -7,8 +7,6 @@ import roomescape.common.validate.Validator;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.TimeValue;
 
-import java.time.LocalTime;
-
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public record CreateReservationTimeRequest(TimeValue startAt) {
 

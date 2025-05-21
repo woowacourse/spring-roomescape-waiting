@@ -13,7 +13,6 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.application.service.ReservationTimeQueryService;
 import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.UserId;
 

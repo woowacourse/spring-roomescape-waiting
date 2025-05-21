@@ -18,13 +18,13 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.ui.ReservationController;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
@@ -188,7 +188,7 @@ public class MissionStepTest {
     @DisplayName("데이터베이스에 예약 하나 추가 후 예약 조회 API를 통해 조회한 예약 수와 데이터베이스 쿼리를 통해 조회한 예약 수가 같은지 비교할 수 있다")
     void fifth() {
         // given
-        final Reservation reservation = reservationRepository.save(
+        reservationRepository.save(
                 Reservation.withoutId(
                         normalUser.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),

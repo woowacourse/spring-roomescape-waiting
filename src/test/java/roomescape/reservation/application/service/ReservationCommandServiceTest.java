@@ -17,13 +17,13 @@ import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.domain.TimeValue;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
@@ -124,7 +124,7 @@ class ReservationCommandServiceTest {
                         Password.fromEncoded("1234"),
                         UserRole.NORMAL));
 
-        final Reservation savedReservation = reservationCommandService.create(
+        reservationCommandService.create(
                 new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),

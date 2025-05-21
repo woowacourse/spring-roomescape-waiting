@@ -7,7 +7,6 @@ import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.domain.TimeValue;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 

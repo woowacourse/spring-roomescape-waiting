@@ -7,17 +7,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
+import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
-import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.time.domain.TimeValue;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
@@ -50,8 +50,6 @@ class ReservationQueryServiceTest {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserQueryService userQueryService;
 
     @Test
     @DisplayName("예약을 조회할 수 있다")
@@ -155,16 +153,16 @@ class ReservationQueryServiceTest {
 
         final Reservation reservation2 = reservationRepository.save(
                 Reservation.withoutId(
-                        notMe.getId(),
+                        me.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
                         time.getStartAt(),
                         theme2
                 )
         );
 
-        final Reservation reservation3 = reservationRepository.save(
+        reservationRepository.save(
                 Reservation.withoutId(
-                        me.getId(),
+                        notMe.getId(), // 나 아님
                         ReservationDate.from(LocalDate.now().plusDays(1)),
                         time.getStartAt(),
                         theme3
@@ -176,7 +174,7 @@ class ReservationQueryServiceTest {
 
         // then
         assertThat(reservations).hasSize(2);
-        assertThat(reservations).contains(reservation1, reservation3);
+        assertThat(reservations).contains(reservation1, reservation2);
     }
 
     @Test

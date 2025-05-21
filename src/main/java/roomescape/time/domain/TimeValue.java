@@ -25,17 +25,17 @@ public class TimeValue {
 
     @Column(name = "start_at")
     private LocalTime value;
-    
+
     public static TimeValue from(final LocalTime startAt) {
         validate(startAt);
         return new TimeValue(startAt);
     }
-    
+
     private static void validate(final LocalTime startAt) {
         Validator.of(TimeValue.class)
                 .validateNotNull(Fields.value, startAt, DomainTerm.RESERVATION_TIME.label());
     }
-    
+
     public boolean isBefore(final LocalTime time) {
         return value.isBefore(time);
     }
