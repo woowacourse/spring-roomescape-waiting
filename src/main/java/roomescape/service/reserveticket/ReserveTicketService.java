@@ -10,6 +10,7 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reserveticket.ReservationTicketWaitings;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.dto.reservation.AddReservationDto;
+import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
@@ -50,7 +51,7 @@ public class ReserveTicketService {
         return reservationTicketWaitings.reserveTicketWaitings();
     }
 
-    public List<ReserveTicketWaiting> memberReservationTickets(Long memberId) {
+    public List<ReserveTicketWaiting> memberReservationWaitingTickets(Long memberId) {
         List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByReserverId(memberId);
 
         return reserveTickets.stream()
@@ -84,18 +85,19 @@ public class ReserveTicketService {
                 .toList();
     }
 
-    public List<ReserveTicket> memberReservations(Long memberId) {
-        return reserveTicketRepository.findAllByReserverId(memberId);
-    }
-
     @Transactional
-    public long addWaitingReservation(AddReservationDto addReservationDto, Long memberId) {
-//        int nextWeightNumber = reserveTicketRepository.countSameWaitingReservation(addReservationDto.themeId(),
-//                addReservationDto.date(), addReservationDto.timeId(), minWeight) + 1;
+    public long addWaitingReservation(AddReservationDto addReservationDto, Long reserverId) {
         long reservationId = reservationService.addReservation(addReservationDto, new NonDuplicateCheckStrategy(),
                 ReservationStatus.PREPARE);
+
+        if (reserveTicketRepository.existsBySameWaitingReservation(addReservationDto.themeId(),
+                addReservationDto.date(),
+                addReservationDto.timeId(), reserverId)) {
+            throw new InvalidReservationException("중복된 대기 요청입니다.");
+        }
+
         Reservation reservation = reservationService.getReservationById(reservationId);
-        Reserver reserver = memberService.getMemberById(memberId);
+        Reserver reserver = memberService.getMemberById(reserverId);
         ReserveTicket reserveTicket = new ReserveTicket(null, reservation, reserver);
         return reserveTicketRepository.save(reserveTicket).getId();
     }

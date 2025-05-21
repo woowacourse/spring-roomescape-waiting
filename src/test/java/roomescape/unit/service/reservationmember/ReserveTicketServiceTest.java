@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.dto.member.SignupRequestDto;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AddReservationTimeDto;
@@ -144,9 +143,9 @@ class ReserveTicketServiceTest {
         long secondId = reserveTicketService.addReservation(
                 new AddReservationDto("name", LocalDate.now().plusDays(2), timeId, themeId), memberId);
 
-        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(memberId);
+        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.memberReservationWaitingTickets(memberId);
         List<Long> reservationMemberIds = reserveTickets.stream()
-                .map(ReserveTicket::getReservationId)
+                .map(ReserveTicketWaiting::getId)
                 .toList();
 
         assertThat(reservationMemberIds).containsAnyElementsOf(List.of(firstId, secondId));
@@ -168,6 +167,8 @@ class ReserveTicketServiceTest {
     @Test
     void 예약_대기일시_예약_순번을_알_수_있다() {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long secondMemberId = memberService.signup(new SignupRequestDto("email2@email.com", "password", "name2"));
+
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
         LocalDate reservationDate = LocalDate.now().plusDays(1L);
@@ -175,7 +176,7 @@ class ReserveTicketServiceTest {
         reserveTicketService.addWaitingReservation(
                 new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
         reserveTicketService.addWaitingReservation(
-                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), secondMemberId);
 
         List<ReserveTicketWaiting> reserveTicketWaitings = reserveTicketService.allReservationTickets();
 
@@ -186,8 +187,26 @@ class ReserveTicketServiceTest {
     }
 
     @Test
+    void 동일한_유저는_중복된_예약_대기를_할_수_없음() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        LocalDate reservationDate = LocalDate.now().plusDays(1L);
+
+        reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+
+        assertThatThrownBy(() -> reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void 중간에_있던_예약이_삭제되어도_순번이_제대로_출력된다() {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long secondMemberId = memberService.signup(new SignupRequestDto("email2@email.com", "password", "name2"));
+        long thirdMemberId = memberService.signup(new SignupRequestDto("email3@email.com", "password", "name3"));
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
         LocalDate reservationDate = LocalDate.now().plusDays(1L);
@@ -195,9 +214,9 @@ class ReserveTicketServiceTest {
         reserveTicketService.addWaitingReservation(
                 new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
         long middleWaitingId = reserveTicketService.addWaitingReservation(
-                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), secondMemberId);
         long lastWaitingId = reserveTicketService.addWaitingReservation(
-                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), thirdMemberId);
 
         reserveTicketService.deleteReservation(middleWaitingId);
         List<ReserveTicketWaiting> reserveTicketWaitings = reserveTicketService.allReservationTickets();
@@ -207,5 +226,17 @@ class ReserveTicketServiceTest {
         int waitRank = lastTicketWaiting.getWaitRank();
         assertThat(id).isEqualTo(lastWaitingId);
         assertThat(waitRank).isEqualTo(2);
+    }
+
+    @Test
+    void 유저는_예약이없어도_예약_대기를_할_수_있다() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        LocalDate reservationDate = LocalDate.now().plusDays(1L);
+
+        long waitingReservation = reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
+        assertThat(reserveTicketService.memberReservationWaitingTickets(waitingReservation)).hasSize(1);
     }
 }

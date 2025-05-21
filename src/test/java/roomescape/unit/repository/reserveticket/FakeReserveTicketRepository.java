@@ -53,4 +53,15 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
                 .toList()
                 .size();
     }
+
+    @Override
+    public boolean existsBySameWaitingReservation(long themeId, LocalDate date, long timeId, long reserverId) {
+        return reserveTickets.stream()
+                .anyMatch(rt ->
+                        rt.getReservation().getTheme().getId() == themeId &&
+                                rt.getReservation().getDate().equals(date) &&
+                                rt.getReservation().getReservationTime().getId() == timeId &&
+                                rt.getMemberId() == reserverId
+                );
+    }
 }

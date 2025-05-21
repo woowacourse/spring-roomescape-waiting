@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
-import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -121,9 +120,9 @@ public class ReservationController {
     @GetMapping("/mine")
     public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(
             @AuthenticationPrincipal UserInfo userInfo) {
-        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(userInfo.id());
+        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.memberReservationWaitingTickets(userInfo.id());
         List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getReservationId(),
+                .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getId(),
                         reservationMember.getName(),
                         reservationMember.getThemeName(),
                         reservationMember.getDate(),
