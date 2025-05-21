@@ -3,6 +3,7 @@ package roomescape.reservation.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 import roomescape.reservation.domain.Reservation;
 
 public class MyReservationJsonResponse implements MyReservationResponse {
@@ -55,5 +56,20 @@ public class MyReservationJsonResponse implements MyReservationResponse {
     @Override
     public String getStatus() {
         return status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof MyReservationJsonResponse that)) {
+            return false;
+        }
+        return Objects.equals(id, that.id) && Objects.equals(themeName, that.themeName)
+            && Objects.equals(date, that.date) && Objects.equals(time, that.time)
+            && Objects.equals(status, that.status);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, themeName, date, time, status);
     }
 }
