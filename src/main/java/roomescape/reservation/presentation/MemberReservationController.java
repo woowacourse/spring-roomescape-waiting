@@ -16,14 +16,14 @@ import roomescape.common.exception.handler.dto.ExceptionResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationFacadeService;
 
 @RestController
 public class MemberReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationFacadeService reservationService;
 
-    public MemberReservationController(final ReservationService reservationService) {
+    public MemberReservationController(final ReservationFacadeService reservationService) {
         this.reservationService = reservationService;
     }
 

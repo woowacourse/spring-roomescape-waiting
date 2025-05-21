@@ -18,7 +18,7 @@ import roomescape.reservationTime.presentation.dto.ReservationTimeRequest;
 import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
 import roomescape.reservationTime.presentation.dto.TimeConditionRequest;
 import roomescape.reservationTime.presentation.dto.TimeConditionResponse;
-import roomescape.reservationTime.service.ReservationTimeService;
+import roomescape.reservationTime.service.ReservationTimeFacadeService;
 
 @RestController
 @RequestMapping("/times")
@@ -26,9 +26,9 @@ public class ReservationTimeController {
 
     public static final String GET_ADMIN_TIME = "/admin/time";
 
-    private final ReservationTimeService reservationTimeService;
+    private final ReservationTimeFacadeService reservationTimeService;
 
-    public ReservationTimeController(final ReservationTimeService reservationTimeService) {
+    public ReservationTimeController(final ReservationTimeFacadeService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
     }
 

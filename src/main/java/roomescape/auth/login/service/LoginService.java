@@ -2,30 +2,32 @@ package roomescape.auth.login.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.admin.domain.Admin;
-import roomescape.admin.service.AdminService;
+import roomescape.admin.service.AdminQueryService;
 import roomescape.auth.exception.UnauthorizedException;
-import roomescape.auth.token.JwtTokenManager;
 import roomescape.auth.login.presentation.dto.LoginRequest;
+import roomescape.auth.token.JwtTokenManager;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
-import roomescape.member.service.MemberService;
+import roomescape.member.service.MemberQueryService;
 
 @Service
 public class LoginService {
 
     private final JwtTokenManager jwtTokenManager;
-    private final AdminService adminService;
-    private final MemberService memberService;
+    private final AdminQueryService adminQueryService;
+    private final MemberQueryService memberQueryService;
 
-    public LoginService(JwtTokenManager jwtTokenManager, AdminService adminService, MemberService memberService) {
+    public LoginService(JwtTokenManager jwtTokenManager, AdminQueryService adminQueryService,
+                        MemberQueryService memberQueryService) {
         this.jwtTokenManager = jwtTokenManager;
-        this.adminService = adminService;
-        this.memberService = memberService;
+        this.adminQueryService = adminQueryService;
+        this.memberQueryService = memberQueryService;
     }
 
     public String createAdminToken(final LoginRequest request) {
         validateAdminExistsAccount(request);
 
-        Admin admin = adminService.findByEmail(request.email());
+        Admin admin = adminQueryService.findByEmail(request.email());
         validateAdminSamePassword(request, admin);
 
         return jwtTokenManager.createToken(admin.getId(), "ADMIN");
@@ -34,7 +36,7 @@ public class LoginService {
     public String createMemberToken(final LoginRequest request) {
         validateMemberExistsAccount(request);
 
-        Member member = memberService.findByEmail(request.email());
+        Member member = memberQueryService.findByEmail(new Email(request.email()));
         validateMemberSamePassword(request, member);
 
         return jwtTokenManager.createToken(member.getId(), "MEMBER");
@@ -53,24 +55,24 @@ public class LoginService {
     }
 
     private void validateAdminExistsAccount(final LoginRequest request) {
-        boolean adminExist = adminService.isExistsByEmail(request.email());
+        boolean adminExist = adminQueryService.isExistsByEmail(request.email());
         if (!adminExist) {
             throw new UnauthorizedException("계정이 존재하지 않습니다.");
         }
     }
 
     private void validateMemberExistsAccount(final LoginRequest request) {
-        boolean memberExist = memberService.isExistsByEmail(request.email());
+        boolean memberExist = memberQueryService.isExistsByEmail(new Email(request.email()));
         if (!memberExist) {
             throw new UnauthorizedException("계정이 존재하지 않습니다.");
         }
     }
 
     public Admin findByAdminId(final Long id) {
-        return adminService.findById(id);
+        return adminQueryService.findById(id);
     }
 
     public Member findByMemberId(final Long id) {
-        return memberService.findById(id);
+        return memberQueryService.findById(id);
     }
 }

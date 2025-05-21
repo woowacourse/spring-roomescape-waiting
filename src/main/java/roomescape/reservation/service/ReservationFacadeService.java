@@ -8,57 +8,55 @@ import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.SearchCondition;
 import roomescape.common.exception.BusinessException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;
+import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
+import roomescape.reservationTime.service.ReservationTimeQueryService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.presentation.dto.ThemeResponse;
+import roomescape.theme.service.ThemeQueryService;
 
 @Service
-public class ReservationService {
+public class ReservationFacadeService {
 
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final ReservationQueryService reservationQueryService;
+    private final ReservationCommandService reservationCommandService;
+    private final ReservationTimeQueryService reservationTimeQueryService;
+    private final ThemeQueryService themeQueryService;
+    private final MemberQueryService memberQueryService;
 
-    public ReservationService(
-        final ReservationRepository reservationRepository,
-        final ReservationTimeRepository reservationTimeRepository,
-        final ThemeRepository themeRepository,
-        final MemberRepository memberRepository
+    public ReservationFacadeService(ReservationQueryService reservationQueryService,
+                                    ReservationCommandService reservationCommandService,
+                                    ReservationTimeQueryService reservationTimeQueryService,
+                                    ThemeQueryService themeQueryService,
+                                    MemberQueryService memberQueryService
     ) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+        this.reservationQueryService = reservationQueryService;
+        this.reservationCommandService = reservationCommandService;
+        this.reservationTimeQueryService = reservationTimeQueryService;
+        this.themeQueryService = themeQueryService;
+        this.memberQueryService = memberQueryService;
     }
 
     @Transactional
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
-        ReservationTime time = reservationTimeRepository.findById(request.timeId())
-            .orElseThrow(() -> new BusinessException("예약 시간을 찾을 수 없습니다."));
-        Theme theme = themeRepository.findById(request.themeId())
-            .orElseThrow(() -> new BusinessException("테마를 찾을 수 없습니다."));
-        Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+        ReservationTime time = reservationTimeQueryService.findById(request.timeId());
+        Theme theme = themeQueryService.findById(request.themeId());
+        Member member = memberQueryService.findById(memberId);
 
-        List<Reservation> reservations = reservationRepository.findBy(request.themeId(), request.date());
+        List<Reservation> reservations = reservationQueryService.findByThemeIdAndDate(request.themeId(), request.date());
         validateExistDuplicateReservation(reservations, time);
 
         LocalDateTime now = LocalDateTime.now();
         Reservation reservation = new Reservation(request.date(), time, theme, member, ReservationStatus.RESERVED);
         validateCanReserveDateTime(reservation, now);
-        reservation = reservationRepository.save(reservation);
+        reservation = reservationCommandService.save(reservation);
 
         return ReservationResponse.from(reservation);
     }
@@ -79,27 +77,17 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservations() {
-        return reservationRepository.findAll().stream()
+        return reservationQueryService.findAll().stream()
             .map(ReservationResponse::from)
             .toList();
     }
 
     public void deleteReservationById(final Long id) {
-        validateExistsReservation(id);
-        reservationRepository.deleteById(id);
-    }
-
-    private void validateExistsReservation(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new BusinessException("해당 예약이 존재하지 않습니다.");
-        }
+        reservationCommandService.deleteById(id);
     }
 
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {
-        List<Reservation> reservations = reservationRepository.findBy(
-            condition.memberId(), condition.themeId(),
-            condition.dateFrom(), condition.dateTo()
-        );
+        List<Reservation> reservations = reservationQueryService.findBySearchCondition(condition);
 
         return reservations.stream()
             .map(reservation -> new ReservationResponse(
@@ -114,7 +102,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
-        List<Reservation> reservations = reservationRepository.findByMemberId(loginMemberInfo.id());
+        List<Reservation> reservations = reservationQueryService.findByMemberId(loginMemberInfo.id());
 
         return reservations.stream()
             .map(MyReservationResponse::from)

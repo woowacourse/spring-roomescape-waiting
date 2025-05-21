@@ -6,31 +6,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.login.presentation.dto.LoginMemberInfo;
-import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.member.presentation.dto.MemberRequest;
 import roomescape.member.presentation.dto.MemberResponse;
-import roomescape.member.presentation.dto.MyReservationResponse;
-import roomescape.member.service.MemberService;
+import roomescape.member.service.MemberFacadeService;
 
 @RestController
 public class MemberController {
 
-    private final MemberService memberService;
+    private final MemberFacadeService memberFacadeService;
 
-    public MemberController(MemberService memberService) {
-        this.memberService = memberService;
+    public MemberController(MemberFacadeService memberFacadeService) {
+        this.memberFacadeService = memberFacadeService;
     }
 
     @GetMapping("/members")
     public ResponseEntity<List<MemberResponse>> findAll() {
-        return ResponseEntity.ok(memberService.findAll());
+        return ResponseEntity.ok(memberFacadeService.findAll());
     }
 
     @PostMapping("/members")
     public ResponseEntity<MemberResponse> createMember(@RequestBody MemberRequest request) {
-        MemberResponse response = memberService.save(request);
-
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(memberFacadeService.save(request));
     }
 }

@@ -12,14 +12,14 @@ import roomescape.auth.login.presentation.dto.SearchCondition;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationFacadeService;
 
 @RestController
 public class AdminReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationFacadeService reservationService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationFacadeService reservationService) {
         this.reservationService = reservationService;
     }
 

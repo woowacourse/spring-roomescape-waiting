@@ -6,11 +6,11 @@ import roomescape.admin.domain.AdminRepository;
 import roomescape.common.exception.BusinessException;
 
 @Service
-public class AdminService {
+public class AdminQueryService {
 
     private final AdminRepository adminRepository;
 
-    public AdminService(AdminRepository adminRepository) {
+    public AdminQueryService(AdminRepository adminRepository) {
         this.adminRepository = adminRepository;
     }
 
