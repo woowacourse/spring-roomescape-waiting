@@ -82,10 +82,6 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public boolean existsByTimeId(Long id) {
-        return reservationRepository.existsByTimeId(id);
-    }
-
     public void validateReservationNonExistenceByTimeId(Long reservationTimeId) {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new ConflictException("해당 예약 시간을 사용하는 예약이 존재합니다.");
