@@ -15,3 +15,6 @@ VALUES ('홍길동', 'member@naver.com', '1234', 'MEMBER');
 
 INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2025-05-11', 1, 1, 1, 'BOOKED');
+
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2025-05-20', 1, 1, 1, 'BOOKED');
