@@ -14,30 +14,32 @@ import roomescape.user.domain.User;
 @Entity
 public class Waiting {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "reservation_time_id")
-    private ReservationTime reservationTime;
+    private ReservationTime time;
 
     @ManyToOne
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
     @ManyToOne
-    private User user;
+    @JoinColumn(name = "member_id")
+    private User member;
 
     protected Waiting() {
     }
 
-    public Waiting(LocalDate date, ReservationTime reservationTime, Theme theme, User user) {
+    public Waiting(LocalDate date, ReservationTime time, Theme theme, User member) {
         this.date = date;
-        this.reservationTime = reservationTime;
+        this.time = time;
         this.theme = theme;
-        this.user = user;
+        this.member = member;
     }
 
     public static Waiting of(LocalDate date, ReservationTime reservationTime, Theme theme, User user) {
@@ -52,8 +54,8 @@ public class Waiting {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Theme getTheme() {

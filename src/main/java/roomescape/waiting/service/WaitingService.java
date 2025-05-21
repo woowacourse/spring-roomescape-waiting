@@ -45,7 +45,7 @@ public class WaitingService {
     }
 
     private static WaitingResponseDto convertWaitingResponseDto(Waiting savedWaiting) {
-        ReservationTime reservationTime = savedWaiting.getReservationTime();
+        ReservationTime reservationTime = savedWaiting.getTime();
         ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.of(reservationTime);
 
         Theme theme = savedWaiting.getTheme();
