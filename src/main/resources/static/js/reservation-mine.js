@@ -53,6 +53,7 @@ function requestDeleteWaiting(id) {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;
+        response.json().then(error => alert(error.message));
         throw new Error('Delete failed');
     });
 }
