@@ -16,7 +16,7 @@ public record ReservationWithStatusResponse(
                 reservation.getId(),
                 reservation.getMember().getName(),
                 reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getReservationTime()),
+                ReservationTimeResponse.from(reservation.getTimeSlot()),
                 reservation.getTheme().getName(),
                 "예약"
         );

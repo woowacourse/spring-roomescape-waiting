@@ -11,11 +11,9 @@ import roomescape.reservation.domain.TimeSlot;
 class FakeTimeSlotRepositoryTest {
 
     private FakeTimeSlotRepository reservationTimeRepository;
-    private FakeReservationRepository reservationRepository;
 
     public FakeTimeSlotRepositoryTest() {
-        this.reservationRepository = new FakeReservationRepository();
-        this.reservationTimeRepository = new FakeTimeSlotRepository(reservationRepository);
+        this.reservationTimeRepository = new FakeTimeSlotRepository();
     }
 
     @Test

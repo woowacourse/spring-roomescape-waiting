@@ -52,11 +52,29 @@ public class TimeSlot {
             return false;
         }
         TimeSlot that = (TimeSlot) o;
-        return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, startAt);
+        return Objects.hash(id);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private LocalTime startAt;
+
+        public Builder startAt(LocalTime startAt) {
+            this.startAt = startAt;
+            return this;
+        }
+
+        public TimeSlot build() {
+            return new TimeSlot(id, startAt);
+        }
     }
 }

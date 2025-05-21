@@ -38,7 +38,7 @@ class TimeSlotServiceTest {
     @BeforeEach
     void setUp() {
         reservationRepository = new FakeReservationRepository();
-        timeSlotRepository = new FakeTimeSlotRepository(reservationRepository);
+        timeSlotRepository = new FakeTimeSlotRepository();
         themeRepository = new FakeThemeRepository();
         timeSlotService = new TimeSlotService(timeSlotRepository, reservationRepository,
                 themeRepository);

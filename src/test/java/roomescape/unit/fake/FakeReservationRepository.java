@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
@@ -29,7 +30,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         Reservation reservationWithId = Reservation.of(index.getAndIncrement(), reservation.getMember(),
-                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
+                reservation.getDate(), reservation.getTimeSlot(), reservation.getTheme());
         reservations.add(reservationWithId);
         return reservationWithId;
     }
@@ -66,7 +67,7 @@ public class FakeReservationRepository implements ReservationRepository {
                                                                Theme theme) {
         return reservations.stream()
                 .filter(reservation -> reservation.getDate().equals(date))
-                .filter(reservation -> reservation.getReservationTime().equals(time))
+                .filter(reservation -> reservation.getTimeSlot().equals(time))
                 .filter(reservation -> reservation.getTheme().equals(theme))
                 .findFirst();
     }
@@ -82,7 +83,7 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByTimeSlotId(Long timeId) {
         return reservations.stream()
-                .filter(reservation -> reservation.getReservationTime().getId().equals(timeId))
+                .filter(reservation -> reservation.getTimeSlot().getId().equals(timeId))
                 .toList();
     }
 
@@ -113,5 +114,23 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.stream()
                 .filter(reservation -> reservation.getMember().getId().equals(memberId))
                 .toList();
+    }
+
+    @Override
+    public boolean existsByDateAndMemberAndThemeAndTimeSlot(LocalDate date, Member member, Theme theme,
+                                                            TimeSlot timeSlot) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getDate().equals(date))
+                .filter(reservation -> reservation.getTimeSlot().equals(timeSlot))
+                .filter(reservation -> reservation.getMember().equals(member))
+                .anyMatch(reservation -> reservation.getTheme().equals(theme));
+    }
+
+    @Override
+    public boolean existsByDateAndThemeAndTimeSlot(LocalDate date, Theme theme, TimeSlot timeSlot) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getDate().equals(date))
+                .filter(reservation -> reservation.getTimeSlot().equals(timeSlot))
+                .anyMatch(reservation -> reservation.getTheme().equals(theme));
     }
 }

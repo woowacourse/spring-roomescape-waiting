@@ -5,18 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.reservation.domain.TimeSlot;
-import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 public class FakeTimeSlotRepository implements TimeSlotRepository {
 
     private final List<TimeSlot> timeSlots = new ArrayList<>();
     private final AtomicLong index = new AtomicLong(1);
-    private final ReservationRepository reservationRepository;
-
-    public FakeTimeSlotRepository(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
-    }
 
     @Override
     public List<TimeSlot> findAll() {

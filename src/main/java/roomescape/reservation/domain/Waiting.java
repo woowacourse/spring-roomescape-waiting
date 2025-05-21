@@ -13,7 +13,7 @@ import roomescape.exception.PastDateTimeReservationException;
 import roomescape.member.domain.Member;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +31,8 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
-    private Reservation(final Long id, final Member member, final LocalDate date, final TimeSlot timeSlot,
-                        final Theme theme) {
+    private Waiting(final Long id, final Member member, final LocalDate date, final TimeSlot timeSlot,
+                    final Theme theme) {
         validateNull(member, date, timeSlot, theme);
         this.id = id;
         this.member = member;
@@ -41,17 +41,17 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation() {
+    public Waiting() {
     }
 
-    public static Reservation of(final Long id, final Member member, final LocalDate date,
-                                 final TimeSlot timeSlot, final Theme theme) {
-        return new Reservation(id, member, date, timeSlot, theme);
+    public static Waiting of(final Long id, final Member member, final LocalDate date,
+                             final TimeSlot timeSlot, final Theme theme) {
+        return new Waiting(id, member, date, timeSlot, theme);
     }
 
-    public static Reservation createWithoutId(final Member member, final LocalDate date,
-                                              final TimeSlot timeSlot, final Theme theme) {
-        return new Reservation(null, member, date, timeSlot, theme);
+    public static Waiting createWithoutId(final Member member, final LocalDate date,
+                                          final TimeSlot timeSlot, final Theme theme) {
+        return new Waiting(null, member, date, timeSlot, theme);
     }
 
     private static void validateNull(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {
@@ -74,10 +74,6 @@ public class Reservation {
         if (LocalDateTime.now().isAfter(dateTime)) {
             throw new PastDateTimeReservationException();
         }
-    }
-
-    public Reservation withId(Long id) {
-        return new Reservation(id, member, date, timeSlot, theme);
     }
 
     public Long getId() {
@@ -105,6 +101,7 @@ public class Reservation {
     }
 
     public static class Builder {
+
         private Long id;
         private Member member;
         private TimeSlot timeSlot;
@@ -136,8 +133,8 @@ public class Reservation {
             return this;
         }
 
-        public Reservation build() {
-            return new Reservation(id, member, date, timeSlot, theme);
+        public Waiting build() {
+            return new Waiting(id, member, date, timeSlot, theme);
         }
     }
 }

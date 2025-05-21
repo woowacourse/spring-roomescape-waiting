@@ -11,7 +11,7 @@ public record ReservationResponse(
         String themeName
 ) {
     public static ReservationResponse from(Reservation reservation) {
-        ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getReservationTime());
+        ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getTimeSlot());
         return new ReservationResponse(reservation.getId(), reservation.getMember().getName(), reservation.getDate(),
                 dto,
                 reservation.getTheme().getName());

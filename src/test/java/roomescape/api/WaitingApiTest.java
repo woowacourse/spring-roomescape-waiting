@@ -1,0 +1,94 @@
+package roomescape.api;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import roomescape.auth.infrastructure.JwtTokenProvider;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
+import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+public class WaitingApiTest {
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+
+    @Test
+    void 대기를_생성한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).bulid()
+        );
+        Member member2 = memberRepository.save(
+                Member.builder()
+                        .name("member2")
+                        .password("password2")
+                        .email("email2@domain.com")
+                        .role(Role.MEMBER).bulid()
+        );
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .theme(theme)
+                        .member(member2)
+                        .timeSlot(timeSlot)
+                        .date(date).build()
+        );
+        String token = tokenProvider.createToken("1", Role.MEMBER);
+        Map<String, Object> body = Map.of(
+                "themeId", 1,
+                "timeId", 1,
+                "date", date.toString()
+        );
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(body)
+                .when().post("/api/waiting")
+                .then().log().all()
+                .statusCode(201)
+                .extract().as(WaitingResponse.class);
+    }
+}

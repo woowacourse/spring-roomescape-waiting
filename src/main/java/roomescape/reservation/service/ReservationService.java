@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.MemberNotFoundException;
 import roomescape.exception.ReservationNotFoundException;
-import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -51,7 +51,7 @@ public class ReservationService {
 
     public ReservationResponse createReservation(Long memberId, Long timeId, Long themeId, LocalDate date) {
         TimeSlot timeSlot = timeSlotRepository.findById(timeId)
-                .orElseThrow(ReservationTimeNotFoundException::new);
+                .orElseThrow(TimeSlotNotFoundException::new);
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         Reservation reservation = Reservation.createWithoutId(member, date, timeSlot, theme);

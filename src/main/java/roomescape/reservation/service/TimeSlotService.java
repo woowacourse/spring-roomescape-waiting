@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ExistedReservationException;
-import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
@@ -46,7 +46,7 @@ public class TimeSlotService {
 
     public void deleteTimeById(Long id) {
         if (timeSlotRepository.findById(id).isEmpty()) {
-            throw new ReservationTimeNotFoundException();
+            throw new TimeSlotNotFoundException();
         }
         if (reservationRepository.findByTimeSlotId(id).size() > 0) {
             throw new ExistedReservationException();
@@ -59,7 +59,7 @@ public class TimeSlotService {
         List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
 
         List<TimeSlot> bookedTimeSlots = reservations.stream()
-                .map(Reservation::getReservationTime)
+                .map(Reservation::getTimeSlot)
                 .toList();
         List<TimeSlot> timeSlots = timeSlotRepository.findAll();
 
