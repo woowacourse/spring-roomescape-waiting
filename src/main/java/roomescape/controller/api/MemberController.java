@@ -24,16 +24,16 @@ public class MemberController {
         this.memberService = memberService;
     }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public MemberResponse createMember(@RequestBody @Valid MemberRequest request) {
+        return MemberResponse.from(memberService.addMember(request));
+    }
+
     @GetMapping
     public List<MemberResponse> readMembers() {
         return memberService.findAllMembers().stream()
             .map(MemberResponse::from)
             .toList();
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public MemberResponse createMember(@RequestBody @Valid MemberRequest request) {
-        return MemberResponse.from(memberService.addMember(request));
     }
 }

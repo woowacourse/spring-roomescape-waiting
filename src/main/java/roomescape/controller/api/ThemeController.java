@@ -26,6 +26,12 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ThemeResponse createTheme(@RequestBody @Valid ThemeRequest request) {
+        return ThemeResponse.from(themeService.addTheme(request));
+    }
+
     @GetMapping
     public List<ThemeResponse> readThemes() {
         return themeService.findAllThemes().stream()
@@ -38,12 +44,6 @@ public class ThemeController {
         return themeService.findTopReservedThemes().stream()
             .map(ThemeResponse::from)
             .toList();
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ThemeResponse createTheme(@RequestBody @Valid ThemeRequest request) {
-        return ThemeResponse.from(themeService.addTheme(request));
     }
 
     @DeleteMapping("/{id}")

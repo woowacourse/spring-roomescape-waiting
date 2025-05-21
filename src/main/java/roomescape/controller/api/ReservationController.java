@@ -31,6 +31,15 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ReservationResponse createReservation(
+            @AuthMember Member member,
+            @RequestBody @Valid ReservationRequest request
+    ) {
+        return ReservationResponse.from(reservationService.addReservationAfterNow(member, request));
+    }
+
     @GetMapping
     public List<ReservationResponse> readReservations() {
         return reservationService.findAllReservations().stream()
@@ -56,15 +65,6 @@ public class ReservationController {
         return reservationService.findReservationsByMemberId(member).stream()
             .map(MyReservationResponse::from)
             .toList();
-    }
-
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponse createReservation(
-        @AuthMember Member member,
-        @RequestBody @Valid ReservationRequest request
-    ) {
-        return ReservationResponse.from(reservationService.addReservationAfterNow(member, request));
     }
 
     @DeleteMapping("/{id}")

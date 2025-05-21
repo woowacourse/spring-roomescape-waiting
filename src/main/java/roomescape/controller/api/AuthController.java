@@ -23,6 +23,17 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/login")
     public ResponseEntity<Void> createToken(
             @RequestBody @Valid LoginRequest request,
@@ -40,16 +51,5 @@ public class AuthController {
     @GetMapping("/login/check")
     public ResponseEntity<LoginResponse> checkLogin(@AuthMember Member member) {
         return ResponseEntity.ok(LoginResponse.from(member));
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("token", null);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-
-        return ResponseEntity.ok().build();
     }
 }
