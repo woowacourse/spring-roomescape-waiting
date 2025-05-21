@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,6 @@ public interface WaitingRepository {
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
     void deleteById(Long id);
+
+    boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
 }

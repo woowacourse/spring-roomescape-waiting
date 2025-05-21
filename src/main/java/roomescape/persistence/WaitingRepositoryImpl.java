@@ -5,6 +5,7 @@ import roomescape.domain.Waiting;
 import roomescape.domain.WaitingRepository;
 import roomescape.domain.WaitingWithRank;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,5 +36,10 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     @Override
     public void deleteById(final Long id) {
         jpaWaitingRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(final Long memberId, final LocalDate date, final Long timeId, final Long themeId) {
+        return jpaWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId);
     }
 }

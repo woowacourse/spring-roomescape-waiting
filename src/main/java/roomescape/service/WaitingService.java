@@ -8,6 +8,7 @@ import roomescape.service.param.CreateWaitingParam;
 import roomescape.service.result.WaitingResult;
 import roomescape.service.result.WaitingWithRankResult;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,12 +42,13 @@ public class WaitingService {
                 () -> new NotFoundThemeException(createWaitingParam.themeId() + "에 해당하는 정보가 없습니다."));
         Member member = memberRepository.findById(createWaitingParam.memberId()).orElseThrow(
                 () -> new NotFoundMemberException(createWaitingParam.memberId() + "에 해당하는 정보가 없습니다."));
+        LocalDate date = createWaitingParam.date();
+        validateDuplicateWaiting(member, date, reservationTime, theme);
 
-        //TODO: 중복 대기 검증
         Waiting waiting = waitingRepository.save(
                 Waiting.createNew(
                         member,
-                        createWaitingParam.date(),
+                        date,
                         reservationTime,
                         theme
                 )
@@ -62,5 +64,17 @@ public class WaitingService {
         }
 
         waitingRepository.deleteById(waitingId);
+    }
+
+    private void validateDuplicateWaiting(final Member member, final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
+        boolean isExistWaiting = waitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+                member.getId(),
+                date,
+                reservationTime.getId(),
+                theme.getId());
+
+        if (isExistWaiting) {
+            throw new UnAvailableReservationException("예약 대기가 이미 존재합니다.");
+        }
     }
 }

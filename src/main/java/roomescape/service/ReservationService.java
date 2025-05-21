@@ -34,7 +34,7 @@ public class ReservationService {
         Member member = memberRepository.findById(createReservationParam.memberId()).orElseThrow(
                 () -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
 
-        validateUniqueReservation(createReservationParam, reservationTime, theme);
+        validateDuplicateReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
 
         Reservation reservation = Reservation.createNew(member, createReservationParam.date(), reservationTime, theme);
@@ -71,7 +71,7 @@ public class ReservationService {
         return ReservationResult.from(reservations);
     }
 
-    private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
+    private void validateDuplicateReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
             throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
