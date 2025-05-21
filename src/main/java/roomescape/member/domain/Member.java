@@ -58,8 +58,12 @@ public class Member {
         return new Member(newPrimaryKey, member.name, member.email, member.role, member.password);
     }
 
-    public boolean checkInvalidLogin(String email, String password) {
-        return !(this.email.equals(email) && this.password.equals(password));
+    public boolean hasSameEmail(String email) {
+        return this.email.equals(email);
+    }
+
+    public boolean hasSamePassword(String password) {
+        return this.password.equals(password);
     }
 
     private void validate(String name, String email, MemberRole role, String password) {

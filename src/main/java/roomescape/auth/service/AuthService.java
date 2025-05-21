@@ -22,8 +22,8 @@ public class AuthService {
         return authorizationProvider.createPrincipal(AuthorizationPayload.fromMember(member));
     }
 
-    public void validateInvalidLogin(Member member, LoginRequest request) {
-        if (!member.checkInvalidLogin(request.email(), request.password())) {
+    private void validateInvalidLogin(Member member, LoginRequest request) {
+        if (!member.hasSameEmail(request.email()) || !member.hasSamePassword(request.password())) {
             throw new UnauthorizedException("이메일 혹은 비밀번호가 일치하지 않습니다.");
         }
     }
