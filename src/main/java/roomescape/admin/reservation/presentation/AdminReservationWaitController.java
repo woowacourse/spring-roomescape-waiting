@@ -1,4 +1,4 @@
-package roomescape.admin.reservation;
+package roomescape.admin.reservation.presentation;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.admin.reservation.presentation.dto.AdminWaitingReservationResponse;
 import roomescape.global.auth.Auth;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.ReservationService;

@@ -1,4 +1,4 @@
-package roomescape.admin.reservation;
+package roomescape.admin.reservation.presentation;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import roomescape.admin.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.global.auth.Auth;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.ReservationService;

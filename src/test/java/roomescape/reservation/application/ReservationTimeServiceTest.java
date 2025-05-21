@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.admin.reservation.AdminReservationRequest;
+import roomescape.admin.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.time.application.ReservationTimeService;
 import roomescape.reservation.time.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
