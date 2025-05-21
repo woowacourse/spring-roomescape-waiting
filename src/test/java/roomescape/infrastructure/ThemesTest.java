@@ -59,9 +59,9 @@ class ThemesTest {
         String slotId1 = testUtil.insertSlot(date, reservationTimeId, themeId1);
         String slotId2_1 = testUtil.insertSlot(date, reservationTimeId, themeId2);
         String slotId2_2 = testUtil.insertSlot(date, reservationTimeId, themeId2);
-        String slotId3_1 = testUtil.insertSlot(date.minusDays(10), reservationTimeId, themeId3);
-        String slotId3_2 = testUtil.insertSlot(date.minusDays(10), reservationTimeId, themeId3);
-        String slotId3_3 = testUtil.insertSlot(date.plusDays(10), reservationTimeId, themeId3);
+        String slotId3_1 = testUtil.insertSlot(date.plusDays(5), reservationTimeId, themeId3);
+        String slotId3_2 = testUtil.insertSlot(date.plusDays(5), reservationTimeId, themeId3);
+        String slotId3_3 = testUtil.insertSlot(date.plusDays(5), reservationTimeId, themeId3);
         String userId1 = testUtil.insertUser();
         testUtil.insertReservation(slotId1, userId1);
         testUtil.insertReservation(slotId2_1, userId1);
@@ -70,7 +70,7 @@ class ThemesTest {
         testUtil.insertReservation(slotId3_2, userId1);
         testUtil.insertReservation(slotId3_3, userId1);
 
-        final List<Theme> result = sut.findPopularThemes(date.minusDays(5), date.plusDays(5), 2);
+        final List<Theme> result = sut.findPopularThemes(date.minusDays(5), date.plusDays(3), 2);
 
         assertThat(result).extracting(r -> r.getId().value())
                 .containsExactly(themeId2, themeId1);

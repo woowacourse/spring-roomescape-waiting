@@ -63,11 +63,11 @@ class ReservationTimesTest {
         String timeId3 = testUtil.insertReservationTime();
         String themeId = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId);
+        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
         testUtil.insertReservation(slotId, userId);
 
         // when
-        final List<ReservationTime> result = sut.findAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
+        final List<ReservationTime> result = sut.findAvailableByDateAndThemeId(LocalDate.now().plusDays(5), Id.create(themeId));
 
         // then
         assertThat(result).extracting(r -> r.getId().value())
@@ -82,11 +82,11 @@ class ReservationTimesTest {
         testUtil.insertReservationTime();
         String themeId = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId);
+        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
         testUtil.insertReservation(slotId, userId);
 
         // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
+        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(5), Id.create(themeId));
 
         // then
         assertThat(result).extracting(r -> r.getId().value())
@@ -133,7 +133,7 @@ class ReservationTimesTest {
         String themeId1 = testUtil.insertTheme();
         String themeId2 = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId1);
+        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId1);
         testUtil.insertReservation(slotId, userId);
 
         // when
@@ -152,13 +152,13 @@ class ReservationTimesTest {
         testUtil.insertReservationTime();
         String themeId = testUtil.insertTheme();
         String userId = testUtil.insertUser();
-        String slotId1 = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId1, themeId);
-        String slotId2 = testUtil.insertSlot(LocalDate.now().plusDays(10), timeId3, themeId);
+        String slotId1 = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
+        String slotId2 = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId3, themeId);
         testUtil.insertReservation(slotId1, userId);
         testUtil.insertReservation(slotId2, userId);
 
         // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
+        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(5), Id.create(themeId));
 
         // then
         assertThat(result).extracting(r -> r.getId().value())
