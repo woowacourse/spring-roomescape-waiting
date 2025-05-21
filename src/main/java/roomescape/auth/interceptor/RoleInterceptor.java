@@ -36,6 +36,10 @@ public class RoleInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        return validateToken(request, handlerMethod);
+    }
+
+    private boolean validateToken(final HttpServletRequest request, final HandlerMethod handlerMethod) {
         RequireRole classAnnotation = handlerMethod.getBeanType().getAnnotation(RequireRole.class);
         RequireRole methodAnnotation = handlerMethod.getMethodAnnotation(RequireRole.class);
         if (classAnnotation != null) {

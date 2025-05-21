@@ -19,10 +19,10 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
               AND m.id = :memberId    
               AND r.date BETWEEN :startDate AND :endDate 
             """)
-    List<Reservation> findFilteredReservations(final Long themeId,
-                                               final Long memberId,
-                                               final LocalDate startDate,
-                                               final LocalDate endDate);
+    List<Reservation> findFilteredReservations(Long themeId,
+                                               Long memberId,
+                                               LocalDate startDate,
+                                               LocalDate endDate);
 
     @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.time.id = :timeId) ")
     boolean existsByTimeId(Long timeId);
@@ -31,7 +31,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     boolean existsByThemeId(Long themeId);
 
     @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE (r.date, r.time.id, r.theme.id) = (:date, :timeId, :themeId)) ")
-    boolean existsByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId);
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     @Query("""
             SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(rt.id, rt.startAt, 

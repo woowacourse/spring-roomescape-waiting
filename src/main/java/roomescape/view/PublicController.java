@@ -7,22 +7,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PublicController {
 
     @GetMapping
-    public String showHomePage(){
+    public String showHomePage() {
         return "index";
     }
 
     @GetMapping("/reservation")
-    public String showReservationPage(){
+    public String showReservationPage() {
         return "reservation";
     }
 
     @GetMapping("/signup")
-    public String showSignupPage(){
+    public String showSignupPage() {
         return "signup";
     }
 
     @GetMapping("/login")
-    public String showLoginPage(){
+    public String showLoginPage() {
         return "login";
     }
 }
