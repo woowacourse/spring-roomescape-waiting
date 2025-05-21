@@ -1,5 +1,7 @@
 package roomescape.reservation.presentation;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
@@ -23,8 +25,8 @@ public class WaitingControllerTest {
     private final MemberFixture memberFixture = new MemberFixture();
 
     @Test
-    @DisplayName("예약 추가 테스트")
-    void createReservationTest() {
+    @DisplayName("예약 대기 추가 테스트")
+    void createWaitingTest() {
         // given
         final Map<String, String> cookies = memberFixture.loginAdmin();
         reservationFixture.createReservationTime(LocalTime.of(10, 30), cookies);
@@ -47,5 +49,39 @@ public class WaitingControllerTest {
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제 테스트")
+    void deleteWaitingTest() {
+        // given
+        final Map<String, String> cookies = memberFixture.loginAdmin();
+        reservationFixture.createReservationTime(LocalTime.of(10, 30), cookies);
+
+        reservationFixture.createTheme(
+                "레벨2 탈출",
+                "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
+                cookies
+        );
+
+        reservationFixture.createWaiting(LocalDate.of(2025, 8, 5), 1L, 1L, cookies);
+
+        // when
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .when().delete("/reservations/waiting/1")
+                .then().log().all()
+                .statusCode(204);
+
+        // then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .when().get("/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
     }
 }
