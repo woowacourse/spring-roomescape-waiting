@@ -27,7 +27,7 @@ public class ReservationTimeIntegrationTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(0));
     }
 
     @DisplayName("예약 시간을 추가 및 삭제 할 수 있다.")
@@ -44,7 +44,7 @@ public class ReservationTimeIntegrationTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().delete("/times/4")
+                .when().delete("/times/1")
                 .then().log().all()
                 .statusCode(204);
     }

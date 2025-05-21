@@ -28,7 +28,7 @@ public class ThemeIntegrationTest {
                 .when().get("/themes")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(0));
     }
 
     @DisplayName("테마를 추가 및 삭제 할 수 있다.")
@@ -48,12 +48,12 @@ public class ThemeIntegrationTest {
                 .extract()
                 .response();
 
-        ThemeResponse expected = new ThemeResponse(4L, "테스트1", "테스트2", "테스트3");
+        ThemeResponse expected = new ThemeResponse(1L, "테스트1", "테스트2", "테스트3");
         ThemeResponse actual = response.as(ThemeResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
 
         RestAssured.given().log().all()
-                .when().delete("/themes/4")
+                .when().delete("/themes/1")
                 .then().log().all()
                 .statusCode(204);
     }

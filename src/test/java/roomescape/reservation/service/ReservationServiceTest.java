@@ -18,18 +18,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.common.exception.BusinessException;
+import roomescape.member.domain.Email;
+import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
+import roomescape.member.domain.Name;
+import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
 import roomescape.member.presentation.dto.MyReservationResponse;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.service.ReservationServiceTest.ReservationConfig;
+import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepositoryAdaptor;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
@@ -41,16 +49,46 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private JpaMemberRepository jpaMemberRepository;
+
+    @Autowired
+    private JpaReservationRepository jpaReservationRepository;
+
+    @Autowired
+    private JpaReservationTimeRepository jpaReservationTimeRepository;
+
+    @Autowired
+    private JpaThemeRepository jpaThemeRepository;
+
     @DisplayName("멤버별 예약을 조회 할 수 있다.")
     @Test
     void can_find_my_reservation() {
-        LoginMemberInfo loginMemberInfo = new LoginMemberInfo(1L);
+        // given
+        Theme theme = jpaThemeRepository.save(new Theme("test", "test", "test"));
+        ReservationTime time1 = jpaReservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
+        ReservationTime time2 = jpaReservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        Member member = jpaMemberRepository.save(
+            new Member(new Name("율무"), new Email("test@email.com"), new Password("password"))
+        );
+        LocalDate nowLater4Days = LocalDate.now().plusDays(4);
 
-        List<MyReservationResponse> result = reservationService.getMemberReservations(loginMemberInfo);
+        Reservation reservation1 = jpaReservationRepository.save(
+            new Reservation(nowLater4Days, time1, theme, member, Status.RESERVED)
+        );
+        Reservation reservation2 = jpaReservationRepository.save(
+            new Reservation(nowLater4Days, time2, theme, member, Status.RESERVED)
+        );
 
+        // when
+        List<MyReservationResponse> result = reservationService.getMemberReservations(
+            new LoginMemberInfo(member.getId())
+        );
+
+        // then
         List<MyReservationResponse> expected = List.of(
-            new MyReservationResponse(1L, "테마1", LocalDate.now().minusDays(1), LocalTime.of(10, 0), "예약"),
-            new MyReservationResponse(2L, "테마1", LocalDate.now().minusDays(1), LocalTime.of(11, 0), "예약"));
+            new MyReservationResponse(reservation1.getId(), "test", nowLater4Days, time1.getStartAt(), "예약"),
+            new MyReservationResponse(reservation2.getId(), "test", nowLater4Days, time2.getStartAt(), "예약"));
         assertThat(result).isEqualTo(expected);
     }
 
