@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ThemeCreateDto;
@@ -50,7 +52,8 @@ public class ThemeService {
         LocalDate now = clockProvider.now().toLocalDate();
         LocalDate startDate = now.minusWeeks(1);
         LocalDate endDate = now.minusDays(1);
-        List<Theme> themeRanking = themeRepository.findThemeRanking(startDate, endDate, RANKING_LIMIT_COUNT);
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Theme> themeRanking = themeRepository.findThemeRanking(startDate, endDate, pageable);
         return ThemeDto.from(themeRanking);
     }
 
