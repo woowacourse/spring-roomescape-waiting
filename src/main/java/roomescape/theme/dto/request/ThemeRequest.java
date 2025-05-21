@@ -1,0 +1,16 @@
+package roomescape.theme.dto.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import roomescape.theme.domain.Theme;
+
+public record ThemeRequest(
+        @NotBlank String name,
+        @NotBlank String description,
+        @Size(max = 255) @NotBlank String thumbnail
+) {
+
+    public Theme toEntity() {
+        return new Theme(name, description, thumbnail);
+    }
+}
