@@ -25,4 +25,19 @@ public interface WaitingRepsitory extends JpaRepository<Waiting, Long> {
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, @NotNull Long timeId, @NotNull Long themeId, Long memberId);
+
+    @Query("SELECT new roomescape.domain.WaitingWithRank(" +
+            "    w, " +
+            "    (SELECT COUNT(w2) " +
+            "     FROM Waiting w2 " +
+            "     WHERE w2.theme = w.theme " +
+            "       AND w2.date = w.date " +
+            "       AND w2.time = w.time " +
+            "       AND w2.id < w.id)) " +
+            "FROM Waiting w ")
+    List<WaitingWithRank> findAllWithRank();
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    Waiting findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

@@ -2,8 +2,10 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Member;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.waiting.WaitingResponse;
+import roomescape.dto.waiting.WaitingWithRankResponse;
 import roomescape.service.waiting.WaitingService;
 
 @RestController
@@ -22,6 +25,12 @@ public class WaitingController {
 
     public WaitingController(WaitingService waitingService) {
         this.waitingService = waitingService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WaitingWithRankResponse>> findAllWaitings() {
+
+        return ResponseEntity.ok().body(waitingService.findAllWaitings());
     }
 
     @PostMapping
