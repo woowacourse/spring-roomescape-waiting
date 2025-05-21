@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-  document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
-  document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
+    document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
+    document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
 function renderTheme(themes) {
@@ -44,14 +44,14 @@ function renderTheme(themes) {
 }
 
 function createSlot(type, text, id, booked) {
-  const div = document.createElement('div');
-  div.className = type + '-slot cursor-pointer bg-light border rounded p-3 mb-2';
-  div.textContent = text;
-  div.setAttribute('data-' + type + '-id', id);
-  if (type === 'time') {
-    div.setAttribute('data-time-booked', booked);
-  }
-  return div;
+    const div = document.createElement('div');
+    div.className = type + '-slot cursor-pointer bg-light border rounded p-3 mb-2';
+    div.textContent = text;
+    div.setAttribute('data-' + type + '-id', id);
+    if (type === 'time') {
+        div.setAttribute('data-time-booked', booked);
+    }
+    return div;
 }
 
 function checkDate() {
@@ -80,10 +80,6 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
-          요청 포맷에 맞게 설정
-    */
     fetch(`/times/available?themeId=${themeId}&date=${date}`, {
         method: 'GET',
         headers: {
@@ -109,10 +105,6 @@ function renderAvailableTimes(times) {
         return;
     }
     times.forEach(time => {
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
-              response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-        */
         const timeId = time.id;
         const startAt = time.time;
         const alreadyBooked = time.alreadyBooked;
@@ -123,27 +115,27 @@ function renderAvailableTimes(times) {
 }
 
 function checkDateAndThemeAndTime() {
-  const selectedDate = document.getElementById("datepicker").value;
-  const selectedThemeElement = document.querySelector('.theme-slot.active');
-  const selectedTimeElement = document.querySelector('.time-slot.active');
-  const reserveButton = document.getElementById("reserve-button");
-  const waitButton = document.getElementById("wait-button");
+    const selectedDate = document.getElementById("datepicker").value;
+    const selectedThemeElement = document.querySelector('.theme-slot.active');
+    const selectedTimeElement = document.querySelector('.time-slot.active');
+    const reserveButton = document.getElementById("reserve-button");
+    const waitButton = document.getElementById("wait-button");
 
-  if (selectedDate && selectedThemeElement && selectedTimeElement) {
-    if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
-      // 선택된 시간이 이미 예약된 경우
-      reserveButton.classList.add("disabled");
-      waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
+    if (selectedDate && selectedThemeElement && selectedTimeElement) {
+        if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
+            // 선택된 시간이 이미 예약된 경우
+            reserveButton.classList.add("disabled");
+            waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
+        } else {
+            // 선택된 시간이 예약 가능한 경우
+            reserveButton.classList.remove("disabled");
+            waitButton.classList.add("disabled"); // 예약 대기 버튼 비활성화
+        }
     } else {
-      // 선택된 시간이 예약 가능한 경우
-      reserveButton.classList.remove("disabled");
-      waitButton.classList.add("disabled"); // 예약 대기 버튼 비활성화
+        // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
+        reserveButton.classList.add("disabled");
+        waitButton.classList.add("disabled");
     }
-  } else {
-    // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
-    reserveButton.classList.add("disabled");
-    waitButton.classList.add("disabled");
-  }
 }
 
 function onReservationButtonClick() {
@@ -152,12 +144,6 @@ function onReservationButtonClick() {
     const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
 
     if (selectedDate && selectedThemeId && selectedTimeId) {
-
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-              [5단계] 예약 생성 기능 변경 - 사용자
-              request 명세에 맞게 설정
-        */
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,

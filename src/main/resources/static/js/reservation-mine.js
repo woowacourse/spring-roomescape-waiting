@@ -1,20 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
-      .then(response => {
-        if (response.status === 200) return response.json();
-        throw new Error('Read failed');
-      })
-      .then(render)
-      .catch(error => console.error('Error fetching reservations:', error));
+    fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
+        .then(response => {
+            if (response.status === 200) return response.json();
+            throw new Error('Read failed');
+        })
+        .then(render)
+        .catch(error => console.error('Error fetching reservations:', error));
 });
 
 function render(data) {
-  const tableBody = document.getElementById('table-body');
-  tableBody.innerHTML = '';
+    const tableBody = document.getElementById('table-body');
+    tableBody.innerHTML = '';
 
-  data.forEach(item => {
-    const row = tableBody.insertRow();
+    data.forEach(item => {
+        const row = tableBody.insertRow();
 
     const theme = item.theme;
     const date = item.date;
