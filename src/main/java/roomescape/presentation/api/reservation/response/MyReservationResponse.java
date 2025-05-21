@@ -1,7 +1,6 @@
 package roomescape.presentation.api.reservation.response;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import roomescape.application.reservation.query.dto.ReservationWithStatusResult;
 import roomescape.application.reservation.query.dto.WaitingWithRankResult;
 import roomescape.domain.reservation.ReservationStatus;
@@ -10,7 +9,7 @@ public record MyReservationResponse(
         Long id,
         String theme,
         LocalDate date,
-        LocalTime time,
+        String time,
         String status,
         ReservationResponseType type
 ) {
@@ -20,7 +19,7 @@ public record MyReservationResponse(
                 reservationWithStatusResult.reservationId(),
                 reservationWithStatusResult.themeName(),
                 reservationWithStatusResult.reservationDate(),
-                reservationWithStatusResult.reservationTime(),
+                ReservationDateTimeFormat.TIME.format(reservationWithStatusResult.reservationTime()),
                 toDisplayStatus(reservationWithStatusResult.status()),
                 ReservationResponseType.RESERVE
         );
@@ -31,7 +30,7 @@ public record MyReservationResponse(
                 waitingWithRankResult.waitingId(),
                 waitingWithRankResult.themeName(),
                 waitingWithRankResult.reservationDate(),
-                waitingWithRankResult.reservationTime(),
+                ReservationDateTimeFormat.TIME.format(waitingWithRankResult.reservationTime()),
                 toDisplayStatus(waitingWithRankResult.waitingCount()),
                 ReservationResponseType.WAITING
         );
