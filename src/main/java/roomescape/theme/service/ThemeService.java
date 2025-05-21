@@ -64,9 +64,8 @@ public class ThemeService {
         LocalDate start = now.minusDays(POPULAR_THEME_RANGE_START_SUBTRACT);
         LocalDate end = now.minusDays(POPULAR_THEME_RANGE_END_SUBTRACT);
 
-        return themeRepository.findPopularThemes(start, end).stream()
+        return themeRepository.findPopularThemes(start, end, POPULAR_THEME_COUNT).stream()
             .map(theme -> new PopularThemeResponse(theme.getName(), theme.getDescription(), theme.getThumbnail()))
-            .limit(POPULAR_THEME_COUNT)
             .toList();
     }
 }
