@@ -29,12 +29,12 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    private void validate(final LocalTime startAt) {
-        ValidationUtils.validateNonNull(startAt, "예약 시간을 입력해야 합니다.");
-    }
-
     public ReservationTime(final LocalTime startAt) {
         this(null, startAt);
+    }
+
+    private void validate(final LocalTime startAt) {
+        ValidationUtils.validateNonNull(startAt, "예약 시간은 필수입니다.");
     }
 
     public boolean isBefore(final LocalTime other) {

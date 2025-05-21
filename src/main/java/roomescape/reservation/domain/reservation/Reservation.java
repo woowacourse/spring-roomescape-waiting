@@ -55,10 +55,10 @@ public class Reservation {
     }
 
     private void validate(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
-        ValidationUtils.validateNonNull(member, "예약 멤버를 입력해야 합니다.");
-        ValidationUtils.validateNonNull(date, "예약 날짜를 입력해야 합니다.");
-        ValidationUtils.validateNonNull(time, "예약 시간을 입력해야 합니다.");
-        ValidationUtils.validateNonNull(theme, "예약 테마를 입력해야 합니다.");
+        ValidationUtils.validateNonNull(member, "예약 멤버는 필수입니다.");
+        ValidationUtils.validateNonNull(date, "예약 날짜는 필수입니다.");
+        ValidationUtils.validateNonNull(time, "예약 시간은 필수입니다.");
+        ValidationUtils.validateNonNull(theme, "예약 테마는 필수입니다.");
     }
 
     public boolean isSameTime(final ReservationTime time) {

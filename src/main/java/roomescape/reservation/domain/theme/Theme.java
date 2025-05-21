@@ -39,9 +39,9 @@ public class Theme {
     }
 
     private void validate(final String name, final String description, final String thumbnail) {
-        ValidationUtils.validateNonNull(name, "테마 이름을 입력해야 합니다.");
-        ValidationUtils.validateNonNull(description, "테마 설명을 입력해야 합니다.");
-        ValidationUtils.validateNonNull(thumbnail, "테마 썸네일을 입력해야 합니다.");
+        ValidationUtils.validateNonNull(name, "테마 이름은 필수입니다.");
+        ValidationUtils.validateNonNull(description, "테마 설명은 필수입니다.");
+        ValidationUtils.validateNonNull(thumbnail, "테마 썸네일은 필수입니다.");
     }
 
     public boolean isSameId(final long id) {
