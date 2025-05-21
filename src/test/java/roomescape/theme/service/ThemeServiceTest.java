@@ -35,7 +35,7 @@ import roomescape.theme.service.ThemeServiceTest.ThemeConfig;
 class ThemeServiceTest {
 
     @Autowired
-    private ThemeService themeService;
+    private ThemeFacadeService themeService;
 
     @Autowired
     private JpaReservationRepository jpaReservationRepository;
@@ -105,8 +105,20 @@ class ThemeServiceTest {
         }
 
         @Bean
-        public ThemeService themeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-            return new ThemeService(themeRepository, reservationRepository);
+        public ThemeQueryService themeQueryService(ThemeRepository themeRepository) {
+            return new ThemeQueryService(themeRepository);
+        }
+
+        @Bean
+        public ThemeCommandService themeCommandService(ThemeRepository themeRepository,
+                                                       ReservationRepository reservationRepository) {
+            return new ThemeCommandService(themeRepository, reservationRepository);
+        }
+
+        @Bean
+        public ThemeFacadeService themeService(ThemeQueryService themeQueryService,
+                                               ThemeCommandService themeCommandService) {
+            return new ThemeFacadeService(themeQueryService, themeCommandService);
         }
     }
 }

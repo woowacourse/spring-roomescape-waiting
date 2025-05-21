@@ -21,22 +21,23 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
+import roomescape.reservation.service.ReservationQueryService;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepositoryAdaptor;
 import roomescape.reservationTime.presentation.dto.TimeConditionRequest;
 import roomescape.reservationTime.presentation.dto.TimeConditionResponse;
-import roomescape.reservationTime.service.ReservationTimeServiceTest.ReservationTimeConfig;
+import roomescape.reservationTime.service.ReservationTimeFacadeServiceTest.ReservationTimeConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 
 @DataJpaTest
 @Import(ReservationTimeConfig.class)
-class ReservationTimeServiceTest {
+class ReservationTimeFacadeServiceTest {
 
     @Autowired
-    private ReservationTimeService reservationTimeService;
+    private ReservationTimeFacadeService reservationTimeFacadeService;
 
     @Autowired
     private JpaThemeRepository jpaThemeRepository;
@@ -54,7 +55,7 @@ class ReservationTimeServiceTest {
     @DisplayName("이미 존재하는 예약이 있는 경우 예약 시간을 삭제할 수 없다.")
     @Test
     void can_not_delete_when_reservation_exists() {
-        Assertions.assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(1L))
+        Assertions.assertThatThrownBy(() -> reservationTimeFacadeService.deleteReservationTimeById(1L))
             .isInstanceOf(BusinessException.class);
     }
 
@@ -77,7 +78,7 @@ class ReservationTimeServiceTest {
         jpaReservationRepository.save(new Reservation(now, time2, theme, member, ReservationStatus.RESERVED));
 
         // when
-        List<TimeConditionResponse> responses = reservationTimeService.getTimesWithCondition(
+        List<TimeConditionResponse> responses = reservationTimeFacadeService.getTimesWithCondition(
             new TimeConditionRequest(now, theme.getId()));
 
         // then
@@ -96,15 +97,34 @@ class ReservationTimeServiceTest {
         }
 
         @Bean
-        public ReservationTimeRepository reservationTimeRepository(
-            JpaReservationTimeRepository jpaReservationTimeRepository) {
+        public ReservationTimeRepository reservationTimeRepository(JpaReservationTimeRepository jpaReservationTimeRepository) {
             return new JpaReservationTimeRepositoryAdaptor(jpaReservationTimeRepository);
         }
 
         @Bean
-        public ReservationTimeService reservationTimeService(ReservationRepository reservationRepository,
-                                                             ReservationTimeRepository reservationTimeRepository) {
-            return new ReservationTimeService(reservationRepository, reservationTimeRepository);
+        public ReservationQueryService reservationQueryService(ReservationRepository reservationRepository) {
+            return new ReservationQueryService(reservationRepository);
+        }
+
+        @Bean
+        public ReservationTimeQueryService reservationTimeQueryService(ReservationTimeRepository reservationTimeRepository) {
+            return new ReservationTimeQueryService(reservationTimeRepository);
+        }
+
+        @Bean
+        public ReservationTimeCommandService reservationTimeCommandService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
+            return new ReservationTimeCommandService(reservationRepository, reservationTimeRepository);
+        }
+
+        @Bean
+        public ReservationTimeFacadeService reservationTimeService(ReservationTimeQueryService reservationTimeQueryService,
+                                                                   ReservationTimeCommandService reservationTimeCommandService,
+                                                                   ReservationQueryService reservationQueryService) {
+            return new ReservationTimeFacadeService(
+                reservationTimeQueryService,
+                reservationTimeCommandService,
+                reservationQueryService
+            );
         }
     }
 }

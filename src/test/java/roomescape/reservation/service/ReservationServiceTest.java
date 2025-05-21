@@ -26,6 +26,7 @@ import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
 import roomescape.member.presentation.dto.MyReservationResponse;
+import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
@@ -37,17 +38,19 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepositoryAdaptor;
+import roomescape.reservationTime.service.ReservationTimeQueryService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
+import roomescape.theme.service.ThemeQueryService;
 
 @DataJpaTest
 @Import(ReservationConfig.class)
 class ReservationServiceTest {
 
     @Autowired
-    private ReservationService reservationService;
+    private ReservationFacadeService reservationFacadeService;
 
     @Autowired
     private JpaMemberRepository jpaMemberRepository;
@@ -81,7 +84,7 @@ class ReservationServiceTest {
         );
 
         // when
-        List<MyReservationResponse> result = reservationService.getMemberReservations(
+        List<MyReservationResponse> result = reservationFacadeService.getMemberReservations(
             new LoginMemberInfo(member.getId())
         );
 
@@ -99,7 +102,7 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.now().minusDays(days);
 
         Assertions.assertThatThrownBy(
-                        () -> reservationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
+                        () -> reservationFacadeService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
                 .isInstanceOf(BusinessException.class);
     }
 
@@ -115,7 +118,7 @@ class ReservationServiceTest {
     @DisplayName("중복 예약이 불가하다.")
     @Test
     void cant_not_reserve_duplicate() {
-        Assertions.assertThatThrownBy(() -> reservationService.createReservation(
+        Assertions.assertThatThrownBy(() -> reservationFacadeService.createReservation(
                         new ReservationRequest(LocalDate.of(2024, 10, 6), 1L, 1L), 1L))
                 .isInstanceOf(BusinessException.class);
     }
@@ -143,17 +146,44 @@ class ReservationServiceTest {
         }
 
         @Bean
-        public ReservationService reservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository,
-            MemberRepository memberRepository
+        public ReservationQueryService reservationQueryService(ReservationRepository reservationRepository) {
+            return new ReservationQueryService(reservationRepository);
+        }
+
+        @Bean
+        public ReservationCommandService reservationCommandService(ReservationRepository reservationRepository) {
+            return new ReservationCommandService(reservationRepository);
+        }
+
+        @Bean
+        public ReservationTimeQueryService reservationTimeQueryService(ReservationTimeRepository reservationTimeRepository) {
+            return new ReservationTimeQueryService(reservationTimeRepository);
+        }
+
+        @Bean
+        public ThemeQueryService themeQueryService(ThemeRepository themeRepository) {
+            return new ThemeQueryService(themeRepository);
+        }
+
+        @Bean
+        public MemberQueryService memberQueryService(MemberRepository memberRepository) {
+            return new MemberQueryService(memberRepository);
+        }
+
+        @Bean
+        public ReservationFacadeService reservationFacadeService(
+            ReservationQueryService reservationQueryService,
+            ReservationCommandService reservationCommandService,
+            ReservationTimeQueryService reservationTimeQueryService,
+            ThemeQueryService themeQueryService,
+            MemberQueryService memberQueryService
         ) {
-            return new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                memberRepository);
+            return new ReservationFacadeService(
+                reservationQueryService,
+                reservationCommandService,
+                reservationTimeQueryService,
+                themeQueryService,
+                memberQueryService);
         }
     }
 }
