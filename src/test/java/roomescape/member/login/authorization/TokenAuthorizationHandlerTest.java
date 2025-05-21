@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.AuthorizationException;
+import roomescape.common.security.TokenAuthorizationHandler;
 
 class TokenAuthorizationHandlerTest {
 

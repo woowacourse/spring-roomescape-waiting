@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import roomescape.auth.annotation.LoginMemberId;
 import roomescape.member.dto.MemberResponse;
-import roomescape.member.login.authentication.AuthenticationPrincipal;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -21,7 +21,7 @@ public class MemberReservationApiController {
 
     @GetMapping
     public ResponseEntity<List<MyReservationResponse>> findAllByMemberId(
-            @AuthenticationPrincipal MemberResponse memberResponse
+            @LoginMemberId MemberResponse memberResponse
     ) {
         return ResponseEntity.ok(reservationService.findAllByMemberId(memberResponse.id()));
     }

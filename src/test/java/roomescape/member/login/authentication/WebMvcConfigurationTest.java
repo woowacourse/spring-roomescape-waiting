@@ -14,22 +14,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
+import roomescape.auth.ui.AdminAuthorizationInterceptor;
+import roomescape.auth.ui.LoginMemberIdArgumentResolver;
+import roomescape.common.config.WebMvcConfiguration;
 
 class WebMvcConfigurationTest {
 
     private WebMvcConfiguration webMvcConfiguration;
-    private LoginAuthenticationResolver loginAuthenticationResolver;
-    private LoginAuthorizationInterceptor loginAuthorizationInterceptor;
+    private LoginMemberIdArgumentResolver loginMemberIdArgumentResolver;
+    private AdminAuthorizationInterceptor adminAuthorizationInterceptor;
 
     @BeforeEach
     void setUp() {
-        loginAuthenticationResolver = mock(LoginAuthenticationResolver.class);
-        loginAuthorizationInterceptor = mock(LoginAuthorizationInterceptor.class);
+        loginMemberIdArgumentResolver = mock(LoginMemberIdArgumentResolver.class);
+        adminAuthorizationInterceptor = mock(AdminAuthorizationInterceptor.class);
 
         webMvcConfiguration = new WebMvcConfiguration(
-                loginAuthenticationResolver,
-                loginAuthorizationInterceptor
+                loginMemberIdArgumentResolver,
+                adminAuthorizationInterceptor
         );
     }
 
@@ -40,7 +42,7 @@ class WebMvcConfigurationTest {
 
         webMvcConfiguration.addArgumentResolvers(resolvers);
 
-        assertThat(resolvers.getFirst()).isEqualTo(loginAuthenticationResolver);
+        assertThat(resolvers.getFirst()).isEqualTo(loginMemberIdArgumentResolver);
     }
 
     @Test
@@ -54,7 +56,7 @@ class WebMvcConfigurationTest {
 
         webMvcConfiguration.addInterceptors(registry);
 
-        verify(registry).addInterceptor(loginAuthorizationInterceptor);
+        verify(registry).addInterceptor(adminAuthorizationInterceptor);
         verify(registration).addPathPatterns(new String[]{"/admin/**"});
     }
 }

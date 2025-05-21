@@ -14,14 +14,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.auth.ui.AdminAuthorizationInterceptor;
+import roomescape.common.security.TokenAuthorizationHandler;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
-import roomescape.member.dto.MemberSignupRequest;
-import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
-import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 
-@WebMvcTest(MemberApiController.class)
-class MemberApiControllerTest {
+@WebMvcTest(MemberController.class)
+class MemberControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,7 +31,7 @@ class MemberApiControllerTest {
     @MockitoBean
     private TokenAuthorizationHandler tokenAuthorizationHandler;
     @MockitoBean
-    private LoginAuthorizationInterceptor loginAuthorizationInterceptor;
+    private AdminAuthorizationInterceptor adminAuthorizationInterceptor;
 
     private static final String URI = "/members";
 
@@ -56,7 +56,7 @@ class MemberApiControllerTest {
                 }
                 """;
 
-        when(memberService.add(any(MemberSignupRequest.class)))
+        when(memberService.add(any(MemberRequest.class)))
                 .thenReturn(new MemberResponse(1L, "test-user", "test@example.com"));
 
         mockMvc.perform(post(URI)

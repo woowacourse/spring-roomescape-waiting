@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.annotation.LoginMemberId;
 import roomescape.member.dto.MemberResponse;
-import roomescape.member.login.authentication.AuthenticationPrincipal;
 import roomescape.waiting.dto.WaitingRequest;
 import roomescape.waiting.dto.WaitingResponse;
 import roomescape.waiting.service.WaitingService;
@@ -25,7 +25,7 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> add(
-            @AuthenticationPrincipal MemberResponse memberResponse,
+            @LoginMemberId MemberResponse memberResponse,
             @RequestBody WaitingRequest request
     ) {
         WaitingResponse response = waitingService.add(

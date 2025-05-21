@@ -9,9 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.auth.application.TokenProvider;
+import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.exception.AuthorizationException;
+import roomescape.common.security.TokenAuthorizationHandler;
 
-class LoginAuthorizationInterceptorTest {
+class AdminAuthorizationInterceptorTest {
 
     @DisplayName("관리자 역할의 유효한 토큰이 주어지면 preHandle은 true를 반환한다")
     @Test
@@ -19,12 +22,12 @@ class LoginAuthorizationInterceptorTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         TokenAuthorizationHandler tokenHandler = mock(TokenAuthorizationHandler.class);
-        JwtTokenProvider jwtProvider = mock(JwtTokenProvider.class);
+        TokenProvider jwtProvider = mock(TokenProvider.class);
 
         when(tokenHandler.extractToken(request)).thenReturn("valid-token");
         when(jwtProvider.getPayloadRole("valid-token")).thenReturn("admin");
 
-        LoginAuthorizationInterceptor interceptor = new LoginAuthorizationInterceptor(tokenHandler, jwtProvider);
+        AdminAuthorizationInterceptor interceptor = new AdminAuthorizationInterceptor(tokenHandler, jwtProvider);
 
         boolean result = interceptor.preHandle(request, response, new Object());
 
@@ -37,11 +40,11 @@ class LoginAuthorizationInterceptorTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         TokenAuthorizationHandler tokenHandler = mock(TokenAuthorizationHandler.class);
-        JwtTokenProvider jwtProvider = mock(JwtTokenProvider.class);
+        TokenProvider jwtProvider = mock(TokenProvider.class);
 
         when(tokenHandler.extractToken(request)).thenReturn(null);
 
-        LoginAuthorizationInterceptor interceptor = new LoginAuthorizationInterceptor(tokenHandler, jwtProvider);
+        AdminAuthorizationInterceptor interceptor = new AdminAuthorizationInterceptor(tokenHandler, jwtProvider);
 
         assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object()))
                 .isInstanceOf(AuthorizationException.class)
@@ -54,12 +57,12 @@ class LoginAuthorizationInterceptorTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         TokenAuthorizationHandler tokenHandler = mock(TokenAuthorizationHandler.class);
-        JwtTokenProvider jwtProvider = mock(JwtTokenProvider.class);
+        TokenProvider jwtProvider = mock(TokenProvider.class);
 
         when(tokenHandler.extractToken(request)).thenReturn("valid-token");
         when(jwtProvider.getPayloadRole("valid-token")).thenReturn("user");
 
-        LoginAuthorizationInterceptor interceptor = new LoginAuthorizationInterceptor(tokenHandler, jwtProvider);
+        AdminAuthorizationInterceptor interceptor = new AdminAuthorizationInterceptor(tokenHandler, jwtProvider);
 
         boolean result = interceptor.preHandle(request, response, new Object());
 

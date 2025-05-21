@@ -15,14 +15,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.auth.application.TokenProvider;
+import roomescape.auth.application.dto.LoginRequest;
+import roomescape.auth.ui.AdminAuthorizationInterceptor;
+import roomescape.common.config.WebMvcConfiguration;
 import roomescape.common.exception.GlobalExceptionHandler;
-import roomescape.member.dto.MemberLoginRequest;
+import roomescape.common.security.TokenAuthorizationHandler;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.MemberTokenResponse;
-import roomescape.member.login.authentication.WebMvcConfiguration;
-import roomescape.member.login.authorization.JwtTokenProvider;
-import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
-import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 
 @WebMvcTest(LoginApiController.class)
@@ -37,9 +37,9 @@ class LoginApiControllerTest {
     @MockitoBean
     private TokenAuthorizationHandler tokenAuthorizationHandler;
     @MockitoBean
-    private LoginAuthorizationInterceptor loginAuthorizationInterceptor;
+    private AdminAuthorizationInterceptor adminAuthorizationInterceptor;
     @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
+    private TokenProvider tokenProvider;
 
     private static final String URI = "/login";
 
@@ -53,7 +53,7 @@ class LoginApiControllerTest {
                 }
                 """;
 
-        when(memberService.createToken(any(MemberLoginRequest.class)))
+        when(memberService.createToken(any(LoginRequest.class)))
                 .thenReturn(new MemberTokenResponse("test-token"));
 
         mockMvc.perform(post(URI)

@@ -9,11 +9,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
+import roomescape.auth.annotation.LoginMemberId;
+import roomescape.auth.ui.LoginMemberIdArgumentResolver;
+import roomescape.common.security.TokenAuthorizationHandler;
 import roomescape.member.dto.MemberResponse;
-import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 
-class LoginAuthenticationResolverTest {
+class LoginMemberIdArgumentResolverTest {
 
     @DisplayName("Argument Resolver를 사용해 토큰을 통한 회원 조회 기능을 구현한다")
     @Test
@@ -31,9 +33,9 @@ class LoginAuthenticationResolverTest {
         when(webRequest.getNativeRequest()).thenReturn(httpRequest);
         when(authorizationHandler.extractToken(httpRequest)).thenReturn(token);
         when(memberService.findByToken(token)).thenReturn(expectedMember);
-        when(methodParameter.hasParameterAnnotation(AuthenticationPrincipal.class)).thenReturn(true);
+        when(methodParameter.hasParameterAnnotation(LoginMemberId.class)).thenReturn(true);
 
-        LoginAuthenticationResolver resolver = new LoginAuthenticationResolver(memberService, authorizationHandler);
+        LoginMemberIdArgumentResolver resolver = new LoginMemberIdArgumentResolver(memberService, authorizationHandler);
         Object result = resolver.resolveArgument(methodParameter, null, webRequest, null);
 
         assertThat(result).isEqualTo(expectedMember);

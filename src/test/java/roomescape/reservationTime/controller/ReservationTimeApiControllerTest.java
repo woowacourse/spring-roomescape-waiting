@@ -13,8 +13,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
-import roomescape.member.login.authorization.TokenAuthorizationHandler;
+import roomescape.auth.ui.AdminAuthorizationInterceptor;
+import roomescape.common.security.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 import roomescape.reservationTime.service.ReservationTimeService;
 
@@ -31,7 +31,7 @@ class ReservationTimeApiControllerTest {
     @MockitoBean
     private TokenAuthorizationHandler tokenAuthorizationHandler;
     @MockitoBean
-    private LoginAuthorizationInterceptor loginAuthorizationInterceptor;
+    private AdminAuthorizationInterceptor adminAuthorizationInterceptor;
 
     private static final String URI = "/times";
 

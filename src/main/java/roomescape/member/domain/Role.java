@@ -1,20 +1,26 @@
 package roomescape.member.domain;
 
+import java.util.Arrays;
+import roomescape.member.exception.MemberRoleNotExistsException;
+
 public enum Role {
     ADMIN("admin"),
     USER("user");
 
-    private final String role;
+    private final String name;
 
-    Role(String role) {
-        this.role = role;
+    Role(String name) {
+        this.name = name;
     }
 
-    public static Role from(String role) {
-        return Role.valueOf(role.toUpperCase());
+    public static Role findBy(String name) {
+        return Arrays.stream(Role.values())
+                .filter(role -> role.getName().equals(name))
+                .findAny()
+                .orElseThrow(MemberRoleNotExistsException::new);
     }
 
-    public String getRole() {
-        return role;
+    public String getName() {
+        return name;
     }
 }

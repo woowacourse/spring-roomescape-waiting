@@ -14,13 +14,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.auth.application.TokenProvider;
+import roomescape.auth.ui.AdminAuthorizationInterceptor;
+import roomescape.common.config.WebMvcConfiguration;
 import roomescape.common.exception.GlobalExceptionHandler;
+import roomescape.common.security.TokenAuthorizationHandler;
+import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
-import roomescape.member.dto.MemberSignupRequest;
-import roomescape.member.login.authentication.WebMvcConfiguration;
-import roomescape.member.login.authorization.JwtTokenProvider;
-import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
-import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 
 @WebMvcTest(SignupApiController.class)
@@ -38,19 +38,19 @@ class SignupApiControllerTest {
     @MockitoBean
     private TokenAuthorizationHandler tokenAuthorizationHandler;
     @MockitoBean
-    private LoginAuthorizationInterceptor loginAuthorizationInterceptor;
+    private AdminAuthorizationInterceptor adminAuthorizationInterceptor;
     @MockitoBean
-    private JwtTokenProvider jwtTokenProvider;
+    private TokenProvider tokenProvider;
 
     private static final String URI = "/signup";
 
     @DisplayName("회원가입 요청을 처리한다")
     @Test
     void signup() throws Exception {
-        when(memberService.add(any(MemberSignupRequest.class)))
+        when(memberService.add(any(MemberRequest.class)))
                 .thenReturn(new MemberResponse(1L, "test-user", "test@example.com"));
 
-        MemberSignupRequest signupRequest = new MemberSignupRequest("test@example.com", "1234", "test-user");
+        MemberRequest signupRequest = new MemberRequest("test@example.com", "1234", "test-user");
         String requestBody = objectMapper.writeValueAsString(signupRequest);
 
         mockMvc.perform(post(URI)

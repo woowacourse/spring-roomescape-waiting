@@ -13,7 +13,7 @@ public enum MemberErrorCode implements ErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     EMAIL_REQUIRED(HttpStatus.BAD_REQUEST, "이메일은 필수 입력값입니다."),
     INVALID_EMAIL(HttpStatus.BAD_REQUEST, "이메일의 형식이 올바르지 않습니다."),
-    PASSWORD_NOT_MATCHED(HttpStatus.UNAUTHORIZED, "비밀번호가 틀렸습니다.");
+    ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 권한입니다.");
 
 
     private final HttpStatus status;
