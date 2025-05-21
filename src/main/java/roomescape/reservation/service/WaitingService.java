@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.exception.CannotWaitWithoutReservationException;
@@ -47,30 +48,40 @@ public class WaitingService {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.findById(request.themeId()).orElseThrow(ThemeNotFoundException::new);
         TimeSlot timeSlot = timeSlotRepository.findById(request.timeId()).orElseThrow(TimeSlotNotFoundException::new);
-        if (reservationRepository.existsByDateAndMemberAndThemeAndTimeSlot(request.date(), member, theme, timeSlot)) {
-            throw new ExistedReservationException();
-        }
-        if (waitingRepository.existsByDateAndMemberAndThemeAndTimeSlot(request.date(), member, theme, timeSlot)) {
-            throw new ExistedWaitingException();
-        }
-        if (!reservationRepository.existsByDateAndThemeAndTimeSlot(request.date(), theme, timeSlot)) {
-            throw new CannotWaitWithoutReservationException();
-        }
+        validateAlreadyReserved(request.date(), member, theme, timeSlot);
+        validateDuplicatedWaiting(request.date(), member, theme, timeSlot);
+        validateReservationExist(request.date(), theme, timeSlot);
 
         Waiting waiting = Waiting.builder()
                 .date(request.date())
                 .member(member)
                 .theme(theme)
                 .timeSlot(timeSlot).build();
-
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(savedWaiting);
+    }
+
+    private void validateReservationExist(LocalDate date, Theme theme, TimeSlot timeSlot) {
+        if (!reservationRepository.existsByDateAndThemeAndTimeSlot(date, theme, timeSlot)) {
+            throw new CannotWaitWithoutReservationException();
+        }
+    }
+
+    private void validateAlreadyReserved(LocalDate date, Member member, Theme theme, TimeSlot timeSlot) {
+        if (reservationRepository.existsByDateAndMemberAndThemeAndTimeSlot(date, member, theme, timeSlot)) {
+            throw new ExistedReservationException();
+        }
+    }
+
+    private void validateDuplicatedWaiting(LocalDate date, Member member, Theme theme, TimeSlot timeSlot) {
+        if (waitingRepository.existsByDateAndMemberAndThemeAndTimeSlot(date, member, theme, timeSlot)) {
+            throw new ExistedWaitingException();
+        }
     }
 
     public List<WaitingWithRankResponse> findWaitingByMemberId(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         return waitingRepository.findByMemberIdWithRank(member.getId());
-
     }
 
     public void deleteWaitingById(Long memberId, Long waitingId) {
