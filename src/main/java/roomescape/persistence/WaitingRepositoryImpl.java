@@ -33,7 +33,7 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public int findMaxOrderByThemeIdAndDateAndTimeId(final Long themeId, final LocalDate date, final Long reservationTimeId) {
-        return jpaWaitingRepository.findMaxOrderByThemeIdAndDateAndTimeId(themeId, date, reservationTimeId);
+    public void deleteById(final Long id) {
+        jpaWaitingRepository.deleteById(id);
     }
 }

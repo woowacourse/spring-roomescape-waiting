@@ -1,6 +1,5 @@
 package roomescape.domain;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +11,5 @@ public interface WaitingRepository {
 
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
-    public int findMaxOrderByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long reservationTimeId);
-
+    void deleteById(Long id);
 }

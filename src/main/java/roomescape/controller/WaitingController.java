@@ -2,10 +2,7 @@ package roomescape.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
 import roomescape.controller.request.CreateWaitingRequest;
 import roomescape.controller.request.LoginMemberInfo;
@@ -28,5 +25,12 @@ public class WaitingController {
                                                          @RequestBody CreateWaitingRequest createWaitingRequest) {
         WaitingResult waitingresult = waitingService.create(createWaitingRequest.toServiceParam(loginMemberInfo.id()));
         return ResponseEntity.status(HttpStatus.CREATED).body(WaitingResponse.from(waitingresult));
+    }
+
+    @DeleteMapping("/{waitingId}")
+    public ResponseEntity<Void> deleteWaiting(@LoginMember LoginMemberInfo loginMemberInfo, @PathVariable Long waitingId) {
+        waitingService.delete(loginMemberInfo.id(), waitingId); //TOOD: Service로 넘기는 포맷 고민
+
+        return ResponseEntity.noContent().build();
     }
 }

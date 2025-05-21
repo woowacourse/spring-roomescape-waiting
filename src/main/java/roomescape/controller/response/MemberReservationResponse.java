@@ -10,13 +10,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public record MemberReservationResponse(String theme,
+public record MemberReservationResponse(Long id,
+                                        String theme,
                                         LocalDate date,
                                         LocalTime time,
                                         String status) {
 
     public static MemberReservationResponse from(ReservationResult reservationResult) {
         return new MemberReservationResponse(
+                reservationResult.id(),
                 reservationResult.theme().name(),
                 reservationResult.date(),
                 reservationResult.time().startAt(),
@@ -25,6 +27,7 @@ public record MemberReservationResponse(String theme,
 
     public static MemberReservationResponse from(WaitingWithRankResult waitingWithRankResult) {
         return new MemberReservationResponse(
+                waitingWithRankResult.id(),
                 waitingWithRankResult.theme().name(),
                 waitingWithRankResult.date(),
                 waitingWithRankResult.time().startAt(),
