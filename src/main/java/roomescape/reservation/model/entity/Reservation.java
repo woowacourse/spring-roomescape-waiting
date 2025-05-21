@@ -56,7 +56,7 @@ public class Reservation {
         return LocalDateTime.of(date, time.getStartAt());
     }
 
-    public static Reservation createFutureReservation(ReservationDetails details) {
+    public static Reservation createFuture(ReservationDetails details) {
         LocalDateTime requestedDateTime = LocalDateTime.of(details.date(), details.reservationTime().getStartAt());
         validateFutureTime(requestedDateTime);
         return details.toReservation();

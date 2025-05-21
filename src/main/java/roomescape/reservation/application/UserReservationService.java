@@ -35,7 +35,7 @@ public class UserReservationService {
         ReservationDetails reservationDetails = createReservationDetails(request);
         try {
             reservationValidator.validateNoDuplication(request.date(), request.timeId(), request.themeId());
-            Reservation reservation = Reservation.createFutureReservation(reservationDetails);
+            Reservation reservation = Reservation.createFuture(reservationDetails);
             Reservation savedReservation = reservationRepository.save(reservation);
             return ReservationServiceResponse.from(savedReservation);
         } catch (ReservationException e) {
