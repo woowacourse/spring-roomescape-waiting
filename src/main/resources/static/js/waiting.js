@@ -67,7 +67,7 @@ function deny(event) {
     if (!response.ok) {
       return response.json().then(data => {
         // 서버에서 JSON 에러 메시지를 줄 경우
-        throw new Error(data.message || '예약 승인에 실패했습니다.');
+        throw new Error(data.message || '예약 대기 거절에 실패했습니다.');
       });
     }
     return response;
