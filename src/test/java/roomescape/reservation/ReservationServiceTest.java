@@ -741,5 +741,43 @@ public class ReservationServiceTest {
 
         }
 
+        @DisplayName("pending 상태의 예약을 삭제하면 대기중인 다음 순번의 예약이 pending 상태로 변경된다.")
+        @Test
+        void create10() {
+            // given
+            final Member pendingMember = new Member("email", "pass", "boogie", MemberRole.MEMBER);
+            final Member waitingMember = new Member("email1", "pass", "boogie", MemberRole.MEMBER);
+            final Member waitingMember1 = new Member("email2", "pass", "boogie", MemberRole.MEMBER);
+            final ReservationTime reservationTime = new ReservationTime(LocalTime.now().plusMinutes(1));
+            final Theme theme = new Theme("야당", "야당당", "123");
+            final Reservation pendingReservation = new Reservation(LocalDate.now(), pendingMember, reservationTime, theme,
+                    ReservationStatus.PENDING);
+            final Reservation waitingReservation = new Reservation(LocalDate.now(), waitingMember, reservationTime, theme,
+                    ReservationStatus.WAITING);
+            final Reservation waitingReservation1 = new Reservation(LocalDate.now(), waitingMember1, reservationTime, theme,
+                    ReservationStatus.WAITING);
+
+            memberRepositoryFacade.save(pendingMember);
+            memberRepositoryFacade.save(waitingMember);
+            memberRepositoryFacade.save(waitingMember1);
+            reservationTimeRepositoryFacade.save(reservationTime);
+            themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(pendingReservation);
+            reservationRepositoryFacade.save(waitingReservation);
+            reservationRepositoryFacade.save(waitingReservation1);
+
+            // when
+            reservationService.deleteById(1L);
+
+            // then
+            final Reservation actual1 = reservationRepositoryFacade.findById(2L).get();
+            assertThat(actual1.getReservationStatus()).isEqualTo(ReservationStatus.PENDING);
+
+            final Reservation actual2 = reservationRepositoryFacade.findById(3L).get();
+            assertThat(actual2.getReservationStatus()).isEqualTo(ReservationStatus.WAITING);
+
+
+        }
+
     }
 }
