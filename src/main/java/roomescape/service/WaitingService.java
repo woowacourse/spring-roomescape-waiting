@@ -30,6 +30,10 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
+    public List<WaitingWithRankResult> findWaitingsWithRankByMemberId(Long memberId) {
+        return WaitingWithRankResult.from(waitingRepository.findWaitingWithRankByMemberId(memberId));
+    }
+
     public WaitingResult create(CreateWaitingParam createWaitingParam) {
         ReservationTime reservationTime = reservationTimeRepository.findById(createWaitingParam.timeId()).orElseThrow(
                 () -> new NotFoundReservationTimeException(createWaitingParam.timeId() + "에 해당하는 정보가 없습니다."));
@@ -40,8 +44,6 @@ public class WaitingService {
         LocalDate date = createWaitingParam.date();
 
         //TODO: 중복 대기 검증
-
-        int maxOrder = waitingRepository.findMaxOrderByThemeIdAndDateAndTimeId(createWaitingParam.themeId(), date, createWaitingParam.timeId());
         Waiting waiting = waitingRepository.save(
                 Waiting.createNew(
                         member,

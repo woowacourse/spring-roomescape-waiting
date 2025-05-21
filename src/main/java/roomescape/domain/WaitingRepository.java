@@ -10,7 +10,7 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(Long id);
 
-    List<Waiting> findByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long reservationTimeId);
+    List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
     public int findMaxOrderByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long reservationTimeId);
 

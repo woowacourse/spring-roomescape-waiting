@@ -3,6 +3,7 @@ package roomescape.service.result;
 import roomescape.domain.Waiting;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record WaitingResult(
         MemberResult member,
@@ -17,5 +18,11 @@ public record WaitingResult(
                 ReservationTimeResult.from(waiting.getTime()),
                 ThemeResult.from(waiting.getTheme())
         );
+    }
+
+    public static List<WaitingResult> from(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(WaitingResult::from)
+                .toList();
     }
 }

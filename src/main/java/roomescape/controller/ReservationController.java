@@ -9,7 +9,9 @@ import roomescape.controller.request.LoginMemberInfo;
 import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.result.ReservationResult;
+import roomescape.service.result.WaitingWithRankResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,9 +22,11 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService; //TODO: 내 예약, 대기 조회 고민
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -54,7 +58,8 @@ public class ReservationController {
 
     @GetMapping("/member")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
-        List<ReservationResult> reservationResults = reservationService.findMemberReservationsById(loginMemberInfo.id());
-        return ResponseEntity.ok(MemberReservationResponse.from(reservationResults));
+        List<ReservationResult> reservationResults = reservationService.findReservationsByMemberId(loginMemberInfo.id());
+        List<WaitingWithRankResult> waitingsWithRank = waitingService.findWaitingsWithRankByMemberId(loginMemberInfo.id());
+        return ResponseEntity.ok(MemberReservationResponse.from(reservationResults, waitingsWithRank));
     }
 }

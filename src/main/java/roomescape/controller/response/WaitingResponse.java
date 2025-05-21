@@ -3,6 +3,7 @@ package roomescape.controller.response;
 import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record WaitingResponse(
         LoginMemberResponse member,
@@ -17,5 +18,11 @@ public record WaitingResponse(
                 ReservationTimeResponse.from(waitingResult.time()),
                 ThemeResponse.from(waitingResult.theme())
         );
+    }
+
+    public static List<WaitingResponse> from(List<WaitingResult> waitingResults) {
+        return waitingResults.stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }
