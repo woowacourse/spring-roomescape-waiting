@@ -2,7 +2,7 @@ package roomescape.application.auth;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.auth.dto.LoginParam;
+import roomescape.application.auth.dto.LoginCommand;
 import roomescape.application.auth.dto.LoginResult;
 import roomescape.infrastructure.error.exception.LoginAuthException;
 import roomescape.domain.member.Email;
@@ -24,17 +24,21 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResult login(LoginParam loginParam) {
-        Member member = getMemberByEmail(new Email(loginParam.email()));
-        if (member.isNotPassword(loginParam.password())) {
-            throw new LoginAuthException(loginParam.email() + " 사용자의 비밀번호가 같지 않습니다.");
-        }
+    public LoginResult login(LoginCommand loginCommand) {
+        Member member = getMemberByEmail(loginCommand.email());
+        validatePasswordMatch(member, loginCommand.password());
         return createLoginResult(member);
     }
 
-    private Member getMemberByEmail(Email email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new LoginAuthException(email.value() + "에 해당하는 멤버가 존재하지 않습니다."));
+    private void validatePasswordMatch(Member member, String password) {
+        if (member.isNotPassword(password)) {
+            throw new LoginAuthException("비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    private Member getMemberByEmail(String emailValue) {
+        return memberRepository.findByEmail(new Email(emailValue))
+                .orElseThrow(() -> new LoginAuthException(emailValue + "에 해당하는 멤버가 존재하지 않습니다."));
     }
 
     private LoginResult createLoginResult(Member member) {

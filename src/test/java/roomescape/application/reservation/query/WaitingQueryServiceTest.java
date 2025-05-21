@@ -44,10 +44,7 @@ class WaitingQueryServiceTest extends AbstractServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        waitingQueryService = new WaitingQueryService(
-                waitingRepository,
-                memberRepository
-        );
+        waitingQueryService = new WaitingQueryService(waitingRepository);
     }
 
     @Test

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
-import roomescape.application.auth.dto.LoginParam;
+import roomescape.application.auth.dto.LoginCommand;
 import roomescape.application.auth.dto.LoginResult;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
@@ -42,10 +42,10 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
     void 사용자는_로그인을_할_수_있다() {
         // given
         memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
-        LoginParam loginParam = new LoginParam("test@email.com", "pw");
+        LoginCommand loginCommand = new LoginCommand("test@email.com", "pw");
 
         // when
-        LoginResult loginResult = authService.login(loginParam);
+        LoginResult loginResult = authService.login(loginCommand);
 
         // then
         assertThat(loginResult)
@@ -55,11 +55,11 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
     @Test
     void 로그인시_이메일에_해당하는_사용자가_없는경우_예외가_발생한다() {
         // given
-        LoginParam loginParam = new LoginParam("invalid@email.com", "pw");
+        LoginCommand loginCommand = new LoginCommand("invalid@email.com", "pw");
 
         // when
         // then
-        assertThatCode(() -> authService.login(loginParam))
+        assertThatCode(() -> authService.login(loginCommand))
                 .isInstanceOf(LoginAuthException.class)
                 .hasMessage("invalid@email.com에 해당하는 멤버가 존재하지 않습니다.");
     }
@@ -68,11 +68,11 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
     void 로그인시_비밀번호가_틀린경우_예외가_발생한다() {
         // given
         memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
-        LoginParam loginParam = new LoginParam("test@email.com", "invalidpw");
+        LoginCommand loginCommand = new LoginCommand("test@email.com", "invalidpw");
 
         // when
         // then
-        assertThatCode(() -> authService.login(loginParam))
+        assertThatCode(() -> authService.login(loginCommand))
                 .isInstanceOf(LoginAuthException.class)
                 .hasMessage("test@email.com 사용자의 비밀번호가 같지 않습니다.");
     }
