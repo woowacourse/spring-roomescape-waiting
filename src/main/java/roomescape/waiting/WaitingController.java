@@ -28,10 +28,10 @@ public class WaitingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(
-            @PathVariable("id") final Long id,
+            @PathVariable("id") final Long reservationId,
             @AuthenticationPrincipal final LoginMember member
     ) {
-        waitingService.deleteById(id, member);
+        waitingService.deleteByReservationId(reservationId, member);
         return ResponseEntity.noContent().build();
     }
 }

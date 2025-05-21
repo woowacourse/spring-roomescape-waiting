@@ -6,7 +6,7 @@ import roomescape.waiting.Waiting;
 public record WaitingResponse(
         Long id,
         Long rank,
-        ReservationResponse reservationResponse
+        ReservationResponse reservation
 ) {
 
     public static WaitingResponse of(Waiting waiting, ReservationResponse reservationResponse) {

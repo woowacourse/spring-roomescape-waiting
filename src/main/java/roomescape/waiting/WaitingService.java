@@ -48,8 +48,25 @@ public class WaitingService {
         return WaitingResponse.of(savedWaiting, reservationResponse);
     }
 
+    public List<WaitingResponse> readAll() {
+        return waitingRepository.findAll().stream()
+                .map(waiting -> {
+                    ReservationResponse reservationResponse = ReservationResponse.from(waiting.getReservation());
+                    return WaitingResponse.of(waiting, reservationResponse);
+                })
+                .toList();
+    }
+
     @Transactional
-    public void deleteById(final Long reservationId, final LoginMember member) {
+    public void deleteById(final Long id) {
+        Waiting waiting = getWaitingById(id);
+        Reservation reservation = waiting.getReservation();
+
+        deleteWaiting(waiting, reservation);
+    }
+
+    @Transactional
+    public void deleteByReservationId(final Long reservationId, final LoginMember member) {
         Reservation reservation = getReservationById(reservationId);
         Waiting waiting = getWaitingByReservation(reservation);
 
@@ -58,6 +75,10 @@ public class WaitingService {
             throw new AuthorizationException();
         }
 
+        deleteWaiting(waiting, reservation);
+    }
+
+    private void deleteWaiting(final Waiting waiting, final Reservation reservation) {
         waitingRepository.delete(waiting);
         reservationRepository.delete(reservation);
 
@@ -119,6 +140,11 @@ public class WaitingService {
     private Reservation getReservationById(final Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    private Waiting getWaitingById(final Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(WaitingNotFoundException::new);
     }
 
     private Waiting getWaitingByReservation(final Reservation reservation) {

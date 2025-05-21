@@ -120,7 +120,7 @@ class WaitingServiceTest {
                 .willReturn(List.of(waiting2, waiting3));
 
         // when
-        waitingService.deleteById(RESERVATION.getId(), LOGIN_MEMBER);
+        waitingService.deleteByReservationId(RESERVATION.getId(), LOGIN_MEMBER);
 
         // then
         assertAll(
@@ -142,7 +142,7 @@ class WaitingServiceTest {
                 .willReturn(Optional.of(waiting));
 
         // when & then
-        assertThatThrownBy(() -> waitingService.deleteById(RESERVATION.getId(), LOGIN_MEMBER))
+        assertThatThrownBy(() -> waitingService.deleteByReservationId(RESERVATION.getId(), LOGIN_MEMBER))
                 .isInstanceOf(AuthorizationException.class);
     }
 
@@ -161,6 +161,6 @@ class WaitingServiceTest {
                 .willReturn(List.of());
 
         // when & then
-        assertDoesNotThrow(() -> waitingService.deleteById(RESERVATION.getId(), LOGIN_MEMBER));
+        assertDoesNotThrow(() -> waitingService.deleteByReservationId(RESERVATION.getId(), LOGIN_MEMBER));
     }
 }

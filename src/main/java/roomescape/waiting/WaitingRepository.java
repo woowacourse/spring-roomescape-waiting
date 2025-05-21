@@ -14,6 +14,8 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     Optional<Waiting> findByReservation(Reservation reservation);
 
+    List<Waiting> findAll();
+
     @Query(value = """
                 SELECT w FROM Waiting w
                 WHERE w.reservation.date = :date
