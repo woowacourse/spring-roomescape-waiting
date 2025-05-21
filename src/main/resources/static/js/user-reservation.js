@@ -160,16 +160,33 @@ function onReservationButtonClick() {
       },
       body: JSON.stringify(reservationData)
     })
-        .then(response => {
-          if (response.status !== 201) throw new Error('Reservation failed');
+        .then(async response => {
+          if (response.status === 401) {
+            throw new Error('401');
+          }
+
+          if (response.status === 400) {
+            const data = await response.json();
+            throw new Error(data.message || '잘못된 요청입니다.');
+          }
+
+          if (response.status !== 201) {
+            throw new Error('Reservation failed');
+          }
+
+          return response;
         })
         .then(() => {
           alert("예약이 완료되었습니다.");
           location.reload();
         })
         .catch(error => {
-          alert("An error occurred while making the reservation.");
-          console.error(error);
+          if (error.message === '401') {
+            alert("예약은 로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+            location.href = "/login";
+          } else {
+            alert(error.message);
+          }
         });
   } else {
     alert("Please select a date, theme, and time before making a reservation.");
@@ -195,19 +212,32 @@ function onWaitButtonClick() {
       },
       body: JSON.stringify(reservationData)
     })
-        .then(response => {
-          if (response.status !== 201) throw new Error('Reservation waiting failed');
+        .then(async response => {
+          if (response.status === 401) {
+            throw new Error('401');
+          }
+          if (response.status === 400) {
+            const errorBody = await response.json();
+            throw new Error(errorBody.message || '잘못된 요청입니다.');
+          }
+          if (response.status !== 201) {
+            throw new Error('예약 대기 요청에 실패했습니다.');
+          }
+          return response;
         })
         .then(() => {
           alert('예약 대기가 완료되었습니다.');
-          window.location.href = "/reservation-mine";
+          location.reload();
         })
         .catch(error => {
-          alert("An error occurred while making the reservation waiting.");
-          console.error(error);
+          if (error.message === '401') {
+            alert("예약 대기는 로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+            location.href = "/login";
+          } else {
+            alert(error.message);
+            console.error(error);
+          }
         });
-  } else {
-    alert("Please select a date, theme, and time before making a reservation waiting.");
   }
 }
 
