@@ -76,12 +76,12 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllWaitings() {
+    public List<Reservation> findAllWaitingReservations() {
         return dao.findAllByStatus(Status.WAITING);
     }
 
     @Override
-    public void updateFirstWaiting(ReservationDate date, ReservationTime time, Theme theme) {
-        dao.updateFirstWaiting(date, time, theme);
+    public void updateWaitingReservations(ReservationDate date, ReservationTime time, Theme theme) {
+        dao.updateWaitingReservations(date, time, theme);
     }
 }

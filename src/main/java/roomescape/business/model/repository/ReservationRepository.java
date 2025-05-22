@@ -33,7 +33,7 @@ public interface ReservationRepository {
 
     void deleteById(Id reservationId);
 
-    List<Reservation> findAllWaitings();
+    List<Reservation> findAllWaitingReservations();
 
-    void updateFirstWaiting(ReservationDate date, ReservationTime time, Theme theme);
+    void updateWaitingReservations(ReservationDate date, ReservationTime time, Theme theme);
 }

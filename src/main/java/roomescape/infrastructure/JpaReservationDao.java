@@ -80,7 +80,7 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
                         AND r2.status  = roomescape.business.model.vo.Status.WAITING
                  )
             """)
-    void updateFirstWaiting(
+    void updateWaitingReservations(
             @Param("date") ReservationDate date,
             @Param("time") ReservationTime time,
             @Param("theme") Theme theme

@@ -58,7 +58,7 @@ public class ReservationApiController {
     @AuthRequired
     @Role(UserRole.ADMIN)
     public ResponseEntity<List<ReservationResponse>> getWaitingReservations() {
-        List<ReservationResponse> responses = reservationService.getAllWaitings();
+        List<ReservationResponse> responses = reservationService.getAllWaitingReservations();
         return ResponseEntity.ok(responses);
     }
 

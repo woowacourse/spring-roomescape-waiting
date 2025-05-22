@@ -29,6 +29,7 @@ import roomescape.presentation.dto.response.ReservationWithAhead;
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
+    private final WaitingService waitingService;
 
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
@@ -65,14 +66,12 @@ public class ReservationService {
         Id id = Id.create(reservationId);
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
-        reservationRepository.deleteById(id);
-        reservationRepository.updateFirstWaiting(reservation.getDate(), reservation.getTime(), reservation.getTheme());
-
+        delete(id);
+        waitingService.updateWaitingReservations(reservation);
     }
 
-    public void delete(final String reservationId) {
-        Id id = Id.create(reservationId);
-        reservationRepository.deleteById(id);
+    public void delete(final Id reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 
     public List<ReservationWithAhead> getMyReservations(final String userIdValue) {
@@ -80,11 +79,7 @@ public class ReservationService {
         return reservationRepository.findReservationsWithAhead(userId);
     }
 
-    public List<ReservationResponse> getAllWaitings() {
-        return ReservationResponse.from(
-                ReservationDto.fromEntities(
-                        reservationRepository.findAllWaitings()
-                )
-        );
+    public List<ReservationResponse> getAllWaitingReservations() {
+        return waitingService.getAllWaitingReservations();
     }
 }

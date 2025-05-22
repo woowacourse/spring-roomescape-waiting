@@ -250,7 +250,7 @@ class ReservationServiceTest {
         );
 
         // when
-        sut.delete(reservation.getId().value());
+        sut.delete(reservation.getId());
 
         // then
         verify(reservationRepository).deleteById(reservation.getId());
