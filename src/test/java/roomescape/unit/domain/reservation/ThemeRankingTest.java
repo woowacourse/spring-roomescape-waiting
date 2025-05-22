@@ -17,16 +17,16 @@ class ThemeRankingTest {
     void 테마_랭킹_테스트() {
         Theme themeA = new Theme(1L, "asdf", "asdf", "asdf");
         Theme themeB = new Theme(2L, "asdf", "asdf", "asdf");
-        Reservation reservation = new Reservation(0L, "tuda", LocalDate.now(), new ReservationTime(0L, LocalTime.now()),
+        Reservation reservation = new Reservation(0L, LocalDate.now(), new ReservationTime(0L, LocalTime.now()),
                 themeA);
 
-        Reservation reservation2 = new Reservation(1L, "tuda2", LocalDate.now(),
+        Reservation reservation2 = new Reservation(1L, LocalDate.now(),
                 new ReservationTime(0L, LocalTime.now()), themeB);
 
-        Reservation reservation3 = new Reservation(2L, "tuda3", LocalDate.now(),
+        Reservation reservation3 = new Reservation(2L, LocalDate.now(),
                 new ReservationTime(0L, LocalTime.now()), themeB);
 
-        Reservation reservation4 = new Reservation(2L, "tuda3", LocalDate.now(),
+        Reservation reservation4 = new Reservation(2L, LocalDate.now(),
                 new ReservationTime(0L, LocalTime.now()), themeB);
 
         ThemeRanking ranking = new ThemeRanking(List.of(reservation, reservation2, reservation3, reservation4));

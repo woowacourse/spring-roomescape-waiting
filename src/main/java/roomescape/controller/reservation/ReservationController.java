@@ -81,7 +81,19 @@ public class ReservationController {
         Reservation reservation = reservationService.getReservationById(addedReservationId);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
-                reservation.getName(), reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
+                reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
+        return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponseDto> addWaitingReservations(
+            @RequestBody @Valid AddReservationDto newReservationDto,
+            @AuthenticationPrincipal UserInfo userInfo) {
+        long addedReservationId = reserveTicketService.addWaitingReservation(newReservationDto, userInfo.id());
+        Reservation reservation = reservationService.getReservationById(addedReservationId);
+
+        ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
+                reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
         return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
     }
 

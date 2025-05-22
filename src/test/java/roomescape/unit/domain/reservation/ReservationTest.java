@@ -16,7 +16,7 @@ class ReservationTest {
     @Test
     void 날짜가_범위_사이에_있는지_확인할_수_있다() {
         LocalDate today = LocalDate.now();
-        Reservation reservation = new Reservation(null, "tuda", today,
+        Reservation reservation = new Reservation(null, today,
                 new ReservationTime(null, LocalTime.now().plusHours(1L)), null);
 
         LocalDate from = today.minusDays(1);
@@ -33,7 +33,6 @@ class ReservationTest {
 
         Reservation reservation = new Reservation(
                 null,
-                "tuda",
                 today.minusDays(2),
                 new ReservationTime(null, LocalTime.now().plusHours(1L)),
                 null
@@ -53,7 +52,6 @@ class ReservationTest {
 
         Reservation reservation = new Reservation(
                 null,
-                "tuda",
                 today.plusDays(2),
                 new ReservationTime(null, LocalTime.now().plusHours(1L)),
                 null

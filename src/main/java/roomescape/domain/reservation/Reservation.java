@@ -22,7 +22,6 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
     private LocalDate date;
 
     @JoinColumn(name = "time_id")
@@ -41,15 +40,14 @@ public class Reservation {
 
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme,
                        ReservationStatus reservationStatus) {
-        this(id, name, date, time, theme);
+        this(id, date, time, theme);
         this.reservationStatus = reservationStatus;
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
-        this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
@@ -78,10 +76,6 @@ public class Reservation {
 
     public Long getId() {
         return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public LocalDate getDate() {

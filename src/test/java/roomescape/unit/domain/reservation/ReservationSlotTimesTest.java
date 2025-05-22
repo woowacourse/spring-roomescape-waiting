@@ -21,7 +21,7 @@ class ReservationSlotTimesTest {
 
         List<ReservationTime> allTimes = List.of(time1, time2, time3);
 
-        Reservation alreadyReserved = new Reservation(1L, "사용자", LocalDate.now(), time2, null);
+        Reservation alreadyReserved = new Reservation(1L, LocalDate.now(), time2, null);
         List<Reservation> alreadyReservedList = List.of(alreadyReserved);
 
         ReservationSlotTimes slotTimes = new ReservationSlotTimes(allTimes, alreadyReservedList);
