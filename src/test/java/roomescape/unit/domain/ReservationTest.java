@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -26,7 +27,7 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now());
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
 
-        Reservation reservation = new Reservation(member, yesterday, reservationTime, theme, ReservationStatus.RESERVED);
+        ConfirmedReservation reservation = new ConfirmedReservation(member, yesterday, reservationTime, theme);
 
         //when
         boolean actual = reservation.isBefore(LocalDateTime.now());
@@ -43,7 +44,7 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusMinutes(10));
         Theme theme = new Theme(1L, "테마", "설명", "썸네일");
 
-        Reservation reservation = new Reservation(member, today, reservationTime, theme, ReservationStatus.RESERVED);
+        ConfirmedReservation reservation = new ConfirmedReservation(member, today, reservationTime, theme);
 
         //when
         boolean actual = reservation.isBefore(LocalDateTime.now());

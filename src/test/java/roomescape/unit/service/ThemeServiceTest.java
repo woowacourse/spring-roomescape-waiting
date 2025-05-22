@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dto.request.CreateThemeRequest;
 import roomescape.entity.Theme;
 import roomescape.exception.custom.InvalidThemeException;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ConfirmReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.ThemeService;
 
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class ThemeServiceTest {
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private ConfirmReservationRepository confirmReservationRepository;
 
     @Mock
     private ThemeRepository themeRepository;
@@ -75,7 +75,7 @@ class ThemeServiceTest {
     @Test
     void 예약이_존재하는_테마는_삭제할_수_없다() {
         // given
-        when(reservationRepository.existsByThemeId(1L)).thenReturn(true);
+        when(confirmReservationRepository.existsByThemeId(1L)).thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(1L))

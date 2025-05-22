@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import roomescape.entity.Reservation;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.ReservationTime;
 
 public class ReservationSlots {
@@ -14,11 +14,11 @@ public class ReservationSlots {
 
     public ReservationSlots(
             List<ReservationTime> times,
-            List<Reservation> alreadyReservedReservations
+            List<ConfirmedReservation> alreadyReservedReservations
     ) {
         List<ReservationSlot> reservationSlots = new ArrayList<>();
         Set<ReservationTime> alreadyReservationTimes = alreadyReservedReservations.stream()
-                .map(Reservation::getReservationTime)
+                .map(ConfirmedReservation::getReservationTime)
                 .collect(Collectors.toSet());
 
         for (ReservationTime time : times) {

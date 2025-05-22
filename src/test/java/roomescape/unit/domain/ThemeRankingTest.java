@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.ThemeRanking;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
@@ -22,16 +23,16 @@ class ThemeRankingTest {
         Theme themeB = new Theme("B", "b", "b");
         Theme themeC = new Theme("C", "c", "c");
 
-        List<Reservation> reservations = new ArrayList<>();
+        List<ConfirmedReservation> reservations = new ArrayList<>();
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB, ReservationStatus.RESERVED));
+        reservations.add(new ConfirmedReservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB));
+        reservations.add(new ConfirmedReservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB));
+        reservations.add(new ConfirmedReservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeB));
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA, ReservationStatus.RESERVED));
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA, ReservationStatus.RESERVED));
+        reservations.add(new ConfirmedReservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA));
+        reservations.add(new ConfirmedReservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeA));
 
-        reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeC, ReservationStatus.RESERVED));
+        reservations.add(new ConfirmedReservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), themeC));
 
         ThemeRanking ranking = new ThemeRanking(reservations);
 
@@ -46,11 +47,11 @@ class ThemeRankingTest {
     @Test
     void 랭킹은_10개_까지로_제한한다() {
         // given
-        List<Reservation> reservations = new ArrayList<>();
+        List<ConfirmedReservation> reservations = new ArrayList<>();
         for (int i = 1; i <= 11; i++) {
             Theme theme = new Theme("T" + i, "T" + i, "T" + i);
             for (int j = 0; j < i; j++) {
-                reservations.add(new Reservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), theme, ReservationStatus.RESERVED));
+                reservations.add(new ConfirmedReservation(null, LocalDate.now(), new ReservationTime(LocalTime.now()), theme));
             }
         }
 
