@@ -96,12 +96,6 @@ public class ReservationWaitingService {
     }
 
     @Transactional(readOnly = true)
-    public Reservation findReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다."));
-    }
-
-    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllReservationsByMemberId(Long id) {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)
