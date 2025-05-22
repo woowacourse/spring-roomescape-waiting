@@ -73,6 +73,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationDtos);
     }
 
+
     @PostMapping
     public ResponseEntity<ReservationResponseDto> addReservations(
             @RequestBody @Valid AddReservationDto newReservationDto,
@@ -134,12 +135,13 @@ public class ReservationController {
             @AuthenticationPrincipal UserInfo userInfo) {
         List<ReserveTicketWaiting> reserveTickets = reserveTicketService.memberReservationWaitingTickets(userInfo.id());
         List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getId(),
-                        reservationMember.getName(),
-                        reservationMember.getThemeName(),
-                        reservationMember.getDate(),
-                        reservationMember.getStartAt(),
-                        reservationMember.getReservationStatus().getStatus()))
+                .map((reserveTicket) -> new MyReservationMemberResponseDto(reserveTicket.getId(),
+                        reserveTicket.getName(),
+                        reserveTicket.getThemeName(),
+                        reserveTicket.getDate(),
+                        reserveTicket.getStartAt(),
+                        reserveTicket.getReservationStatus().getStatus(),
+                        reserveTicket.getWaitRank()))
                 .toList();
         return ResponseEntity.ok(reservationDtos);
     }
