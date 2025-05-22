@@ -18,6 +18,7 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
                     WHERE r.date BETWEEN :fromDate AND :toDate
                     GROUP BY r.theme.id
                     ORDER BY COUNT(r) DESC
+                    LIMIT :listNum
                 )
             """)
     List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum);

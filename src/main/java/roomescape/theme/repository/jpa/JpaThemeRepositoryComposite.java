@@ -1,12 +1,13 @@
 package roomescape.theme.repository.jpa;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 @ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
@@ -38,7 +39,7 @@ public class JpaThemeRepositoryComposite implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum) {
-        return jpaThemeRepository.findTopByReservationCountDesc(fromDate, toDate, listNum);
+    public List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long limit) {
+        return jpaThemeRepository.findTopByReservationCountDesc(fromDate, toDate, limit);
     }
 }
