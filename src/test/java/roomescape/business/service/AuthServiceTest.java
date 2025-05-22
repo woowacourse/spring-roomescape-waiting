@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import roomescape.auth.AuthToken;
 import roomescape.auth.jwt.JwtUtil;
+import roomescape.business.application_service.service.AuthService;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Users;
 import roomescape.exception.auth.AuthenticationException;

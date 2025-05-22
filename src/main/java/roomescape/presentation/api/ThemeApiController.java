@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthRequired;
 import roomescape.auth.Role;
+import roomescape.business.application_service.reader.ThemeReader;
+import roomescape.business.application_service.service.ThemeService;
 import roomescape.business.dto.ThemeDto;
 import roomescape.business.model.vo.UserRole;
-import roomescape.business.reader.ThemeReader;
-import roomescape.business.service.ThemeService;
 import roomescape.presentation.dto.request.ThemeCreateRequest;
 import roomescape.presentation.dto.response.ThemeResponse;
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.business.application_service.service.ReservationTimeService;
 import roomescape.business.dto.ReservationTimeDto;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimes;

@@ -5,7 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.business.application_service.service.ReservationService;
 import roomescape.business.dto.ReservationDto;
+import roomescape.business.helper_service.ReservationSlotHelper;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.entity.ReservationTime;
@@ -13,7 +15,6 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
-import roomescape.business.reader.ReservationSlotReader;
 import roomescape.exception.business.DuplicatedException;
 
 import java.time.LocalDate;
@@ -32,7 +33,7 @@ class ReservationServiceTest {
     @Mock
     private Reservations reservations;
     @Mock
-    private ReservationSlotReader slotReader;
+    private ReservationSlotHelper slotReader;
     @InjectMocks
     private ReservationService sut;
 
@@ -47,7 +48,7 @@ class ReservationServiceTest {
         ReservationSlot slot = new ReservationSlot(time, date, theme);
 
         when(users.findById(user.getId())).thenReturn(Optional.of(user));
-        when(slotReader.findByDateAndTimeIdAndThemeId(date, time.getId().value(), theme.getId().value())).thenReturn(Optional.of(slot));
+        when(slotReader.findByDateAndTimeIdAndThemeIdOrElseSave(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
         when(reservations.isSlotFreeFor(slot, user)).thenReturn(true);
 
         // when
@@ -56,7 +57,7 @@ class ReservationServiceTest {
         // then
         assertThat(result).isNotNull();
         verify(users).findById(user.getId());
-        verify(slotReader).findByDateAndTimeIdAndThemeId(date, time.getId().value(), theme.getId().value());
+        verify(slotReader).findByDateAndTimeIdAndThemeIdOrElseSave(date, time.getId().value(), theme.getId().value());
         verify(reservations).isSlotFreeFor(slot, user);
         verify(reservations).save(any(Reservation.class));
     }
@@ -72,7 +73,7 @@ class ReservationServiceTest {
         ReservationSlot slot = new ReservationSlot(time, date, theme);
 
         when(users.findById(user.getId())).thenReturn(Optional.of(user));
-        when(slotReader.findByDateAndTimeIdAndThemeId(date, time.getId().value(), theme.getId().value())).thenReturn(Optional.of(slot));
+        when(slotReader.findByDateAndTimeIdAndThemeIdOrElseSave(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
         when(reservations.isSlotFreeFor(slot, user)).thenReturn(false);
 
         // when, then

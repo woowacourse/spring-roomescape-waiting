@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthRequired;
 import roomescape.auth.AuthToken;
 import roomescape.auth.LoginInfo;
+import roomescape.business.application_service.reader.UserReader;
+import roomescape.business.application_service.service.AuthService;
 import roomescape.business.dto.UserDto;
-import roomescape.business.reader.UserReader;
-import roomescape.business.service.AuthService;
 import roomescape.presentation.dto.request.LoginRequest;
 import roomescape.presentation.dto.response.UserResponse;
 

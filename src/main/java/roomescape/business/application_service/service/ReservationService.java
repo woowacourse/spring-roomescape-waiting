@@ -1,16 +1,16 @@
-package roomescape.business.service;
+package roomescape.business.application_service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservationDto;
+import roomescape.business.helper_service.ReservationSlotHelper;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
-import roomescape.business.reader.ReservationSlotReader;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
@@ -29,15 +29,13 @@ public class ReservationService {
 
     private final Users users;
     private final Reservations reservations;
-    private final ReservationSlotService slotService;
-    private final ReservationSlotReader slotReader;
+    private final ReservationSlotHelper slotReader;
 
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
         User user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
 
-        ReservationSlot slot = slotReader.findByDateAndTimeIdAndThemeId(date, timeIdValue, themeIdValue)
-                .orElseGet(() -> slotService.addAndGet(date, timeIdValue, themeIdValue));
+        ReservationSlot slot = slotReader.findByDateAndTimeIdAndThemeIdOrElseSave(date, timeIdValue, themeIdValue);
 
         if (!reservations.isSlotFreeFor(slot, user)) {
             throw new DuplicatedException(RESERVATION_DUPLICATED);

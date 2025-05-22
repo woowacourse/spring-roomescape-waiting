@@ -1,10 +1,11 @@
-package roomescape.business.reader;
+package roomescape.business.application_service.reader;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
+import roomescape.business.helper_service.ReservationSlotHelper;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.repository.Reservations;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 public class ReservationReader {
 
     private final Reservations reservations;
-    private final ReservationSlotReader slotReader;
+    private final ReservationSlotHelper slotReader;
 
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom, final LocalDate dateTo) {
         List<Reservation> reservations = this.reservations.findAllWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);

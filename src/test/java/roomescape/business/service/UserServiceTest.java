@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.business.application_service.service.UserService;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Users;
 import roomescape.exception.business.InvalidCreateArgumentException;

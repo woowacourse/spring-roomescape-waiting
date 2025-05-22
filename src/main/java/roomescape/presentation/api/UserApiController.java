@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthRequired;
 import roomescape.auth.Role;
+import roomescape.business.application_service.reader.UserReader;
+import roomescape.business.application_service.service.UserService;
 import roomescape.business.dto.UserDto;
 import roomescape.business.model.vo.UserRole;
-import roomescape.business.reader.UserReader;
-import roomescape.business.service.UserService;
 import roomescape.presentation.dto.request.RegisterRequest;
 import roomescape.presentation.dto.response.UserResponse;
 

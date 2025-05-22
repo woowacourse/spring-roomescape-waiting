@@ -1,4 +1,4 @@
-package roomescape.business.reader;
+package roomescape.business.application_service.reader;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
