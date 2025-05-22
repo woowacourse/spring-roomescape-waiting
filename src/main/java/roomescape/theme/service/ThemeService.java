@@ -3,16 +3,18 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.ThemeCreateRequest;
-import roomescape.theme.dto.ThemeResponse;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ConstrainedDataException;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.dto.ThemeCreateRequest;
+import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     public static final int POPULAR_THEME_LIMIT = 10;
@@ -25,6 +27,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ThemeResponse createTheme(final ThemeCreateRequest requestDto) {
         if (themeRepository.existsByName(requestDto.name())) {
             throw new DuplicateContentException("[ERROR] 이미 동일한 이름의 테마가 존재합니다.");
@@ -41,6 +44,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteThemeById(final Long id) {
         if (themeRepository.findById(id).isEmpty()) {
             throw new NotFoundException("[ERROR] 등록된 테마만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");

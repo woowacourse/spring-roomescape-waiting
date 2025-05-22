@@ -2,12 +2,14 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.member.domain.Member;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.NotFoundException;
+import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.util.TokenProvider;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;

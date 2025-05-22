@@ -2,16 +2,18 @@ package roomescape.auth.service;
 
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.member.domain.Member;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.member.dto.MemberResponse;
 import roomescape.auth.dto.TokenResponse;
 import roomescape.exception.InvalidAuthorizationException;
+import roomescape.member.domain.Member;
+import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 import roomescape.util.TokenProvider;
 
 @Service
+@Transactional(readOnly = true)
 public class LoginService {
 
     private final MemberRepository memberRepository;

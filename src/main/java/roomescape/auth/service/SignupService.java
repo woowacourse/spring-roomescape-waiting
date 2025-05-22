@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.RegistrationRequest;
 import roomescape.exception.DuplicateContentException;
 import roomescape.member.repository.MemberRepository;
@@ -14,6 +15,7 @@ public class SignupService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public void signup(RegistrationRequest registrationRequest) {
         if (memberRepository.existsByEmail(registrationRequest.email())) {
             throw new DuplicateContentException("[ERROR] 이미 가입한 이메일입니다.");
