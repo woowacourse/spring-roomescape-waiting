@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.CannotWaitWithoutReservationException;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ExistedWaitingException;
@@ -104,6 +105,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public void convertWaitingToReservation(Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
         reservationRepository.findByDateAndTimeSlotAndTheme(

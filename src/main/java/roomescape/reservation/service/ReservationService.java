@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.MemberNotFoundException;
 import roomescape.exception.ReservationNotFoundException;
@@ -73,6 +74,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void cancelReservationAndPromoteWait(Long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.delete(reservation);
