@@ -1,5 +1,6 @@
 package roomescape.waiting.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
@@ -11,6 +12,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.CreateWaitingRequest;
 import roomescape.waiting.dto.WaitingResponse;
+import roomescape.waiting.dto.WaitingSimpleResponse;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
@@ -37,6 +39,13 @@ public class WaitingService {
         final Waiting waiting = Waiting.register(member, reservation);
         final Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingResponse(savedWaiting);
+    }
+
+    public List<WaitingSimpleResponse> getWaitings() {
+        final List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(WaitingSimpleResponse::new)
+                .toList();
     }
 
     public void deleteWaitingById(final long waitingId, final LoginMember loginMember) {

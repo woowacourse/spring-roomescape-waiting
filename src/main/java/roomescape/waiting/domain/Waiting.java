@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.domain.ThemeName;
 
@@ -78,6 +79,10 @@ public class Waiting {
 
     public LocalTime getStartAt() {
         return reservation.getStartAt();
+    }
+
+    public MemberName getMemberName() {
+        return member.getName();
     }
 
     @Override
