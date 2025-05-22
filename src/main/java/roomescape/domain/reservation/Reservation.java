@@ -74,6 +74,10 @@ public class Reservation {
         return dateFrom.isEqual(date) || dateFrom.isBefore(date);
     }
 
+    public void waitingToReservation() {
+        this.reservationStatus = ReservationStatus.RESERVATION;
+    }
+
     public Long getId() {
         return id;
     }
@@ -120,9 +124,5 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(date, time, theme, reservationStatus);
-    }
-
-    public void waitingToReservation() {
-        this.reservationStatus = ReservationStatus.RESERVATION;
     }
 }
