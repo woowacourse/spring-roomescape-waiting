@@ -2,7 +2,7 @@ package roomescape.presentation.response;
 
 import java.time.LocalDate;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithRank;
 
 public record UserReservationResponse(
         long id,
@@ -23,13 +23,13 @@ public record UserReservationResponse(
         );
     }
 
-    public static UserReservationResponse fromWaiting(final Waiting waiting) {
+    public static UserReservationResponse fromWaitingWithRank(final WaitingWithRank waitingWithRank) {
         return new UserReservationResponse(
-                waiting.id(),
-                ThemeResponse.from(waiting.theme()),
-                waiting.date(),
-                TimeSlotResponse.from(waiting.timeSlot()),
-                "대기"
+                waitingWithRank.waiting().id(),
+                ThemeResponse.from(waitingWithRank.waiting().theme()),
+                waitingWithRank.waiting().date(),
+                TimeSlotResponse.from(waitingWithRank.waiting().timeSlot()),
+                waitingWithRank.rank() + "번째 예약대기"
         );
     }
 }

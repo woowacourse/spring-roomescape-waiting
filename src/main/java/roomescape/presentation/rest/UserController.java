@@ -16,7 +16,7 @@ import roomescape.application.UserService;
 import roomescape.application.WaitingService;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.user.User;
-import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.presentation.auth.Authenticated;
 import roomescape.presentation.request.SignupRequest;
 import roomescape.presentation.response.UserReservationResponse;
@@ -49,7 +49,7 @@ public class UserController {
     @GetMapping("/reservations")
     public List<UserReservationResponse> readAllReservationsByUser(@Authenticated final User user) {
         List<Reservation> reservations = reservationService.findReservationsByUserId(user.id());
-        List<Waiting> waitings = waitingService.findWaitingByUserId(user.id());
+        List<WaitingWithRank> waitings = waitingService.findWaitingByUserId(user.id());
 
         List<UserReservationResponse> userReservationResponses = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class UserController {
                 .toList();
 
         List<UserReservationResponse> waitingResponse = waitings.stream()
-                .map(UserReservationResponse::fromWaiting)
+                .map(UserReservationResponse::fromWaitingWithRank)
                 .toList();
 
         userReservationResponses.addAll(reservedResponse);
