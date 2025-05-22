@@ -19,7 +19,6 @@ import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationWaitResponse;
-import roomescape.entity.Reservation;
 import roomescape.global.Role;
 import roomescape.service.ReservationService;
 
@@ -54,10 +53,8 @@ public class ReservationController {
     @CheckRole(value = {Role.ADMIN, Role.USER})
     public ResponseEntity<ReservationResponse> addReservations(
             @RequestBody @Valid CreateReservationRequest request,
-            LoginMemberRequest loginMemberRequest
-    ) {
-        Reservation reservation = reservationService.addReservation(request, loginMemberRequest);
-        ReservationResponse response = ReservationResponse.from(reservation);
+            LoginMemberRequest loginMemberRequest) {
+        ReservationResponse response = reservationService.addReservation(request, loginMemberRequest);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -72,8 +69,7 @@ public class ReservationController {
     public ResponseEntity<ReservationWaitResponse> addWaitReservation(
             @RequestBody @Valid CreateWaitReservationRequest request,
             LoginMemberRequest loginMemberRequest) {
-        Reservation reservation = reservationService.addWaitReservation(request, loginMemberRequest);
-        ReservationWaitResponse response = ReservationWaitResponse.from(reservation);
+        ReservationWaitResponse response = reservationService.addWaitReservation(request, loginMemberRequest);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

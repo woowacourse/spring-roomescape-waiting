@@ -47,19 +47,24 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
-    public Reservation addReservation(CreateReservationRequest request, LoginMemberRequest loginMemberRequest) {
-        return createReservation(loginMemberRequest.id(), request.themeId(), request.date(), request.timeId(),
-                ReservationStatus.RESERVED);
+    public ReservationResponse addReservation(CreateReservationRequest request, LoginMemberRequest loginMemberRequest) {
+        Reservation reservation = createReservation(loginMemberRequest.id(), request.themeId(), request.date(),
+                request.timeId(), ReservationStatus.RESERVED);
+        return ReservationResponse.from(reservation);
     }
 
-    public Reservation addReservationByAdmin(AdminCreateReservationRequest request) {
-        return createReservation(request.memberId(), request.themeId(), request.date(), request.timeId(),
-                ReservationStatus.RESERVED);
+    public ReservationResponse addReservationByAdmin(AdminCreateReservationRequest request) {
+        Reservation reservation = createReservation(request.memberId(), request.themeId(), request.date(),
+                request.timeId(), ReservationStatus.RESERVED);
+        return ReservationResponse.from(reservation);
     }
 
-    public Reservation addWaitReservation(CreateWaitReservationRequest request, LoginMemberRequest loginMemberRequest) {
-        return createReservation(loginMemberRequest.id(), request.themeId(), request.date(), request.timeId(),
+    public ReservationWaitResponse addWaitReservation(CreateWaitReservationRequest request,
+                                                      LoginMemberRequest loginMemberRequest) {
+        Reservation reservation = createReservation(loginMemberRequest.id(), request.themeId(), request.date(),
+                request.timeId(),
                 ReservationStatus.WAIT);
+        return ReservationWaitResponse.from(reservation);
     }
 
     public void approveWaitReservationByAdmin(long waitReservationId) {

@@ -52,10 +52,8 @@ public class AdminController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservationByAdmin(
-            @RequestBody @Valid AdminCreateReservationRequest request
-    ) {
-        Reservation reservation = reservationService.addReservationByAdmin(request);
-        ReservationResponse response = ReservationResponse.from(reservation);
+            @RequestBody @Valid AdminCreateReservationRequest request) {
+        ReservationResponse response = reservationService.addReservationByAdmin(request);
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/reservations/{id}")

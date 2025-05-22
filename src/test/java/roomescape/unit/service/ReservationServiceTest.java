@@ -14,11 +14,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.ReservationWithRank;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.CreateWaitReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationWaitResponse;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -102,14 +104,13 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
 
         //when
-        Reservation actual = reservationService.addReservation(request, loginMemberRequest);
+        ReservationResponse actual = reservationService.addReservation(request, loginMemberRequest);
 
         //then
         assertAll(
-                () -> assertThat(actual.getReservationTime().getId()).isEqualTo(time.getId()),
-                () -> assertThat(actual.getTheme().getId()).isEqualTo(theme.getId()),
-                () -> assertThat(actual.getMember().getId()).isEqualTo(member.getId()),
-                () -> assertThat(actual.getStatus()).isEqualTo(ReservationStatus.RESERVED)
+                () -> assertThat(actual.time()).isEqualTo(time.getStartAt()),
+                () -> assertThat(actual.themeName()).isEqualTo(theme.getName()),
+                () -> assertThat(actual.name()).isEqualTo(member.getName())
         );
     }
 
@@ -155,14 +156,17 @@ class ReservationServiceTest {
     @Test
     void 대상_유저의_예약_전체를_조회할_수_있다() {
         //given
+        LocalDate date = LocalDate.of(3000, 1, 1);
         when(memberRepository.findFetchById(any(Long.class)))
                 .thenReturn(Optional.of(member));
         when(reservationTimeRepository.findById(any(Long.class)))
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(any(Long.class)))
                 .thenReturn(Optional.of(theme));
+        when(reservationRepository.findReservationWithRank(any(), any()))
+                .thenReturn(List.of(new ReservationWithRank(
+                        new Reservation(member, date, time, theme, ReservationStatus.RESERVED), 0)));
 
-        LocalDate date = LocalDate.of(3000, 1, 1);
         Reservation reservation2 = new Reservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER),
                 LocalDate.now(), time, theme, ReservationStatus.RESERVED);
 
@@ -174,9 +178,16 @@ class ReservationServiceTest {
         List<MyReservationResponse> actual = reservationService.findAllReservationOfMember(1L);
 
         //then
+        MyReservationResponse notContained = new MyReservationResponse(reservation2.getId(),
+                reservation2.getTheme().getName(),
+                reservation2.getDate(),
+                reservation2.getStartAt(),
+                reservation2.getStatus().getText(),
+                0);
+
         assertAll(
                 () -> assertThat(actual).hasSize(1),
-                () -> assertThat(actual).doesNotContain(MyReservationResponse.from(reservation2))
+                () -> assertThat(actual).doesNotContain(notContained)
         );
     }
 
@@ -194,14 +205,13 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
 
         //when
-        Reservation actual = reservationService.addWaitReservation(request, loginMemberRequest);
+        ReservationWaitResponse actual = reservationService.addWaitReservation(request, loginMemberRequest);
 
         //then
         assertAll(
-                () -> assertThat(actual.getReservationTime().getId()).isEqualTo(time.getId()),
-                () -> assertThat(actual.getTheme().getId()).isEqualTo(theme.getId()),
-                () -> assertThat(actual.getMember().getId()).isEqualTo(member.getId()),
-                () -> assertThat(actual.getStatus()).isEqualTo(ReservationStatus.WAIT)
+                () -> assertThat(actual.time()).isEqualTo(time.getStartAt()),
+                () -> assertThat(actual.themeName()).isEqualTo(theme.getName()),
+                () -> assertThat(actual.name()).isEqualTo(member.getName())
         );
     }
 
