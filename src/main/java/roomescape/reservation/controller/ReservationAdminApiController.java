@@ -5,8 +5,9 @@ import static roomescape.reservation.controller.response.ReservationSuccessCode.
 
 import jakarta.validation.Valid;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,8 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.response.ApiResponse;
 import roomescape.reservation.controller.request.ReserveByAdminRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.service.ReservedQueryService;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservedQueryService;
 import roomescape.reservation.service.command.ReserveCommand;
 
 @RequiredArgsConstructor
@@ -45,14 +46,15 @@ public class ReservationAdminApiController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ReservationResponse>>> searchReservations(
+    public ResponseEntity<ApiResponse<Page<ReservationResponse>>> searchReservations(
             @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
             @RequestParam(required = false) LocalDate from,
-            @RequestParam(required = false) LocalDate to
+            @RequestParam(required = false) LocalDate to,
+            Pageable pageable
     ) {
-        List<ReservationResponse> responses = reservedQueryService.getFilteredReserved(themeId, memberId, from,
-                to);
+        Page<ReservationResponse> responses = reservedQueryService.getFilteredReserved(themeId, memberId, from,
+                to, pageable);
         return ResponseEntity.ok(
                 ApiResponse.success(SEARCH_RESERVATION, responses));
     }

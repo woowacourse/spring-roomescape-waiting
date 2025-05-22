@@ -59,7 +59,7 @@ public class WaitingAdminApiTest {
                 .when().get("/admin/waitings")
                 .then().log().all()
                 .statusCode(200)
-                .body("data.size()", is(1));
+                .body("data.totalElements", is(1));
     }
 
     @Test

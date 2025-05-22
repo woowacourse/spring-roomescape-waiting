@@ -10,17 +10,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import roomescape.common.CleanUp;
 import roomescape.fixture.db.MemberDbFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
-import roomescape.fixture.db.ReservationTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.ReservationService;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.controller.response.WaitingInfoResponse;
 
@@ -29,11 +29,6 @@ class WaitingQueryServiceTest {
 
     @Autowired
     private WaitingQueryService waitingQueryService;
-
-    @Autowired
-    private ReservationService reservationService;
-    @Autowired
-    private ReservationTimeDbFixture reservationTimeDbFixture;
     @Autowired
     private ThemeDbFixture themeDbFixture;
     @Autowired
@@ -46,9 +41,12 @@ class WaitingQueryServiceTest {
     @Autowired
     private CleanUp cleanUp;
 
+    private Pageable pageable;
+
     @BeforeEach
     void setUp() {
         cleanUp.all();
+        pageable = Pageable.ofSize(20);
     }
 
     @Test
@@ -63,14 +61,15 @@ class WaitingQueryServiceTest {
         reservationRepository.save(Reservation.waiting(유저2, 내일_열시, 공포));
 
         // when
-        List<WaitingInfoResponse> result = waitingQueryService.getAllInfo();
+        Page<WaitingInfoResponse> result = waitingQueryService.getAllInfo(pageable);
 
+        List<WaitingInfoResponse> content = result.getContent();
         // then
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(2);
-            softly.assertThat(result.get(0).theme()).isEqualTo(공포.getName());
-            softly.assertThat(result.get(1).theme()).isEqualTo(공포.getName());
-            softly.assertThat(result)
+            softly.assertThat(content).hasSize(2);
+            softly.assertThat(content.get(0).theme()).isEqualTo(공포.getName());
+            softly.assertThat(content.get(1).theme()).isEqualTo(공포.getName());
+            softly.assertThat(content)
                     .extracting(WaitingInfoResponse::name)
                     .containsExactlyInAnyOrder(유저1.getName(), 유저2.getName());
         });

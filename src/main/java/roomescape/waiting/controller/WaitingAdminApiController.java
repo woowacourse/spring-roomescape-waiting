@@ -2,8 +2,9 @@ package roomescape.waiting.controller;
 
 import static roomescape.waiting.controller.response.WaitingSuccessCode.READ_WAITING_SUCCESS_CODE;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +25,8 @@ public class WaitingAdminApiController {
     private final WaitingQueryService waitingQueryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<WaitingInfoResponse>>> readAll() {
-        List<WaitingInfoResponse> responses = waitingQueryService.getAllInfo();
+    public ResponseEntity<ApiResponse<Page<WaitingInfoResponse>>> readAll(Pageable pageable) {
+        Page<WaitingInfoResponse> responses = waitingQueryService.getAllInfo(pageable);
 
         return ResponseEntity.ok(ApiResponse.success(READ_WAITING_SUCCESS_CODE, responses));
     }

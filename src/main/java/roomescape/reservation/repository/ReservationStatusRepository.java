@@ -3,6 +3,8 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,8 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationWithRank;
 
 public interface ReservationStatusRepository extends JpaRepository<Reservation, Long> {
+
+    Page<Reservation> findByStatus(ReservationStatus status, Pageable pageable);
 
     List<Reservation> findByStatus(ReservationStatus status);
 
@@ -27,12 +31,13 @@ public interface ReservationStatusRepository extends JpaRepository<Reservation, 
               and (:toDate is null or r.reservationDateTime.reservationDate.date <= :toDate)
               and (r.status = :status)
             """)
-    List<Reservation> findFilteredReservations(
+    Page<Reservation> findFilteredReservations(
             @Param("themeId") Long themeId,
             @Param("memberId") Long memberId,
             @Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate,
-            @Param("status") ReservationStatus status
+            @Param("status") ReservationStatus status,
+            Pageable pageable
     );
 
     @Query("""

@@ -3,6 +3,8 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.NotFoundException;
@@ -21,16 +23,16 @@ public class ReservedQueryService {
 
     private final ReservationStatusRepository statusRepository;
 
-    public List<ReservationResponse> getFilteredReserved(Long themeId, Long memberId, LocalDate from,
-                                                         LocalDate to) {
+    public Page<ReservationResponse> getFilteredReserved(Long themeId, Long memberId, LocalDate from,
+                                                         LocalDate to, Pageable pageable) {
         if (themeId == null && memberId == null && from == null && to == null) {
-            return getAllReserved();
+            return getAllReserved(pageable);
         }
 
-        List<Reservation> reservations = statusRepository.findFilteredReservations(
-                themeId, memberId, from, to, RESERVED);
+        Page<Reservation> reservations = statusRepository.findFilteredReservations(
+                themeId, memberId, from, to, RESERVED, pageable);
 
-        return ReservationResponse.from(reservations);
+        return reservations.map(ReservationResponse::from);
     }
 
     public Reservation getReserved(Long id) {
@@ -38,10 +40,10 @@ public class ReservedQueryService {
                 .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
     }
 
-    private List<ReservationResponse> getAllReserved() {
-        List<Reservation> reservations = statusRepository.findByStatus(RESERVED);
+    private Page<ReservationResponse> getAllReserved(Pageable pageable) {
+        Page<Reservation> reservations = statusRepository.findByStatus(RESERVED, pageable);
 
-        return ReservationResponse.from(reservations);
+        return reservations.map(ReservationResponse::from);
     }
 
     public List<MyReservationResponse> getReservations(Long memberId) {

@@ -3,6 +3,8 @@ package roomescape.waiting.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.NotFoundException;
@@ -20,11 +22,9 @@ public class WaitingQueryService {
     private static final ReservationStatus WAITING = ReservationStatus.WAITING;
     private final ReservationStatusRepository statusRepository;
 
-    public List<WaitingInfoResponse> getAllInfo() {
-        return statusRepository.findByStatus(WAITING)
-                .stream()
-                .map(WaitingInfoResponse::from)
-                .toList();
+    public Page<WaitingInfoResponse> getAllInfo(Pageable pageable) {
+        return statusRepository.findByStatus(WAITING, pageable)
+                .map(WaitingInfoResponse::from);
     }
 
     public List<MyReservationResponse> getWaitingReservations(Long memberId) {
@@ -42,5 +42,4 @@ public class WaitingQueryService {
     public boolean existWaiting(Long userId, LocalDate date, Long timeId) {
         return statusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(userId, date, timeId, WAITING);
     }
-
 }
