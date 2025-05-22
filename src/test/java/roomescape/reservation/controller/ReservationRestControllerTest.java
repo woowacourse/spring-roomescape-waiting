@@ -171,6 +171,63 @@ class ReservationRestControllerTest {
     }
 
     @Test
+    void 멤버가_예약_대기를_등록한다() {
+        //given
+        final String payload = "wooga@gmail.com";
+        final String token = jwtTokenProvider.createToken(payload);
+        final Map<String, String> resesrvationParams = createReservationRequestJsonMap("2026-04-15", "1", "1");
+        final Map<String, String> waitingParams = createWaitingRequestJsonMap("2026-04-15", "1", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(resesrvationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        //when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(waitingParams)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void 예약_대기_아이디_기준으로_삭제한다() {
+        //given
+        final String payload = "wooga@gmail.com";
+        final String token = jwtTokenProvider.createToken(payload);
+        final Map<String, String> reservationParams = createReservationRequestJsonMap("2026-04-15", "1", "1");
+        final Map<String, String> waitingParams = createWaitingRequestJsonMap("2026-04-15", "1", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(waitingParams)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        //when & then
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/1")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    @Test
     void 컨트롤러는_JdbcTemplate_타입의_필드를_갖고_있지_않다() {
         boolean isJdbcTemplateInjected = false;
 
@@ -183,6 +240,18 @@ class ReservationRestControllerTest {
 
         assertThat(isJdbcTemplateInjected).isFalse();
     }
+
+    private Map<String, String> createWaitingRequestJsonMap(
+            final String date,
+            final String theme,
+            final String time) {
+        return Map.of(
+                "date", date,
+                "theme", theme,
+                "time", time
+        );
+    }
+
 
     private Map<String, String> createReservationRequestJsonMap(
             final String date,
