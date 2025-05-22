@@ -2,23 +2,20 @@ package roomescape.presentation.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.application.service.AuthService;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.model.Role;
 import roomescape.presentation.support.CookieUtils;
-import roomescape.application.service.AuthService;
 
 @Component
+@RequiredArgsConstructor
 public class AdminAuthInterceptor implements HandlerInterceptor {
 
     private final AuthService authService;
     private final CookieUtils cookieUtils;
-
-    public AdminAuthInterceptor(AuthService authService, CookieUtils cookieUtils) {
-        this.authService = authService;
-        this.cookieUtils = cookieUtils;
-    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)

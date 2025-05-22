@@ -1,24 +1,22 @@
 package roomescape.presentation.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.request.ReservationAdminRegisterDto;
 import roomescape.application.service.ReservationAdminService;
+import roomescape.dto.request.ReservationAdminRegisterDto;
 
 @RestController
 @RequestMapping("/admin/reservations")
+@RequiredArgsConstructor
 public class ReservationAdminController {
 
     private final ReservationAdminService reservationAdminService;
-
-    public ReservationAdminController(ReservationAdminService reservationAdminService) {
-        this.reservationAdminService = reservationAdminService;
-    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
