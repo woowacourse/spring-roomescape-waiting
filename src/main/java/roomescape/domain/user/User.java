@@ -61,10 +61,6 @@ public class User {
         return password.equals(passwordToCompare);
     }
 
-    public boolean isAdmin() {
-        return role == UserRole.ADMIN;
-    }
-
     private void validateNameLength(final String name) {
         if (name.isBlank()) {
             throw new InvalidInputException("이름은 공백일 수 없습니다.");

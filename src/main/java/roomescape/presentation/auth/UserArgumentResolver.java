@@ -1,6 +1,7 @@
 package roomescape.presentation.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -24,7 +25,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(
-            final MethodParameter parameter,
+            @NonNull final MethodParameter parameter,
             final ModelAndViewContainer mavContainer,
             final NativeWebRequest webRequest,
             final WebDataBinderFactory binderFactory
