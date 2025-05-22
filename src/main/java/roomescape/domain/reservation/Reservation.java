@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -39,7 +38,10 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status = ReservationStatus.RESERVED;
 
-    private Reservation(final Long id, final User user, final LocalDate date, final TimeSlot timeSlot,
+    private Reservation(final Long id,
+                        final User user,
+                        final LocalDate date,
+                        final TimeSlot timeSlot,
                         final Theme theme) {
         this.id = id;
         this.user = user;
@@ -51,33 +53,33 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public static Reservation ofExisting(final long id, final User user, final LocalDate date, final TimeSlot timeSlot,
+    public static Reservation ofExisting(final long id,
+                                         final User user,
+                                         final LocalDate date,
+                                         final TimeSlot timeSlot,
                                          final Theme theme) {
         return new Reservation(id, user, date, timeSlot, theme);
     }
 
-    public static Reservation reserveNewly(final User user, final LocalDate date, final TimeSlot timeSlot,
+    public static Reservation reserveNewly(final User user,
+                                           final LocalDate date,
+                                           final TimeSlot timeSlot,
                                            final Theme theme) {
-        if (isBeforeNow(date, timeSlot)) {
-            throw new BusinessRuleViolationException("이전 날짜로 예약할 수 없습니다.");
-        }
+
+        validateNotPastDateTime(date, timeSlot);
         return new Reservation(null, user, date, timeSlot, theme);
     }
 
-    private static boolean isBeforeNow(final LocalDate date, final TimeSlot timeSlot) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate today = now.toLocalDate();
-        LocalTime timeNow = now.toLocalTime();
-        return date.isBefore(today)
-                || (date.isEqual(today) && timeSlot.isTimeBefore(timeNow));
-    }
+    private static void validateNotPastDateTime(final LocalDate date, final TimeSlot timeSlot) {
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
 
-    public boolean isDateEquals(final LocalDate date) {
-        return this.date.isEqual(date);
-    }
+        boolean isPastDate = date.isBefore(currentDate);
+        boolean isCurrentDateAndPastTime = date.isEqual(currentDate) && timeSlot.isTimeBefore(currentTime);
 
-    public boolean isTimeSlotEquals(final TimeSlot timeSlot) {
-        return this.timeSlot.isSameAs(timeSlot);
+        if (isPastDate || isCurrentDateAndPastTime) {
+            throw new BusinessRuleViolationException("이전 날짜로 예약할 수 없습니다.");
+        }
     }
 }
 
