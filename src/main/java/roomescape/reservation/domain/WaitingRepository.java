@@ -16,4 +16,6 @@ public interface WaitingRepository {
     void deleteById(Long id);
 
     List<Waiting> findAll();
+
+    List<Waiting> findByReservationId(Long reservationId);
 }

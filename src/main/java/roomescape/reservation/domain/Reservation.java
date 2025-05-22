@@ -53,12 +53,7 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.status = status;
-        setMember(member);
-    }
-
-    private void setMember(Member member) {
         this.member = member;
-        member.getReservations().add(this);
     }
 
     private void validateIsNonNull(final Object object) {
@@ -90,6 +85,10 @@ public class Reservation {
 
     public boolean isSameMember(Member member) {
         return this.member.equals(member);
+    }
+
+    public void reAssignedTo(Member member) {
+        this.member = member;
     }
 
     public Long getId() {

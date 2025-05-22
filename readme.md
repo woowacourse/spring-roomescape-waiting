@@ -16,6 +16,7 @@
     - [x] 중복 예약을 생성할 때
 - [x] "/reservations/{id}" delete 요청 시 해당 id로 설정된 예약을 삭제한다.
     - [x] 만약 해당 예약이 없다면 404 NOT FOUND 상태 코드가 반환된다.
+    - [x] 삭제 대상 예약에 대한 예약 대기가 있다면 우선순위 예약대기를 예약으로 등록한다.
 - [x] "/admin/reservations" post 요청 시 관리자 예약을 할 수 있다.
 - [x] "/reservation-mine" get 요청 시 특정 사용자의 예약과 예약 대기를 조회 할 수 있다.
 

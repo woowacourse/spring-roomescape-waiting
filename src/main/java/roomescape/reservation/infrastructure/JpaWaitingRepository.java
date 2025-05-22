@@ -26,4 +26,12 @@ public interface JpaWaitingRepository extends CrudRepository<Waiting, Long> {
     List<WaitingWithRank> findByMemberId(@Param("memberId") Long memberId);
 
     List<Waiting> findAll();
+
+    @Query("""
+    SELECT w
+    FROM Waiting w 
+    WHERE w.reservation.id = :reservationId
+    ORDER BY w.id ASC
+    """)
+    List<Waiting> findByReservationId(@Param("reservationId") Long reservationId);
 }

@@ -194,6 +194,45 @@ class ReservationServiceTest {
         assertThat(secondResponse.time().id()).isEqualTo(1L);
     }
 
+    @DisplayName("대기 목록이 없는 경우 예약을 삭제할 수 있다.")
+    @Test
+    void can_delete_reservation_without_waiting() {
+        Long reservationId = 2L; // 대기 목록이 없는 예약
+
+        reservationService.deleteReservationById(reservationId);
+
+        List<ReservationResponse> reservations = reservationService.getReservations();
+        assertThat(reservations).hasSize(3);
+        assertThat(reservations).noneMatch(reservation -> reservation.id().equals(reservationId));
+    }
+
+    @DisplayName("대기 목록이 있는 경우 첫 번째 대기자가 예약을 받는다.")
+    @Test
+    void when_delete_reservation_with_waiting_first_waiting_gets_reservation() {
+        Long reservationId = 1L; // 대기 목록이 있는 예약
+        Long firstWaitingMemberId = 2L;
+
+        reservationService.deleteReservationById(reservationId);
+
+        List<MyReservationResponse> memberReservations = reservationService.getMemberReservations(new LoginMemberInfo(firstWaitingMemberId));
+        assertThat(memberReservations).anyMatch(reservation -> 
+            reservation.theme().equals("테마1") && 
+            reservation.date().equals(LocalDate.of(2025, 4, 28)) &&
+            reservation.time().equals(LocalTime.of(10, 0)) &&
+            reservation.status().equals("예약")
+        );
+    }
+
+    @DisplayName("존재하지 않는 예약은 삭제할 수 없다.")
+    @Test
+    void cannot_delete_non_existent_reservation() {
+        Long nonExistentReservationId = 999L;
+
+        Assertions.assertThatThrownBy(() -> reservationService.deleteReservationById(nonExistentReservationId))
+            .isInstanceOf(ReservationException.class)
+            .hasMessage("예약을 찾을 수 없습니다.");
+    }
+
     static class ReservationConfig {
 
         @Bean

@@ -27,9 +27,6 @@ public class Member {
     @Embedded
     private Password password;
 
-    @OneToMany(mappedBy = "member")
-    private List<Reservation> reservations = new ArrayList<>();
-
     protected Member() {
     }
 
@@ -65,19 +62,15 @@ public class Member {
         return password.password();
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Member member = (Member) o;
-        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password) && Objects.equals(reservations, member.reservations);
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email, password, reservations);
+        return Objects.hash(id, name, email, password);
     }
 }

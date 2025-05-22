@@ -128,10 +128,19 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservationById(final Long id) {
-        reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findById(id)
             .orElseThrow(() -> new ReservationException("예약을 찾을 수 없습니다."));
 
-        reservationRepository.deleteById(id);
+        List<Waiting> waitings = waitingRepository.findByReservationId(id);
+        if (waitings.isEmpty()) {
+            reservationRepository.deleteById(id);
+            return;
+        }
+
+        Waiting firstWaiting = waitings.getFirst();
+        reservation.reAssignedTo(firstWaiting.getMember());
+
+        waitingRepository.deleteById(firstWaiting.getId());
     }
 
     @Transactional
@@ -164,7 +173,7 @@ public class ReservationService {
         Member member = memberRepository.findById(loginMemberInfo.id())
             .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
 
-        List<Reservation> reservations = member.getReservations();
+        List<Reservation> reservations = reservationRepository.findBy(loginMemberInfo.id());
 
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findByMemberId(loginMemberInfo.id());
 

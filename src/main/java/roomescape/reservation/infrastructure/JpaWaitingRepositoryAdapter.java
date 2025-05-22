@@ -47,4 +47,9 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
     public List<Waiting> findAll() {
         return jpaWaitingRepository.findAll();
     }
+
+    @Override
+    public List<Waiting> findByReservationId(Long reservationId) {
+        return jpaWaitingRepository.findByReservationId(reservationId);
+    }
 }
