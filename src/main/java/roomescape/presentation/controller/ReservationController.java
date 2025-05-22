@@ -19,6 +19,7 @@ import roomescape.presentation.dto.ReservationAvailableTimeResponse;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.presentation.dto.WaitInfoResponse;
 
 @RestController
 public class ReservationController {
@@ -45,6 +46,21 @@ public class ReservationController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservationResponse);
+    }
+
+    @PostMapping("/reservations/wait")
+    public ResponseEntity<WaitInfoResponse> createReservationWaitByLoginMember(
+            @RequestBody final ReservationRequest reservationRequest,
+            final @AuthenticationPrincipal LoginMember loginMember
+    ){
+        final WaitInfoResponse waitInfoResponse = reservationService.insertWait(
+                reservationRequest.date(),
+                loginMember.id(),
+                reservationRequest.timeId(),
+                reservationRequest.themeId());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(waitInfoResponse);
     }
 
     @GetMapping("/reservations")

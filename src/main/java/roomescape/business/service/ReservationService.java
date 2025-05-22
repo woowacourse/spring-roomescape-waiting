@@ -20,6 +20,7 @@ import roomescape.persistence.repository.ThemeRepository;
 import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.presentation.dto.WaitInfoResponse;
 
 @Service
 public class ReservationService {
@@ -34,7 +35,7 @@ public class ReservationService {
                               final MemberRepository memberRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
-                                final WaitInfoRepository waitInfoRepository
+                              final WaitInfoRepository waitInfoRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
@@ -55,6 +56,7 @@ public class ReservationService {
 
         validateIsDuplicate(date, timeId, themeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
+        // 예약이 존재합니다. 예약대기를 사용해주세요.
 
         final Reservation reservation = new Reservation(date, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
@@ -62,6 +64,28 @@ public class ReservationService {
         final WaitInfo waitInfo = new WaitInfo(member, reservation);
         waitInfoRepository.save(waitInfo);
         return ReservationResponse.from(savedReservation);
+    }
+
+
+    public WaitInfoResponse insertWait(final LocalDate date, final Long memberId, final Long timeId,
+                                       final Long themeId) {
+        validateMemberIdExists(memberId);
+        final Member member = memberRepository.findById(memberId).get();
+        validateTimeIdExists(timeId);
+        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        validateThemeIdExists(themeId);
+
+        validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
+
+        validateReservationExists(date, timeId, themeId);
+        final Reservation reservation = reservationRepository.findByDateAndReservationTimeIdAndThemeId(
+                date, timeId, themeId).get();
+        validateWaitInfoExists(reservation.getId());
+        validateWaitInfoIsNotDuplicate(memberId, reservation.getId());
+
+        final WaitInfo waitInfo = new WaitInfo(member, reservation);
+        waitInfoRepository.save(waitInfo);
+        return WaitInfoResponse.from(waitInfo);
     }
 
     private void validateMemberIdExists(final Long memberId) {
@@ -94,6 +118,28 @@ public class ReservationService {
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
         if (reservationDateTime.isBefore(now)) {
             throw new InvalidDateAndTimeException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
+        }
+    }
+
+    // TODO: 테스트 추가
+    private void validateReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
+        if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
+            throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(themeId));
+        }
+    }
+
+    // TODO: 테스트 추가
+    private void validateWaitInfoExists(Long reservationId) {
+        if (!waitInfoRepository.existsByReservationId(reservationId)) {
+            throw new NotFoundException("예약 대기자가 없습니다. 예약하기를 사용해주세요.");
+        }
+    }
+
+    // TODO: 테스트 추가
+    private void validateWaitInfoIsNotDuplicate(final Long memberId, final Long reservationId) {
+        if (waitInfoRepository.existsByMemberIdAndReservationId(memberId, reservationId)) {
+            throw new DuplicateException("추가하려는 예약 대기가 이미 존재합니다. memberId: %d, reservationId: %d"
+                    .formatted(memberId, reservationId));
         }
     }
 
