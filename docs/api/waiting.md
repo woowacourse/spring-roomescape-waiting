@@ -67,7 +67,7 @@ Content-Type: application/json
 ### Request
 
 ```
-DELETE /waitings/1 HTTP/1.1
+DELETE /waitings/{id} HTTP/1.1
 cookie: token={member-access-token}
 ```
 
@@ -120,4 +120,25 @@ Content-Type: application/json
 
 - 어드민 예약 목록 조회에 성공하면 200을 반환한다.
 - 인증 정보가 올바르지 않을 경우 401을 반환한다.
-- 어드민 권한이 없을 경우 403을 반환한다. 
+- 어드민 권한이 없을 경우 403을 반환한다.
+
+## 어드민 예약 대기 거절 API
+
+### Request
+
+```
+DELETE /admin/waitings/{id} HTTP/1.1
+cookie: token={admin-access-token}
+```
+
+### Response
+
+```
+HTTP/1.1 204
+```
+
+### 시나리오
+
+- 어드민 예약 대기 거절을 성공하면 204를 반환한다.
+- 인증 정보가 올바르지 않을 경우 401을 반환한다.
+- 어드민이 아닐 경우 403을 반환한다.

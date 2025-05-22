@@ -63,6 +63,10 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    public void deleteWaitingById(final long id) {
+        waitingRepository.deleteById(id);
+    }
+
     private void validateWaiting(final Reservation reservation, final Member member) {
         if (reservation.hasOwner(member)) {
             throw new BadRequestException("이미 선점한 예약입니다. 추가 대기는 불가능합니다.");

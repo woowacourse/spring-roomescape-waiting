@@ -90,4 +90,54 @@ public class AdminWaitingApiTest {
                     .statusCode(403);
         }
     }
+
+    @DisplayName("어드민 예약 대기 거절 테스트")
+    @Nested
+    class DeleteWaitingTest {
+
+        @Autowired
+        private WaitingRepository waitingRepository;
+
+        @DisplayName("어드민 예약 대기 거절 성공하면 204를 반환한다.")
+        @Test
+        void testDeleteWaiting() {
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie(AUTH_COOKIE_NAME, ADMIN_TOKEN)
+                    .when().delete("/admin/waitings/{id}", 1L)
+                    .then().log().all()
+                    .statusCode(204);
+            assertThat(waitingRepository.count()).isEqualTo(1);
+        }
+
+        @DisplayName("인증 정보가 올바르지 않을 경우 401을 반환한다.")
+        @Test
+        void testUnauthorized() {
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .when().delete("/admin/waitings/{id}", 1L)
+                    .then().log().all()
+                    .statusCode(401);
+        }
+
+        @DisplayName("어드민 권한이 없을 경우 403을 반환한다.")
+        @Test
+        void testForbidden() {
+            // given
+            String memberToken = RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(new LoginRequest("aaa@gmail.com", "1234"))
+                    .when().post("/login")
+                    .then().log().all()
+                    .extract().cookie(AUTH_COOKIE_NAME);
+            // when
+            // then
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie(AUTH_COOKIE_NAME, memberToken)
+                    .when().delete("/admin/waitings/{id}", 1L)
+                    .then().log().all()
+                    .statusCode(403);
+        }
+    }
 }
