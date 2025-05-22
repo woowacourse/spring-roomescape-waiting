@@ -5,18 +5,17 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record CreateReservationAdminRequest(
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @NotNull
-    LocalDate date,
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        @NotNull
+        LocalDate date,
 
-    @NotNull
-    Long timeId,
+        @NotNull
+        Long timeId,
 
-    @NotNull
-    Long themeId,
+        @NotNull
+        Long themeId,
 
-    @NotNull
-    Long userId
+        @NotNull
+        Long userId
 ) {
-
 }
