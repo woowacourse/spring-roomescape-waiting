@@ -15,9 +15,9 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        const theme = item.theme;
-        const date = item.date;
-        const time = item.time;
+        const theme = item.schedule.theme.name;
+        const date = item.schedule.date;
+        const time = item.schedule.time.startAt;
         const status = item.status;
 
         row.insertCell(0).textContent = theme;
@@ -25,9 +25,6 @@ function render(data) {
         row.insertCell(2).textContent = time;
         row.insertCell(3).textContent = status;
 
-        /*
-        TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
-         */
         if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
@@ -44,10 +41,8 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-    /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
-     */
-    const endpoint = '';
+    console.log("ddd");
+    const endpoint = `/waitings/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

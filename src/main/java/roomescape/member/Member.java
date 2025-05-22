@@ -36,4 +36,8 @@ public class Member {
     public boolean matchesPassword(final String password) {
         return Objects.equals(this.password, password);
     }
+
+    public boolean isEmailEquals(final String email) {
+        return this.email.equals(email);
+    }
 }

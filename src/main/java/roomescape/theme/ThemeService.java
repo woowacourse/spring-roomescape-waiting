@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -55,7 +55,7 @@ public class ThemeService {
         final Theme theme = themeRepository.findById(id)
                 .orElseThrow(ThemeNotFoundException::new);
 
-        if (reservationRepository.existsByTheme(theme)) {
+        if (reservationRepository.existsBySchedule_Theme(theme)) {
             throw new ThemeUsedException();
         }
 

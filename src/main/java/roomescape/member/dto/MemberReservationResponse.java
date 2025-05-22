@@ -1,25 +1,24 @@
 package roomescape.member.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import roomescape.reservation.reservation.Reservation;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.Reservation;
 
 public record MemberReservationResponse(
         Long reservationId,
         String theme,
         LocalDate date,
-        @JsonFormat(pattern = "HH:mm") LocalTime time,
-        String status
+        @JsonFormat(pattern = "HH:mm") LocalTime time
 ) {
 
     public static MemberReservationResponse of(Reservation reservation) {
         return new MemberReservationResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getReservationTime().getStartAt(),
-                reservation.getReservationStatus().getMessage()
+                reservation.getSchedule().getTheme().getName(),
+                reservation.getSchedule().getDate(),
+                reservation.getSchedule().getReservationTime().getStartAt()
         );
     }
 }

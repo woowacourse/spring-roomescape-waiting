@@ -1,16 +1,8 @@
 package roomescape;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookie;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +12,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.reservation.dto.ReservationResponse;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class DataSourceTest {
@@ -28,6 +29,7 @@ public class DataSourceTest {
     private static final Map<String, String> RESERVATION_BODY = new HashMap<>();
     private static final Map<String, String> TIME_BODY = new HashMap<>();
     private static final Map<String, String> THEME_BODY = new HashMap<>();
+    private static final Map<String, String> SCHEDULE_BODY = new HashMap<>();
     private static final Map<String, String> MEMBER_BODY = new HashMap<>();
     private static final Map<String, Object> AUTH_BODY = new HashMap<>();
 
@@ -54,6 +56,10 @@ public class DataSourceTest {
         THEME_BODY.put("description", "dest");
         THEME_BODY.put("thumbnail", "thumbnail");
 
+        SCHEDULE_BODY.put("date", "2026-08-05");
+        SCHEDULE_BODY.put("reservationTimeId", "1");
+        SCHEDULE_BODY.put("themeId", "1");
+
         MEMBER_BODY.put("name", "브라운");
         MEMBER_BODY.put("email", "asd@email.com");
         MEMBER_BODY.put("password", "pass");
@@ -65,10 +71,12 @@ public class DataSourceTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.update("DELETE FROM RESERVATION");
+        jdbcTemplate.update("DELETE FROM SCHEDULE");
         jdbcTemplate.update("DELETE FROM RESERVATION_TIME");
         jdbcTemplate.update("DELETE FROM THEME");
         jdbcTemplate.update("DELETE FROM MEMBER");
 
+        jdbcTemplate.update("ALTER TABLE SCHEDULE ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE RESERVATION ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE RESERVATION_TIME ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE THEME ALTER COLUMN id RESTART WITH 1");
@@ -94,8 +102,8 @@ public class DataSourceTest {
         jdbcTemplate.update("INSERT INTO member (name, email, password, role) VALUES (?, ?, ?, ?)", "name", "email@email.com", "password", "MEMBER");
         jdbcTemplate.update("INSERT INTO THEME (name, description, thumbnail) VALUES (?, ?, ?)", "name", "dest", "thumb");
         jdbcTemplate.update("INSERT INTO RESERVATION_TIME (start_at) VALUES (?)", "10:00");
-        jdbcTemplate.update("INSERT INTO RESERVATION (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)", "2023-08-05",
-                "1", "1", "1");
+        jdbcTemplate.update("INSERT INTO SCHEDULE (date, reservation_time_id, theme_id) VALUES (?, ?, ?)", "2023-08-05", "1", "1");
+        jdbcTemplate.update("INSERT INTO RESERVATION (member_id, schedule_id) VALUES (?, ?)", "1", "1");
         final Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
         // when
@@ -115,6 +123,7 @@ public class DataSourceTest {
         // given & when
         givenCreateTheme();
         givenCreateReservationTime();
+        givenCreateSchedule();
         givenCreateMember();
         final Cookie cookie = givenAuthCookie();
         givenCreateReservation(cookie);
@@ -140,6 +149,7 @@ public class DataSourceTest {
         givenCreateTheme();
         givenCreateReservationTime();
         givenCreateMember();
+        givenCreateSchedule();
         final Cookie cookie = givenAuthCookie();
         givenCreateReservation(cookie);
 
@@ -175,6 +185,15 @@ public class DataSourceTest {
                 .contentType(ContentType.JSON)
                 .body(THEME_BODY)
                 .when().post("/themes")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    private void givenCreateSchedule() {
+        RestAssured.given().port(port).log().all()
+                .contentType(ContentType.JSON)
+                .body(SCHEDULE_BODY)
+                .when().post("/schedules")
                 .then().log().all()
                 .statusCode(201);
     }

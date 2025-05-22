@@ -1,21 +1,17 @@
-package roomescape.reservation;
+package roomescape.reservation.reservation;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.auth.AuthenticationPrincipal;
 import roomescape.auth.dto.LoginMember;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.ReservationWaitingService;
+import roomescape.reservation.reservation.dto.ReservationRequest;
+import roomescape.reservation.reservation.dto.ReservationResponse;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/reservations")
@@ -23,6 +19,7 @@ import roomescape.reservation.dto.ReservationResponse;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationWaitingService reservationWaitingService;
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
@@ -43,7 +40,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteById(
             @PathVariable("id") final Long id
     ) {
-        reservationService.deleteById(id);
+        reservationWaitingService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
     }
 }

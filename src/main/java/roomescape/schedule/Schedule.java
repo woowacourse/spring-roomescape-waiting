@@ -1,30 +1,28 @@
-package roomescape.reservation;
+package roomescape.schedule;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.member.Member;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Reservation {
+public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-    private LocalDate date;
 
-    @ManyToOne
-    private Member member;
+    private LocalDate date;
 
     @ManyToOne
     private ReservationTime reservationTime;
@@ -32,20 +30,19 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus reservationStatus;
-
-    public Reservation(
-            final LocalDate date,
-            final Member member,
-            final ReservationTime reservationTime,
-            final Theme theme,
-            final ReservationStatus reservationStatus
-    ) {
+    public Schedule(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         this.date = date;
-        this.member = member;
         this.reservationTime = reservationTime;
         this.theme = theme;
-        this.reservationStatus = reservationStatus;
+    }
+
+    public boolean isPast() {
+        if (date.isBefore(LocalDate.now())) {
+            return true;
+        }
+        if (date.equals(LocalDate.now()) && reservationTime.isBefore(LocalTime.now())) {
+            return true;
+        }
+        return false;
     }
 }

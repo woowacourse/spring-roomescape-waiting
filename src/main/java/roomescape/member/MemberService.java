@@ -8,7 +8,7 @@ import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.reservation.ReservationRepository;
 
 import java.util.List;
 

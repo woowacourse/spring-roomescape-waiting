@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -130,7 +130,7 @@ class ThemeServiceTest {
             final Theme theme = themeWithId(1L, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.existsByTheme(theme))
+            given(reservationRepository.existsBySchedule_Theme(theme))
                     .willReturn(false);
 
             // when
@@ -147,7 +147,7 @@ class ThemeServiceTest {
             final Long id = 1L;
             given(themeRepository.findById(id))
                     .willReturn(Optional.empty());
-            
+
             // when & then
             assertThatThrownBy(() -> {
                 themeService.deleteById(id);
@@ -162,7 +162,7 @@ class ThemeServiceTest {
             final Theme theme = themeWithId(id, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.existsByTheme(theme))
+            given(reservationRepository.existsBySchedule_Theme(theme))
                     .willReturn(true);
 
             // when & then

@@ -6,8 +6,7 @@ import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflic
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExistsThemeException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.reservation.ReservationRepository;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
@@ -46,8 +45,8 @@ public class ReservationTimeService {
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(ReservationTimeNotExistsThemeException::new);
 
-        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(theme, date).stream()
-                .map(Reservation::getReservationTime)
+        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllBySchedule_ThemeAndSchedule_Date(theme, date).stream()
+                .map(reservation -> reservation.getSchedule().getReservationTime())
                 .collect(Collectors.toSet());
 
         return times.stream()
@@ -64,7 +63,7 @@ public class ReservationTimeService {
         final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(ReservationTimeNotFoundException::new);
 
-        if (reservationRepository.existsByReservationTime(reservationTime)) {
+        if (reservationRepository.existsBySchedule_ReservationTime(reservationTime)) {
             throw new ReservationTimeUsedException();
         }
 
