@@ -77,12 +77,4 @@ public class Reservation {
     public LocalTime getStartAt() {
         return time.getStartAt();
     }
-
-    public Long getMemberId() {
-        return member.getId();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
-    }
 }

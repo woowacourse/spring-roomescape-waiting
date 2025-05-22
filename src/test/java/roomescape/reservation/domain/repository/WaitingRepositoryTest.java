@@ -74,7 +74,7 @@ class WaitingRepositoryTest {
 
     @Test
     void 특정_id와_멤버id를_기반으로_대기_존재여부를_확인한다() {
-        boolean exists = waitingRepository.existsByIdAndMember_Id(1L, 1L); // 엠제이의 첫 번째 대기
+        boolean exists = waitingRepository.existsByIdAndMemberId(1L, 1L); // 엠제이의 첫 번째 대기
         assertThat(exists).isTrue();
     }
 

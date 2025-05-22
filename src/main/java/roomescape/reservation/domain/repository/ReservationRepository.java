@@ -56,9 +56,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("to") LocalDate to
     );
 
-    boolean existsByTime_Id(Long timeId);
+    boolean existsByTimeId(Long timeId);
 
-    boolean existsByTheme_Id(Long themeId);
+    boolean existsByThemeId(Long themeId);
 
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 

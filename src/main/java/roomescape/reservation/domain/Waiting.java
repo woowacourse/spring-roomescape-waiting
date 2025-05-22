@@ -59,19 +59,11 @@ public class Waiting {
         this(null, date, time, theme, member);
     }
 
-    public Long getMemberId() {
-        return member.getId();
-    }
-
     public String getThemeName() {
         return theme.getName();
     }
 
     public LocalTime getStartAt() {
         return time.getStartAt();
-    }
-
-    public Long getThemeId() {
-        return theme.getId();
     }
 }

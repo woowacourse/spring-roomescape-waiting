@@ -85,7 +85,7 @@ public class ReservationCommandService {
     }
 
     public void deleteOwnWaitingById(final Long reservationId, final Long memberId) {
-        if (!waitingRepository.existsByIdAndMember_Id(reservationId, memberId)) {
+        if (!waitingRepository.existsByIdAndMemberId(reservationId, memberId)) {
             throw new BadRequestException("사용자 본인의 예약이 아닙니다.");
         }
         if (!waitingRepository.existsById(memberId)) {
