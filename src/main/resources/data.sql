@@ -27,3 +27,11 @@ INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES 
 INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-09', 1, 1, 5);
 INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-08', 1, 1, 4);
 
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-31', 2, 1, 1);
+
+
+-- 방탈출 예약 대기 삽입
+INSERT INTO wait_info (member_id, reservation_id) VALUES (1, 1);
+INSERT INTO wait_info (member_id, reservation_id) VALUES (1, 2);
+INSERT INTO wait_info (member_id, reservation_id) VALUES (1, 3);
+INSERT INTO wait_info (member_id, reservation_id) VALUES (2, 4);

@@ -21,3 +21,13 @@ INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VAL
 INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (102, '2025-05-08', 100, 100, 100);
 
 INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (103, '2025-05-10', 101, 100, 100);
+
+
+-- 방탈출 예약 대기 삽입
+INSERT INTO wait_info (id, member_id, reservation_id) VALUES (100, 100, 100);
+INSERT INTO wait_info (id, member_id, reservation_id) VALUES (101, 100, 101);
+
+-- 방탈출 예약 대기 필터링에서 조회되지 않는 데이터
+INSERT INTO wait_info (id, member_id, reservation_id) VALUES (103, 100, 102);
+
+INSERT INTO wait_info (id, member_id, reservation_id) VALUES (104, 101, 103);

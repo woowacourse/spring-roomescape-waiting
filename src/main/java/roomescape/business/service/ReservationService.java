@@ -56,7 +56,7 @@ public class ReservationService {
 
         validateIsDuplicate(date, timeId, themeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
-        // 예약이 존재합니다. 예약대기를 사용해주세요.
+        // TODO: 검증 변경하기, "예약이 존재합니다. 예약대기를 사용해주세요."
 
         final Reservation reservation = new Reservation(date, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
@@ -66,7 +66,7 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-
+    // TODO: 테스트 추가
     public WaitInfoResponse insertWait(final LocalDate date, final Long memberId, final Long timeId,
                                        final Long themeId) {
         validateMemberIdExists(memberId);
@@ -166,9 +166,25 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
-        return reservationRepository.findByMemberId(memberId)
-                .stream()
-                .map(ReservationMineResponse::from)
+        final List<WaitInfo> memberWaitInfos = waitInfoRepository.findByMemberId(memberId);
+        return memberWaitInfos.stream()
+                .map(waitInfo -> new ReservationMineResponse(waitInfo.getReservation().getId(),
+                        waitInfo.getReservation().getTheme().getName(),
+                        waitInfo.getReservation().getDate(),
+                        waitInfo.getReservation().getReservationTime().getStartAt(),
+                        calculateStatus(waitInfo)))
                 .toList();
+    }
+
+    // TODO: 테스트 추가, 랭크 계산이 잘 계산되는지 확인하기
+    private String calculateStatus(final WaitInfo waitInfo) {
+        final Long rank = waitInfoRepository.countByIdLessThanEqualAndReservationId(
+                waitInfo.getId(),
+                waitInfo.getReservation().getId());
+
+        if(rank == 1) {
+            return "예약";
+        }
+        return "%d번째 예약대기".formatted(rank);
     }
 }

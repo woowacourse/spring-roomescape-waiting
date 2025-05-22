@@ -23,10 +23,12 @@ import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
+import roomescape.business.domain.WaitInfo;
 import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.LoginRequest;
 import roomescape.presentation.dto.ReservationRequest;
 
@@ -44,6 +46,8 @@ class ReservationControllerIntegrationTest {
     private MemberRepository memberRepository;
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private WaitInfoRepository waitInfoRepository;
 
     @BeforeEach
     void setUp() {
@@ -239,6 +243,11 @@ class ReservationControllerIntegrationTest {
         reservationRepository.save(reservation14_00);
         final Reservation reservation16_00 = new Reservation(futureDate, member2, reservationTime16_00, theme);
         reservationRepository.save(reservation16_00);
+
+        final WaitInfo waitInfo1 = new WaitInfo(member1, reservation14_00);
+        waitInfoRepository.save(waitInfo1);
+        final WaitInfo waitInfo2 = new WaitInfo(member2, reservation16_00);
+        waitInfoRepository.save(waitInfo2);
 
         final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
         final String token = given()
