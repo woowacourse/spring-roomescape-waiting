@@ -67,10 +67,15 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ReservationTime that)) {
             return false;
         }
-        ReservationTime that = (ReservationTime) o;
+        if (this.id == null || that.id == null) {
+            return false;
+        }
         return Objects.equals(id, that.id);
     }
 

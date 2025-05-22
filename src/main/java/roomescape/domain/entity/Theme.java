@@ -52,10 +52,16 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Theme theme)) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Theme that)) {
             return false;
         }
-        return Objects.equals(id, theme.id);
+        if (this.id == null || that.id == null) {
+            return false;
+        }
+        return Objects.equals(id, that.id);
     }
 
     @Override
