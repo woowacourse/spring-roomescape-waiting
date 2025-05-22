@@ -96,7 +96,7 @@ public class WaitingService {
 
     private Long getWaitingRank(final Schedule schedule) {
         final List<Waiting> waitings = waitingRepository.findAllBySchedule(schedule);
-        return (long) waitings.size();
+        return (long) waitings.size() + 1;
     }
 
     private void decreaseRankOfFollowingWaitings(final Waiting waiting) {
