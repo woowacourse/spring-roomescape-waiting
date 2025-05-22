@@ -1,45 +1,28 @@
 package roomescape.integration.service;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.common.Constant.FIXED_CLOCK;
 import static roomescape.integration.fixture.ReservationDateFixture.예약날짜_오늘;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.NoSuchElementException;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.ClockConfig;
-import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberEncodedPassword;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberRole;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationDateTime;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeDescription;
-import roomescape.domain.theme.ThemeName;
-import roomescape.domain.theme.ThemeThumbnail;
-import roomescape.domain.time.ReservationTime;
 import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.integration.fixture.ReservationDbFixture;
 import roomescape.integration.fixture.ReservationTimeDbFixture;
 import roomescape.integration.fixture.ThemeDbFixture;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationCreateRequest;
-import roomescape.service.response.MyReservationResponse;
-import roomescape.service.response.ReservationResponse;
 
 @Transactional
 @SpringBootTest
@@ -47,23 +30,7 @@ import roomescape.service.response.ReservationResponse;
 class ReservationServiceTest {
 
     @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Autowired
-    private ThemeRepository themeRepository;
-
-    @Autowired
-    private MemberRepository memberRepository;
-
-    private final LocalDate today = LocalDate.now();
-
-    @Autowired
     private ReservationService service;
-
-    private final LocalTime time = LocalTime.of(10, 0);
 
     @Autowired
     private ReservationDbFixture reservationDbFixture;
@@ -77,47 +44,26 @@ class ReservationServiceTest {
     @Autowired
     private ThemeDbFixture themeDbFixture;
 
+    private final LocalDate today = LocalDate.now();
+    private final LocalTime time = LocalTime.of(10, 0);
+
     @Test
     void 모든_예약을_조회한다() {
         // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(
-                null,
-                time
-        ));
-        Theme theme = themeRepository.save(new Theme(
-                        null,
-                        new ThemeName("공포"),
-                        new ThemeDescription("무섭다"),
-                        new ThemeThumbnail("thumb.jpg")
-                )
-        );
-        Member member = memberRepository.save(new Member(
-                        null,
-                        new MemberName("홍길동"),
-                        new MemberEmail("leehyeonsu4888@gmail.com"),
-                        new MemberEncodedPassword("dsadsa"),
-                        MemberRole.MEMBER
-                )
-        );
-        ReservationDateTime reservationDateTime = new ReservationDateTime(예약날짜_오늘, reservationTime, FIXED_CLOCK);
-        reservationRepository.save(
-                new Reservation(
-                        null,
-                        member,
-                        reservationDateTime.getReservationDate(),
-                        reservationDateTime.getReservationTime(),
-                        theme
-                )
-        );
+        var reservationTime = reservationTimeDbFixture.예약시간(time);
+        var theme = themeDbFixture.공포();
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationDateTime = new ReservationDateTime(예약날짜_오늘, reservationTime, FIXED_CLOCK);
+        reservationDbFixture.예약_생성(reservationDateTime.getReservationDate(), reservationTime, theme, member);
 
         // when
-        List<ReservationResponse> all = service.findAllReservations();
+        var all = service.findAllReservations();
 
         // then
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(all).hasSize(1);
-            ReservationResponse response = all.get(0);
-            softly.assertThat(response.name()).isEqualTo("홍길동");
+            var response = all.get(0);
+            softly.assertThat(response.name()).isEqualTo("한스");
             softly.assertThat(response.date()).isEqualTo(예약날짜_오늘.date());
             softly.assertThat(response.time().startAt()).isEqualTo(time);
             softly.assertThat(response.theme().id()).isEqualTo(theme.getId());
@@ -129,137 +75,83 @@ class ReservationServiceTest {
 
     @Test
     void 예약을_생성할_수_있다() {
-        Member member = memberRepository.save(new Member(
-                null,
-                new MemberName("홍길동"),
-                new MemberEmail("leehyeonsu4888@gmail.com"),
-                new MemberEncodedPassword("encoded"),
-                MemberRole.MEMBER
-        ));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(null, time));
-        Theme theme = themeRepository.save(new Theme(
-                null,
-                new ThemeName("공포"),
-                new ThemeDescription("무섭다"),
-                new ThemeThumbnail("thumb.jpg")
-        ));
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간(time);
+        var theme = themeDbFixture.공포();
 
-        ReservationCreateRequest request = new ReservationCreateRequest(today, reservationTime.getId(), theme.getId());
-        ReservationResponse response = service.createReservation(request, member.getId());
+        var request = new ReservationCreateRequest(today, reservationTime.getId(), theme.getId());
 
-        assertThat(response.name()).isEqualTo("홍길동");
+        // when
+        var response = service.createReservation(request, member.getId());
+
+        // then
+        assertThat(response.name()).isEqualTo("한스");
     }
 
     @Test
     void 예약시간이_없으면_예외가_발생한다() {
-        Member member = memberRepository.save(new Member(
-                        null,
-                        new MemberName("홍길동"),
-                        new MemberEmail("leehyeonsu4888@gmail.com"),
-                        new MemberEncodedPassword("encoded"),
-                        MemberRole.MEMBER
-                )
-        );
-        ReservationCreateRequest request = new ReservationCreateRequest(today, 999L, 1L);
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var request = new ReservationCreateRequest(today, 999L, 1L);
 
+        // when // then
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
     void 이미_예약된_시간이면_예외가_발생한다() {
-        Member member = memberRepository.save(new Member(
-                        null,
-                        new MemberName("홍길동"),
-                        new MemberEmail("leehyeonsu4888@gmail.com"),
-                        new MemberEncodedPassword("encoded"),
-                        MemberRole.MEMBER
-                )
-        );
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(null, time));
-        Theme theme = themeRepository.save(new Theme(
-                        null,
-                        new ThemeName("공포"),
-                        new ThemeDescription("무섭다"),
-                        new ThemeThumbnail("thumb.jpg")
-                )
-        );
-        ReservationDateTime reservationDateTime = new ReservationDateTime(예약날짜_오늘, reservationTime, FIXED_CLOCK);
-        reservationRepository.save(new Reservation(
-                        null,
-                        member,
-                        reservationDateTime.getReservationDate(),
-                        reservationDateTime.getReservationTime(),
-                        theme
-                )
-        );
-        ReservationCreateRequest request = new ReservationCreateRequest(
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간(time);
+        var theme = themeDbFixture.공포();
+        var reservationDateTime = new ReservationDateTime(예약날짜_오늘, reservationTime, FIXED_CLOCK);
+        reservationDbFixture.예약_생성(reservationDateTime.getReservationDate(), reservationTime, theme, member);
+        var request = new ReservationCreateRequest(
                 예약날짜_오늘.date(),
                 reservationTime.getId(),
                 theme.getId()
         );
 
+        // when // then
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void 테마가_없으면_예외가_발생한다() {
-        Member member = memberRepository.save(new Member(
-                null,
-                new MemberName("홍길동"),
-                new MemberEmail("leehyeonsu4888@gmail.com"),
-                new MemberEncodedPassword("encoded"),
-                MemberRole.MEMBER
-        ));
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(
-                null,
-                time
-        ));
-        ReservationCreateRequest request = new ReservationCreateRequest(today, reservationTime.getId(), 999L);
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간(time);
+        var request = new ReservationCreateRequest(today, reservationTime.getId(), 999L);
 
+        // when // then
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
     void 예약을_삭제할_수_있다() {
-        Member member = memberRepository.save(new Member(
-                null,
-                new MemberName("홍길동"),
-                new MemberEmail("leehyeonsu4888@gmail.com"),
-                new MemberEncodedPassword("encoded"),
-                MemberRole.MEMBER)
-        );
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(
-                null,
-                time
-        ));
-        Theme theme = themeRepository.save(new Theme(
-                        null,
-                        new ThemeName("공포"),
-                        new ThemeDescription("무섭다"),
-                        new ThemeThumbnail("thumb.jpg")
-                )
-        );
-        ReservationDateTime reservationDateTime = new ReservationDateTime(new ReservationDate(today), reservationTime,
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간(time);
+        var theme = themeDbFixture.공포();
+        var reservationDateTime = new ReservationDateTime(new ReservationDate(today), reservationTime,
                 FIXED_CLOCK);
-        Reservation reservation = reservationRepository.save(new Reservation(
-                        null,
-                        member,
-                        reservationDateTime.getReservationDate(),
-                        reservationDateTime.getReservationTime(),
-                        theme
-                )
-        );
+        var reservation = reservationDbFixture.예약_생성(reservationDateTime.getReservationDate(), reservationTime, theme,
+                member);
 
+        // when
         service.deleteReservationById(reservation.getId());
 
-        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
+        // then
+        assertThat(service.findAllReservations()).isEmpty();
     }
 
     @Test
     void 삭제할_예약이_없으면_예외() {
+        // when // then
         assertThatThrownBy(() -> service.deleteReservationById(999L))
                 .isInstanceOf(NoSuchElementException.class);
     }
@@ -267,18 +159,18 @@ class ReservationServiceTest {
     @Test
     void 내_예약_조회() {
         // given
-        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
-        ReservationTime 예약시간_10시 = reservationTimeDbFixture.예약시간_10시();
-        Theme 공포 = themeDbFixture.공포();
-        Reservation reservation = reservationDbFixture.예약_25_4_22(예약시간_10시, 공포, 한스);
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        var reservation = reservationDbFixture.예약_25_4_22(reservationTime, theme, member);
 
         // when
-        List<MyReservationResponse> all = service.findAllMyReservation(한스.getId());
+        var all = service.findAllMyReservation(member.getId());
 
         // then
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(all).hasSize(1);
-            MyReservationResponse response = all.get(0);
+            var response = all.get(0);
             softly.assertThat(response.reservationId()).isEqualTo(reservation.getId());
             softly.assertThat(response.theme()).isEqualTo(reservation.getTheme().getName().name());
             softly.assertThat(response.date()).isEqualTo(reservation.getDate());

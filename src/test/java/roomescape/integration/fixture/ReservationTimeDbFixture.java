@@ -8,7 +8,7 @@ import roomescape.repository.ReservationTimeRepository;
 @Component
 public class ReservationTimeDbFixture {
 
-    private ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
 
     public ReservationTimeDbFixture(final ReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;

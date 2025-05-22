@@ -10,7 +10,8 @@ import roomescape.repository.ReservationRepository;
 
 @Component
 public class ReservationDbFixture {
-    private ReservationRepository reservationRepository;
+
+    private final ReservationRepository reservationRepository;
 
     public ReservationDbFixture(final ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;

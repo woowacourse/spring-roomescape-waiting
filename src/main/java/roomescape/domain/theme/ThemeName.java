@@ -11,6 +11,7 @@ public record ThemeName(
         @Size(max = ThemeName.MAX_NAME_LENGTH)
         String name
 ) {
+
     private static final int MAX_NAME_LENGTH = 5;
 
     public ThemeName(final String name) {

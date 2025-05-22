@@ -25,12 +25,13 @@ public class MemberArgumentResolver implements HandlerMethodArgumentResolver {
             final NativeWebRequest webRequest,
             final WebDataBinderFactory binderFactory
     ) {
-        HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
-        HttpSession session = request.getSession(false);
+        final HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
+        final HttpSession session = request.getSession(false);
         if (session == null) {
             throw new AuthenticationException("로그인이 필요합니다.");
         }
-        SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
+
+        final SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
         if (sessionMember == null) {
             throw new AuthenticationException("로그인이 필요합니다.");
         }

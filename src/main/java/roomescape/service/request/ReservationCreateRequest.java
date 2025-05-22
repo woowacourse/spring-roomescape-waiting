@@ -8,4 +8,5 @@ public record ReservationCreateRequest(
         @NotNull Long timeId,
         @NotNull Long themeId
 ) {
+
 }

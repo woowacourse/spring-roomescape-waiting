@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.theme.Theme;
@@ -22,8 +21,8 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
             ORDER BY COUNT(r.id) DESC
             """)
     List<Theme> findPopularThemeDuringAWeek(
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            Pageable pageable
+            @Param("startDate") final LocalDate startDate,
+            @Param("endDate") final LocalDate endDate,
+            final Pageable pageable
     );
 }

@@ -46,7 +46,7 @@ class ReservationRestTest extends RestAssuredTestBase {
 
     @Test
     void 예약을_생성한다() {
-        Map<String, Object> request = Map.of(
+        var request = Map.of(
                 "date", LocalDate.now(FIXED_CLOCK).plusDays(1).toString(),
                 "timeId", timeId,
                 "themeId", themeId

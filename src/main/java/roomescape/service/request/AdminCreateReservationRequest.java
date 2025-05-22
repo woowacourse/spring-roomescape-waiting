@@ -9,4 +9,5 @@ public record AdminCreateReservationRequest(
         @NotNull Long themeId,
         @NotNull Long memberId
 ) {
+
 }

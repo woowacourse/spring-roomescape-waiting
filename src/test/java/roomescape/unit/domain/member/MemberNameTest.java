@@ -1,6 +1,7 @@
 package roomescape.unit.domain.member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +12,7 @@ class MemberNameTest {
 
     @Test
     void 유저_이름은_null일_수_없다() {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberName(null))
                 .isInstanceOf(NullPointerException.class);
     }
@@ -22,7 +23,7 @@ class MemberNameTest {
             "한스스스스스스",
     })
     void 유저_이름이_5자_초과면_예외가_발생한다(String name) {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberName(name))
                 .isInstanceOf(IllegalStateException.class);
     }
@@ -33,7 +34,7 @@ class MemberNameTest {
             "한스스스"
     })
     void 올바르게_유저_이름을_생성한다(String name) {
-        // when & then
+        // when // then
         assertThatCode(() -> new MemberName(name))
                 .doesNotThrowAnyException();
     }

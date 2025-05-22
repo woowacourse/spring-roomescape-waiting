@@ -15,6 +15,7 @@ import roomescape.service.response.ReservationTimeResponse;
 
 @Service
 public class ReservationTimeService {
+
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 

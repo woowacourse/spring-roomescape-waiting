@@ -11,6 +11,7 @@ public record MemberName(
         @Size(max = MemberName.MAXIMUM_NAME_LENGTH)
         String name
 ) {
+
     public static final int MAXIMUM_NAME_LENGTH = 5;
 
     public MemberName(final String name) {

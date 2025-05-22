@@ -35,7 +35,6 @@ public class Reservation {
     private ReservationTime reservationTime;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     protected Reservation() {

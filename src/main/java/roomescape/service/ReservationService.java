@@ -24,6 +24,7 @@ import roomescape.service.response.ReservationResponse;
 
 @Service
 public class ReservationService {
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -89,7 +90,6 @@ public class ReservationService {
                 .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버가 존재하지 않습니다."));
-
         return reservationRepository.save(
                 new Reservation(null, member, dateTime.getReservationDate(), dateTime.getReservationTime(), theme));
     }
@@ -117,7 +117,6 @@ public class ReservationService {
                 .and(ReservationSpecifications.hasThemeId(themeId))
                 .and(ReservationSpecifications.dateAfterOrEqual(fromDate))
                 .and(ReservationSpecifications.dateBeforeOrEqual(toDate));
-
         return ReservationResponse.from(reservationRepository.findAll(spec));
     }
 

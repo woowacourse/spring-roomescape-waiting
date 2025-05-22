@@ -16,11 +16,12 @@ public class AdminOnlyInterceptor implements HandlerInterceptor {
             final HttpServletRequest request,
             final HttpServletResponse response,
             final Object handler
-    ) throws Exception {
-        HttpSession session = request.getSession(false);
+    ) {
+        final HttpSession session = request.getSession(false);
         if (session == null) {
             throw new AuthenticationException("로그인이 필요합니다.");
         }
+
         SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
         if (sessionMember == null) {
             throw new AuthenticationException("로그인이 필요합니다.");

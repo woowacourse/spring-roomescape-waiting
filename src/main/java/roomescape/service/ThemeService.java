@@ -36,12 +36,12 @@ public class ThemeService {
         if (reservationRepository.existsByTheme_Id(id)) {
             throw new IllegalStateException("이미 예약이 존재해서 테마를 삭제할 수 없습니다.");
         }
-        Theme theme = getTheme(id);
+        final Theme theme = getTheme(id);
         themeRepository.deleteById(theme.getId());
     }
 
     public ThemeResponse createTheme(final CreateThemeRequest request) {
-        Theme theme = themeRepository.save(new Theme(
+        final Theme theme = themeRepository.save(new Theme(
                         null,
                         new ThemeName(request.name()),
                         new ThemeDescription(request.description()),
@@ -52,14 +52,14 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findAllThemes() {
-        List<Theme> themes = themeRepository.findAll();
+        final List<Theme> themes = themeRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
     public List<ThemeResponse> getWeeklyPopularThemes() {
-        DateRange dateRange = DateRange.createLastWeekRange(clock);
-        PageRequest pageRequest = PageRequest.of(0, 10);
-        List<Theme> themes = themeRepository.findPopularThemeDuringAWeek(
+        final DateRange dateRange = DateRange.createLastWeekRange(clock);
+        final PageRequest pageRequest = PageRequest.of(0, 10);
+        final List<Theme> themes = themeRepository.findPopularThemeDuringAWeek(
                 dateRange.getStartDate(),
                 dateRange.getEndDate(),
                 pageRequest
