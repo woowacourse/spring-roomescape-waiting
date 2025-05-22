@@ -1,5 +1,6 @@
 package roomescape.infrastructure.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             + "WHERE w.member.id=:memberId"
     )
     List<WaitingWithRank> findWithRankByMemberId(Long memberId);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 }
