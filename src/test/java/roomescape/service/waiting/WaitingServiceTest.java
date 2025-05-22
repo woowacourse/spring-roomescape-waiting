@@ -26,13 +26,13 @@ import roomescape.exception.waiting.WaitingAlreadyExistException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
-import roomescape.repository.waiting.WaitingRepsitory;
+import roomescape.repository.waiting.WaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
 
     @Mock
-    private WaitingRepsitory waitingRepsitory;
+    private WaitingRepository waitingRepository;
     @Mock
     private ReservationTimeRepository timeRepository;
     @Mock
@@ -56,8 +56,8 @@ class WaitingServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), any(), any(), any())).thenReturn(
                 false);
-        when(waitingRepsitory.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), any(), any(), any())).thenReturn(false);
-        when(waitingRepsitory.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), any(), any(), any())).thenReturn(false);
+        when(waitingRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         WaitingResponse response = waitingService.create(request, member);
@@ -95,7 +95,7 @@ class WaitingServiceTest {
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
         when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), any(), any(), any())).thenReturn(
                 false);
-        when(waitingRepsitory.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), any(), any(), any())).thenReturn(true);
+        when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), any(), any(), any())).thenReturn(true);
 
         assertThatThrownBy(() -> waitingService.create(request, member))
                 .isInstanceOf(WaitingAlreadyExistException.class);

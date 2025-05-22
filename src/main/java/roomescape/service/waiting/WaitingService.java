@@ -20,19 +20,19 @@ import roomescape.exception.waiting.WaitingAlreadyExistException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
-import roomescape.repository.waiting.WaitingRepsitory;
+import roomescape.repository.waiting.WaitingRepository;
 
 @Service
 public class WaitingService {
 
-    private final WaitingRepsitory waitingRepsitory;
+    private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public WaitingService(WaitingRepsitory waitingRepsitory, ReservationTimeRepository timeRepository,
+    public WaitingService(WaitingRepository waitingRepository, ReservationTimeRepository timeRepository,
                           ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-        this.waitingRepsitory = waitingRepsitory;
+        this.waitingRepository = waitingRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
@@ -54,19 +54,19 @@ public class WaitingService {
             throw new ReservationWaitingDuplicateException();
         }
 
-        if (waitingRepsitory.existsByDateAndTimeIdAndThemeIdAndMemberId(request.date(), request.timeId(),
+        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(request.date(), request.timeId(),
                 request.themeId(), member.getId())) {
             throw new WaitingAlreadyExistException();
         }
 
         Waiting waiting = new Waiting(null, request.date(), reservationTime, theme, member);
 
-        return WaitingResponse.from(waitingRepsitory.save(waiting));
+        return WaitingResponse.from(waitingRepository.save(waiting));
     }
 
     public List<MemberReservationResponse> findWaitingWithRankByMember(Member member) {
 
-        List<WaitingWithRank> waitings = waitingRepsitory.findWaitingsWithRankByMemberId(member.getId());
+        List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(member.getId());
 
         return waitings.stream()
                 .map(MemberReservationResponse::from)
@@ -75,12 +75,12 @@ public class WaitingService {
 
     public void deleteWaitingById(Long id) {
 
-        waitingRepsitory.deleteById(id);
+        waitingRepository.deleteById(id);
     }
 
     public List<WaitingWithMemberNameResponse> findAllWaitings() {
 
-        List<Waiting> waitings = waitingRepsitory.findAll();
+        List<Waiting> waitings = waitingRepository.findAll();
         return waitings.stream()
                 .map(WaitingWithMemberNameResponse::from)
                 .toList();

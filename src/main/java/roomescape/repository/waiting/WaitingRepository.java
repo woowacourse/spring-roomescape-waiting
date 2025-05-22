@@ -10,7 +10,7 @@ import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
 
 @Repository
-public interface WaitingRepsitory extends JpaRepository<Waiting, Long> {
+public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("SELECT new roomescape.domain.WaitingWithRank(" +
             "    w, " +

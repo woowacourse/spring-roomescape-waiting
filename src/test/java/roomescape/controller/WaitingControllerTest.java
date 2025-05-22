@@ -31,7 +31,7 @@ import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
-import roomescape.repository.waiting.WaitingRepsitory;
+import roomescape.repository.waiting.WaitingRepository;
 import roomescape.util.JwtTokenProvider;
 
 @SpringBootTest
@@ -54,7 +54,7 @@ class WaitingControllerTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
-    private WaitingRepsitory waitingRepsitory;
+    private WaitingRepository waitingRepository;
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
@@ -85,7 +85,7 @@ class WaitingControllerTest {
         waiter = new Member(null, "대기자B", "waiter@email.com", "pw", Role.USER);
         memberRepository.save(waiter);
         waiting = new Waiting(null, LocalDate.now().plusDays(1), reservationTime, theme, waiter);
-        waitingRepsitory.save(waiting);
+        waitingRepository.save(waiting);
     }
 
     @Test

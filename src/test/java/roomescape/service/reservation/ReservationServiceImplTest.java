@@ -34,7 +34,7 @@ import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
-import roomescape.repository.waiting.WaitingRepsitory;
+import roomescape.repository.waiting.WaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceImplTest {
@@ -52,7 +52,7 @@ class ReservationServiceImplTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private WaitingRepsitory waitingRepsitory;
+    private WaitingRepository waitingRepository;
 
     @InjectMocks
     private ReservationServiceImpl reservationService;
@@ -230,9 +230,9 @@ class ReservationServiceImplTest {
         Reservation reservation = new Reservation(reservationId, date, time, theme, member);
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-        when(waitingRepsitory.existsByDateAndTimeIdAndThemeId(any(), any(), any())).thenReturn(true);
+        when(waitingRepository.existsByDateAndTimeIdAndThemeId(any(), any(), any())).thenReturn(true);
         Waiting waiting = new Waiting(1L, date, time, theme, member);
-        when(waitingRepsitory.findFirstWaitingByDateAndTimeIdAndThemeId(any(), any(), any())).thenReturn(waiting);
+        when(waitingRepository.findFirstWaitingByDateAndTimeIdAndThemeId(any(), any(), any())).thenReturn(waiting);
 
         // when
         reservationService.deleteById(reservationId);
@@ -240,7 +240,7 @@ class ReservationServiceImplTest {
         // then
         verify(reservationRepository).deleteById(reservationId);
         verify(reservationRepository).save(any());
-        verify(waitingRepsitory).deleteById(any());
+        verify(waitingRepository).deleteById(any());
     }
 
     @DisplayName("조건별 예약 조회가 가능하다")

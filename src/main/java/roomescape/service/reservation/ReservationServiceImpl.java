@@ -25,7 +25,7 @@ import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
-import roomescape.repository.waiting.WaitingRepsitory;
+import roomescape.repository.waiting.WaitingRepository;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -34,16 +34,16 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final WaitingRepsitory waitingRepsitory;
+    private final WaitingRepository waitingRepository;
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
                                   ReservationTimeRepository timeRepository, ThemeRepository themeRepository,
-                                  MemberRepository memberRepository, WaitingRepsitory waitingRepsitory) {
+                                  MemberRepository memberRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.waitingRepsitory = waitingRepsitory;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse create(ReservationRequest request, Member member) {
@@ -80,21 +80,21 @@ public class ReservationServiceImpl implements ReservationService {
 
         reservationRepository.deleteById(id);
 
-        if (waitingRepsitory.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
+        if (waitingRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())) {
             promoteFirstWaitingToReservation(reservation);
         }
     }
 
     private void promoteFirstWaitingToReservation(Reservation reservation) {
-        Waiting waiting = waitingRepsitory.findFirstWaitingByDateAndTimeIdAndThemeId(reservation.getDate(),
+        Waiting waiting = waitingRepository.findFirstWaitingByDateAndTimeIdAndThemeId(reservation.getDate(),
                 reservation.getTime().getId(), reservation.getTheme().getId());
 
         Reservation newReservation = new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme(),
                 waiting.getMember());
 
         reservationRepository.save(newReservation);
-        waitingRepsitory.deleteById(waiting.getId());
+        waitingRepository.deleteById(waiting.getId());
 
     }
 
