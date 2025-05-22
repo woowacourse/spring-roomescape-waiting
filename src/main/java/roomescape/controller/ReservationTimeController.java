@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class ReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> create(
-            @RequestBody CreateReservationTimeRequest createReservationTImeRequest) {
+            @Valid @RequestBody CreateReservationTimeRequest createReservationTImeRequest) {
 
         ReservationTimeResult reservationTimeResult = reservationService.create(createReservationTImeRequest.toServiceParam());
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationTimeResponse.from(reservationTimeResult));
@@ -41,7 +42,9 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableTimes(@RequestParam Long themeId, @RequestParam("date") LocalDate reservationDate) {
+    public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableTimes(
+            @RequestParam Long themeId,
+            @RequestParam("date") LocalDate reservationDate) {
         List<AvailableReservationTimeResult> availableTimes = reservationService.getAvailableTimesByThemeIdAndDate(themeId, reservationDate);
         List<AvailableReservationTimeResponse> availableReservationTimeResponses = availableTimes.stream()
                 .map(AvailableReservationTimeResponse::from)

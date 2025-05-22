@@ -1,9 +1,12 @@
 package roomescape.controller.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import roomescape.service.dto.param.CreateReservationTimeParam;
 
 public record CreateReservationTimeRequest(
+
+        @NotNull
         LocalTime startAt
 ) {
     public CreateReservationTimeRequest {

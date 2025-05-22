@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.controller.dto.request.CreatBookingRequest;
+import roomescape.controller.dto.request.CreateBookingRequest;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -69,7 +69,7 @@ class WaitingControllerTest {
 
         String token = jwtTokenProvider.createToken(MemberResult.from(member));
 
-        CreatBookingRequest request = new CreatBookingRequest(
+        CreateBookingRequest request = new CreateBookingRequest(
                 DEFAULT_DATE, reservationTime.getId(), theme.getId()
         );
 
