@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
@@ -16,23 +17,18 @@ import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.infrastructure.db.ReservationJpaRepository;
-import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.persistence.ReservationRepository;
+import roomescape.persistence.ReservationTimeRepository;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationTimeService {
 
-    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
-    private final ReservationJpaRepository reservationJpaRepository;
-
-    public ReservationTimeService(ReservationTimeJpaRepository reservationTimeJpaRepository,
-                                  ReservationJpaRepository reservationJpaRepository) {
-        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
-        this.reservationJpaRepository = reservationJpaRepository;
-    }
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
     public List<ReservationTimeResponseDto> getAllTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeJpaRepository.findAll();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return reservationTimes.stream().map(ReservationTimeResponseDto::new).toList();
     }
@@ -41,14 +37,14 @@ public class ReservationTimeService {
         validateReservationTime(reservationTimeRegisterDto);
 
         ReservationTime reservationTime = reservationTimeRegisterDto.convertToTime();
-        ReservationTime savedReservationTime = reservationTimeJpaRepository.save(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
         return new ReservationTimeResponseDto(savedReservationTime.getId(), savedReservationTime.getStartAt());
     }
 
     public void deleteTime(Long id) {
         try {
-            reservationTimeJpaRepository.deleteById(id);
+            reservationTimeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new ResourceInUseException("삭제하고자 하는 시각에 예약된 정보가 있습니다.");
         }
@@ -56,7 +52,7 @@ public class ReservationTimeService {
 
     public List<AvailableReservationTimeResponseDto> getAvailableTimes(String date, Long themeId) {
         List<Reservation> reservations = getReservationsBy(date, themeId);
-        List<ReservationTime> reservationTimes = reservationTimeJpaRepository.findAll();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         Set<ReservationTime> nonDuplicatedReservationTimes = getReservationTimes(reservations);
 
         reservationTimes.removeAll(nonDuplicatedReservationTimes);
@@ -66,7 +62,7 @@ public class ReservationTimeService {
 
     private List<Reservation> getReservationsBy(String date, Long themeId) {
         LocalDate parsedDate = LocalDate.parse(date);
-        return reservationJpaRepository.findByThemeIdAndDate(themeId, parsedDate);
+        return reservationRepository.findReservationsForThemeOnDate(themeId, parsedDate);
     }
 
     private Set<ReservationTime> getReservationTimes(List<Reservation> reservations) {
@@ -109,7 +105,7 @@ public class ReservationTimeService {
     private void validateReservationTime(ReservationTimeRegisterDto reservationTimeRegisterDto) {
         LocalTime parsedStartAt = LocalTime.parse(reservationTimeRegisterDto.startAt());
 
-        if (reservationTimeJpaRepository.existsByStartAt((parsedStartAt))) {
+        if (reservationTimeRepository.isDuplicatedStartAt((parsedStartAt))) {
             throw new DuplicatedException("중복된 예약시각은 등록할 수 없습니다.");
         }
     }

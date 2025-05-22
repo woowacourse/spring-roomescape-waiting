@@ -5,19 +5,18 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
-import roomescape.common.exception.NotFoundException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
-import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 import roomescape.persistence.MemberRepository;
 import roomescape.persistence.ReservationRepository;
+import roomescape.persistence.ReservationTimeRepository;
 import roomescape.persistence.ThemeRepository;
 
 @Service
@@ -25,7 +24,7 @@ import roomescape.persistence.ThemeRepository;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
@@ -72,7 +71,7 @@ public class ReservationService {
     }
 
     private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
-        ReservationTime time = findTimeById(reservationRegisterDto.timeId());
+        ReservationTime time = reservationTimeRepository.findById(reservationRegisterDto.timeId());
         Theme theme = themeRepository.findById(reservationRegisterDto.themeId());
         Member member = memberRepository.findById(loginMember.id());
 
@@ -85,10 +84,5 @@ public class ReservationService {
                 .ifPresent(foundReservation -> {
                     throw new DuplicatedException("이미 예약이 존재합니다.");
                 });
-    }
-
-    private ReservationTime findTimeById(final Long id) {
-        return reservationTimeJpaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("id 에 해당하는 예약 시각이 존재하지 않습니다."));
     }
 }
