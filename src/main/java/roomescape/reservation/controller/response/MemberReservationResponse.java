@@ -1,6 +1,7 @@
 package roomescape.reservation.controller.response;
 
 import java.time.LocalDate;
+import roomescape.member.controller.response.MemberResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.theme.controller.response.ThemeResponse;
@@ -13,7 +14,8 @@ public record MemberReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme,
         String status,
-        Long rank
+        Long rank,
+        MemberResponse memberResponse
 ) {
 
     public static MemberReservationResponse from(Reservation reservation) {
@@ -23,7 +25,8 @@ public record MemberReservationResponse(
                 ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme()),
                 "예약",
-                0L
+                0L,
+                MemberResponse.from(reservation.getMember())
         );
     }
 
@@ -34,7 +37,8 @@ public record MemberReservationResponse(
                 ReservationTimeResponse.from(waitingWithRank.waiting().getReservation().getReservationTime()),
                 ThemeResponse.from(waitingWithRank.waiting().getReservation().getTheme()),
                 "예약대기",
-                waitingWithRank.rank() + 1L
+                waitingWithRank.rank() + 1L,
+                MemberResponse.from(waitingWithRank.waiting().getMember())
         );
     }
 }

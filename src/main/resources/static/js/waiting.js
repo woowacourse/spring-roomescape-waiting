@@ -24,10 +24,10 @@ function render(data) {
               예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
         const id = item.id;
-        const name = '';
-        const theme = '';
-        const date = '';
-        const startAt = '';
+        const name = item.memberResponse.name;
+        const theme = item.theme.name;
+        const date = item.date;
+        const startAt = item.time.startAt;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명
