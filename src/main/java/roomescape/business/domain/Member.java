@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
 
 @Entity
 @Table(name = "member")
@@ -60,5 +61,9 @@ public class Member {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean isSameMember(final Long targetMemberId) {
+        return Objects.equals(id, targetMemberId);
     }
 }

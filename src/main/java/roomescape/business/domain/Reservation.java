@@ -73,8 +73,12 @@ public class Reservation {
         return theme;
     }
 
-    public boolean isSameReservationTime(final ReservationTime reservationTime) {
-        return this.time.isSameReservationTime(reservationTime);
+    public boolean isSameReservationTime(final ReservationTime targetReservationTime) {
+        return time.isSameReservationTime(targetReservationTime);
+    }
+
+    public boolean isSameMember(Long id) {
+        return member.isSameMember(id);
     }
 
     private void validateDate(final LocalDate date) {
