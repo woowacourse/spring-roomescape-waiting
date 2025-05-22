@@ -1,12 +1,12 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.member.domain.Member;
@@ -14,6 +14,11 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
+@Table(
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"reservationDate", "reservationTime_id", "theme_id"}
+        )
+)
 public class Reservation {
 
     @Id
@@ -26,11 +31,8 @@ public class Reservation {
     private Theme theme;
     @ManyToOne
     private Member member;
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus reservationStatus;
 
     public Reservation() {
-
     }
 
     public Reservation(
@@ -38,25 +40,22 @@ public class Reservation {
             LocalDate reservationDate,
             ReservationTime reservationTime,
             Theme theme,
-            Member member,
-            ReservationStatus reservationStatus
+            Member member
     ) {
         this.id = id;
         this.reservationDate = new ReservationDate(reservationDate);
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
-        this.reservationStatus = reservationStatus;
     }
 
     public static Reservation create(
             LocalDate reservationDate,
             ReservationTime reservationTime,
             Theme theme,
-            Member member,
-            ReservationStatus reservationStatus
+            Member member
     ) {
-        return new Reservation(null, reservationDate, reservationTime, theme, member, reservationStatus);
+        return new Reservation(null, reservationDate, reservationTime, theme, member);
     }
 
     public Long getId() {
@@ -83,7 +82,7 @@ public class Reservation {
         return member;
     }
 
-    public ReservationStatus getReservationStatus() {
-        return reservationStatus;
+    public void updateMember(final Member member) {
+        this.member = member;
     }
 }

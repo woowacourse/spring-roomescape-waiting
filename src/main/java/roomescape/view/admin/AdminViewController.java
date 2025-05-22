@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 public class AdminViewController {
 
-    @GetMapping
+    @GetMapping()
     public String getAdmin() {
-        return "redirect:/";
+        return "admin/index";
     }
 
     @GetMapping("/reservation")
@@ -26,5 +26,10 @@ public class AdminViewController {
     @GetMapping("/theme")
     public String getThemes() {
         return "admin/theme";
+    }
+
+    @GetMapping("/waiting")
+    public String getWaitings() {
+        return "/admin/waiting";
     }
 }

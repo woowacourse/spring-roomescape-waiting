@@ -16,7 +16,8 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    boolean existsByReservationDateAndReservationTimeId(ReservationDate reservationDate, Long timeId);
+    boolean existsByReservationDateAndReservationTimeIdAndThemeId(ReservationDate reservationDate, Long timeId,
+                                                                  Long themeId);
 
     boolean existsByReservationTimeId(Long timeId);
 
@@ -25,4 +26,7 @@ public interface ReservationRepository {
     List<Reservation> findByFilter(Long memberId, Long themeId, LocalDate start, LocalDate end);
 
     List<Reservation> findAllByMemberId(Long memberId);
+
+    Optional<Reservation> findByThemeIdAndReservationTimeIdAndReservationDate_reservationDate(Long themeId, Long timeId,
+                                                                                              LocalDate date);
 }

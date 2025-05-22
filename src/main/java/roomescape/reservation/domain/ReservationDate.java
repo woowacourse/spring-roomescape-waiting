@@ -9,7 +9,6 @@ public class ReservationDate {
     private LocalDate reservationDate;
 
     public ReservationDate() {
-
     }
 
     public ReservationDate(LocalDate reservationDate) {

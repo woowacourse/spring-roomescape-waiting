@@ -1,22 +1,33 @@
 package roomescape.member.controller;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import roomescape.common.BaseTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import roomescape.member.controller.request.SignUpRequest;
 import roomescape.member.service.MemberService;
 
-class TokenLoginApiControllerTest extends BaseTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class TokenLoginApiControllerTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     MemberService memberService;
@@ -25,7 +36,6 @@ class TokenLoginApiControllerTest extends BaseTest {
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = port;
         member = new HashMap<>();
         memberService.save(new SignUpRequest("매트", "matt@kakao.com", "1234"));
         member.put("name", "matt");
@@ -35,28 +45,24 @@ class TokenLoginApiControllerTest extends BaseTest {
 
     @Test
     @DisplayName("토큰 로그인에 성공한다.")
-    void tokenLogin() {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(member)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200);
+    void tokenLogin() throws Exception {
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(member)))
+                .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("회원가입되지 않은 회원은 로그인에 실패한다.")
-    void tokenLoginFailTest() {
+    void tokenLoginFailTest() throws Exception {
         Map<String, String> failMap = new HashMap<>(
                 Map.of(
                         "name", "말론", "email", "malone.gmail", "password", "1234"
                 )
         );
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(failMap)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(400);
+        mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(failMap)))
+                .andExpect(status().isBadRequest());
     }
 }
