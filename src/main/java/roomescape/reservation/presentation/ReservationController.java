@@ -16,9 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.common.argumentResolver.Login;
+import roomescape.member.argumentResolver.LoginMember;
 import roomescape.common.exceptionHandler.dto.ExceptionResponse;
-import roomescape.member.dto.request.LoginMember;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
@@ -47,7 +46,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody final ReservationRequest request,
-                                                                 @Login final LoginMember loginMember) {
+                                                                 @LoginMember final roomescape.member.dto.request.LoginMember loginMember) {
         ReservationResponse response = reservationService.createReservation(request, loginMember.id());
         URI locationUri = URI.create(RESERVATION_BASE_URL + SLASH + response.id());
         return ResponseEntity.created(locationUri).body(response);
@@ -68,7 +67,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@Login LoginMember loginMember) {
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginMember roomescape.member.dto.request.LoginMember loginMember) {
         List<MyReservationResponse> myReservationResponses = reservationService.getMyReservations(loginMember.id());
         return ResponseEntity.ok().body(myReservationResponses);
     }

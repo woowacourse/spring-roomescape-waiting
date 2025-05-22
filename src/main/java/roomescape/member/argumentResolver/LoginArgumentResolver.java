@@ -1,4 +1,4 @@
-package roomescape.common.argumentResolver;
+package roomescape.member.argumentResolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
@@ -7,7 +7,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.common.util.TokenCookieManager;
-import roomescape.member.dto.request.LoginMember;
 import roomescape.member.service.LoginService;
 
 public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
@@ -21,8 +20,8 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        boolean hasAnnotation = parameter.hasParameterAnnotation(Login.class);
-        boolean hasLoginMemberType = LoginMember.class.isAssignableFrom(parameter.getParameterType());
+        boolean hasAnnotation = parameter.hasParameterAnnotation(LoginMember.class);
+        boolean hasLoginMemberType = roomescape.member.dto.request.LoginMember.class.isAssignableFrom(parameter.getParameterType());
 
         return hasAnnotation && hasLoginMemberType;
     }

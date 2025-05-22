@@ -18,7 +18,7 @@ import roomescape.member.domain.Role;
 import roomescape.member.dto.request.LoginMember;
 import roomescape.member.dto.request.LoginRequest;
 
-class LoginServiceTest {
+class LoginMemberServiceTest {
 
     private MemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
     private LoginService loginService = new LoginService(
