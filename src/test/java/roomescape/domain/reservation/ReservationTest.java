@@ -46,6 +46,16 @@ public class ReservationTest {
     }
 
     @Test
+    @DisplayName("주어진 예약과 같은 예약 슬롯인 지 비교할 수 있다.")
+    void sameSlotWith() {
+        var slot = ReservationSlot.of(date, timeSlot, theme);
+        var reservation1 = new Reservation(1L, user1, slot, ReservationStatus.RESERVED);
+        var reservation2 = new Reservation(2L, user2, slot, ReservationStatus.RESERVED);
+
+        assertThat(reservation1.sameSlotWith(reservation2)).isTrue();
+    }
+
+    @Test
     @DisplayName("예약이 대기 상태인 지 확인한다.")
     void isWaiting() {
         var reservation = reservationOf(ReservationStatus.WAITING);

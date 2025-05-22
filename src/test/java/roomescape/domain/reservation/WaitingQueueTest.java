@@ -18,7 +18,6 @@ import roomescape.TestFixtures;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.User;
-import roomescape.exception.AlreadyExistedException;
 
 class WaitingQueueTest {
 
@@ -35,53 +34,6 @@ class WaitingQueueTest {
     private final User user3 = TestFixtures.anyUserWithNewId();
 
     @Test
-    @DisplayName("대기열에 예약을 추가한다.")
-    void join() {
-        // given
-        var reservation1 = reservationOf(slot, user1);
-        var queue = new WaitingQueue(slot, List.of(reservation1));
-
-        var reservation2 = reservationOf(slot, user2);
-
-        // when
-        var order = queue.join(reservation2);
-
-        // then
-        assertThat(order).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("대기열에 예약을 추가할 때 해당 유저의 예약이 이미 존재하면 예외가 발생한다.")
-    void joinDuplicated() {
-        // given
-        var reservation = reservationOf(slot, user1);
-        var queue = new WaitingQueue(slot, List.of(reservation));
-
-        // when & then
-        assertThatThrownBy(() -> queue.join(reservation))
-            .isInstanceOf(AlreadyExistedException.class);
-    }
-
-    @Test
-    @DisplayName("대기열에 예약을 추가할 때 해당 예약의 슬롯이 다르면 예외가 발생한다.")
-    void joinWithMismatchSlot() {
-        // given
-        var queue = new WaitingQueue(slot, emptyList());
-        var reservation = reservationOf(otherSlot, user1);
-
-        // when & then
-        assertThatThrownBy(() -> queue.join(reservation))
-            .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("대기열이 비었는 지 확인한다.")
-    void areWaitingsEmpty() {
-        var queue = new WaitingQueue(slot, emptyList());
-        assertThat(queue.areWaitingsEmpty()).isTrue();
-    }
-
-    @Test
     @DisplayName("주어진 예약의 대기 순번을 알 수 있다.")
     void orderOf() {
         // given
@@ -89,7 +41,7 @@ class WaitingQueueTest {
         var reservation2 = reservationOf(slot, user2);
         var reservation3 = reservationOf(slot, user3);
 
-        var queue = new WaitingQueue(slot, List.of(reservation1, reservation2, reservation3));
+        var queue = new WaitingQueue(List.of(reservation1, reservation2, reservation3));
 
         // when & then
         assertAll(
@@ -102,7 +54,7 @@ class WaitingQueueTest {
     @Test
     @DisplayName("대기열에 존재하지 않는 예약의 순번을 조회하려하면 예외가 발생한다.")
     void orderOfNotWaiting() {
-        var queue = new WaitingQueue(slot, emptyList());
+        var queue = new WaitingQueue(emptyList());
         var reservation = reservationOf(slot, user1);
 
         assertThatThrownBy(() -> queue.orderOf(reservation))
@@ -112,7 +64,7 @@ class WaitingQueueTest {
     @Test
     @DisplayName("다른 슬롯의 예약 순번을 조회하려하면 예외가 발생한다.")
     void orderOfMismatchSlot() {
-        var queue = new WaitingQueue(slot, emptyList());
+        var queue = new WaitingQueue(emptyList());
         var reservation = reservationOf(otherSlot, user1);
 
         assertThatThrownBy(() -> queue.orderOf(reservation))

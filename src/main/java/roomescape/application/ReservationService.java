@@ -1,7 +1,9 @@
 package roomescape.application;
 
+import static org.springframework.data.jpa.domain.Specification.allOf;
 import static roomescape.infrastructure.ReservationSpecs.byFilter;
 import static roomescape.infrastructure.ReservationSpecs.bySlot;
+import static roomescape.infrastructure.ReservationSpecs.byUserId;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,7 +14,6 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservation.WaitingQueue;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
@@ -40,12 +41,10 @@ public class ReservationService {
     @Transactional
     public Reservation waitFor(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var slot = toReservationSlot(date, timeId, themeId);
-        var user = userRepository.getById(userId);
+        throwIfDuplicates(userId, slot);
 
-        var waitingQueue = new WaitingQueue(slot, reservationRepository.findAll(bySlot(slot)));
-        var reservation = reservationRepository.save(Reservation.ofWaiting(user, slot));
-        waitingQueue.join(reservation);
-        return reservation;
+        var user = userRepository.getById(userId);
+        return reservationRepository.save(Reservation.ofWaiting(user, slot));
     }
 
     private ReservationSlot toReservationSlot(final LocalDate date, final long timeId, final long themeId) {
@@ -57,6 +56,13 @@ public class ReservationService {
     private void throwIfDuplicates(final ReservationSlot slot) {
         if (reservationRepository.exists(bySlot(slot))) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
+        }
+    }
+
+    private void throwIfDuplicates(final long userId, final ReservationSlot slot) {
+        var alreadyReserved = reservationRepository.exists(allOf(byUserId(userId), bySlot(slot)));
+        if (alreadyReserved) {
+            throw new AlreadyExistedException("이미 해당 예약 슬롯에 예약 또는 대기하셨습니다.");
         }
     }
 

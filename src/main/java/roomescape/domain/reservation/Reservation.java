@@ -48,6 +48,10 @@ public class Reservation {
         return new Reservation(0L, user, slot, ReservationStatus.WAITING);
     }
 
+    public final boolean sameSlotWith(final Reservation reservation) {
+        return this.slot.equals(reservation.slot);
+    }
+
     public boolean isOwnedBy(final User user) {
         return this.user.equals(user);
     }

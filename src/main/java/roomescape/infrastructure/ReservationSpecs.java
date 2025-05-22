@@ -34,6 +34,11 @@ public class ReservationSpecs {
         return Specification.allOf(byDate(slot.date()), byTimeSlotId(slot.timeSlot().id()), byThemeId(slot.theme().id()));
     }
 
+    public static Specification<Reservation> byUserId(final long userId) {
+        return (root, query, criteriaBuilder) ->
+            criteriaBuilder.equal(root.get("user").get("id"), userId);
+    }
+
     public static Specification<Reservation> byFilter(final ReservationSearchFilter filter) {
         return (root, query, cb) -> {
             var predicates = new ArrayList<Predicate>();

@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import roomescape.application.UserService;
 import roomescape.domain.auth.AuthenticationInfo;
+import roomescape.domain.reservation.Waiting;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
@@ -57,9 +58,9 @@ class UserControllerTest {
 
     @Test
     @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다.")
-    void getAllReservationsByUser() throws Exception {
-        Mockito.when(userService.getReservations(Mockito.anyLong())).thenReturn(List.of(
-            anyReservationWithNewId()));
+    void getMyReservations() throws Exception {
+        Mockito.when(userService.getMyReservations(Mockito.anyLong())).thenReturn(List.of(
+            new Waiting(anyReservationWithNewId())));
 
         mockMvc.perform(get("/users/reservations")
                 .contentType(MediaType.APPLICATION_JSON)

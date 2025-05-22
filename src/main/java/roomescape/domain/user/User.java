@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
@@ -57,6 +58,12 @@ public class User {
 
     public boolean isAdmin() {
         return role == UserRole.ADMIN;
+    }
+
+    public List<ReservationSlot> reservedSlots() {
+        return reservations.stream()
+            .map(Reservation::slot)
+            .toList();
     }
 
     public List<Reservation> reservations() {

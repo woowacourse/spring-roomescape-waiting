@@ -33,7 +33,7 @@ public class UserController {
 
     @GetMapping("/reservations")
     public List<UserReservationResponse> getAllReservationsByUser(final AuthenticationInfo authenticationInfo) {
-        var reservations = userService.getReservations(authenticationInfo.id());
+        var reservations = userService.getMyReservations(authenticationInfo.id());
         return UserReservationResponse.from(reservations);
     }
 }

@@ -26,7 +26,7 @@ public class TestFixtures {
     }
 
     public static User anyUser() {
-        return new User(new UserName("name"), new Email("email@email.com"), new Password("password"));
+        return new User(new UserName("name"), new Email("email" + ID_GENERATOR.incrementAndGet() + "@email.com"), new Password("password"));
     }
 
     public static User anyUserWithNewId() {

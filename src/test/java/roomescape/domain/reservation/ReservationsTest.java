@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.TestFixtures.anyUserWithNewId;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,7 +20,7 @@ class ReservationsTest {
 
     private static final AtomicLong DUMMY_ID_GENERATOR = new AtomicLong();
 
-    private static final User user = TestFixtures.anyUserWithNewId();
+    private static final User user = anyUserWithNewId();
     private static final LocalDate date = LocalDate.of(2025, 5, 1);
     private static final Theme theme = TestFixtures.anyThemeWithNewId();
     private static final TimeSlot time1 = new TimeSlot(1L, LocalTime.of(10, 0));
@@ -74,6 +75,30 @@ class ReservationsTest {
         );
     }
 
+    @Test
+    @DisplayName("가지고 있는 예약들과 비교해 주어진 예약들의 대기 순번을 계산한다.")
+    void checkWaitingOrders() {
+        // given
+        var reservations = new Reservations(List.of(
+            reservationOf(theme, date, time1, ReservationStatus.WAITING),
+            reservationOf(theme, date, time1, ReservationStatus.WAITING),
+            reservationOf(theme, date, time1, ReservationStatus.WAITING)
+        ));
+
+        var reservation1 = reservationOf(theme, date, time1, ReservationStatus.WAITING);
+        var reservation2 = reservationOf(theme, date, time2, ReservationStatus.RESERVED);
+        var reservationsToCheck = List.of(reservation1, reservation2);
+
+        // when
+        var checkedWaitingOrders = reservations.checkWaitingOrders(reservationsToCheck);
+
+        // then
+        assertThat(checkedWaitingOrders).contains(
+            new Waiting(reservation1, 4),
+            new Waiting(reservation2, 1)
+        );
+    }
+
     private Reservation reservationOf(final TimeSlot timeSlot) {
         return new Reservation(
             DUMMY_ID_GENERATOR.incrementAndGet(),
@@ -89,6 +114,15 @@ class ReservationsTest {
             user,
             ReservationSlot.of(date, timeSlot, theme),
             ReservationStatus.RESERVED
+        );
+    }
+
+    private Reservation reservationOf(final Theme theme, final LocalDate date, final TimeSlot timeSlot, final ReservationStatus status) {
+        return new Reservation(
+            DUMMY_ID_GENERATOR.incrementAndGet(),
+            user,
+            ReservationSlot.of(date, timeSlot, theme),
+            status
         );
     }
 }
