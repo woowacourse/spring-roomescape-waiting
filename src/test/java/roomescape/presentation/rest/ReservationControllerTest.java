@@ -55,6 +55,25 @@ class ReservationControllerTest {
     }
 
     @Test
+    @DisplayName("예약 대기 요청시, id를 포함한 예약 내용과 CREATED를 응답한다.")
+    void waitFor() throws Exception {
+        Mockito.when(reservationService.waitFor(anyLong(), any(), anyLong(), anyLong()))
+            .thenReturn(anyReservationWithNewId());
+
+        mockMvc.perform(post("/reservations/wait")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "date": "3000-03-17",
+                        "timeId": "1",
+                        "themeId": "1"
+                    }
+                    """))
+            .andExpect(jsonPath("$..['id','user','date','time','theme']").exists())
+            .andExpect(status().isCreated());
+    }
+
+    @Test
     @DisplayName("예약 조회 요청시, 조건에 맞는 모든 예약과 OK를 응답한다.")
     void getAllReservations() throws Exception {
         var expectedReservations = List.of(anyReservationWithNewId(), anyReservationWithNewId(), anyReservationWithNewId());

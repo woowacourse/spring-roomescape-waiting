@@ -39,6 +39,16 @@ public class ReservationController {
         return ReservationResponse.from(reservation);
     }
 
+    @PostMapping("/wait")
+    @ResponseStatus(CREATED)
+    public ReservationResponse waitFor(
+            final AuthenticationInfo authenticationInfo,
+            @RequestBody @Valid final CreateReservationRequest request
+    ) {
+        var reservation = service.waitFor(authenticationInfo.id(), request.date(), request.timeId(), request.themeId());
+        return ReservationResponse.from(reservation);
+    }
+
     @GetMapping
     public List<ReservationResponse> getAllReservations(
             @RequestParam(name = "themeId", required = false) final Long themeId,
