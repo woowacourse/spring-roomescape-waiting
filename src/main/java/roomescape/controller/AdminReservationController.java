@@ -31,7 +31,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> addAdminReservation(
             @Valid @RequestBody AdminReservationRequest adminReservationRequest) {
 
-        return ResponseEntity.created(URI.create("admin/reservations"))
+        return ResponseEntity.created(URI.create("/admin/reservations"))
                 .body(reservationService.createByAdmin(adminReservationRequest));
     }
 
