@@ -17,6 +17,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -75,6 +76,126 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result.getId()).isEqualTo(waitingReservation.getId());
+    }
+
+    @Test
+    @DisplayName("특정 날짜와 테마 ID로 예약을 찾을 수 있다")
+    void findByDateAndThemeId() {
+        // given
+        TestData testData = setUpTestData();
+        LocalDate targetDate = LocalDate.now();
+
+        // when
+        List<Reservation> results = reservationRepository.findByDateAndThemeId(
+                targetDate, testData.theme1.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(results).hasSize(1),
+                () -> assertThat(results.get(0).getDate()).isEqualTo(targetDate),
+                () -> assertThat(results.get(0).getTheme().getId()).isEqualTo(testData.theme1.getId())
+        );
+    }
+
+    @Test
+    @DisplayName("회원의 모든 예약 정보와 대기 순위를 조회할 수 있다")
+    void findReservationsWithRankByMemberId() {
+        // given
+        Member member = createAndSaveMemberFixture();
+        Theme theme = createAndSaveThemeFixture();
+        ReservationTime time = createAndSaveReservationTimeFixture();
+        LocalDate date = LocalDate.now();
+
+        createAndSaveWaitingReservationFixture(member, theme, date, time);
+        createAndSaveWaitingReservationFixture(member, theme, date, time);
+
+        // when
+        List<ReservationWithRank> results = reservationRepository
+                .findReservationsWithRankByMemberId(member.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(results).hasSize(2),
+                () -> assertThat(results.get(0).rank()).isEqualTo(1L),
+                () -> assertThat(results.get(1).rank()).isEqualTo(2L)
+        );
+    }
+
+    @Test
+    @DisplayName("대기 상태인 모든 예약 정보와 대기 순위를 조회할 수 있다")
+    void findReservationsWithRankOfWaitingStatus() {
+        // given
+        Member member = createAndSaveMemberFixture();
+        Theme theme = createAndSaveThemeFixture();
+        ReservationTime time = createAndSaveReservationTimeFixture();
+        LocalDate date = LocalDate.now();
+
+        createAndSaveReservedReservationFixture(member, theme, date, time);
+        createAndSaveWaitingReservationFixture(member, theme, date, time);
+        createAndSaveWaitingReservationFixture(member, theme, date, time);
+
+        // when
+        List<ReservationWithRank> results = reservationRepository.findReservationsWithRankOfWaitingStatus();
+
+        // then
+        assertAll(
+                () -> assertThat(results).hasSize(2),
+                () -> assertThat(results).extracting("rank")
+                        .containsExactly(1L, 2L)
+        );
+    }
+
+    @Test
+    @DisplayName("특정 예약 시간 ID에 대한 예약 존재 여부를 확인할 수 있다")
+    void existsByReservationTimeId() {
+        // given
+        ReservationTime time = createAndSaveReservationTimeFixture();
+        Theme theme = createAndSaveThemeFixture();
+        Member member = createAndSaveMemberFixture();
+
+        createAndSaveReservedReservationFixture(member, theme, LocalDate.now(), time);
+
+        // when & then
+        assertAll(
+                () -> assertThat(reservationRepository.existsByReservationTimeId(time.getId())).isTrue(),
+                () -> assertThat(reservationRepository.existsByReservationTimeId(999L)).isFalse()
+        );
+    }
+
+    @Test
+    @DisplayName("특정 날짜와 시작 시간에 대한 예약 존재 여부를 확인할 수 있다")
+    void existsByDateAndReservationTimeStartAt() {
+        // given
+        LocalDate date = LocalDate.now();
+        LocalTime startAt = LocalTime.of(10, 0);
+        ReservationTime time = createAndSaveReservationTimeFixture();
+        Theme theme = createAndSaveThemeFixture();
+        Member member = createAndSaveMemberFixture();
+
+        createAndSaveReservedReservationFixture(member, theme, date, time);
+
+        // when & then
+        assertAll(
+                () -> assertThat(reservationRepository.existsByDateAndReservationTimeStartAt(
+                        date, startAt)).isTrue(),
+                () -> assertThat(reservationRepository.existsByDateAndReservationTimeStartAt(
+                        date.plusDays(1), startAt)).isFalse(),
+                () -> assertThat(reservationRepository.existsByDateAndReservationTimeStartAt(
+                        date, LocalTime.of(11, 0))).isFalse()
+        );
+    }
+
+    @Test
+    @DisplayName("특정 테마 ID에 대한 예약 존재 여부를 확인할 수 있다")
+    void existsByThemeId() {
+        // given
+        TestData testData = setUpTestData();
+
+        // when & then
+        assertAll(
+                () -> assertThat(reservationRepository.existsByThemeId(testData.theme1.getId())).isTrue(),
+                () -> assertThat(reservationRepository.existsByThemeId(999L)).isFalse()
+        );
     }
 
     private TestData setUpTestData() {
