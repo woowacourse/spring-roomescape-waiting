@@ -16,8 +16,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             select m
             from Member m
             left join fetch m.reservations r
-            join fetch r.reservationTime
-            join fetch r.theme
+            left join fetch r.reservationTime
+            left join fetch r.theme
             where m.id = :memberId
             """)
     Optional<Member> findFetchById(@Param("memberId") Long memberId);
@@ -32,6 +32,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             and r.reservationTime.id = :timeId
             and r.theme.id = :themeId
             and r.status = :status
+            order by r.createAt asc
             """)
     List<Member> findNextReserveMember(@Param("date") LocalDate date,
                                        @Param("timeId") Long timeId,
