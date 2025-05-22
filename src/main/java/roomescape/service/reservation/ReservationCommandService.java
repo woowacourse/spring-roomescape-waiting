@@ -1,39 +1,43 @@
-package roomescape.service;
+package roomescape.service.reservation;
 
-import java.time.LocalDate;
-import java.util.List;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
-import roomescape.dto.auth.LoginInfo;
-import roomescape.dto.reservation.MyReservationResponseDto;
+import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
-import roomescape.repository.JpaMemberRepository;
-import roomescape.repository.JpaReservationRepository;
-import roomescape.repository.JpaReservationTimeRepository;
-import roomescape.repository.JpaThemeRepository;
+import roomescape.repository.*;
 import roomescape.service.dto.ReservationCreateDto;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 @Service
-public class ReservationService {
+@Transactional
+public class ReservationCommandService {
 
     private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
     private final JpaMemberRepository memberRepository;
+    private final JpaWaitingRepository waitingRepository;
 
-    public ReservationService(final JpaReservationRepository reservationRepository,
-                              final JpaReservationTimeRepository reservationTimeRepository,
-                              final JpaThemeRepository themeRepository,
-                              final JpaMemberRepository memberRepository) {
+    public ReservationCommandService(JpaReservationRepository reservationRepository,
+                                     JpaReservationTimeRepository reservationTimeRepository,
+                                     JpaThemeRepository themeRepository,
+                                     JpaMemberRepository memberRepository,
+                                     JpaWaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponseDto createReservation(ReservationCreateDto dto) {
@@ -63,33 +67,33 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationResponseDto> findAllReservationResponses() {
-        List<Reservation> allReservations = reservationRepository.findAll();
+    public void cancelReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다."));
 
-        return allReservations.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
-                        reservation.getTheme()))
-                .toList();
+        Theme theme = reservation.getTheme();
+        LocalDate date = reservation.getDate();
+        ReservationTime time = reservation.getTime();
+
+        reservationRepository.delete(reservation);
+
+        promoteWaitingIfExists(theme, date, time);
     }
 
-    public List<ReservationResponseDto> findReservationBetween(long themeId, long memberId, LocalDate from,
-                                                               LocalDate to) {
-        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findByPeriod(from, to, themeId, memberId);
-        return reservationsByPeriodAndMemberAndTheme.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
-                        reservation.getTheme()))
-                .toList();
-    }
+    private void promoteWaitingIfExists(Theme theme, LocalDate date, ReservationTime time) {
+        Optional<Waiting> firstWaiting = waitingRepository.findWaitingsFor(
+                theme, date, time, PageRequest.of(0, 1))
+                .stream()
+                .findFirst();
 
-    public void deleteReservation(Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
-        }
-        reservationRepository.deleteById(id);
-    }
+        if (firstWaiting.isEmpty()) return;
 
-    public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
-        List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
-        return reservations.stream().map(reservation -> new MyReservationResponseDto(reservation)).toList();
+        Waiting waiting = firstWaiting.get();
+        Member member = waiting.getMember();
+
+        Reservation newReservation = Reservation.createWithoutId(member, date, time, theme);
+        reservationRepository.save(newReservation);
+
+        waitingRepository.delete(waiting);
     }
 }

@@ -16,8 +16,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @DataJpaTest
 class JpaReservationRepositoryTest {
 
@@ -30,15 +28,19 @@ class JpaReservationRepositoryTest {
     @Autowired
     JpaReservationTimeRepository reservationTimeRepository;
 
+    Member member;
+    ReservationTime reservationTime;
+    Theme theme;
+
     @BeforeEach
     void setUp() {
-        Member member = new Member(null, "가이온", "hello@woowa.com", Role.USER, "password");
+        member = new Member(null, "가이온", "hello@woowa.com", Role.USER, "password");
         memberRepository.save(member);
 
-        ReservationTime reservationTime = new ReservationTime(null, LocalTime.of(10,0));
+        reservationTime = new ReservationTime(null, LocalTime.of(10,0));
         reservationTimeRepository.save(reservationTime);
 
-        Theme theme = new Theme(null, "테마1", "설명", "썸네일");
+        theme = new Theme(null, "테마1", "설명", "썸네일");
         themeRepository.save(theme);
 
         Reservation reservation1 = new Reservation(null, member, LocalDate.now().plusDays(1),reservationTime,theme);
@@ -53,8 +55,8 @@ class JpaReservationRepositoryTest {
         List<Reservation> byPeriod = reservationRepository.findByPeriod(
                 LocalDate.now(),
                 LocalDate.now().plusDays(2),
-                1L,
-                1L);
+                theme.getId(),
+                member.getId());
         Assertions.assertThat(byPeriod.size()).isEqualTo(2);
     }
 }
