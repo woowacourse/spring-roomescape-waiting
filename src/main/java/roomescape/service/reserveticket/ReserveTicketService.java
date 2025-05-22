@@ -29,7 +29,7 @@ public class ReserveTicketService {
     @Transactional
     public long addReservation(AddReservationDto newReservationDto, long memberId) {
         Member member = memberService.getMemberById(memberId);
-        long reservationId = reservationService.addReservation(newReservationDto);
+        long reservationId = reservationService.addReservation(newReservationDto, member.getName());
         Reservation reservation = reservationService.getReservationById(reservationId);
         return reserveTicketRepository.add(reservation, member);
     }
