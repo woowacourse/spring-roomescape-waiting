@@ -60,7 +60,6 @@ class ReservationServiceTest {
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(RESERVATION_DATE, 1L, 1L)).thenReturn(false);
         Reservation saved = new Reservation(1L, member, RESERVATION_DATE, reservationTime, theme,
                 ReservationStatus.RESERVED);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
@@ -108,11 +107,13 @@ class ReservationServiceTest {
                 new ReservationResult(1L, new MemberResult(1L, "name1", MemberRole.USER, "email1@email.com"),
                         RESERVATION_DATE,
                         new ReservationTimeResult(1L, LocalTime.of(12, 1)),
-                        new ThemeResult(1L, "test", "description", "thumbnail")),
+                        new ThemeResult(1L, "test", "description", "thumbnail"),
+                        ReservationStatus.RESERVED),
                 new ReservationResult(2L, new MemberResult(2L, "name2", MemberRole.USER, "email2@email.com"),
                         RESERVATION_DATE,
                         new ReservationTimeResult(2L, LocalTime.of(13, 1)),
-                        new ThemeResult(1L, "test", "description", "thumbnail"))
+                        new ThemeResult(1L, "test", "description", "thumbnail"),
+                        ReservationStatus.RESERVED)
         ));
     }
 
@@ -134,7 +135,8 @@ class ReservationServiceTest {
                 new ReservationResult(1L, new MemberResult(1L, "name1", MemberRole.USER, "email1@email.com"),
                         RESERVATION_DATE,
                         new ReservationTimeResult(1L, LocalTime.of(12, 0)),
-                        new ThemeResult(1L, "test", "description", "thumbnail"))
+                        new ThemeResult(1L, "test", "description", "thumbnail"),
+                        ReservationStatus.RESERVED)
         );
     }
 
