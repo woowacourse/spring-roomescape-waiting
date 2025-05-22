@@ -62,7 +62,7 @@ public class ReservationCommandService {
         }
     }
 
-    public void deleteReservation(Long id) {
+    public void cancelReservation(Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
