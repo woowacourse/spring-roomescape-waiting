@@ -22,7 +22,7 @@ class ReservationPolicyTest {
             "2025-04-23T12:00, 2025-04-23T11:59",
             "2025-04-23T12:00, 2025-04-22T12:00"
     })
-    void 지난_날짜_예약은_불가능하다(String fixedNowStr, String reservationDateTimeStr) {
+    void 지난_날짜_예약은_불가능하다(LocalDateTime fixedNowStr, LocalDateTime reservationDateTimeStr) {
         // given
         Clock clock = fixedClock(fixedNowStr);
         Reservation reservation = reservationAt(reservationDateTimeStr);
@@ -39,7 +39,7 @@ class ReservationPolicyTest {
             "2025-04-23T12:00, 2025-04-23T12:00",
             "2025-04-23T12:00, 2025-04-23T12:09"
     })
-    void 임박한_예약은_불가능하다(String fixedNowStr, String reservationDateTimeStr) {
+    void 임박한_예약은_불가능하다(LocalDateTime fixedNowStr, LocalDateTime reservationDateTimeStr) {
         // given
         Clock clock = fixedClock(fixedNowStr);
         Reservation reservation = reservationAt(reservationDateTimeStr);
@@ -53,10 +53,10 @@ class ReservationPolicyTest {
 
     @ParameterizedTest
     @CsvSource({"2025-04-23T12:00, 2025-04-23T13:00"})
-    void 중복된_예약은_불가능하다(String fixedNowStr, String reservationDateTimeStr) {
+    void 중복된_예약은_불가능하다(LocalDateTime fixedNowStr, LocalDateTime dateTime) {
         // given
         Clock clock = fixedClock(fixedNowStr);
-        Reservation reservation = reservationAt(reservationDateTimeStr);
+        Reservation reservation = reservationAt(dateTime);
         ReservationPolicy policy = new ReservationPolicy(clock);
 
         // when & then
@@ -65,16 +65,14 @@ class ReservationPolicyTest {
                 .hasMessage(DUPLICATE_RESERVATION_MESSAGE);
     }
 
-    private Clock fixedClock(String timeStr) {
-        LocalDateTime time = LocalDateTime.parse(timeStr);
-        return Clock.fixed(time.toInstant(ZoneOffset.ofHours(9)), ZoneId.of("Asia/Seoul"));
+    private Clock fixedClock(LocalDateTime dateTime) {
+        return Clock.fixed(dateTime.toInstant(ZoneOffset.ofHours(9)), ZoneId.of("Asia/Seoul"));
     }
 
-    private Reservation reservationAt(String reservationDateTimeStr) {
+    private Reservation reservationAt(LocalDateTime dateTime) {
         Member member = TestFixture.createDefaultMember();
         Theme theme = TestFixture.createDefaultTheme();
 
-        LocalDateTime dateTime = LocalDateTime.parse(reservationDateTimeStr);
         ReservationTime reservationTime = TestFixture.createTimeFrom(dateTime.toLocalTime());
 
         return TestFixture.createNewReservation(member, dateTime.toLocalDate(), reservationTime, theme);

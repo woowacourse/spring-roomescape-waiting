@@ -25,7 +25,8 @@ public class ReservationCreationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationPolicy reservationPolicy;
 
-    public ReservationCreationService(ReservationRepository reservationRepository, MemberRepository memberRepository,
+    public ReservationCreationService(ReservationRepository reservationRepository,
+                                      MemberRepository memberRepository,
                                       ThemeRepository themeRepository,
                                       ReservationTimeRepository reservationTimeRepository,
                                       ReservationPolicy reservationPolicy) {

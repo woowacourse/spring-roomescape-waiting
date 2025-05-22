@@ -124,7 +124,7 @@ class ReservationServiceTest {
                 createNewReservation(member, DEFAULT_DATE, reservationTime, theme));
 
         //when
-        reservationService.deleteById(reservation.getId());
+        reservationService.deleteByIdAndReserveNextWaiting(reservation.getId());
 
         //then
         assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
@@ -144,7 +144,7 @@ class ReservationServiceTest {
         waitingRepository.save(createWaiting(member2, DEFAULT_DATE, reservationTime, theme));
 
         //when
-        reservationService.deleteById(reservation.getId());
+        reservationService.deleteByIdAndReserveNextWaiting(reservation.getId());
 
         //then
         assertAll(

@@ -34,7 +34,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long reservationId) {
+    public void deleteByIdAndReserveNextWaiting(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("reservationId", reservationId));
 

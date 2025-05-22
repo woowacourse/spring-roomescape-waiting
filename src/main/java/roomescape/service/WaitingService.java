@@ -19,6 +19,7 @@ import roomescape.service.param.CreateBookingParam;
 import roomescape.service.result.WaitingResult;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
