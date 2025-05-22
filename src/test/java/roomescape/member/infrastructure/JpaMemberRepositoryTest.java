@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 
@@ -16,10 +17,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 @DataJpaTest
+@Import(MemberRepositoryImpl.class)
 public class JpaMemberRepositoryTest {
 
     @Autowired
-    private JpaMemberRepository repository;
+    private MemberRepositoryImpl repository;
 
     @Test
     @DisplayName("정상적으로 저장되어 id를 반환하는지 확인한다.")

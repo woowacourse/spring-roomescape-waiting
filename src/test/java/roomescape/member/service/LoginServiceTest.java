@@ -23,6 +23,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 public class LoginServiceTest {
 
     private MemberRepository memberRepository = new FakeMemberRepository(new ArrayList<>());
+
     private LoginService loginService = new LoginService(
             new JwtTokenContainer("realjwttokensercretkeyrealjwttokensercretkey"),
             memberRepository,
