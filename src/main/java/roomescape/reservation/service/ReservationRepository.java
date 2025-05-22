@@ -25,4 +25,7 @@ public interface ReservationRepository {
     List<Reservation> findByFilter(Long memberId, Long themeId, LocalDate start, LocalDate end);
 
     List<Reservation> findAllByMemberId(Long memberId);
+
+    Optional<Reservation> findByThemeIdAndReservationTimeIdAndReservationDate_reservationDate(Long themeId, Long timeId,
+                                                                                              LocalDate date);
 }

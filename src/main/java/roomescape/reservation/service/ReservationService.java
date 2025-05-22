@@ -3,21 +3,21 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.controller.request.ReservationRequest;
+import roomescape.reservation.controller.response.MemberReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
-import roomescape.user.controller.dto.ReservationRequest;
-import roomescape.user.controller.dto.response.MemberReservationResponse;
 
 @Service
 public class ReservationService {
@@ -55,8 +55,7 @@ public class ReservationService {
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.findById(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVE));
-
+                .getDate(), reservationTime, theme, member));
         return ReservationResponse.from(created);
     }
 
@@ -72,7 +71,7 @@ public class ReservationService {
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.findById(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVE));
+                .getDate(), reservationTime, theme, member));
         return ReservationResponse.from(created);
     }
 
@@ -102,5 +101,14 @@ public class ReservationService {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
+    }
+
+    public ReservationResponse findByReservation(Long themeId, Long timeId, LocalDate date) {
+        Optional<Reservation> reservation = reservationRepository.findByThemeIdAndReservationTimeIdAndReservationDate_reservationDate(
+                themeId, timeId, date);
+        if (reservation.isPresent()) {
+            return ReservationResponse.from(reservation.get());
+        }
+        throw new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다.");
     }
 }
