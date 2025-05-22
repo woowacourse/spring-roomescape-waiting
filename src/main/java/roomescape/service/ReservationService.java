@@ -1,10 +1,10 @@
 package roomescape.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.request.ReservationSearchCondition;
 import roomescape.domain.Reservation;
 import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
@@ -24,10 +24,14 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
-    public List<ReservationResult> getReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom,
-                                                               LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.findReservationsInConditions(memberId, themeId, dateFrom,
-                dateTo);
+    public List<ReservationResult> getReservationsInConditions(ReservationSearchCondition condition) {
+        List<Reservation> reservations = reservationRepository.findReservationsInConditions(
+                condition.memberId(),
+                condition.themeId(),
+                condition.dateFrom(),
+                condition.dateTo()
+        );
+
         return reservations.stream()
                 .map(ReservationResult::from)
                 .toList();

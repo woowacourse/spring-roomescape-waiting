@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DatabaseCleaner;
+import roomescape.controller.dto.request.ReservationSearchCondition;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -74,8 +75,8 @@ class ReservationServiceTest {
                 createNewReservation(member, DEFAULT_DATE.plusDays(1), reservationTime, theme));
 
         //when
-        List<ReservationResult> reservationResults = reservationService.getReservationsInConditions(null, null, null,
-                null);
+        ReservationSearchCondition condition = new ReservationSearchCondition(null, null, null, null);
+        List<ReservationResult> reservationResults = reservationService.getReservationsInConditions(condition);
 
         //then
         assertAll(
@@ -102,8 +103,8 @@ class ReservationServiceTest {
                 createNewReservation(member2, DEFAULT_DATE, reservationTime, theme));
 
         //when
-        List<ReservationResult> reservationResults = reservationService.getReservationsInConditions(member1.getId(),
-                null, null, null);
+        ReservationSearchCondition condition = new ReservationSearchCondition(member1.getId(), null, null, null);
+        List<ReservationResult> reservationResults = reservationService.getReservationsInConditions(condition);
 
         //then
         assertAll(
