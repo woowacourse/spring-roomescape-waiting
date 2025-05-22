@@ -101,7 +101,7 @@ class ReserveTicketServiceTest {
         long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
         long reservationId = reserveTicketService.addReservation(addReservationDto, memberId);
 
-        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.searchReservations();
+        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.allReservationTickets();
 
         assertAll(
                 () -> assertThat(reserveTickets.get(0).getId()).isEqualTo(reservationId),
@@ -165,8 +165,15 @@ class ReserveTicketServiceTest {
                 new AddReservationDto(LocalDate.now().plusDays(2L), timeId, themeId),
                 memberId);
 
-        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.allReservationTickets();
-        assertThat(reserveTickets.getFirst().getReservationStatus()).isEqualTo(ReservationStatus.PREPARE);
+        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.allReservationTickets()
+                .stream()
+                .filter(reserveTicketWaiting -> reserveTicketWaiting.getReservationStatus()
+                        .equals(ReservationStatus.PREPARE))
+                .toList();
+        assertAll(
+                () -> assertThat(reserveTickets.getFirst().getReservationStatus()).isEqualTo(ReservationStatus.PREPARE),
+                () -> assertThat(reserveTickets).hasSize(1)
+        );
     }
 
     @Test
