@@ -55,6 +55,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
+        // TODO : 예약 대기가 있는 경우 처리
         reservationService.deleteReservationById(id);
 
         return ResponseEntity.noContent().build();
@@ -77,5 +78,12 @@ public class ReservationController {
         waitingService.deleteWaitingById(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<WaitingResponse>> getWaitings() {
+        List<WaitingResponse> responses = waitingService.getWaitings();
+
+        return ResponseEntity.ok(responses);
     }
 }

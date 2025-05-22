@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Waiting;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record WaitingResponse(
         Long id,
@@ -26,5 +27,11 @@ public record WaitingResponse(
                 waiting.getReservation().getDate(),
                 ReservationTimeResponse.from(waiting.getReservation().getTime())
         );
+    }
+
+    public static List<WaitingResponse> from(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }

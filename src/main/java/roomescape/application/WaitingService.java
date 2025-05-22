@@ -78,4 +78,10 @@ public class WaitingService {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 대기 건이 존재하지 않습니다."));
     }
+
+    public List<WaitingResponse> getWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        return WaitingResponse.from(waitings);
+    }
 }

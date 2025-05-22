@@ -135,7 +135,7 @@
 ### 4단계 - 예약 대기 관리
 - [x] 어드민 예약 대기 관리 페이지 응답
   - `/admin/waiting` 요청 시 예약 대기 관리 페이지 응답
-- [ ] 어드민 예약 대기 목록 조회 기능
+- [x] 어드민 예약 대기 목록 조회 기능
   - request
     ```
     GET /reservations/waitings HTTP/1.1
