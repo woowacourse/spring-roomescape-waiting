@@ -19,25 +19,24 @@ import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.entity.Reservation;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.global.Role;
-import roomescape.service.ReservationFacade;
 import roomescape.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationFacade reservationService;
+    private final ReservationService reservationService;
 
-    public ReservationController(ReservationFacade reservationService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
     @GetMapping
     @CheckRole(Role.ADMIN)
     public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<Reservation> reservations = reservationService.findAllReservation();
+        List<ConfirmedReservation> reservations = reservationService.findAllConfirmReservation();
         List<ReservationResponse> responses = reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -48,7 +47,7 @@ public class ReservationController {
     @GetMapping("/mine")
     @CheckRole({Role.USER, Role.ADMIN})
     public ResponseEntity<List<MyReservationResponse>> getMyReservation(LoginMemberRequest loginMemberRequest) {
-        List<Reservation> reservations = reservationService.findAllReservationByMember(loginMemberRequest.id());
+        List<ConfirmedReservation> reservations = reservationService.findAllReservationByMember(loginMemberRequest.id());
 
         List<WaitingWithRank> allWaitingWithRank = reservationService.findALlWaitingWithRank(loginMemberRequest.id());
 
@@ -72,7 +71,7 @@ public class ReservationController {
             @RequestBody @Valid CreateReservationRequest request,
             LoginMemberRequest loginMemberRequest
     ) {
-        Reservation reservation = reservationService.addReservation(request, loginMemberRequest);
+        ConfirmedReservation reservation = reservationService.addReservation(request, loginMemberRequest);
         ReservationResponse response = ReservationResponse.from(reservation);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -85,7 +84,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     @CheckRole(value = {Role.ADMIN, Role.USER})
-    public ResponseEntity<Void> deleteReservations(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteReservations(@PathVariable("id") Long id) {
         reservationService.deleteReservation(id);
 
         return ResponseEntity.noContent().build();
