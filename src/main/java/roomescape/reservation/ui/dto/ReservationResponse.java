@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 public record ReservationResponse(Long reservationId,
                                   UserResponse user,
                                   LocalDate date,
-                                  int sequence,
                                   ReservationTimeResponse time,
                                   ThemeResponse theme) {
 
@@ -33,7 +32,6 @@ public record ReservationResponse(Long reservationId,
                 domain.getId(),
                 UserResponse.from(user),
                 domain.getDate().getValue(),
-                domain.getStatus().getSequence(),
                 roomescape.time.ui.dto.ReservationTimeResponse.from(domain.getTime()),
                 ThemeResponse.from(domain.getTheme()));
     }

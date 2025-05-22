@@ -8,7 +8,6 @@ import roomescape.reservation.application.dto.AvailableReservationTimeServiceRes
 import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.domain.BookedCount;
-import roomescape.reservation.domain.BookedStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
@@ -46,7 +45,7 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
         final List<AvailableReservationTimeServiceResponse> responses = new ArrayList<>();
 
         for (final ReservationTime reservationTime : allTimes) {
-            final BookedStatus isBooked = BookedStatus.from(bookedTimeIds.contains(reservationTime.getId()));
+            final boolean isBooked = bookedTimeIds.contains(reservationTime.getId());
             responses.add(new AvailableReservationTimeServiceResponse(
                     reservationTime,
                     isBooked));

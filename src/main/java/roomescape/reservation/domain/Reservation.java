@@ -48,32 +48,23 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    @Embedded
-    @AttributeOverride(
-            name = BookedStatus.Fields.sequence,
-            column = @Column(name = Fields.status))
-    private BookedStatus status;
-
     public Reservation(final Long userId,
                        final ReservationDate date,
                        final ReservationTime time,
-                       final Theme theme,
-                       final BookedStatus status
+                       final Theme theme
     ) {
         validate(userId, date, time, theme);
         this.userId = userId;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
 
     public Reservation(final Long id,
                        final Long userId,
                        final ReservationDate date,
                        final ReservationTime time,
-                       final Theme theme,
-                       final BookedStatus status
+                       final Theme theme
     ) {
         validate(id);
         validate(userId, date, time, theme);
@@ -82,7 +73,6 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
 
     public static Reservation withId(final Long id,
@@ -90,14 +80,14 @@ public class Reservation {
                                      final ReservationDate date,
                                      final ReservationTime time,
                                      final Theme theme) {
-        return new Reservation(id, userId, date, time, theme, BookedStatus.from(0));
+        return new Reservation(id, userId, date, time, theme);
     }
 
     public static Reservation withoutId(final Long userId,
                                         final ReservationDate date,
                                         final ReservationTime time,
                                         final Theme theme) {
-        return new Reservation(userId, date, time, theme, BookedStatus.from(0));
+        return new Reservation(userId, date, time, theme);
     }
 
     private static void validate(final Long userId,

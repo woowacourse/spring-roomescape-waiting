@@ -145,11 +145,11 @@ class ReservationQueryServiceImplTest {
                             .hasSize(2);
 
                     assertThat(timesWithAvailability.stream()
-                            .filter(a -> a.bookedStatus().isBooked()))
+                            .filter(AvailableReservationTimeServiceResponse::isBooked))
                             .hasSize(1);
 
                     assertThat(timesWithAvailability.stream()
-                            .filter(a -> a.bookedStatus().isBooked())
+                            .filter(AvailableReservationTimeServiceResponse::isBooked)
                             .map(AvailableReservationTimeServiceResponse::time)
                             .findFirst()
                             .orElseThrow()
