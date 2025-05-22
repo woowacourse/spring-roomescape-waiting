@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.exception.custom.InvalidReservationException;
 import roomescape.global.ReservationStatus;
 
 @Entity
@@ -86,9 +87,11 @@ public class Reservation {
     }
 
     public void changeStatusWaitToReserve() {
-        if (member != null) {
-            member.waitToReserve(date, reservationTime, theme);
+        if (member == null) {
+            throw new InvalidReservationException("Member 가 없는 대기 reservation은 예약으로 변경할 수 없습니다.");
         }
+
+        this.status = ReservationStatus.RESERVED;
     }
 
     public Long getId() {
