@@ -100,7 +100,7 @@ class ReservationServiceImplTest {
     @Test
     void alreadyExists() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now().plusDays(1);
         Long timeId = 1L;
         Long themeId = 1L;
         String name = "에드";
