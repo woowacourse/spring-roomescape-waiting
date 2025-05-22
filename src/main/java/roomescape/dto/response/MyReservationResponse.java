@@ -9,8 +9,7 @@ public record MyReservationResponse(Long id,
                                     String theme,
                                     LocalDate date,
                                     LocalTime time,
-                                    String status,
-                                    long waitRank) {
+                                    String status) {
 
     public static MyReservationResponse from(ReservationWithRank reservationWithRank) {
 
@@ -21,7 +20,6 @@ public record MyReservationResponse(Long id,
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                reservation.getStatus().getText(),
-                reservationWithRank.getRank());
+                reservation.getStatus().renderText(reservationWithRank.getRank()));
     }
 }

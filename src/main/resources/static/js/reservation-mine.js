@@ -20,16 +20,11 @@ function render(data) {
         const date = item.date;
         const time = item.time;
         const status = item.status;
-        const waitRank = item.waitRank;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time
-        if (status === '예약') {
-            row.insertCell(3).textContent = status;
-        } else if (status === '대기') {
-            row.insertCell(3).textContent = waitRank + " 번째 " + status;
-        }
+        row.insertCell(3).textContent = status;
 
         if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
             const cancelCell = row.insertCell(4);

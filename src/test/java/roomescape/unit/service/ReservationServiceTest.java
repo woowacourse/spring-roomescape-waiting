@@ -182,8 +182,7 @@ class ReservationServiceTest {
                 reservation2.getTheme().getName(),
                 reservation2.getDate(),
                 reservation2.getStartAt(),
-                reservation2.getStatus().getText(),
-                0);
+                reservation2.getStatus().renderText(0));
 
         assertAll(
                 () -> assertThat(actual).hasSize(1),
