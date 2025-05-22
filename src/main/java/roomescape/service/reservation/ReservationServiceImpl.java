@@ -4,10 +4,12 @@ import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
@@ -16,12 +18,14 @@ import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
 import roomescape.exception.reservation.ReservationInPastException;
+import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
+import roomescape.repository.waiting.WaitingRepository;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -30,16 +34,19 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationServiceImpl(ReservationRepository reservationRepository,
                                   ReservationTimeRepository timeRepository, ThemeRepository themeRepository,
-                                  MemberRepository memberRepository) {
+                                  MemberRepository memberRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public ReservationResponse create(ReservationRequest request, Member member) {
         ReservationTime reservationTime = timeRepository.findById(request.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
@@ -51,7 +58,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new ReservationInPastException();
         }
 
-        if (reservationRepository.existsByDateAndTime(request.date(), reservationTime)) {
+        if (reservationRepository.existsByDateAndTimeId(request.date(), reservationTime.getId())) {
             throw new ReservationAlreadyExistsException();
         }
 
@@ -61,14 +68,39 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationResponse.from(reservationRepository.save(newReservation));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAll() {
         return ReservationResponse.from(reservationRepository.findAll());
     }
 
+    @Transactional
     public void deleteById(Long id) {
+
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(() -> {
+            throw new ReservationNotFoundException(id);
+        });
+
         reservationRepository.deleteById(id);
+
+        if (waitingRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId())) {
+            promoteFirstWaitingToReservation(reservation);
+        }
     }
 
+    private void promoteFirstWaitingToReservation(Reservation reservation) {
+        Waiting waiting = waitingRepository.findFirstWaitingByDateAndTimeIdAndThemeId(reservation.getDate(),
+                reservation.getTime().getId(), reservation.getTheme().getId());
+
+        Reservation newReservation = new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme(),
+                waiting.getMember());
+
+        reservationRepository.save(newReservation);
+        waitingRepository.deleteById(waiting.getId());
+
+    }
+
+    @Transactional
     @Override
     public ReservationResponse createByAdmin(AdminReservationRequest adminReservationRequest) {
         ReservationTime reservationTime = timeRepository.findById(adminReservationRequest.timeId())
@@ -86,6 +118,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationResponse.from(reservationRepository.save(newReservation));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ReservationResponse> getReservationsByConditions(@Valid SearchConditionsRequest searchConditionsRequest) {
 
@@ -100,6 +133,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<MemberReservationResponse> getReservationByMember(Member member) {
         return reservationRepository.findAllByMember(member)

@@ -3,6 +3,7 @@ package roomescape.service.reservationtime;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.reservationtime.AvailableTimeResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
@@ -24,6 +25,7 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse create(ReservationTimeRequest request) {
 
         if (timeRepository.existsByStartAt(request.startAt())) {
@@ -34,10 +36,12 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
         return ReservationTimeResponse.from(timeRepository.save(newReservationTime));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getAll() {
         return ReservationTimeResponse.from(timeRepository.findAll());
     }
 
+    @Transactional
     public void deleteById(Long id) {
 
         if (isReservationExists(id)) {
@@ -50,19 +54,26 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
         return reservationRepository.existsByTimeId(id);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
 
         List<Long> bookedReservationTimesId = reservationRepository.findAllTimeIdByDateAndThemeId(date,
                 themeId);
         List<ReservationTime> reservationTimes = timeRepository.findAll();
+        List<AvailableTimeResponse> availableTimeResponses = getAvailableTimeResponses(reservationTimes,
+                bookedReservationTimesId);
 
-        List<AvailableTimeResponse> availableTimeResponses = reservationTimes.stream()
+        return availableTimeResponses;
+    }
+
+    private List<AvailableTimeResponse> getAvailableTimeResponses(List<ReservationTime> reservationTimes,
+                                                                  List<Long> bookedReservationTimesId) {
+        return reservationTimes.stream()
                 .map(reservationTime -> {
                     boolean alreadyBooked = bookedReservationTimesId.contains(reservationTime.getId());
                     return AvailableTimeResponse.from(reservationTime, alreadyBooked);
                 })
                 .toList();
-
-        return availableTimeResponses;
     }
+
 }

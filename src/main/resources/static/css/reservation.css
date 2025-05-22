@@ -13,3 +13,9 @@
     color: #666666;
     cursor: not-allowed;
 }
+
+.time-slot.already-booked {
+    background-color: #e0e0e0;
+    color: #888;
+    cursor: pointer;
+}
