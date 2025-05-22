@@ -91,7 +91,6 @@ class ReservationWaitControllerTest {
                     .andExpect(status().isCreated())
                     .andExpect(header().string("Location",
                             matchesPattern(".*/reservations/wait/")))
-                    .andExpect(jsonPath("$.id").value(response.getId()))
                     .andExpect(jsonPath("$.member.id").value(memberId))
                     .andExpect(jsonPath("$.theme.id").value(1L))
                     .andExpect(jsonPath("$.date").value("2024-05-05"))

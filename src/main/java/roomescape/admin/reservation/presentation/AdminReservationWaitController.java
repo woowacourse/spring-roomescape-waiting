@@ -11,7 +11,6 @@ import roomescape.admin.reservation.presentation.dto.AdminWaitingReservationResp
 import roomescape.global.auth.Auth;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @RestController
 @RequestMapping("/reservations/wait")
@@ -31,7 +30,7 @@ public class AdminReservationWaitController {
 
     @Auth(Role.ADMIN)
     @PatchMapping("/accept/{reservationId}")
-    public ResponseEntity<ReservationResponse> acceptWaitingReservation(
+    public ResponseEntity<Void> acceptWaitingReservation(
             final @PathVariable Long reservationId
     ) {
         reservationService.acceptWaitingReservation(reservationId);
