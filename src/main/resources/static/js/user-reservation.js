@@ -48,7 +48,7 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
-        if (booked) div.classList.add('disabled');
+        if (booked) div.classList.add('booked');
     }
     return div;
 }
@@ -104,7 +104,7 @@ function checkDateAndThemeAndTime() {
     const button = document.getElementById("reserve-button");
     const waitButton = document.getElementById("wait-button");
 
-    if (date && theme && time && time.getAttribute('data-time-booked') !== 'true') {
+    if (date && theme && time) {
         if (time.getAttribute('data-time-booked') === 'true') {
             // 선택된 시간이 이미 예약된 경우
             button.classList.add("disabled");
@@ -187,6 +187,7 @@ function onWaitButtonClick() {
         alert("Please select a date, theme, and time before making a reservation waiting.");
     }
 }
+
 
 function requestRead(endpoint) {
     return fetch(endpoint)

@@ -3,6 +3,10 @@
     opacity: 0.6;
 }
 
+.booked {
+    opacity: 0.6;
+}
+
 #theme-slots .theme-slot.active, #time-slots .time-slot.active {
     background-color: #0a3711 !important;
     color: white;
