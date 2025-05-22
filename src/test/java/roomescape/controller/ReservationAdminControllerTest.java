@@ -32,8 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static roomescape.TestFixture.TEST_DATE;
 import static roomescape.TestFixture.VALID_TOKEN;
 
-@WebMvcTest(AdminController.class)
-class AdminControllerTest {
+@WebMvcTest(ReservationAdminController.class)
+class ReservationAdminControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

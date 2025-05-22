@@ -40,16 +40,4 @@ public class WaitingController {
         WaitingResult waitingresult = waitingService.create(createWaitingRequest.toServiceParam(loginMemberInfo.id()));
         return ResponseEntity.status(HttpStatus.CREATED).body(WaitingResponse.from(waitingresult));
     }
-
-    @PostMapping("/{waitingId}/approve")
-    public ResponseEntity<Void> approveWaiting(@PathVariable Long waitingId) {
-        waitingService.approve(waitingId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{waitingId}/reject")
-    public ResponseEntity<Void> rejectWaiting(@PathVariable Long waitingId) {
-        waitingService.deleteById(waitingId);
-        return ResponseEntity.noContent().build();
-    }
 }

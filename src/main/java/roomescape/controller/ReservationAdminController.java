@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/admin")
-public class AdminController {
+public class ReservationAdminController {
 
     private final ReservationService reservationService;
 
-    public AdminController(final ReservationService reservationService) {
+    public ReservationAdminController(final ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 

@@ -54,7 +54,7 @@ function approve(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 승인 API 호출
      */
-    const endpoint = '/waitings/' + id + "/approve";
+    const endpoint = '/admin/waitings/' + id + "/approve";
     return fetch(endpoint, {
         method: 'post'
     }).then(response => {
@@ -71,7 +71,7 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = '/waitings/' + id + "/reject";
+    const endpoint = '/admin/waitings/' + id + "/reject";
     return fetch(endpoint, {
         method: 'post'
     }).then(response => {
