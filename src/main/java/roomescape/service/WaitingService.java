@@ -17,6 +17,7 @@ import java.util.Objects;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -24,11 +25,13 @@ public class WaitingService {
     public WaitingService(MemberRepository memberRepository,
                           ThemeRepository themeRepository,
                           ReservationTimeRepository reservationTimeRepository,
-                          WaitingRepository waitingRepository) {
+                          WaitingRepository waitingRepository,
+                          ReservationRepository reservationRepository) {
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<WaitingResult> findAll() {
@@ -68,6 +71,20 @@ public class WaitingService {
         }
 
         waitingRepository.deleteById(waitingId);
+    }
+
+    public void approve(final Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(
+                () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
+
+        Reservation newReservation = Reservation.createNew(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
+        reservationRepository.save(newReservation);
+        waitingRepository.deleteById(waitingId);
+    }
+
+    public void approveFirst(Long themeId, LocalDate date, Long timeId) {
+        List<Waiting> waitings = waitingRepository.findByThemeIdAndDateAndTimeId(themeId, date, timeId);
+        approve(waitings.getFirst().getId()); //TODO: 1순위 대기 가져오는 로직 수정 필요
     }
 
     public void deleteById(final Long waitingId) {

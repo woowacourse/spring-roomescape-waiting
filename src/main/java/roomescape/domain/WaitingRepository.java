@@ -19,4 +19,6 @@ public interface WaitingRepository {
     List<Waiting> findAll();
 
     boolean existsById(Long waitingId);
+
+    List<Waiting> findByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId);
 }
