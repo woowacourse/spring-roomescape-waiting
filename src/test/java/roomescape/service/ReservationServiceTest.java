@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
@@ -52,7 +52,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "theme", "theme", "theme");
         Member member = new Member(1L, "moda", "email", Role.ADMIN, "pw");
-        Reservation reservation = new Reservation(1L, member, LocalDate.of(2025, 11, 11), reservationTime, theme);
+        Reservation reservation = Reservation.createWithoutId(member, LocalDate.of(2025, 11, 11), reservationTime, theme);
 
         when(reservationTimeRepository.findById(any(Long.class))).thenReturn(
                 Optional.of(reservationTime));

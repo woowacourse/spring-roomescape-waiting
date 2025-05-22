@@ -1,6 +1,8 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -9,6 +11,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.exception.InvalidRequestException;
 
@@ -16,7 +20,7 @@ import roomescape.exception.InvalidRequestException;
 public class Reservation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -30,12 +34,17 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus status;
+
     public Reservation(
             final Long id,
             final Member member,
             final LocalDate date,
             final ReservationTime time,
-            final Theme theme) {
+            final Theme theme,
+            final ReservationStatus status
+    ) {
         validateDate(date);
         validateReservationTime(time);
         validateTheme(theme);
@@ -44,16 +53,25 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
     }
 
     public Reservation() {
     }
 
+    //TODO 일단 변경을 최소화하기 위해 메서드를 분리함
     public static Reservation createWithoutId(Member member,
                                               LocalDate date,
                                               ReservationTime time,
                                               Theme theme) {
-        return new Reservation(null, member, date, time, theme);
+        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
+    }
+
+    public static Reservation createWaitingWithoutId(Member member,
+                                              LocalDate date,
+                                              ReservationTime time,
+                                              Theme theme) {
+        return new Reservation(null, member, date, time, theme, ReservationStatus.WAITING);
     }
 
     public static void validateReservableTime(final LocalDate date, final LocalTime startAt) {
@@ -114,5 +132,9 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }
