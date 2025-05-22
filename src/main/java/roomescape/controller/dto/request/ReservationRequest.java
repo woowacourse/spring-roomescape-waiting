@@ -7,9 +7,8 @@ import java.time.LocalDate;
 
 public record ReservationRequest(
     @JsonFormat(pattern = "yyyy-MM-dd") @NotNull LocalDate date,
-    @NotNull Long timeId,
-    @NotNull Long themeId,
-    Long memberId
+    @NotNull long timeId,
+    @NotNull long themeId
 ) {
 
 }
