@@ -8,27 +8,27 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 
 @Service
 public class ReservationAdminService {
 
-    private final ReservationRepository reservationRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final MemberRepository memberRepository;
+    private final ReservationJpaRepository reservationJpaRepository;
+    private final ThemeJpaRepository themeJpaRepository;
+    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
-    public ReservationAdminService(ReservationRepository reservationRepository,
-                                   ThemeRepository themeRepository,
-                                   ReservationTimeRepository reservationTimeRepository,
-                                   MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
-        this.themeRepository = themeRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.memberRepository = memberRepository;
+    public ReservationAdminService(ReservationJpaRepository reservationJpaRepository,
+                                   ThemeJpaRepository themeJpaRepository,
+                                   ReservationTimeJpaRepository reservationTimeJpaRepository,
+                                   MemberJpaRepository memberJpaRepository) {
+        this.reservationJpaRepository = reservationJpaRepository;
+        this.themeJpaRepository = themeJpaRepository;
+        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
+        this.memberJpaRepository = memberJpaRepository;
     }
 
     public void saveReservation(ReservationAdminRegisterDto registerDto) {
@@ -38,21 +38,21 @@ public class ReservationAdminService {
 
         Reservation reservation = new Reservation(registerDto.date(), reservationTime, theme, member, LocalDate.now());
 
-        reservationRepository.save(reservation);
+        reservationJpaRepository.save(reservation);
     }
 
     private Theme findThemeById(Long id) {
-        return themeRepository.findById(id)
+        return themeJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 id 를 가진 테마는 존재하지 않습니다."));
     }
 
     private ReservationTime findReservationTimeById(Long id) {
-        return reservationTimeRepository.findById(id)
+        return reservationTimeJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 id 를 가진 예약 시각은 존재하지 않습니다."));
     }
 
     private Member findMemberById(Long id) {
-        return memberRepository.findById(id)
+        return memberJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 id 를 가진 회원은 존재하지 않습니다."));
     }
 }

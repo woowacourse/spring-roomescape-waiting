@@ -14,27 +14,27 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 
 @Service
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final ReservationJpaRepository reservationJpaRepository;
+    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
+    private final ThemeJpaRepository themeJpaRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+    public ReservationService(ReservationJpaRepository reservationJpaRepository,
+                              ReservationTimeJpaRepository reservationTimeJpaRepository,
+                              ThemeJpaRepository themeJpaRepository,
+                              MemberJpaRepository memberJpaRepository) {
+        this.reservationJpaRepository = reservationJpaRepository;
+        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
+        this.themeJpaRepository = themeJpaRepository;
+        this.memberJpaRepository = memberJpaRepository;
     }
 
     public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
@@ -42,12 +42,12 @@ public class ReservationService {
         Reservation reservation = createReservation(reservationRegisterDto, loginMember);
         assertReservationIsNotDuplicated(reservation);
 
-        Reservation savedReservation = reservationRepository.save(reservation);
+        Reservation savedReservation = reservationJpaRepository.save(reservation);
         return new ReservationResponseDto(savedReservation);
     }
 
     public List<ReservationResponseDto> getAllReservations() {
-        return reservationRepository.findAll().stream()
+        return reservationJpaRepository.findAll().stream()
                 .map(ReservationResponseDto::new)
                 .toList();
     }
@@ -58,7 +58,7 @@ public class ReservationService {
         LocalDate startDate = reservationSearchDto.startDate();
         LocalDate endDate = reservationSearchDto.endDate();
 
-        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
+        return reservationJpaRepository.findByThemeIdAndMemberIdAndDateBetween(
                         themeId,
                         memberId,
                         startDate,
@@ -68,11 +68,11 @@ public class ReservationService {
     }
 
     public void cancelReservation(Long id) {
-        reservationRepository.deleteById(id);
+        reservationJpaRepository.deleteById(id);
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
+        List<Reservation> reservations = reservationJpaRepository.findByMemberId(loginMember.id());
 
         return reservations.stream()
                 .map(MemberReservationResponseDto::new)
@@ -88,22 +88,22 @@ public class ReservationService {
     }
 
     private ReservationTime findTimeById(final Long id) {
-        return reservationTimeRepository.findById(id)
+        return reservationTimeJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id 에 해당하는 예약 시각이 존재하지 않습니다."));
     }
 
     private Theme findThemeById(final Long id) {
-        return themeRepository.findById(id)
+        return themeJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id 에 해당하는 테마가 존재하지 않습니다."));
     }
 
     private Member findMemberById(Long id) {
-        return memberRepository.findById(id)
+        return memberJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자에 대한 예약 요청입니다."));
     }
 
     private void assertReservationIsNotDuplicated(Reservation reservation) {
-        reservationRepository.findByDateAndReservationTime(reservation.getDate(), reservation.getReservationTime())
+        reservationJpaRepository.findByDateAndReservationTime(reservation.getDate(), reservation.getReservationTime())
                 .ifPresent(foundReservation -> {
                     throw new DuplicatedException("이미 예약이 존재합니다.");
                 });

@@ -15,10 +15,10 @@ import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Reservation;
 import roomescape.model.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -28,16 +28,16 @@ class ThemeServiceTest {
     ThemeService themeService;
 
     @Autowired
-    ThemeRepository themeRepository;
+    ThemeJpaRepository themeJpaRepository;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationJpaRepository reservationJpaRepository;
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberJpaRepository;
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @DisplayName("모든 테마를 조회할 수 있다.")
     @Test
@@ -94,13 +94,13 @@ class ThemeServiceTest {
     void test3() {
         // given
         Theme theme = new Theme("테마", "설명", "이미지");
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeJpaRepository.save(theme);
 
         // when
         themeService.deleteTheme(savedTheme.getId());
 
         // then
-        List<Theme> themes = themeRepository.findAll();
+        List<Theme> themes = themeJpaRepository.findAll();
 
         List<Long> actual = themes.stream()
                 .map(Theme::getId)
@@ -114,14 +114,14 @@ class ThemeServiceTest {
     void test4() {
         // given
         Theme theme = new Theme("테마", "설명", "이미지");
-        Theme savedTheme = themeRepository.save(theme);
-        List<Reservation> reservations = reservationRepository.findByThemeId(savedTheme.getId());
+        Theme savedTheme = themeJpaRepository.save(theme);
+        List<Reservation> reservations = reservationJpaRepository.findByThemeId(savedTheme.getId());
 
         // when
         themeService.deleteTheme(savedTheme.getId());
 
         // then
-        List<Theme> actual = reservationRepository.findByThemeId(savedTheme.getId()).stream()
+        List<Theme> actual = reservationJpaRepository.findByThemeId(savedTheme.getId()).stream()
                 .map(Reservation::getTheme)
                 .toList();
         assertThat(actual).allMatch(Objects::isNull);

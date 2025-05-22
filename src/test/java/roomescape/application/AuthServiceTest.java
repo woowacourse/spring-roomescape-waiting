@@ -14,7 +14,7 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.request.LoginRequestDto;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
-import roomescape.repository.MemberRepository;
+import roomescape.infrastructure.db.MemberJpaRepository;
 
 @SpringBootTest
 public class AuthServiceTest {
@@ -23,7 +23,7 @@ public class AuthServiceTest {
     JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberJpaRepository;
 
     @Autowired
     AuthService authService;

@@ -23,8 +23,8 @@ import roomescape.dto.response.ReservationResponseDto;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -34,10 +34,10 @@ public class MissionStepTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
-    private ThemeRepository themeRepository;
+    private ThemeJpaRepository themeJpaRepository;
 
     private String email;
 
@@ -46,8 +46,8 @@ public class MissionStepTest {
 
     @BeforeEach
     void beforeEachTest() {
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 10)));
-        themeRepository.save(new Theme("공포", "무서워요", "image"));
+        reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(10, 10)));
+        themeJpaRepository.save(new Theme("공포", "무서워요", "image"));
 
         this.email = "email@gmail.com";
         jdbcTemplate.update("INSERT INTO member"

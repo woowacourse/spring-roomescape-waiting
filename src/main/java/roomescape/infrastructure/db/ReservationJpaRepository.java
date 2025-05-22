@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.infrastructure.db;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
 
     Optional<Reservation> findByDateAndReservationTime(LocalDate date, ReservationTime time);
 

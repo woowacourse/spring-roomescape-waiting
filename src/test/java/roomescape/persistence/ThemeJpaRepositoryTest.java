@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.persistence;
 
 
 import jakarta.persistence.EntityManager;
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -17,10 +18,10 @@ import roomescape.model.Role;
 import roomescape.model.Theme;
 
 @DataJpaTest
-class ThemeRepositoryTest {
+class ThemeJpaRepositoryTest {
 
     @Autowired
-    ThemeRepository themeRepository;
+    ThemeJpaRepository themeJpaRepository;
 
     @Autowired
     EntityManager entityManager;
@@ -66,7 +67,7 @@ class ThemeRepositoryTest {
         entityManager.clear();
 
         //when
-        List<String> actual = themeRepository.findTopReservedThemesSince(
+        List<String> actual = themeJpaRepository.findTopReservedThemesSince(
                         LocalDate.now().minusDays(2),
                         LocalDate.now(),
                         2
@@ -86,10 +87,10 @@ class ThemeRepositoryTest {
         // given
         String name = "새로운 테마";
         Theme theme = new Theme(name, "설명", "썸네일");
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeJpaRepository.save(theme);
 
         // when
-        boolean actual = themeRepository.existsByName(name);
+        boolean actual = themeJpaRepository.existsByName(name);
 
         // then
         assertThat(actual).isTrue();

@@ -15,7 +15,7 @@ import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.repository.ReservationRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -25,7 +25,7 @@ class ReservationTimeServiceTest {
     ReservationTimeService reservationTimeService;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationJpaRepository reservationJpaRepository;
 
     @Test
     @DisplayName("시간을 삭제한다")
@@ -87,7 +87,7 @@ class ReservationTimeServiceTest {
         reservationTimeService.deleteTime(saved.id());
 
         // then
-        List<ReservationTime> actual = reservationRepository.findByReservationTimeId(saved.id()).stream()
+        List<ReservationTime> actual = reservationJpaRepository.findByReservationTimeId(saved.id()).stream()
                 .map(Reservation::getReservationTime)
                 .toList();
         assertThat(actual).allMatch(Objects::isNull);

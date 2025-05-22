@@ -10,8 +10,8 @@ import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Theme;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 
 @Service
 public class ThemeService {
@@ -19,16 +19,16 @@ public class ThemeService {
     private static final int POPULAR_DAY_RANGE = 7;
     private static final int POPULAR_THEME_SIZE = 10;
 
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ThemeJpaRepository themeJpaRepository;
+    private final ReservationJpaRepository reservationJpaRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
+    public ThemeService(ThemeJpaRepository themeJpaRepository, ReservationJpaRepository reservationJpaRepository) {
+        this.themeJpaRepository = themeJpaRepository;
+        this.reservationJpaRepository = reservationJpaRepository;
     }
 
     public List<ThemeResponseDto> getAllThemes() {
-        return themeRepository.findAll().stream()
+        return themeJpaRepository.findAll().stream()
                 .map(ThemeResponseDto::new)
                 .collect(Collectors.toList());
     }
@@ -37,7 +37,7 @@ public class ThemeService {
         validateTheme(themeRegisterDto);
 
         Theme theme = themeRegisterDto.convertToTheme();
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeJpaRepository.save(theme);
 
         return new ThemeResponseDto(
                 savedTheme.getId(),
@@ -48,7 +48,7 @@ public class ThemeService {
     }
 
     private void validateTheme(ThemeRegisterDto themeRegisterDto) {
-        boolean duplicatedNameExisted = themeRepository.existsByName(themeRegisterDto.name());
+        boolean duplicatedNameExisted = themeJpaRepository.existsByName(themeRegisterDto.name());
         if (duplicatedNameExisted) {
             throw new DuplicatedException("중복된 테마명은 등록할 수 없습니다.");
         }
@@ -56,7 +56,7 @@ public class ThemeService {
 
     public void deleteTheme(Long id) {
         try {
-            themeRepository.deleteById(id);
+            themeJpaRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
             throw new ResourceInUseException("삭제하고자 하는 테마에 예약된 정보가 있습니다.");
         }
@@ -65,7 +65,7 @@ public class ThemeService {
     public List<ThemeResponseDto> findPopularThemes(String date) {
         LocalDate parsedDate = LocalDate.parse(date);
 
-        return themeRepository.findTopReservedThemesSince(
+        return themeJpaRepository.findTopReservedThemesSince(
                         parsedDate,
                         parsedDate.minusDays(POPULAR_DAY_RANGE),
                         POPULAR_THEME_SIZE).stream()

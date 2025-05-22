@@ -26,10 +26,10 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 
 @Slf4j
 @SpringBootTest
@@ -40,17 +40,17 @@ class ReservationServiceTest {
     ReservationService reservationService;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationJpaRepository reservationJpaRepository;
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberJpaRepository;
 
     private LoginMember loginMember;
     @Autowired
-    private ThemeRepository themeRepository;
+    private ThemeJpaRepository themeJpaRepository;
 
     @BeforeEach
     void setUp() {
@@ -128,17 +128,17 @@ class ReservationServiceTest {
     void test6() {
         //given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeJpaRepository.save(reservationTime);
 
         Theme theme = new Theme("테마", "공포", "image");
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeJpaRepository.save(theme);
 
         Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
-        Member savedMember = memberRepository.save(member);
+        Member savedMember = memberJpaRepository.save(member);
 
         Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                 savedMember, LocalDate.now());
-        Reservation savedReservation = reservationRepository.save(reservation);
+        Reservation savedReservation = reservationJpaRepository.save(reservation);
 
         LoginMember loginMember = new LoginMember(savedMember);
 

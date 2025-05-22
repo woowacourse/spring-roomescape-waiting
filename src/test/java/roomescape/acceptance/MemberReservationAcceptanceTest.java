@@ -18,10 +18,10 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 import roomescape.application.service.ReservationService;
 
@@ -33,16 +33,16 @@ class MemberReservationAcceptanceTest {
     JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberJpaRepository;
 
     @Autowired
-    ThemeRepository themeRepository;
+    ThemeJpaRepository themeJpaRepository;
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationJpaRepository reservationJpaRepository;
     @Autowired
     private ReservationService reservationService;
 
@@ -51,17 +51,17 @@ class MemberReservationAcceptanceTest {
     void test1() {
         //given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
-        ReservationTime savedReservationTime = this.reservationTimeRepository.save(reservationTime);
+        ReservationTime savedReservationTime = this.reservationTimeJpaRepository.save(reservationTime);
 
         Theme theme = new Theme("테마", "공포", "image");
-        Theme savedTheme = this.themeRepository.save(theme);
+        Theme savedTheme = this.themeJpaRepository.save(theme);
 
         Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
-        Member savedMember = this.memberRepository.save(member);
+        Member savedMember = this.memberJpaRepository.save(member);
 
         Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                 savedMember, LocalDate.now());
-        Reservation savedReservation = this.reservationRepository.save(reservation);
+        Reservation savedReservation = this.reservationJpaRepository.save(reservation);
 
         String token = jjwtJwtTokenProvider.createToken(savedMember.getEmail());
 

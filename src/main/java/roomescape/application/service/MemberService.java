@@ -4,19 +4,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.dto.response.MemberResponseDto;
-import roomescape.repository.MemberRepository;
+import roomescape.infrastructure.db.MemberJpaRepository;
 
 @Service
 public class MemberService {
 
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
-    public MemberService(final MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
+    public MemberService(final MemberJpaRepository memberJpaRepository) {
+        this.memberJpaRepository = memberJpaRepository;
     }
 
     public List<MemberResponseDto> findAll() {
-        return memberRepository.findAll().stream()
+        return memberJpaRepository.findAll().stream()
                 .map(MemberResponseDto::new)
                 .collect(Collectors.toList());
     }

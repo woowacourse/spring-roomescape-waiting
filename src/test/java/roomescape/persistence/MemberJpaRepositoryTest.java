@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.persistence;
 
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -7,14 +7,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Role;
 
 @DataJpaTest
-class MemberRepositoryTest {
+class MemberJpaRepositoryTest {
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberJpaRepository;
 
     @Test
     @DisplayName("이메일을 통해 저장된 모든 Member 를 가져온다")
@@ -22,7 +23,7 @@ class MemberRepositoryTest {
         // given
         String email = "email@gmail.com";
 
-        Member member = memberRepository.save(new Member(
+        Member member = memberJpaRepository.save(new Member(
                 "히로",
                 email,
                 "password"
@@ -30,7 +31,7 @@ class MemberRepositoryTest {
         );
 
         // when
-        Optional<Member> foundMember = memberRepository.findByEmail(email);
+        Optional<Member> foundMember = memberJpaRepository.findByEmail(email);
 
         // then
         assertAll(

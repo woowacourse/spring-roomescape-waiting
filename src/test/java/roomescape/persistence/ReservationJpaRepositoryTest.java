@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.persistence;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,6 +10,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -17,32 +21,32 @@ import roomescape.model.Role;
 import roomescape.model.Theme;
 
 @DataJpaTest
-class ReservationRepositoryTest {
+class ReservationJpaRepositoryTest {
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationJpaRepository reservationJpaRepository;
 
     @Autowired
-    ReservationTimeRepository reservationTimeRepository;
+    ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
-    ThemeRepository themeRepository;
+    ThemeJpaRepository themeJpaRepository;
 
     @Autowired
-    MemberRepository memberRepository;
+    MemberJpaRepository memberJpaRepository;
 
     @Test
     @DisplayName("테마와 멤버의 아이디 및 특정 날짜 사이에 있는 예약들을 가져온다")
     void test1() {
         // given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeJpaRepository.save(reservationTime);
 
         Theme theme = new Theme("테마", "설명", "썸네일");
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeJpaRepository.save(theme);
 
         Member member = new Member("도기", "email@gmail.com", "password", Role.ADMIN);
-        Member savedMember = memberRepository.save(member);
+        Member savedMember = memberJpaRepository.save(member);
 
         Reservation reservationInRange = new Reservation(
                 LocalDate.now().plusDays(1),
@@ -60,11 +64,11 @@ class ReservationRepositoryTest {
                 LocalDate.now()
         );
 
-        reservationRepository.save(reservationInRange);
-        reservationRepository.save(secondReservationOutOfRange);
+        reservationJpaRepository.save(reservationInRange);
+        reservationJpaRepository.save(secondReservationOutOfRange);
 
         // when
-        List<Reservation> actual = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
+        List<Reservation> actual = reservationJpaRepository.findByThemeIdAndMemberIdAndDateBetween(
                 savedTheme.getId(),
                 savedMember.getId(),
                 LocalDate.now().plusDays(1),
@@ -92,13 +96,13 @@ class ReservationRepositoryTest {
     void test2() {
         // given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeJpaRepository.save(reservationTime);
 
         Theme theme = new Theme("테마", "설명", "썸네일");
-        Theme savedTheme = themeRepository.save(theme);
+        Theme savedTheme = themeJpaRepository.save(theme);
 
         Member member = new Member("도기", "email@gmail.com", "password", Role.ADMIN);
-        Member savedMember = memberRepository.save(member);
+        Member savedMember = memberJpaRepository.save(member);
 
         Reservation reservationInRange = new Reservation(
                 LocalDate.now().plusDays(1),
@@ -116,11 +120,11 @@ class ReservationRepositoryTest {
                 LocalDate.now()
         );
 
-        reservationRepository.save(reservationInRange);
-        reservationRepository.save(secondReservationOutOfRange);
+        reservationJpaRepository.save(reservationInRange);
+        reservationJpaRepository.save(secondReservationOutOfRange);
 
         // when
-        Optional<Reservation> actual = reservationRepository.findByDateAndReservationTime(
+        Optional<Reservation> actual = reservationJpaRepository.findByDateAndReservationTime(
                 LocalDate.now().plusDays(1),
                 savedReservationTime
         );
@@ -136,15 +140,15 @@ class ReservationRepositoryTest {
     @DisplayName("특정 테마 ID로 모든 예약을 조회한다")
     void test3() {
         // given
-        Theme theme = themeRepository.save(new Theme("공포", "무서움", "image.png"));
-        Member member = memberRepository.save(new Member("히로", "hiro@example.com", "1234", Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Theme theme = themeJpaRepository.save(new Theme("공포", "무서움", "image.png"));
+        Member member = memberJpaRepository.save(new Member("히로", "hiro@example.com", "1234", Role.USER));
+        ReservationTime time = reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(10, 0)));
 
         Reservation reservation = new Reservation(LocalDate.now(), time, theme, member, LocalDate.now().minusDays(1));
-        reservationRepository.save(reservation);
+        reservationJpaRepository.save(reservation);
 
         // when
-        List<Reservation> found = reservationRepository.findByThemeId(theme.getId());
+        List<Reservation> found = reservationJpaRepository.findByThemeId(theme.getId());
 
         // then
         assertThat(found).isNotEmpty();
@@ -155,15 +159,15 @@ class ReservationRepositoryTest {
     @DisplayName("특정 멤버 ID로 모든 예약을 조회한다")
     void test4() {
         // given
-        Theme theme = themeRepository.save(new Theme("스릴러", "짜릿함", "thumb.jpg"));
-        Member member = memberRepository.save(new Member("멤버1", "mem1@com", "pw", Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
+        Theme theme = themeJpaRepository.save(new Theme("스릴러", "짜릿함", "thumb.jpg"));
+        Member member = memberJpaRepository.save(new Member("멤버1", "mem1@com", "pw", Role.USER));
+        ReservationTime time = reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(14, 0)));
 
         Reservation reservation = new Reservation(LocalDate.now(), time, theme, member, LocalDate.now().minusDays(1));
-        reservationRepository.save(reservation);
+        reservationJpaRepository.save(reservation);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByMemberId(member.getId());
+        List<Reservation> reservations = reservationJpaRepository.findByMemberId(member.getId());
 
         // then
         assertThat(reservations).extracting(Reservation::getMember).allMatch(m -> m.getId().equals(member.getId()));
@@ -173,15 +177,15 @@ class ReservationRepositoryTest {
     @DisplayName("특정 예약 시간 ID로 예약을 조회한다")
     void test5() {
         // given
-        Theme theme = themeRepository.save(new Theme("추리", "머리 아픔", "icon.png"));
-        Member member = memberRepository.save(new Member("탐정", "detective@case.com", "pw", Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(16, 0)));
+        Theme theme = themeJpaRepository.save(new Theme("추리", "머리 아픔", "icon.png"));
+        Member member = memberJpaRepository.save(new Member("탐정", "detective@case.com", "pw", Role.USER));
+        ReservationTime time = reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(16, 0)));
 
         Reservation reservation = new Reservation(LocalDate.now(), time, theme, member, LocalDate.now().minusDays(1));
-        reservationRepository.save(reservation);
+        reservationJpaRepository.save(reservation);
 
         // when
-        List<Reservation> result = reservationRepository.findByReservationTimeId(time.getId());
+        List<Reservation> result = reservationJpaRepository.findByReservationTimeId(time.getId());
 
         // then
         assertThat(result).hasSize(1);
