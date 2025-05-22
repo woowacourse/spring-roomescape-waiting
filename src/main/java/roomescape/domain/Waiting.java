@@ -34,8 +34,4 @@ public class Waiting extends Booking {
     public boolean sameWaiterWith(Long memberId) {
         return getMember().getId().equals(memberId);
     }
-
-    public LocalDateTime getWaitingStartedAt() {
-        return waitingStartedAt;
-    }
 }
