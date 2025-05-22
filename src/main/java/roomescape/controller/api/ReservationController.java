@@ -12,9 +12,7 @@ import roomescape.entity.Member;
 import roomescape.service.ReservationService;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -60,9 +58,9 @@ public class ReservationController {
         @RequestParam LocalDate dateTo
     ) {
         return reservationService.findReservationsByFilters(themeId, memberId, dateFrom, dateTo)
-            .stream()
-            .map(ReservationResponse::from)
-            .toList();
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     @GetMapping("/mine")
@@ -71,11 +69,12 @@ public class ReservationController {
         List<MyReservationResponse> responseFromReservation = reservationService.findReservationsByMemberId(member).stream()
                 .map(MyReservationResponse::fromReservation)
                 .toList();
+
         List<MyReservationResponse> responseFromWaiting = reservationService.findAllWaitingWithRankByMemberId(member).stream()
                 .map(MyReservationResponse::fromWaiting)
                 .toList();
-        return Stream.of(responseFromReservation, responseFromWaiting)
-                .flatMap(Collection::stream)
+
+        return Stream.concat(responseFromReservation.stream(), responseFromWaiting.stream())
                 .toList();
     }
 

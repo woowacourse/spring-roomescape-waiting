@@ -33,7 +33,7 @@ public class MemberController {
     @GetMapping
     public List<MemberResponse> readMembers() {
         return memberService.findAllMembers().stream()
-            .map(MemberResponse::from)
-            .toList();
+                .map(MemberResponse::from)
+                .toList();
     }
 }

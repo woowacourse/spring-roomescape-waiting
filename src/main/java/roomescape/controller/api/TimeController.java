@@ -36,8 +36,8 @@ public class TimeController {
     @GetMapping
     public List<TimeResponse> readReservationTimes() {
         return timeService.findAllReservationTimes().stream()
-            .map(TimeResponse::from)
-            .toList();
+                .map(TimeResponse::from)
+                .toList();
     }
 
     @GetMapping("/{date}/{themeId}")
@@ -46,8 +46,8 @@ public class TimeController {
             @PathVariable("themeId") long themeId
     ) {
         return timeService.findAllTimesWithBooked(date, themeId).stream()
-            .map(TimeResponse::from)
-            .toList();
+                .map(TimeResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

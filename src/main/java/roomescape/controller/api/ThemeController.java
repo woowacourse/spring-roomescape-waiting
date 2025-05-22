@@ -35,15 +35,15 @@ public class ThemeController {
     @GetMapping
     public List<ThemeResponse> readThemes() {
         return themeService.findAllThemes().stream()
-            .map(ThemeResponse::from)
-            .toList();
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     @GetMapping("/top-rank")
     public List<ThemeResponse> readTopRankTheme() {
         return themeService.findTopReservedThemes().stream()
-            .map(ThemeResponse::from)
-            .toList();
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")
