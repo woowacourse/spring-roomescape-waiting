@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.waiting;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +21,7 @@ import roomescape.exception.BusinessRuleViolationException;
 @Accessors(fluent = true)
 @ToString
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,11 +34,11 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    private Reservation(final Long id,
-                        final User user,
-                        final LocalDate date,
-                        final TimeSlot timeSlot,
-                        final Theme theme) {
+    private Waiting(final Long id,
+                    final User user,
+                    final LocalDate date,
+                    final TimeSlot timeSlot,
+                    final Theme theme) {
         this.id = id;
         this.user = user;
         this.date = date;
@@ -46,24 +46,16 @@ public class Reservation {
         this.theme = theme;
     }
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public static Reservation ofExisting(final long id,
-                                         final User user,
-                                         final LocalDate date,
-                                         final TimeSlot timeSlot,
-                                         final Theme theme) {
-        return new Reservation(id, user, date, timeSlot, theme);
-    }
-
-    public static Reservation reserveNewly(final User user,
-                                           final LocalDate date,
-                                           final TimeSlot timeSlot,
-                                           final Theme theme) {
+    public static Waiting reserveNewly(final User user,
+                                       final LocalDate date,
+                                       final TimeSlot timeSlot,
+                                       final Theme theme) {
 
         validateNotPastDateTime(date, timeSlot);
-        return new Reservation(null, user, date, timeSlot, theme);
+        return new Waiting(null, user, date, timeSlot, theme);
     }
 
     private static void validateNotPastDateTime(final LocalDate date, final TimeSlot timeSlot) {
@@ -74,8 +66,7 @@ public class Reservation {
         boolean isCurrentDateAndPastTime = date.isEqual(currentDate) && timeSlot.isTimeBefore(currentTime);
 
         if (isPastDate || isCurrentDateAndPastTime) {
-            throw new BusinessRuleViolationException("이전 날짜로 예약할 수 없습니다.");
+            throw new BusinessRuleViolationException("이전 날짜로 예약 대기 신청할 수 없습니다.");
         }
     }
 }
-
