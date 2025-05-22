@@ -1,5 +1,6 @@
 package roomescape.reservation;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
@@ -39,6 +40,7 @@ public class ReservationWaitingService {
         return responses;
     }
 
+    @Transactional
     public void deleteReservationById(final Long id) {
         Reservation reservation = getReservationById(id);
         reservationRepository.deleteById(id);
