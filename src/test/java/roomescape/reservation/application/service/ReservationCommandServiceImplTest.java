@@ -142,7 +142,7 @@ class ReservationCommandServiceImplTest {
                 .hasMessageContainingAll(
                         "RESERVATION already exists.",
                         "params={ReservationDate=ReservationDate(value=",
-                        "ReservationTimeId=ReservationTimeId(",
+                        "Long=",
                         "Long="
                 );
     }

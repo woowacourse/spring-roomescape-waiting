@@ -22,7 +22,6 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
@@ -241,7 +240,7 @@ class ReservationFacadeTest {
                 UserId.from(1L),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 ReservationTime.withId(
-                        ReservationTimeId.from(1L),
+                        1L,
                         LocalTime.of(15, 0)
                 ),
                 Theme.withId(

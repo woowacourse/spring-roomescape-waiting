@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.domain.ReservationTimeRepository;
 
 import java.time.LocalTime;
@@ -19,7 +18,7 @@ public class ReservationTimeQueryServiceImpl implements ReservationTimeQueryServ
     private final ReservationTimeRepository reservationTimeRepository;
 
     @Override
-    public ReservationTime get(final ReservationTimeId id) {
+    public ReservationTime get(final Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(NoSuchElementException::new);
     }
@@ -35,7 +34,7 @@ public class ReservationTimeQueryServiceImpl implements ReservationTimeQueryServ
     }
 
     @Override
-    public boolean existById(final ReservationTimeId id) {
+    public boolean existById(final Long id) {
         return reservationTimeRepository.existsById(id);
     }
 }

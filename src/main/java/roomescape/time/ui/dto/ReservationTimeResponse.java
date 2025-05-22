@@ -19,7 +19,7 @@ public record ReservationTimeResponse(Long id,
 
     public static ReservationTimeResponse from(final ReservationTime domain) {
         return new ReservationTimeResponse(
-                domain.getId().getValue(),
+                domain.getId(),
                 domain.getStartAt());
     }
 

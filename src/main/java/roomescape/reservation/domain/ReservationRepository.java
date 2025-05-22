@@ -1,7 +1,6 @@
 package roomescape.reservation.domain;
 
 import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
@@ -9,15 +8,15 @@ import java.util.Optional;
 
 public interface ReservationRepository {
 
-    boolean existsByParams(Long id);
+    boolean existsById(Long id);
 
-    boolean existsByParams(ReservationTimeId timeId);
+    boolean existsByParams(Long timeId);
 
-    boolean existsByParams(ReservationDate date, ReservationTimeId timeId, Long themeId);
+    boolean existsByParams(ReservationDate date, Long timeId, Long themeId);
 
     Optional<Reservation> findById(Long id);
 
-    List<ReservationTimeId> findTimeIdByParams(ReservationDate date, Long themeId);
+    List<Long> findTimeIdByParams(ReservationDate date, Long themeId);
 
     List<Reservation> findAll();
 

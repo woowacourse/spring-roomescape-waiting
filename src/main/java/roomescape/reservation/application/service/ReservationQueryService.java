@@ -6,7 +6,6 @@ import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
@@ -15,7 +14,8 @@ public interface ReservationQueryService {
 
     List<Reservation> getAll();
 
-    List<AvailableReservationTimeServiceResponse> getTimesWithAvailability(AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest);
+    List<AvailableReservationTimeServiceResponse> getTimesWithAvailability(
+            AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest);
 
     List<ThemeToBookCountServiceResponse> getRanking(ReservationDate startDate, ReservationDate endDate, int count);
 
@@ -23,7 +23,7 @@ public interface ReservationQueryService {
 
     List<Reservation> getAllByUserId(UserId userId);
 
-    boolean existsByTimeId(ReservationTimeId timeId);
+    boolean existsByTimeId(Long timeId);
 
-    boolean existsByParams(ReservationDate date, ReservationTimeId timeId, Long themeId);
+    boolean existsByParams(ReservationDate date, Long timeId, Long themeId);
 }

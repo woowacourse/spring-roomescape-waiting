@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.domain.ReservationTimeRepository;
 
 import java.time.LocalTime;
@@ -30,7 +29,7 @@ class ReservationTimeQueryServiceImplTest {
         // given
         final LocalTime time = LocalTime.of(10, 0);
         final ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.withoutId(time));
-        final ReservationTimeId id = savedTime.getId();
+        final Long id = savedTime.getId();
 
         // when
         final ReservationTime reservationTime = reservationTimeQueryService.get(id);

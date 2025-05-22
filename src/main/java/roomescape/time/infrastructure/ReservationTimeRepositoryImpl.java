@@ -3,7 +3,6 @@ package roomescape.time.infrastructure;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.domain.ReservationTimeRepository;
 
 import java.time.LocalTime;
@@ -17,8 +16,8 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     private final JpaReservationTimeRepository jpaReservationTimeRepository;
 
     @Override
-    public boolean existsById(final ReservationTimeId id) {
-        return jpaReservationTimeRepository.existsById(id.getValue());
+    public boolean existsById(final Long id) {
+        return jpaReservationTimeRepository.existsById(id);
     }
 
     @Override
@@ -27,8 +26,8 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> findById(final ReservationTimeId id) {
-        return jpaReservationTimeRepository.findById(id.getValue());
+    public Optional<ReservationTime> findById(final Long id) {
+        return jpaReservationTimeRepository.findById(id);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public void deleteById(final ReservationTimeId id) {
-        jpaReservationTimeRepository.deleteById(id.getValue());
+    public void deleteById(final Long id) {
+        jpaReservationTimeRepository.deleteById(id);
     }
 }

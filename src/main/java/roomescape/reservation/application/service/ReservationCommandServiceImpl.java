@@ -40,11 +40,9 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
                     request.themeId());
         }
 
-        final ReservationTime reservationTime = reservationTimeQueryService.get(
-                request.timeId());
+        final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());
 
-        final Theme theme = themeQueryService.get(
-                request.themeId());
+        final Theme theme = themeQueryService.get(request.themeId());
 
         final Reservation reservation = request.toDomain(reservationTime, theme);
         reservation.validatePast(timeProvider.now());

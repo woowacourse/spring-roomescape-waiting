@@ -10,7 +10,6 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.time.application.dto.CreateReservationTimeServiceRequest;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.domain.ReservationTimeRepository;
 
 @Service
@@ -32,7 +31,7 @@ public class ReservationTimeCommandServiceImpl implements ReservationTimeCommand
     }
 
     @Override
-    public void delete(final ReservationTimeId id) {
+    public void delete(final Long id) {
         if (!reservationTimeQueryService.existById(id)) {
             throw new NotFoundException(DomainTerm.RESERVATION_TIME, id);
         }

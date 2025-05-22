@@ -8,13 +8,12 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public record CreateReservationServiceRequest(UserId userId,
                                               ReservationDate date,
-                                              ReservationTimeId timeId,
+                                              Long timeId,
                                               Long themeId) {
 
     public CreateReservationServiceRequest {
@@ -31,7 +30,7 @@ public record CreateReservationServiceRequest(UserId userId,
 
     private void validate(final UserId userId,
                           final ReservationDate date,
-                          final ReservationTimeId timeId,
+                          final Long timeId,
                           final Long themeId) {
         Validator.of(CreateReservationServiceRequest.class)
                 .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label())

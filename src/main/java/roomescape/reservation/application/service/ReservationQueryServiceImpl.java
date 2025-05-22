@@ -14,7 +14,6 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.time.application.service.ReservationTimeQueryService;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.ArrayList;
@@ -40,7 +39,7 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
             final AvailableReservationTimeServiceRequest request) {
         final List<ReservationTime> allTimes = reservationTimeQueryService.getAll();
 
-        final Set<ReservationTimeId> bookedTimeIds = new HashSet<>(reservationRepository.findTimeIdByParams(
+        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findTimeIdByParams(
                 request.date(),
                 request.themeId())
         );
@@ -84,13 +83,13 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
     }
 
     @Override
-    public boolean existsByTimeId(final ReservationTimeId timeId) {
+    public boolean existsByTimeId(final Long timeId) {
         return reservationRepository.existsByParams(timeId);
     }
 
     @Override
     public boolean existsByParams(final ReservationDate date,
-                                  final ReservationTimeId timeId,
+                                  final Long timeId,
                                   final Long themeId) {
         return reservationRepository.existsByParams(date, timeId, themeId);
     }

@@ -112,8 +112,8 @@ class ReservationFacadeIntegrationTest {
         // then
         assertThat(responses).isNotEmpty();
         assertThat(responses)
-                .anyMatch(response -> response.timeId().equals(anotherTime.getId().getValue()) && !response.isBooked())
-                .anyMatch(response -> response.timeId().equals(time.getId().getValue()) && response.isBooked());
+                .anyMatch(response -> response.timeId().equals(anotherTime.getId()) && !response.isBooked())
+                .anyMatch(response -> response.timeId().equals(time.getId()) && response.isBooked());
     }
 
     @Test
@@ -128,7 +128,7 @@ class ReservationFacadeIntegrationTest {
 
         CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
+                time.getId(),
                 theme.getId(),
                 user.getId().getValue()
         );

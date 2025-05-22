@@ -20,7 +20,6 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.application.dto.CreateReservationTimeServiceRequest;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
@@ -74,7 +73,7 @@ class ReservationTimeCommandServiceImplTest {
         final ReservationTime saved =
                 reservationTimeRepository.save(
                         ReservationTime.withoutId(LocalTime.of(14, 0)));
-        final ReservationTimeId id = saved.getId();
+        final Long id = saved.getId();
 
         // when
         reservationTimeCommandService.delete(id);
@@ -87,13 +86,13 @@ class ReservationTimeCommandServiceImplTest {
     @DisplayName("존재하지 않는 예약 시간을 삭제하려 하면 예외가 발생한다")
     void deleteNonExistentReservationTime() {
         // given
-        final ReservationTimeId id = ReservationTimeId.from(-1L);
+        final Long id = -1L;
 
         // when
         // then
         assertThatThrownBy(() -> reservationTimeCommandService.delete(id))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("[RESERVATION_TIME] not found. params={ReservationTimeId=ReservationTimeId(-1)}");
+                .hasMessage("[RESERVATION_TIME] not found. params={Long=-1}");
     }
 
     @Test
@@ -128,7 +127,7 @@ class ReservationTimeCommandServiceImplTest {
         assertThatThrownBy(() -> reservationTimeCommandService.delete(savedTime.getId()))
                 .isInstanceOf(ConstraintConflictException.class)
                 .hasMessage("[RESERVATION_TIME] is referenced by another entity. " +
-                        "params={ReservationTimeId=ReservationTimeId(%s)}".formatted(reservation.getTime().getId().getValue()));
+                        "params={Long=%s}".formatted(reservation.getTime().getId()));
     }
 
     @Test

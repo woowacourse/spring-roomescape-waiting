@@ -148,7 +148,7 @@ public class MissionStepTest {
 
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
+                time.getId(),
                 theme.getId(),
                 user.getId().getValue()
         );
@@ -279,7 +279,7 @@ public class MissionStepTest {
 
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
+                time.getId(),
                 theme.getId(),
                 user.getId().getValue()
         );
@@ -328,7 +328,7 @@ public class MissionStepTest {
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/times/%d".formatted(time.getId().getValue()))
+                .when().delete("/times/%d".formatted(time.getId()))
                 .then().log().all()
                 .statusCode(204);
     }

@@ -10,7 +10,6 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
@@ -23,18 +22,18 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     private final JpaReservationRepository jpaReservationRepository;
 
     @Override
-    public boolean existsByParams(final Long id) {
+    public boolean existsById(final Long id) {
         return jpaReservationRepository.existsById(id);
     }
 
     @Override
-    public boolean existsByParams(final ReservationTimeId timeId) {
-        return jpaReservationRepository.existsByTimeId(timeId.getValue());
+    public boolean existsByParams(final Long timeId) {
+        return jpaReservationRepository.existsByTimeId(timeId);
     }
 
     @Override
-    public boolean existsByParams(final ReservationDate date, final ReservationTimeId timeId, final Long themeId) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId.getValue(), themeId);
+    public boolean existsByParams(final ReservationDate date, final Long timeId, final Long themeId) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Override
@@ -43,7 +42,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final Long themeId) {
+    public List<Long> findTimeIdByParams(final ReservationDate date, final Long themeId) {
         return jpaReservationRepository.findAllByDateAndThemeId(date, themeId).stream()
                 .map(Reservation::getTime)
                 .map(ReservationTime::getId)

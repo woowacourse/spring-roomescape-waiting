@@ -23,7 +23,7 @@ public record AvailableReservationTimeWebResponse(
             final AvailableReservationTimeServiceResponse serviceResponse) {
         return new AvailableReservationTimeWebResponse(
                 serviceResponse.time().getStartAt(),
-                serviceResponse.time().getId().getValue(),
+                serviceResponse.time().getId(),
                 serviceResponse.bookedStatus().isBooked());
     }
 
