@@ -70,6 +70,13 @@ public class WaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
+    public void deleteById(final Long waitingId) {
+        if(!waitingRepository.existsById(waitingId)) {
+            throw new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다.");
+        }
+        waitingRepository.deleteById(waitingId);
+    }
+
     private void validateDuplicateWaiting(final Member member, final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         boolean isExistWaiting = waitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
                 member.getId(),

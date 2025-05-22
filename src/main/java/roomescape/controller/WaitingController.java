@@ -35,9 +35,9 @@ public class WaitingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(WaitingResponse.from(waitingresult));
     }
 
-    @DeleteMapping("/{waitingId}")
-    public ResponseEntity<Void> deleteWaiting(@LoginMember LoginMemberInfo loginMemberInfo, @PathVariable Long waitingId) {
-        waitingService.delete(loginMemberInfo.id(), waitingId); //TODO: Service로 넘기는 포맷 고민
+    @PostMapping("/{waitingId}/reject")
+    public ResponseEntity<Void> rejectWaiting(@PathVariable Long waitingId) {
+        waitingService.deleteById(waitingId);
         return ResponseEntity.noContent().build();
     }
 }

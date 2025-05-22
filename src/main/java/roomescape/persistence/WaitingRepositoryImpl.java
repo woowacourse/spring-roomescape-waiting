@@ -47,4 +47,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     public List<Waiting> findAll() {
         return jpaWaitingRepository.findAll();
     }
+
+    @Override
+    public boolean existsById(final Long waitingId) {
+        return jpaWaitingRepository.existsById(waitingId);
+    }
 }
