@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -46,6 +47,31 @@ public class Waiting {
 
     public static Waiting createWithoutId(LocalDate date, Theme theme, ReservationTime time, Member member) {
         return new Waiting(null, date, theme, time, member);
+    }
+
+    public boolean isPastWaiting() {
+        LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
+        return dateTime.isBefore(LocalDateTime.now());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public ReservationTime getTime() {
+        return time;
+    }
+
+    public Member getMember() {
+        return member;
     }
 
     @Override
