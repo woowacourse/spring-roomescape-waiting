@@ -49,7 +49,7 @@ public class ReservationRestController {
             @PathVariable final Long id,
             final MemberAuthInfo memberAuthInfo
     ) {
-        reservationService.deleteIfOwner(id, memberAuthInfo);
+        reservationService.deleteIfOwner(id, memberAuthInfo.id());
 
         return ResponseEntity.noContent().build();
     }

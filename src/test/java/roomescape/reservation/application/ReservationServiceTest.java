@@ -127,7 +127,7 @@ class ReservationServiceTest {
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
         // when & then
-        Assertions.assertThatCode(() -> reservationService.deleteIfOwner(reservationId, member1AuthInfo))
+        Assertions.assertThatCode(() -> reservationService.deleteIfOwner(reservationId, member1AuthInfo.id()))
                 .doesNotThrowAnyException();
     }
 
@@ -147,7 +147,7 @@ class ReservationServiceTest {
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.deleteIfOwner(reservationId, member2AuthInfo))
+        Assertions.assertThatThrownBy(() -> reservationService.deleteIfOwner(reservationId, member2AuthInfo.id()))
                 .isInstanceOf(AuthorizationException.class);
     }
 
@@ -165,7 +165,7 @@ class ReservationServiceTest {
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.deleteIfOwner(Long.MAX_VALUE, member1AuthInfo))
+        Assertions.assertThatThrownBy(() -> reservationService.deleteIfOwner(Long.MAX_VALUE, member1AuthInfo.id()))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 

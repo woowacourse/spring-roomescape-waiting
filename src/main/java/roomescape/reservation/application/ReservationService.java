@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
@@ -87,10 +86,10 @@ public class ReservationService {
         }
     }
 
-    public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
+    public void deleteIfOwner(final Long reservationId, final Long memberId) {
         final Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
-        final Member member = memberRepository.findById(memberAuthInfo.id())
+        final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         if (!Objects.equals(reservation.getMember(), member)) {
