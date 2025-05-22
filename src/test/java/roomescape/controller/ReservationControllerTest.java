@@ -23,12 +23,14 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.domain.enums.Role;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
+import roomescape.repository.waiting.WaitingRepsitory;
 import roomescape.util.JwtTokenProvider;
 
 @SpringBootTest
@@ -56,6 +58,10 @@ class ReservationControllerTest {
     Theme theme;
     Member member;
     Reservation reservation;
+    Member waiter;
+    Waiting waiting;
+    @Autowired
+    private WaitingRepsitory waitingRepsitory;
 
     @BeforeEach
     void beforeEach() {
@@ -63,11 +69,15 @@ class ReservationControllerTest {
         theme = new Theme("이름", "설명", "썸네일");
         member = new Member(null, "슬링키", "email", "password", Role.USER);
         reservation = new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member);
+        waiter = new Member(null, "키링슬", "email", "password", Role.USER);
+        waiting = new Waiting(null, LocalDate.now().plusDays(1), reservationTime, theme, waiter);
 
         reservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
         memberRepository.save(member);
+        memberRepository.save(waiter);
         reservationRepository.save(reservation);
+        waitingRepsitory.save(waiting);
     }
 
     @Test
@@ -109,13 +119,16 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 삭제 테스트")
+    @DisplayName("예약 삭제 테스트 - 예약 대기 자동으로 예약으로 변경")
     void deleteReservation() throws Exception {
-
         Long id = reservation.getId();
         // when & then
         mockMvc.perform(delete("/reservations/" + id))
                 .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/reservations"))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$.[0].member.name").value("키링슬"));
     }
 
     @Test
