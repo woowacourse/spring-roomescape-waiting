@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,8 @@ import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
+import roomescape.business.domain.Waiting;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
@@ -32,8 +36,10 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository,
-                              final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository,
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final MemberRepository memberRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository,
                               final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
@@ -105,10 +111,29 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(id));
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당하는 예약을 찾을 수 없습니다. 예약 id: %d".formatted(id)));
+
+        if(LocalDate.now().isBefore(reservation.getDate())) {
+            throw new BadRequestException("이전 날짜의 예약은 삭제할 수 없습니다.");
         }
+        if (Objects.equals(reservation.getDate(), LocalDate.now())) {
+            if(reservation.getTime().getStartAt().isBefore(reservation.getTime().getStartAt())) {
+                throw new BadRequestException("지난 시간의 예약을 삭제할 수 없습니다.");
+            }
+        }
+
         reservationRepository.deleteById(id);
+
+        final Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
+                reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
+
+        firstWaiting.ifPresent(waiting -> {
+            waitingRepository.deleteById(waiting.getId());
+            Reservation newReservation = new Reservation(waiting.getDate(), waiting.getMember(), waiting.getTime(),
+                    waiting.getTheme());
+            reservationRepository.save(newReservation);
+        });
     }
 
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
