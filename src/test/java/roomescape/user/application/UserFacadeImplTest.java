@@ -10,7 +10,6 @@ import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRole;
 import roomescape.user.ui.dto.UserResponse;
@@ -48,7 +47,7 @@ class UserFacadeImplTest {
 
     private User createUser(Long id, String name, String email, String password) {
         return User.withId(
-                UserId.from(id),
+                id,
                 UserName.from(name),
                 Email.from(email),
                 Password.fromEncoded(password),

@@ -79,7 +79,7 @@ public class MissionStepTest {
                         UserRole.ADMIN));
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -103,7 +103,7 @@ public class MissionStepTest {
                         UserRole.ADMIN));
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -150,11 +150,11 @@ public class MissionStepTest {
                 LocalDate.now().plusDays(1),
                 time.getId(),
                 theme.getId(),
-                user.getId().getValue()
+                user.getId()
         );
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -168,7 +168,7 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("user.id", is(user.getId().getValue().intValue()));
+                .body("user.id", is(user.getId().intValue()));
 
         RestAssured.given().log().all()
                 .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
@@ -235,7 +235,7 @@ public class MissionStepTest {
                 ));
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -281,11 +281,11 @@ public class MissionStepTest {
                 LocalDate.now().plusDays(1),
                 time.getId(),
                 theme.getId(),
-                user.getId().getValue()
+                user.getId()
         );
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();

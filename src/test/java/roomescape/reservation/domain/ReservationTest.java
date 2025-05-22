@@ -11,7 +11,6 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
-import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +39,7 @@ class ReservationTest {
     @DisplayName("예약 날짜가 null이면 예외가 발생한다")
     void throwExceptionWhenReservationDateIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
 
@@ -54,7 +53,7 @@ class ReservationTest {
     @DisplayName("예약 시간이 null이면 예외가 발생한다")
     void throwExceptionWhenReservationTimeIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
         Theme theme = createTheme();
 
@@ -68,7 +67,7 @@ class ReservationTest {
     @DisplayName("테마가 null이면 예외가 발생한다")
     void throwExceptionWhenThemeIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
         ReservationTime time = createReservationTime();
 
@@ -82,7 +81,7 @@ class ReservationTest {
     @DisplayName("예약 ID가 null이면 예외가 발생한다")
     void throwExceptionWhenReservationIdIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
@@ -97,7 +96,7 @@ class ReservationTest {
     @DisplayName("과거 날짜로 예약하면 예외가 발생한다")
     void throwExceptionWhenReservationDateIsInThePast() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate pastDate = ReservationDate.from(LocalDate.now().minusDays(1));
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
@@ -113,7 +112,7 @@ class ReservationTest {
     @DisplayName("같은 날짜의 과거 시간으로 예약하면 예외가 발생한다")
     void throwExceptionWhenReservationTimeIsInThePast() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate todayDate = ReservationDate.from(LocalDate.now());
         LocalDateTime now = LocalDateTime.now();
         ReservationTime pastTime = ReservationTime.withoutId(now.toLocalTime().minusHours(1));

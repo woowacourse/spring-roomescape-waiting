@@ -8,10 +8,9 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.user.domain.UserId;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record CreateReservationServiceRequest(UserId userId,
+public record CreateReservationServiceRequest(Long userId,
                                               ReservationDate date,
                                               Long timeId,
                                               Long themeId) {
@@ -28,7 +27,7 @@ public record CreateReservationServiceRequest(UserId userId,
                 theme);
     }
 
-    private void validate(final UserId userId,
+    private void validate(final Long userId,
                           final ReservationDate date,
                           final Long timeId,
                           final Long themeId) {

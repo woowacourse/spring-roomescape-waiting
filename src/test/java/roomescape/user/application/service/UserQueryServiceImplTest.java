@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
 import roomescape.user.domain.UserRole;
@@ -42,7 +41,7 @@ class UserQueryServiceImplTest {
                         password,
                         UserRole.NORMAL));
 
-        UserId userId = user.getId();
+        Long userId = user.getId();
 
         //when
         User actual = userQueryService.getByEmail(email);
@@ -97,7 +96,7 @@ class UserQueryServiceImplTest {
                         password,
                         UserRole.NORMAL));
 
-        UserId userId = user.getId();
+        Long userId = user.getId();
 
         //when
         User actual = userQueryService.getById(userId);
@@ -138,9 +137,9 @@ class UserQueryServiceImplTest {
                         UserRole.NORMAL));
 
         //when
-        List<UserId> ids = List.of(user1.getId(), user2.getId());
+        List<Long> ids = List.of(user1.getId(), user2.getId());
         List<User> actual = userQueryService.getAllByIds(ids);
-        List<UserId> actualIds = actual.stream()
+        List<Long> actualIds = actual.stream()
                 .map(User::getId)
                 .toList();
 

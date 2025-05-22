@@ -1,5 +1,6 @@
 package roomescape.reservation.application.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
 import roomescape.user.domain.UserRole;
@@ -32,6 +32,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+@Slf4j
 @SpringBootTest
 @Transactional
 class ReservationQueryServiceImplTest {
@@ -183,7 +184,7 @@ class ReservationQueryServiceImplTest {
                         ThemeDescription.from("지구별 방탈출 최고2"),
                         ThemeThumbnail.from("www.making.com")));
 
-        UserId userId = user.getId();
+        Long userId = user.getId();
         final Reservation reservation1 = reservationRepository.save(Reservation.withoutId(
                 userId,
                 date,

@@ -14,7 +14,6 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.time.application.service.ReservationTimeQueryService;
 import roomescape.time.domain.ReservationTime;
-import roomescape.user.domain.UserId;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -78,7 +77,7 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
     }
 
     @Override
-    public List<Reservation> getAllByUserId(final UserId userId) {
+    public List<Reservation> getAllByUserId(final Long userId) {
         return reservationRepository.findAllByUserId(userId);
     }
 

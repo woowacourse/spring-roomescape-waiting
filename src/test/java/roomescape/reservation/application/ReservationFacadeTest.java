@@ -24,7 +24,6 @@ import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRole;
 
@@ -100,14 +99,14 @@ class ReservationFacadeTest {
         Long userId = 1L;
         given(userQueryService.getById(any())).willReturn(createUser(1L));
         List<Reservation> reservations = List.of(createReservation(1L));
-        given(reservationQueryService.getAllByUserId(any(UserId.class))).willReturn(reservations);
+        given(reservationQueryService.getAllByUserId(any(Long.class))).willReturn(reservations);
 
         //when
         List<ReservationResponse> result = reservationFacade.getAllByUserId(userId);
 
         //then
         assertThat(result).hasSize(1);
-        then(reservationQueryService).should(times(1)).getAllByUserId(any(UserId.class));
+        then(reservationQueryService).should(times(1)).getAllByUserId(any(Long.class));
     }
 
     @Test
@@ -116,7 +115,7 @@ class ReservationFacadeTest {
         //given
         Long nonExistentUserId = 9999L;
         given(userQueryService.getById(any())).willReturn(createUser(nonExistentUserId));
-        given(reservationQueryService.getAllByUserId(any(UserId.class)))
+        given(reservationQueryService.getAllByUserId(any(Long.class)))
                 .willThrow(new NotFoundException(DomainTerm.USER_ID));
 
         //when
@@ -237,7 +236,7 @@ class ReservationFacadeTest {
     private Reservation createReservation(Long id) {
         return Reservation.withId(
                 id,
-                UserId.from(1L),
+                1L,
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 ReservationTime.withId(
                         1L,
@@ -262,7 +261,7 @@ class ReservationFacadeTest {
 
     private User createUser(Long Id) {
         return User.withId(
-                UserId.from(Id),
+                Id,
                 UserName.from("테스트"),
                 Email.from("email@email.com"),
                 Password.fromEncoded("password"),

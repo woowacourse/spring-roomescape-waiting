@@ -6,7 +6,6 @@ import roomescape.common.domain.DomainTerm;
 import roomescape.common.domain.Email;
 import roomescape.common.exception.NotFoundException;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserRepository;
 
 import java.util.List;
@@ -29,12 +28,12 @@ public class UserQueryServiceImpl implements UserQueryService {
     }
 
     @Override
-    public List<User> getAllByIds(final List<UserId> ids) {
+    public List<User> getAllByIds(final List<Long> ids) {
         return userRepository.findAllByIds(ids);
     }
 
     @Override
-    public User getById(final UserId id) {
+    public User getById(final Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(DomainTerm.USER, id));
     }

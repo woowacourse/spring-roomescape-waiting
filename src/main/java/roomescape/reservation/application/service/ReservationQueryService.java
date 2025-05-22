@@ -6,7 +6,6 @@ import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.user.domain.UserId;
 
 import java.util.List;
 
@@ -21,7 +20,7 @@ public interface ReservationQueryService {
 
     List<Reservation> getByParams(ReservationSearchRequest request);
 
-    List<Reservation> getAllByUserId(UserId userId);
+    List<Reservation> getAllByUserId(Long userId);
 
     boolean existsByTimeId(Long timeId);
 

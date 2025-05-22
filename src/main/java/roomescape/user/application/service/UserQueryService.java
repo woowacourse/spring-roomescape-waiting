@@ -2,7 +2,6 @@ package roomescape.user.application.service;
 
 import roomescape.common.domain.Email;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ public interface UserQueryService {
 
     List<User> getAll();
 
-    List<User> getAllByIds(List<UserId> ids);
+    List<User> getAllByIds(List<Long> ids);
 
-    User getById(UserId id);
+    User getById(Long id);
 }

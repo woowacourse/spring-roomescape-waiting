@@ -4,11 +4,10 @@ import org.springframework.data.jpa.domain.Specification;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
-import roomescape.user.domain.UserId;
 
 public class ReservationSpecs {
 
-    public static Specification<Reservation> isMemberReservation(final UserId userId) {
+    public static Specification<Reservation> isMemberReservation(final Long userId) {
         if (userId == null) {
             return null;
         }

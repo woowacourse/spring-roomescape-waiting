@@ -14,7 +14,6 @@ import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,7 +29,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
     @Override
     public List<ReservationResponse> getAll() {
         final List<Reservation> reservations = reservationQueryService.getAll();
-        final List<UserId> userIds = reservations.stream()
+        final List<Long> userIds = reservations.stream()
                 .map(Reservation::getUserId)
                 .toList();
 
@@ -52,7 +51,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
     @Override
     public List<ReservationResponse> getByParams(final ReservationSearchWebRequest request) {
         final List<Reservation> reservations = reservationQueryService.getByParams(request.toServiceRequest());
-        final List<UserId> userIds = reservations.stream()
+        final List<Long> userIds = reservations.stream()
                 .map(Reservation::getUserId)
                 .toList();
 
@@ -63,14 +62,14 @@ public class ReservationFacadeImpl implements ReservationFacade {
 
     @Override
     public List<ReservationResponse> getAllByUserId(final Long userId) {
-        final User user = userQueryService.getById(UserId.from(userId));
-        return ReservationResponse.from(reservationQueryService.getAllByUserId(UserId.from(userId)), user);
+        final User user = userQueryService.getById(userId);
+        return ReservationResponse.from(reservationQueryService.getAllByUserId(userId), user);
     }
 
     @Override
     @Transactional
     public ReservationResponse create(final CreateReservationWithUserIdWebRequest request) {
-        final User user = userQueryService.getById(UserId.from(request.userId()));
+        final User user = userQueryService.getById(request.userId());
 
         final Reservation reservation = reservationCommandService.create(
                 request.toServiceRequest());

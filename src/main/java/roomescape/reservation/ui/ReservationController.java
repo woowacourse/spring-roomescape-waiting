@@ -33,7 +33,7 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationResponse>> getMine(@UserSession final Session session) {
-        final List<ReservationResponse> reservations = reservationFacade.getAllByUserId(session.id().getValue());
+        final List<ReservationResponse> reservations = reservationFacade.getAllByUserId(session.userId());
         return ResponseEntity.ok(reservations);
     }
 
@@ -50,7 +50,7 @@ public class ReservationController {
             @RequestBody final CreateReservationWebRequest request,
             @UserSession final Session session) {
         final ReservationResponse reservationResponse = reservationFacade.create(
-                request.toRequestWithUserId(session.id().getValue()));
+                request.toRequestWithUserId(session.userId()));
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.reservationId()));
         return ResponseEntity.created(location)
                 .body(reservationResponse);

@@ -18,7 +18,7 @@ public record UserSessionResponse(Long userId,
 
     public static UserSessionResponse from(final Session session) {
         return new UserSessionResponse(
-                session.id().getValue(),
+                session.userId(),
                 session.name().getValue(),
                 session.role().name()
         );
@@ -26,7 +26,7 @@ public record UserSessionResponse(Long userId,
 
     public static UserSessionResponse from(final User user) {
         return new UserSessionResponse(
-                user.getId().getValue(),
+                user.getId(),
                 user.getName().getValue(),
                 user.getRole().name()
         );

@@ -10,7 +10,6 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 import roomescape.time.domain.ReservationTime;
-import roomescape.user.domain.UserId;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +54,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByUserId(final UserId userId) {
+    public List<Reservation> findAllByUserId(final Long userId) {
         return jpaReservationRepository.findAllByUserId(userId);
     }
 
@@ -76,7 +75,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByParams(final UserId userId, final Long themeId, final ReservationDate from, final ReservationDate to) {
+    public List<Reservation> findAllByParams(final Long userId, final Long themeId, final ReservationDate from, final ReservationDate to) {
         Specification<Reservation> spec = Specification.where(ReservationSpecs.isMemberReservation(userId))
                 .and(ReservationSpecs.isThemeReservation(themeId))
                 .and(ReservationSpecs.isReservationByPeriod(from, to));

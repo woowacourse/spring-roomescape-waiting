@@ -35,7 +35,7 @@ class HmacJwtGeneratorTest {
     void jwtIsGeneratedSuccessfully() {
         // given
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, "1")
+                .add(Session.Fields.userId, "1")
                 .add(Session.Fields.name, "강산")
                 .add(Session.Fields.role, "ADMIN")
                 .build();
@@ -57,7 +57,7 @@ class HmacJwtGeneratorTest {
     void claimsShouldBeIncludedInJwt() {
         // given
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, "1")
+                .add(Session.Fields.userId, "1")
                 .add(Session.Fields.name, "강산")
                 .add(Session.Fields.role, "ADMIN")
                 .build();
@@ -71,7 +71,7 @@ class HmacJwtGeneratorTest {
 
         // then
         final Claims parsedClaims = jwtParser.execute(jwt, secretKey);
-        assertThat(parsedClaims.get(Session.Fields.id)).isEqualTo("1");
+        assertThat(parsedClaims.get(Session.Fields.userId)).isEqualTo("1");
         assertThat(parsedClaims.get(Session.Fields.name)).isEqualTo("강산");
         assertThat(parsedClaims.get(Session.Fields.role)).isEqualTo("ADMIN");
     }
@@ -81,7 +81,7 @@ class HmacJwtGeneratorTest {
     void tokenTypeSetsCorrectExpiration() {
         // given
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, "1")
+                .add(Session.Fields.userId, "1")
                 .add(Session.Fields.name, "강산")
                 .add(Session.Fields.role, "ADMIN")
                 .build();

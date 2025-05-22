@@ -8,7 +8,7 @@ public record UserResponse(Long id, String name, String email) {
 
     public static UserResponse from(final User user) {
         return new UserResponse(
-                user.getId().getValue(),
+                user.getId(),
                 user.getName().getValue(),
                 user.getEmail().getValue()
         );

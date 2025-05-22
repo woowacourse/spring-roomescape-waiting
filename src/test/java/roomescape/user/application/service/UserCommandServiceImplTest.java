@@ -9,7 +9,6 @@ import roomescape.auth.sign.application.usecase.CreateUserRequest;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
 import roomescape.user.domain.UserRole;
@@ -36,7 +35,7 @@ class UserCommandServiceImplTest {
         CreateUserRequest request = new CreateUserRequest(userName, email, password);
         final User user = userCommandService.create(request);
 
-        UserId userId = user.getId();
+        Long userId = user.getId();
 
         //when
         User actual = userRepository.findById(userId)

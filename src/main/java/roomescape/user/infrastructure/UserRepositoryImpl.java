@@ -2,10 +2,8 @@ package roomescape.user.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.common.domain.DomainId;
 import roomescape.common.domain.Email;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserRepository;
 
 import java.util.List;
@@ -18,8 +16,8 @@ public class UserRepositoryImpl implements UserRepository {
     private final JpaUserRepository jpaUserRepository;
 
     @Override
-    public Optional<User> findById(final UserId id) {
-        return jpaUserRepository.findById(id.getValue());
+    public Optional<User> findById(final Long id) {
+        return jpaUserRepository.findById(id);
     }
 
     @Override
@@ -33,9 +31,8 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public List<User> findAllByIds(final List<UserId> ids) {
-        final List<Long> longIds = ids.stream().map(DomainId::getValue).toList();
-        return jpaUserRepository.findAllByIdIn(longIds);
+    public List<User> findAllByIds(final List<Long> ids) {
+        return jpaUserRepository.findAllByIdIn(ids);
     }
 
     @Override

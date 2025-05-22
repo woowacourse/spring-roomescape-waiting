@@ -49,7 +49,7 @@ public class SignInUseCaseImpl implements SignInUseCase {
 
     private Claims buildClaims(final User user) {
         return Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();

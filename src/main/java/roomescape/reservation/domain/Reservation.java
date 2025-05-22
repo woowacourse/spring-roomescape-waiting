@@ -19,7 +19,6 @@ import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.user.domain.UserId;
 
 import java.time.LocalDateTime;
 
@@ -34,11 +33,8 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Embedded
-    @AttributeOverride(
-            name = UserId.Fields.value,
-            column = @Column(name = Fields.userId))
-    private UserId userId;
+    @Column
+    private Long userId;
 
     @Embedded
     @AttributeOverride(
@@ -58,7 +54,7 @@ public class Reservation {
             column = @Column(name = Fields.status))
     private BookedStatus status;
 
-    public Reservation(final UserId userId,
+    public Reservation(final Long userId,
                        final ReservationDate date,
                        final ReservationTime time,
                        final Theme theme,
@@ -73,7 +69,7 @@ public class Reservation {
     }
 
     public Reservation(final Long id,
-                       final UserId userId,
+                       final Long userId,
                        final ReservationDate date,
                        final ReservationTime time,
                        final Theme theme,
@@ -90,21 +86,21 @@ public class Reservation {
     }
 
     public static Reservation withId(final Long id,
-                                     final UserId userId,
+                                     final Long userId,
                                      final ReservationDate date,
                                      final ReservationTime time,
                                      final Theme theme) {
         return new Reservation(id, userId, date, time, theme, BookedStatus.from(0));
     }
 
-    public static Reservation withoutId(final UserId userId,
+    public static Reservation withoutId(final Long userId,
                                         final ReservationDate date,
                                         final ReservationTime time,
                                         final Theme theme) {
         return new Reservation(userId, date, time, theme, BookedStatus.from(0));
     }
 
-    private static void validate(final UserId userId,
+    private static void validate(final Long userId,
                                  final ReservationDate date,
                                  final ReservationTime time,
                                  final Theme theme) {

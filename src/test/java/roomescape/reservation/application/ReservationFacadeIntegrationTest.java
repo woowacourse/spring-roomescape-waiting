@@ -130,7 +130,7 @@ class ReservationFacadeIntegrationTest {
                 LocalDate.now().plusDays(1),
                 time.getId(),
                 theme.getId(),
-                user.getId().getValue()
+                user.getId()
         );
 
         // when & then
@@ -150,7 +150,7 @@ class ReservationFacadeIntegrationTest {
     }
 
     private void clearAllUsers() {
-        jdbcTemplate.update("DELETE FROM reservations WHERE user_id = ?", user.getId().getValue());
+        jdbcTemplate.update("DELETE FROM reservations WHERE user_id = ?", user.getId());
         jdbcTemplate.update("DELETE FROM users");
     }
 }

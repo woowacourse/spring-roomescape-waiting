@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
-import roomescape.user.domain.UserId;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
-    List<Reservation> findAllByUserId(UserId userId);
+    List<Reservation> findAllByUserId(Long userId);
 
     List<Reservation> findAllByDateAndThemeId(ReservationDate date, Long themeId);
 

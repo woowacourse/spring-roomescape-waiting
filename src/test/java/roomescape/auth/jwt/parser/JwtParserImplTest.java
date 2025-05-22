@@ -40,7 +40,7 @@ class JwtParserImplTest {
         final Instant expiration = now.plusMillis(type.getPeriodInMillis());
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, "1")
+                .add(Session.Fields.userId, "1")
                 .add(Session.Fields.name, "강산")
                 .add(Session.Fields.role, "ADMIN")
                 .build();
@@ -54,7 +54,7 @@ class JwtParserImplTest {
         final Claims parsedClaims = jwtParser.execute(jwt, secretKey);
 
         // then
-        assertThat(parsedClaims.get(Session.Fields.id)).isEqualTo(claims.get(Session.Fields.id));
+        assertThat(parsedClaims.get(Session.Fields.userId)).isEqualTo(claims.get(Session.Fields.userId));
         assertThat(parsedClaims.get(Session.Fields.name)).isEqualTo(claims.get(Session.Fields.name));
         assertThat(parsedClaims.get(Session.Fields.role)).isEqualTo(claims.get(Session.Fields.role));
     }
@@ -72,7 +72,7 @@ class JwtParserImplTest {
 
         final Jwt jwt = jwtGenerator.execute(
                 Jwts.claims()
-                        .add(Session.Fields.id, "1")
+                        .add(Session.Fields.userId, "1")
                         .add(Session.Fields.name, "강산")
                         .add(Session.Fields.role, "ADMIN")
                         .build(),
@@ -96,7 +96,7 @@ class JwtParserImplTest {
 
         final Jwt jwt = jwtGenerator.execute(
                 Jwts.claims()
-                        .add(Session.Fields.id, "1")
+                        .add(Session.Fields.userId, "1")
                         .add(Session.Fields.name, "강산")
                         .add(Session.Fields.role, "ADMIN")
                         .build(),

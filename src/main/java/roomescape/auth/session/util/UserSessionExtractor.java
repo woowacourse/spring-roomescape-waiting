@@ -9,7 +9,6 @@ import roomescape.auth.jwt.domain.TokenType;
 import roomescape.auth.jwt.manager.JwtManager;
 import roomescape.auth.session.Session;
 import roomescape.common.cookie.manager.CookieManager;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRole;
 
@@ -28,7 +27,7 @@ public class UserSessionExtractor {
         final Claims claims = jwtManager.parse(accessToken);
 
         return new Session(
-                UserId.from(claims.get(Session.Fields.id, Long.class)),
+                claims.get(Session.Fields.userId, Long.class),
                 UserName.from(claims.get(Session.Fields.name, String.class)),
                 UserRole.valueOf(claims.get(Session.Fields.role, String.class))
         );
