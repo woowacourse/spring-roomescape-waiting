@@ -1,6 +1,6 @@
 package roomescape.reservation.domain;
 
-import roomescape.reservation.infrastructure.vo.ThemBookingCount;
+import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 import roomescape.theme.domain.ThemeId;
 import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
@@ -28,7 +28,7 @@ public interface ReservationRepository {
 
     void deleteById(ReservationId id);
 
-    List<ThemBookingCount> findThemesToBookedCount(ReservationDate startDate, ReservationDate endDate, int count);
+    List<ThemeBookingCount> findThemesToBookedCount(ReservationDate startDate, ReservationDate endDate, int count);
 
     List<Reservation> findAllByParams(UserId userId, ThemeId themeId, ReservationDate reservationDate, ReservationDate reservationDate1);
 }

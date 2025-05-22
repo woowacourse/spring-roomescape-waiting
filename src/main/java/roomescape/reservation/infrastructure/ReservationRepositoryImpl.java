@@ -9,7 +9,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.infrastructure.vo.ThemBookingCount;
+import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 import roomescape.theme.domain.ThemeId;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeId;
@@ -73,7 +73,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<ThemBookingCount> findThemesToBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
+    public List<ThemeBookingCount> findThemesToBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
         Pageable topN = PageRequest.of(0, count);
         return jpaReservationRepository.findThemesWithBookedCount(startDate, endDate, topN);
     }
