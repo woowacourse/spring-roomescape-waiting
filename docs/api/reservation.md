@@ -142,3 +142,7 @@ DELETE /reservations/1 HTTP/1.1
 ```
 HTTP/1.1 204
 ```
+
+### 시나리오
+
+- 예약
