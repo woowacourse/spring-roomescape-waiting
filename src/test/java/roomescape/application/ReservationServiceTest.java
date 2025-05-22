@@ -104,7 +104,7 @@ class ReservationServiceTest {
         var waited = service.waitFor(user2.id(), tomorrow(), timeSlot.id(), theme.id());
 
         // when
-        service.cancelWaiting(waited.id());
+        service.cancelWaiting(user2.id(), waited.id());
 
         // then
         var reservations = service.findAllReservations(NONE_FILTERING);
@@ -116,7 +116,22 @@ class ReservationServiceTest {
     void cancelWaitingThatIsNotWaiting() {
         var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
-        assertThatThrownBy(() -> service.cancelWaiting(reserved.id()))
+        assertThatThrownBy(() -> service.cancelWaiting(user.id(), reserved.id()))
+            .isInstanceOf(BusinessRuleViolationException.class);
+    }
+
+    @Test
+    @DisplayName("다른 사용자의 예약 대기를 취소할 수 없다.")
+    void cancelWaitingCanOnlyMine() {
+        // given
+        User anotherUser = new User(new UserName("user2"), new Email("user2@email.com"), new Password("pw"));
+        repositoryHelper.saveUser(anotherUser);
+
+        service.reserve(anotherUser.id(), tomorrow(), timeSlot.id(), theme.id());
+        var waited = service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        // when & then
+        assertThatThrownBy(() -> service.cancelWaiting(anotherUser.id(), waited.id()))
             .isInstanceOf(BusinessRuleViolationException.class);
     }
 

@@ -17,6 +17,7 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
+import roomescape.exception.BusinessRuleViolationException;
 
 @Service
 @AllArgsConstructor
@@ -68,8 +69,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelWaiting(final long id) {
-        var reservation = reservationRepository.getById(id);
+    public void cancelWaiting(final long userId, final long reservationId) {
+        var user = userRepository.getById(userId);
+        var reservation = reservationRepository.getById(reservationId);
+        if (!reservation.isOwnedBy(user)) {
+            throw new BusinessRuleViolationException("다른 사용자의 예약 대기를 취소할 수 없습니다.");
+        }
+
         reservation.cancel();
         reservationRepository.delete(reservation);
     }
