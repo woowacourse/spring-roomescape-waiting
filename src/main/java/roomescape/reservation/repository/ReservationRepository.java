@@ -87,6 +87,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             join fetch r.reservationDatetime.reservationTime
             join fetch r.theme
             where r.reserver.id = :memberId
+            order by r.reservationDatetime.reservationDate.date asc, r.reservationDatetime.reservationTime.startAt asc
             """)
     List<Reservation> findByMemberId(@Param("memberId") Long memberId);
 }
