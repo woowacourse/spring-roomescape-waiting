@@ -78,7 +78,7 @@ class ReservationServiceTest {
         // when
         var fromYesterday_toToday = new ReservationSearchFilter(theme.id(), user.id(), yesterday(), today());
         var fromToday_toTomorrow = new ReservationSearchFilter(theme.id(), user.id(), today(), tomorrow());
-        var fromTomorrow_toThreeDays = new ReservationSearchFilter(theme.id(), user.id(), tomorrow(), afterThreeDay.dateTime().date());
+        var fromTomorrow_toThreeDays = new ReservationSearchFilter(theme.id(), user.id(), tomorrow(), afterThreeDay.slot().date());
 
         // then
         assertAll(

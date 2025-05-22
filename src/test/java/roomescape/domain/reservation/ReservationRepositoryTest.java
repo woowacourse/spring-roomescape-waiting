@@ -34,7 +34,7 @@ class ReservationRepositoryTest {
         var timeSlot = repositoryHelper.saveAnyTimeSlot();
         var theme = repositoryHelper.saveAnyTheme();
 
-        var reservation = new Reservation(user, ReservationDateTime.of(date, timeSlot), theme);
+        var reservation = new Reservation(user, new ReservationSlot(ReservationDateTime.of(date, timeSlot), theme));
         savedReservation = reservationRepository.save(reservation);
         repositoryHelper.flushAndClear();
     }

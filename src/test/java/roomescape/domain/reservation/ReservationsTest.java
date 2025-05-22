@@ -78,8 +78,7 @@ class ReservationsTest {
         return new Reservation(
             DUMMY_ID_GENERATOR.incrementAndGet(),
             user,
-            ReservationDateTime.of(date, timeSlot),
-            theme,
+            new ReservationSlot(ReservationDateTime.of(date, timeSlot), theme),
             ReservationStatus.RESERVED
         );
     }
@@ -88,8 +87,7 @@ class ReservationsTest {
         return new Reservation(
             DUMMY_ID_GENERATOR.incrementAndGet(),
             user,
-            ReservationDateTime.of(date, timeSlot),
-            theme,
+            new ReservationSlot(ReservationDateTime.of(date, timeSlot), theme),
             ReservationStatus.RESERVED
         );
     }

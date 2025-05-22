@@ -17,9 +17,9 @@ public record UserReservationResponse(
     public static UserReservationResponse from(final Reservation reservation) {
         return new UserReservationResponse(
                 reservation.id(),
-                ThemeResponse.from(reservation.theme()),
-                reservation.dateTime().date(),
-                TimeSlotResponse.from(reservation.dateTime().timeSlot()),
+                ThemeResponse.from(reservation.slot().theme()),
+                reservation.slot().date(),
+                TimeSlotResponse.from(reservation.slot().timeSlot()),
                 reservation.status()
         );
     }

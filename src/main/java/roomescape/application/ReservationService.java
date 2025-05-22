@@ -15,6 +15,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlot;
@@ -38,7 +39,7 @@ public class ReservationService {
         throwIfDuplicates(date, timeSlot, theme);
         var user = userRepository.getById(userId);
 
-        var reservation = new Reservation(user, ReservationDateTime.forReserve(date, timeSlot), theme);
+        var reservation = new Reservation(user, new ReservationSlot(ReservationDateTime.forReserve(date, timeSlot), theme));
         return reservationRepository.save(reservation);
     }
 

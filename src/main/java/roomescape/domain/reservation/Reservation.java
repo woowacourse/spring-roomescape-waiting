@@ -13,7 +13,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
 
 @EqualsAndHashCode(of = {"id"})
@@ -29,22 +28,19 @@ public class Reservation {
     @ManyToOne
     private User user;
     @Embedded
-    private ReservationDateTime dateTime;
-    @ManyToOne
-    private Theme theme;
+    private ReservationSlot slot;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(final long id, final User user, final ReservationDateTime dateTime, final Theme theme, final ReservationStatus status) {
+    public Reservation(final long id, final User user, final ReservationSlot slot, final ReservationStatus status) {
         this.id = id;
         this.user = user;
-        this.dateTime = dateTime;
-        this.theme = theme;
+        this.slot = slot;
         this.status = status;
     }
 
-    public Reservation(final User user, final ReservationDateTime dateTime, final Theme theme) {
-        this(0L, user, dateTime, theme, ReservationStatus.RESERVED);
+    public Reservation(final User user, final ReservationSlot slot) {
+        this(0L, user, slot, ReservationStatus.RESERVED);
     }
 
     @Override
@@ -52,8 +48,7 @@ public class Reservation {
         return "Reservation{" +
                "id=" + id +
                ", userId=" + user.id() +
-               ", dateTime=" + dateTime +
-               ", themeId=" + theme.id() +
+               ", slot=" + slot +
                ", status=" + status +
                '}';
     }

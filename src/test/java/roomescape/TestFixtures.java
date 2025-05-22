@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDateTime;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Description;
 import roomescape.domain.theme.Theme;
@@ -67,8 +68,10 @@ public class TestFixtures {
         return new Reservation(
             ID_GENERATOR.incrementAndGet(),
             anyUserWithNewId(),
-            ReservationDateTime.forReserve(LocalDate.of(3000, 10, 1), anyTimeSlotWithNewId()),
-            anyThemeWithNewId(),
+            new ReservationSlot(
+                ReservationDateTime.forReserve(LocalDate.of(3000, 10, 1), anyTimeSlotWithNewId()),
+                anyThemeWithNewId()
+            ),
             ReservationStatus.RESERVED
         );
     }
