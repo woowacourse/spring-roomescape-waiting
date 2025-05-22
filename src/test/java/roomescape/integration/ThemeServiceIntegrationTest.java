@@ -24,14 +24,13 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
-import roomescape.reservation.repository.jpa.ThemeRepositoryImpl;
 import roomescape.reservation.service.ThemeService;
 import roomescape.reservation.service.dto.ThemeCreateCommand;
 import roomescape.reservation.service.dto.ThemeInfo;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@Import(value = {ThemeRepositoryImpl.class, ReservationRepositoryImpl.class})
+@Import(value = ReservationRepositoryImpl.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
 @Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)

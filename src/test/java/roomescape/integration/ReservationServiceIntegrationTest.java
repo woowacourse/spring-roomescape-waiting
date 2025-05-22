@@ -25,14 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.repository.jpa.MemberRepositoryImpl;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
-import roomescape.reservation.repository.jpa.ReservationTimeRepositoryImpl;
-import roomescape.reservation.repository.jpa.ThemeRepositoryImpl;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
@@ -40,8 +37,7 @@ import roomescape.reservation.service.dto.ReservationSearchCondition;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@Import(value = {ReservationRepositoryImpl.class, ReservationTimeRepositoryImpl.class,
-        ThemeRepositoryImpl.class, MemberRepositoryImpl.class})
+@Import(ReservationRepositoryImpl.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
 @Sql(value = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
