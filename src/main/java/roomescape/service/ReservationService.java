@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.exception.*;
 import roomescape.service.param.CreateReservationParam;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -26,6 +28,7 @@ public class ReservationService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    @Transactional
     public ReservationResult create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = reservationTimeRepository.findById(createReservationParam.timeId()).orElseThrow(
                 () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
@@ -42,6 +45,7 @@ public class ReservationService {
         return ReservationResult.from(reservation);
     }
 
+    @Transactional
     public void deleteById(Long reservationId) {
         reservationRepository.deleteById(reservationId);
     }

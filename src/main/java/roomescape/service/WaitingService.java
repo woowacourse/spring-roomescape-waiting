@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -42,6 +42,7 @@ public class WaitingService {
         return WaitingWithRankResult.from(waitingRepository.findWaitingWithRankByMemberId(memberId));
     }
 
+    @Transactional
     public WaitingResult create(CreateWaitingParam createWaitingParam) {
         ReservationTime reservationTime = reservationTimeRepository.findById(createWaitingParam.timeId()).orElseThrow(
                 () -> new NotFoundReservationTimeException(createWaitingParam.timeId() + "에 해당하는 정보가 없습니다."));
@@ -63,16 +64,18 @@ public class WaitingService {
         return WaitingResult.from(waiting);
     }
 
+    @Transactional
     public void deleteByMemberIdAndWaitingId(Long memberId, Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(
                 () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
-        if(!Objects.equals(waiting.getMember().getId(), memberId)) { //TODO: 한번에 쿼리로 할지 고민, 내부에 물어볼지 고민
+        if(!Objects.equals(waiting.getMember().getId(), memberId)) {
             throw new DeletionNotAllowedException("잘못된 삭제 요청입니다.");
         }
 
         waitingRepository.deleteById(waitingId);
     }
 
+    @Transactional
     public void approve(final Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(
                 () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
@@ -82,11 +85,13 @@ public class WaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
+    @Transactional
     public void approveFirst(Long themeId, LocalDate date, Long timeId) {
         List<Waiting> waitings = waitingRepository.findByThemeIdAndDateAndTimeId(themeId, date, timeId);
         approve(waitings.getFirst().getId()); //TODO: 1순위 대기 가져오는 로직 수정 필요
     }
 
+    @Transactional
     public void deleteById(final Long waitingId) {
         if(!waitingRepository.existsById(waitingId)) {
             throw new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다.");

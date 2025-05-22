@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeRepository;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int RANK_LIMIT = 10;
@@ -32,6 +34,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResult create(CreateThemeParam createThemeParam) {
         Theme theme = themeRepository.save(new Theme(createThemeParam.name(), createThemeParam.description(), createThemeParam.thumbnail()));
         return ThemeResult.from(theme);
@@ -44,6 +47,7 @@ public class ThemeService {
         return ThemeResult.from(theme);
     }
 
+    @Transactional
     public void deleteById(final Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
             throw new DeletionNotAllowedException("해당 테마에 예약이 존재합니다.");
