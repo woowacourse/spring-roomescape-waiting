@@ -13,6 +13,7 @@ import roomescape.reservation.model.entity.Waiting;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
 import roomescape.reservation.model.repository.WaitingRepository;
+import roomescape.reservation.model.service.WaitingValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -23,17 +24,22 @@ public class ReservationWaitingService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final MemberRepository memberRepository;
 
+    private final WaitingValidator waitingValidator;
+
     public WaitingServiceResponse create(CreateReservationServiceRequest request) {
+        waitingValidator.validateNoDuplication(request.date(), request.timeId(), request.themeId(),
+            request.memberId());
+
         ReservationTheme theme = reservationThemeRepository.getById(request.themeId());
         ReservationTime time = reservationTimeRepository.getById(request.timeId());
         Member member = memberRepository.getById(request.memberId());
+
         Waiting waiting = Waiting.builder()
             .date(request.date())
             .theme(theme)
             .time(time)
             .member(member)
             .build();
-
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingServiceResponse.from(savedWaiting);
     }

@@ -47,14 +47,14 @@ public class ReservationDbRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> getSearchReservations(Long themeId, Long memberId, LocalDate from, LocalDate to) {
+    public List<Reservation> getSearchReservations(Long themeId, Long memberId, LocalDate from,
+        LocalDate to) {
         Specification<Reservation> spec = Specification.where(
-            ReservationSpecification.memberIdEquals(memberId))
+                ReservationSpecification.memberIdEquals(memberId))
             .and(ReservationSpecification.themeIdEquals(themeId))
             .and(ReservationSpecification.betweenDate(from, to));
 
-        List<Reservation> reservations = reservationJpaRepository.findAll(spec);
-        return reservations;
+        return reservationJpaRepository.findAll(spec);
     }
 
     @Override
@@ -71,5 +71,12 @@ public class ReservationDbRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAllByMemberId(Long memberId) {
         return reservationJpaRepository.findAllByMemberId(memberId);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId,
+        Long themeId, Long memberId) {
+        return reservationJpaRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId,
+            themeId, memberId);
     }
 }

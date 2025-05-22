@@ -1,5 +1,6 @@
 package roomescape.reservation.model.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.model.entity.Waiting;
@@ -16,4 +17,6 @@ public interface WaitingRepository {
     void delete(Waiting waiting);
 
     Optional<Waiting> findById(Long id);
+
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 }
