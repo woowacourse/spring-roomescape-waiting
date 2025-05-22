@@ -29,6 +29,9 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
             AND w2.timeSlot = w.timeSlot
             AND w2.id < w.id))
             FROM Waiting w
+            JOIN FETCH w.member
+            JOIN FETCH w.theme
+            JOIN FETCH w.timeSlot
             WHERE w.member.id = :memberId
             """)
     List<WaitingWithRankResponse> findByMemberIdWithRank(Long memberId);
@@ -37,5 +40,12 @@ public interface WaitingRepository extends Repository<Waiting, Long> {
 
     Optional<Waiting> findFirstByDateAndTimeSlotAndThemeOrderById(LocalDate date, TimeSlot timeSlot, Theme theme);
 
+    @Query("""
+            SELECT w
+            FROM Waiting w
+            JOIN FETCH w.member
+            JOIN FETCH w.theme
+            JOIN FETCH w.timeSlot
+            """)
     List<Waiting> findAll();
 }

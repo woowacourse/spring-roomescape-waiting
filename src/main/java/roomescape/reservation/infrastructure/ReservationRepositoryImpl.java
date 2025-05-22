@@ -21,6 +21,9 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Reservation> cq = cb.createQuery(Reservation.class);
         Root<Reservation> reservation = cq.from(Reservation.class);
+        reservation.fetch("member");
+        reservation.fetch("theme");
+        reservation.fetch("timeSlot");
 
         List<Predicate> predicates = new ArrayList<>();
 
