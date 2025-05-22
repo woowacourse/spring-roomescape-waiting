@@ -7,6 +7,7 @@ import roomescape.entity.Reservation;
 import roomescape.global.ReservationStatus;
 
 public record MyReservationResponse(
+        Long id,
         String theme,
         LocalDate date,
         LocalTime time,
@@ -15,6 +16,7 @@ public record MyReservationResponse(
     public static MyReservationResponse from(Reservation reservation) {
 
         return new MyReservationResponse(
+                reservation.getId(),
                 reservation.getThemeName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
@@ -25,6 +27,7 @@ public record MyReservationResponse(
     public static MyReservationResponse from(WaitingWithRank waitingWithRank) {
 
         return new MyReservationResponse(
+                waitingWithRank.getWaiting().getId(),
                 waitingWithRank.getWaiting().getThemeName(),
                 waitingWithRank.getWaiting().getDate(),
                 waitingWithRank.getWaiting().getStartAt(),
