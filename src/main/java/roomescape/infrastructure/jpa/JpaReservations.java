@@ -70,8 +70,8 @@ public class JpaReservations implements Reservations {
     }
 
     @Override
-    public boolean isSlotFreeFor(final ReservationSlot slot, final User user) {
-        return dao.existsBySlotAndUser(slot, user);
+    public boolean isSlotFreeFor(ReservationSlot slot, User user) {
+        return !dao.existsBySlotAndUser(slot, user);
     }
 
     @Override
