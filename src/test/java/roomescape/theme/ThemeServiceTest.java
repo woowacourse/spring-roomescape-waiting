@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -147,7 +147,7 @@ class ThemeServiceTest {
             final Long id = 1L;
             given(themeRepository.findById(id))
                     .willReturn(Optional.empty());
-            
+
             // when & then
             assertThatThrownBy(() -> {
                 themeService.deleteById(id);

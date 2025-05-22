@@ -1,10 +1,10 @@
-package roomescape.waiting.dto;
+package roomescape.reservation.reservation.dto;
 
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record WaitingRequest(
+public record ReservationRequest(
         @NotNull LocalDate date,
         @NotNull Long timeId,
         @NotNull Long themeId

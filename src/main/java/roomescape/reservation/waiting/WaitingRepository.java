@@ -1,8 +1,8 @@
-package roomescape.waiting;
+package roomescape.reservation.waiting;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.reservation.Reservation;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 

@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.reservation;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -6,10 +6,10 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.reservation.*;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
-import roomescape.reservation.dto.AdminFilterReservationRequest;
-import roomescape.reservation.dto.AdminReservationRequest;
-import roomescape.reservation.dto.ReservationRequest;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.reservation.dto.AdminFilterReservationRequest;
+import roomescape.reservation.reservation.dto.AdminReservationRequest;
+import roomescape.reservation.reservation.dto.ReservationRequest;
+import roomescape.reservation.reservation.dto.ReservationResponse;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepository;
 import roomescape.theme.Theme;

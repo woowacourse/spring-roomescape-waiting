@@ -1,11 +1,11 @@
-package roomescape.waiting;
+package roomescape.reservation.waiting;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.reservation.Reservation;
 
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

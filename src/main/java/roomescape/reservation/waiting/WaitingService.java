@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.reservation.waiting;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,16 +9,14 @@ import roomescape.exception.custom.reason.reservation.*;
 import roomescape.exception.custom.reason.waiting.WaitingNotFoundException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
-import roomescape.reservation.ReservationStatus;
-import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.reservation.Reservation;
+import roomescape.reservation.reservation.ReservationRepository;
+import roomescape.reservation.reservation.ReservationStatus;
+import roomescape.reservation.reservation.dto.ReservationResponse;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepository;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
-import roomescape.waiting.dto.WaitingRequest;
-import roomescape.waiting.dto.WaitingResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

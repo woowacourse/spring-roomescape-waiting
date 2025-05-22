@@ -1,7 +1,6 @@
-package roomescape.waiting.dto;
+package roomescape.reservation.waiting;
 
-import roomescape.reservation.dto.ReservationResponse;
-import roomescape.waiting.Waiting;
+import roomescape.reservation.reservation.dto.ReservationResponse;
 
 public record WaitingResponse(
         Long id,

@@ -2,10 +2,10 @@ package roomescape.util;
 
 import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.member.Member;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.reservation.Reservation;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
-import roomescape.waiting.Waiting;
+import roomescape.reservation.waiting.Waiting;
 
 public class TestFactory {
 

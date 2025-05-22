@@ -4,8 +4,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationStatus;
+import roomescape.reservation.reservation.Reservation;
+import roomescape.reservation.reservation.ReservationStatus;
+import roomescape.reservation.waiting.Waiting;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
