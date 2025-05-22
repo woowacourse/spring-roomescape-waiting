@@ -5,7 +5,7 @@ import java.util.List;
 import roomescape.domain.reservation.Reservation;
 
 public record UserReservationResponse(
-    long reservationId,
+    long id,
     LocalDate date,
     TimeSlotResponse time,
     ThemeResponse theme,
