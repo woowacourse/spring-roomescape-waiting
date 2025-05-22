@@ -36,4 +36,11 @@ public class AdminPageController {
     public String getThemePage() {
         return "admin/theme";
     }
+
+    @GetMapping("/admin/waiting")
+    @AuthRequired
+    @Role(UserRole.ADMIN)
+    public String getWaitingPage() {
+        return "admin/waiting";
+    }
 }
