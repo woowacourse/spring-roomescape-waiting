@@ -15,6 +15,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.method.HandlerMethod;
 import roomescape.admin.dto.AdminReservationRequest;
+import roomescape.admin.interceptor.AdminInterceptor;
 import roomescape.admin.presentation.AdminController;
 import roomescape.common.util.JwtTokenContainer;
 import roomescape.common.util.TokenCookieManager;
