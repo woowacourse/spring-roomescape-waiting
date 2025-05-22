@@ -70,7 +70,7 @@ class AuthControllerTest {
                     .given().log().all()
                     .contentType(ContentType.JSON)
                     .body(requestDto)
-                    .when().post("/login")
+                    .when().post("/signin")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value())
                     .extract().response();
@@ -89,7 +89,7 @@ class AuthControllerTest {
                     .given().log().all()
                     .contentType(ContentType.JSON)
                     .body(requestDto)
-                    .when().post("/login")
+                    .when().post("/signin")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value())
                     .extract().response();
@@ -107,7 +107,7 @@ class AuthControllerTest {
                     .given().log().all()
                     .contentType(ContentType.JSON)
                     .body(requestDto)
-                    .when().post("/login")
+                    .when().post("/signin")
                     .then().log().all()
                     .statusCode(HttpStatus.NOT_FOUND.value())
                     .extract().response();
