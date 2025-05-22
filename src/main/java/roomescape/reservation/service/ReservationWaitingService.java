@@ -57,9 +57,9 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationResponse createReservation(Long memberId, ReservationRequest request) {
-        Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
-        if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(reservationDate,
+                request.timeId(), request.themeId())) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
         Member member = memberService.findById(memberId);
@@ -73,9 +73,9 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationResponse createReservationByName(String name, ReservationRequest request) {
-        Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
-        if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(reservationDate,
+                request.timeId(), request.themeId())) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
         Member member = memberService.findByName(name);

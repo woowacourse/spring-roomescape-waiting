@@ -11,7 +11,6 @@ import static roomescape.reservation.fixture.ReservationDateFixture.예약날짜
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,7 +66,8 @@ class ReservationWaitingServiceTest {
         Theme savedTheme = new Theme(1L, "test", "test", "test");
         Reservation savedReservation = new Reservation(1L, 예약날짜_내일.getDate(), savedReservationTime, savedTheme,
                 savedMember);
-        when(reservationRepository.existsByReservationDateAndReservationTimeId(any(), any())).thenReturn(false);
+        when(reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(any(), any(),
+                any())).thenReturn(false);
         when(memberService.findById(any(Long.class))).thenReturn(savedMember);
         when(reservationTimeService.findById(any(Long.class))).thenReturn(savedReservationTime);
         when(themeService.findById(any(Long.class))).thenReturn(savedTheme);
@@ -92,7 +92,8 @@ class ReservationWaitingServiceTest {
     void 예약이_존재하면_예약을_생성할_수_없다() {
         ReservationTime savedReservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme savedTheme = new Theme(1L, "test", "test", "test");
-        when(reservationRepository.existsByReservationDateAndReservationTimeId(any(), any())).thenReturn(true);
+        when(reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(any(), any(),
+                any())).thenReturn(true);
 
         ReservationRequest request = new ReservationRequest(
                 예약날짜_내일.getDate(),
@@ -195,7 +196,7 @@ class ReservationWaitingServiceTest {
     @Test
     void 존재하지_않는_예약을_삭제할_수_없다() {
         when(reservationRepository.findById(3L)).thenReturn(Optional.empty());
-        
+
         assertThatThrownBy(() -> reservationWaitingService.deleteReservationAndUpdateWaiting(3L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("[ERROR] 예약을 찾을 수 없습니다.");
@@ -211,7 +212,8 @@ class ReservationWaitingServiceTest {
         Reservation reservation = new Reservation(reservationId, LocalDate.now(), reservationTime, theme, member);
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-        when(waitingRepository.findFirstOrderById(eq(theme.getId()), eq(reservationTime.getId()), eq(reservation.getDate())))
+        when(waitingRepository.findFirstOrderById(eq(theme.getId()), eq(reservationTime.getId()),
+                eq(reservation.getDate())))
                 .thenReturn(Optional.empty());
 
         // when
@@ -229,11 +231,13 @@ class ReservationWaitingServiceTest {
         Member waitingMember = new Member(2L, new Name("대기자"), new Email("waiting@test.com"), Role.MEMBER);
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "theme", "desc", "img");
-        Reservation reservation = new Reservation(reservationId, LocalDate.now(), reservationTime, theme, reservedMember);
+        Reservation reservation = new Reservation(reservationId, LocalDate.now(), reservationTime, theme,
+                reservedMember);
         Waiting waiting = new Waiting(1L, reservation, waitingMember);
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-        when(waitingRepository.findFirstOrderById(eq(theme.getId()), eq(reservationTime.getId()), eq(reservation.getDate())))
+        when(waitingRepository.findFirstOrderById(eq(theme.getId()), eq(reservationTime.getId()),
+                eq(reservation.getDate())))
                 .thenReturn(Optional.of(waiting));
 
         // when
