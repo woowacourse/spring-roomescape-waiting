@@ -51,7 +51,9 @@ public class ReservationController {
     ) {
         var searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
         var reservations = service.findAllReservations(searchFilter);
-        return ReservationResponse.from(reservations);
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

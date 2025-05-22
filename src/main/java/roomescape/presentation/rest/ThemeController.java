@@ -39,7 +39,9 @@ public class ThemeController {
     @GetMapping
     public List<ThemeResponse> getAllThemes() {
         var themes = service.findAllThemes();
-        return ThemeResponse.from(themes);
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     @GetMapping(value = "/popular", params = {"startDate", "endDate", "count"})
@@ -49,7 +51,9 @@ public class ThemeController {
             @RequestParam("count") final Integer count
     ) {
         var themes = service.findPopularThemes(startDate, endDate, count);
-        return ThemeResponse.from(themes);
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

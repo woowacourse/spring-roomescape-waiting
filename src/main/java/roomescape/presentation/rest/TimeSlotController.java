@@ -38,7 +38,9 @@ public class TimeSlotController {
     @GetMapping("/times")
     public List<TimeSlotResponse> getAllTimeSlots() {
         var timeSlots = service.findAllTimeSlots();
-        return TimeSlotResponse.from(timeSlots);
+        return timeSlots.stream()
+                .map(TimeSlotResponse::from)
+                .toList();
     }
 
     @GetMapping(value = "/availableTimes", params = {"date", "themeId"})
@@ -47,7 +49,9 @@ public class TimeSlotController {
             @RequestParam("themeId") final Long themeId
     ) {
         var availableTimeSlots = service.findAvailableTimeSlots(date, themeId);
-        return AvailableTimeSlotResponse.from(availableTimeSlots);
+        return availableTimeSlots.stream()
+                .map(AvailableTimeSlotResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/times/{id}")

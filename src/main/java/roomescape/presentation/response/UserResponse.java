@@ -1,6 +1,5 @@
 package roomescape.presentation.response;
 
-import java.util.List;
 import roomescape.domain.user.User;
 
 public record UserResponse(
@@ -13,11 +12,5 @@ public record UserResponse(
                 user.id(),
                 user.name()
         );
-    }
-
-    public static List<UserResponse> from(final List<User> users) {
-        return users.stream()
-                .map(UserResponse::from)
-                .toList();
     }
 }

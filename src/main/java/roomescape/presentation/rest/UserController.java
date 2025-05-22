@@ -40,6 +40,8 @@ public class UserController {
     @GetMapping("/reservations")
     public List<UserReservationResponse> getAllReservationsByUser(@Authenticated final User user) {
         var reservations = reservationService.getReservations(user.id());
-        return UserReservationResponse.from(reservations);
+        return reservations.stream()
+                .map(UserReservationResponse::from)
+                .toList();
     }
 }

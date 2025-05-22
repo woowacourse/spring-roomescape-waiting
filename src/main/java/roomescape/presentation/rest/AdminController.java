@@ -39,6 +39,8 @@ public class AdminController {
     @GetMapping("/users")
     public List<UserResponse> getAllUsers() {
         var users = userService.findAllUsers();
-        return UserResponse.from(users);
+        return users.stream()
+                .map(UserResponse::from)
+                .toList();
     }
 }
