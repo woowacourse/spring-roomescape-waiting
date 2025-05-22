@@ -20,7 +20,6 @@ class ReservationTest {
         Theme theme = Theme.create("공포", "공포테마", "공포.jpg");
 
         Reservation reservation = Reservation.create(member, date, time, theme);
-        reservation.reserve();
 
         assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }

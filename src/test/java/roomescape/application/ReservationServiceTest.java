@@ -212,7 +212,7 @@ class ReservationServiceTest extends BaseTest {
 
         assertAll(
                 () -> assertThat(responses).hasSize(1),
-                () -> assertThat(response.reservationId()).isEqualTo(reservation.getId()),
+                () -> assertThat(response.id()).isEqualTo(reservation.getId()),
                 () -> assertThat(response.date()).isEqualTo(reservation.getDate()),
                 () -> assertThat(response.time()).isEqualTo(reservationTime.getStartAt()),
                 () -> assertThat(response.theme()).isEqualTo(theme.getName()),

@@ -22,7 +22,6 @@ public class ReservationDbFixture {
     public Reservation 예약_한스_25_4_22_10시_공포(Member member, ReservationTime reservationTime, Theme theme) {
         LocalDate date = ReservationDateFixture.예약날짜_25_4_22.getDate();
         Reservation reservation = Reservation.create(member, date, reservationTime, theme);
-        reservation.reserve();
 
         return reservationRepository.save(reservation);
     }
@@ -30,7 +29,6 @@ public class ReservationDbFixture {
     public Reservation 예약_생성_한스(Member member, ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         LocalDate date = reservationDate.getDate();
         Reservation reservation = Reservation.create(member, date, reservationTime, theme);
-        reservation.reserve();
 
         return reservationRepository.save(reservation);
     }
