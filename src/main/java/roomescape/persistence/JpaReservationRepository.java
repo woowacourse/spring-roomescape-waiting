@@ -30,7 +30,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         JOIN FETCH r.member
         WHERE r.member.id = :memberId
     """)
-    List<Reservation> findByMemberIdWithDetails(Long memberId);
+    List<Reservation> findByMemberId(Long memberId);
 
     @Query("""
         SELECT CASE WHEN EXISTS (

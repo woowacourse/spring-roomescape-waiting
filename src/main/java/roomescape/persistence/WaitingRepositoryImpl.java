@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Waiting;
 import roomescape.domain.repository.WaitingRepository;
+import roomescape.persistence.dto.WaitingWithRankData;
 
 @Repository
 public class WaitingRepositoryImpl implements WaitingRepository {
@@ -42,12 +43,12 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByMemberId(Long memberId) {
-        return jpaWaitingRepository.findByMemberId(memberId);
+    public List<WaitingWithRankData> findWaitingsWithRankByMemberId(Long memberId) {
+        return jpaWaitingRepository.findWaitingsWithRankByMemberId(memberId);
     }
 
     @Override
     public List<Waiting> findAll() {
-        return jpaWaitingRepository.findAllWithDetails();
+        return jpaWaitingRepository.findAllWaitings();
     }
 }

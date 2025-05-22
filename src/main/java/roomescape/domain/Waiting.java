@@ -1,10 +1,20 @@
 package roomescape.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Waiting extends Booking {
+
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime waitingStartedAt;
 
     protected Waiting() {
     }
@@ -23,5 +33,9 @@ public class Waiting extends Booking {
 
     public boolean sameWaiterWith(Long memberId) {
         return getMember().getId().equals(memberId);
+    }
+
+    public LocalDateTime getWaitingStartedAt() {
+        return waitingStartedAt;
     }
 }

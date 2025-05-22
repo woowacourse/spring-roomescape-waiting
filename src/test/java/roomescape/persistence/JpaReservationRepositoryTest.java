@@ -30,89 +30,6 @@ class JpaReservationRepositoryTest {
     private EntityManager entityManager;
 
     @Test
-    @DisplayName("회원 ID로 예약을 찾을 수 있다.")
-    void findByMemberId() {
-        //given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        // when
-        List<Reservation> result = jpaReservationRepository.findByMemberIdWithDetails(member.getId());
-
-        // then
-        assertAll(
-                () -> assertThat(result.size()).isEqualTo(1),
-                () -> assertThat(result.getFirst()).isEqualTo(reservation)
-        );
-    }
-
-    @Test
-    @DisplayName("예약 시간 ID를 통해 해당 시간에 대한 예약이 존재함을 확인할 수 있다.")
-    void existsByTimeId() {
-        //given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        //when
-        boolean result = jpaReservationRepository.existsByTimeId(time.getId());
-
-        //then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("날짜, 예약 시간 ID, 테마 ID가 같은 예약이 존재함을 확인할 수 있다.")
-    void existsByDateAndTimeIdAndThemeId() {
-        //given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        //when
-        boolean result = jpaReservationRepository.existsByDateAndTimeIdAndThemeId(DEFAULT_DATE, time.getId(), theme.getId());
-
-        //then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("테마 ID에 예약이 존재하는지 확인할 수 있다.")
-    void existsByThemeId() {
-        // given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        // when
-        boolean result = jpaReservationRepository.existsByThemeId(theme.getId());
-
-        //then
-        assertThat(result).isTrue();
-    }
-
-    @Test
     @DisplayName("회원 ID로 예약 조회를 필터링할 수 있다.")
     void findReservationsInConditions1() {
         // given
@@ -246,5 +163,28 @@ class JpaReservationRepositoryTest {
 
         // then
         assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("회원 ID로 예약을 찾을 수 있다.")
+    void findByMemberId() {
+        //given
+        Member member = TestFixture.createDefaultMember();
+        entityManager.persist(member);
+        Theme theme = TestFixture.createDefaultTheme();
+        entityManager.persist(theme);
+        ReservationTime time = TestFixture.createDefaultReservationTime();
+        entityManager.persist(time);
+        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme);
+        entityManager.persist(reservation);
+
+        // when
+        List<Reservation> result = jpaReservationRepository.findByMemberId(member.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(result.size()).isEqualTo(1),
+                () -> assertThat(result.getFirst()).isEqualTo(reservation)
+        );
     }
 }

@@ -63,7 +63,7 @@ class MyPageServiceTest {
                 () -> assertThat(results)
                         .isEqualTo(List.of(
                                 MemberBookingResult.from(reservation),
-                                MemberBookingResult.from(waiting)
+                                MemberBookingResult.from(waiting, 1)
                         ))
         );
     }

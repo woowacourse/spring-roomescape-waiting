@@ -24,13 +24,14 @@ public record MemberBookingResult(
         );
     }
 
-    public static MemberBookingResult from(Waiting waiting) {
+    public static MemberBookingResult from(Waiting waiting, long rank) {
         return new MemberBookingResult(
                 waiting.getId(),
                 MemberResult.from(waiting.getMember()),
-                ThemeResult.from(waiting.getTheme()), waiting.getDate(),
+                ThemeResult.from(waiting.getTheme()),
+                waiting.getDate(),
                 ReservationTimeResult.from(waiting.getTime()),
-                "대기"
+                rank + "번째 대기"
         );
     }
 

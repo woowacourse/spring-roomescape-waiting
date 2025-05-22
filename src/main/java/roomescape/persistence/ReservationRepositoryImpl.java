@@ -33,7 +33,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     public List<Reservation> findByMemberId(final Long memberId) {
-        return jpaReservationRepository.findByMemberIdWithDetails(memberId);
+        return jpaReservationRepository.findByMemberId(memberId);
     }
 
     @Override
