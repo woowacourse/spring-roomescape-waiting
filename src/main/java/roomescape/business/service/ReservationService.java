@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
@@ -17,6 +18,7 @@ import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
 import roomescape.infrastructure.repository.ThemeRepository;
+import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
@@ -28,14 +30,17 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository,
-                              final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository
+                              final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository,
+                              final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -76,7 +81,7 @@ public class ReservationService {
     }
 
     private void validateIsDuplicate(final LocalDate date, final Long playTimeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, playTimeId, themeId)) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, playTimeId, themeId)) {
             throw new DuplicateException("추가 하려는 예약과 같은 날짜, 시간, 테마의 예약이 이미 존재합니다.");
         }
     }
@@ -107,9 +112,17 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
-        return reservationRepository.findByMemberId(memberId)
+        final List<ReservationMineResponse> reservations = reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(ReservationMineResponse::from)
+                .toList();
+
+        final List<ReservationMineResponse> waitings = waitingRepository.findWithRankByMemberId(memberId)
+                .stream()
+                .map(ReservationMineResponse::from)
+                .toList();
+
+        return Stream.concat(reservations.stream(), waitings.stream())
                 .toList();
     }
 }

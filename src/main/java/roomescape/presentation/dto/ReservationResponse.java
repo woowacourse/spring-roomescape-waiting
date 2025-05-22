@@ -11,7 +11,7 @@ public record ReservationResponse(Long id, LocalDate date, MemberResponse member
                 reservation.getId(),
                 reservation.getDate(),
                 MemberResponse.from(reservation.getMember()),
-                ReservationTimeResponse.from(reservation.getReservationTime()),
+                ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme())
         );
     }
