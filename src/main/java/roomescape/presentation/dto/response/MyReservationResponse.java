@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public record MyReservationResponse(
-        Long reservationId,
+        Long id,
 
         String theme,
 
@@ -21,8 +21,10 @@ public record MyReservationResponse(
         @JsonFormat(pattern = "HH:mm")
         LocalTime time,
 
-        String status
-) {
+        String status,
+
+        boolean isWaiting
+        ) {
 
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
@@ -30,17 +32,19 @@ public record MyReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getStatus().getName()
+                reservation.getStatus().getName(),
+                false
         );
     }
 
     public static MyReservationResponse from(Waiting waiting) {
         return new MyReservationResponse(
-                waiting.getReservation().getId(),
+                waiting.getId(),
                 waiting.getReservation().getTheme().getName(),
                 waiting.getReservation().getDate(),
                 waiting.getReservation().getTime().getStartAt(),
-                waiting.getRank() + "번째 예약대기"
+                waiting.getRank() + "번째 예약대기",
+                true
         );
     }
 

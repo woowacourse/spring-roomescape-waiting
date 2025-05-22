@@ -71,4 +71,11 @@ public class ReservationController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
+        waitingService.deleteWaitingById(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

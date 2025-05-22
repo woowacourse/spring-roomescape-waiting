@@ -75,7 +75,7 @@
     Location: /reservations/waitings/1
     Content-Type: application/json
     ```
-- [ ] 예약 대기 취소 기능
+- [x] 예약 대기 취소 기능
   - request
     ```
     DELETE /reservations/waitings/1 HTTP/1.1

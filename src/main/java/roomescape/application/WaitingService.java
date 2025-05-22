@@ -45,4 +45,15 @@ public class WaitingService {
     public List<Waiting> findWaitingsByMember(Member member) {
         return waitingRepository.findAllByMember(member);
     }
+
+    @Transactional
+    public void deleteWaitingById(Long id) {
+        Waiting waiting = findWaitingById(id);
+        waitingRepository.deleteById(waiting.getId());
+    }
+
+    public Waiting findWaitingById(Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 대기 건이 존재하지 않습니다."));
+    }
 }
