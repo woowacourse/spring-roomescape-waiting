@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
-    @ExceptionHandler(SaveException.class)
+    @ExceptionHandler({SaveException.class, WaitingNotAllowedException.class, ReservationNotAllowedException.class})
     public ResponseEntity<String> handleSaveException(final SaveException e) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
     }
