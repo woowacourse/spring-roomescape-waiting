@@ -38,13 +38,17 @@
   예약 생성
 
 
-- [ ] `POST /reservations/wait`  
+- [x] `POST /reservations/wait`  
   예약 대기 생성
 
 
 - [x] `DELETE /reservations/{id}`  
   예약 삭제
   - 예약에서 참조 중인 시간은 삭제 불가능
+
+
+- [x] `DELETE /reservations/wait/{id}`  
+  예약 대기 취소
 
 
 - [x] `GET /reservations/mine`  
@@ -91,6 +95,10 @@
 
 ### 사용자 페이지
 
+- [x] `GET /`
+  메인 페이지
+
+
 - [x] `GET /login`  
   로그인 페이지
 
@@ -111,6 +119,10 @@
 
 - [x] `GET /admin/reservation`  
   예약 관리용 페이지
+
+
+- [x] `GET /admin/waiting`  
+  예약 대기 관리용 페이지
 
 
 - [x] `GET /admin/time`  
