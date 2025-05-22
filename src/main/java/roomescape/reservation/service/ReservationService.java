@@ -30,39 +30,50 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
 
     public Reservation save(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
-        if (!date.isAfter(LocalDate.now())) {
-            throw new PastDateException("과거 시간은 예약 등록을 할 수 없습니다. date = " + date);
-        }
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
-        final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
-            throw new DataExistException("해당 시간에 이미 예약된 테마입니다.");
-        }
-        final Reservation reservation = new Reservation(member, date, reservationTime, theme);
+        validateDate(date);
+        ReservationTime reservationTime = getReservationTime(timeId);
+        Theme theme = getTheme(themeId);
+        validateReservationExists(date, reservationTime, theme);
 
-        Reservation savedReservation = reservationRepository.save(reservation);
-        ReservationWithStatus reservationWithStatus = new ReservationWithStatus(savedReservation, StatusType.RESERVED);
-        reservationWithStatusRepository.save(reservationWithStatus);
-
-        return savedReservation;
+        Reservation reservation = new Reservation(member, date, reservationTime, theme);
+        return saveReservationWithStatus(reservation, StatusType.RESERVED);
     }
 
     public Reservation saveWaiting(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
+        validateDate(date);
+        ReservationTime reservationTime = getReservationTime(timeId);
+        Theme theme = getTheme(themeId);
+
+        Reservation reservation = new Reservation(member, date, reservationTime, theme);
+        return saveReservationWithStatus(reservation, StatusType.WAITING);
+    }
+
+    private void validateDate(final LocalDate date) {
         if (!date.isAfter(LocalDate.now())) {
             throw new PastDateException("과거 시간은 예약 등록을 할 수 없습니다. date = " + date);
         }
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
+    }
+
+    private ReservationTime getReservationTime(final Long timeId) {
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
-        final Theme theme = themeRepository.findById(themeId)
+    }
+
+    private Theme getTheme(final Long themeId) {
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
-        final Reservation reservation = new Reservation(member, date, reservationTime, theme);
+    }
 
+    private void validateReservationExists(final LocalDate date, final ReservationTime time, final Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
+            throw new DataExistException("해당 시간에 이미 예약된 테마입니다.");
+        }
+    }
+
+    private Reservation saveReservationWithStatus(final Reservation reservation, final StatusType status) {
         Reservation savedReservation = reservationRepository.save(reservation);
-        ReservationWithStatus reservationWithStatus = new ReservationWithStatus(savedReservation, StatusType.WAITING);
+        ReservationWithStatus reservationWithStatus = new ReservationWithStatus(savedReservation, status);
         reservationWithStatusRepository.save(reservationWithStatus);
-
         return savedReservation;
     }
 
@@ -80,8 +91,7 @@ public class ReservationService {
     public List<AvailableReservationTime> findAvailableReservationTimes(final LocalDate date, final Long themeId) {
         final List<AvailableReservationTime> availableReservationTimes = new ArrayList<>();
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
+        final Theme theme = getTheme(themeId);
 
         for (ReservationTime reservationTime : reservationTimes) {
             availableReservationTimes.add(new AvailableReservationTime(
