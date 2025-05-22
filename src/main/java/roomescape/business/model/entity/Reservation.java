@@ -12,7 +12,7 @@ import roomescape.business.model.vo.Id;
 
 @ToString
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Getter
 @Entity
 public class Reservation {
@@ -20,9 +20,9 @@ public class Reservation {
     @EmbeddedId
     private final Id id = Id.issue();
     @ManyToOne
-    private User user;
+    private final User user;
     @ManyToOne
-    private ReservationSlot slot;
+    private final ReservationSlot slot;
 
     public Reservation(final User user, final ReservationSlot slot) {
         this.user = user;

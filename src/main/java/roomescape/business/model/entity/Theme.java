@@ -13,7 +13,7 @@ import roomescape.business.model.vo.ThemeName;
 
 @ToString
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Getter
 @Entity
 public class Theme {
@@ -21,9 +21,9 @@ public class Theme {
     @EmbeddedId
     private final Id id = Id.issue();
     @Embedded
-    private ThemeName name;
-    private String description;
-    private String thumbnail;
+    private final ThemeName name;
+    private final String description;
+    private final String thumbnail;
 
     public Theme(final String name, final String description, final String thumbnail) {
         this.name = new ThemeName(name);

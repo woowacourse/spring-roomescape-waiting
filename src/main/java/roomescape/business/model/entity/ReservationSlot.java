@@ -23,7 +23,7 @@ import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
 
 @ToString(exclude = "reservations")
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Getter
 @Entity
 public class ReservationSlot {
@@ -31,11 +31,11 @@ public class ReservationSlot {
     @EmbeddedId
     private final Id id = Id.issue();
     @ManyToOne
-    private ReservationTime time;
+    private final ReservationTime time;
     @Embedded
-    private ReservationDate date;
+    private final ReservationDate date;
     @ManyToOne
-    private Theme theme;
+    private final Theme theme;
     @OneToMany(mappedBy = "slot", cascade = CascadeType.REMOVE)
     private final List<Reservation> reservations = new ArrayList<>();
 

@@ -43,7 +43,7 @@ class ReservationServiceTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
 
-        User user = new User("Test User", "test@example.com", "password");
+        User user = User.member("Test User", "test@example.com", "password");
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         Theme theme = new Theme("Test Theme", "Description", "thumbnail.jpg");
         ReservationSlot slot = new ReservationSlot(time, date, theme);
@@ -68,7 +68,7 @@ class ReservationServiceTest {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
 
-        User user = new User("Test User", "test@example.com", "password");
+        User user = User.member("Test User", "test@example.com", "password");
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         Theme theme = new Theme("Test Theme", "Description", "thumbnail.jpg");
         ReservationSlot slot = new ReservationSlot(time, date, theme);
@@ -89,7 +89,7 @@ class ReservationServiceTest {
     @Test
     void 예약_삭제_성공() {
         // given
-        User user = new User("Test User", "test@example.com", "password");
+        User user = User.member("Test User", "test@example.com", "password");
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         Theme theme = new Theme("Test Theme", "Description", "thumbnail.jpg");
         ReservationSlot slot = new ReservationSlot(time, LocalDate.now().plusDays(1), theme);

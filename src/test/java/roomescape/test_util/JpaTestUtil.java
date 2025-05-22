@@ -42,12 +42,12 @@ public class JpaTestUtil {
     public String insertUser() {
         String name = generateRandomAlphabetString(5);
         String email = name + "@email.com";
-        User user = new User(name, email, "password123");
+        User user = User.member(name, email, "password123");
         return userDao.save(user).getId().value();
     }
 
     public String insertUser(final String name, final String email) {
-        User user = new User(name, email, "password123");
+        User user = User.member(name, email, "password123");
         return userDao.save(user).getId().value();
     }
 

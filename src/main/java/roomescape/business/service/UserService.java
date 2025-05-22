@@ -28,7 +28,7 @@ public class UserService {
         if (users.existByEmail(email)) {
             throw new InvalidCreateArgumentException(EMAIL_DUPLICATED);
         }
-        val user = new User(name, email, password);
+        val user = User.member(name, email, password);
         users.save(user);
         return UserDto.fromEntity(user);
     }

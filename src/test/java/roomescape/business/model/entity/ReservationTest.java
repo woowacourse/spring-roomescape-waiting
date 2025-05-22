@@ -24,7 +24,7 @@ class ReservationTest {
         @Test
         void 정상적인_예약을_생성할_수_있다() {
             // given
-            final User user = new User(NAME, EMAIL, PASSWORD);
+            final User user = User.member(NAME, EMAIL, PASSWORD);
             final ReservationSlot slot = new ReservationSlot(RESERVATION_TIME, DATE, THEME);
 
             // when
@@ -38,7 +38,7 @@ class ReservationTest {
 
         @Test
         void 과거_날짜로_예약할_수_없다() {
-            final User user = new User(NAME, EMAIL, PASSWORD);
+            final User user = User.member(NAME, EMAIL, PASSWORD);
             final ReservationSlot slot = new ReservationSlot(RESERVATION_TIME, LocalDate.now().minusDays(1), THEME);
 
             assertThatThrownBy(() -> new Reservation(user, slot))
@@ -47,7 +47,7 @@ class ReservationTest {
 
         @Test
         void 현재보다_일주일_이후로_예약할_수_없다() {
-            final User user = new User(NAME, EMAIL, PASSWORD);
+            final User user = User.member(NAME, EMAIL, PASSWORD);
             final ReservationSlot slot = new ReservationSlot(RESERVATION_TIME, LocalDate.now().plusDays(8), THEME);
 
             assertThatThrownBy(() -> new Reservation(user, slot))

@@ -38,8 +38,8 @@ public class LocalDataInitializer {
         final Theme theme2 = new Theme("사라진 시간", "시간을 거슬러 단서를 찾아라!", "time.jpg");
         final ReservationTime time1 = new ReservationTime(LocalTime.of(14, 0));
         final ReservationTime time2 = new ReservationTime(LocalTime.of(16, 0));
-        final User user1 = new User("dompoo", "dompoo@gmail.com", "1234");
-        final User user2 = new User("lemon", "lemon@gmail.com", "1234");
+        final User user1 = User.member("dompoo", "dompoo@gmail.com", "1234");
+        final User user2 = User.member("lemon", "lemon@gmail.com", "1234");
         final User admin = User.admin("admin", "admin@gmail.com", "1234");
         final ReservationSlot reservationSlot1 = new ReservationSlot(time1, LocalDate.now().plusDays(1), theme1);
         final ReservationSlot reservationSlot2 = new ReservationSlot(time1, LocalDate.now().plusDays(2), theme2);

@@ -31,7 +31,7 @@ class JJWTJwtUtilTest {
     @Test
     void 유효한_사용자정보로_토큰을_생성한다() {
         // given
-        User user = new User("dompoo", "dompoo@email.com", "password");
+        User user = User.member("dompoo", "dompoo@email.com", "password");
 
         // when
         AuthToken authToken = sut.createToken(user);

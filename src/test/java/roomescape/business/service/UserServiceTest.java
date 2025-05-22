@@ -67,7 +67,7 @@ class UserServiceTest {
     void 이메일로_사용자를_조회할_수_있다() {
         // given
         String email = "test@example.com";
-        User userData = new User("Test User", email, "password123");
+        User userData = User.member("Test User", email, "password123");
         UserDto expectedUser = new UserDto(userData.getId(), UserRole.USER, new UserName("Test User"), new Email(email));
 
         when(users.findByEmail(email)).thenReturn(Optional.of(userData));

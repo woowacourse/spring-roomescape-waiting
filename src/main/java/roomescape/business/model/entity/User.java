@@ -17,7 +17,7 @@ import roomescape.business.model.vo.UserRole;
 
 @ToString(exclude = "password")
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Getter
 @Entity
 @Table(name = "users")
@@ -25,25 +25,27 @@ public class User {
 
     @EmbeddedId
     private final Id id = Id.issue();
-    private UserRole userRole;
+    private final UserRole userRole;
     @Embedded
-    private UserName name;
+    private final UserName name;
     @Embedded
-    private Email email;
+    private final Email email;
     @Embedded
-    private Password password;
+    private final Password password;
 
-    public User(final String name, final String email, final String rawPassword) {
-        this.userRole = UserRole.USER;
+    private User(final UserRole userRole, final String name, final String email, final String password) {
+        this.userRole = userRole;
         this.name = new UserName(name);
         this.email = new Email(email);
-        this.password = Password.encode(rawPassword);
+        this.password = Password.encode(password);
+    }
+
+    public static User member(final String name, final String email, final String password) {
+        return new User(UserRole.USER, name, email, password);
     }
 
     public static User admin(final String name, final String email, final String password) {
-        User user = new User(name, email, password);
-        user.userRole = UserRole.ADMIN;
-        return user;
+        return new User(UserRole.ADMIN, name, email, password);
     }
 
     public boolean isPasswordCorrect(final String password) {

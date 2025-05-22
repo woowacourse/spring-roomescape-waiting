@@ -15,7 +15,7 @@ import java.time.LocalTime;
 
 @ToString
 @EqualsAndHashCode(of = "id")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Getter
 @Entity
 public class ReservationTime {
@@ -25,7 +25,7 @@ public class ReservationTime {
     @EmbeddedId
     private final Id id = Id.issue();
     @Embedded
-    private StartTime startTime;
+    private final StartTime startTime;
 
     public ReservationTime(final LocalTime startTime) {
         this.startTime = new StartTime(startTime);

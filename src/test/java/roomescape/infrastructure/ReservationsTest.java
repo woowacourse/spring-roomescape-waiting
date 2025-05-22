@@ -60,7 +60,7 @@ class ReservationsTest {
         // given
         final ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         final Theme theme = new Theme("스릴러", "", "");
-        final User user = new User("돔푸", "dompoo@email.com", "password");
+        final User user = User.member("돔푸", "dompoo@email.com", "password");
         final ReservationSlot slot = new ReservationSlot(time, DATE1, theme);
         reservationTimes.save(time);
         themes.save(theme);
