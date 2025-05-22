@@ -1,15 +1,17 @@
 package roomescape.reservation.application;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.common.exception.impl.BadRequestException;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.dto.MemberReservationRequest;
+import roomescape.reservation.application.dto.MyReservation;
 import roomescape.reservation.application.dto.WaitingResponse;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
@@ -64,6 +66,15 @@ public class WaitingService {
         return WaitingResponse.from(savedWaiting);
     }
 
+    public List<MyReservation> getWaitingsFromMember(Long memberId) {
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(
+            memberId);
+
+        return waitingWithRanks.stream()
+            .map(MyReservation::from)
+            .toList();
+    }
+
     private ReservationTime getReservationTime(final Long timeId) {
         return reservationTimeRepository.findById(timeId)
             .orElseThrow(() -> new NotFoundException("선택한 예약 시간이 존재하지 않습니다."));
@@ -77,5 +88,10 @@ public class WaitingService {
     private Member getMember(final Long memberId) {
         return memberRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundException("선택한 멤버가 존재하지 않습니다."));
+    }
+
+    private Waiting getWaiting(final Long waitingId) {
+        return waitingRepository.findById(waitingId)
+            .orElseThrow(() -> new NotFoundException("선택한 웨이팅이 존재하지 않습니다."));
     }
 }

@@ -3,9 +3,9 @@ package roomescape.reservation.domain;
 public class WaitingWithRank {
 
     private Waiting waiting;
-    private Long rank;
+    private long rank;
 
-    public WaitingWithRank(Waiting waiting, Long rank) {
+    public WaitingWithRank(Waiting waiting, long rank) {
         this.waiting = waiting;
         this.rank = rank;
     }
@@ -14,7 +14,7 @@ public class WaitingWithRank {
         return waiting;
     }
 
-    public Long getRank() {
+    public long getRank() {
         return rank;
     }
 }
