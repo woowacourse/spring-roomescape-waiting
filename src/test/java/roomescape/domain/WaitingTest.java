@@ -11,7 +11,7 @@ import roomescape.exception.waiting.WaitingFieldRequiredException;
 
 class WaitingTest {
 
-    @DisplayName("대기는 빈 날짜로 생성할 수 없다")
+    @DisplayName("예약 대기는 빈 날짜로 생성할 수 없다")
     @Test
     void waitingDateTest() {
         // given
@@ -25,7 +25,7 @@ class WaitingTest {
                 .isInstanceOf(WaitingFieldRequiredException.class);
     }
 
-    @DisplayName("대기는 빈 시간으로 생성할 수 없다")
+    @DisplayName("예약 대기는 빈 시간으로 생성할 수 없다")
     @Test
     void waitingTimeTest() {
         // given
@@ -38,7 +38,7 @@ class WaitingTest {
                 .isInstanceOf(WaitingFieldRequiredException.class);
     }
 
-    @DisplayName("대기는 빈 테마로 생성할 수 없다")
+    @DisplayName("예약 대기는 빈 테마로 생성할 수 없다")
     @Test
     void waitingThemeTest() {
         // given
@@ -51,7 +51,7 @@ class WaitingTest {
                 .isInstanceOf(WaitingFieldRequiredException.class);
     }
 
-    @DisplayName("대기는 빈 멤버로 생성할 수 없다")
+    @DisplayName("예약 대기는 빈 멤버로 생성할 수 없다")
     @Test
     void waitingMemberTest() {
         // given
