@@ -24,7 +24,6 @@ public class Reservation {
     private LocalDate date;
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime reservationTime;
     @ManyToOne(fetch = FetchType.LAZY)

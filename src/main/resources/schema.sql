@@ -24,11 +24,12 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS reservation (
                                            id BIGINT NOT NULL AUTO_INCREMENT,
                                            date VARCHAR(255) NOT NULL,
-    time_id BIGINT,
+    status VARCHAR(255) NOT NULL,
+    reservation_time_id BIGINT,
     theme_id BIGINT,
     user_id BIGINT,
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (reservation_time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (user_id) REFERENCES users (id)
     );
