@@ -7,6 +7,7 @@
     - 예약을 추가하거나 삭제할 수 있다.
 - [x] "/admin/theme" get 요청 시, 테마 관리 페이지를 출력한다.
 - [x] "/admin/time" get 요청 시, 시관 관리 페이지를 출력한다.
+- [x] "/admin/waiting" get 요청 시, 예약 대기 관리 페이지를 출력한다.
 
 ### 예약
 - [x] "/reservations" get 요청 시 모든 예약 정보를 반환한다.
