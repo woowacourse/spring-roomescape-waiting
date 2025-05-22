@@ -1,0 +1,58 @@
+package roomescape.controller.api;
+
+import io.restassured.RestAssured;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.util.JwtTokenProvider;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+class MemberReservationControllerTest {
+
+    @Autowired
+    MemberRepository memberRepository;
+    @Autowired
+    ReservationRepository reservationRepository;
+    @Autowired
+    ThemeRepository themeRepository;
+    @Autowired
+    ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    @DisplayName("자신의 예약 정보를 불러올 수 있다")
+    @Test
+    void myReservationTest() {
+        Member member = Member.createWithoutId("가이온", "hello@woowa.com", Role.USER, "password");
+        ReservationTime time = ReservationTime.createWithoutId(LocalTime.now());
+        Theme theme = Theme.createWithoutId("테마A", "", "");
+        Reservation reservation = Reservation.createWithoutId(member, LocalDate.now(), time, theme);
+
+        memberRepository.save(member);
+        reservationTimeRepository.save(time);
+        themeRepository.save(theme);
+        reservationRepository.save(reservation);
+
+        Member findMember = memberRepository.findById(member.getId()).get();
+        String token = jwtTokenProvider.createToken(findMember);
+
+        RestAssured.given()
+                .cookie("token", token).log().all()
+                .when().get("/reservations/me")
+                .then().log().all().statusCode(200);
+    }
+}
