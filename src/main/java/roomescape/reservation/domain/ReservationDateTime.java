@@ -2,6 +2,7 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ public class ReservationDateTime {
     @Embedded
     private ReservationDate reservationDate;
     @JoinColumn(name = "time_id")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime reservationTime;
 
     public ReservationDateTime(
