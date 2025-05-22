@@ -35,11 +35,26 @@ public class WaitingService {
     public WaitingResponse createWaiting(ReservationCreateRequest request, LoginMember loginMember) {
         Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         Member member = memberService.findMemberByEmail(loginMember.email());
+        validateReservation(reservation, member);
+
         long rank = waitingRepository.countByReservation(reservation) + 1;
         Waiting waiting = Waiting.create(reservation, member, rank);
+        validateWaiting(waiting, member);
 
         Waiting saved = waitingRepository.save(waiting);
         return WaitingResponse.from(saved);
+    }
+
+    private void validateReservation(Reservation reservation, Member member) {
+        if (reservationRepository.existsByDateAndTimeAndThemeAndMember(reservation.getDate(), reservation.getTime(), reservation.getTheme(), member)) {
+            throw new IllegalArgumentException("[ERROR] 이미 해당 날짜, 해당 테마, 해당 시간에 예약이 존재합니다.");
+        }
+    }
+
+    private void validateWaiting(Waiting waiting, Member member) {
+        if (waitingRepository.existsByReservationAndMember(waiting.getReservation(), member)) {
+            throw new IllegalArgumentException("[ERROR] 이미 해당 날짜, 해당 테마, 해당 시간에 예약 대기 중입니다.");
+        }
     }
 
     public List<Waiting> findWaitingsByMember(Member member) {

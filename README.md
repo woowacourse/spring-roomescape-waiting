@@ -128,6 +128,6 @@
           }
       ]
       ```
-- [ ] 중복 예약 불가능 기능
+- [x] 중복 예약 불가능 기능
 - [x] 화면 응답
   - [3단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/ce6b8eef9072409e89b91411b3ef144d4de0b48c)

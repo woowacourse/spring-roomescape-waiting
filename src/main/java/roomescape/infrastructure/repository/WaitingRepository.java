@@ -12,4 +12,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     long countByReservation(Reservation reservation);
 
     List<Waiting> findAllByMember(Member member);
+
+    boolean existsByReservationAndMember(Reservation reservation, Member member);
 }
