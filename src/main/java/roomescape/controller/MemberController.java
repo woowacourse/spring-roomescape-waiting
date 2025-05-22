@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.request.RegisterMemberRequest;
-import roomescape.controller.response.MemberResponse;
-import roomescape.controller.response.RegisterUserResponse;
+import roomescape.controller.dto.request.RegisterMemberRequest;
+import roomescape.controller.dto.response.MemberResponse;
+import roomescape.controller.dto.response.RegisterUserResponse;
 import roomescape.service.MemberService;
-import roomescape.service.param.RegisterMemberParam;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.param.RegisterMemberParam;
+import roomescape.service.dto.result.MemberResult;
 
 @RestController
 @RequestMapping("/members")

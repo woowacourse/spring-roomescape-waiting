@@ -3,10 +3,10 @@ package roomescape.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.request.CreateThemeRequest;
-import roomescape.controller.response.ThemeResponse;
+import roomescape.controller.dto.request.CreateThemeRequest;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
-import roomescape.service.result.ThemeResult;
+import roomescape.service.dto.result.ThemeResult;
 
 import java.util.List;
 

@@ -3,7 +3,7 @@ package roomescape.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.controller.request.LoginMemberInfo;
+import roomescape.controller.dto.request.LoginMemberInfo;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -15,8 +15,8 @@ import roomescape.domain.repository.ThemeRepository;
 import roomescape.domain.repository.WaitingRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundException;
-import roomescape.service.param.CreateBookingParam;
-import roomescape.service.result.WaitingResult;
+import roomescape.service.dto.param.CreateBookingParam;
+import roomescape.service.dto.result.WaitingResult;
 
 @Service
 @Transactional(readOnly = true)

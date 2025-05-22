@@ -14,9 +14,9 @@ import roomescape.domain.MemberRole;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnAuthorizedException;
-import roomescape.service.param.LoginMemberParam;
-import roomescape.service.param.RegisterMemberParam;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.param.LoginMemberParam;
+import roomescape.service.dto.param.RegisterMemberParam;
+import roomescape.service.dto.result.MemberResult;
 
 @SpringBootTest
 @ActiveProfiles("test")

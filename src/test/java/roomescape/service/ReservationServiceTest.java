@@ -28,7 +28,7 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.domain.repository.WaitingRepository;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.dto.result.ReservationResult;
 
 @SpringBootTest
 @ActiveProfiles("test")

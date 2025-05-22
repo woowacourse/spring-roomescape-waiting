@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
-import roomescape.controller.request.CreatBookingRequest;
-import roomescape.controller.request.LoginMemberInfo;
-import roomescape.controller.response.BookingResponse;
+import roomescape.controller.dto.request.CreatBookingRequest;
+import roomescape.controller.dto.request.LoginMemberInfo;
+import roomescape.controller.dto.response.BookingResponse;
 import roomescape.service.WaitingService;
-import roomescape.service.result.WaitingResult;
+import roomescape.service.dto.result.WaitingResult;
 
 @RestController
 @RequestMapping("/waitings")

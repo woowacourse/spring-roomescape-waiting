@@ -12,8 +12,8 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.NotFoundException;
-import roomescape.service.param.CreateBookingParam;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.dto.param.CreateBookingParam;
+import roomescape.service.dto.result.ReservationResult;
 
 @Service
 @Transactional(readOnly = true)

@@ -18,12 +18,12 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.controller.request.LoginMemberRequest;
-import roomescape.controller.response.CheckLoginUserResponse;
-import roomescape.controller.response.LoginMemberResponse;
+import roomescape.controller.dto.request.LoginMemberRequest;
+import roomescape.controller.dto.response.CheckLoginUserResponse;
+import roomescape.controller.dto.response.LoginMemberResponse;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.result.MemberResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

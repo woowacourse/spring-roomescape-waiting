@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.auth.CookieProvider;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.controller.request.LoginMemberRequest;
-import roomescape.controller.response.CheckLoginUserResponse;
-import roomescape.controller.response.LoginMemberResponse;
+import roomescape.controller.dto.request.LoginMemberRequest;
+import roomescape.controller.dto.response.CheckLoginUserResponse;
+import roomescape.controller.dto.response.LoginMemberResponse;
 import roomescape.service.MemberService;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.result.MemberResult;
 
 @Controller
 public class AuthController {

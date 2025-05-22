@@ -21,13 +21,13 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.controller.request.CreatBookingRequest;
+import roomescape.controller.dto.request.CreatBookingRequest;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.repository.WaitingRepository;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.result.MemberResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

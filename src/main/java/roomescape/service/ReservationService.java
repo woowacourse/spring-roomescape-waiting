@@ -10,7 +10,7 @@ import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.WaitingRepository;
 import roomescape.exception.NotFoundException;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.dto.result.ReservationResult;
 
 @Service
 @Transactional(readOnly = true)

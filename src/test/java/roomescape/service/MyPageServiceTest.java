@@ -19,7 +19,7 @@ import roomescape.DatabaseCleaner;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.Waiting;
-import roomescape.service.result.MemberBookingResult;
+import roomescape.service.dto.result.MemberBookingResult;
 
 @SpringBootTest
 @ActiveProfiles("test")

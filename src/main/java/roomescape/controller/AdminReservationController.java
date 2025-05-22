@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.request.CreateReservationAdminRequest;
-import roomescape.controller.response.BookingResponse;
+import roomescape.controller.dto.request.CreateReservationAdminRequest;
+import roomescape.controller.dto.response.BookingResponse;
 import roomescape.service.ReservationCreationService;
 import roomescape.service.ReservationService;
-import roomescape.service.param.CreateBookingParam;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.dto.param.CreateBookingParam;
+import roomescape.service.dto.result.ReservationResult;
 
 @RestController
 @RequestMapping("/admin/reservations")

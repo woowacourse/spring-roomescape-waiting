@@ -8,7 +8,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.WaitingRepository;
 import roomescape.persistence.dto.WaitingWithRankData;
-import roomescape.service.result.MemberBookingResult;
+import roomescape.service.dto.result.MemberBookingResult;
 
 @Service
 public class MyPageService {

@@ -19,9 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
-import roomescape.controller.request.RegisterMemberRequest;
-import roomescape.controller.response.MemberResponse;
-import roomescape.controller.response.RegisterUserResponse;
+import roomescape.controller.dto.request.RegisterMemberRequest;
+import roomescape.controller.dto.response.MemberResponse;
+import roomescape.controller.dto.response.RegisterUserResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

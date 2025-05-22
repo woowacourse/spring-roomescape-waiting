@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.response.BookingResponse;
+import roomescape.controller.dto.response.BookingResponse;
 import roomescape.service.WaitingService;
-import roomescape.service.result.WaitingResult;
+import roomescape.service.dto.result.WaitingResult;
 
 @RestController
 @RequestMapping("/admin/waitings")

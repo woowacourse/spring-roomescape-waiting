@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
-import roomescape.controller.request.LoginMemberInfo;
-import roomescape.controller.response.MemberBookingResponse;
+import roomescape.controller.dto.request.LoginMemberInfo;
+import roomescape.controller.dto.response.MemberBookingResponse;
 import roomescape.service.MyPageService;
 import roomescape.service.WaitingService;
-import roomescape.service.result.MemberBookingResult;
+import roomescape.service.dto.result.MemberBookingResult;
 
 @RestController
 @RequestMapping("/mypage")

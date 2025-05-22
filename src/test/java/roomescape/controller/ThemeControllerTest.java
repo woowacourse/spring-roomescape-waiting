@@ -20,8 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
-import roomescape.controller.request.CreateThemeRequest;
-import roomescape.controller.response.ThemeResponse;
+import roomescape.controller.dto.request.CreateThemeRequest;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
 

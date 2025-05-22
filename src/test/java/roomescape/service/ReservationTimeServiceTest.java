@@ -30,9 +30,9 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundException;
-import roomescape.service.param.CreateReservationTimeParam;
-import roomescape.service.result.AvailableReservationTimeResult;
-import roomescape.service.result.ReservationTimeResult;
+import roomescape.service.dto.param.CreateReservationTimeParam;
+import roomescape.service.dto.result.AvailableReservationTimeResult;
+import roomescape.service.dto.result.ReservationTimeResult;
 
 @SpringBootTest
 @ActiveProfiles("test")

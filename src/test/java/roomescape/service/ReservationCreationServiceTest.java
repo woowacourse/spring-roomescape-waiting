@@ -23,8 +23,8 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnAvailableReservationException;
-import roomescape.service.param.CreateBookingParam;
-import roomescape.service.result.ReservationResult;
+import roomescape.service.dto.param.CreateBookingParam;
+import roomescape.service.dto.result.ReservationResult;
 
 @SpringBootTest
 @ActiveProfiles("test")

@@ -12,9 +12,9 @@ import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundException;
 import roomescape.persistence.dto.ReservationTimeAvailabilityData;
-import roomescape.service.param.CreateReservationTimeParam;
-import roomescape.service.result.AvailableReservationTimeResult;
-import roomescape.service.result.ReservationTimeResult;
+import roomescape.service.dto.param.CreateReservationTimeParam;
+import roomescape.service.dto.result.AvailableReservationTimeResult;
+import roomescape.service.dto.result.ReservationTimeResult;
 
 @Service
 @Transactional(readOnly = true)

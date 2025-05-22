@@ -6,9 +6,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.controller.request.LoginMemberInfo;
+import roomescape.controller.dto.request.LoginMemberInfo;
 import roomescape.service.MemberService;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.result.MemberResult;
 
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 

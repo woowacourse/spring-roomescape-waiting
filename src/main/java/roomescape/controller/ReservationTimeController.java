@@ -3,12 +3,12 @@ package roomescape.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.request.CreateReservationTimeRequest;
-import roomescape.controller.response.AvailableReservationTimeResponse;
-import roomescape.controller.response.ReservationTimeResponse;
+import roomescape.controller.dto.request.CreateReservationTimeRequest;
+import roomescape.controller.dto.response.AvailableReservationTimeResponse;
+import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
-import roomescape.service.result.AvailableReservationTimeResult;
-import roomescape.service.result.ReservationTimeResult;
+import roomescape.service.dto.result.AvailableReservationTimeResult;
+import roomescape.service.dto.result.ReservationTimeResult;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -7,9 +7,9 @@ import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.UnAuthorizedException;
-import roomescape.service.param.LoginMemberParam;
-import roomescape.service.param.RegisterMemberParam;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.param.LoginMemberParam;
+import roomescape.service.dto.param.RegisterMemberParam;
+import roomescape.service.dto.result.MemberResult;
 
 import java.util.List;
 import java.util.Objects;
