@@ -88,8 +88,8 @@ class ReservationRepositoryTest {
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId1, "돔푸");
         testUtil.insertUser(userId2, "레몬");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId2);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId2, Status.RESERVED);
 
         // when
         final List<Reservation> result = sut.findAll();
@@ -113,11 +113,11 @@ class ReservationRepositoryTest {
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId1, "돔푸");
         testUtil.insertUser(userId2, "레몬");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId2);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId2, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(null, null, null, null);
+        final List<Reservation> result = sut.findAllReservationWithFilter(null, null, null, null);
 
         // then
         assertThat(result).hasSize(2);
@@ -138,11 +138,11 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId2, "스릴러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId2, userId);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId2, userId, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), null, null, null);
+        final List<Reservation> result = sut.findAllReservationWithFilter(Id.create(themeId1), null, null, null);
 
         // then
         assertThat(result).hasSize(1);
@@ -163,11 +163,11 @@ class ReservationRepositoryTest {
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId1, "돔푸");
         testUtil.insertUser(userId2, "레몬");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId2);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId1, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId2, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(null, Id.create(userId2), null, null);
+        final List<Reservation> result = sut.findAllReservationWithFilter(null, Id.create(userId2), null, null);
 
         // then
         assertThat(result).hasSize(1);
@@ -187,12 +187,12 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId);
-        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId, Status.RESERVED);
+        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(null, null, DATE2, DATE3);
+        final List<Reservation> result = sut.findAllReservationWithFilter(null, null, DATE2, DATE3);
 
         // then
         assertThat(result).hasSize(2);
@@ -212,12 +212,12 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId);
-        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId, Status.RESERVED);
+        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(null, null, DATE2, null);
+        final List<Reservation> result = sut.findAllReservationWithFilter(null, null, DATE2, null);
 
         // then
         assertThat(result).hasSize(2);
@@ -237,12 +237,12 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId);
-        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId, userId, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId, userId, Status.RESERVED);
+        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId, userId, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(null, null, null, DATE2);
+        final List<Reservation> result = sut.findAllReservationWithFilter(null, null, null, DATE2);
 
         // then
         assertThat(result).hasSize(2);
@@ -266,12 +266,12 @@ class ReservationRepositoryTest {
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId1, "돔푸");
         testUtil.insertUser(userId2, "레몬");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId1);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId1, userId2);
-        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId2, userId2);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId1, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId1, userId2, Status.RESERVED);
+        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId2, userId2, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId2), null, null);
+        final List<Reservation> result = sut.findAllReservationWithFilter(Id.create(themeId1), Id.create(userId2), null, null);
 
         // then
         assertThat(result).hasSize(1);
@@ -298,13 +298,13 @@ class ReservationRepositoryTest {
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId1, "돔푸");
         testUtil.insertUser(userId2, "레몬");
-        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId1);
-        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId1, userId2);
-        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId2, userId2);
-        testUtil.insertReservation(reservationId4, DATE3, timeId, themeId1, userId2);
+        testUtil.insertReservation(reservationId1, DATE1, timeId, themeId1, userId1, Status.RESERVED);
+        testUtil.insertReservation(reservationId2, DATE2, timeId, themeId1, userId2, Status.RESERVED);
+        testUtil.insertReservation(reservationId3, DATE3, timeId, themeId2, userId2, Status.RESERVED);
+        testUtil.insertReservation(reservationId4, DATE3, timeId, themeId1, userId2, Status.RESERVED);
 
         // when
-        final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId2), DATE2, DATE2);
+        final List<Reservation> result = sut.findAllReservationWithFilter(Id.create(themeId1), Id.create(userId2), DATE2, DATE2);
 
         // then
         assertThat(result).hasSize(1);
@@ -325,7 +325,7 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId, Status.RESERVED);
 
         // when
         final Optional<Reservation> result = sut.findById(Id.create(reservationId));
@@ -350,7 +350,7 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId, Status.RESERVED);
 
         // when
         final boolean result = sut.existById(Id.create(reservationId));
@@ -370,7 +370,7 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId, Status.RESERVED);
 
         // when
         final boolean result = sut.existByTimeId(Id.create(timeId));
@@ -390,7 +390,7 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId, Status.RESERVED);
 
         // when
         final boolean result = sut.existByThemeId(Id.create(themeId));
@@ -410,7 +410,7 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId, Status.RESERVED);
         Theme theme = Theme.restore(themeId, "호러", "", "");
 
         // when
@@ -431,7 +431,7 @@ class ReservationRepositoryTest {
         testUtil.insertTheme(themeId, "호러");
         testUtil.insertReservationTime(timeId, TIME);
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId);
+        testUtil.insertReservation(reservationId, DATE1, timeId, themeId, userId, Status.RESERVED);
 
         // when
         sut.deleteById(Id.create(reservationId));

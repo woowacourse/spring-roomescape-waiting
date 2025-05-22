@@ -2,7 +2,7 @@ package roomescape.presentation.dto.response;
 
 import roomescape.business.model.entity.Reservation;
 
-public record ReservationWithAhead(
+public record ReservationWithAheadDto(
         Reservation reservation,
         Long aheadCount
 ) {

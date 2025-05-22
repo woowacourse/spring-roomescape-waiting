@@ -14,7 +14,7 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 import roomescape.business.model.vo.Status;
-import roomescape.presentation.dto.response.ReservationWithAhead;
+import roomescape.presentation.dto.response.ReservationWithAheadDto;
 
 public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
 
@@ -28,17 +28,18 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
                AND (:userId   IS NULL OR u.id    = :userId)
                AND (:dateFrom IS NULL OR r.date.value >= :dateFrom)
                AND (:dateTo   IS NULL OR r.date.value <= :dateTo)
-               AND r.status = roomescape.business.model.vo.Status.RESERVED
+               AND (:status   IS NULL OR r.status = :status)
             """)
     List<Reservation> findAllWithFilter(
             @Param("themeId") Id themeId,
             @Param("userId") Id userId,
             @Param("dateFrom") LocalDate dateFrom,
-            @Param("dateTo") LocalDate dateTo
+            @Param("dateTo") LocalDate dateTo,
+            @Param("status") Status status
     );
 
     @Query("""
-                SELECT new roomescape.presentation.dto.response.ReservationWithAhead(
+                SELECT new roomescape.presentation.dto.response.ReservationWithAheadDto(
                     r,
                     (
                         SELECT COUNT(r2) + 1L
@@ -52,9 +53,7 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
                 FROM Reservation r
                 WHERE r.user.id = :userId
             """)
-    List<ReservationWithAhead> findReservationsWithAhead(@Param("userId") Id userId);
-
-    List<Reservation> findAllByStatus(Status status);
+    List<ReservationWithAheadDto> findReservationsWithAhead(@Param("userId") Id userId);
 
     boolean existsByDateValueAndTimeStartTimeValueAndThemeId(LocalDate date, LocalTime time, Id themeId);
 

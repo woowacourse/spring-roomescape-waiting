@@ -24,7 +24,7 @@ import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
 import roomescape.presentation.dto.response.ReservationMineResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
-import roomescape.presentation.dto.response.ReservationWithAhead;
+import roomescape.presentation.dto.response.ReservationWithAheadDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -78,7 +78,7 @@ public class ReservationApiController {
     @GetMapping("/reservations/mine")
     @AuthRequired
     public ResponseEntity<List<ReservationMineResponse>> getMyReservations(LoginInfo loginInfo) {
-        List<ReservationWithAhead> myReservationsWithAhead = reservationService.getMyReservations(loginInfo.id());
+        List<ReservationWithAheadDto> myReservationsWithAhead = reservationService.getMyReservations(loginInfo.id());
         List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservationsWithAhead);
         return ResponseEntity.ok(responses);
     }

@@ -9,7 +9,7 @@ import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.presentation.dto.response.ReservationWithAhead;
+import roomescape.presentation.dto.response.ReservationWithAheadDto;
 
 public interface ReservationRepository {
 
@@ -17,9 +17,9 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findAllReservationWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo);
 
-    List<ReservationWithAhead> findReservationsWithAhead(Id userId);
+    List<ReservationWithAheadDto> findReservationsWithAhead(Id userId);
 
     Optional<Reservation> findById(Id id);
 

@@ -24,7 +24,7 @@ import roomescape.business.model.vo.Status;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
 import roomescape.presentation.dto.response.ReservationResponse;
-import roomescape.presentation.dto.response.ReservationWithAhead;
+import roomescape.presentation.dto.response.ReservationWithAheadDto;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +57,7 @@ public class ReservationService {
 
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom,
                                        final LocalDate dateTo) {
-        List<Reservation> reservations = reservationRepository.findAllWithFilter(Id.create(themeIdValue),
+        List<Reservation> reservations = reservationRepository.findAllReservationWithFilter(Id.create(themeIdValue),
                 Id.create(userIdValue), dateFrom, dateTo);
         return ReservationDto.fromEntities(reservations);
     }
@@ -74,7 +74,7 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    public List<ReservationWithAhead> getMyReservations(final String userIdValue) {
+    public List<ReservationWithAheadDto> getMyReservations(final String userIdValue) {
         Id userId = Id.create(userIdValue);
         return reservationRepository.findReservationsWithAhead(userId);
     }

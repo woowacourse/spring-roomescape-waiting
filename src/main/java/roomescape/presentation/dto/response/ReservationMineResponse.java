@@ -14,19 +14,19 @@ public record ReservationMineResponse(
         Status status,
         Long aheadCount
 ) {
-    public static ReservationMineResponse from(ReservationWithAhead myReservationWithAhead) {
-        Reservation reservation = myReservationWithAhead.reservation();
+    public static ReservationMineResponse from(ReservationWithAheadDto myReservationWithAheadDto) {
+        Reservation reservation = myReservationWithAheadDto.reservation();
         return new ReservationMineResponse(
                 reservation.getId().value(),
                 reservation.getTheme().getName().value(),
                 reservation.getDate().value(),
                 reservation.getTime().getStartTime().value(),
                 reservation.getStatus(),
-                myReservationWithAhead.aheadCount()
+                myReservationWithAheadDto.aheadCount()
         );
     }
 
-    public static List<ReservationMineResponse> from(List<ReservationWithAhead> myReservationsWithAheads) {
+    public static List<ReservationMineResponse> from(List<ReservationWithAheadDto> myReservationsWithAheads) {
         return myReservationsWithAheads.stream()
                 .map(ReservationMineResponse::from)
                 .toList();

@@ -226,7 +226,7 @@ class ReservationServiceTest {
                         ThemeDto.fromEntity(theme2), Status.RESERVED)
         );
 
-        when(reservationRepository.findAllWithFilter(themeId, userId, dateFrom, dateTo))
+        when(reservationRepository.findAllReservationWithFilter(themeId, userId, dateFrom, dateTo))
                 .thenReturn(reservationData);
 
         // when
@@ -234,7 +234,7 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEqualTo(expectedReservations);
-        verify(reservationRepository).findAllWithFilter(themeId, userId, dateFrom, dateTo);
+        verify(reservationRepository).findAllReservationWithFilter(themeId, userId, dateFrom, dateTo);
     }
 
     @Test

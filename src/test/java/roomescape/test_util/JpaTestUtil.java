@@ -37,8 +37,8 @@ public class JpaTestUtil {
         userDao.save(User.restore(id, "USER", name, name + "@email.com", "password123"));
     }
 
-    public void insertReservation(final String id, final LocalDate date, final String timeId, final String themeId,
-                                  final String userId) {
+    public void insertReservation(final String id, final LocalDate date, final String timeId, final String themeId, final String userId,
+                                  Status reservationStatus) {
         User user = userDao.findById(Id.create(userId)).get();
         ReservationTime time = timeDao.findById(Id.create(timeId)).get();
         Theme theme = themeDao.findById(Id.create(themeId)).get();
