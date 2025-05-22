@@ -26,7 +26,6 @@ public class Reservation {
     private Member member;
 
     public Reservation() {
-
     }
 
     public Reservation(

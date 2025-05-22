@@ -21,7 +21,6 @@ public class Member {
     private Role role;
 
     public Member() {
-
     }
 
     public Member(Long id, Name name, Email email, Password password, Role role) {
