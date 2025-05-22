@@ -20,87 +20,85 @@ VALUES ('08:00'),
        ('18:00');
 
 INSERT INTO member (name, email, password, member_role)
-VALUES
-    ('Admin', 'admin@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'ADMIN'),
-    ('Regular', 'user@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'REGULAR'),
-    ('Alice', 'alice@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Bob', 'bob@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Carol', 'carol@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Dave', 'dave@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Eve', 'eve@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Frank', 'frank@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Grace', 'grace@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Heidi', 'heidi@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Ivan', 'ivan@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Judy', 'judy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Mallory', 'mallory@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Niaj', 'niaj@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Olivia', 'olivia@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Peggy', 'peggy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Rupert', 'rupert@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Sybil', 'sybil@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Trent', 'trent@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Uma', 'uma@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Victor', 'victor@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Wendy', 'wendy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Xander', 'xander@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Yvonne', 'yvonne@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Zack', 'zack@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Amy', 'amy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Brian', 'brian@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Chloe', 'chloe@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
-    ('Daniel', 'daniel@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR');
+VALUES ('Admin', 'admin@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'ADMIN'),
+       ('Regular', 'user@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'REGULAR'),
+       ('Alice', 'alice@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Bob', 'bob@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Carol', 'carol@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Dave', 'dave@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Eve', 'eve@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Frank', 'frank@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Grace', 'grace@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Heidi', 'heidi@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Ivan', 'ivan@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Judy', 'judy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Mallory', 'mallory@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Niaj', 'niaj@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Olivia', 'olivia@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Peggy', 'peggy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Rupert', 'rupert@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Sybil', 'sybil@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Trent', 'trent@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Uma', 'uma@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Victor', 'victor@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Wendy', 'wendy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Xander', 'xander@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Yvonne', 'yvonne@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Zack', 'zack@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Amy', 'amy@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Brian', 'brian@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Chloe', 'chloe@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
+       ('Daniel', 'daniel@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR');
 
-INSERT INTO reservation(date, time_id, theme_id, member_id)
+INSERT INTO reservation(date, time_id, theme_id, member_id, reservation_status)
 VALUES
     -- theme_id = 12 (6회)
-    ('2025-05-10', 1, 12, 3), -- Alice
-    ('2025-05-10', 2, 12, 4), -- Bob
-    ('2025-05-10', 3, 12, 5), -- Carol
-    ('2025-05-10', 4, 12, 6), -- Dave
-    ('2025-05-10', 5, 12, 7), -- Eve
-    ('2025-05-10', 1, 12, 8), -- Frank
+    ('2025-05-10', 1, 12, 3, 'RESERVED'),  -- Alice
+    ('2025-05-10', 2, 12, 4, 'RESERVED'),  -- Bob
+    ('2025-05-10', 3, 12, 5, 'RESERVED'),  -- Carol
+    ('2025-05-10', 4, 12, 6, 'RESERVED'),  -- Dave
+    ('2025-05-10', 5, 12, 7, 'RESERVED'),  -- Eve
+    ('2025-05-10', 1, 12, 8, 'RESERVED'),  -- Frank
 
     -- theme_id = 11 (5회)
-    ('2025-05-10', 2, 11, 9), -- Grace
-    ('2025-05-10', 3, 11, 10), -- Heidi
-    ('2025-05-10', 4, 11, 11), -- Ivan
-    ('2025-05-10', 5, 11, 12), -- Judy
-    ('2025-05-10', 1, 11, 13), -- Mallory
+    ('2025-05-10', 2, 11, 9, 'RESERVED'),  -- Grace
+    ('2025-05-10', 3, 11, 10, 'RESERVED'), -- Heidi
+    ('2025-05-10', 4, 11, 11, 'RESERVED'), -- Ivan
+    ('2025-05-10', 5, 11, 12, 'RESERVED'), -- Judy
+    ('2025-05-10', 1, 11, 13, 'RESERVED'), -- Mallory
 
     -- theme_id = 3 (4회)
-    ('2025-05-10', 2, 3, 14), -- Niaj
-    ('2025-05-10', 3, 3, 15), -- Olivia
-    ('2025-05-10', 4, 3, 16), -- Peggy
-    ('2025-05-10', 5, 3, 17), -- Rupert
+    ('2025-05-10', 2, 3, 14, 'RESERVED'),  -- Niaj
+    ('2025-05-10', 3, 3, 15, 'RESERVED'),  -- Olivia
+    ('2025-05-10', 4, 3, 16, 'RESERVED'),  -- Peggy
+    ('2025-05-10', 5, 3, 17, 'RESERVED'),  -- Rupert
 
     -- theme_id = 4 (3회)
-    ('2025-05-11', 1, 4, 18), -- Sybil
-    ('2025-05-11', 2, 4, 19), -- Trent
-    ('2025-05-11', 3, 4, 20), -- Uma
+    ('2025-05-11', 1, 4, 18, 'RESERVED'),  -- Sybil
+    ('2025-05-11', 2, 4, 19, 'RESERVED'),  -- Trent
+    ('2025-05-11', 3, 4, 20, 'RESERVED'),  -- Uma
 
     -- theme_id = 5 (2회)
-    ('2025-05-11', 4, 5, 21), -- Victor
-    ('2025-05-11', 5, 5, 22), -- Wendy
+    ('2025-05-11', 4, 5, 21, 'RESERVED'),  -- Victor
+    ('2025-05-11', 5, 5, 22, 'RESERVED'),  -- Wendy
 
-    -- theme_id = 6 (1회)
-    ('2025-05-11', 1, 6, 23), -- Xander
+    -- theme_id = 6 (1회), 'RESERVED'
+    ('2025-05-11', 1, 6, 23, 'RESERVED'),  -- Xander
 
-    -- theme_id = 7 (1회)
-    ('2025-05-11', 2, 7, 24), -- Yvonne
+    -- theme_id = 7 (1회), 'RESERVED'
+    ('2025-05-11', 2, 7, 24, 'RESERVED'),  -- Yvonne
 
-    -- theme_id = 8 (1회)
-    ('2025-05-11', 3, 8, 25), -- Zack
+    -- theme_id = 8 (1회), 'RESERVED'
+    ('2025-05-11', 3, 8, 25, 'RESERVED'),  -- Zack
 
-    -- theme_id = 9 (1회)
-    ('2025-05-11', 4, 9, 26), -- Amy
+    -- theme_id = 9 (1회), 'RESERVED'
+    ('2025-05-11', 4, 9, 26, 'RESERVED'),  -- Amy
 
     -- theme_id = 10 (1회)
-    ('2025-05-11', 5, 10, 27), -- Brian
+    ('2025-05-11', 5, 10, 27, 'RESERVED'), -- Brian
 
     -- theme_id = 11 (1회)
-    ('2025-05-11', 1, 11, 28), -- Chloe
+    ('2025-05-11', 1, 11, 28, 'RESERVED'), -- Chloe
 
     -- theme_id = 12 (1회)
-    ('2025-05-11', 2, 12, 29); -- Daniel
-
+    ('2025-05-11', 2, 12, 29, 'RESERVED'); -- Daniel
