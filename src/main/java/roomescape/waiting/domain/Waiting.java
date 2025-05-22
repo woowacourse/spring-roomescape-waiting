@@ -6,11 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.theme.domain.ThemeName;
 
 @Entity
 public class Waiting {
@@ -63,6 +66,18 @@ public class Waiting {
 
     public Member getMember() {
         return member;
+    }
+
+    public ThemeName getThemeName() {
+        return reservation.getThemeName();
+    }
+
+    public LocalDate getDate() {
+        return reservation.getDate();
+    }
+
+    public LocalTime getStartAt() {
+        return reservation.getStartAt();
     }
 
     @Override

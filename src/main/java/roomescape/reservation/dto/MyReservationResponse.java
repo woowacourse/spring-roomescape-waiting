@@ -16,17 +16,17 @@ public record MyReservationResponse(
 
     public MyReservationResponse(final Reservation reservation) {
         this(reservation.getId(),
-                reservation.getTheme().getName().getValue(),
+                reservation.getThemeName().getValue(),
                 reservation.getDate(),
-                reservation.getTime().getStartAt(),
+                reservation.getStartAt(),
                 new ReservationStatusResponse(ReservationStatus.RESERVED, 0L));
     }
 
     public MyReservationResponse(final WaitingWithRank waitingWithRank) {
-        this(waitingWithRank.getWaiting().getReservation().getId(),
-                waitingWithRank.getWaiting().getReservation().getTheme().getName().getValue(),
-                waitingWithRank.getWaiting().getReservation().getDate(),
-                waitingWithRank.getWaiting().getReservation().getTime().getStartAt(),
+        this(waitingWithRank.getWaiting().getId(),
+                waitingWithRank.getThemeName().getValue(),
+                waitingWithRank.getDate(),
+                waitingWithRank.getStartAt(),
                 new ReservationStatusResponse(ReservationStatus.WAITING, waitingWithRank.getRank()));
     }
 }

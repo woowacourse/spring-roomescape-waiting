@@ -8,10 +8,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeName;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
@@ -85,6 +87,14 @@ public class Reservation {
 
     public ReservationTime getTime() {
         return time;
+    }
+
+    public ThemeName getThemeName() {
+        return theme.getName();
+    }
+
+    public LocalTime getStartAt() {
+        return time.getStartAt();
     }
 
     @Override

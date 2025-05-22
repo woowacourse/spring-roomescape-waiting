@@ -1,5 +1,9 @@
 package roomescape.waiting.domain;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import roomescape.theme.domain.ThemeName;
+
 public class WaitingWithRank {
 
     private Waiting waiting;
@@ -16,5 +20,17 @@ public class WaitingWithRank {
 
     public long getRank() {
         return rank;
+    }
+
+    public ThemeName getThemeName() {
+        return waiting.getThemeName();
+    }
+
+    public LocalDate getDate() {
+        return waiting.getDate();
+    }
+
+    public LocalTime getStartAt() {
+        return waiting.getStartAt();
     }
 }
