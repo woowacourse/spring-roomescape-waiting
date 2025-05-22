@@ -9,7 +9,8 @@ FROM member;
 
 -- member 데이터
 INSERT INTO member(name, email, password, role)
-VALUES ('훌라', 'test@test.com', 'test', 'USER'),
+VALUES ('플린트', 'test@test.com', 'test', 'USER'),
+       ('훌라', 'test2@test2.com', 'test2', 'USER'),
        ('어드민', 'admin@admin.com', 'admin', 'ADMIN');
 
 -- theme 데이터
@@ -26,6 +27,7 @@ VALUES ('10:00'),
        ('16:00');
 
 -- reservation 데이터
-INSERT INTO reservation(member_id, date, time_id, theme_id, status)
-VALUES (1, '2025-07-01', 1, 1, 'RESERVED'),
-       (2, '2025-07-01', 1, 1, 'WAIT');
+INSERT INTO reservation(member_id, date, time_id, theme_id, status, create_at)
+VALUES (1, '2025-07-01', 1, 1, 'RESERVED', '2025-05-20 10:15:00'),
+       (2, '2025-07-01', 1, 1, 'WAIT', '2025-05-21 08:00:00'),
+       (3, '2025-07-01', 1, 1, 'WAIT', '2025-05-21 08:01:00');

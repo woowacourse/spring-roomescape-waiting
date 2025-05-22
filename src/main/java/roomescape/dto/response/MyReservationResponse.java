@@ -2,6 +2,7 @@ package roomescape.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.ReservationWithRank;
 import roomescape.entity.Reservation;
 
 public record MyReservationResponse(Long id,
@@ -9,9 +10,11 @@ public record MyReservationResponse(Long id,
                                     LocalDate date,
                                     LocalTime time,
                                     String status,
-                                    Long waitRank) {
+                                    long waitRank) {
 
-    public static MyReservationResponse from(Reservation reservation) {
+    public static MyReservationResponse from(ReservationWithRank reservationWithRank) {
+
+        Reservation reservation = reservationWithRank.getReservation();
 
         return new MyReservationResponse(
                 reservation.getId(),
@@ -19,16 +22,6 @@ public record MyReservationResponse(Long id,
                 reservation.getDate(),
                 reservation.getStartAt(),
                 reservation.getStatus().getText(),
-                null);
-    }
-
-    public static MyReservationResponse of(Reservation reservation, Long waitRank) {
-        return new MyReservationResponse(
-                reservation.getId(),
-                reservation.getThemeName(),
-                reservation.getDate(),
-                reservation.getStartAt(),
-                reservation.getStatus().getText(),
-                waitRank);
+                reservationWithRank.getRank());
     }
 }

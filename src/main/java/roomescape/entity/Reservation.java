@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import org.hibernate.annotations.CreationTimestamp;
 import roomescape.exception.custom.InvalidReservationException;
 import roomescape.global.ReservationStatus;
 
@@ -42,6 +43,9 @@ public class Reservation {
 
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
+
+    @CreationTimestamp()
+    private LocalDateTime createAt;
 
     protected Reservation() {
     }

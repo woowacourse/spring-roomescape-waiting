@@ -1,12 +1,12 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.ReservationWithRank;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.CreateWaitReservationRequest;
@@ -134,28 +134,12 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllReservationOfMember(Long memberId) {
-        Member member = memberRepository.findFetchById(memberId)
-                .orElseThrow(() -> new InvalidMemberException("존재하지 않는 멤버 입니다."));
-        List<MyReservationResponse> responses = new ArrayList<>();
-        for (Reservation reservation : member.getReservations()) {
-            checkStatusAndWaitRank(reservation, responses);
-        }
-        return responses;
-    }
+        List<ReservationWithRank> reservationWithRanks = reservationRepository.findReservationWithRank(
+                memberId, ReservationStatus.WAIT);
 
-    private void checkStatusAndWaitRank(Reservation reservation, List<MyReservationResponse> responses) {
-        if (reservation.getStatus() == ReservationStatus.WAIT) {
-            Long waitRank = reservationRepository.countRankById(reservation.getId(),
-                    reservation.getDate(),
-                    reservation.getReservationTime().getId(),
-                    reservation.getTheme().getId(),
-                    ReservationStatus.WAIT);
-            responses.add(MyReservationResponse.of(reservation, waitRank));
-            return;
-        }
-        if (reservation.getStatus() == ReservationStatus.RESERVED) {
-            responses.add(MyReservationResponse.from(reservation));
-        }
+        return reservationWithRanks.stream()
+                .map(MyReservationResponse::from)
+                .toList();
     }
 
     public List<Reservation> findAllByFilter(

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.ReservationWithRank;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
@@ -41,17 +42,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByThemeId(Long themeId);
 
     @Query(value = """
-                select count(r)
-                from Reservation r
-                where r.id <= :id
-                and r.date = :date
-                and r.reservationTime.id = :timeId
-                and r.theme.id = :themeId
-                and r.status = :status
+            select new roomescape.domain.ReservationWithRank(r,
+                        (select count(rw)
+                         from Reservation rw
+                         where rw.theme = r.theme
+                         and rw.date = r.date
+                         and rw.reservationTime = r.reservationTime
+                         and rw.status = :status
+                         and rw.createAt <= r.createAt))
+            from Reservation r
+            where r.member.id = :memberId
             """)
-    Long countRankById(@Param("id") Long reservationId,
-                       @Param("date") LocalDate date,
-                       @Param("timeId") Long timeId,
-                       @Param("themeId") Long themeId,
-                       @Param("status") ReservationStatus status);
+    List<ReservationWithRank> findReservationWithRank(@Param("memberId") Long memberId,
+                                                      @Param("status") ReservationStatus status);
 }
