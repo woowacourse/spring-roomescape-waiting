@@ -21,8 +21,8 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
 import roomescape.dto.reservationmember.ReservationTicketResponseDto;
+import roomescape.dto.reservationmember.ReservationTicketWaitingDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
@@ -89,24 +89,6 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
     }
 
-    @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponseDto> addWaitingReservations(
-            @RequestBody @Valid AddReservationDto newReservationDto,
-            @AuthenticationPrincipal UserInfo userInfo) {
-        long addedReservationId = reserveTicketService.addWaitingReservation(newReservationDto, userInfo.id());
-        Reservation reservation = reservationService.getReservationById(addedReservationId);
-
-        ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
-                reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
-        return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
-    }
-
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<ReservationResponseDto> removeWaitingReservations(@PathVariable Long id) {
-        reserveTicketService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservations(@PathVariable Long id) {
         reserveTicketService.deleteReservation(id);
@@ -140,11 +122,11 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(
+    public ResponseEntity<List<ReservationTicketWaitingDto>> myReservations(
             @AuthenticationPrincipal UserInfo userInfo) {
         List<ReserveTicketWaiting> reserveTickets = reserveTicketService.memberReservationWaitingTickets(userInfo.id());
-        List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reserveTicket) -> new MyReservationMemberResponseDto(reserveTicket.getId(),
+        List<ReservationTicketWaitingDto> reservationDtos = reserveTickets.stream()
+                .map((reserveTicket) -> new ReservationTicketWaitingDto(reserveTicket.getId(),
                         reserveTicket.getName(),
                         reserveTicket.getThemeName(),
                         reserveTicket.getDate(),
@@ -153,5 +135,29 @@ public class ReservationController {
                         reserveTicket.getWaitRank()))
                 .toList();
         return ResponseEntity.ok(reservationDtos);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponseDto> addWaitingReservations(
+            @RequestBody @Valid AddReservationDto newReservationDto,
+            @AuthenticationPrincipal UserInfo userInfo) {
+        long addedReservationId = reserveTicketService.addWaitingReservation(newReservationDto, userInfo.id());
+        Reservation reservation = reservationService.getReservationById(addedReservationId);
+
+        ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
+                reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
+        return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
+    }
+
+    @PostMapping("/waiting/{id}")
+    public ResponseEntity<ReservationResponseDto> changeWaitingToReservation(@PathVariable Long id) {
+        reserveTicketService.changeWaitingToReservation(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<ReservationResponseDto> removeWaitingReservations(@PathVariable Long id) {
+        reserveTicketService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 }

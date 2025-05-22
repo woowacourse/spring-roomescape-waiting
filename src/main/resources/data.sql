@@ -1,5 +1,7 @@
 INSERT INTO RESERVER(name, username, password, role)
 VALUES ('praisebak', 'praisebak@naver.com', '$2a$10$4DDpj4fav96RdKr/uG8A0etFZb4/NSZpf1Km/MA6gyZpoEcD4q6i.', 'ADMIN');
+INSERT INTO RESERVER(name, username, password, role)
+VALUES ('praisebak2', 'praisebak2@naver.com', '$2a$10$4DDpj4fav96RdKr/uG8A0etFZb4/NSZpf1Km/MA6gyZpoEcD4q6i.', 'ADMIN');
 
 INSERT INTO THEME(name, description, thumbnail)
 VALUES ('asdf', 'asdf', 'asdf');
@@ -33,10 +35,13 @@ INSERT INTO RESERVATION(date, time_id, theme_id)
 VALUES ('2025-05-10', 2, 3);
 INSERT INTO RESERVATION(date, time_id, theme_id)
 VALUES ('2025-07-10', 1, 1);
-INSERT INTO RESERVATION(date, time_id, theme_id)
-VALUES ('2025-07-10', 1, 2);
-INSERT INTO RESERVATION(date, time_id, theme_id)
-VALUES ('2025-07-10', 2, 2);
+INSERT INTO RESERVATION(date, time_id, theme_id, reservation_status)
+VALUES ('2025-07-10', 1, 1, 'PREPARE');
+INSERT INTO RESERVATION(date, time_id, theme_id, reservation_status)
+VALUES ('2025-07-10', 1, 2, 'PREPARE');
+INSERT INTO RESERVATION(date, time_id, theme_id, reservation_status)
+VALUES ('2025-07-10', 1, 2, 'PREPARE');
+
 
 INSERT INTO RESERVE_TICKET(reserver_id, reservation_id)
 VALUES (1, 1);
@@ -56,4 +61,8 @@ INSERT INTO RESERVE_TICKET(reserver_id, reservation_id)
 VALUES (1, 8);
 INSERT INTO RESERVE_TICKET(reserver_id, reservation_id)
 VALUES (1, 9);
+INSERT INTO RESERVE_TICKET(reserver_id, reservation_id)
+VALUES (2, 10);
+
+
 

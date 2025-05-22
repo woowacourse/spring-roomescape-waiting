@@ -23,7 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
+import roomescape.dto.reservationmember.ReservationTicketWaitingDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.integrate.IntegrationTest;
 import roomescape.integrate.fixture.RequestFixture;
@@ -148,9 +148,9 @@ class ReservationIntegrateTest extends IntegrationTest {
                 .body("size()", is(2))
                 .extract().response();
 
-        List<MyReservationMemberResponseDto> myReservationMemberResponseDtos = response.jsonPath()
-                .getList("", MyReservationMemberResponseDto.class);
+        List<ReservationTicketWaitingDto> reservationTicketWaitingDtos = response.jsonPath()
+                .getList("", ReservationTicketWaitingDto.class);
 
-        assertThat(myReservationMemberResponseDtos.getFirst().status()).contains("예약");
+        assertThat(reservationTicketWaitingDtos.getFirst().status()).contains("예약");
     }
 }

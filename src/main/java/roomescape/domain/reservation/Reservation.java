@@ -121,4 +121,8 @@ public class Reservation {
     public int hashCode() {
         return Objects.hash(date, time, theme, reservationStatus);
     }
+
+    public void waitingToReservation() {
+        this.reservationStatus = ReservationStatus.RESERVATION;
+    }
 }
