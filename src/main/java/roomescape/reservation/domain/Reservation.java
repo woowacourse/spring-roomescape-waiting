@@ -101,9 +101,8 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
+        if (!(o instanceof Reservation that)) return false;
+        return date.equals(that.date) && theme.equals(that.theme) && member.equals(that.member) && time.equals(that.time);
     }
 
     @Override
