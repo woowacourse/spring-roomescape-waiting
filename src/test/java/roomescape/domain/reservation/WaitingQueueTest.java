@@ -51,7 +51,7 @@ class WaitingQueueTest {
     }
 
     @Test
-    @DisplayName("대기열에 예약을 추가할 때 중복된 예약이면 예외가 발생한다.")
+    @DisplayName("대기열에 예약을 추가할 때 해당 유저의 예약이 이미 존재하면 예외가 발생한다.")
     void joinDuplicated() {
         // given
         var reservation = reservationOf(slot, user1);

@@ -17,18 +17,16 @@ public class WaitingQueue {
 
     private List<Reservation> createQueue(final SequencedCollection<Reservation> reservations) {
         var queue = new LinkedList<Reservation>();
-        reservations.forEach(reservation -> {
-            checkSameSlot(reservation);
+        for (var reservation : reservations) {
+            throwIfSlotMismatch(reservation);
             queue.addLast(reservation);
-        });
+        }
         return queue;
     }
 
     public int join(final Reservation reservation) {
-        checkSameSlot(reservation);
-        if (queue.contains(reservation)) {
-            throw new AlreadyExistedException("이미 대기중인 예약입니다.");
-        }
+        throwIfSlotMismatch(reservation);
+        throwIfUserDuplicates(reservation);
         queue.add(reservation);
         return queue.size();
     }
@@ -38,16 +36,23 @@ public class WaitingQueue {
     }
 
     public int orderOf(final Reservation reservation) {
-        checkSameSlot(reservation);
+        throwIfSlotMismatch(reservation);
         if (areWaitingsEmpty() || !queue.contains(reservation)) {
             throw new IllegalArgumentException("해당 예약은 대기열에 존재하지 않습니다.");
         }
         return queue.indexOf(reservation) + 1;
     }
 
-    private void checkSameSlot(final Reservation reservation) {
+    private void throwIfSlotMismatch(final Reservation reservation) {
         if (!slot.equals(reservation.slot())) {
             throw new IllegalArgumentException("예약 슬롯이 일치하지 않습니다 : " + reservation);
+        }
+    }
+
+    private void throwIfUserDuplicates(final Reservation reservation) {
+        var userAlreadyReserved = queue.stream().anyMatch(r -> r.isOwnedBy(reservation.user()));
+        if (userAlreadyReserved) {
+            throw new AlreadyExistedException("이미 존재하는 예약입니다.");
         }
     }
 }
