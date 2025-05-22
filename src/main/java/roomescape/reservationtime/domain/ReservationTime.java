@@ -1,14 +1,10 @@
 package roomescape.reservationtime.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import roomescape.exception.DomainValidationException;
+
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.DomainValidationException;
 
 @Entity
 @Table(name = "reservation_time")
@@ -19,7 +15,7 @@ public class ReservationTime {
     @Column(nullable = false, unique = true)
     private LocalTime startAt;
 
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(Long id, LocalTime startAt) {

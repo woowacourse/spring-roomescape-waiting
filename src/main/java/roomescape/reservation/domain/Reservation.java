@@ -1,19 +1,13 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import java.time.LocalDate;
-import java.util.Objects;
+import jakarta.persistence.*;
 import roomescape.exception.DomainValidationException;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "reservation")
@@ -37,7 +31,7 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -51,7 +45,7 @@ public class Reservation {
 
     public static Reservation generateWithPrimaryKey(Reservation reservation, Long newPrimaryKey) {
         return new Reservation(newPrimaryKey, reservation.date, reservation.time, reservation.theme,
-            reservation.member);
+                reservation.member);
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {

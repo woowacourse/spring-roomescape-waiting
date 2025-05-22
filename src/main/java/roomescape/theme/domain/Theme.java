@@ -1,13 +1,9 @@
 package roomescape.theme.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import java.util.Objects;
+import jakarta.persistence.*;
 import roomescape.exception.DomainValidationException;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "theme")
@@ -22,7 +18,7 @@ public class Theme {
     @Column
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(Long id, String name, String description, String thumbnail) {

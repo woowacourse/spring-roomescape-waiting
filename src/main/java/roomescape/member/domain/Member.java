@@ -1,16 +1,10 @@
 package roomescape.member.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import roomescape.exception.DomainValidationException;
+
 import java.util.Objects;
 import java.util.regex.Pattern;
-import roomescape.exception.DomainValidationException;
 
 @Entity
 @Table(name = "member")
@@ -34,7 +28,7 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(Long id, String name, String email, MemberRole role, String password) {
