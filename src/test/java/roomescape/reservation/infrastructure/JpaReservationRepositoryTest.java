@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.jpa.JpaReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -64,7 +64,8 @@ class JpaReservationRepositoryTest {
         Theme theme = em.find(Theme.class, 1L);
         Member member = em.find(Member.class, 1L);
         Reservation reservation = Reservation.createWithoutId(
-                LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2000, 11, 2), reservationTime, theme,
+                ReservationStatus.RESERVED);
         // when
         Reservation saveReservation = repository.save(reservation);
         // then
@@ -79,11 +80,11 @@ class JpaReservationRepositoryTest {
         Theme theme = em.find(Theme.class, 1L);
         Member member = em.find(Member.class, 1L);
         Reservation reservation1 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         Reservation reservation2 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 10, 2), reservationTime, theme);
+                LocalDate.of(2000, 10, 2), reservationTime, theme, ReservationStatus.RESERVED);
         Reservation reservation3 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         repository.save(reservation1);
         repository.save(reservation2);
         repository.save(reservation3);
@@ -102,7 +103,7 @@ class JpaReservationRepositoryTest {
         Theme theme = em.find(Theme.class, 1L);
         Member member = em.find(Member.class, 1L);
         Reservation reservation = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         em.persist(reservation);
         em.flush();
         // when & then
@@ -117,11 +118,11 @@ class JpaReservationRepositoryTest {
         Theme theme = em.find(Theme.class, 1L);
         Member member = em.find(Member.class, 1L);
         Reservation reservation1 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         Reservation reservation2 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 10, 2), reservationTime, theme);
+                LocalDate.of(2000, 10, 2), reservationTime, theme, ReservationStatus.RESERVED);
         Reservation reservation3 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         repository.save(reservation1);
         repository.save(reservation2);
         repository.save(reservation3);
@@ -141,7 +142,7 @@ class JpaReservationRepositoryTest {
         Theme theme = em.find(Theme.class, 1L);
         Member member = em.find(Member.class, 1L);
         Reservation reservation = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         em.persist(reservation);
         em.flush();
         // when
@@ -158,19 +159,19 @@ class JpaReservationRepositoryTest {
         Theme theme = em.find(Theme.class, 1L);
         Member member = em.find(Member.class, 1L);
         Reservation reservation = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         em.persist(reservation);
         em.flush();
         // when & then
         assertAll(
-                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
-                        LocalDate.of(2000, 11, 3), LocalTime.of(10, 0), 1L)).isFalse(),
-                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
-                        LocalDate.of(2000, 11, 2), LocalTime.of(10, 1), 1L)).isFalse(),
-                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
-                        LocalDate.of(2000, 11, 2), LocalTime.of(10, 0), 2L)).isFalse(),
-                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
-                        LocalDate.of(2000, 11, 2), LocalTime.of(10, 0), 1L)).isTrue()
+                () -> assertThat(repository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                        LocalDate.of(2000, 11, 3), 1L, 1L, ReservationStatus.RESERVED)).isFalse(),
+                () -> assertThat(repository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                        LocalDate.of(2000, 11, 2), 100L, 1L, ReservationStatus.RESERVED)).isFalse(),
+                () -> assertThat(repository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                        LocalDate.of(2000, 11, 2), 1L, 2L, ReservationStatus.RESERVED)).isFalse(),
+                () -> assertThat(repository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                        LocalDate.of(2000, 11, 2), 1L, 1L, ReservationStatus.RESERVED)).isTrue()
         );
     }
 
@@ -183,7 +184,7 @@ class JpaReservationRepositoryTest {
         Theme theme = em.find(Theme.class, 1L);
         Member member = em.find(Member.class, 1L);
         Reservation reservation = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime, theme);
+                LocalDate.of(2000, 11, 2), reservationTime, theme, ReservationStatus.RESERVED);
         em.persist(reservation);
         em.flush();
         // when

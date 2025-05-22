@@ -15,6 +15,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.service.FakeReservationRepository;
 import roomescape.reservation.service.FakeReservationTimeRepository;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -42,7 +43,8 @@ class ReservationTimeServiceTest {
         ReservationRepository reservationRepository = new FakeReservationRepository(reservations);
         Member member = Member.createWithId(1L, "홍길동", "a@com", "a", Role.USER);
         reservationRepository.save(Reservation.createWithoutId(
-                LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2024, 10, 6), reservationTime1, theme));
+                LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2024, 10, 6), reservationTime1, theme,
+                ReservationStatus.RESERVED));
 
         reservationTimeService = new ReservationTimeService(reservationRepository, reservationTimeRepository);
     }

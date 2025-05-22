@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +22,7 @@ import roomescape.member.domain.Role;
 import roomescape.member.service.FakeMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
@@ -100,13 +100,13 @@ class ReservationServiceTest {
         reservationTimeRepository.save(reservationTime2);
         reservationRepository.save(
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2024, 10, 6),
-                        reservationTime1, theme1));
+                        reservationTime1, theme1, ReservationStatus.RESERVED));
         reservationRepository.save(
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2024, 10, 7),
-                        reservationTime1, theme2));
+                        reservationTime1, theme2, ReservationStatus.RESERVED));
         reservationRepository.save(
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2024, 10, 8),
-                        reservationTime1, theme2));
+                        reservationTime1, theme2, ReservationStatus.RESERVED));
     }
 
     @DisplayName("지나간 날짜와 시간에 대한 예약을 생성할 수 없다.")

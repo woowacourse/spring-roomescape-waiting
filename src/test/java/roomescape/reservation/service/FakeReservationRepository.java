@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -41,12 +42,24 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean hasReservedReservation(Reservation reservation) {
+        return reservations.stream()
+                .anyMatch(nextReservation ->
+                        nextReservation.timeId().equals(reservation.timeId())
+                                && nextReservation.getDate().equals(reservation.getDate())
+                                && nextReservation.themeId().equals(reservation.themeId())
+                                && nextReservation.getStatus().equals(ReservationStatus.RESERVED));
+    }
+
+    @Override
     public boolean hasSameReservation(Reservation reservation) {
         return reservations.stream()
                 .anyMatch(nextReservation ->
-                        nextReservation.reservationTime().equals(reservation.reservationTime())
+                        nextReservation.timeId().equals(reservation.timeId())
                                 && nextReservation.getDate().equals(reservation.getDate())
-                                && nextReservation.themeId().equals(reservation.themeId()));
+                                && nextReservation.themeId().equals(reservation.themeId())
+                                && nextReservation.timeId().equals(reservation.timeId())
+                                && nextReservation.getStatus().equals(reservation.getStatus()));
     }
 
     @Override
