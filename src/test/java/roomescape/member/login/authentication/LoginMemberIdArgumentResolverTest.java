@@ -12,8 +12,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import roomescape.auth.annotation.LoginMemberId;
 import roomescape.auth.ui.LoginMemberIdArgumentResolver;
 import roomescape.common.security.TokenAuthorizationHandler;
-import roomescape.member.dto.MemberResponse;
-import roomescape.member.service.MemberService;
+import roomescape.member.application.dto.MemberResponse;
+import roomescape.member.application.MemberService;
 
 class LoginMemberIdArgumentResolverTest {
 

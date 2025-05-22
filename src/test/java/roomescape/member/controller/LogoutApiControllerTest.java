@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.security.TokenAuthorizationHandler;
-import roomescape.member.service.MemberService;
+import roomescape.member.application.MemberService;
 
 @WebMvcTest(LogoutApiController.class)
 class LogoutApiControllerTest {

@@ -24,4 +24,8 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
 
     boolean existsBySpec(ReservationSpec spec);
+
+    List<Long> findTimeIdsByDateAndTheme(LocalDate date, Long themeId);
+
+    boolean existsByTimeId(Long timeId);
 }

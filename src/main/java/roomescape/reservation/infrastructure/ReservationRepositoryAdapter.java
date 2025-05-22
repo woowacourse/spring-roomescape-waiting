@@ -54,4 +54,14 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     public boolean existsBySpec(ReservationSpec spec) {
         return reservationJpaRepository.existsBySpec(spec);
     }
+
+    @Override
+    public List<Long> findTimeIdsByDateAndTheme(LocalDate date, Long themeId) {
+        return reservationJpaRepository.findTimeIdsByDateAndThemeId(date, themeId);
+    }
+
+    @Override
+    public boolean existsByTimeId(Long timeId) {
+        return reservationJpaRepository.existsBySpecTimeId(timeId);
+    }
 }

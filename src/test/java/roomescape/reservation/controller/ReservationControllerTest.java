@@ -26,18 +26,18 @@ import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.config.WebMvcConfiguration;
 import roomescape.common.exception.GlobalExceptionHandler;
 import roomescape.common.security.TokenAuthorizationHandler;
+import roomescape.member.application.MemberService;
+import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.dto.MemberResponse;
-import roomescape.member.service.MemberService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.application.dto.UserReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.ui.ReservationController;
+import roomescape.reservationTime.application.dto.TimeResponse;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -81,7 +81,7 @@ class ReservationControllerTest {
                         MemberResponse.from(reservation.getMember()),
                         ThemeResponse.from(reservation.getTheme()),
                         reservation.getDate(),
-                        ReservationTimeResponse.from(reservation.getTime())
+                        TimeResponse.from(reservation.getTime())
                 )
         );
         when(reservationService.findAll()).thenReturn(expectedResponses);

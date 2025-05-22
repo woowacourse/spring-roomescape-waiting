@@ -3,20 +3,15 @@ package roomescape.reservationTime.infrastructure;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 
 @Repository
+@AllArgsConstructor
 public class ReservationTimeRepositoryAdapter implements ReservationTimeRepository {
     private final ReservationTimeJpaRepository reservationTimeJpaRepository;
-    private final ReservationTimeJdbcDao reservationTimeJdbcDao;
-
-    public ReservationTimeRepositoryAdapter(ReservationTimeJpaRepository reservationTimeJpaRepository,
-                                            ReservationTimeJdbcDao reservationTimeJdbcDao) {
-        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
-        this.reservationTimeJdbcDao = reservationTimeJdbcDao;
-    }
 
     @Override
     public boolean existsByStartAt(LocalTime startAt) {
@@ -40,7 +35,7 @@ public class ReservationTimeRepositoryAdapter implements ReservationTimeReposito
 
     @Override
     public Optional<ReservationTime> findById(Long id) {
-        return reservationTimeJdbcDao.findById(id);
+        return reservationTimeJpaRepository.findById(id);
     }
 
     @Override

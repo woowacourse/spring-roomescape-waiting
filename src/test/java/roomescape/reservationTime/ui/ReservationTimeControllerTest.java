@@ -1,10 +1,11 @@
-package roomescape.theme.controller;
+package roomescape.reservationTime.ui;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +16,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.security.TokenAuthorizationHandler;
 import roomescape.member.application.MemberService;
-import roomescape.theme.service.ThemeService;
+import roomescape.reservationTime.application.ReservationTimeService;
 
-@WebMvcTest(ThemeApiController.class)
-class ThemeApiControllerTest {
+@WebMvcTest(ReservationTimeController.class)
+class ReservationTimeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ThemeService themeService;
+    private ReservationTimeService reservationTimeService;
     @MockitoBean
     private MemberService memberService;
     @MockitoBean
@@ -32,9 +33,9 @@ class ThemeApiControllerTest {
     @MockitoBean
     private AdminAuthorizationInterceptor adminAuthorizationInterceptor;
 
-    private static final String URI = "/themes";
+    private static final String URI = "/times";
 
-    @DisplayName("테마 내역을 모두 조회한다")
+    @DisplayName("시간 내역을 모두 조회한다")
     @Test
     void findAll() throws Exception {
         mockMvc.perform(get(URI)
@@ -42,32 +43,47 @@ class ThemeApiControllerTest {
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("기간에 따라 테마 순위권을 모두 조회한다")
+    @DisplayName("날짜와 테마에 따라 시간 내역을 모두 조회한다")
     @Test
-    void findRankedByPeriod() throws Exception {
-        mockMvc.perform(get(URI + "/ranked")
+    void findByDateAndTheme() throws Exception {
+        mockMvc.perform(get(URI + "/available")
+                        .param("date", LocalDate.now().toString())
+                        .param("themeId", "1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
-    @DisplayName("새로운 테마 내역을 추가한다")
+    @DisplayName("추가하려는 시간이 빈 값일 경우 예외가 발생한다")
     @Test
-    void add() throws Exception {
+    void exception_add_time_empty() throws Exception {
         String requestBody = """
                 {
-                    "name" : "micky",
-                    "description" : "horror",
-                    "thumbnail" : "picture"
+                    "startAt": ""
                 }
                 """;
 
         mockMvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
-    @DisplayName("해당 아이디의 테마 내역을 삭제한다")
+    @DisplayName("추가하려는 시간이 형식에 맞지 않을 경우 예외가 발생한다")
+    @Test
+    void exception_add_time_format() throws Exception {
+        String requestBody = """
+                {
+                    "startAt": "10"
+                }
+                """;
+
+        mockMvc.perform(post("/times")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @DisplayName("해당 아이디의 시간 내역을 삭제한다")
     @Test
     void deleteById() throws Exception {
         mockMvc.perform(delete(URI + "/1")

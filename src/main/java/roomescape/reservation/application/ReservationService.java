@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.member.dto.MemberResponse;
 import roomescape.member.exception.MemberNotFoundException;
 import roomescape.reservation.application.dto.AdminReservationRequest;
 import roomescape.reservation.application.dto.AdminReservationSearchRequest;
@@ -19,9 +19,9 @@ import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationInPastException;
+import roomescape.reservationTime.application.dto.TimeResponse;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
-import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.reservationTime.exception.TimeNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
@@ -60,7 +60,7 @@ public class ReservationService {
                         MemberResponse.from(reservation.getMember()),
                         ThemeResponse.from(reservation.getTheme()),
                         reservation.getDate(),
-                        ReservationTimeResponse.from(reservation.getTime()))
+                        TimeResponse.from(reservation.getTime()))
                 )
                 .toList();
     }

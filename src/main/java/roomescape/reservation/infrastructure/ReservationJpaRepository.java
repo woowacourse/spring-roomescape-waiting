@@ -50,4 +50,13 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             JOIN FETCH r.spec.time
             """)
     List<Reservation> findAllWithEager();
+
+    @Query("""
+            SELECT r.spec.time.id
+            FROM Reservation r
+            WHERE r.spec.date.value = :date AND r.spec.theme.id = :themeId
+            """)
+    List<Long> findTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
+
+    boolean existsBySpecTimeId(Long timeId);
 }

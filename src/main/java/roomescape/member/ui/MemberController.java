@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import roomescape.member.dto.MemberRequest;
-import roomescape.member.dto.MemberResponse;
-import roomescape.member.service.MemberService;
+import roomescape.member.application.dto.MemberRequest;
+import roomescape.member.application.dto.MemberResponse;
+import roomescape.member.application.MemberService;
 
 @Controller
 @RequestMapping("members")

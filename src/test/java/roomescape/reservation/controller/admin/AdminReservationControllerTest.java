@@ -18,17 +18,17 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.security.TokenAuthorizationHandler;
+import roomescape.member.application.MemberService;
+import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.dto.MemberResponse;
-import roomescape.member.service.MemberService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.dto.AdminReservationRequest;
 import roomescape.reservation.application.dto.AdminReservationSearchRequest;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.ui.AdminReservationController;
+import roomescape.reservationTime.application.dto.TimeResponse;
 import roomescape.reservationTime.domain.ReservationTime;
-import roomescape.reservationTime.dto.admin.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -67,7 +67,7 @@ class AdminReservationControllerTest {
 
         when(reservationService.createByAdmin(any(AdminReservationRequest.class)))
                 .thenReturn(new ReservationResponse(1L, MemberResponse.from(member), ThemeResponse.from(theme),
-                        LocalDate.of(2026, 5, 5), ReservationTimeResponse.from(time)));
+                        LocalDate.of(2026, 5, 5), TimeResponse.from(time)));
 
         mockMvc.perform(post(URI)
                         .contentType(MediaType.APPLICATION_JSON)

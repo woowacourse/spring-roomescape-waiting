@@ -19,9 +19,9 @@ import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.config.WebMvcConfiguration;
 import roomescape.common.exception.GlobalExceptionHandler;
 import roomescape.common.security.TokenAuthorizationHandler;
-import roomescape.member.dto.MemberRequest;
-import roomescape.member.dto.MemberResponse;
-import roomescape.member.service.MemberService;
+import roomescape.member.application.dto.MemberRequest;
+import roomescape.member.application.dto.MemberResponse;
+import roomescape.member.application.MemberService;
 
 @WebMvcTest(SignupApiController.class)
 @Import({WebMvcConfiguration.class, GlobalExceptionHandler.class})
