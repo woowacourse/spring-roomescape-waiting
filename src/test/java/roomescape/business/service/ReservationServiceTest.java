@@ -13,6 +13,7 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
+import roomescape.business.reader.ReservationSlotReader;
 import roomescape.exception.business.DuplicatedException;
 
 import java.time.LocalDate;
@@ -28,13 +29,10 @@ class ReservationServiceTest {
 
     @Mock
     private Users users;
-
     @Mock
     private Reservations reservations;
-
     @Mock
-    private ReservationSlotService slotService;
-
+    private ReservationSlotReader slotReader;
     @InjectMocks
     private ReservationService sut;
 
@@ -49,7 +47,7 @@ class ReservationServiceTest {
         ReservationSlot slot = new ReservationSlot(time, date, theme);
 
         when(users.findById(user.getId())).thenReturn(Optional.of(user));
-        when(slotService.getByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
+        when(slotReader.findByDateAndTimeIdAndThemeId(date, time.getId().value(), theme.getId().value())).thenReturn(Optional.of(slot));
         when(reservations.isSlotFreeFor(slot, user)).thenReturn(true);
 
         // when
@@ -58,7 +56,7 @@ class ReservationServiceTest {
         // then
         assertThat(result).isNotNull();
         verify(users).findById(user.getId());
-        verify(slotService).getByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value());
+        verify(slotReader).findByDateAndTimeIdAndThemeId(date, time.getId().value(), theme.getId().value());
         verify(reservations).isSlotFreeFor(slot, user);
         verify(reservations).save(any(Reservation.class));
     }
@@ -74,7 +72,7 @@ class ReservationServiceTest {
         ReservationSlot slot = new ReservationSlot(time, date, theme);
 
         when(users.findById(user.getId())).thenReturn(Optional.of(user));
-        when(slotService.getByDateAndTimeIdAndThemeIdOrElseCreate(date, time.getId().value(), theme.getId().value())).thenReturn(slot);
+        when(slotReader.findByDateAndTimeIdAndThemeId(date, time.getId().value(), theme.getId().value())).thenReturn(Optional.of(slot));
         when(reservations.isSlotFreeFor(slot, user)).thenReturn(false);
 
         // when, then

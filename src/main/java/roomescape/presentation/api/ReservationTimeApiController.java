@@ -15,6 +15,7 @@ import roomescape.auth.Role;
 import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;
 import roomescape.business.model.vo.UserRole;
+import roomescape.business.reader.ReservationTimeReader;
 import roomescape.business.service.ReservationTimeService;
 import roomescape.presentation.dto.request.ReservationTimeRequest;
 import roomescape.presentation.dto.response.BookedReservationTimeResponse;
@@ -28,13 +29,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReservationTimeApiController {
 
-    private final ReservationTimeService reservationTimeService;
+    private final ReservationTimeService timeService;
+    private final ReservationTimeReader timeReader;
 
     @PostMapping("/times")
     @AuthRequired
     @Role(UserRole.ADMIN)
     public ResponseEntity<ReservationTimeResponse> createReservationTime(@RequestBody @Valid ReservationTimeRequest request) {
-        ReservationTimeDto dtos = reservationTimeService.addAndGet(request.startAtToLocalTime());
+        ReservationTimeDto dtos = timeService.addAndGet(request.startAtToLocalTime());
         ReservationTimeResponse response = ReservationTimeResponse.from(dtos);
         return ResponseEntity.created(URI.create("/times")).body(response);
     }
@@ -42,7 +44,7 @@ public class ReservationTimeApiController {
     @GetMapping("/times")
     @AuthRequired
     public ResponseEntity<List<ReservationTimeResponse>> getAllReservationTime() {
-        List<ReservationTimeDto> reservationTimeDtos = reservationTimeService.getAll();
+        List<ReservationTimeDto> reservationTimeDtos = timeReader.getAll();
         List<ReservationTimeResponse> responses = ReservationTimeResponse.from(reservationTimeDtos);
         return ResponseEntity.ok(responses);
     }
@@ -53,7 +55,7 @@ public class ReservationTimeApiController {
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") String themeId
     ) {
-        List<ReservableReservationTimeDto> reservationTimeDtos = reservationTimeService.getAllByDateAndThemeId(date, themeId);
+        List<ReservableReservationTimeDto> reservationTimeDtos = timeReader.getAllByDateAndThemeId(date, themeId);
         List<BookedReservationTimeResponse> responses = BookedReservationTimeResponse.from(reservationTimeDtos);
         return ResponseEntity.ok(responses);
     }
@@ -62,7 +64,7 @@ public class ReservationTimeApiController {
     @AuthRequired
     @Role(UserRole.ADMIN)
     public ResponseEntity<Void> deleteReservationTime(@PathVariable String id) {
-        reservationTimeService.delete(id);
+        timeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

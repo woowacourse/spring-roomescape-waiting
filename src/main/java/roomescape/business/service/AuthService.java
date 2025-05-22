@@ -14,7 +14,7 @@ import static roomescape.exception.SecurityErrorCode.INVALID_PASSWORD;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class AuthService {
 
     private final Users users;

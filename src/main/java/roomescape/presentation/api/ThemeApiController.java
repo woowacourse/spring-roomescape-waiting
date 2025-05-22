@@ -14,6 +14,7 @@ import roomescape.auth.AuthRequired;
 import roomescape.auth.Role;
 import roomescape.business.dto.ThemeDto;
 import roomescape.business.model.vo.UserRole;
+import roomescape.business.reader.ThemeReader;
 import roomescape.business.service.ThemeService;
 import roomescape.presentation.dto.request.ThemeCreateRequest;
 import roomescape.presentation.dto.response.ThemeResponse;
@@ -26,6 +27,7 @@ import java.util.List;
 public class ThemeApiController {
 
     private final ThemeService themeService;
+    private final ThemeReader themeReader;
 
     @PostMapping("/themes")
     @AuthRequired
@@ -38,7 +40,7 @@ public class ThemeApiController {
     @GetMapping("/themes")
     @AuthRequired
     public ResponseEntity<List<ThemeResponse>> getThemes() {
-        List<ThemeDto> themeDtos = themeService.getAll();
+        List<ThemeDto> themeDtos = themeReader.getAll();
         List<ThemeResponse> responses = ThemeResponse.from(themeDtos);
         return ResponseEntity.ok(responses);
     }
@@ -46,7 +48,7 @@ public class ThemeApiController {
     @GetMapping("/themes/popular")
     @AuthRequired
     public ResponseEntity<List<ThemeResponse>> getPopularThemes(@RequestParam(value = "size", defaultValue = "10") int size) {
-        List<ThemeDto> popularThemeDtos = themeService.getPopular(size);
+        List<ThemeDto> popularThemeDtos = themeReader.getPopular(size);
         List<ThemeResponse> responses = ThemeResponse.from(popularThemeDtos);
         return ResponseEntity.ok(responses);
     }

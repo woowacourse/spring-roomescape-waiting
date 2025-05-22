@@ -5,22 +5,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.StartTime;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.InvalidCreateArgumentException;
 import roomescape.exception.business.NotFoundException;
 import roomescape.exception.business.RelatedEntityExistException;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -88,63 +83,6 @@ class ReservationTimeServiceTest {
         verify(reservationTimes).existByTime(time);
         verify(reservationTimes).existBetween(any(LocalTime.class), any(LocalTime.class));
         verify(reservationTimes, never()).save(any(ReservationTime.class));
-    }
-
-    @Test
-    void 모든_예약_시간을_조회할_수_있다() {
-        // given
-        List<ReservationTime> dataTimes = Arrays.asList(
-                new ReservationTime(LocalTime.of(10, 0)),
-                new ReservationTime(LocalTime.of(14, 0))
-        );
-
-        List<ReservationTimeDto> expectedTimes = List.of(
-                new ReservationTimeDto(dataTimes.get(0).getId(), new StartTime(LocalTime.of(10, 0))),
-                new ReservationTimeDto(dataTimes.get(1).getId(), new StartTime(LocalTime.of(14, 0)))
-        );
-
-        when(reservationTimes.findAll()).thenReturn(dataTimes);
-
-        // when
-        List<ReservationTimeDto> result = sut.getAll();
-
-        // then
-        assertThat(result).isEqualTo(expectedTimes);
-        verify(reservationTimes).findAll();
-    }
-
-    @Test
-    void 날짜와_테마_ID로_이용_가능한_예약_시간을_조회할_수_있다() {
-        // given
-        LocalDate date = LocalDate.now();
-        Id themeId = Id.create("theme-id");
-        List<ReservationTime> availableTimes = Arrays.asList(
-                new ReservationTime(LocalTime.of(11, 0)),
-                new ReservationTime(LocalTime.of(15, 0))
-        );
-        List<ReservationTime> notAvailableTimes = Arrays.asList(
-                new ReservationTime(LocalTime.of(12, 0)),
-                new ReservationTime(LocalTime.of(16, 0))
-        );
-        List<ReservableReservationTimeDto> expectedAvailableTimes = Arrays.asList(
-                new ReservableReservationTimeDto(availableTimes.get(0).getId(), new StartTime(LocalTime.of(11, 0)), true),
-                new ReservableReservationTimeDto(availableTimes.get(1).getId(), new StartTime(LocalTime.of(15, 0)), true),
-                new ReservableReservationTimeDto(notAvailableTimes.get(0).getId(), new StartTime(LocalTime.of(12, 0)), false),
-                new ReservableReservationTimeDto(notAvailableTimes.get(1).getId(), new StartTime(LocalTime.of(16, 0)), false)
-        );
-
-        when(reservationTimes.findAvailableByDateAndThemeId(date, themeId))
-                .thenReturn(availableTimes);
-        when(reservationTimes.findNotAvailableByDateAndThemeId(date, themeId))
-                .thenReturn(notAvailableTimes);
-
-        // when
-        List<ReservableReservationTimeDto> result = sut.getAllByDateAndThemeId(date, themeId.value());
-
-        // then
-        assertThat(result).containsExactlyElementsOf(expectedAvailableTimes);
-        verify(reservationTimes).findAvailableByDateAndThemeId(date, themeId);
-        verify(reservationTimes).findNotAvailableByDateAndThemeId(date, themeId);
     }
 
     @Test

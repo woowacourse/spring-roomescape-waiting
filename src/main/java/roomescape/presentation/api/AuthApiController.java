@@ -11,8 +11,8 @@ import roomescape.auth.AuthRequired;
 import roomescape.auth.AuthToken;
 import roomescape.auth.LoginInfo;
 import roomescape.business.dto.UserDto;
+import roomescape.business.reader.UserReader;
 import roomescape.business.service.AuthService;
-import roomescape.business.service.UserService;
 import roomescape.presentation.dto.request.LoginRequest;
 import roomescape.presentation.dto.response.UserResponse;
 
@@ -21,7 +21,7 @@ import roomescape.presentation.dto.response.UserResponse;
 public class AuthApiController {
 
     private final AuthService authService;
-    private final UserService userService;
+    private final UserReader userReader;
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody @Valid LoginRequest request) {
@@ -32,7 +32,7 @@ public class AuthApiController {
     @GetMapping("/login/check")
     @AuthRequired
     public ResponseEntity<UserResponse> check(LoginInfo loginInfo) {
-        UserDto userDto = userService.getById(loginInfo.id());
+        UserDto userDto = userReader.getById(loginInfo.id());
         return ResponseEntity.ok(UserResponse.from(userDto));
     }
 }

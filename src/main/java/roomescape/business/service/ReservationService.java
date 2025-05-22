@@ -3,7 +3,6 @@ package roomescape.business.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
@@ -11,14 +10,12 @@ import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
+import roomescape.business.reader.ReservationSlotReader;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static roomescape.exception.ErrorCode.RESERVATION_DUPLICATED;
 import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
@@ -27,19 +24,20 @@ import static roomescape.exception.SecurityErrorCode.AUTHORITY_LACK;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class ReservationService {
 
     private final Users users;
     private final Reservations reservations;
     private final ReservationSlotService slotService;
+    private final ReservationSlotReader slotReader;
 
-    @Transactional
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
         User user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
 
-        ReservationSlot slot = slotService.getByDateAndTimeIdAndThemeIdOrElseCreate(date, timeIdValue, themeIdValue);
+        ReservationSlot slot = slotReader.findByDateAndTimeIdAndThemeId(date, timeIdValue, themeIdValue)
+                .orElseGet(() -> slotService.addAndGet(date, timeIdValue, themeIdValue));
 
         if (!reservations.isSlotFreeFor(slot, user)) {
             throw new DuplicatedException(RESERVATION_DUPLICATED);
@@ -50,23 +48,6 @@ public class ReservationService {
         return ReservationDto.fromEntity(reservation);
     }
 
-    public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom, final LocalDate dateTo) {
-        List<Reservation> reservations = this.reservations.findAllWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
-        return ReservationDto.fromEntities(reservations);
-    }
-
-    public List<MyReservationDto> getMyReservations(final String userIdValue) {
-        List<ReservationSlot> slots = slotService.getAllSlotsContainsReserverOf(userIdValue);
-        Id userId = Id.create(userIdValue);
-        Map<Reservation, Integer> reservationsWithWaitingNumber = slots.stream()
-                .collect(Collectors.toMap(
-                        slot -> slot.reservationOf(userId),
-                        slot -> slot.waitingNumberOf(userId)
-                ));
-        return MyReservationDto.fromMap(reservationsWithWaitingNumber);
-    }
-
-    @Transactional
     public void delete(final String reservationIdValue, final String userIdValue) {
         Id reservationId = Id.create(reservationIdValue);
         Reservation reservation = reservations.findById(reservationId)

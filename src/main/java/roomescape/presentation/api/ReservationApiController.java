@@ -16,6 +16,7 @@ import roomescape.auth.Role;
 import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.vo.UserRole;
+import roomescape.business.reader.ReservationReader;
 import roomescape.business.service.ReservationService;
 import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
@@ -31,6 +32,7 @@ import java.util.List;
 public class ReservationApiController {
 
     private final ReservationService reservationService;
+    private final ReservationReader reservationReader;
 
     @PostMapping("/reservations")
     @AuthRequired
@@ -57,7 +59,7 @@ public class ReservationApiController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        List<ReservationDto> reservationDtos = reservationService.getAll(themeId, userId, dateFrom, dateTo);
+        List<ReservationDto> reservationDtos = reservationReader.getAll(themeId, userId, dateFrom, dateTo);
         List<ReservationResponse> responses = ReservationResponse.from(reservationDtos);
         return ResponseEntity.ok(responses);
     }
@@ -65,7 +67,7 @@ public class ReservationApiController {
     @GetMapping("/reservations/mine")
     @AuthRequired
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(LoginInfo loginInfo) {
-        List<MyReservationDto> myReservations = reservationService.getMyReservations(loginInfo.id());
+        List<MyReservationDto> myReservations = reservationReader.getMyReservations(loginInfo.id());
         List<MyReservationResponse> responses = MyReservationResponse.from(myReservations);
         return ResponseEntity.ok(responses);
     }
