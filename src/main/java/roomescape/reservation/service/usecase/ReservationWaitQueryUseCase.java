@@ -3,6 +3,7 @@ package roomescape.reservation.service.usecase;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.domain.ReservationWait;
 import roomescape.reservation.repository.ReservationWaitRepository;
 import roomescape.reservation.service.dto.ReservationWaitWithRankResponse;
 
@@ -14,5 +15,9 @@ public class ReservationWaitQueryUseCase {
 
     public List<ReservationWaitWithRankResponse> getByMemberId(final Long memberId) {
         return reservationWaitRepository.findWithRankByInfoMemberId(memberId);
+    }
+
+    public List<ReservationWait> getAll() {
+        return reservationWaitRepository.findAll();
     }
 }

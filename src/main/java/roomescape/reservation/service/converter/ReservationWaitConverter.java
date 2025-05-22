@@ -1,8 +1,11 @@
 package roomescape.reservation.service.converter;
 
+import java.util.List;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberConverter;
+import roomescape.reservation.controller.dto.ReservationWaitWebResponse;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationWait;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
@@ -27,12 +30,18 @@ public class ReservationWaitConverter {
         );
     }
 
-    public static ReservationWebResponse toDto(final ReservationWait reservationWait) {
-        return new ReservationWebResponse(
+    public static ReservationWaitWebResponse toDto(final ReservationWait reservationWait) {
+        return new ReservationWaitWebResponse(
                 reservationWait.getId(),
                 MemberConverter.toDto(reservationWait.getMember()),
                 reservationWait.getDate().getValue(),
                 ReservationTimeConverter.toDto(reservationWait.getTime()),
                 ThemeConverter.toDto(reservationWait.getTheme()));
+    }
+
+    public static List<ReservationWaitWebResponse> toDto(final List<ReservationWait> reservationWaits) {
+        return reservationWaits.stream()
+                .map(ReservationWaitConverter::toDto)
+                .toList();
     }
 }

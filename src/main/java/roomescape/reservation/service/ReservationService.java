@@ -11,6 +11,7 @@ import roomescape.reservation.controller.dto.AvailableReservationTimeWebResponse
 import roomescape.reservation.controller.dto.CreateReservationByAdminWebRequest;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
 import roomescape.reservation.controller.dto.ReservationSearchWebRequest;
+import roomescape.reservation.controller.dto.ReservationWaitWebResponse;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.domain.Reservation;
@@ -36,7 +37,14 @@ public class ReservationService {
 
     public List<ReservationWebResponse> getAll() {
         return ReservationConverter.toDto(
-                reservationQueryUseCase.getAll());
+                reservationQueryUseCase.getAll()
+        );
+    }
+
+    public List<ReservationWaitWebResponse> getAllReservationWait() {
+        return ReservationWaitConverter.toDto(
+                reservationWaitQueryUseCase.getAll()
+        );
     }
 
     public List<ReservationWithStatusResponse> getWithReservationWaitByMemberId(final Long memberId) {
@@ -107,7 +115,7 @@ public class ReservationService {
         return ReservationConverter.toDto(reservation);
     }
 
-    public ReservationWebResponse createReservationWait(
+    public ReservationWaitWebResponse createReservationWait(
             final CreateReservationWebRequest createReservationWebRequest,
             final MemberInfo memberInfo
     ) {
@@ -144,4 +152,5 @@ public class ReservationService {
                 .map(ReservationConverter::toDto)
                 .toList();
     }
+
 }

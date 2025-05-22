@@ -30,6 +30,10 @@
   모든 예약 목록 조회
 
  
+- [x] `GET /reservations/wait`  
+  모든 예약 대기 목록 조회
+ 
+
 - [x] `GET /reservations/times`  
   날짜와 테마에 따른 예약 가능 여부를 포함한 시간 목록 조회
 

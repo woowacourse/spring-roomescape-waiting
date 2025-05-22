@@ -23,12 +23,12 @@ INSERT INTO reservation_time (start_at) VALUES ('20:00:00');
 
 -- Reservation 데이터 (현재 날짜 기준 예약)
 INSERT INTO reservation (member_id, reservation_date, time_id, theme_id) 
-VALUES (2, CURRENT_DATE, 1, 1);
+VALUES (2, CURRENT_DATE + 1, 1, 1);
 INSERT INTO reservation (member_id, reservation_date, time_id, theme_id) 
-VALUES (3, CURRENT_DATE, 2, 2);
+VALUES (3, CURRENT_DATE + 1, 2, 2);
 
 -- ReservationWait 데이터 (대기 예약)
 INSERT INTO reservation_wait (member_id, reservation_date, time_id, theme_id) 
-VALUES (2, CURRENT_DATE, 3, 1);
+VALUES (2, CURRENT_DATE + 1, 3, 1);
 INSERT INTO reservation_wait (member_id, reservation_date, time_id, theme_id) 
-VALUES (3, CURRENT_DATE, 4, 3); 
+VALUES (3, CURRENT_DATE + 1, 4, 3);
