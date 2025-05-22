@@ -40,17 +40,21 @@ class ThemesTest {
 
     @Test
     void 모든_테마를_찾을_수_있다() {
+        // given
         String themeId1 = testUtil.insertTheme();
         String themeId2 = testUtil.insertTheme();
 
+        // when
         final List<Theme> result = sut.findAll();
 
+        // then
         assertThat(result).extracting(r -> r.getId().value())
                 .containsExactlyInAnyOrder(themeId1, themeId2);
     }
 
     @Test
     void 예약이_많은_순으로_테마를_찾을_수_있다() {
+        // given
         LocalDate date = LocalDate.now();
         String reservationTimeId = testUtil.insertReservationTime();
         String themeId1 = testUtil.insertTheme();
@@ -70,37 +74,48 @@ class ThemesTest {
         testUtil.insertReservation(slotId3_2, userId1);
         testUtil.insertReservation(slotId3_3, userId1);
 
+        // when
         final List<Theme> result = sut.findPopularThemes(date.minusDays(5), date.plusDays(3), 2);
 
+        // then
         assertThat(result).extracting(r -> r.getId().value())
                 .containsExactly(themeId2, themeId1);
     }
 
     @Test
     void ID를_기준으로_테마를_찾을_수_있다() {
+        // given
         String themeId = testUtil.insertTheme();
 
+        // when
         final Optional<Theme> result = sut.findById(Id.create(themeId));
 
+        // then
         assertThat(result.isPresent()).isTrue();
         assertThat(result.get().getId().value()).isEqualTo(themeId);
     }
 
     @Test
     void ID를_기준으로_존재하는지_확인할_수_있다() {
+        // given
         String themeId = testUtil.insertTheme();
 
+        // when
         final boolean result = sut.existById(Id.create(themeId));
 
+        // then
         assertThat(result).isTrue();
     }
 
     @Test
     void ID를_기준으로_삭제할_수_있다() {
+        // given
         String themeId = testUtil.insertTheme();
 
+        // when
         sut.deleteById(Id.create(themeId));
 
+        // then
         assertThat(testUtil.countTheme()).isZero();
     }
 }

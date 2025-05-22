@@ -1,6 +1,7 @@
 package roomescape.infrastructure;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -74,95 +75,99 @@ class ReservationTimesTest {
                 .containsExactlyInAnyOrder(timeId2, timeId3);
     }
 
-    @Test
-    void 해당_날짜와_테마에_예약된_모든_예약_시간을_찾을_수_있다() {
-        // given
-        String timeId1 = testUtil.insertReservationTime();
-        testUtil.insertReservationTime();
-        testUtil.insertReservationTime();
-        String themeId = testUtil.insertTheme();
-        String userId = testUtil.insertUser();
-        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
-        testUtil.insertReservation(slotId, userId);
+    @Nested
+    class 예약된_시간_조회_테스트 {
 
-        // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(5), Id.create(themeId));
+        @Test
+        void 해당_날짜와_테마에_예약된_모든_예약_시간을_찾을_수_있다() {
+            // given
+            String timeId1 = testUtil.insertReservationTime();
+            testUtil.insertReservationTime();
+            testUtil.insertReservationTime();
+            String themeId = testUtil.insertTheme();
+            String userId = testUtil.insertUser();
+            String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
+            testUtil.insertReservation(slotId, userId);
 
-        // then
-        assertThat(result).extracting(r -> r.getId().value())
-                .containsExactlyInAnyOrder(timeId1);
-    }
+            // when
+            final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(5), Id.create(themeId));
 
-    @Test
-    void 예약된_시간이_없을_때_빈_리스트를_반환한다() {
-        // given
-        testUtil.insertReservationTime();
-        testUtil.insertReservationTime();
-        String themeId = testUtil.insertTheme();
-        testUtil.insertUser();
+            // then
+            assertThat(result).extracting(r -> r.getId().value())
+                    .containsExactlyInAnyOrder(timeId1);
+        }
 
-        // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
+        @Test
+        void 예약된_시간이_없을_때_빈_리스트를_반환한다() {
+            // given
+            testUtil.insertReservationTime();
+            testUtil.insertReservationTime();
+            String themeId = testUtil.insertTheme();
+            testUtil.insertUser();
 
-        // then
-        assertThat(result).isEmpty();
-    }
+            // when
+            final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
 
-    @Test
-    void 다른_날짜의_예약은_포함하지_않는다() {
-        // given
-        String timeId1 = testUtil.insertReservationTime();
-        testUtil.insertReservationTime();
-        String themeId = testUtil.insertTheme();
-        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
-        String userId = testUtil.insertUser();
-        testUtil.insertReservation(slotId, userId);
+            // then
+            assertThat(result).isEmpty();
+        }
 
-        // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
+        @Test
+        void 다른_날짜의_예약은_포함하지_않는다() {
+            // given
+            String timeId1 = testUtil.insertReservationTime();
+            testUtil.insertReservationTime();
+            String themeId = testUtil.insertTheme();
+            String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
+            String userId = testUtil.insertUser();
+            testUtil.insertReservation(slotId, userId);
 
-        // then
-        assertThat(result).isEmpty();
-    }
+            // when
+            final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
 
-    @Test
-    void 다른_테마의_예약은_포함하지_않는다() {
-        // given
-        String timeId1 = testUtil.insertReservationTime();
-        testUtil.insertReservationTime();
-        String themeId1 = testUtil.insertTheme();
-        String themeId2 = testUtil.insertTheme();
-        String userId = testUtil.insertUser();
-        String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId1);
-        testUtil.insertReservation(slotId, userId);
+            // then
+            assertThat(result).isEmpty();
+        }
 
-        // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId2));
+        @Test
+        void 다른_테마의_예약은_포함하지_않는다() {
+            // given
+            String timeId1 = testUtil.insertReservationTime();
+            testUtil.insertReservationTime();
+            String themeId1 = testUtil.insertTheme();
+            String themeId2 = testUtil.insertTheme();
+            String userId = testUtil.insertUser();
+            String slotId = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId1);
+            testUtil.insertReservation(slotId, userId);
 
-        // then
-        assertThat(result).isEmpty();
-    }
+            // when
+            final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId2));
 
-    @Test
-    void 여러_예약이_있을_때_모든_예약된_시간을_찾을_수_있다() {
-        // given
-        String timeId1 = testUtil.insertReservationTime();
-        testUtil.insertReservationTime();
-        String timeId3 = testUtil.insertReservationTime();
-        testUtil.insertReservationTime();
-        String themeId = testUtil.insertTheme();
-        String userId = testUtil.insertUser();
-        String slotId1 = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
-        String slotId2 = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId3, themeId);
-        testUtil.insertReservation(slotId1, userId);
-        testUtil.insertReservation(slotId2, userId);
+            // then
+            assertThat(result).isEmpty();
+        }
 
-        // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(5), Id.create(themeId));
+        @Test
+        void 여러_예약이_있을_때_모든_예약된_시간을_찾을_수_있다() {
+            // given
+            String timeId1 = testUtil.insertReservationTime();
+            testUtil.insertReservationTime();
+            String timeId3 = testUtil.insertReservationTime();
+            testUtil.insertReservationTime();
+            String themeId = testUtil.insertTheme();
+            String userId = testUtil.insertUser();
+            String slotId1 = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId1, themeId);
+            String slotId2 = testUtil.insertSlot(LocalDate.now().plusDays(5), timeId3, themeId);
+            testUtil.insertReservation(slotId1, userId);
+            testUtil.insertReservation(slotId2, userId);
 
-        // then
-        assertThat(result).extracting(r -> r.getId().value())
-                .containsExactlyInAnyOrder(timeId1, timeId3);
+            // when
+            final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(5), Id.create(themeId));
+
+            // then
+            assertThat(result).extracting(r -> r.getId().value())
+                    .containsExactlyInAnyOrder(timeId1, timeId3);
+        }
     }
 
     @Test

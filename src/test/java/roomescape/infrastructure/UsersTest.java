@@ -1,6 +1,7 @@
 package roomescape.infrastructure;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -54,68 +55,79 @@ class UsersTest {
                 .containsExactlyInAnyOrder(Id.create(userId1), Id.create(userId2));
     }
 
-    @Test
-    void ID로_사용자를_조회할_수_있다() {
-        // given
-        String userId = testUtil.insertUser();
+    @Nested
+    class ID_기준_조회_테스트 {
+        
+        @Test
+        void ID로_사용자를_조회할_수_있다() {
+            // given
+            String userId = testUtil.insertUser();
 
-        // when
-        final Optional<User> result = sut.findById(Id.create(userId));
+            // when
+            final Optional<User> result = sut.findById(Id.create(userId));
 
-        // then
-        assertThat(result).isPresent();
-        assertThat(result.get().getId().value()).isEqualTo(userId);
+            // then
+            assertThat(result).isPresent();
+            assertThat(result.get().getId().value()).isEqualTo(userId);
+        }
+
+        @Test
+        void 존재하지_않는_ID로_사용자를_조회하면_빈_Optional을_반환한다() {
+            // when
+            final Optional<User> result = sut.findById(Id.create("999"));
+
+            // then
+            assertThat(result).isEmpty();
+        }
     }
 
-    @Test
-    void 존재하지_않는_ID로_사용자를_조회하면_빈_Optional을_반환한다() {
-        // when
-        final Optional<User> result = sut.findById(Id.create("999"));
+    @Nested
+    class 이메일_기준_조회_테스트 {
 
-        // then
-        assertThat(result).isEmpty();
+        @Test
+        void 이메일로_사용자를_조회할_수_있다() {
+            // given
+            String userId = testUtil.insertUser("돔푸", "dompoo@email.com");
+
+            // when
+            final Optional<User> result = sut.findByEmail("dompoo@email.com");
+
+            // then
+            assertThat(result).isPresent();
+            assertThat(result.get().getId().value()).isEqualTo(userId);
+        }
+
+        @Test
+        void 존재하지_않는_이메일로_사용자를_조회하면_빈_Optional을_반환한다() {
+            // when
+            final Optional<User> result = sut.findByEmail("nonexistent@email.com");
+
+            // then
+            assertThat(result).isEmpty();
+        }
     }
 
-    @Test
-    void 이메일로_사용자를_조회할_수_있다() {
-        // given
-        String userId = testUtil.insertUser("돔푸", "dompoo@email.com");
+    @Nested
+    class 이메일_존재_확인_테스트 {
+        @Test
+        void 이메일이_존재하는지_확인할_수_있다() {
+            // given
+            testUtil.insertUser("돔푸", "dompoo@email.com");
 
-        // when
-        final Optional<User> result = sut.findByEmail("dompoo@email.com");
+            // when
+            final boolean result = sut.existByEmail("dompoo@email.com");
 
-        // then
-        assertThat(result).isPresent();
-        assertThat(result.get().getId().value()).isEqualTo(userId);
-    }
+            // then
+            assertThat(result).isTrue();
+        }
 
-    @Test
-    void 존재하지_않는_이메일로_사용자를_조회하면_빈_Optional을_반환한다() {
-        // when
-        final Optional<User> result = sut.findByEmail("nonexistent@email.com");
+        @Test
+        void 존재하지_않는_이메일로_확인하면_false를_반환한다() {
+            // when
+            final boolean result = sut.existByEmail("nonexistent@email.com");
 
-        // then
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    void 이메일이_존재하는지_확인할_수_있다() {
-        // given
-        testUtil.insertUser("돔푸", "dompoo@email.com");
-
-        // when
-        final boolean result = sut.existByEmail("dompoo@email.com");
-
-        // then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void 존재하지_않는_이메일로_확인하면_false를_반환한다() {
-        // when
-        final boolean result = sut.existByEmail("nonexistent@email.com");
-
-        // then
-        assertThat(result).isFalse();
+            // then
+            assertThat(result).isFalse();
+        }
     }
 }
