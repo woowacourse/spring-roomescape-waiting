@@ -46,6 +46,7 @@ public class ReservationServiceImpl implements ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public ReservationResponse create(ReservationRequest request, Member member) {
         ReservationTime reservationTime = timeRepository.findById(request.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
@@ -67,6 +68,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationResponse.from(reservationRepository.save(newReservation));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAll() {
         return ReservationResponse.from(reservationRepository.findAll());
     }
@@ -98,6 +100,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     }
 
+    @Transactional
     @Override
     public ReservationResponse createByAdmin(AdminReservationRequest adminReservationRequest) {
         ReservationTime reservationTime = timeRepository.findById(adminReservationRequest.timeId())
@@ -115,6 +118,7 @@ public class ReservationServiceImpl implements ReservationService {
         return ReservationResponse.from(reservationRepository.save(newReservation));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ReservationResponse> getReservationsByConditions(@Valid SearchConditionsRequest searchConditionsRequest) {
 
@@ -129,6 +133,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<MemberReservationResponse> getReservationByMember(Member member) {
         return reservationRepository.findAllByMember(member)

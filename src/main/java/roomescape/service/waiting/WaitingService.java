@@ -3,6 +3,7 @@ package roomescape.service.waiting;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -38,6 +39,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public WaitingResponse create(ReservationRequest request, Member member) {
         ReservationTime reservationTime = timeRepository.findById(request.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(request.timeId()));
@@ -64,6 +66,7 @@ public class WaitingService {
         return WaitingResponse.from(waitingRepository.save(waiting));
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findWaitingWithRankByMember(Member member) {
 
         List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(member.getId());
@@ -78,6 +81,7 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingWithMemberNameResponse> findAllWaitings() {
 
         List<Waiting> waitings = waitingRepository.findAll();
