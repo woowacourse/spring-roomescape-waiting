@@ -22,4 +22,6 @@ public interface WaitingRepository {
     Optional<Waiting> findById(Long id);
 
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+
+    Optional<Waiting> findFirstOrderById(Long themeId, Long timeId, LocalDate date);
 }

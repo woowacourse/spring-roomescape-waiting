@@ -19,38 +19,35 @@ import roomescape.reservation.controller.request.WaitingCreateRequest;
 import roomescape.reservation.controller.response.MemberReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.controller.response.WaitingResponse;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.WaitingService;
+import roomescape.reservation.service.ReservationWaitingService;
 
 @RestController
 public class MemberReservationApiController {
 
-    private final ReservationService reservationService;
-    private final WaitingService waitingService;
+    private final ReservationWaitingService reservationWaitingService;
 
-    public MemberReservationApiController(ReservationService reservationService, final WaitingService waitingService) {
-        this.reservationService = reservationService;
-        this.waitingService = waitingService;
+    public MemberReservationApiController(ReservationWaitingService reservationWaitingService) {
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@LoginMember MemberResponse memberResponse,
                                                                  @RequestBody ReservationRequest request) {
-        ReservationResponse response = reservationService.createByName(memberResponse.name(), request);
+        ReservationResponse response = reservationWaitingService.createReservationByName(memberResponse.name(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<ReservationResponse> responses = reservationService.findAll();
+        List<ReservationResponse> responses = reservationWaitingService.findAllReservations();
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse) {
-        List<MemberReservationResponse> reservations = reservationService.findAllByMemberId(memberResponse.id());
-        List<MemberReservationResponse> waitings = waitingService.findWaitingsWithRankByMemberId(memberResponse.id());
+        List<MemberReservationResponse> reservations = reservationWaitingService.findAllReservationsByMemberId(memberResponse.id());
+        List<MemberReservationResponse> waitings = reservationWaitingService.findWaitingsWithRankByMemberId(memberResponse.id());
         List<MemberReservationResponse> response = Stream.of(reservations, waitings)
                 .flatMap(Collection::stream)
                 .toList();
@@ -60,7 +57,7 @@ public class MemberReservationApiController {
     @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> create(@LoginMember MemberResponse memberResponse,
                                                   @RequestBody @Valid WaitingCreateRequest request) {
-        WaitingResponse response = waitingService.create(memberResponse, request);
+        WaitingResponse response = reservationWaitingService.createWaiting(memberResponse, request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -68,7 +65,7 @@ public class MemberReservationApiController {
 
     @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        waitingService.deleteById(id);
+        reservationWaitingService.deleteWaitingById(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -81,4 +81,8 @@ public class Reservation {
     public Member getMember() {
         return member;
     }
+
+    public void updateMember(final Member member) {
+        this.member = member;
+    }
 }

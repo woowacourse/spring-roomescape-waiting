@@ -19,19 +19,16 @@ import roomescape.reservation.controller.request.ReservationCreateRequest;
 import roomescape.reservation.controller.request.ReservationRequest;
 import roomescape.reservation.controller.response.MemberReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.WaitingService;
+import roomescape.reservation.service.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminReservationApiController {
 
-    private final ReservationService reservationService;
-    private final WaitingService waitingService;
+    private final ReservationWaitingService reservationWaitingService;
 
-    public AdminReservationApiController(ReservationService reservationService, WaitingService waitingService) {
-        this.reservationService = reservationService;
-        this.waitingService = waitingService;
+    public AdminReservationApiController(ReservationWaitingService reservationWaitingService) {
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @GetMapping("/reservations")
@@ -41,7 +38,7 @@ public class AdminReservationApiController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
-        List<ReservationResponse> reservationResponses = reservationService.findAllByFilter(memberId, themeId,
+        List<ReservationResponse> reservationResponses = reservationWaitingService.findAllReservationsByFilter(memberId, themeId,
                 startDate,
                 endDate);
         return ResponseEntity.ok(reservationResponses);
@@ -49,7 +46,7 @@ public class AdminReservationApiController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationCreateRequest request) {
-        ReservationResponse response = reservationService.create(request.memberId(), new ReservationRequest(
+        ReservationResponse response = reservationWaitingService.createReservation(request.memberId(), new ReservationRequest(
                 request.date(), request.themeId(), request.timeId()
         ));
         return ResponseEntity
@@ -59,14 +56,14 @@ public class AdminReservationApiController {
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteById(id);
+        reservationWaitingService.deleteReservationAndUpdateWaiting(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/waitings")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse) {
-        List<MemberReservationResponse> waitings = waitingService.findWaitingsWithRankByMemberId(memberResponse.id());
+        List<MemberReservationResponse> waitings = reservationWaitingService.findWaitingsWithRankByMemberId(memberResponse.id());
         return ResponseEntity.ok().body(waitings);
     }
 }
