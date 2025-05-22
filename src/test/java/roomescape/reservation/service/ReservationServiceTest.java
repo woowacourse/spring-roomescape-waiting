@@ -333,7 +333,7 @@ class ReservationServiceTest {
                                                 savedTheme));
 
                 // when
-                final List<ReservationWithStatus> reservations = reservationService.findByMember(savedMember);
+                final List<Reservation> reservations = reservationService.findReservationsByMember(savedMember);
 
                 // then
                 assertThat(reservations.size()).isEqualTo(1);

@@ -43,7 +43,7 @@ public class ReservationService {
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);
 
         Reservation savedReservation = reservationRepository.save(reservation);
-    ReservationWithStatus reservationWithStatus = new ReservationWithStatus(savedReservation, StatusType.RESERVED);
+        ReservationWithStatus reservationWithStatus = new ReservationWithStatus(savedReservation, StatusType.RESERVED);
         reservationWithStatusRepository.save(reservationWithStatus);
 
         return savedReservation;
@@ -90,12 +90,14 @@ public class ReservationService {
                     reservationRepository.existsByDateAndTimeAndTheme(
                             date,
                             reservationTime,
-                            theme
-                    ))
-            );
+                            theme)));
         }
 
         return availableReservationTimes;
+    }
+
+    public List<Reservation> findReservationsByMember(final Member member) {
+        return reservationRepository.findByMember(member);
     }
 
     public List<ReservationWithStatus> findByMember(final Member member) {
