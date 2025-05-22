@@ -2,10 +2,8 @@ package roomescape.controller;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.DEFAULT_DATE;
-import static roomescape.TestFixture.createDefaultMember;
-import static roomescape.TestFixture.createDefaultReservationTime;
-import static roomescape.TestFixture.createDefaultTheme;
+import static roomescape.TestFixture.createAdminMember;
+import static roomescape.TestFixture.createDefaultWaiting_1;
 
 import io.restassured.RestAssured;
 import java.util.List;
@@ -19,19 +17,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
-import roomescape.TestFixture;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.controller.request.CreatBookingRequest;
 import roomescape.controller.response.BookingResponse;
 import roomescape.domain.Member;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.Waiting;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.service.result.MemberResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class ReservationControllerTest {
+class AdminWaitingControllerTest {
 
     @LocalServerPort
     private int port;
@@ -40,7 +35,7 @@ class ReservationControllerTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private DBHelper dbHelper;
@@ -59,47 +54,46 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 목록을 조회한다")
-    void getReservations() {
+    @DisplayName("대기 예약 목록을 조회한다")
+    void getWaitingReservations() {
         // given
-        dbHelper.insertReservation(TestFixture.createDefaultReservation_1());
-        dbHelper.insertReservation(TestFixture.createDefaultReservation_2());
+        Member admin = createAdminMember();
+        dbHelper.insertMember(admin);
+        String token = jwtTokenProvider.createToken(MemberResult.from(admin));
+        Waiting waiting = createDefaultWaiting_1();
+        dbHelper.insertWaiting(waiting);
 
         // when & then
         List<BookingResponse> responses = given().log().all()
+                .cookie("token", token)
                 .when()
-                .get("/reservations")
+                .get("/admin/waitings")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().jsonPath().getList(".", BookingResponse.class);
 
-        assertThat(responses).hasSize(2);
+        assertThat(responses).hasSize(1);
     }
 
+    @DisplayName("대기 예약을 거절한다.")
     @Test
-    @DisplayName("예약을 생성한다")
-    void createReservation() {
+    void deleteWaiting() {
         // given
-        Member member = createDefaultMember();
-        ReservationTime reservationTime = createDefaultReservationTime();
-        Theme theme = createDefaultTheme();
-        dbHelper.prepareForReservation(member, reservationTime, theme);
-
-        String token = jwtTokenProvider.createToken(MemberResult.from(member));
-
-        CreatBookingRequest request = new CreatBookingRequest(
-                DEFAULT_DATE, reservationTime.getId(), theme.getId()
-        );
+        Member admin = createAdminMember();
+        dbHelper.insertMember(admin);
+        String token = jwtTokenProvider.createToken(MemberResult.from(admin));
+        Waiting waiting = createDefaultWaiting_1();
+        dbHelper.insertWaiting(waiting);
 
         // when & then
         given().log().all()
                 .cookie("token", token)
-                .contentType("application/json")
-                .body(request)
                 .when()
-                .post("/reservations")
+                .delete("/admin/waitings/1")
                 .then().log().all()
-                .statusCode(HttpStatus.CREATED.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        assertThat(waitingRepository.findById(1L)).isEmpty();
     }
 
-} 
+}

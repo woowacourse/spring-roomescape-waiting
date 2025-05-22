@@ -6,10 +6,12 @@ import static roomescape.TestFixture.DEFAULT_DATE;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.DatabaseCleaner;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -43,6 +45,14 @@ class ThemeServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @BeforeEach
+    void clean() {
+        databaseCleaner.clean();
+    }
 
     @Test
     void 테마를_전체_조회할_수_있다() {

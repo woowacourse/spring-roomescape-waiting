@@ -22,7 +22,7 @@ class ReservationTest {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 1, 2, 0, 0);
         Clock clock = TestFixture.fixedClockAt(fixedDateTime);
 
-        Reservation reservation = Reservation.createNew(
+        Reservation reservation = Reservation.create(
                 TestFixture.createDefaultMember(),
                 date,
                 time,
@@ -43,7 +43,7 @@ class ReservationTest {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 1, 1, 0, 0);
         Clock clock = TestFixture.fixedClockAt(fixedDateTime);
 
-        Reservation reservation = Reservation.createNew(
+        Reservation reservation = Reservation.create(
                 TestFixture.createDefaultMember(),
                 date,
                 time,
@@ -64,7 +64,7 @@ class ReservationTest {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 1, 1, 11, 30);
         Clock clock = TestFixture.fixedClockAt(fixedDateTime);
 
-        Reservation reservation = Reservation.createNew(
+        Reservation reservation = Reservation.create(
                 TestFixture.createDefaultMember(),
                 date,
                 time,

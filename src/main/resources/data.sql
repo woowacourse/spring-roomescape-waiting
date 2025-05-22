@@ -11,7 +11,7 @@ INSERT INTO reservation_time(start_at) VALUES ('20:00');
 INSERT INTO reservation_time(start_at) VALUES ('21:00');
 INSERT INTO reservation_time(start_at) VALUES ('22:00');
 
--- theme 테이블에 대한 INSERT
+-- themeName 테이블에 대한 INSERT
 INSERT INTO theme(name, description, thumbnail) VALUES ('The Haunted Mansion', 'Solve the mysteries of the haunted mansion to escape.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 INSERT INTO theme(name, description, thumbnail) VALUES ('Secret Agent Mission', 'Complete your secret agent mission before time runs out.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 INSERT INTO theme(name, description, thumbnail) VALUES ('Pirate''s Treasure', 'Find the hidden pirate''s treasure in this thrilling adventure.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');

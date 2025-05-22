@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
-        log.debug("NoResourceFoundException: ", e);
+        log.error("NoResourceFoundException: ", e);
         return ResponseEntity.noContent().build();
     }
 

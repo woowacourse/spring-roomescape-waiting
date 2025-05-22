@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DEFAULT_DATE;
 import static roomescape.TestFixture.createDefaultMember;
 import static roomescape.TestFixture.createDefaultReservationTime;
-import static roomescape.TestFixture.createDefaultReservationTimeByTime;
+import static roomescape.TestFixture.createTimeFrom;
 import static roomescape.TestFixture.createDefaultTheme;
 import static roomescape.TestFixture.createNewReservation;
 
@@ -115,9 +115,9 @@ class ReservationTimeControllerTest {
     @DisplayName("테마와 날짜에 따른 예약 가능 시간을 조회한다")
     void getAvailableTimes() {
         // given
-        ReservationTime time1 = createDefaultReservationTimeByTime(LocalTime.of(10, 0));
+        ReservationTime time1 = createTimeFrom(LocalTime.of(10, 0));
         dbHelper.insertTime(time1);
-        dbHelper.insertTime(createDefaultReservationTimeByTime(LocalTime.of(11, 0)));
+        dbHelper.insertTime(createTimeFrom(LocalTime.of(11, 0)));
         Theme theme = createDefaultTheme();
         dbHelper.insertTheme(theme);
 

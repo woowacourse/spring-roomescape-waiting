@@ -10,6 +10,7 @@ import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 
 public class TestFixture {
     public static final LocalDate DEFAULT_DATE = LocalDate.now().plusDays(1);
@@ -22,15 +23,36 @@ public class TestFixture {
         return createNewReservation(createMemberByName("member2"), DEFAULT_DATE.plusDays(1), createDefaultReservationTime(), createDefaultTheme());
     }
 
-    public static Reservation createDefaultWaiting_1() {
-        return createWaitingReservation(createDefaultMember(), DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme());
+    public static Reservation createReservationByMember(Member member) {
+        return Reservation.create(member, DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme());
+    }
+
+    public static Reservation createNewReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return Reservation.create(member, date, time, theme);
+    }
+
+    public static Waiting createDefaultWaiting_1() {
+        return createWaiting(createMemberByName("member1"), DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme());
+    }
+
+    public static Waiting createDefaultWaiting_2() {
+        return createWaiting(createMemberByName("member2"), DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme());
+    }
+
+
+    public static Waiting createWaiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return Waiting.create(member, date, time, theme);
+    }
+
+    public static Waiting createWaitingByMember(Member member) {
+        return Waiting.create(member,DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme());
     }
 
     public static ReservationTime createDefaultReservationTime() {
         return ReservationTime.createNew(LocalTime.of(12, 0));
     }
 
-    public static ReservationTime createDefaultReservationTimeByTime(LocalTime time) {
+    public static ReservationTime createTimeFrom(LocalTime time) {
         return ReservationTime.createNew(time);
     }
 
@@ -47,19 +69,11 @@ public class TestFixture {
     }
 
     public static Theme createDefaultTheme() {
-        return new Theme("theme", "description", "thumbnail");
+        return new Theme("themeName", "description", "thumbnail");
     }
 
     public static Theme createThemeByName(String name) {
         return new Theme(name, "description", "thumbnail");
-    }
-
-    public static Reservation createNewReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return Reservation.createNew(member, date, time, theme);
-    }
-
-    public static Reservation createWaitingReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return Reservation.createWaiting(member, date, time, theme);
     }
 
     public static Clock fixedClockAt(LocalDateTime fixedDateTime) {

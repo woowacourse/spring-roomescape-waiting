@@ -9,13 +9,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,10 +35,10 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    private Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
@@ -47,20 +46,18 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public static Reservation create(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, member, date, time, theme);
+    public static Waiting create(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Waiting(null, member, date, time, theme);
+    }
+
+    public Reservation toReservation() {
+        return Reservation.create(member, date, time, theme);
     }
 
     public boolean isPast(Clock clock) {
         LocalDateTime now = LocalDateTime.now(clock);
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        return reservationDateTime.isBefore(now);
-    }
-
-    public long calculateMinutesUntilStart(Clock clock) {
-        LocalDateTime now = LocalDateTime.now(clock);
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        return Duration.between(now, reservationDateTime).toMinutes();
+        LocalDateTime waitingDateTime = LocalDateTime.of(date, time.getStartAt());
+        return waitingDateTime.isBefore(now);
     }
 
     public Long getId() {
@@ -88,7 +85,7 @@ public class Reservation {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Reservation other)) {
+        if (!(o instanceof Waiting other)) {
             return false;
         }
         if (this.id == null || other.id == null) {
@@ -103,5 +100,9 @@ public class Reservation {
             return System.identityHashCode(this);
         }
         return Objects.hash(id);
+    }
+
+    public boolean sameWaiterWith(Long otherId) {
+        return this.member.getId().equals(otherId);
     }
 }

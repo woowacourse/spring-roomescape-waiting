@@ -11,12 +11,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.DatabaseCleaner;
 import roomescape.TestFixture;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -51,6 +53,14 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @BeforeEach
+    void clean() {
+        databaseCleaner.clean();
+    }
 
     @Test
     void 예약_시간을_생성할_수_있다() {
@@ -87,8 +97,8 @@ class ReservationTimeServiceTest {
     @Test
     void 전체_예약_시간을_조회할_수_있다() {
         //given
-        ReservationTime reservationTime1 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(12, 0)));
-        ReservationTime reservationTime2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(13, 0)));
+        ReservationTime reservationTime1 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(12, 0)));
+        ReservationTime reservationTime2 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(13, 0)));
 
         //when
         List<ReservationTimeResult> reservationTimeResults = reservationTimeService.getAll();
@@ -150,9 +160,9 @@ class ReservationTimeServiceTest {
     void 테마와_날짜에_해당하는_예약_가능한_시간을_조회할_수_있다() {
         // given
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
-        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(12, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(14, 0)));
-        ReservationTime time3 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(16, 0)));
+        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(12, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(14, 0)));
+        ReservationTime time3 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(16, 0)));
         
         Member member = memberRepository.save(TestFixture.createDefaultMember());
         reservationRepository.save(TestFixture.createNewReservation(member, DEFAULT_DATE, time2, theme));
@@ -173,8 +183,8 @@ class ReservationTimeServiceTest {
     void 예약이_없는_날짜의_모든_시간은_예약_가능_상태이다() {
         // given
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
-        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(12, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(14, 0)));
+        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(12, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(14, 0)));
         
         LocalDate futureDate = DEFAULT_DATE.plusDays(7);
 
@@ -194,8 +204,8 @@ class ReservationTimeServiceTest {
     void 예약이_있는_날짜_정보를_같이_반환한다() {
         // given
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
-        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(12, 0)));
-        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createDefaultReservationTimeByTime(LocalTime.of(14, 0)));
+        ReservationTime time1 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(12, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(TestFixture.createTimeFrom(LocalTime.of(14, 0)));
         
         Member member = memberRepository.save(TestFixture.createDefaultMember());
         reservationRepository.save(TestFixture.createNewReservation(member, DEFAULT_DATE, time1, theme));

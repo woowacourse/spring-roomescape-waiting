@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DEFAULT_DATE;
 import static roomescape.TestFixture.createDefaultMember;
 import static roomescape.TestFixture.createDefaultReservationTime;
@@ -19,19 +20,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
-import roomescape.TestFixture;
 import roomescape.auth.JwtTokenProvider;
 import roomescape.controller.request.CreatBookingRequest;
-import roomescape.controller.response.BookingResponse;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.Waiting;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.service.result.MemberResult;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-class ReservationControllerTest {
+class WaitingControllerTest {
 
     @LocalServerPort
     private int port;
@@ -40,7 +40,7 @@ class ReservationControllerTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private DBHelper dbHelper;
@@ -59,26 +59,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 목록을 조회한다")
-    void getReservations() {
-        // given
-        dbHelper.insertReservation(TestFixture.createDefaultReservation_1());
-        dbHelper.insertReservation(TestFixture.createDefaultReservation_2());
-
-        // when & then
-        List<BookingResponse> responses = given().log().all()
-                .when()
-                .get("/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.OK.value())
-                .extract().jsonPath().getList(".", BookingResponse.class);
-
-        assertThat(responses).hasSize(2);
-    }
-
-    @Test
-    @DisplayName("예약을 생성한다")
-    void createReservation() {
+    @DisplayName("대기 예약을 생성한다")
+    void createWaitingReservation() {
         // given
         Member member = createDefaultMember();
         ReservationTime reservationTime = createDefaultReservationTime();
@@ -97,9 +79,18 @@ class ReservationControllerTest {
                 .contentType("application/json")
                 .body(request)
                 .when()
-                .post("/reservations")
+                .post("/waitings")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
+
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        assertAll(
+                () -> assertThat(waitings).hasSize(1),
+                () -> assertThat(waitings.get(0).getMember()).isEqualTo(member),
+                () -> assertThat(waitings.get(0).getTime()).isEqualTo(reservationTime),
+                () -> assertThat(waitings.get(0).getTheme()).isEqualTo(theme)
+        );
     }
 
-} 
+}

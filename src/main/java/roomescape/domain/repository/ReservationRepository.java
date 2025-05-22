@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
-import roomescape.service.result.WaitingWithRank;
 
 
 public interface ReservationRepository {
@@ -17,13 +16,7 @@ public interface ReservationRepository {
 
     List<Reservation> findByMemberId(Long memberId);
 
-    List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
-
     List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
-
-    List<Reservation> findWaitingReservations();
-
-    Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId);
 
     boolean existsByTimeId(Long reservationTimeId);
 
@@ -33,5 +26,5 @@ public interface ReservationRepository {
 
     boolean isReservationSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId);
 
-    boolean hasAlreadyReservedOrWaited(Long memberId, Long themeId, Long timeId, LocalDate date);
+    boolean hasAlreadyReserved(Long memberId, Long themeId, Long timeId, LocalDate date);
 }

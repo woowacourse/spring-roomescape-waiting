@@ -8,6 +8,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 
 @Component
 @Transactional
@@ -28,25 +29,47 @@ public class DBHelper {
         }
 
         em.persist(reservation);
+        em.flush();
 
         return reservation.getId();
     }
 
+    public Waiting insertWaiting(Waiting waiting) {
+        if(waiting.getMember().getId() == null) {
+            em.persist(waiting.getMember());
+        }
+        if(waiting.getTime().getId() == null) {
+            em.persist(waiting.getTime());
+        }
+        if(waiting.getTheme().getId() == null) {
+            em.persist(waiting.getTheme());
+        }
+
+        em.persist(waiting);
+        em.flush();
+
+        return waiting;
+    }
+
     public void insertMember(Member member) {
         em.persist(member);
+        em.flush();
     }
 
     public void insertTime(ReservationTime reservationTime) {
         em.persist(reservationTime);
+        em.flush();
     }
 
     public void insertTheme(Theme theme) {
         em.persist(theme);
+        em.flush();
     }
 
     public void prepareForReservation(Member member, ReservationTime time, Theme theme) {
         insertMember(member);
         insertTime(time);
         insertTheme(theme);
+        em.flush();
     }
 }

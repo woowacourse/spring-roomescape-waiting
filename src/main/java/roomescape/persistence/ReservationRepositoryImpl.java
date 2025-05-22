@@ -1,13 +1,11 @@
 package roomescape.persistence;
 
-import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.repository.ReservationRepository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.service.result.WaitingWithRank;
+import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
+import roomescape.domain.repository.ReservationRepository;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -39,11 +37,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId) {
-        return jpaReservationRepository.findWaitingsWithRankByMemberId(memberId);
-    }
-
-    @Override
     public boolean existsByTimeId(final Long reservationTimeId) {
         return jpaReservationRepository.existsByTimeId(reservationTimeId);
     }
@@ -69,17 +62,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findWaitingReservations() {
-        return jpaReservationRepository.findWaitingReservations();
-    }
-
-    @Override
-    public Optional<Reservation> findFirstWaiting(LocalDate date, Long themeId, Long timeId) {
-        return jpaReservationRepository.findFirstWaiting(date, themeId, timeId);
-    }
-
-    @Override
-    public boolean hasAlreadyReservedOrWaited(Long memberId, Long themeId, Long timeId, LocalDate date) {
+    public boolean hasAlreadyReserved(Long memberId, Long themeId, Long timeId, LocalDate date) {
         return jpaReservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(memberId, themeId, timeId, date);
     }
 }

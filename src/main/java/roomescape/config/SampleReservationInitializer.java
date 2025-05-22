@@ -8,27 +8,31 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.repository.WaitingRepository;
 
 @Component
 @Profile("local")
 public class SampleReservationInitializer implements CommandLineRunner {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
     public SampleReservationInitializer(
             ReservationRepository reservationRepository,
-            MemberRepository memberRepository,
+            WaitingRepository waitingRepository, MemberRepository memberRepository,
             ReservationTimeRepository timeRepository,
             ThemeRepository themeRepository
     ) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
@@ -71,7 +75,7 @@ public class SampleReservationInitializer implements CommandLineRunner {
         ReservationTime time = timeRepository.findById(timeId).orElseThrow();
         Theme theme = themeRepository.findById(themeId).orElseThrow();
 
-        Reservation reservation = Reservation.createNew(member, date, time, theme);
+        Reservation reservation = Reservation.create(member, date, time, theme);
         reservationRepository.save(reservation);
     }
 
@@ -80,7 +84,7 @@ public class SampleReservationInitializer implements CommandLineRunner {
         ReservationTime time = timeRepository.findById(timeId).orElseThrow();
         Theme theme = themeRepository.findById(themeId).orElseThrow();
 
-        Reservation reservation = Reservation.createWaiting(member, date, time, theme);
-        reservationRepository.save(reservation);
+        Waiting waiting = Waiting.create(member, date, time, theme);
+        waitingRepository.save(waiting);
     }
 }
