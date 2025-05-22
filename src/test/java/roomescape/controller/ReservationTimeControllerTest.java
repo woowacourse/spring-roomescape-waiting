@@ -74,13 +74,13 @@ class ReservationTimeControllerTest {
     @Test
     @DisplayName("예약 시간 생성 테스트")
     void createReservationTime() throws Exception {
-        ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(10, 0));
+        ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(12, 0));
 
         mockMvc.perform(post("/times")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.startAt").value("10:00:00"));
+                .andExpect(jsonPath("$.startAt").value("12:00:00"));
     }
 
     @Test
