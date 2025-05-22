@@ -28,6 +28,12 @@ VALUES ('10:00'),
 
 -- reservation 데이터
 INSERT INTO reservation(member_id, date, time_id, theme_id, status, create_at)
-VALUES (1, '2025-07-01', 1, 1, 'RESERVED', '2025-05-20 10:15:00'),
+VALUES (1, DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 'RESERVED', DATEADD('DAY', -1, CURRENT_DATE)),
+       (2, DATEADD('DAY', -2, CURRENT_DATE), 2, 2, 'RESERVED', DATEADD('DAY', -2, CURRENT_DATE)),
+       (3, DATEADD('DAY', -3, CURRENT_DATE), 3, 2, 'RESERVED', DATEADD('DAY', -3, CURRENT_DATE)),
+       (1, DATEADD('DAY', -1, CURRENT_DATE), 2, 3, 'RESERVED', DATEADD('DAY', -1, CURRENT_DATE)),
+       (2, DATEADD('DAY', -4, CURRENT_DATE), 3, 3, 'RESERVED', DATEADD('DAY', -4, CURRENT_DATE)),
+       (3, DATEADD('DAY', -5, CURRENT_DATE), 4, 3, 'RESERVED', DATEADD('DAY', -5, CURRENT_DATE)),
+       (1, '2025-07-01', 1, 1, 'RESERVED', '2025-05-20 10:15:00'),
        (2, '2025-07-01', 1, 1, 'WAIT', '2025-05-21 08:00:00'),
        (3, '2025-07-01', 1, 1, 'WAIT', '2025-05-21 08:01:00');
