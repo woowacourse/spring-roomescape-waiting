@@ -7,8 +7,10 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.request.ReservationWaitingRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -45,15 +47,38 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        Reservation reservation = Reservation.createWithoutId(dateTime.now(), member, request.date(), time,
-                theme);
+        Reservation reservation = Reservation.createWithoutId(dateTime.now(), member, request.date(), time, theme,
+                ReservationStatus.RESERVED);
 
-        if (reservationRepository.hasSameReservation(reservation)) {
+        if (reservationRepository.hasReservedReservation(reservation)) {
             throw new IllegalArgumentException("이미 예약이 존재합니다.");
         }
 
         Reservation save = reservationRepository.save(reservation);
+        return ReservationResponse.from(save);
+    }
 
+    public ReservationResponse createWaitingReservation(final ReservationWaitingRequest waitingRequest,
+                                                        final Long memberId) {
+        ReservationTime time = reservationTimeRepository.findById(waitingRequest.time())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
+        Theme theme = themeRepository.findById(waitingRequest.theme())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        Reservation reservation = Reservation.createWithoutId(dateTime.now(), member, waitingRequest.date(), time,
+                theme, ReservationStatus.WAITED);
+
+        if (!reservationRepository.hasReservedReservation(reservation)) {
+            throw new IllegalArgumentException("예약 가능한 상태에서는 대기할 수 없습니다.");
+        }
+
+        if (reservationRepository.hasSameReservation(reservation)) {
+            throw new IllegalArgumentException("이미 예약 대기를 신청했습니다");
+        }
+
+        Reservation save = reservationRepository.save(reservation);
         return ReservationResponse.from(save);
     }
 
