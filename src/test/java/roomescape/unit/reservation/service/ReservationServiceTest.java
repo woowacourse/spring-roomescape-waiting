@@ -147,7 +147,7 @@ class ReservationServiceTest {
                 timeSlot1, theme1);
         Reservation savedReservation = reservationRepository.save(reservation1);
         // when
-        reservationService.deleteReservationById(savedReservation.getId());
+        reservationService.cancelReservationAndPromoteWait(savedReservation.getId());
 
         // then
         List<ReservationResponse> all = reservationService.findReservations(
@@ -158,7 +158,7 @@ class ReservationServiceTest {
     @Test
     void id에_대한_예약이_없을_경우_예외가_발생한다() {
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.deleteReservationById(10L))
+        Assertions.assertThatThrownBy(() -> reservationService.cancelReservationAndPromoteWait(10L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -197,7 +197,7 @@ class ReservationServiceTest {
                 Waiting.of(null, member2, LocalDate.of(2025, 7, 25), timeSlot1, theme1)
         );
         // when
-        reservationService.deleteReservationById(reservation.getId());
+        reservationService.cancelReservationAndPromoteWait(reservation.getId());
 
         // then
         List<Reservation> reservations = reservationRepository.findAll();

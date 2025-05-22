@@ -1,9 +1,7 @@
 package roomescape.reservation.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.MemberNotFoundException;
@@ -25,7 +23,6 @@ import roomescape.reservation.infrastructure.TimeSlotRepository;
 import roomescape.reservation.infrastructure.WaitingRepository;
 
 @Service
-@Transactional
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -55,11 +52,15 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservation(Long memberId, Long timeId, Long themeId, LocalDate date) {
-        TimeSlot timeSlot = timeSlotRepository.findById(timeId)
-                .orElseThrow(TimeSlotNotFoundException::new);
+        TimeSlot timeSlot = timeSlotRepository.findById(timeId).orElseThrow(TimeSlotNotFoundException::new);
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-        Reservation reservation = Reservation.createWithoutId(member, date, timeSlot, theme);
+        Reservation reservation = Reservation.builder()
+                .date(date)
+                .member(member)
+                .theme(theme)
+                .timeSlot(timeSlot).build();
+
         reservation.validateDateTime();
         validateDuplicate(date, timeSlot, theme);
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -72,21 +73,24 @@ public class ReservationService {
         }
     }
 
-    public void deleteReservationById(Long id) {
+    public void cancelReservationAndPromoteWait(Long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.delete(reservation);
-        Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndTimeSlotAndThemeOrderById(
-                reservation.getDate(), reservation.getTimeSlot(), reservation.getTheme());
-        if (firstWaiting.isEmpty()) {
-            return;
-        }
+        waitingRepository.findFirstByDateAndTimeSlotAndThemeOrderById(reservation.getDate(), reservation.getTimeSlot(),
+                        reservation.getTheme())
+                .ifPresent(this::promoteWaitingToReservation);
+    }
+
+    private void promoteWaitingToReservation(Waiting waiting) {
         Reservation newReservation = Reservation.builder()
-                .date(firstWaiting.get().getDate())
-                .theme(firstWaiting.get().getTheme())
-                .timeSlot(firstWaiting.get().getTimeSlot())
-                .member(firstWaiting.get().getMember()).build();
+                .date(waiting.getDate())
+                .theme(waiting.getTheme())
+                .timeSlot(waiting.getTimeSlot())
+                .member(waiting.getMember())
+                .build();
+
         reservationRepository.save(newReservation);
-        waitingRepository.delete(firstWaiting.get());
+        waitingRepository.delete(waiting);
     }
 
     public List<ReservationWithStatusResponse> findReservationByMemberId(Long memberId) {
