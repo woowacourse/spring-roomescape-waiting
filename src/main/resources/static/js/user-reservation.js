@@ -49,9 +49,6 @@ function createSlot(type, text, id, booked) {
   div.setAttribute('data-' + type + '-id', id);
   if (type === 'time') {
     div.setAttribute('data-time-booked', booked);
-    if (booked) {
-      div.classList.add('disabled');
-    }
   }
   return div;
 }
@@ -192,7 +189,7 @@ function onWaitButtonClick() {
     /*
     TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('', {
+    fetch('/waiting-reservations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
