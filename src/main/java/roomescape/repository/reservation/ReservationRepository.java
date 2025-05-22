@@ -9,7 +9,6 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.enums.Waiting;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -42,6 +41,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     void updateAllWaitingReservationsAfterPriority(LocalDate date, ReservationTime time, Theme theme,
                                                    Long priority);
 
-    @Query("SELECT r FROM Reservation r WHERE r.status.status = :waiting")
-    List<Reservation> findAllByStatus(Waiting waiting);
+    @Query("SELECT r FROM Reservation r WHERE r.status.priority > 1")
+    List<Reservation> findAllWaiting();
 }

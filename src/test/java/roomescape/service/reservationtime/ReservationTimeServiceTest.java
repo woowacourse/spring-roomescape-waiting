@@ -20,7 +20,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
-import roomescape.domain.enums.Waiting;
 import roomescape.dto.reservationtime.AvailableTimeResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.exception.reservationtime.ReservationTimeAlreadyExistsException;
@@ -39,7 +38,7 @@ class ReservationTimeServiceTest {
     @InjectMocks
     private ReservationTimeService reservationTimeService;
 
-    private final ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
+    private final ReservationStatus status = new ReservationStatus(1L);
 
     @DisplayName("중복되는 시간은 생성할 수 없다")
     @Test

@@ -1,16 +1,15 @@
 package roomescape.service.reservation;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.enums.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.admin.AdminWaitingReservationResponse;
 import roomescape.dto.reservation.MemberReservationResponse;
@@ -67,7 +66,7 @@ public class ReservationService {
             throw new ReservationAlreadyExistsException();
         }
 
-        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, 1L);
+        ReservationStatus status = new ReservationStatus(1L);
         statusRepository.save(status);
 
         Reservation newReservation = new Reservation(request.date(),
@@ -80,8 +79,13 @@ public class ReservationService {
         return ReservationResponse.from(reservationRepository.findAll());
     }
 
+    @Transactional
     public void deleteById(Long id) {
-        reservationRepository.deleteById(id);
+        Reservation targetReservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+
+        updateWaitingReservationPriorities(targetReservation);
+        reservationRepository.delete(targetReservation);
     }
 
     public ReservationResponse createByAdmin(AdminReservationRequest adminReservationRequest) {
@@ -94,7 +98,7 @@ public class ReservationService {
         Member member = memberRepository.findById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new MemberNotFoundException(adminReservationRequest.memberId()));
 
-        ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, 1L);
+        ReservationStatus status = new ReservationStatus(1L);
         statusRepository.save(status);
 
         Reservation newReservation = new Reservation(adminReservationRequest.date(),
@@ -133,7 +137,7 @@ public class ReservationService {
 
         long waitingCount = reservationRepository.countByDateAndTimeAndTheme(request.date(), time, theme);
 
-        ReservationStatus status = new ReservationStatus(Waiting.WAITING, waitingCount + 1);
+        ReservationStatus status = new ReservationStatus(waitingCount + 1);
         statusRepository.save(status);
 
         Reservation reservation = reservationRepository.save(new Reservation(request.date(),
@@ -146,20 +150,24 @@ public class ReservationService {
         Reservation targetReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException(reservationId));
 
+        if (!targetReservation.getMember().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("예약의 주인이 아닙니다.");
+        }
+
+        updateWaitingReservationPriorities(targetReservation);
+        reservationRepository.delete(targetReservation);
+    }
+
+    public List<AdminWaitingReservationResponse> getWaitingReservations() {
+        return AdminWaitingReservationResponse.from(reservationRepository.findAllWaiting());
+    }
+
+    private void updateWaitingReservationPriorities(Reservation targetReservation) {
         reservationRepository.updateAllWaitingReservationsAfterPriority(
                 targetReservation.getDate(),
                 targetReservation.getTime(),
                 targetReservation.getTheme(),
                 targetReservation.getStatus().getPriority()
         );
-
-        reservationRepository.delete(targetReservation);
-
-        ReservationStatus status = targetReservation.getStatus();
-        statusRepository.delete(status);
-    }
-
-    public List<AdminWaitingReservationResponse> getWaitingReservations() {
-        return AdminWaitingReservationResponse.from(reservationRepository.findAllByStatus(Waiting.WAITING));
     }
 }

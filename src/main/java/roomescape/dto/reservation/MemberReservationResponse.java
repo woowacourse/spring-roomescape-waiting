@@ -13,9 +13,9 @@ public record MemberReservationResponse(Long id,
 
     public static MemberReservationResponse from(Reservation reservation) {
         ReservationStatus status = reservation.getStatus();
-        String statusMessage = status.getStatus().getValue();
+        String statusMessage = "예약";
 
-        if (status.getStatus().isWaiting()) {
+        if (status.isWaiting()) {
             statusMessage = String.format("%d번째 예약대기", status.getPriority());
         }
         return new MemberReservationResponse(

@@ -25,7 +25,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.enums.Role;
-import roomescape.domain.enums.Waiting;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.admin.AdminWaitingReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
@@ -61,7 +60,7 @@ class ReservationServiceTest {
     @InjectMocks
     private ReservationService reservationService;
 
-    private final ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
+    private final ReservationStatus status = new ReservationStatus(1L);
 
     @DisplayName("예약 시간이 존재하지 않으면 예약을 생성할 수 없다")
     @Test
@@ -142,7 +141,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "admin@a.com", "pw", roomescape.domain.enums.Role.ADMIN);
         Reservation reservation = new Reservation(99L, date, time, theme, member, status);
-        ReservationStatus reservationStatus = new ReservationStatus(Waiting.CONFIRMED, null);
+        ReservationStatus reservationStatus = new ReservationStatus(1L);
 
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
@@ -175,7 +174,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", roomescape.domain.enums.Role.ADMIN);
         Reservation reservation = new Reservation(99L, date, time, theme, member, status);
-        ReservationStatus reservationStatus = new ReservationStatus(Waiting.CONFIRMED, null);
+        ReservationStatus reservationStatus = new ReservationStatus(1L);
 
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
@@ -205,7 +204,7 @@ class ReservationServiceTest {
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
 
         // 취소할 예약
-        ReservationStatus targetStatus = new ReservationStatus(Waiting.WAITING, priority);
+        ReservationStatus targetStatus = new ReservationStatus(3L);
         Reservation targetReservation = new Reservation(99L, date, time, theme, member, targetStatus);
 
         when(reservationRepository.findById(99L)).thenReturn(Optional.of(targetReservation));
@@ -218,7 +217,6 @@ class ReservationServiceTest {
         // TODO: 순위 변동 사항은 repository의 메서드 책임이니까 그 부분은 mocking 하고 결과는 verify로만 검증을 할까?
         verify(reservationRepository).delete(targetReservation);
         verify(reservationRepository).updateAllWaitingReservationsAfterPriority(date, time, theme, priority);
-        verify(reservationStatusRepository).delete(targetStatus);
     }
 
     @Test
@@ -236,10 +234,10 @@ class ReservationServiceTest {
         List<Reservation> reservations = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             reservations.add(new Reservation(99L + i, LocalDate.now(), time, theme, member,
-                    new ReservationStatus(Waiting.WAITING, priority)));
+                    new ReservationStatus(priority)));
         }
 
-        when(reservationRepository.findAllByStatus(Waiting.WAITING)).thenReturn(reservations);
+        when(reservationRepository.findAllWaiting()).thenReturn(reservations);
 
         // when
         List<AdminWaitingReservationResponse> waitingReservations = reservationService.getWaitingReservations();

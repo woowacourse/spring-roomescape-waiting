@@ -49,27 +49,27 @@ INSERT INTO member (name, email, password, role)
 VALUES ('메롱유저', 'email2@emil.com', 'pw', 'USER');
 
 -- 3. 예약 상태 저장
-INSERT INTO reservation_status (status, priority)
-VALUES ('CONFIRMED', 1),
-       ('WAITING', 2),
-       ('WAITING', 3),
-       ('WAITING', 4),
-       ('WAITING', 5);
+INSERT INTO reservation_status (priority)
+VALUES (1),
+       (2),
+       (3),
+       (4),
+       (5);
 
 -- -- 4. 예약 (member_id는 슬링키의 id 1로 고정)
 -- -- 날짜는 최근 7일 내 (DATEADD 사용)
 --
 -- -- theme 1 (10회)
 INSERT INTO reservation (date, time_id, theme_id, member_id, status_id)
-VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 1, 1);
+VALUES (DATEADD('DAY', 7, CURRENT_DATE), 1, 1, 1, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id, status_id)
-VALUES (DATEADD('DAY', -2, CURRENT_DATE), 1, 1, 1, 2);
+VALUES (DATEADD('DAY', 7, CURRENT_DATE), 1, 1, 1, 2);
 INSERT INTO reservation (date, time_id, theme_id, member_id, status_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 1, 1, 3);
+VALUES (DATEADD('DAY', 7, CURRENT_DATE), 1, 1, 1, 3);
 INSERT INTO reservation (date, time_id, theme_id, member_id, status_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 1, 1, 4);
+VALUES (DATEADD('DAY', 7, CURRENT_DATE), 1, 1, 1, 4);
 INSERT INTO reservation (date, time_id, theme_id, member_id, status_id)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 1, 1, 5);
+VALUES (DATEADD('DAY', 7, CURRENT_DATE), 1, 1, 1, 5);
 -- INSERT INTO reservation (date, time_id, theme_id, member_id)
 -- VALUES (DATEADD('DAY', -4, CURRENT_DATE), 4, 1, 1);
 -- INSERT INTO reservation (date, time_id, theme_id, member_id)

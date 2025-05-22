@@ -7,12 +7,11 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.enums.Role;
-import roomescape.domain.enums.Waiting;
 import roomescape.exception.reservation.ReservationFieldRequiredException;
 
 class ReservationTest {
 
-    private final ReservationStatus status = new ReservationStatus(Waiting.CONFIRMED, null);
+    private final ReservationStatus status = new ReservationStatus(1L);
 
     @DisplayName("예약은 빈 날짜로 생성할 수 없다")
     @Test
