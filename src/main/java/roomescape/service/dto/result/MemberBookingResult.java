@@ -11,7 +11,8 @@ public record MemberBookingResult(
         ThemeResult theme,
         LocalDate date,
         ReservationTimeResult time,
-        String status
+        BookingType bookingType,
+        long rank
 ) {
 
     public static MemberBookingResult from(Reservation reservation) {
@@ -20,7 +21,8 @@ public record MemberBookingResult(
                 MemberResult.from(reservation.getMember()),
                 ThemeResult.from(reservation.getTheme()), reservation.getDate(),
                 ReservationTimeResult.from(reservation.getTime()),
-                "예약"
+                BookingType.RESERVED,
+                0
         );
     }
 
@@ -31,7 +33,8 @@ public record MemberBookingResult(
                 ThemeResult.from(waiting.getTheme()),
                 waiting.getDate(),
                 ReservationTimeResult.from(waiting.getTime()),
-                rank + "번째 대기"
+                BookingType.WAITED,
+                rank
         );
     }
 

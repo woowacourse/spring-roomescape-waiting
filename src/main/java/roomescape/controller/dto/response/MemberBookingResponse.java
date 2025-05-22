@@ -3,6 +3,7 @@ package roomescape.controller.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import roomescape.service.dto.result.BookingType;
 import roomescape.service.dto.result.MemberBookingResult;
 
 public record MemberBookingResponse(
@@ -18,8 +19,19 @@ public record MemberBookingResponse(
                 result.theme().name(),
                 result.date(),
                 result.time().startAt(),
-                result.status()
+                getDisplayName(result.bookingType(), result.rank())
         );
+    }
+
+    private static String getDisplayName(BookingType bookingType, long rank) {
+        StringBuilder sb = new StringBuilder();
+
+        if(rank > 0) {
+            sb.append(rank + "번째 ");
+        }
+        sb.append(bookingType.getDisplayName());
+
+        return sb.toString();
     }
 
     public static List<MemberBookingResponse> from(List<MemberBookingResult> results) {
