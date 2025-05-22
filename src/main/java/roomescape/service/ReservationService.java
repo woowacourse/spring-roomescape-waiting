@@ -152,7 +152,7 @@ public class ReservationService {
     }
 
     public List<ReservationWaitResponse> findAllByStatus(ReservationStatus status) {
-        List<Reservation> waitReservations = reservationRepository.findAllByStatus(status);
+        List<Reservation> waitReservations = reservationRepository.findAllFetchByStatus(status);
         return waitReservations.stream()
                 .map(ReservationWaitResponse::from)
                 .toList();

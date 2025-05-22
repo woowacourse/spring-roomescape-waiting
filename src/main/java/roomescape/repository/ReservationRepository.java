@@ -30,7 +30,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                       @Param("dateFrom") LocalDate dateFrom,
                                       @Param("dateTo") LocalDate dateTo);
 
-    List<Reservation> findAllByStatus(ReservationStatus status);
+    @Query(value = """
+            select r
+            from Reservation r
+            join fetch r.member
+            join fetch r.reservationTime
+            join fetch r.theme
+            where r.status = :status
+            """)
+    List<Reservation> findAllFetchByStatus(@Param("status") ReservationStatus status);
 
     Optional<Reservation> findByDateAndReservationTimeAndThemeAndStatus(LocalDate date,
                                                                         ReservationTime reservationTime,
