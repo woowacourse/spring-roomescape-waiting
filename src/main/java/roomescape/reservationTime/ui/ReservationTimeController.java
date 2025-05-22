@@ -8,20 +8,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.response.ApiResponse;
 import roomescape.reservationTime.application.ReservationTimeService;
 import roomescape.reservationTime.application.dto.AvailableTimeRequest;
 import roomescape.reservationTime.application.dto.AvailableTimeResponse;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/times")
+@RequestMapping("times")
 public class ReservationTimeController {
     private final ReservationTimeService timeService;
 
     @GetMapping("/available")
-    public ResponseEntity<List<AvailableTimeResponse>> get(
+    public ResponseEntity<ApiResponse<List<AvailableTimeResponse>>> get(
             @Valid @ModelAttribute AvailableTimeRequest request
     ) {
-        return ResponseEntity.ok(timeService.getAvailableTimes(request));
+        List<AvailableTimeResponse> response = timeService.findAvailableTimes(request);
+        ApiResponse<List<AvailableTimeResponse>> apiResponse = ApiResponse.createSuccess(response);
+        return ResponseEntity.ok(apiResponse);
     }
 }
+

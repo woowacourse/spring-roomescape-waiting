@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error fetching times:', error));
 });
 
-function render(data) {
+function render(apiResponse) {
+    const data = apiResponse.data;
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 

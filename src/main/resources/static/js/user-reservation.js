@@ -96,7 +96,12 @@ function fetchAvailableTimes(date, themeId) {
     }).then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
-    }).then(renderAvailableTimes)
+    })
+        .then(apiResponse => {
+            if (!apiResponse.success) throw new Error(apiResponse.message || 'Fetch available times failed');
+            return apiResponse.data;
+        })
+        .then(renderAvailableTimes)
         .catch(error => console.error("Error fetching available times:", error));
 }
 
@@ -230,7 +235,14 @@ function onWaitButtonClick() {
 function requestRead(endpoint) {
     return fetch(endpoint)
         .then(response => {
-            if (response.status === 200) return response.json();
-            throw new Error('Read failed');
+            if (!response.ok) throw new Error('Network error');
+            return response.json();
+        })
+        .then(apiResponse => {
+            if (!apiResponse.success) {
+                throw new Error(apiResponse.message || 'API call failed');
+            }
+            return apiResponse.data;
         });
 }
+

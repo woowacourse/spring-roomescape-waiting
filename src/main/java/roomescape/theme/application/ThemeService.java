@@ -17,13 +17,13 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeResponse add(ThemeRequest request) {
+    public ThemeResponse create(ThemeRequest request) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
         return ThemeResponse.from(themeRepository.save(theme));
     }
 
     public List<ThemeResponse> findAll() {
-        return ThemeResponse.from(themeRepository.findAll().stream().toList());
+        return ThemeResponse.from(themeRepository.findAll());
     }
 
     public List<ThemeResponse> findRankedByPeriod() {

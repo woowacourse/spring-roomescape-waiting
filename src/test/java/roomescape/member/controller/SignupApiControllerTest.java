@@ -19,9 +19,9 @@ import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.config.WebMvcConfiguration;
 import roomescape.common.exception.GlobalExceptionHandler;
 import roomescape.common.security.TokenAuthorizationHandler;
+import roomescape.member.application.MemberService;
 import roomescape.member.application.dto.MemberRequest;
 import roomescape.member.application.dto.MemberResponse;
-import roomescape.member.application.MemberService;
 
 @WebMvcTest(SignupApiController.class)
 @Import({WebMvcConfiguration.class, GlobalExceptionHandler.class})
@@ -47,7 +47,7 @@ class SignupApiControllerTest {
     @DisplayName("회원가입 요청을 처리한다")
     @Test
     void signup() throws Exception {
-        when(memberService.add(any(MemberRequest.class)))
+        when(memberService.create(any(MemberRequest.class)))
                 .thenReturn(new MemberResponse(1L, "test-user", "test@example.com"));
 
         MemberRequest signupRequest = new MemberRequest("test@example.com", "1234", "test-user");

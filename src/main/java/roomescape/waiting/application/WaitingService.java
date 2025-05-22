@@ -32,13 +32,14 @@ import roomescape.waiting.exception.WaitingNotFoundException;
 @AllArgsConstructor
 public class WaitingService {
     public static final int FIRST_WAITING = 1;
+
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
-    public WaitingResponse add(Long memberId, WaitingRequest request) {
+    public WaitingResponse create(Long memberId, WaitingRequest request) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
         ReservationDate date = new ReservationDate(request.date());
@@ -87,7 +88,7 @@ public class WaitingService {
     }
 
     public List<WaitingResponse> findAll() {
-        List<Waiting> waitings = waitingRepository.findAll().stream().toList();
+        List<Waiting> waitings = waitingRepository.findAll();
         return WaitingResponse.from(waitings);
     }
 

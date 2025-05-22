@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Theme {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

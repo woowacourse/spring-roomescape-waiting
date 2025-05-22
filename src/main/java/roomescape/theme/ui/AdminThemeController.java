@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.response.ApiResponse;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.application.dto.ThemeRequest;
 import roomescape.theme.application.dto.ThemeResponse;
@@ -18,17 +19,19 @@ import roomescape.theme.application.dto.ThemeResponse;
 @AllArgsConstructor
 @RequestMapping("admin/themes")
 public class AdminThemeController {
-
     private final ThemeService themeService;
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> add(@Valid @RequestBody ThemeRequest themeRequest) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(themeService.add(themeRequest));
+    public ResponseEntity<ApiResponse<ThemeResponse>> create(@Valid @RequestBody ThemeRequest request) {
+        ThemeResponse response = themeService.create(request);
+        ApiResponse<ThemeResponse> apiResponse = ApiResponse.createSuccess(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteById(@PathVariable("id") Long id) {
         themeService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        ApiResponse<Void> apiResponse = ApiResponse.createSuccessWithNoData();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apiResponse);
     }
 }

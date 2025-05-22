@@ -1,30 +1,32 @@
 package roomescape.theme.ui;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.response.ApiResponse;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.application.dto.ThemeResponse;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("themes")
 public class ThemeController {
-
     private final ThemeService themeService;
 
-    public ThemeController(ThemeService themeService) {
-        this.themeService = themeService;
-    }
-
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> findAll() {
-        return ResponseEntity.ok(themeService.findAll());
+    public ResponseEntity<ApiResponse<List<ThemeResponse>>> getAll() {
+        List<ThemeResponse> response = themeService.findAll();
+        ApiResponse<List<ThemeResponse>> apiResponse = ApiResponse.createSuccess(response);
+        return ResponseEntity.ok(apiResponse);
     }
 
     @GetMapping("/ranked")
-    public ResponseEntity<List<ThemeResponse>> findRankedByPeriod() {
-        return ResponseEntity.ok(themeService.findRankedByPeriod());
+    public ResponseEntity<ApiResponse<List<ThemeResponse>>> getRankedByPeriod() {
+        List<ThemeResponse> response = themeService.findRankedByPeriod();
+        ApiResponse<List<ThemeResponse>> apiResponse = ApiResponse.createSuccess(response);
+        return ResponseEntity.ok(apiResponse);
     }
 }

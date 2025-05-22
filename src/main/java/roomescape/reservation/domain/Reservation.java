@@ -22,7 +22,6 @@ import roomescape.theme.domain.Theme;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Reservation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -56,6 +55,4 @@ public class Reservation {
     public Theme getTheme() {
         return spec.getTheme();
     }
-
-
 }

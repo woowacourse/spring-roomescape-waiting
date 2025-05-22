@@ -1,7 +1,6 @@
 package roomescape.theme.infrastructure;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -20,7 +19,7 @@ public class ThemeRepositoryAdapter implements ThemeRepository {
     }
 
     @Override
-    public Collection<Theme> findAll() {
+    public List<Theme> findAll() {
         return themeJpaRepository.findAll();
     }
 

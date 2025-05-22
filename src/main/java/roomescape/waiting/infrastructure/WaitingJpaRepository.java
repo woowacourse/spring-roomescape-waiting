@@ -1,6 +1,6 @@
 package roomescape.waiting.infrastructure;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,13 +8,14 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
 
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
+
     @Query("""
             SELECT w FROM Waiting w
             JOIN FETCH w.member
             JOIN FETCH w.spec.theme
             JOIN FETCH w.spec.time
             """)
-    Collection<Waiting> findAllWithEagerLoading();
+    List<Waiting> findAllWithEagerLoading();
 
     @Query("""
             SELECT new roomescape.waiting.domain.WaitingWithRank(
@@ -28,7 +29,7 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
             FROM Waiting w
             WHERE w.member.id = :memberId
             """)
-    Collection<WaitingWithRank> findWithRankByMemberId(Long memberId);
+    List<WaitingWithRank> findWithRankByMemberId(Long memberId);
 
     @Query("""
             SELECT new roomescape.waiting.domain.WaitingWithRank(

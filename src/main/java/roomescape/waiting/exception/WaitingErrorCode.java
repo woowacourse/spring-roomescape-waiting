@@ -10,7 +10,6 @@ public enum WaitingErrorCode implements ErrorCode {
     WAITING_NOT_FOUND(HttpStatus.NOT_FOUND, "예약 대기를 찾을 수 없습니다."),
     NOT_FIRST_WAITING(HttpStatus.BAD_REQUEST, "우선순위가 낮은 예약 대기입니다.");
 
-
     private final HttpStatus status;
     private final String message;
 

@@ -16,9 +16,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.security.TokenAuthorizationHandler;
+import roomescape.member.application.MemberService;
 import roomescape.member.application.dto.MemberRequest;
 import roomescape.member.application.dto.MemberResponse;
-import roomescape.member.application.MemberService;
 import roomescape.member.ui.MemberController;
 
 @WebMvcTest(MemberController.class)
@@ -57,7 +57,7 @@ class MemberControllerTest {
                 }
                 """;
 
-        when(memberService.add(any(MemberRequest.class)))
+        when(memberService.create(any(MemberRequest.class)))
                 .thenReturn(new MemberResponse(1L, "test-user", "test@example.com"));
 
         mockMvc.perform(post(URI)

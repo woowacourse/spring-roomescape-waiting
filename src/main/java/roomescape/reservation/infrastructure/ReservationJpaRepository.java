@@ -9,6 +9,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSpec;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
+
     @Query("""
             SELECT r FROM Reservation r
             JOIN FETCH r.member

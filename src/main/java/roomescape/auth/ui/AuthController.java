@@ -13,6 +13,7 @@ import roomescape.auth.annotation.LoginMemberId;
 import roomescape.auth.application.AuthService;
 import roomescape.auth.application.dto.LoginCheckResponse;
 import roomescape.auth.application.dto.LoginRequest;
+import roomescape.common.response.ApiResponse;
 
 @RestController
 @AllArgsConstructor
@@ -21,25 +22,28 @@ public class AuthController {
     private final CookieProvider cookieProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<Void>> login(@Valid @RequestBody LoginRequest request) {
         String token = authService.login(request);
         ResponseCookie cookie = cookieProvider.createCookieForLogin(token);
+        ApiResponse<Void> apiResponse = ApiResponse.createSuccessWithNoData();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
+                .body(apiResponse);
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<LoginCheckResponse> checkLogin(@LoginMemberId Long memberId) {
+    public ResponseEntity<ApiResponse<LoginCheckResponse>> checkLogin(@LoginMemberId Long memberId) {
         LoginCheckResponse response = authService.loginCheck(memberId);
-        return ResponseEntity.ok(response);
+        ApiResponse<LoginCheckResponse> apiResponse = ApiResponse.createSuccess(response);
+        return ResponseEntity.ok(apiResponse);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public ResponseEntity<ApiResponse<Void>> logout() {
         ResponseCookie cookie = cookieProvider.createCookieForLogout();
+        ApiResponse<Void> apiResponse = ApiResponse.createSuccessWithNoData();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
+                .body(apiResponse);
     }
 }

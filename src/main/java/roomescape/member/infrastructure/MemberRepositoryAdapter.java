@@ -1,6 +1,6 @@
 package roomescape.member.infrastructure;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -23,7 +23,7 @@ public class MemberRepositoryAdapter implements MemberRepository {
     }
 
     @Override
-    public Collection<Member> findAll() {
+    public List<Member> findAll() {
         return memberJpaRepository.findAll();
     }
 

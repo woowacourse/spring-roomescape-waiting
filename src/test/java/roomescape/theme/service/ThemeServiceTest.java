@@ -60,11 +60,11 @@ class ThemeServiceTest {
 
     @DisplayName("이미 존재하는 테마를 다시 추가하려는 경우 예외를 발생시킨다")
     @Test
-    void exception_add_duplicate_theme() {
+    void exception_create_duplicate_theme() {
         when(themeRepository.existsByName("name1")).thenReturn(true);
 
         ThemeRequest themeRequest = new ThemeRequest("name1", "description2", "thumbnail2");
-        assertThatThrownBy(() -> themeService.add(themeRequest))
+        assertThatThrownBy(() -> themeService.create(themeRequest))
                 .isInstanceOf(DuplicateException.class);
     }
 

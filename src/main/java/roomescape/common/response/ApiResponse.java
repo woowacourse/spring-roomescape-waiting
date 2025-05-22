@@ -14,7 +14,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, data, null);
     }
 
-    public static ApiResponse<?> createSuccessWithNoData() {
+    public static ApiResponse<Void> createSuccessWithNoData() {
         return new ApiResponse<>(true, null, null);
     }
 

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.theme.domain.Theme;
 
 public interface ThemeJpaRepository extends JpaRepository<Theme, Long> {
+
     boolean existsByName(String name);
 
     @Query(value = """

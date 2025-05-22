@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchMembers();
 });
 
-function render(data) {
+function render(apiResponse) {
+    const data = apiResponse.data;
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 

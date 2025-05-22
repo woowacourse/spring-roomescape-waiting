@@ -11,31 +11,31 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.LoginMemberId;
+import roomescape.common.response.ApiResponse;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.application.dto.WaitingRequest;
 import roomescape.waiting.application.dto.WaitingResponse;
 
 @RestController
-@RequestMapping("waitings")
 @AllArgsConstructor
+@RequestMapping("waitings")
 public class WaitingController {
     private final WaitingService waitingService;
 
     @PostMapping
-    public ResponseEntity<WaitingResponse> add(
+    public ResponseEntity<ApiResponse<WaitingResponse>> add(
             @LoginMemberId Long memberId,
             @Valid @RequestBody WaitingRequest request
     ) {
-        WaitingResponse response = waitingService.add(
-                memberId,
-                request
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        WaitingResponse response = waitingService.create(memberId, request);
+        ApiResponse<WaitingResponse> apiResponse = ApiResponse.createSuccess(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id, @LoginMemberId Long memberId) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") Long id, @LoginMemberId Long memberId) {
         waitingService.deleteByUser(id, memberId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        ApiResponse<Void> apiResponse = ApiResponse.createSuccessWithNoData();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(apiResponse);
     }
 }

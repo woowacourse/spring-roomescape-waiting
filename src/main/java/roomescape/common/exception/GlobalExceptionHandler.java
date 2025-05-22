@@ -1,5 +1,6 @@
 package roomescape.common.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import roomescape.common.response.ApiResponse;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -32,7 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
         ErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_ERROR;
-        ApiResponse<?> response = ApiResponse.createError(e.getMessage());
-        return ResponseEntity.status(errorCode.getStatus()).body(response);
+        log.info(e.getMessage());
+        return ResponseEntity.status(errorCode.getStatus()).body(ApiResponse.createError(errorCode.getMessage()));
     }
 }

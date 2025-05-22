@@ -62,17 +62,17 @@ class ReservationTimeServiceTest {
                 LocalDate.now(), 1L
         );
 
-        assertThatThrownBy(() -> reservationTimeService.getAvailableTimes(availableTimeRequest))
+        assertThatThrownBy(() -> reservationTimeService.findAvailableTimes(availableTimeRequest))
                 .isInstanceOf(InvalidIdException.class);
     }
 
     @DisplayName("시간 내역을 추가 시 중복되는 시간인 경우 예외를 발생시킨다")
     @Test
-    void exception_add_duplicate_timeId() {
+    void exception_create_duplicate_timeId() {
         when(timeRepository.existsByStartAt(LocalTime.of(11, 0))).thenReturn(true);
 
         TimeRequest timeRequest = new TimeRequest(LocalTime.of(11, 0));
-        assertThatThrownBy(() -> reservationTimeService.add(timeRequest))
+        assertThatThrownBy(() -> reservationTimeService.create(timeRequest))
                 .isInstanceOf(DuplicateException.class);
     }
 

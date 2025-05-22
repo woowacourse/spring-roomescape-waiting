@@ -1,7 +1,7 @@
 package roomescape.reservationTime.infrastructure;
 
 import java.time.LocalTime;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -19,7 +19,7 @@ public class ReservationTimeRepositoryAdapter implements ReservationTimeReposito
     }
 
     @Override
-    public Collection<ReservationTime> findAll() {
+    public List<ReservationTime> findAll() {
         return reservationTimeJpaRepository.findAll();
     }
 

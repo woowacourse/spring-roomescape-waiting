@@ -21,12 +21,11 @@ public class ReservationTimeService {
     private final ReservationTimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
 
-
-    public TimeResponse add(TimeRequest timeRequest) {
-        LocalTime startedAt = timeRequest.startAt();
+    public TimeResponse create(TimeRequest request) {
+        LocalTime startedAt = request.startAt();
         validateTimeNotExists(startedAt);
 
-        ReservationTime reservationTime = new ReservationTime(timeRequest.startAt());
+        ReservationTime reservationTime = new ReservationTime(request.startAt());
         return TimeResponse.from(timeRepository.save(reservationTime));
     }
 
@@ -37,10 +36,10 @@ public class ReservationTimeService {
     }
 
     public List<TimeResponse> findAll() {
-        return TimeResponse.from(timeRepository.findAll().stream().toList());
+        return TimeResponse.from(timeRepository.findAll());
     }
 
-    public List<AvailableTimeResponse> getAvailableTimes(AvailableTimeRequest request) {
+    public List<AvailableTimeResponse> findAvailableTimes(AvailableTimeRequest request) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndTheme(request.date(), request.themeId());
         Collection<ReservationTime> times = timeRepository.findAll();
 
@@ -52,7 +51,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public void deleteById(final Long id) {
+    public void deleteById(Long id) {
         validateUnUsedTime(id);
         timeRepository.deleteById(id);
     }

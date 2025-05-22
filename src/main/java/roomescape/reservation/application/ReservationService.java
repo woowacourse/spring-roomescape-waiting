@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.exception.MemberNotFoundException;
@@ -19,11 +18,9 @@ import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationInPastException;
-import roomescape.reservationTime.application.dto.TimeResponse;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.reservationTime.exception.TimeNotFoundException;
-import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.exception.ThemeNotFoundException;
@@ -33,43 +30,32 @@ import roomescape.waiting.domain.WaitingWithRank;
 @Service
 @AllArgsConstructor
 public class ReservationService {
-
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
-    public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
+    public List<MyReservationResponse> findAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        List<WaitingWithRank> waitings = waitingRepository.findWithRankByMemberId(memberId).stream().toList();
+        List<WaitingWithRank> waitings = waitingRepository.findWithRankByMemberId(memberId);
         return MyReservationResponse.of(reservations, waitings);
     }
 
-    public List<ReservationResponse> findFiltered(
-            final AdminReservationSearchRequest adminReservationSearchRequest
-    ) {
-        Long memberId = adminReservationSearchRequest.memberId();
-        Long themeId = adminReservationSearchRequest.themeId();
-        LocalDate from = adminReservationSearchRequest.from();
-        LocalDate to = adminReservationSearchRequest.to();
+    public List<ReservationResponse> findFiltered(AdminReservationSearchRequest request) {
+        Long memberId = request.memberId();
+        Long themeId = request.themeId();
+        LocalDate from = request.from();
+        LocalDate to = request.to();
 
-        return reservationRepository.findFiltered(memberId, themeId, from, to)
-                .stream().map(reservation -> new ReservationResponse(
-                        reservation.getId(),
-                        MemberResponse.from(reservation.getMember()),
-                        ThemeResponse.from(reservation.getTheme()),
-                        reservation.getDate(),
-                        TimeResponse.from(reservation.getTime()))
-                )
-                .toList();
+        return ReservationResponse.from(reservationRepository.findFiltered(memberId, themeId, from, to));
     }
 
-    public ReservationResponse createByUser(final Long memberId, final UserReservationRequest request) {
+    public ReservationResponse createByUser(Long memberId, UserReservationRequest request) {
         return create(memberId, request.date(), request.timeId(), request.themeId());
     }
 
-    public ReservationResponse createByAdmin(final AdminReservationRequest request) {
+    public ReservationResponse createByAdmin(AdminReservationRequest request) {
         return create(request.memberId(), request.date(), request.timeId(), request.themeId());
     }
 
@@ -101,7 +87,7 @@ public class ReservationService {
         }
     }
 
-    public void deleteById(final Long id) {
+    public void deleteById(Long id) {
         reservationRepository.deleteById(id);
     }
 }

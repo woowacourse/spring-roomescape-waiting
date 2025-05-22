@@ -19,11 +19,11 @@ import roomescape.auth.application.TokenProvider;
 import roomescape.auth.application.dto.LoginRequest;
 import roomescape.common.exception.AuthenticationException;
 import roomescape.common.exception.AuthorizationException;
+import roomescape.member.application.dto.MemberRequest;
+import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.member.application.dto.MemberRequest;
-import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.dto.MemberTokenResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -119,7 +119,7 @@ class MemberServiceTest {
         when(memberRepository.existsByEmail("admin@email.com")).thenReturn(true);
 
         MemberRequest signupRequest = new MemberRequest("admin@email.com", "password123", "admin");
-        assertThatThrownBy(() -> memberService.add(signupRequest))
+        assertThatThrownBy(() -> memberService.create(signupRequest))
                 .isInstanceOf(AuthorizationException.class);
 
         verify(memberRepository, times(1)).existsByEmail("admin@email.com");

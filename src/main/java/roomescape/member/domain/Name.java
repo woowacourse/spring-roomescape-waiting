@@ -13,7 +13,6 @@ import roomescape.member.exception.NameRequiredException;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Name {
-
     public static final String VALID_NAME_REGEX = "[a-zA-Z가-힣0-9 ]+";
 
     @Column(name = "name", nullable = false)

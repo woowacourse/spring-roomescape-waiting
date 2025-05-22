@@ -37,7 +37,7 @@ class ThemeControllerTest {
 
     @DisplayName("테마 내역을 모두 조회한다")
     @Test
-    void findAll() throws Exception {
+    void getAll() throws Exception {
         mockMvc.perform(get(URI)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -45,7 +45,7 @@ class ThemeControllerTest {
 
     @DisplayName("기간에 따라 테마 순위권을 모두 조회한다")
     @Test
-    void findRankedByPeriod() throws Exception {
+    void getRankedByPeriod() throws Exception {
         mockMvc.perform(get(URI + "/ranked")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
