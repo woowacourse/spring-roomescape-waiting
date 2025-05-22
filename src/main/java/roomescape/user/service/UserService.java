@@ -12,9 +12,11 @@ import roomescape.user.domain.User;
 import roomescape.user.domain.dto.UserRequestDto;
 import roomescape.user.domain.dto.UserResponseDto;
 import roomescape.user.exception.NotFoundUserException;
+import roomescape.user.exception.UserForbiddenException;
 import roomescape.user.repository.UserRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
+import roomescape.waiting.exception.NotFoundWaitingException;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
@@ -66,7 +68,8 @@ public class UserService {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private static List<ReservationWithStateDto> convertReservationWithStateDto(List<Waiting> waitings, List<WaitingWithRank> waitingWithRanks) {
+    private static List<ReservationWithStateDto> convertReservationWithStateDto(List<Waiting> waitings,
+                                                                                List<WaitingWithRank> waitingWithRanks) {
         List<ReservationWithStateDto> dtos = new ArrayList<>();
         for (Waiting waiting : waitings) {
             WaitingWithRank waitingWithRank = waitingWithRanks.stream()
@@ -79,13 +82,13 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteReservationByMember(Long waitingId, User member) {
+    public void deleteWaitingByMember(Long waitingId, User member) {
         validateExistsUser(member.getId());
         Waiting waiting = waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기입니다."));
+                .orElseThrow(NotFoundWaitingException::new);
 
-        if (!waiting.getMember().equals(member)) {
-            throw new IllegalArgumentException("본인의 예약 대기만 삭제할 수 있습니다.");
+        if (!waiting.isSameMember(member)) {
+            throw new UserForbiddenException("본인의 예약 대기만 삭제할 수 있습니다.");
         }
 
         waitingRepository.deleteById(waitingId);

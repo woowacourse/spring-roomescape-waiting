@@ -46,6 +46,10 @@ public class Waiting {
         return new Waiting(date, reservationTime, theme, user);
     }
 
+    public boolean isSameMember(User compare) {
+        return this.member.equals(compare);
+    }
+
     public Long getId() {
         return id;
     }
