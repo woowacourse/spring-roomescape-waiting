@@ -114,11 +114,11 @@ public class ReservationService {
         final Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당하는 예약을 찾을 수 없습니다. 예약 id: %d".formatted(id)));
 
-        if(LocalDate.now().isBefore(reservation.getDate())) {
+        if(reservation.getDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("이전 날짜의 예약은 삭제할 수 없습니다.");
         }
         if (Objects.equals(reservation.getDate(), LocalDate.now())) {
-            if(reservation.getTime().getStartAt().isBefore(reservation.getTime().getStartAt())) {
+            if(reservation.getTime().getStartAt().isBefore(LocalTime.now())) {
                 throw new BadRequestException("지난 시간의 예약을 삭제할 수 없습니다.");
             }
         }
