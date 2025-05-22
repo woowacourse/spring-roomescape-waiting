@@ -78,4 +78,12 @@ public class ReservationApiController {
         reservationService.delete(id, loginInfo.id());
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/admin/reservations/{id}")
+    @AuthRequired
+    @Role(UserRole.ADMIN)
+    public ResponseEntity<Void> deleteReservationAdmin(@PathVariable("id") String id) {
+        reservationService.forceDelete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

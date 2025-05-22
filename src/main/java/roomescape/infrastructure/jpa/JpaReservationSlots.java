@@ -28,6 +28,11 @@ public class JpaReservationSlots implements ReservationSlots {
     }
 
     @Override
+    public List<ReservationSlot> findAll() {
+        return dao.findAll();
+    }
+
+    @Override
     public List<ReservationSlot> findAllSlotsContainsReserverOf(final Id userId) {
         return dao.findAllSlotsContainsReserverOf(userId);
     }

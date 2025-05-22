@@ -55,4 +55,11 @@ public class ReservationService {
         }
         reservations.deleteById(reservationId);
     }
+
+    public void forceDelete(final String reservationIdValue) {
+        Id reservationId = Id.create(reservationIdValue);
+        reservations.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
+        reservations.deleteById(reservationId);
+    }
 }

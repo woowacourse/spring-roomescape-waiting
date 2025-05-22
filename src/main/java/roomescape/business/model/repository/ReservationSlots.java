@@ -11,6 +11,8 @@ public interface ReservationSlots {
 
     void save(ReservationSlot reservationSlot);
 
+    List<ReservationSlot> findAll();
+
     List<ReservationSlot> findAllSlotsContainsReserverOf(Id userId);
 
     Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, Id reservationTimeId, Id themeId);
