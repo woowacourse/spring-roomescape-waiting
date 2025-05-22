@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -64,6 +65,8 @@ public class ReservationController {
         }
 
         List<ReservationTicketResponseDto> reservationDtos = reserveTickets.stream()
+                .filter(reserveTicketWaiting -> reserveTicketWaiting.getReservationStatus()
+                        .equals(ReservationStatus.RESERVATION))
                 .map((reservationTicketWaiting) -> new ReservationTicketResponseDto(reservationTicketWaiting.getId(),
                         reservationTicketWaiting.getName(),
                         reservationTicketWaiting.getThemeName(),
@@ -96,6 +99,12 @@ public class ReservationController {
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
                 reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
         return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<ReservationResponseDto> removeWaitingReservations(@PathVariable Long id) {
+        reserveTicketService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
