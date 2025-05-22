@@ -37,8 +37,6 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
             """)
     List<Reservation> findByMemberId(Long memberId);
 
-    List<Reservation> findByTimeSlotId(Long reservationTimeId);
-
     boolean existsByDateAndMemberAndThemeAndTimeSlot(LocalDate date, Member member, Theme theme, TimeSlot timeSlot);
 
     boolean existsByDateAndThemeAndTimeSlot(LocalDate date, Theme theme, TimeSlot timeSlot);

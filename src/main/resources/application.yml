@@ -1,5 +1,6 @@
 spring:
   jpa:
+    show-sql: true
     properties.hibernate.format_sql: true
     hibernate.ddl-auto: create
     defer-datasource-initialization: true
@@ -19,7 +20,6 @@ auth:
     max-age: 1800
 logging:
   level:
-    org.hibernate:
-      SQL: DEBUG
-      orm.jdbc.bind: TRACE
+    org.hibernate.SQL: DEBUG
+    orm.jdbc.bind: TRACE
     org.springframework.transaction.interceptor: TRACE
