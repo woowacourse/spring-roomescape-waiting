@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import roomescape.config.annotation.AuthMember;
 import roomescape.controller.dto.request.ReservationRequest;
-import roomescape.controller.dto.response.MyReservationResponse;
-import roomescape.controller.dto.response.MyWaitingResponse;
+import roomescape.controller.dto.response.MyReservationAndWaitingResponse;
+import roomescape.controller.dto.response.WaitingResponse;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.entity.Member;
 import roomescape.service.ReservationService;
@@ -36,11 +36,11 @@ public class ReservationController {
 
     @PostMapping("/waiting")
     @ResponseStatus(HttpStatus.CREATED)
-    public MyWaitingResponse createReservationWaiting(
+    public WaitingResponse createReservationWaiting(
             @AuthMember Member member,
             @RequestBody @Valid ReservationRequest request
     ) {
-        return MyWaitingResponse.from(reservationService.addWaiting(member, request));
+        return WaitingResponse.from(reservationService.addWaiting(member, request));
     }
 
     @GetMapping
@@ -64,14 +64,14 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public List<MyReservationResponse> readMyReservations(@AuthMember Member member) {
+    public List<MyReservationAndWaitingResponse> readMyReservations(@AuthMember Member member) {
 
-        List<MyReservationResponse> responseFromReservation = reservationService.findReservationsByMemberId(member).stream()
-                .map(MyReservationResponse::fromReservation)
+        List<MyReservationAndWaitingResponse> responseFromReservation = reservationService.findReservationsByMemberId(member).stream()
+                .map(MyReservationAndWaitingResponse::fromReservation)
                 .toList();
 
-        List<MyReservationResponse> responseFromWaiting = reservationService.findAllWaitingWithRankByMemberId(member).stream()
-                .map(MyReservationResponse::fromWaiting)
+        List<MyReservationAndWaitingResponse> responseFromWaiting = reservationService.findAllWaitingWithRankByMemberId(member).stream()
+                .map(MyReservationAndWaitingResponse::fromWaitingWithRank)
                 .toList();
 
         return Stream.concat(responseFromReservation.stream(), responseFromWaiting.stream())

@@ -7,7 +7,7 @@ import roomescape.entity.Reservation;
 import roomescape.entity.Waiting;
 import roomescape.entity.WaitingWithRank;
 
-public record MyReservationResponse(
+public record MyReservationAndWaitingResponse(
     Long reservationId,
     String theme,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
@@ -17,8 +17,8 @@ public record MyReservationResponse(
     private static final int ADDITIONAL_RANK = 1;
     private static final String RANK_SUFFIX = "번째 ";
 
-    public static MyReservationResponse fromReservation(Reservation reservation) {
-        return new MyReservationResponse(
+    public static MyReservationAndWaitingResponse fromReservation(Reservation reservation) {
+        return new MyReservationAndWaitingResponse(
             reservation.getId(),
             reservation.getThemeName(),
             reservation.getDate(),
@@ -27,9 +27,9 @@ public record MyReservationResponse(
         );
     }
 
-    public static MyReservationResponse fromWaiting(WaitingWithRank waitingWithRank) {
+    public static MyReservationAndWaitingResponse fromWaitingWithRank(WaitingWithRank waitingWithRank) {
         Waiting waiting = waitingWithRank.getWaiting();
-        return new MyReservationResponse(
+        return new MyReservationAndWaitingResponse(
                 waiting.getId(),
                 waiting.getThemeName(),
                 waiting.getDate(),

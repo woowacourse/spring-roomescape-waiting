@@ -2,16 +2,17 @@ package roomescape.controller.api;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.config.annotation.AuthMember;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.response.ReservationResponse;
+import roomescape.controller.dto.response.WaitingResponse;
+import roomescape.controller.dto.response.WaitingWithRankResponse;
 import roomescape.entity.Member;
+import roomescape.entity.WaitingWithRank;
 import roomescape.service.ReservationService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -30,5 +31,13 @@ public class AdminReservationController {
         @RequestBody @Valid ReservationRequest request
     ) {
         return ReservationResponse.from(reservationService.addReservation(member,request));
+    }
+
+    @GetMapping("/waiting")
+    public List<WaitingWithRankResponse> readAllReservationWaiting() {
+        List<WaitingWithRank> allWaiting = reservationService.findAllWaiting();
+        return allWaiting.stream()
+                .map(WaitingWithRankResponse::from)
+                .toList();
     }
 }

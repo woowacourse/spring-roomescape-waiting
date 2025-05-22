@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.ReservationRequest;
+import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.entity.*;
 import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
@@ -37,6 +38,10 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public List<WaitingWithRank> findAllWaiting() {
+        return waitingRepository.findAllWaitingWithRank();
     }
 
     @Transactional(readOnly = true)
@@ -75,8 +80,7 @@ public class ReservationService {
 
         validateDuplicateReservation(date,timeId,themeId);
         validateDateTimeAfterNow(date, time);
-        return reservationRepository.save(
-                new Reservation(member, request.date(), time, theme));
+        return reservationRepository.save(new Reservation(member, request.date(), time, theme));
     }
 
     @Transactional

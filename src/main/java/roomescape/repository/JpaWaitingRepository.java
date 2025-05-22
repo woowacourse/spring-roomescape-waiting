@@ -35,4 +35,14 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting,Long> {
     List<WaitingWithRank> findWaitingsWithRankByMemberId(@Param("member_id") Long memberId);
 
 
+    @Query("SELECT new roomescape.entity.WaitingWithRank(" +
+            "    w, " +
+            "    (SELECT COUNT(w2) " +
+            "     FROM Waiting w2 " +
+            "     WHERE w2.theme = w.theme " +
+            "       AND w2.date = w.date " +
+            "       AND w2.time = w.time " +
+            "       AND w2.id < w.id)) " +
+            "FROM Waiting w ")
+    List<WaitingWithRank> findAllWaitingWithRank();
 }
