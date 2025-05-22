@@ -58,7 +58,6 @@ public class ReservationTimeServiceImpl implements ReservationTimeService {
         List<AvailableTimeResponse> availableTimeResponses = getAvailableTimeResponses(reservationTimes,
                 bookedReservationTimesId);
 
-
         return availableTimeResponses;
     }
 
