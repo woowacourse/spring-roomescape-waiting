@@ -73,4 +73,10 @@ public class ReservationController {
         }
         service.removeByIdForce(id);
     }
+
+    @DeleteMapping("/wait/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void cancelWaiting(@PathVariable("id") final long id) {
+        service.cancelWaiting(id);
+    }
 }

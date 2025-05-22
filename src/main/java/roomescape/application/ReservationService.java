@@ -66,4 +66,11 @@ public class ReservationService {
     public void removeByIdForce(final long id) {
         reservationRepository.deleteByIdOrElseThrow(id);
     }
+
+    @Transactional
+    public void cancelWaiting(final long id) {
+        var reservation = reservationRepository.getById(id);
+        reservation.cancel();
+        reservationRepository.delete(reservation);
+    }
 }

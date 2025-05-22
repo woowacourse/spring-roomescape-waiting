@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.user.User;
+import roomescape.exception.BusinessRuleViolationException;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
@@ -49,6 +50,13 @@ public class Reservation {
 
     public boolean isOwnedBy(final User user) {
         return this.user.equals(user);
+    }
+
+    public void cancel() {
+        if (this.status != ReservationStatus.WAITING) {
+            throw new BusinessRuleViolationException("대기중인 예약만 취소할 수 있습니다.");
+        }
+        this.status = ReservationStatus.CANCELED;
     }
 
     @Override

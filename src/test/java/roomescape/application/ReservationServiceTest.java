@@ -19,7 +19,10 @@ import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.user.Email;
+import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
+import roomescape.domain.user.UserName;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
 
@@ -88,6 +91,33 @@ class ReservationServiceTest {
         // then
         var reservations = service.findAllReservations(NONE_FILTERING);
         assertThat(reservations).doesNotContain(reserved);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 취소한다.")
+    void cancelWaiting() {
+        // given
+        User user2 = new User(new UserName("user2"), new Email("user2@email.com"), new Password("pw"));
+        repositoryHelper.saveUser(user2);
+
+        service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
+        var waited = service.waitFor(user2.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        // when
+        service.cancelWaiting(waited.id());
+
+        // then
+        var reservations = service.findAllReservations(NONE_FILTERING);
+        assertThat(reservations).doesNotContain(waited);
+    }
+
+    @Test
+    @DisplayName("대기 상태가 아닌 예약은 취소할 수 없다.")
+    void cancelWaitingThatIsNotWaiting() {
+        var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        assertThatThrownBy(() -> service.cancelWaiting(reserved.id()))
+            .isInstanceOf(BusinessRuleViolationException.class);
     }
 
     @Test
