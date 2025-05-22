@@ -35,27 +35,6 @@ class JpaReservationRepositoryTest {
     @Autowired
     private EntityManager em;
 
-    private static Stream<Arguments> findByMemberIdAndThemeGetIdAndGetDate_test() {
-        return Stream.of(
-                Arguments.of(1L, null, null, null, 3),
-                Arguments.of(2L, null, null, null, 1),
-                Arguments.of(3L, null, null, null, 0),
-                Arguments.of(null, 1L, null, null, 2),
-                Arguments.of(null, 2L, null, null, 1),
-                Arguments.of(null, 3L, null, null, 1),
-                Arguments.of(null, null, LocalDate.of(2025, 4, 19), null, 3),
-                Arguments.of(null, null, LocalDate.of(2025, 4, 18), null, 4),
-                Arguments.of(null, null, LocalDate.of(2025, 4, 28), null, 2),
-                Arguments.of(null, null, null, LocalDate.of(2025, 4, 28), 4),
-                Arguments.of(null, null, null, LocalDate.of(2025, 4, 26), 2),
-                Arguments.of(null, null, null, LocalDate.of(2025, 4, 18), 1),
-                Arguments.of(null, null, null, LocalDate.of(2025, 4, 17), 0),
-                Arguments.of(1L, 1L, null, null, 2),
-                Arguments.of(1L, null, LocalDate.of(2025, 4, 28), null, 2),
-                Arguments.of(1L, null, LocalDate.of(2025, 4, 26), null, 3)
-        );
-    }
-
     @Test
     @DisplayName("저장 후 아이디 반환 테스트")
     void save_test() {
@@ -204,6 +183,27 @@ class JpaReservationRepositoryTest {
         assertThat(reservations).hasSize(expectedSize);
     }
 
+    private static Stream<Arguments> findByMemberIdAndThemeGetIdAndGetDate_test() {
+        return Stream.of(
+                Arguments.of(1L, null, null, null, 3),
+                Arguments.of(2L, null, null, null, 1),
+                Arguments.of(3L, null, null, null, 0),
+                Arguments.of(null, 1L, null, null, 2),
+                Arguments.of(null, 2L, null, null, 1),
+                Arguments.of(null, 3L, null, null, 1),
+                Arguments.of(null, null, LocalDate.of(2025, 4, 19), null, 3),
+                Arguments.of(null, null, LocalDate.of(2025, 4, 18), null, 4),
+                Arguments.of(null, null, LocalDate.of(2025, 4, 28), null, 2),
+                Arguments.of(null, null, null, LocalDate.of(2025, 4, 28), 4),
+                Arguments.of(null, null, null, LocalDate.of(2025, 4, 26), 2),
+                Arguments.of(null, null, null, LocalDate.of(2025, 4, 18), 1),
+                Arguments.of(null, null, null, LocalDate.of(2025, 4, 17), 0),
+                Arguments.of(1L, 1L, null, null, 2),
+                Arguments.of(1L, null, LocalDate.of(2025, 4, 28), null, 2),
+                Arguments.of(1L, null, LocalDate.of(2025, 4, 26), null, 3)
+        );
+    }
+
     @Test
     @DisplayName("본인 예약들을 조회한다.")
     void findByMemberGetId_test() {
@@ -214,5 +214,59 @@ class JpaReservationRepositoryTest {
         assertThat(findReservations.get(0).name()).isEqualTo("코기");
         assertThat(findReservations.get(1).name()).isEqualTo("코기");
         assertThat(findReservations.get(2).name()).isEqualTo("코기");
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    @DisplayName("특정 상태의 예약이 존재하는지 확인한다.")
+    void existsByDateAndTimeIdAndThemeIdAndStatus_test(LocalDate date, Long timeId, Long themeId,
+                                                       ReservationStatus status, boolean expected) {
+        // when
+        boolean exists = repository.existsByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, status);
+        // then
+        assertThat(exists).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> existsByDateAndTimeIdAndThemeIdAndStatus_test() {
+        return Stream.of(
+                Arguments.of(LocalDate.of(2025, 4, 18), 1L, 2L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 26), 1L, 3L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 18), 1L, 2L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 4, 26), 1L, 3L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 3, 28), 2L, 1L, ReservationStatus.RESERVED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 3L, 1L, ReservationStatus.RESERVED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 2L, 2L, ReservationStatus.RESERVED, false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    @DisplayName("이미 예약이 존재하는지 확인한다.(존재하는 경우)")
+    void existsReservation_test(LocalDate date, Long timeId, Long themeId, Long memberId, ReservationStatus status,
+                                boolean expected) {
+        // when
+        boolean existed = repository.existsReservation(date, timeId, themeId, memberId, status);
+        // then
+        assertThat(existed).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> existsReservation_test() {
+        return Stream.of(
+                Arguments.of(LocalDate.of(2025, 4, 18), 1L, 2L, 2L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 26), 1L, 3L, 1L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 1L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, 1L, ReservationStatus.RESERVED, true),
+                Arguments.of(LocalDate.of(2025, 4, 18), 1L, 2L, 2L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 4, 26), 1L, 3L, 1L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 1L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, 1L, ReservationStatus.WAITED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, 2L, ReservationStatus.RESERVED, false),
+                Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 2L, ReservationStatus.RESERVED, false),
+                Arguments.of(LocalDate.of(2025, 4, 27), 2L, 1L, 1L, ReservationStatus.RESERVED, false)
+        );
     }
 }
