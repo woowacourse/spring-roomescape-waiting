@@ -1,13 +1,12 @@
 package roomescape.reservation.application;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.impl.BadRequestException;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.dto.MemberReservationRequest;
-import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.application.dto.WaitingResponse;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
@@ -21,17 +20,20 @@ import roomescape.theme.domain.repository.ThemeRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public WaitingService(
         final WaitingRepository waitingRepository,
+        final ReservationRepository reservationRepository,
         final ReservationTimeRepository reservationTimeRepository,
         final ThemeRepository themeRepository,
         final MemberRepository memberRepository
     ) {
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
@@ -42,6 +44,13 @@ public class WaitingService {
         Member member = getMember(memberId);
         Theme theme = getTheme(request.themeId());
         Waiting waiting = new Waiting(member, reservationTime, theme, request.date());
+        boolean isAlreadyReserved = reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
+            member.getId(), theme.getId(), reservationTime.getId(), request.date());
+
+        if (isAlreadyReserved) {
+            throw new BadRequestException("이미 예약이 되어있는 상태에서는, 대기할 수 없습니다.");
+        }
+
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(savedWaiting);
     }
