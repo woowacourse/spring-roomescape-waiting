@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -64,9 +65,9 @@ public class Reservation {
     }
 
     private static boolean isBeforeNow(final LocalDate date, final TimeSlot timeSlot) {
-        var now = LocalDateTime.now();
-        var today = now.toLocalDate();
-        var timeNow = now.toLocalTime();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = now.toLocalDate();
+        LocalTime timeNow = now.toLocalTime();
         return date.isBefore(today)
                 || (date.isEqual(today) && timeSlot.isTimeBefore(timeNow));
     }

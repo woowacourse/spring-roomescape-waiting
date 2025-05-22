@@ -28,8 +28,8 @@ public class LoginController {
             @RequestBody @Valid final LoginRequest request,
             final HttpServletResponse response
     ) {
-        var issuedToken = authenticationService.issueToken(request.email(), request.password());
-        var tokenCookie = AuthenticationTokenCookie.forResponse(issuedToken);
+        String issuedToken = authenticationService.issueToken(request.email(), request.password());
+        AuthenticationTokenCookie tokenCookie = AuthenticationTokenCookie.forResponse(issuedToken);
         response.addCookie(tokenCookie);
     }
 
@@ -40,7 +40,7 @@ public class LoginController {
 
     @PostMapping("/logout")
     public void performLogout(final HttpServletResponse response) throws IOException {
-        var tokenCookieForExpire = AuthenticationTokenCookie.forExpire();
+        AuthenticationTokenCookie tokenCookieForExpire = AuthenticationTokenCookie.forExpire();
         response.addCookie(tokenCookieForExpire);
         response.sendRedirect("/");
     }

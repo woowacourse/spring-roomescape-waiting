@@ -29,11 +29,13 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
             final NativeWebRequest webRequest,
             final WebDataBinderFactory binderFactory
     ) {
-        var request = (HttpServletRequest) webRequest.getNativeRequest();
-        var tokenCookie = AuthenticationTokenCookie.fromRequest(request);
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        AuthenticationTokenCookie tokenCookie = AuthenticationTokenCookie.fromRequest(request);
+
         if (tokenCookie.hasToken()) {
             return authenticationService.getUserByToken(tokenCookie.token());
         }
+
         throw new AuthenticationException("사용자 인증이 필요합니다.");
     }
 }

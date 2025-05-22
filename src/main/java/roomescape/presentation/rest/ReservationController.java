@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.user.User;
 import roomescape.presentation.auth.Authenticated;
@@ -38,7 +39,7 @@ public class ReservationController {
             @Authenticated final User user,
             @RequestBody @Valid final CreateReservationRequest request
     ) {
-        var reservation = service.reserve(user, request.date(), request.timeId(), request.themeId());
+        Reservation reservation = service.reserve(user, request.date(), request.timeId(), request.themeId());
         return ReservationResponse.from(reservation);
     }
 
@@ -49,8 +50,9 @@ public class ReservationController {
             @RequestParam(name = "dateFrom", required = false) final LocalDate dateFrom,
             @RequestParam(name = "dateTo", required = false) final LocalDate dateTo
     ) {
-        var searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
-        var reservations = service.findAllReservations(searchFilter);
+        ReservationSearchFilter searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
+        List<Reservation> reservations = service.findAllReservations(searchFilter);
+
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();

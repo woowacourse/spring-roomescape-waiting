@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ThemeService;
+import roomescape.domain.theme.Theme;
 import roomescape.presentation.request.CreateThemeRequest;
 import roomescape.presentation.response.ThemeResponse;
 
@@ -32,13 +33,15 @@ public class ThemeController {
     @PostMapping
     @ResponseStatus(CREATED)
     public ThemeResponse register(@RequestBody @Valid final CreateThemeRequest request) {
-        var theme = service.register(request.name(), request.description(), request.thumbnail());
+        Theme theme = service.register(request.name(), request.description(), request.thumbnail());
+
         return ThemeResponse.from(theme);
     }
 
     @GetMapping
     public List<ThemeResponse> getAllThemes() {
-        var themes = service.findAllThemes();
+        List<Theme> themes = service.findAllThemes();
+
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -48,9 +51,10 @@ public class ThemeController {
     public List<ThemeResponse> getAvailableTimes(
             @RequestParam("startDate") final LocalDate startDate,
             @RequestParam("endDate") final LocalDate endDate,
-            @RequestParam("count") final Integer count
-    ) {
-        var themes = service.findPopularThemes(startDate, endDate, count);
+            @RequestParam("count") final Integer count) {
+
+        List<Theme> themes = service.findPopularThemes(startDate, endDate, count);
+
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();

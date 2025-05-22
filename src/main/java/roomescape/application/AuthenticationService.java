@@ -19,21 +19,27 @@ public class AuthenticationService {
     }
 
     public String issueToken(final String email, final String password) {
-        var user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthenticationException("이메일 또는 비밀번호가 틀렸습니다."));
+
         if (!user.matchesPassword(password)) {
             throw new AuthenticationException("이메일 또는 비밀번호가 틀렸습니다.");
         }
-        var authenticationInfo = new AuthenticationInfo(user.id(), user.role());
+
+        AuthenticationInfo authenticationInfo = new AuthenticationInfo(user.id(), user.role());
         return tokenProvider.createToken(authenticationInfo);
     }
 
     public User getUserByToken(final String token) {
-        var isValidToken = tokenProvider.isValidToken(token);
+        boolean isValidToken = tokenProvider.isValidToken(token);
+
         if (!isValidToken) {
             throw new AuthenticationException("토큰이 만료되었거나 유효하지 않습니다.");
         }
-        var id = tokenProvider.extractId(token);
-        return userRepository.findById(id).orElseThrow(() -> new AuthenticationException("사용자 정보가 없습니다. 다시 로그인 해주세요."));
+
+        long id = tokenProvider.extractId(token);
+
+        return userRepository.findById(id)
+                .orElseThrow(() -> new AuthenticationException("사용자 정보가 없습니다. 다시 로그인 해주세요."));
     }
 }

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.application.UserService;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.user.User;
 import roomescape.presentation.request.CreateReservationAdminRequest;
 import roomescape.presentation.response.ReservationResponse;
 import roomescape.presentation.response.UserResponse;
@@ -31,14 +33,14 @@ public class AdminController {
     @PostMapping("/reservations")
     @ResponseStatus(CREATED)
     public ReservationResponse reserve(@RequestBody @Valid final CreateReservationAdminRequest request) {
-        var user = userService.getById(request.userId());
-        var reservation = reservationService.reserve(user, request.date(), request.timeId(), request.themeId());
+        User user = userService.getById(request.userId());
+        Reservation reservation = reservationService.reserve(user, request.date(), request.timeId(), request.themeId());
         return ReservationResponse.from(reservation);
     }
 
     @GetMapping("/users")
     public List<UserResponse> getAllUsers() {
-        var users = userService.findAllUsers();
+        List<User> users = userService.findAllUsers();
         return users.stream()
                 .map(UserResponse::from)
                 .toList();

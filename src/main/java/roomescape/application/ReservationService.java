@@ -2,6 +2,7 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
@@ -37,11 +38,11 @@ public class ReservationService {
     }
 
     public Reservation reserve(final User user, final LocalDate date, final long timeId, final long themeId) {
-        var timeSlot = getTimeSlotById(timeId);
-        var theme = getThemeById(themeId);
+        TimeSlot timeSlot = getTimeSlotById(timeId);
+        Theme theme = getThemeById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
 
-        var reservation = Reservation.reserveNewly(user, date, timeSlot, theme);
+        Reservation reservation = Reservation.reserveNewly(user, date, timeSlot, theme);
         return reservationRepository.save(reservation);
     }
 
@@ -66,14 +67,16 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        var reservation = reservationRepository.findByDateAndTimeSlotIdAndThemeId(date, timeSlot.id(), theme.id());
+        Optional<Reservation> reservation = reservationRepository.findByDateAndTimeSlotIdAndThemeId(date, timeSlot.id(),
+                theme.id());
+
         if (reservation.isPresent()) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
     }
 
     public List<Reservation> getReservations(final long userId) {
-        var user = userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + userId));
 
         return reservationRepository.findByUserId(user.id());

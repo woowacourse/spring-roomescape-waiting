@@ -10,7 +10,8 @@ import roomescape.domain.reservation.ReservationSearchFilter;
 public class ReservationSpecifications {
     public static Specification<Reservation> byFilter(final ReservationSearchFilter filter) {
         return (root, query, cb) -> {
-            var predicates = new ArrayList<Predicate>();
+            List<Predicate> predicates = new ArrayList<Predicate>();
+
             if (filter.themeId() != null) {
                 predicates.add(cb.equal(root.get("theme").get("id"), filter.themeId()));
             }

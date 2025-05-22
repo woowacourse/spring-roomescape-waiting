@@ -3,6 +3,7 @@ package roomescape.presentation.auth;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.auth.AuthenticationTokenHandler;
 
 public class CheckAdminInterceptor implements HandlerInterceptor {
@@ -14,7 +15,8 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {
+    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response,
+                             final Object handler) {
         if (isCurrentRequestorAdmin(request)) {
             return true;
         }
@@ -23,9 +25,9 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
     }
 
     private boolean isCurrentRequestorAdmin(final HttpServletRequest request) {
-        var tokenCookie = AuthenticationTokenCookie.fromRequest(request);
+        AuthenticationTokenCookie tokenCookie = AuthenticationTokenCookie.fromRequest(request);
         if (tokenCookie.hasToken()) {
-            var token = tokenCookie.token();
+            String token = tokenCookie.token();
             return isAdmin(token);
         }
         return false;
@@ -35,7 +37,7 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
         if (!tokenProvider.isValidToken(token)) {
             return false;
         }
-        var authenticationInfo = tokenProvider.extractAuthenticationInfo(token);
+        AuthenticationInfo authenticationInfo = tokenProvider.extractAuthenticationInfo(token);
         return authenticationInfo.isAdmin();
     }
 }

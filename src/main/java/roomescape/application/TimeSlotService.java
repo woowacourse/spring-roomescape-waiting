@@ -27,7 +27,7 @@ public class TimeSlotService {
     }
 
     public TimeSlot register(final LocalTime startAt) {
-        var timeSlot = new TimeSlot(startAt);
+        TimeSlot timeSlot = new TimeSlot(startAt);
         return timeSlotRepository.save(timeSlot);
     }
 
@@ -36,7 +36,7 @@ public class TimeSlotService {
     }
 
     public void removeById(final long id) {
-        var reservations = reservationRepository.findByTimeSlotId(id);
+        List<Reservation> reservations = reservationRepository.findByTimeSlotId(id);
         if (!reservations.isEmpty()) {
             throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
         }
@@ -46,12 +46,13 @@ public class TimeSlotService {
     }
 
     public List<AvailableTimeSlot> findAvailableTimeSlots(final LocalDate date, final long themeId) {
-        var filteredReservations = reservationRepository.findByDateAndThemeId(date, themeId);
-        var filteredTimeSlots = filteredReservations.stream()
+        List<Reservation> filteredReservations = reservationRepository.findByDateAndThemeId(date, themeId);
+
+        List<TimeSlot> filteredTimeSlots = filteredReservations.stream()
                 .map(Reservation::timeSlot)
                 .toList();
 
-        var allTimeSlots = timeSlotRepository.findAll();
+        List<TimeSlot> allTimeSlots = timeSlotRepository.findAll();
 
         return allTimeSlots.stream()
                 .map(ts -> new AvailableTimeSlot(ts, filteredTimeSlots.contains(ts)))
