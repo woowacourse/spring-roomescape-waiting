@@ -1,6 +1,7 @@
 package roomescape.business.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
@@ -89,5 +90,11 @@ public class WaitingService {
     @Transactional
     public void deleteById(final Long id) {
         waitingRepository.deleteById(id);
+    }
+
+    public List<WaitingResponse> findAll() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }

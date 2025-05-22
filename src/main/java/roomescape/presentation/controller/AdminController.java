@@ -41,6 +41,11 @@ public class AdminController {
         return "admin/theme";
     }
 
+    @GetMapping("/waiting")
+    public String waiting() {
+        return "admin/waiting";
+    }
+
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservationByAdmin(
             @RequestBody final ReservationRequest reservationRequest

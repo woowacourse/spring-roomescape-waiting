@@ -1,8 +1,10 @@
 package roomescape.presentation.controller;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,13 +31,19 @@ public class WaitingController {
             @AuthenticationPrincipal LoginMember loginMember,
             @RequestBody final WaitingRequest waitingRequest
     ) {
-        WaitingResponse response = waitingService.insert(loginMember, waitingRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        WaitingResponse waitingResponse = waitingService.insert(loginMember, waitingRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(waitingResponse);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         waitingService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WaitingResponse>> readAll() {
+        List<WaitingResponse> waitingResponse = waitingService.findAll();
+        return ResponseEntity.ok(waitingResponse);
     }
 }
