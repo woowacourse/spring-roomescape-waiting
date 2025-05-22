@@ -1,7 +1,9 @@
 package roomescape.reservation.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
@@ -16,6 +18,9 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.domain.WaitingStatus;
 
 @Service
 public class ReservationService {
@@ -25,19 +30,15 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(
-            final DateTime dateTime,
-            final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
-    ) {
+    public ReservationService(DateTime dateTime, ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, MemberRepository memberRepository, WaitingRepository waitingRepository) {
         this.dateTime = dateTime;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
@@ -82,9 +83,31 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(final Long id) {
-        List<Reservation> reservations = reservationRepository.findByMemberId(id);
-        return reservations.stream()
+        List<Reservation> confirmedReservations = reservationRepository.findByMemberId(id);
+        List<MyReservationResponse> confirmedResponses = confirmedReservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+
+        List<Waiting> waitingReservations = waitingRepository.findByMemberIdAndStatus(id, WaitingStatus.PENDING);
+        List<MyReservationResponse> waitingResponses = waitingReservations.stream()
+                .map(waiting -> {
+                    long rank = calculateWaitingRank(waiting);
+                    return MyReservationResponse.fromWaiting(waiting, rank);
+                })
+                .toList();
+
+        return Stream.concat(confirmedResponses.stream(), waitingResponses.stream())
+                .sorted(Comparator.comparing(MyReservationResponse::date))
+                .toList();
+    }
+
+    private long calculateWaitingRank(Waiting waiting) {
+        return waitingRepository.countByDateAndThemeIdAndTimeIdAndStatusAndCreatedAtBefore(
+                waiting.getDate(),
+                waiting.getTheme().getId(),
+                waiting.getTime().getId(),
+                WaitingStatus.PENDING,
+                waiting.getCreatedAt()
+        ) + 1;
     }
 }
