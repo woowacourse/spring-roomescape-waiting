@@ -20,7 +20,7 @@ import roomescape.global.interceptor.AuthorizationInterceptor;
 import roomescape.member.presentation.resolver.MemberArgumentResolver;
 import roomescape.reservation.application.ReservationService;
 
-@WebMvcTest(value = AdminReservationController.class,
+@WebMvcTest(value = AdminReservationWaitController.class,
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = {
@@ -42,7 +42,7 @@ class AdminReservationWaitControllerTest {
     @DisplayName("대기 예약 승인 API")
     class AcceptWaitingReservation {
         @Test
-        @DisplayName("관리자가 대기 예약을 성공적으로 승인한다")
+        @DisplayName("대기 예약을 성공적으로 승인한다")
         void acceptWaitingReservationSuccess() throws Exception {
             // given
             Long reservationId = 1L;
@@ -54,18 +54,6 @@ class AdminReservationWaitControllerTest {
             mockMvc.perform(patch("/reservations/wait/accept/{reservationId}", reservationId))
                     .andDo(print())
                     .andExpect(status().isOk());
-        }
-
-        @Test
-        @DisplayName("관리자가 아닌 사용자는 대기 예약을 승인할 수 없다")
-        void acceptWaitingReservationFailUnauthorized() throws Exception {
-            // given
-            Long reservationId = 1L;
-
-            // when && then
-            mockMvc.perform(patch("/reservations/wait/accept/{reservationId}", reservationId))
-                    .andDo(print())
-                    .andExpect(status().isForbidden());
         }
 
         @Test

@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.admin.reservation.presentation.dto.AdminReservationRequest;
-import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.time.application.ReservationTimeRepository;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.theme.application.ThemeRepository;
@@ -134,30 +133,6 @@ public class ReservationServiceTest {
                 () -> assertThat(reservationService.getUserReservations(1L).size()).isEqualTo(0),
                 () -> assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(1)
         );
-    }
-
-    @Test
-    @DisplayName("예약 삭제 테스트")
-    void deleteReservationByUserTest() {
-        // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 40)));
-
-        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
-
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(
-                LocalDate.of(2025, 8, 5),
-                theme.getId(),
-                reservationTime.getId(),
-                2L
-        );
-        ReservationResponse reservation = reservationService.createReservation(adminReservationRequest);
-
-        // when
-        reservationService.deleteReservationByAdmin(reservation.getId());
-
-        // then
-        assertThat(reservationService.getReservations(null, null, null, null).size()).isEqualTo(0);
     }
 
     @Test

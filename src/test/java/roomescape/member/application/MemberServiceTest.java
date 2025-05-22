@@ -40,7 +40,7 @@ public class MemberServiceTest {
         // given
         TokenRequest tokenRequest = new TokenRequest("admin@admin.com", "admin");
         String token = memberService.createToken(tokenRequest);
-        token = token.replaceFirst("token=", "");
+        token = token.replaceFirst("token", "");
 
         // when
         MemberResponse memberResponse = memberService.findByToken(token);
