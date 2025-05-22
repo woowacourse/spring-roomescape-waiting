@@ -2,15 +2,14 @@ package roomescape.presentation.response;
 
 import java.time.LocalDate;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.waiting.Waiting;
 
 public record UserReservationResponse(
-        long reservationId,
+        long id,
         ThemeResponse theme,
         LocalDate date,
         TimeSlotResponse time,
-        ReservationStatus status
+        String status
 
 ) {
 
@@ -20,7 +19,7 @@ public record UserReservationResponse(
                 ThemeResponse.from(reservation.theme()),
                 reservation.date(),
                 TimeSlotResponse.from(reservation.timeSlot()),
-                ReservationStatus.RESERVED
+                "예약"
         );
     }
 
@@ -30,7 +29,7 @@ public record UserReservationResponse(
                 ThemeResponse.from(waiting.theme()),
                 waiting.date(),
                 TimeSlotResponse.from(waiting.timeSlot()),
-                ReservationStatus.WAITING
+                "대기"
         );
     }
 }

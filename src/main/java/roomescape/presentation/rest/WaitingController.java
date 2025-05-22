@@ -19,7 +19,7 @@ import roomescape.presentation.request.CreateWaitingRequest;
 import roomescape.presentation.response.WaitingResponse;
 
 @RestController
-@RequestMapping("waitings")
+@RequestMapping("/waitings")
 public class WaitingController {
 
     private final WaitingService service;

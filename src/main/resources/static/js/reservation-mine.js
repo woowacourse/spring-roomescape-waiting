@@ -16,7 +16,7 @@ function render(data) {
         const row = tableBody.insertRow();
 
         /*
-        TODO: [2단계] 내 예약 목록 조회 기능
+        내 예약 목록 조회 기능
               response 명세에 맞춰 값 설정
          */
         const theme = item.theme.name;
@@ -51,7 +51,9 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const WAITING_PATH = '/waitings';
+
+    const endpoint = `${WAITING_PATH}/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
