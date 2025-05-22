@@ -1,6 +1,7 @@
 package roomescape.service.waiting;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
@@ -14,6 +15,7 @@ import roomescape.service.dto.WaitingCreateDto;
 import java.time.LocalDate;
 
 @Service
+@Transactional
 public class WaitingCommandService {
 
     private final JpaWaitingRepository waitingRepository;

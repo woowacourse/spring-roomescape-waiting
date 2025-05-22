@@ -1,6 +1,7 @@
 package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.dto.reservation.ReservationAndWaitingResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationQueryService {
 
     private final JpaReservationRepository reservationRepository;

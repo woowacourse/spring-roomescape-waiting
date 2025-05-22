@@ -1,6 +1,7 @@
 package roomescape.service.waiting;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.ReservationAndWaitingResponseDto;
@@ -10,6 +11,7 @@ import roomescape.repository.JpaWaitingRepository;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingQueryService {
 
     JpaWaitingRepository waitingRepository;
