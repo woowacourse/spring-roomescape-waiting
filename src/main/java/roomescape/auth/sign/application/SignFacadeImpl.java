@@ -33,6 +33,4 @@ public class SignFacadeImpl implements SignFacade {
         return UserSessionResponse.from(
                 signUpUseCase.execute(request.toServiceRequest()));
     }
-
-    // TODO signout
 }
