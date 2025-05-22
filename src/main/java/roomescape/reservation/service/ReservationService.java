@@ -47,6 +47,13 @@ public class ReservationService {
         return new ReservationResponse(savedReservation);
     }
 
+    public List<ReservationResponse> getReservations() {
+        final List<Reservation> reservations = reservationRepository.findAll();
+        return reservations.stream()
+                .map(ReservationResponse::new)
+                .toList();
+    }
+
     public List<ReservationResponse> getReservations(
             final Long memberId,
             final Long themeId,

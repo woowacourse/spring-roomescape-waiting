@@ -189,10 +189,6 @@ function onWaitButtonClick() {
             timeId: selectedTimeId
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-        TODO: 쿠키도 포함시키도록 해야할듯? Credential 설정
-         */
         fetch('/waitings', {
             method: 'POST',
             headers: {

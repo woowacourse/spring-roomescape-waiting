@@ -48,6 +48,12 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
+    @GetMapping("/reservations")
+    public ResponseEntity<List<ReservationResponse>> findAll() {
+        final List<ReservationResponse> responses = reservationService.getReservations();
+        return ResponseEntity.ok().body(responses);
+    }
+
     @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> findAll(
             @RequestParam(value = "memberId") final Long memberId,
