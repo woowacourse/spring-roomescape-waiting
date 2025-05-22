@@ -66,7 +66,7 @@ class ReservationControllerTest {
 
         ReservationWithStatusResponse response = new ReservationWithStatusResponse(1L, "memberName1",
                 LocalDate.of(2025, 1, 1),
-                new TimeSlotResponse(1L, LocalTime.of(9, 0)), "themeName1", "예약");
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)), "themeName1");
 
         given(reservationService.findReservationByMemberId(1L)).willReturn(List.of(response));
         given(tokenProvider.extractSubject("accessToken")).willReturn("1");

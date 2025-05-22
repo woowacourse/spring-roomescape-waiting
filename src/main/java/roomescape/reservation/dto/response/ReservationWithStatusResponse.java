@@ -8,8 +8,7 @@ public record ReservationWithStatusResponse(
         String memberName,
         LocalDate date,
         TimeSlotResponse time,
-        String themeName,
-        String status
+        String themeName
 ) {
     public static ReservationWithStatusResponse from(Reservation reservation) {
         return new ReservationWithStatusResponse(
@@ -17,8 +16,7 @@ public record ReservationWithStatusResponse(
                 reservation.getMember().getName(),
                 reservation.getDate(),
                 TimeSlotResponse.from(reservation.getTimeSlot()),
-                reservation.getTheme().getName(),
-                "예약"
+                reservation.getTheme().getName()
         );
     }
 }
