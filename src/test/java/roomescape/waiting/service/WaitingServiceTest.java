@@ -65,8 +65,8 @@ class WaitingServiceTest {
             // then
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(responseDto.date()).isEqualTo(requestDto.date());
-                softly.assertThat(responseDto.timeDto().id()).isEqualTo(requestDto.timeId());
-                softly.assertThat(responseDto.themeDto().id()).isEqualTo(requestDto.themeId());
+                softly.assertThat(responseDto.time().id()).isEqualTo(requestDto.timeId());
+                softly.assertThat(responseDto.theme().id()).isEqualTo(requestDto.themeId());
             });
         }
     }

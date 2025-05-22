@@ -11,9 +11,9 @@ import roomescape.waiting.domain.Waiting;
 public record WaitingResponseDto(
         Long id,
         LocalDate date,
-        ReservationTimeResponseDto timeDto,
-        ThemeResponseDto themeDto,
-        UserResponseDto userDto) {
+        ReservationTimeResponseDto time,
+        ThemeResponseDto theme,
+        UserResponseDto user) {
 
     public static WaitingResponseDto of(Waiting savedWaiting) {
         ReservationTime reservationTime = savedWaiting.getTime();
