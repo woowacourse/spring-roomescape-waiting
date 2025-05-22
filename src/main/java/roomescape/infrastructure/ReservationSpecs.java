@@ -11,17 +11,17 @@ public class ReservationSpecs {
 
     public static Specification<Reservation> byDate(final LocalDate date) {
         return (root, query, criteriaBuilder) ->
-            criteriaBuilder.equal(root.get("slot").get("dateTime").get("date"), date);
+            criteriaBuilder.equal(root.get("slot").get("date"), date);
     }
 
     public static Specification<Reservation> byDateBetween(final LocalDate from, final LocalDate to) {
         return (root, query, criteriaBuilder) ->
-            criteriaBuilder.between(root.get("slot").get("dateTime").get("date"), from, to);
+            criteriaBuilder.between(root.get("slot").get("date"), from, to);
     }
 
     public static Specification<Reservation> byTimeSlotId(final long id) {
         return (root, query, criteriaBuilder) ->
-            criteriaBuilder.equal(root.get("slot").get("dateTime").get("timeSlot").get("id"), id);
+            criteriaBuilder.equal(root.get("slot").get("timeSlot").get("id"), id);
     }
 
     public static Specification<Reservation> byThemeId(final long id) {
@@ -39,10 +39,10 @@ public class ReservationSpecs {
                 predicates.add(cb.equal(root.get("user").get("id"), filter.userId()));
             }
             if (filter.dateFrom() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("slot").get("dateTime").get("date"), filter.dateFrom()));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("slot").get("date"), filter.dateFrom()));
             }
             if (filter.dateTo() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("slot").get("dateTime").get("date"), filter.dateTo()));
+                predicates.add(cb.lessThanOrEqualTo(root.get("slot").get("date"), filter.dateTo()));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

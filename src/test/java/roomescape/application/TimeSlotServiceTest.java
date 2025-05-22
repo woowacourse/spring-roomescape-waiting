@@ -13,7 +13,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.exception.InUseException;
 
@@ -63,7 +62,7 @@ class TimeSlotServiceTest {
         var theme = repositoryHelper.saveAnyTheme();
         var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
 
-        var reservationWithTheTimeSlot = new Reservation(user, new ReservationSlot(ReservationDateTime.of(tomorrow(), timeSlotToBeRemoved), theme));
+        var reservationWithTheTimeSlot = new Reservation(user, ReservationSlot.forReserve(tomorrow(), timeSlotToBeRemoved, theme));
         repositoryHelper.saveReservation(reservationWithTheTimeSlot);
 
         // when & then

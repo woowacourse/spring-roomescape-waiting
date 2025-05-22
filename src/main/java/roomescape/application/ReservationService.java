@@ -12,7 +12,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationSlot;
@@ -39,7 +38,7 @@ public class ReservationService {
         throwIfDuplicates(date, timeSlot, theme);
         var user = userRepository.getById(userId);
 
-        var reservation = new Reservation(user, new ReservationSlot(ReservationDateTime.forReserve(date, timeSlot), theme));
+        var reservation = new Reservation(user, ReservationSlot.forReserve(date, timeSlot, theme));
         return reservationRepository.save(reservation);
     }
 
