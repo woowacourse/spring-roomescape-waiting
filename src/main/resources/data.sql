@@ -23,7 +23,18 @@ INSERT INTO member (name, role, email, password) VALUES ('솔라', 'USER', 'sola
 
 
 -- 방탈출 예약 삽입
-INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-10', 1, 1, 5);
-INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-09', 1, 1, 5);
-INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-08', 1, 1, 4);
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-10', 2, 1, 5);
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-09', 2, 1, 5);
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-08', 2, 1, 4);
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-06-30', 2, 1, 4);
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-06-30', 3, 2, 4);
+INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-06-30', 4, 3, 4);
 
+-- 방탈출 예약 대기 삽입
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (3, '2025-05-10', 1, 5, '2025-05-22 16:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (3, '2025-06-30', 1, 4, '2025-05-22 17:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (4, '2025-06-30', 1, 4, '2025-05-22 18:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (2, '2025-06-30', 2, 4, '2025-05-22 17:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (4, '2025-06-30', 2, 4, '2025-05-22 18:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (2, '2025-06-30', 4, 4, '2025-05-22 17:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (3, '2025-06-30', 4, 4, '2025-05-22 18:00');
