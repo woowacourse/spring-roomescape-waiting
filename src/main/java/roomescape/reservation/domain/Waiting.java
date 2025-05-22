@@ -1,13 +1,13 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,22 +22,20 @@ public class Waiting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDate date;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Waiting(final Member member, final ReservationTime time, final Theme theme) {
-        this.createdAt = LocalDateTime.now();
+    public Waiting(final Member member, final ReservationTime time, final Theme theme, final LocalDate date) {
         this.member = member;
+        this.date = date;
         this.time = time;
         this.theme = theme;
     }
