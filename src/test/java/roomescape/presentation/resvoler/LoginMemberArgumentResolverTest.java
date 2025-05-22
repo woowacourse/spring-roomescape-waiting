@@ -20,7 +20,7 @@ import roomescape.dto.LoginMember;
 import roomescape.model.Member;
 import roomescape.model.Role;
 import roomescape.presentation.support.CookieUtils;
-import roomescape.service.AuthService;
+import roomescape.application.AuthService;
 
 @ExtendWith(MockitoExtension.class)
 class LoginMemberArgumentResolverTest {

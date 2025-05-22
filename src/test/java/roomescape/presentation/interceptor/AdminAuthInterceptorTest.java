@@ -20,7 +20,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.model.Role;
 import roomescape.presentation.support.CookieUtils;
-import roomescape.service.AuthService;
+import roomescape.application.AuthService;
 
 @ExtendWith(MockitoExtension.class)
 class AdminAuthInterceptorTest {

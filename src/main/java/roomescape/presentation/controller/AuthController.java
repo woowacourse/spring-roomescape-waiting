@@ -14,7 +14,7 @@ import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.dto.response.TokenResponseDto;
 import roomescape.presentation.support.CookieUtils;
-import roomescape.service.AuthService;
+import roomescape.application.AuthService;
 
 @RestController
 @RequestMapping("/login")

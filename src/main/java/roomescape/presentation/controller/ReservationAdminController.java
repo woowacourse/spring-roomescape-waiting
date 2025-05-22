@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.ReservationAdminRegisterDto;
-import roomescape.service.ReservationAdminService;
+import roomescape.application.ReservationAdminService;
 
 @RestController
 @RequestMapping("/admin/reservations")

@@ -10,7 +10,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.dto.LoginMember;
 import roomescape.model.Member;
 import roomescape.presentation.support.CookieUtils;
-import roomescape.service.AuthService;
+import roomescape.application.AuthService;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {

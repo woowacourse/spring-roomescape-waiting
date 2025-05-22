@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.LoginMember;
 import roomescape.dto.response.MemberReservationResponseDto;
-import roomescape.service.ReservationService;
+import roomescape.application.ReservationService;
 
 @RestController
 @RequestMapping("/reservations-mine")

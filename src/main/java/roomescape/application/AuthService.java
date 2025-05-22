@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.NotFoundException;

@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.application;
 
 import java.util.List;
 import java.util.Objects;
