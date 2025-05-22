@@ -2,7 +2,7 @@ package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
-import roomescape.dto.reservation.MyReservationResponseDto;
+import roomescape.dto.reservation.ReservationAndWaitingResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.repository.JpaReservationRepository;
 
@@ -37,8 +37,8 @@ public class ReservationQueryService {
                 .toList();
     }
 
-    public List<MyReservationResponseDto> findMyReservations(long memberId) {
+    public List<ReservationAndWaitingResponseDto> findMyReservations(long memberId) {
         List<Reservation> reservations = reservationRepository.findReservationsByMemberId(memberId);
-        return reservations.stream().map(MyReservationResponseDto::new).toList();
+        return reservations.stream().map(ReservationAndWaitingResponseDto::new).toList();
     }
 }

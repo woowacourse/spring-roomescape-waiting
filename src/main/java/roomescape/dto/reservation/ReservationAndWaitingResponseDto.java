@@ -4,10 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
-import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
 
-public record MyReservationResponseDto(
+public record ReservationAndWaitingResponseDto(
         long id,
         String theme,
         LocalDate date,
@@ -16,7 +15,7 @@ public record MyReservationResponseDto(
         String status
 ) {
 
-    public MyReservationResponseDto(Reservation reservation) {
+    public ReservationAndWaitingResponseDto(Reservation reservation) {
         this(
                 reservation.getId(),
                 reservation.getTheme().getName(),
@@ -26,7 +25,7 @@ public record MyReservationResponseDto(
         );
     }
 
-    public MyReservationResponseDto(WaitingWithRank waitingWithRank) {
+    public ReservationAndWaitingResponseDto(WaitingWithRank waitingWithRank) {
         this(
                 waitingWithRank.getWaiting().getId(),
                 waitingWithRank.getWaiting().getTheme().getName(),

@@ -11,21 +11,22 @@ import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.dto.time.ReservationTimeResponseDto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
-public record WaitingResponseDto(long id, MemberNameResponseDto member,
+public record WaitingResponseDto(long id,
+                                 String name,
                                  @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                 ThemeResponseDto theme,
-                                 ReservationTimeResponseDto time) {
-    public static WaitingResponseDto of(Waiting waiting, ReservationTime reservationTime, Theme theme) {
-        MemberNameResponseDto memberResponseDto = new MemberNameResponseDto(waiting.getMember().getName());
-        ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.from(reservationTime);
-        ThemeResponseDto themeResponseDto = ThemeResponseDto.from(theme);
+                                 String theme,
+                                 @JsonFormat(pattern = "HH:mm") LocalTime startAt) {
 
+
+
+    public static WaitingResponseDto from(Waiting waiting) {
         return new WaitingResponseDto(
                 waiting.getId(),
-                memberResponseDto,
+                waiting.getMember().getName(),
                 waiting.getDate(),
-                themeResponseDto,
-                timeResponseDto);
+                waiting.getTheme().getName(),
+                waiting.getTime().getStartAt());
     }
 }

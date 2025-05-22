@@ -48,7 +48,7 @@ public class WaitingCommandService {
 
         Waiting waiting = Waiting.createWithoutId(member, dto.localDate(), reservationTime, theme);
         Waiting saved = waitingRepository.save(waiting);
-        WaitingResponseDto waitingResponseDto = WaitingResponseDto.of(saved, reservationTime, theme);
+        WaitingResponseDto waitingResponseDto = WaitingResponseDto.from(saved);
         return waitingResponseDto;
     }
 
