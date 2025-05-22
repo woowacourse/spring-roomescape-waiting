@@ -1,15 +1,15 @@
 package roomescape.waiting.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationtime.exception.NotFoundReservationTimeException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.dto.ThemeResponseDto;
 import roomescape.theme.exception.NotFoundThemeException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.user.domain.User;
+import roomescape.user.repository.UserRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.dto.WaitingRequestDto;
 import roomescape.waiting.domain.dto.WaitingResponseDto;
@@ -21,13 +21,15 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final UserRepository userRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
                           ReservationTimeRepository reservationTimeRepository,
-                          ThemeRepository themeRepository) {
+                          ThemeRepository themeRepository, UserRepository userRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.userRepository = userRepository;
     }
 
     public WaitingResponseDto create(WaitingRequestDto requestDto, User member) {
@@ -44,12 +46,13 @@ public class WaitingService {
         return requestDto.toEntity(reservationTime, theme, member);
     }
 
-    private static WaitingResponseDto convertWaitingResponseDto(Waiting savedWaiting) {
-        ReservationTime reservationTime = savedWaiting.getTime();
-        ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.of(reservationTime);
+    public List<WaitingResponseDto> findAll() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingService::convertWaitingResponseDto)
+                .toList();
+    }
 
-        Theme theme = savedWaiting.getTheme();
-        ThemeResponseDto themeResponseDto = ThemeResponseDto.of(theme);
-        return WaitingResponseDto.of(savedWaiting, timeResponseDto, themeResponseDto);
+    private static WaitingResponseDto convertWaitingResponseDto(Waiting savedWaiting) {
+        return WaitingResponseDto.of(savedWaiting);
     }
 }

@@ -12,7 +12,7 @@ import roomescape.admin.domain.dto.AdminReservationRequestDto;
 import roomescape.admin.domain.dto.SearchReservationRequestDto;
 import roomescape.admin.service.AdminService;
 import roomescape.reservation.domain.dto.ReservationResponseDto;
-import roomescape.user.domain.User;
+import roomescape.waiting.domain.dto.WaitingResponseDto;
 
 @RestController
 @RequestMapping("/admin")
@@ -25,7 +25,8 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponseDto> createReservation(@RequestBody AdminReservationRequestDto requestDto) {
+    public ResponseEntity<ReservationResponseDto> createReservation(
+            @RequestBody AdminReservationRequestDto requestDto) {
         ReservationResponseDto reservationResponseDto = adminService.createReservation(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponseDto);
     }
@@ -34,5 +35,11 @@ public class AdminController {
     public ResponseEntity<List<ReservationResponseDto>> searchReservations(SearchReservationRequestDto requestDto) {
         List<ReservationResponseDto> reservationResponseDtos = adminService.searchReservations(requestDto);
         return ResponseEntity.status(HttpStatus.OK).body(reservationResponseDtos);
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<WaitingResponseDto>> findAllWaitings() {
+        List<WaitingResponseDto> responseDtos = adminService.findAllWaitings();
+        return ResponseEntity.status(HttpStatus.OK).body(responseDtos);
     }
 }

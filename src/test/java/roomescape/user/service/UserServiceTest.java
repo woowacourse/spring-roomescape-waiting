@@ -65,8 +65,7 @@ class UserServiceTest {
             // given
             List<Reservation> reservations = List.of(ReservationFixture.createByBookedStatus(
                             LocalDate.now().plusDays(1), savedTime, savedTheme, savedMember),
-                    ReservationFixture.createByBookedStatus(
-                            LocalDate.now().plusDays(2), savedTime, savedTheme, savedMember));
+                    ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2), savedTime, savedTheme, savedMember));
             List<Reservation> savedReservations = reservationRepository.saveAll(reservations);
 
             // when
