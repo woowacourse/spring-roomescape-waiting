@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import roomescape.dto.response.AdminWaitingResponse;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.Reservation;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.entity.WaitingReservation;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -34,7 +37,8 @@ public class AdminController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        List<Reservation> reservations = reservationService.findAllByFilter(memberId, themeId, dateFrom, dateTo);
+        List<ConfirmedReservation> reservations = reservationService.findAllConfirmReservationByFilter(memberId, themeId, dateFrom,
+                dateTo);
         List<ReservationResponse> responses = reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -46,7 +50,7 @@ public class AdminController {
     public ResponseEntity<ReservationResponse> createReservationByAdmin(
             @RequestBody @Valid AdminCreateReservationRequest request
     ) {
-        Reservation reservation = reservationService.addReservationByAdmin(request);
+        Reservation reservation = reservationService.addConfirmReservationByAdmin(request);
         ReservationResponse response = ReservationResponse.from(reservation);
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -55,5 +59,14 @@ public class AdminController {
                 .toUri();
 
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<AdminWaitingResponse>> getWaitingResponse() {
+        List<WaitingReservation> waitingReservations = reservationService.findAllWaitingReservation();
+        List<AdminWaitingResponse> adminWaitingResponses = waitingReservations.stream()
+                .map(AdminWaitingResponse::from)
+                .toList();
+        return ResponseEntity.ok(adminWaitingResponses);
     }
 }

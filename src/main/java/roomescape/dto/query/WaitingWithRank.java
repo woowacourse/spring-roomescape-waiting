@@ -1,18 +1,18 @@
 package roomescape.dto.query;
 
-import roomescape.entity.Waiting;
+import roomescape.entity.WaitingReservation;
 
 public class WaitingWithRank {
-    private Waiting waiting;
+    private WaitingReservation waitingReservation;
     private Long rank;
 
-    public WaitingWithRank(Waiting waiting, Long rank) {
-        this.waiting = waiting;
+    public WaitingWithRank(WaitingReservation waitingReservation, Long rank) {
+        this.waitingReservation = waitingReservation;
         this.rank = rank;
     }
 
-    public Waiting getWaiting() {
-        return waiting;
+    public WaitingReservation getWaiting() {
+        return waitingReservation;
     }
 
     public Long getRank() {
