@@ -38,6 +38,8 @@ public class WaitingRepositoryTest {
                 .description("description")
                 .thumbnail("thumbnail").build();
         TimeSlot timeSlot = TimeSlot.builder().startAt(LocalTime.of(9, 0)).build();
+        entityManager.persist(theme);
+        entityManager.persist(timeSlot);
         entityManager.persist(member);
         Waiting waiting = Waiting.builder()
                 .member(member)
