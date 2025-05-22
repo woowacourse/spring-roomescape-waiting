@@ -128,9 +128,17 @@ public class ReservationService {
     @Transactional
     public void deleteReservationById(final Long id) {
         reservationRepository.findById(id)
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+            .orElseThrow(() -> new ReservationException("예약을 찾을 수 없습니다."));
 
         reservationRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteWaiting(final Long waitingId) {
+        waitingRepository.findById(waitingId)
+            .orElseThrow(() -> new ReservationException("예약 대기를 찾을 수 없습니다."));
+
+        waitingRepository.deleteById(waitingId);
     }
 
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {

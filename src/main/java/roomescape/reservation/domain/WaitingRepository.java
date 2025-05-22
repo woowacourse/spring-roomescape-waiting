@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface WaitingRepository {
 
@@ -9,4 +10,8 @@ public interface WaitingRepository {
     Waiting save(Waiting withoutId);
 
     List<WaitingWithRank> findByMemberId(Long memberId);
+
+    Optional<Waiting> findById(Long id);
+
+    void deleteById(Long id);
 }

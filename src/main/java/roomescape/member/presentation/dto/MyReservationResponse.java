@@ -23,12 +23,12 @@ public record MyReservationResponse(Long reservationId, String theme, LocalDate 
     }
 
     public static MyReservationResponse from(final WaitingWithRank waitingWithRank) {
-        Waiting waiting = waitingWithRank.getWaiting();
+        Reservation reservation = waitingWithRank.getWaiting().getReservation();
         return new MyReservationResponse(
-            waiting.getId(),
-            waiting.getReservation().getTheme().getName(),
-            waiting.getReservation().getDate(),
-            waiting.getReservation().getTime().getStartAt(),
+            reservation.getId(),
+            reservation.getTheme().getName(),
+            reservation.getDate(),
+            reservation.getTime().getStartAt(),
             formatRank(waitingWithRank.getRank())
         );
     }

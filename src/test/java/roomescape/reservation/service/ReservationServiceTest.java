@@ -154,6 +154,35 @@ class ReservationServiceTest {
         );
     }
 
+    @DisplayName("예약 대기를 삭제할 수 있다.")
+    @Test
+    void can_delete_waiting() {
+        // given
+        Long waitingId = 1L;
+        Long memberId = 2L;
+
+        // when
+        reservationService.deleteWaiting(waitingId);
+
+        // then
+        List<MyReservationResponse> responses = reservationService.getMemberReservations(new LoginMemberInfo(memberId));
+        assertThat(responses).containsExactly(
+            new MyReservationResponse(3L, "테마3", LocalDate.of(2025, 4, 26), LocalTime.of(10, 0), "예약")
+        );
+    }
+
+    @DisplayName("존재하지 않는 예약 대기는 삭제할 수 없다.")
+    @Test
+    void cannot_delete_non_existent_waiting() {
+        // given
+        Long nonExistentWaitingId = 999L;
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> reservationService.deleteWaiting(nonExistentWaitingId))
+            .isInstanceOf(ReservationException.class)
+            .hasMessage("예약 대기를 찾을 수 없습니다.");
+    }
+
     static class ReservationConfig {
 
         @Bean

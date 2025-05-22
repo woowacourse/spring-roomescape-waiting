@@ -4,12 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+
+import org.apache.catalina.connector.Response;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
@@ -45,6 +43,12 @@ public class MemberReservationController {
     {
         WaitingResponse response = reservationService.createWaiting(request, memberInfo.id());
         return ResponseEntity.created(URI.create("/reservations/waiting")).body(response);
+    }
+
+    @DeleteMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") Long id) {
+        reservationService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/reservations-mine")
