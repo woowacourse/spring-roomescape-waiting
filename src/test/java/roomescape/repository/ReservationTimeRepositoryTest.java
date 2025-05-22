@@ -30,7 +30,7 @@ class ReservationTimeRepositoryTest {
     void canFindReservationTimesWithBookState() {
         // given
         Member member = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
         Theme theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
 

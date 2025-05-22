@@ -72,7 +72,7 @@ class ReservationTimeServiceTest {
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
 
         Member member = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
         ReservationTime timeAt10 = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
         ReservationTime timeAt11 = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(11, 0)));
@@ -166,7 +166,7 @@ class ReservationTimeServiceTest {
                     Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
 
             Member member = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             ReservationTime time = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 

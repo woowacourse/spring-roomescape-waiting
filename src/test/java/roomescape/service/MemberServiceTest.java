@@ -44,7 +44,7 @@ class MemberServiceTest {
         void canGetMemberById() {
             // given
             Member expectedMember = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             entityManager.flush();
 
@@ -73,9 +73,9 @@ class MemberServiceTest {
     void canFindAllMemberProfile() {
         // given
         Member firstMember = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123!"));
         Member secondMember = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member2@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member2@test.com", "password123!"));
 
         entityManager.flush();
 
@@ -116,7 +116,7 @@ class MemberServiceTest {
         void cannotAddMember() {
             // given
             Member alreadySavedMember = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "password123!"));
 
             MemberCreationContent creationContent =
                     new MemberCreationContent(Role.GENERAL, "회원", alreadySavedMember.getEmail(), "qwer1234!");

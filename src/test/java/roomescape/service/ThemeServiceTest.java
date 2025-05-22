@@ -80,7 +80,7 @@ class ThemeServiceTest {
                     ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 
             Member member = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             Theme firstTheme = entityManager.persist(
                     Theme.createWithoutId("테마1", "테마 설명", "thumbnail.jpg"));
@@ -121,7 +121,7 @@ class ThemeServiceTest {
                     ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 
             Member member = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             Theme firstTheme = entityManager.persist(
                     Theme.createWithoutId("테마1", "테마 설명", "thumbnail.jpg"));
@@ -210,7 +210,7 @@ class ThemeServiceTest {
                     ReservationTime.createWithoutId(LocalTime.of(10, 0)));
 
             Member member = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
 
             Theme theme = entityManager.persist(
                     Theme.createWithoutId("테마1", "테마 설명", "thumbnail.jpg"));

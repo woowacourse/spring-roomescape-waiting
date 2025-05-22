@@ -41,7 +41,7 @@ public class ReservationJpaRepositoryTest {
         theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
         member = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
     }
 
     @Nested
@@ -53,7 +53,7 @@ public class ReservationJpaRepositoryTest {
         void canFindReservationsByMemberFilter() {
             // given
             Member otherMember = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123!"));
             entityManager.persist(Reservation.createWithoutId(
                     TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
             entityManager.persist(Reservation.createWithoutId(

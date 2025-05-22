@@ -70,7 +70,7 @@ class ReservationServiceTest {
         theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
         member = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
     }
 
     @DisplayName("모든 예약을 조회할 수 있다.")
@@ -111,7 +111,7 @@ class ReservationServiceTest {
                 TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
 
         Member otherMember = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member2@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member2@test.com", "password123!"));
 
         entityManager.persist(Reservation.createWithoutId(
                 TODAY, ReservationStatus.BOOKED, reservationTime, theme, otherMember));
@@ -143,7 +143,7 @@ class ReservationServiceTest {
                     TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
 
             Member otherMember = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123!"));
 
             entityManager.persist(Reservation.createWithoutId(
                     TODAY, ReservationStatus.BOOKED, reservationTime, theme, otherMember));
