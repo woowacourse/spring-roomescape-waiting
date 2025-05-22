@@ -7,6 +7,7 @@ import roomescape.application.auth.dto.LoginRequest;
 import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.MemberServiceResponse;
 import roomescape.domain.Role;
+import roomescape.domain.entity.Member;
 import roomescape.exception.AuthorizationException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.jwt.JwtTokenProvider;
@@ -49,7 +50,7 @@ public class AuthService {
     }
 
     public boolean isAdminAuthorized(MemberIdDto memberIdDto) {
-        MemberServiceResponse memberServiceResponse = memberService.getMemberById(memberIdDto.id());
-        return memberServiceResponse.role() == Role.ADMIN;
+        Member member = memberService.getMemberEntityById(memberIdDto.id());
+        return member.getRole() == Role.ADMIN;
     }
 }

@@ -16,12 +16,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.application.dto.MemberServiceResponse;
 import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.application.dto.ReservationStatusServiceResponse;
-import roomescape.application.dto.ThemeServiceResponse;
-import roomescape.application.dto.TimeServiceResponse;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
 import roomescape.domain.entity.ReservationTime;
@@ -84,12 +81,13 @@ public class ReservationServiceTest {
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
         //when
-        ReservationServiceResponse reservationServiceResponse = reservationService.registerReservation(new ReservationCreateServiceRequest(
-                reservation.getDate(),
-                theme.getId(),
-                time.getId(),
-                member.getId()
-        ));
+        ReservationServiceResponse reservationServiceResponse = reservationService.registerReservation(
+                new ReservationCreateServiceRequest(
+                        reservation.getDate(),
+                        theme.getId(),
+                        time.getId(),
+                        member.getId()
+                ));
 
         //then
         Assertions.assertThat(reservationServiceResponse).isEqualTo(ReservationServiceResponse.from(reservation));
@@ -97,19 +95,19 @@ public class ReservationServiceTest {
 
     private Theme stubTheme(long themeId) {
         Theme theme = Theme.of(themeId, "테마1", "테마1입니다.", "썸네일1");
-        Mockito.doReturn(ThemeServiceResponse.from(theme)).when(themeService).getThemeById(themeId);
+        Mockito.doReturn(theme).when(themeService).getThemeEntityById(themeId);
         return theme;
     }
 
     private ReservationTime stubTime(long timeId) {
         ReservationTime time = ReservationTime.of(timeId, LocalTime.of(10, 0));
-        Mockito.doReturn(TimeServiceResponse.from(time)).when(timeService).getTimeById(timeId);
+        Mockito.doReturn(time).when(timeService).getTimeEntityById(timeId);
         return time;
     }
 
     private Member stubMember(long memberId) {
         Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
-        Mockito.doReturn(MemberServiceResponse.from(member)).when(memberService).getMemberById(memberId);
+        Mockito.doReturn(member).when(memberService).getMemberEntityById(memberId);
         return member;
     }
 }

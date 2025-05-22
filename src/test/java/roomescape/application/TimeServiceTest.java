@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.application.dto.TimeServiceResponse;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.repository.TimeRepository;
 
@@ -27,15 +26,14 @@ public class TimeServiceTest {
     public void getTimeById() {
         // given
         Long id = 1L;
-        TimeServiceResponse expectedTime = new TimeServiceResponse(id, LocalTime.of(10, 0));
-        ReservationTime reservationTime = expectedTime.toEntity();
+        ReservationTime expectedTime = ReservationTime.of(id, LocalTime.of(10, 0));
 
-        Mockito.doReturn(Optional.of(reservationTime)).when(timeRepository).findById(id);
+        Mockito.doReturn(Optional.of(expectedTime)).when(timeRepository).findById(id);
 
         // when
-        TimeServiceResponse timeById = timeService.getTimeById(id);
+        ReservationTime reservationTime = timeService.getTimeEntityById(id);
 
         // then
-        assertThat(timeById.id()).isEqualTo(id);
+        assertThat(reservationTime).isEqualTo(expectedTime);
     }
 }

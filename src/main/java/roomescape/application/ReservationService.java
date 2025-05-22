@@ -40,9 +40,9 @@ public class ReservationService {
     @Transactional
     public ReservationServiceResponse registerReservation(ReservationCreateServiceRequest request) {
         validateNotDuplicate(request);
-        Theme theme = themeService.getThemeById(request.themeId()).toEntity();
-        ReservationTime reservationTime = timeService.getTimeById(request.timeId()).toEntity();
-        Member member = memberService.getMemberById(request.memberId()).toEntity();
+        Theme theme = themeService.getThemeEntityById(request.themeId());
+        ReservationTime reservationTime = timeService.getTimeEntityById(request.timeId());
+        Member member = memberService.getMemberEntityById(request.memberId());
         Reservation reservationWithoutId = Reservation.withoutId(
                 member,
                 theme,
@@ -83,7 +83,7 @@ public class ReservationService {
     }
 
     public List<ReservationStatusServiceResponse> getReservationsByMember(Long memberId) {
-        Member member = memberService.getMemberById(memberId).toEntity();
+        Member member = memberService.getMemberEntityById(memberId);
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
         return memberReservations.stream()
                 .map(reservation -> new ReservationStatusServiceResponse(
