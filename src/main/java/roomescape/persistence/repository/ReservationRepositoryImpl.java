@@ -1,4 +1,4 @@
-package roomescape.persistence;
+package roomescape.persistence.repository;
 
 import java.time.LocalDate;
 import java.util.List;

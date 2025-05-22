@@ -14,10 +14,10 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.persistence.MemberRepository;
-import roomescape.persistence.ReservationRepository;
-import roomescape.persistence.ReservationTimeRepository;
-import roomescape.persistence.ThemeRepository;
+import roomescape.persistence.repository.MemberRepository;
+import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
+import roomescape.persistence.repository.ThemeRepository;
 import roomescape.persistence.vo.Period;
 
 @Service

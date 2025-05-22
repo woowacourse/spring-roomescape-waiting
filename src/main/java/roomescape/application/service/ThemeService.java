@@ -11,8 +11,8 @@ import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Theme;
-import roomescape.persistence.ReservationRepository;
-import roomescape.persistence.ThemeRepository;
+import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ThemeRepository;
 import roomescape.persistence.vo.Period;
 
 @Service

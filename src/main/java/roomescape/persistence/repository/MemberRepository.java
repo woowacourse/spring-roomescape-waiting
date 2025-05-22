@@ -1,4 +1,4 @@
-package roomescape.persistence;
+package roomescape.persistence.repository;
 
 import roomescape.model.Member;
 

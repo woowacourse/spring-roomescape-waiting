@@ -17,8 +17,8 @@ import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
-import roomescape.persistence.ReservationRepository;
-import roomescape.persistence.ReservationTimeRepository;
+import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
 
 @Service
 @RequiredArgsConstructor

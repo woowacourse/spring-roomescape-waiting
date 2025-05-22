@@ -1,4 +1,4 @@
-package roomescape.persistence;
+package roomescape.persistence.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

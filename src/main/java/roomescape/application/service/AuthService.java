@@ -8,7 +8,7 @@ import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.dto.response.TokenResponseDto;
 import roomescape.model.Member;
-import roomescape.persistence.MemberRepository;
+import roomescape.persistence.repository.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
