@@ -43,6 +43,14 @@ public class Reservation {
         this(0L, user, slot, ReservationStatus.RESERVED);
     }
 
+    public static Reservation ofWaiting(final User user, final ReservationSlot slot) {
+        return new Reservation(0L, user, slot, ReservationStatus.HOLD);
+    }
+
+    public boolean isOwnedBy(final User user) {
+        return this.user.equals(user);
+    }
+
     @Override
     public String toString() {
         return "Reservation{" +

@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.ReservationSearchFilter;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.User;
@@ -42,6 +43,7 @@ class ReservationServiceTest {
         user = repositoryHelper.saveAnyUser();
         timeSlot = repositoryHelper.saveAnyTimeSlot();
         theme = repositoryHelper.saveAnyTheme();
+        repositoryHelper.flushAndClear();
     }
 
     @Test
@@ -51,6 +53,27 @@ class ReservationServiceTest {
 
         var reservations = service.findAllReservations(NONE_FILTERING);
         assertThat(reservations).contains(reserved);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 건다.")
+    void waitFor() {
+        var waited = service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        var reservations = service.findAllReservations(NONE_FILTERING);
+        assertAll(
+            () -> assertThat(waited.status()).isEqualTo(ReservationStatus.HOLD),
+            () -> assertThat(reservations).contains(waited)
+        );
+    }
+
+    @Test
+    @DisplayName("한 유저가 중복으로 예약 대기를 하려고 하면 예외가 발생한다.")
+    void waitForDuplicates() {
+        service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        assertThatThrownBy(() -> service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id()))
+            .isInstanceOf(AlreadyExistedException.class);
     }
 
     @Test

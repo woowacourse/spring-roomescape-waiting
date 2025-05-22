@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSearchFilter;
+import roomescape.domain.reservation.ReservationSlot;
 
 public class ReservationSpecs {
 
@@ -27,6 +28,10 @@ public class ReservationSpecs {
     public static Specification<Reservation> byThemeId(final long id) {
         return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("slot").get("theme").get("id"), id);
+    }
+
+    public static Specification<Reservation> bySlot(final ReservationSlot slot) {
+        return Specification.allOf(byDate(slot.date()), byTimeSlotId(slot.timeSlot().id()), byThemeId(slot.theme().id()));
     }
 
     public static Specification<Reservation> byFilter(final ReservationSearchFilter filter) {
