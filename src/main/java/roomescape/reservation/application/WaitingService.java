@@ -94,4 +94,12 @@ public class WaitingService {
         return waitingRepository.findById(waitingId)
             .orElseThrow(() -> new NotFoundException("선택한 웨이팅이 존재하지 않습니다."));
     }
+
+    public void cancel(Long memberId, Long waitingId) {
+        Waiting waiting = getWaiting(waitingId);
+        if (!waiting.getMember().getId().equals(memberId)) {
+            throw new IllegalArgumentException("본인의 대기만 삭제할 수 있습니다.");
+        }
+        waitingRepository.deleteById(waitingId);
+    }
 }
