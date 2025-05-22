@@ -13,12 +13,10 @@ import roomescape.user.domain.UserRole;
 import java.util.List;
 
 @RestController
-@RequestMapping(ThemeController.BASE_PATH)
+@RequestMapping("/themes")
 @RequiredRoles(UserRole.NORMAL)
 @RequiredArgsConstructor
 public class ThemeController {
-
-    public static final String BASE_PATH = "/themes";
 
     private final ThemeFacade themeFacade;
 

@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.aop.RequiredRoles;
 import roomescape.auth.session.UserSession;
 import roomescape.auth.session.annotation.SignInUser;
-import roomescape.common.uri.UriFactory;
 import roomescape.reservation.application.ReservationFacade;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.domain.ReservationId;
@@ -27,10 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequiredRoles(UserRole.ADMIN)
-@RequestMapping(AdminReservationController.BASE_PATH)
+@RequestMapping("/admin/reservations")
 public class AdminReservationController {
-
-    public static final String BASE_PATH = "/admin/reservations";
 
     private final ReservationFacade reservationFacade;
 
@@ -51,10 +49,16 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> create(
             @RequestBody final CreateReservationWithUserIdWebRequest request,
             @SignInUser final UserSession userSession) {
-        final ReservationResponse reservationResponse = reservationFacade.create(request.toServiceRequest(), userSession);
-        final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.reservationId()));
+        final ReservationResponse response = reservationFacade.create(request.toServiceRequest(), userSession);
+
+        final URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.reservationId())
+                .toUri();
+
         return ResponseEntity.created(location)
-                .body(reservationResponse);
+                .body(response);
     }
 
     @DeleteMapping("/{id}")

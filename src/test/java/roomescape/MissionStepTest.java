@@ -227,7 +227,7 @@ public class MissionStepTest {
                 .contentType(ContentType.JSON)
                 .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(normalUser))
                 .body(request)
-                .when().post(ReservationController.BASE_PATH)
+                .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
                 .extract().as(ReservationResponse.class);
