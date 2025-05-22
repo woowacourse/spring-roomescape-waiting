@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.persistence.vo.Period;
 
 public interface ReservationRepository {
 
@@ -12,17 +13,12 @@ public interface ReservationRepository {
     List<Reservation> findForThemeAndMemberInPeriod(
             Long themeId,
             Long memberId,
-            LocalDate startDate,
-            LocalDate endDate
+            Period period
     );
 
     List<Reservation> findForThemeOnDate(Long themeId, LocalDate date);
 
     List<Reservation> findForMember(Long memberId);
-
-    List<Reservation> findForTheme(Long themeId);
-
-    List<Reservation> findForReservationTime(Long reservationTimeId);
 
     Reservation save(Reservation reservation);
 
