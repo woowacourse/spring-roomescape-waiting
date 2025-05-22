@@ -46,6 +46,13 @@ public class ReservationTest {
     }
 
     @Test
+    @DisplayName("예약이 대기 상태인 지 확인한다.")
+    void isWaiting() {
+        var reservation = reservationOf(ReservationStatus.WAITING);
+        assertThat(reservation.isWaiting()).isTrue();
+    }
+
+    @Test
     @DisplayName("대기 상태의 예약을 취소할 수 있다.")
     void cancel() {
         // given

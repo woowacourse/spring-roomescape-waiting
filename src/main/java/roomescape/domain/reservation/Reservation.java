@@ -52,8 +52,12 @@ public class Reservation {
         return this.user.equals(user);
     }
 
+    public boolean isWaiting() {
+        return this.status == ReservationStatus.WAITING;
+    }
+
     public void cancel() {
-        if (this.status != ReservationStatus.WAITING) {
+        if (!isWaiting()) {
             throw new BusinessRuleViolationException("대기중인 예약만 취소할 수 있습니다.");
         }
         this.status = ReservationStatus.CANCELED;
