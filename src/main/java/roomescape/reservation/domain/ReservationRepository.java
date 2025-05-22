@@ -18,6 +18,8 @@ public interface ReservationRepository {
 
     boolean existsByTimeId(Long timeId);
 
+    boolean hasReservedReservation(Reservation reservation);
+
     boolean hasSameReservation(Reservation reservation);
 
     boolean existsByThemeId(Long themeId);

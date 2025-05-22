@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
 @Repository
 public class ReservationCustomRepositoryImpl implements ReservationCustomRepository {
@@ -23,6 +24,28 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
                 memberId, themeId, from, to, query);
 
         return typedQuery.getResultList();
+    }
+
+    @Override
+    public boolean existsReservation(LocalDate date, Long timeId, Long themeId, Long memberId,
+                                     ReservationStatus status) {
+        return em.createQuery("""
+                                SELECT EXISTS (
+                            SELECT 1
+                            FROM Reservation r
+                            WHERE r.date = :date
+                              AND r.time.id = :timeId
+                              AND r.theme.id = :themeId
+                              AND r.member.id = :memberId
+                              AND r.status = :status
+                        )
+                        """, Boolean.class)
+                .setParameter("date", date)
+                .setParameter("timeId", timeId)
+                .setParameter("themeId", themeId)
+                .setParameter("memberId", memberId)
+                .setParameter("status", status)
+                .getSingleResult();
     }
 
     private StringBuilder createQuery(Long memberId, Long themeId, LocalDate from, LocalDate to) {

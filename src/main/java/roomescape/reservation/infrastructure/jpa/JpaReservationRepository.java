@@ -1,11 +1,11 @@
 package roomescape.reservation.infrastructure.jpa;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long>, ReservationCustomRepository {
 
@@ -13,7 +13,8 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsByDateAndTimeStartAtAndThemeId(LocalDate date, LocalTime time, Long themeId);
+    boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId,
+                                                     ReservationStatus status);
 
     boolean existsByThemeId(Long themeId);
 
