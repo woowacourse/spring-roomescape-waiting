@@ -16,7 +16,7 @@ import roomescape.exception.InvalidRequestException;
 public class Reservation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @ManyToOne
@@ -39,7 +39,6 @@ public class Reservation {
         validateDate(date);
         validateReservationTime(time);
         validateTheme(theme);
-
         this.id = id;
         this.member = member;
         this.date = date;
@@ -50,12 +49,15 @@ public class Reservation {
     public Reservation() {
     }
 
-    public static Reservation createWithoutId(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public static Reservation createWithoutId(Member member,
+                                              LocalDate date,
+                                              ReservationTime time,
+                                              Theme theme) {
         return new Reservation(null, member, date, time, theme);
     }
 
     public static void validateReservableTime(final LocalDate date, final LocalTime startAt) {
-        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
+       LocalDateTime dateTime = LocalDateTime.of(date, startAt);
         if (dateTime.isBefore(LocalDateTime.now())) {
             throw new InvalidRequestException("[ERROR] 현 시점 이후의 날짜와 시간을 선택해주세요.");
         }

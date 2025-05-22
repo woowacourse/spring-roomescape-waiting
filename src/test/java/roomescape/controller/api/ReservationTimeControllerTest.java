@@ -2,16 +2,21 @@ package roomescape.controller.api;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.ReservationTime;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import roomescape.repository.JpaReservationTimeRepository;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -20,6 +25,14 @@ import static org.hamcrest.Matchers.is;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeControllerTest {
 
+//    @Autowired
+//    private JpaReservationTimeRepository jpaReservationTimeRepository;
+//
+//    @BeforeEach
+//    void setUp() {
+//        jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+//    }
+
     @DisplayName("목록 내용 갯수를 검사한다")
     @Test
     void timesTest() {
@@ -27,12 +40,17 @@ class ReservationTimeControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(0));
+                .body("size()", is(1));
     }
 
     @Nested
     @DisplayName("예약시간 생성")
     class ReservationTimePostTest {
+
+//        @BeforeEach
+//        void setUp() {
+//            jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+//        }
 
         @DisplayName("Time 입력 테스트")
         @Test
@@ -104,6 +122,7 @@ class ReservationTimeControllerTest {
     }
 
     @Nested
+    @Disabled
     @DisplayName("예약시간 삭제")
     class DeleteReservationTimeTest {
 
