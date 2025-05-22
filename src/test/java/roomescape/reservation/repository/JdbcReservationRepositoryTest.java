@@ -72,8 +72,19 @@ class JdbcReservationRepositoryTest {
         tm.persistAndFlush(member1);
         tm.persistAndFlush(member2);
 
-        Reservation reservation1 = Reservation.booked(date, time1, theme1, member1);
-        Reservation reservation2 = Reservation.booked(date, time2, theme2, member2);
+        Reservation reservation1 = Reservation.builder()
+                .date(date)
+                .time(time1)
+                .theme(theme1)
+                .member(member1)
+                .build();
+
+        Reservation reservation2 = Reservation.builder()
+                .date(date)
+                .time(time2)
+                .theme(theme2)
+                .member(member2)
+                .build();
         tm.persistAndFlush(reservation1);
         tm.persistAndFlush(reservation2);
 
@@ -97,9 +108,9 @@ class JdbcReservationRepositoryTest {
         LocalDate date2 = LocalDate.of(2999, 7, 2);
         LocalDate date3 = LocalDate.of(2999, 7, 3);
 
-        tm.persistAndFlush(Reservation.booked(date1, time1, theme1, member1));
-        tm.persistAndFlush(Reservation.booked(date2, time1, theme1, member1));
-        tm.persistAndFlush(Reservation.booked(date3, time1, theme1, member1));
+        tm.persistAndFlush(Reservation.builder().date(date1).time(time1).theme(theme1).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().date(date2).time(time1).theme(theme1).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().date(date3).time(time1).theme(theme1).member(member1).build());
 
         tm.clear();
 
@@ -130,11 +141,11 @@ class JdbcReservationRepositoryTest {
         tm.persistAndFlush(member1);
         tm.persistAndFlush(member2);
 
-        tm.persistAndFlush(Reservation.booked(date1, time1, theme1, member1));
-        tm.persistAndFlush(Reservation.booked(date2, time1, theme1, member1));
-        tm.persistAndFlush(Reservation.booked(date3, time1, theme1, member1));
-        tm.persistAndFlush(Reservation.booked(date4, time1, theme1, member2));
-        tm.persistAndFlush(Reservation.booked(date5, time1, theme1, member2));
+        tm.persistAndFlush(Reservation.builder().date(date5).time(time1).theme(theme1).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().date(date4).time(time1).theme(theme1).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().date(date3).time(time1).theme(theme1).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().date(date2).time(time1).theme(theme1).member(member2).build());
+        tm.persistAndFlush(Reservation.builder().date(date1).time(time1).theme(theme1).member(member2).build());
 
         tm.clear();
 
@@ -161,7 +172,12 @@ class JdbcReservationRepositoryTest {
         tm.persistAndFlush(theme1);
         tm.persistAndFlush(member1);
         tm.persistAndFlush(futureTime);
-        final Reservation booked = Reservation.booked(today, futureTime, theme1, member1);
+        final Reservation booked = Reservation.builder()
+                .date(today)
+                .theme(theme1)
+                .member(member1)
+                .time(futureTime)
+                .build();
 
         tm.clear();
 
@@ -183,7 +199,12 @@ class JdbcReservationRepositoryTest {
         LocalDate today = LocalDate.now();
         LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);
         ReservationTime pastTime = ReservationTime.from(oneMinuteBefore);
-        final Reservation booked = Reservation.booked(today, pastTime, defaultTheme, defaultMember);
+        final Reservation booked = Reservation.builder()
+                .date(today)
+                .time(pastTime)
+                .theme(defaultTheme)
+                .member(defaultMember)
+                .build();
         // when
 
         // then

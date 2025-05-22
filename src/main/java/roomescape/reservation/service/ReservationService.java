@@ -1,22 +1,26 @@
 package roomescape.reservation.service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
+import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.WaitingReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -31,6 +35,9 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingReservationRepository waitingReservationRepository;
+    private final WaitingReservationService waitingReservationService;
+
 
     public List<ReservationResponse> findReservationsByCriteria(final ReservationSearchRequest request) {
         final List<Reservation> reservations = reservationRepository.findByCriteria(request.themeId(),
@@ -45,6 +52,7 @@ public class ReservationService {
         return reservationTimeRepository.findAllAvailable(date, themeId);
     }
 
+    @Transactional
     public ReservationResponse saveReservation(final ReservationRequest request, final LoginMember loginMember) {
         final ReservationTime reservationTime = findReservationTimeById(request.timeId());
         final Member member = findMemberById(loginMember.id());
@@ -64,14 +72,27 @@ public class ReservationService {
             final ReservationTime reservationTime,
             final Theme theme, Member member
     ) {
-        Reservation reservation;
         if (hasReservation(date, reservationTime, theme)) {
-            reservation = Reservation.waiting(date, reservationTime, theme, member);
-        } else {
-            reservation = Reservation.booked(date, reservationTime, theme, member);
+            throw new ReservationException("이미 해당 날짜에 예약이 존재합니다.");
         }
-        final Reservation newReservation = reservationRepository.save(reservation);
-        return new ReservationResponse(newReservation);
+        try {
+            final Reservation reservation = Reservation.builder()
+                    .date(date)
+                    .time(reservationTime)
+                    .theme(theme)
+                    .member(member)
+                    .build();
+            final Reservation newReservation = reservationRepository.save(reservation);
+            return new ReservationResponse(newReservation);
+        } catch (final DataIntegrityViolationException e) {
+            final WaitingReservation waitingReservation = WaitingReservation.builder()
+                    .date(date)
+                    .time(reservationTime)
+                    .theme(theme)
+                    .member(member)
+                    .build();
+            return waitingReservationService.saveAsWaitingIfReserved(waitingReservation);
+        }
     }
 
     public void deleteReservation(final Long id) {
@@ -80,29 +101,31 @@ public class ReservationService {
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {
         final Member member = findMemberById(loginMember.id());
-        final List<MyReservationResponse> bookedReservations = reservationRepository.findByMemberAndStatus(member,
-                        ReservationStatus.BOOKED).stream()
-                .map(MyReservationResponse::new)
+        final List<MyReservationResponse> bookedReservations = reservationRepository.findByMember(member).stream()
+                .map(MyReservationResponse::from)
                 .toList();
-        final List<MyReservationResponse> waitingReservations = reservationRepository.findWaitingReservationByMemberWithRank(
+        final List<MyReservationResponse> waitingReservations = waitingReservationRepository.findWaitingReservationByMember(
                         member).stream()
-                .map(MyReservationResponse::new)
+                .map(MyReservationResponse::from)
                 .toList();
         return Stream.concat(bookedReservations.stream(), waitingReservations.stream())
                 .toList();
     }
 
     public List<ReservationResponse> findAllWaitingReservation() {
-        final List<Reservation> waitingReservations = reservationRepository.findAllByStatus(ReservationStatus.WAITING);
-        return waitingReservations.stream().map(ReservationResponse::new).toList();
+        final List<WaitingReservation> waitingReservationReservations = waitingReservationRepository.findAll();
+        return waitingReservationReservations.stream().map(ReservationResponse::new).toList();
     }
 
     public void approveWaitingReservation(final Long id) {
-        final Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
-
-        reservation.updateStatus(ReservationStatus.BOOKED);
-
+        final WaitingReservation waitingReservation = this.waitingReservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약 대기가 존재하지 않습니다."));
+        final Reservation reservation = Reservation.builder()
+                .theme(waitingReservation.getTheme())
+                .date(waitingReservation.getDate())
+                .time(waitingReservation.getTime())
+                .member(waitingReservation.getMember())
+                .build();
         reservationRepository.save(reservation);
     }
 

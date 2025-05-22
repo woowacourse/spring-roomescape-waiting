@@ -30,7 +30,7 @@ import roomescape.theme.domain.Theme;
 
 @DataJpaTest
 @Sql("/data.sql")
-@Import(ReservationService.class)
+@Import({ReservationService.class, WaitingReservationService.class})
 class ReservationServiceTest {
 
     @Autowired
@@ -38,7 +38,7 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-
+    
     @Autowired
     private ReservationService service;
 
@@ -63,7 +63,12 @@ class ReservationServiceTest {
                 .role(MemberRole.MEMBER)
                 .build();
 
-        reservation = Reservation.booked(LocalDate.of(2999, 5, 11), time, theme, member);
+        reservation = Reservation.builder()
+                .date(LocalDate.of(2999, 5, 11))
+                .time(time)
+                .theme(theme)
+                .member(member)
+                .build();
     }
 
     @Test
@@ -83,7 +88,7 @@ class ReservationServiceTest {
         tm.persistAndFlush(theme);
         tm.persistAndFlush(member);
         ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time.getId(), theme.getId());
-        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
         tm.clear();
 

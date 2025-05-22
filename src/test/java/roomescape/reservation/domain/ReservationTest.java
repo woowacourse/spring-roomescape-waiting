@@ -27,8 +27,13 @@ class ReservationTest {
         // given
         LocalDate today = LocalDate.now();
         LocalTime later = LocalTime.now().plusMinutes(5);
-        ReservationTime rt = ReservationTime.from(later);
-        Reservation reservation = Reservation.booked(today, rt, defaultTheme, defaultMember);
+        ReservationTime reservationTime = ReservationTime.from(later);
+        Reservation reservation = Reservation.builder()
+                .date(today)
+                .time(reservationTime)
+                .theme(defaultTheme)
+                .member(defaultMember)
+                .build();
 
         // when
         // then
@@ -51,22 +56,40 @@ class ReservationTest {
         // when
         // then
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThatThrownBy(
-                            () -> Reservation.booked(null, reservationTime, theme, member))
+            softly.assertThatThrownBy(() ->
+                            Reservation.builder()
+                                    .date(null)
+                                    .time(reservationTime)
+                                    .theme(theme)
+                                    .member(member)
+                                    .build())
                     .isInstanceOf(NullPointerException.class);
-            softly.assertThatThrownBy(
-                            () -> Reservation.booked(localDate, null, theme, member))
+
+            softly.assertThatThrownBy(() ->
+                            Reservation.builder()
+                                    .date(localDate)
+                                    .time(null)
+                                    .theme(theme)
+                                    .member(member)
+                                    .build())
                     .isInstanceOf(NullPointerException.class);
-            softly.assertThatThrownBy(
-                            () -> Reservation.booked(localDate, reservationTime, null, member))
+
+            softly.assertThatThrownBy(() ->
+                            Reservation.builder()
+                                    .date(localDate)
+                                    .time(reservationTime)
+                                    .theme(null)
+                                    .member(member)
+                                    .build())
                     .isInstanceOf(NullPointerException.class);
-            softly.assertThatThrownBy(() -> Reservation.booked(null, reservationTime, theme, member))
-                    .isInstanceOf(NullPointerException.class);
-            softly.assertThatThrownBy(() -> Reservation.booked(localDate, null, theme, member))
-                    .isInstanceOf(NullPointerException.class);
-            softly.assertThatThrownBy(() -> Reservation.booked(localDate, reservationTime, null, member))
-                    .isInstanceOf(NullPointerException.class);
-            softly.assertThatThrownBy(() -> Reservation.booked(localDate, reservationTime, theme, null))
+
+            softly.assertThatThrownBy(() ->
+                            Reservation.builder()
+                                    .date(localDate)
+                                    .time(reservationTime)
+                                    .theme(theme)
+                                    .member(null)
+                                    .build())
                     .isInstanceOf(NullPointerException.class);
         });
     }

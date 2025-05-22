@@ -4,8 +4,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,7 +26,6 @@ import roomescape.reservation.service.ReservationService;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private static final Log log = LogFactory.getLog(AdminReservationController.class);
     private final ReservationService reservationService;
 
     @PostMapping

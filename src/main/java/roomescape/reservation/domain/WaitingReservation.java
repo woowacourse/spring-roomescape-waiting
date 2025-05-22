@@ -8,31 +8,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Getter
 @Entity
-@Table(
-        uniqueConstraints = @UniqueConstraint(
-                name = "unique_reservation_per_time",
-                columnNames = {"date", "time_id", "theme_id"}
-        )
-)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Reservation extends BaseTimeEntity {
+public class WaitingReservation extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,7 +43,7 @@ public class Reservation extends BaseTimeEntity {
     private Member member;
 
     @Builder
-    private Reservation(
+    private WaitingReservation(
             final Long id,
             @NonNull final LocalDate date,
             @NonNull final ReservationTime time,
@@ -66,14 +55,5 @@ public class Reservation extends BaseTimeEntity {
         this.time = time;
         this.theme = theme;
         this.member = member;
-    }
-
-    @PrePersist
-    private void validateFutureOrPresent() {
-        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        final LocalDateTime currentDateTime = LocalDateTime.now();
-        if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new ReservationException("예약은 현재 시간 이후로 가능합니다.");
-        }
     }
 }

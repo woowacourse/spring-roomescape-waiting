@@ -7,8 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.dto.WaitingReservationWithRank;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -34,19 +32,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByTimeId(final Long timeId);
 
-    List<Reservation> findByMemberAndStatus(final Member member, ReservationStatus status);
-
-    @Query("""
-                select new roomescape.reservation.dto.WaitingReservationWithRank(r, 
-                  (select COUNT(rw)
-                   from Reservation rw
-                   where rw.theme = r.theme AND rw.date = r.date AND rw.time = r.time AND rw.createdAt <= r.createdAt AND rw.status = 'WAITING')
-                )
-                FROM Reservation r
-                WHERE r.member = :member
-                  AND r.status = 'WAITING'
-            """)
-    List<WaitingReservationWithRank> findWaitingReservationByMemberWithRank(@Param("member") Member member);
-
-    List<Reservation> findAllByStatus(ReservationStatus status);
+    List<Reservation> findByMember(final Member member);
 }
