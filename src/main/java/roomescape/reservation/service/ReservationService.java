@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
@@ -171,5 +172,13 @@ public class ReservationService {
             reservations.stream().map(MyReservationResponse::from),
             waitingWithRanks.stream().map(MyReservationResponse::from)
         ).toList();
+    }
+
+    public List<ReservationResponse> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        return waitings.stream()
+            .map(ReservationResponse::from)
+            .toList();
     }
 }

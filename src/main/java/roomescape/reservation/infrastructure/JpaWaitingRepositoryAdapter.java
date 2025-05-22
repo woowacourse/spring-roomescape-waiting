@@ -7,6 +7,7 @@ import roomescape.reservation.domain.WaitingRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 @Repository
 public class JpaWaitingRepositoryAdapter implements WaitingRepository {
@@ -40,5 +41,10 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
     @Override
     public void deleteById(Long id) {
         jpaWaitingRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Waiting> findAll() {
+        return jpaWaitingRepository.findAll();
     }
 }

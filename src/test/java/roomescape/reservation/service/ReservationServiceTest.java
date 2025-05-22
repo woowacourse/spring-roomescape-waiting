@@ -34,14 +34,17 @@ import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.infrastructure.JpaWaitingRepository;
 import roomescape.reservation.infrastructure.JpaWaitingRepositoryAdapter;
 import roomescape.reservation.presentation.dto.ReservationRequest;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationServiceTest.ReservationConfig;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepositoryAdaptor;
+import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
+import roomescape.theme.presentation.dto.ThemeResponse;
 
 @DataJpaTest
 @Import(ReservationConfig.class)
@@ -181,6 +184,14 @@ class ReservationServiceTest {
         Assertions.assertThatThrownBy(() -> reservationService.deleteWaiting(nonExistentWaitingId))
             .isInstanceOf(ReservationException.class)
             .hasMessage("예약 대기를 찾을 수 없습니다.");
+    }
+
+    @DisplayName("예약 대기 목록을 조회할 수 있다.")
+    @Test
+    void can_find_all_waitings() {
+        List<ReservationResponse> waitings = reservationService.findAllWaitings();
+
+        assertThat(waitings.size()).isEqualTo(2);
     }
 
     static class ReservationConfig {
