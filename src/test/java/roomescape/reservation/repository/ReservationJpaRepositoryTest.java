@@ -51,9 +51,9 @@ class ReservationJpaRepositoryTest {
         );
         Theme theme = themeRepository.save(new Theme("공포", "ss", "ss"));
         reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), time, theme, member, ReservationStatus.RESERVE));
+                Reservation.create(예약날짜_내일.getDate(), time, theme, member));
         reservationRepository.save(
-                Reservation.create(LocalDate.of(2002, 5, 1), time, theme, member, ReservationStatus.RESERVE));
+                Reservation.create(LocalDate.of(2002, 5, 1), time, theme, member));
     }
 
     @Test
