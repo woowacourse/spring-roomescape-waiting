@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,11 +68,11 @@ public class AdminController {
     @GetMapping("/reservations/waiting")
     public ResponseEntity<List<ReservationWaitResponse>> getWaitReservations() {
         List<ReservationWaitResponse> responses = reservationService.findAllByStatus(ReservationStatus.WAIT);
-        
+
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/reservations/waiting/{id}")
+    @PutMapping("/reservations/waiting/{id}")
     public ResponseEntity<Void> approveWaitReservation(@PathVariable("id") Long reservationId) {
         reservationService.approveWaitReservationByAdmin(reservationId);
         return ResponseEntity.ok().build();
