@@ -4,6 +4,8 @@ import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
+import roomescape.business.model.vo.StartTime;
+import roomescape.business.model.vo.ThemeName;
 import roomescape.business.model.vo.UserName;
 
 import java.util.List;
@@ -11,18 +13,18 @@ import java.util.List;
 public record WaitingDto(
         Id reservationId,
         UserName userName,
-        Id themeId,
+        ThemeName themeName,
         ReservationDate date,
-        Id timeId
+        StartTime time
 ) {
 
     public static WaitingDto fromEntity(final ReservationSlot slot, final Reservation reservation) {
         return new WaitingDto(
                 reservation.getId(),
                 reservation.getUser().getName(),
-                slot.getTheme().getId(),
+                slot.getTheme().getName(),
                 slot.getDate(),
-                slot.getTime().getId()
+                slot.getTime().getStartTime()
         );
     }
 

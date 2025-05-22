@@ -3,22 +3,23 @@ package roomescape.presentation.dto.response;
 import roomescape.business.dto.WaitingDto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 public record WaitingResponse(
         String id,
         String name,
-        String themeId,
+        String themeName,
         LocalDate date,
-        String timeId
+        LocalTime time
 ) {
     public static WaitingResponse from(final WaitingDto dto) {
         return new WaitingResponse(
                 dto.reservationId().value(),
                 dto.userName().value(),
-                dto.themeId().value(),
+                dto.themeName().value(),
                 dto.date().value(),
-                dto.timeId().value()
+                dto.time().value()
         );
     }
 

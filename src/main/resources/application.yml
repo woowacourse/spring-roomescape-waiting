@@ -9,6 +9,7 @@ spring:
     url: jdbc:h2:mem:database  # 인메모리 H2 DB 사용
   jpa:
     open-in-view: false
+    show-sql: true
 
 jwt:
   secret: iwantcoffee-americano+ice-americano-is-best-i.love_it+yaho

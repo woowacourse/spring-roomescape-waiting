@@ -1,5 +1,6 @@
 package roomescape.infrastructure.jpa.dao;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.business.model.entity.ReservationSlot;
@@ -25,6 +26,9 @@ public interface JpaReservationSlotDao extends JpaRepository<ReservationSlot, Id
             )
             """)
     List<ReservationSlot> findAllSlotsContainsReserverOf(Id userId);
+
+    @EntityGraph(attributePaths = {"reservations", "reservations.user", "theme", "time"})
+    List<ReservationSlot> findAll();
 
     Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(ReservationDate date, Id timeId, Id themeId);
 }
