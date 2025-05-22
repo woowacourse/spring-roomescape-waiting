@@ -4,6 +4,7 @@ import roomescape.business.dto.MyReservationDto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 
 public record MyReservationResponse(
@@ -34,6 +35,10 @@ public record MyReservationResponse(
     public static List<MyReservationResponse> from(List<MyReservationDto> myReservations) {
         return myReservations.stream()
                 .map(MyReservationResponse::from)
+                .sorted(Comparator
+                        .comparing(MyReservationResponse::date)
+                        .thenComparing(MyReservationResponse::time)
+                )
                 .toList();
     }
 }
