@@ -1,9 +1,11 @@
 package roomescape.reservation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.domain.Reservation;
 
 public class MyReservationJsonResponse implements MyReservationResponse {
 
@@ -21,13 +23,13 @@ public class MyReservationJsonResponse implements MyReservationResponse {
         this.status = status;
     }
 
-    public static MyReservationJsonResponse fromReservationAndStatus(Reservation reservation, String status) {
+    public static MyReservationJsonResponse fromReservationAndStatus(Reservation reservation, ReservationStatus status) {
         return new MyReservationJsonResponse(
-            reservation.getId(),
-            reservation.getTheme().getName(),
-            reservation.getDate(),
-            reservation.getTime().getStartAt(),
-            status
+                reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                status.getDescription()
         );
     }
 

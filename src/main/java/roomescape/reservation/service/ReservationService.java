@@ -1,14 +1,12 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchConditionRequest;
 import roomescape.reservation.dto.response.MyReservationJsonResponse;
@@ -18,30 +16,34 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
 
     @Autowired
     public ReservationService(
-        ReservationRepository reservationRepository
+            ReservationRepository reservationRepository
     ) {
         this.reservationRepository = reservationRepository;
     }
 
     public ReservationResponse createReservation(
-        ReservationTime reservationTime,
-        Theme theme,
-        Member member,
-        List<ReservationTime> availableTimes,
-        ReservationCreateRequest reservationCreateRequest
+            ReservationTime reservationTime,
+            Theme theme,
+            Member member,
+            List<ReservationTime> availableTimes,
+            ReservationCreateRequest reservationCreateRequest
     ) {
         validateNotPast(LocalDateTime.of(reservationCreateRequest.date(), reservationTime.getStartAt()));
 
         validateReservationTimeConflict(availableTimes, reservationTime);
 
         Reservation reservation = reservationRepository.save(
-            reservationCreateRequest.toReservation(reservationTime, theme, member));
+                reservationCreateRequest.toReservation(reservationTime, theme, member));
 
         return ReservationResponse.from(reservation);
     }
@@ -65,17 +67,17 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findByCondition(
-        ReservationSearchConditionRequest reservationSearchConditionRequest) {
+            ReservationSearchConditionRequest reservationSearchConditionRequest) {
         List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndVisitDateBetween(
-            reservationSearchConditionRequest.getThemeId(),
-            reservationSearchConditionRequest.getMemberId(),
-            reservationSearchConditionRequest.getDateFrom(),
-            reservationSearchConditionRequest.getDateTo()
+                reservationSearchConditionRequest.getThemeId(),
+                reservationSearchConditionRequest.getMemberId(),
+                reservationSearchConditionRequest.getDateFrom(),
+                reservationSearchConditionRequest.getDateTo()
         );
 
         return reservations.stream()
-            .map(ReservationResponse::from)
-            .toList();
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public void deleteReservationById(Long id) {
@@ -95,20 +97,20 @@ public class ReservationService {
     public List<MyReservationResponse> findAllByMember(Member member) {
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         return reservations.stream()
-            .map(reservation ->
-                MyReservationJsonResponse.fromReservationAndStatus(
-                    reservation,
-                    getReservationStatus(reservation)
+                .map(reservation ->
+                        MyReservationJsonResponse.fromReservationAndStatus(
+                                reservation,
+                                getReservationStatus(reservation)
+                        )
                 )
-            )
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 
-    private String getReservationStatus(Reservation reservation) {
+    private ReservationStatus getReservationStatus(Reservation reservation) {
         LocalDateTime reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getTime().getStartAt());
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            return "완료";
+            return ReservationStatus.COMPLETED;
         }
-        return "예약";
+        return ReservationStatus.RESERVED;
     }
 }
