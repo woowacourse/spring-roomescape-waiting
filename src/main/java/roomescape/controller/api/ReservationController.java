@@ -34,26 +34,42 @@ public class ReservationController {
         return ResponseEntity.ok(allReservations);
     }
 
-    @PostMapping
-    public ResponseEntity<ReservationResponseDto> addReservation(@CurrentMember LoginInfo loginInfo,
-                                                                 @RequestBody final MemberReservationCreateRequestDto requestDto) {
-        ReservationCreateDto reservationCreateDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
-                requestDto.themeId(), loginInfo.id());
-        ReservationResponseDto responseDto = reservationService.createReservation(reservationCreateDto);
-        return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/me")
     public ResponseEntity<List<MyReservationResponseDto>> getMyReservations(
             @CurrentMember LoginInfo loginInfo
     ) {
         List<MyReservationResponseDto> myReservations = reservationService.findMyReservations(loginInfo);
         return ResponseEntity.ok(myReservations);
+    }
+
+    @PostMapping
+    public ResponseEntity<ReservationResponseDto> addReservation(
+            @CurrentMember LoginInfo loginInfo,
+            @RequestBody final MemberReservationCreateRequestDto requestDto
+    ) {
+        ReservationCreateDto reservationCreateDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
+                requestDto.themeId(), loginInfo.id());
+        ReservationResponseDto responseDto = reservationService.createReservation(reservationCreateDto);
+        return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponseDto> addReservationWaiting(
+            @CurrentMember LoginInfo loginInfo,
+            @RequestBody MemberReservationCreateRequestDto request
+    ) {
+        ReservationCreateDto reservationCreateDto = new ReservationCreateDto(request.date(), request.timeId(),
+                request.themeId(), loginInfo.id());
+        ReservationResponseDto reservationWaiting = reservationService.createReservationWaiting(reservationCreateDto);
+        return ResponseEntity.created(URI.create("reservations/waiting/" + reservationWaiting.id())).body(reservationWaiting);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable("id") final Long id
+    ) {
+        reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 }

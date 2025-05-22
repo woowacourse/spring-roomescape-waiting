@@ -8,6 +8,7 @@ import roomescape.domain.member.Role;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.reservation.Reservation;
 
 class ReservationTest {
 
@@ -16,7 +17,7 @@ class ReservationTest {
     void invalidReservationDateTimeTest() {
         Member member = new Member(1L, "가이온", "hello@woowa.com", Role.USER, "password");
         Assertions.assertThatThrownBy(() ->
-                        new Reservation(1L, member, null, new ReservationTime(1L, LocalTime.now()), new Theme(1L, "우테코", "방탈출", ".png")))
+                        Reservation.createWithoutId(member, null, new ReservationTime(1L, LocalTime.now()), new Theme(1L, "우테코", "방탈출", ".png")))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -25,7 +26,7 @@ class ReservationTest {
     void invalidReservationTimeTest() {
         Member member = new Member(1L, "가이온", "hello@woowa.com", Role.USER, "password");
         Assertions.assertThatThrownBy(() ->
-                        new Reservation(1L, member, LocalDate.now(), null, new Theme(1L, "우테코", "방탈출", ".png")))
+                        Reservation.createWithoutId(member, LocalDate.now(), null, new Theme(1L, "우테코", "방탈출", ".png")))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -4,10 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.ReservationWaiting;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MyReservationResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -62,8 +63,46 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId,
                 themeId);
         if (!reservations.isEmpty()) {
-            throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 다른 예약 일정을 선택해주세요.");
+            throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 예약 대기 기능을 사용해주세요.");
         }
+    }
+
+    public ReservationResponseDto createReservationWaiting(ReservationCreateDto createDto) {
+        // 1. 요청한 시간, 테마, 멤버 반환
+        ReservationTime reservationTime = reservationTimeRepository.findById(createDto.timeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + createDto.timeId()));
+
+        Reservation.validateReservableTime(createDto.date(), reservationTime.getStartAt());
+
+        Theme theme = themeRepository.findById(createDto.themeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + createDto.themeId()));
+
+        Member member = memberRepository.findById(createDto.memberId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + createDto.memberId()));
+
+        // 2. 예약 대기 등록
+        List<Reservation> existingReservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
+                createDto.date(),
+                createDto.timeId(),
+                createDto.themeId());
+
+        if (existingReservations.isEmpty()) {
+            throw new IllegalArgumentException("[ERROR] 현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
+        }
+        ReservationWaiting reservationWaiting = new ReservationWaiting(
+                createDto.date(),
+                reservationTime,
+                theme,
+                member,
+                existingReservations.size() //todo : rank는 이것만 해주면 되나? 다시 생각해보기
+        );
+
+        Reservation savedReservation = reservationRepository.save(reservationWaiting.getReservation());
+        return ReservationResponseDto.of(
+                savedReservation,
+                reservationTime,
+                theme
+        );
     }
 
     @Transactional(readOnly = true)
