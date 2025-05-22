@@ -62,6 +62,12 @@ public class WaitingService {
                 .toList();
     }
 
+    public List<WaitingResponse> getWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::new)
+                .toList();
+    }
+
     @Transactional
     public void deleteWaiting(final Long id) {
         final Waiting waiting = waitingRepository.findById(id)
