@@ -45,6 +45,10 @@ public class Waiting {
         return new Waiting(null, LocalDateTime.now(), reservation, member);
     }
 
+    public boolean hasOwner(final Member other) {
+        return this.member.equals(other);
+    }
+
     public Long getId() {
         return id;
     }

@@ -3,6 +3,7 @@ package roomescape.waiting.service;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
+import roomescape.global.exception.custom.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -36,6 +37,21 @@ public class WaitingService {
         final Waiting waiting = Waiting.register(member, reservation);
         final Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingResponse(savedWaiting);
+    }
+
+    public void deleteWaitingById(final long waitingId, final LoginMember loginMember) {
+        // TODO 고민할 것
+        // 이게 효율적인 방법일까?
+        // 멤버를 또 불러오는게 맞을까?? 아니면 아이디만 쓰기??
+        // 트랜잭션이 필요한가?
+        final Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new BadRequestException("id를 찾을 수 없습니다."));
+        final Member member = memberRepository.findById(loginMember.id())
+                .orElseThrow(() -> new BadRequestException("회원 정보를 찾을 수 없습니다."));
+        if (!waiting.hasOwner(member)) {
+            throw new ForbiddenException("본인의 예약대기만 삭제할 수있습니다.");
+        }
+        waitingRepository.delete(waiting);
     }
 
     private void validateWaiting(final Reservation reservation, final Member member) {

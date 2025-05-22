@@ -76,11 +76,11 @@ INSERT INTO reservation(date, member_id, time_id, theme_id)
 VALUES (DATEADD('DAY', -8, CURRENT_DATE), 1, 5, 10);
 
 INSERT INTO waiting(member_id, reservation_id, created_at)
-VALUES (2, 1, '2025-05-01 20:41:04.077864'); -- 3 번째 예약 대기
+VALUES (2, 1, '2025-05-01 20:41:04.077864'); -- 1 번째 예약대기
 INSERT INTO waiting(member_id, reservation_id, created_at)
-VALUES (3, 1, '2025-05-02 20:41:04.077864'); -- 2 번째 예약 대기
+VALUES (3, 1, '2025-05-02 20:41:04.077864'); -- 2 번째 예약대기
 INSERT INTO waiting(member_id, reservation_id, created_at)
-VALUES (1, 1, '2025-05-03 20:41:04.077864'); -- 3 번째 예약 대기
+VALUES (1, 1, '2025-05-03 20:41:04.077864'); -- 3 번째 예약대기
 INSERT INTO waiting(member_id, reservation_id, created_at)
 VALUES (1, 2, '2025-05-21 20:41:04.077864'); -- 1 번째 예약 대기
 INSERT INTO waiting(member_id, reservation_id, created_at)
