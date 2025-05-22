@@ -3,6 +3,8 @@ package roomescape.controller;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,17 +14,17 @@ import roomescape.annotation.CheckRole;
 import roomescape.dto.request.CreateWaitingRequest;
 import roomescape.dto.request.LoginMemberRequest;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.entity.Waiting;
+import roomescape.entity.WaitingReservation;
 import roomescape.global.Role;
-import roomescape.service.ReservationFacade;
+import roomescape.service.ReservationService;
 
 @RestController
-@RequestMapping("waiting")
+@RequestMapping("/waiting")
 public class WaitingController {
 
-    private final ReservationFacade waitingService;
+    private final ReservationService waitingService;
 
-    public WaitingController(ReservationFacade waitingService) {
+    public WaitingController(ReservationService waitingService) {
         this.waitingService = waitingService;
     }
 
@@ -32,8 +34,8 @@ public class WaitingController {
             @RequestBody @Valid CreateWaitingRequest request,
             LoginMemberRequest loginMemberRequest
     ) {
-        Waiting waiting = waitingService.addWaiting(request, loginMemberRequest);
-        WaitingResponse response = WaitingResponse.from(waiting);
+        WaitingReservation waitingReservation = waitingService.addWaiting(request, loginMemberRequest);
+        WaitingResponse response = WaitingResponse.from(waitingReservation);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -41,5 +43,13 @@ public class WaitingController {
                 .toUri();
 
         return ResponseEntity.created(location).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    @CheckRole(value = {Role.ADMIN, Role.USER})
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") Long id) {
+        waitingService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
+
     }
 }
