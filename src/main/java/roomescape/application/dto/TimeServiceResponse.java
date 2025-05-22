@@ -18,8 +18,4 @@ public record TimeServiceResponse(
                 .map(TimeServiceResponse::from)
                 .toList();
     }
-
-    public ReservationTime toEntity() {
-        return ReservationTime.of(id, startAt);
-    }
 }

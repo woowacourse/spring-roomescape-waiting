@@ -19,8 +19,4 @@ public record ThemeServiceResponse(
                 .map(ThemeServiceResponse::from)
                 .toList();
     }
-
-    public Theme toEntity() {
-        return Theme.of(id, name, description, thumbnail);
-    }
 }
