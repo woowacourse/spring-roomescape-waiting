@@ -1,4 +1,4 @@
-package roomescape.application;
+package roomescape.infrastructure;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

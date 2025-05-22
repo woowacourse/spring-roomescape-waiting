@@ -1,4 +1,4 @@
-package roomescape.application;
+package roomescape.application.service;
 
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.application.service.AuthService;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.request.LoginRequestDto;

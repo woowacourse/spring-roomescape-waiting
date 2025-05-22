@@ -1,4 +1,4 @@
-package roomescape.application;
+package roomescape.application.service;
 
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import roomescape.application.service.ThemeService;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Theme;
