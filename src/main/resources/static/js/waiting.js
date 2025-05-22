@@ -24,7 +24,7 @@ function render(data) {
               예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
         const id = item.id;
-        const name = item.member;
+        const name = item.name;
         const theme = item.theme;
         const date = item.date;
         const startAt = item.time;
