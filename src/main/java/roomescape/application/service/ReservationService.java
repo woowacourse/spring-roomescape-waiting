@@ -12,13 +12,13 @@ import roomescape.dto.request.ReservationSearchDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
 import roomescape.infrastructure.db.ReservationTimeJpaRepository;
-import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 import roomescape.persistence.MemberRepository;
 import roomescape.persistence.ReservationRepository;
+import roomescape.persistence.ThemeRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeJpaRepository reservationTimeJpaRepository;
-    private final ThemeJpaRepository themeJpaRepository;
+    private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
@@ -60,7 +60,7 @@ public class ReservationService {
     }
 
     public void cancelReservation(Long id) {
-        reservationRepository.deleteWithId(id);
+        reservationRepository.deleteById(id);
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
@@ -73,7 +73,7 @@ public class ReservationService {
 
     private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
         ReservationTime time = findTimeById(reservationRegisterDto.timeId());
-        Theme theme = findThemeById(reservationRegisterDto.themeId());
+        Theme theme = themeRepository.findById(reservationRegisterDto.themeId());
         Member member = memberRepository.findById(loginMember.id());
 
         return reservationRegisterDto.convertToReservation(time, theme, member);
@@ -90,10 +90,5 @@ public class ReservationService {
     private ReservationTime findTimeById(final Long id) {
         return reservationTimeJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("id 에 해당하는 예약 시각이 존재하지 않습니다."));
-    }
-
-    private Theme findThemeById(final Long id) {
-        return themeJpaRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("id 에 해당하는 테마가 존재하지 않습니다."));
     }
 }
