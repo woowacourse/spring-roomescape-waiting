@@ -75,6 +75,7 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId)));
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         waitingRepository.deleteById(id);
     }
