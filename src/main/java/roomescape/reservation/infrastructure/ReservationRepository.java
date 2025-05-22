@@ -21,6 +21,13 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
 
     List<Reservation> findByThemeId(Long themeId);
 
+    @Query("""
+                SELECT r
+                FROM Reservation r
+                WHERE r.timeSlot.id = :timeSlotId
+            """)
+    List<Reservation> findByTimeSlotId(Long timeSlotId);
+
     Optional<Reservation> findByDateAndTimeSlotAndTheme(LocalDate date, TimeSlot time, Theme theme);
 
     List<Reservation> findByDateBetween(LocalDate dateFrom, LocalDate dateTo);
