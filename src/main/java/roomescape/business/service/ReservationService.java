@@ -1,13 +1,13 @@
 package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
+import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
@@ -36,7 +36,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
-        val user = users.findById(Id.create(userIdValue))
+        User user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
 
         ReservationSlot slot = slotService.getByDateAndTimeIdAndThemeIdOrElseCreate(date, timeIdValue, themeIdValue);
@@ -45,13 +45,13 @@ public class ReservationService {
             throw new DuplicatedException(RESERVATION_DUPLICATED);
         }
 
-        val reservation = new Reservation(user, slot);
+        Reservation reservation = new Reservation(user, slot);
         reservations.save(reservation);
         return ReservationDto.fromEntity(reservation);
     }
 
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom, final LocalDate dateTo) {
-        val reservations = this.reservations.findAllWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
+        List<Reservation> reservations = this.reservations.findAllWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
         return ReservationDto.fromEntities(reservations);
     }
 
@@ -68,8 +68,8 @@ public class ReservationService {
 
     @Transactional
     public void delete(final String reservationIdValue, final String userIdValue) {
-        val reservationId = Id.create(reservationIdValue);
-        val reservation = reservations.findById(reservationId)
+        Id reservationId = Id.create(reservationIdValue);
+        Reservation reservation = reservations.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
         if (!reservation.isSameReserver(userIdValue)) {
             throw new AuthorizationException(AUTHORITY_LACK);

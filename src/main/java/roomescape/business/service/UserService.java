@@ -1,7 +1,6 @@
 package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.UserDto;
@@ -28,25 +27,25 @@ public class UserService {
         if (users.existByEmail(email)) {
             throw new InvalidCreateArgumentException(EMAIL_DUPLICATED);
         }
-        val user = User.member(name, email, password);
+        User user = User.member(name, email, password);
         users.save(user);
         return UserDto.fromEntity(user);
     }
 
     public UserDto getById(final String userIdValue) {
-        val user = users.findById(Id.create(userIdValue))
+        User user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
         return UserDto.fromEntity(user);
     }
 
     public UserDto getByEmail(final String email) {
-        val user = users.findByEmail(email)
+        User user = users.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
         return UserDto.fromEntity(user);
     }
 
     public List<UserDto> getAll() {
-        val users = this.users.findAll();
+        List<User> users = this.users.findAll();
         return UserDto.fromEntities(users);
     }
 }

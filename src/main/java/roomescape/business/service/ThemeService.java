@@ -1,7 +1,6 @@
 package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ThemeDto;
@@ -31,19 +30,19 @@ public class ThemeService {
 
     @Transactional
     public ThemeDto addAndGet(final String name, final String description, final String thumbnail) {
-        val theme = new Theme(name, description, thumbnail);
+        Theme theme = new Theme(name, description, thumbnail);
         themes.save(theme);
         return ThemeDto.fromEntity(theme);
     }
 
     public List<ThemeDto> getAll() {
-        val themes = this.themes.findAll();
+        List<Theme> themes = this.themes.findAll();
         return ThemeDto.fromEntities(themes);
     }
 
     public List<ThemeDto> getPopular(final int size) {
-        val now = LocalDate.now();
-        val popularThemes = themes.findPopularThemes(
+        LocalDate now = LocalDate.now();
+        List<Theme> popularThemes = themes.findPopularThemes(
                 now.minusDays(AGGREGATE_START_DATE_INTERVAL),
                 now.minusDays(AGGREGATE_END_DATE_INTERVAL),
                 size
@@ -53,7 +52,7 @@ public class ThemeService {
 
     @Transactional
     public void delete(final String themeIdValue) {
-        val themeId = Id.create(themeIdValue);
+        Id themeId = Id.create(themeIdValue);
         if (reservations.existByThemeId(themeId)) {
             throw new RelatedEntityExistException(RESERVED_THEME);
         }

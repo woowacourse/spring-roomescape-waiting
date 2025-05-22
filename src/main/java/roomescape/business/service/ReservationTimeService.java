@@ -1,7 +1,6 @@
 package roomescape.business.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservableReservationTimeDto;
@@ -34,7 +33,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTimeDto addAndGet(final LocalTime time) {
-        val reservationTime = new ReservationTime(time);
+        ReservationTime reservationTime = new ReservationTime(time);
         validateNoDuplication(reservationTime);
         validateTimeInterval(reservationTime);
 
@@ -43,35 +42,35 @@ public class ReservationTimeService {
     }
 
     private void validateNoDuplication(final ReservationTime reservationTime) {
-        val isExist = reservationTimes.existByTime(reservationTime.startTimeValue());
+        boolean isExist = reservationTimes.existByTime(reservationTime.startTimeValue());
         if (isExist) {
             throw new DuplicatedException(RESERVATION_TIME_ALREADY_EXIST);
         }
     }
 
     private void validateTimeInterval(final ReservationTime reservationTime) {
-        val existInInterval = reservationTimes.existBetween(reservationTime.startInterval(), reservationTime.endInterval());
+        boolean existInInterval = reservationTimes.existBetween(reservationTime.startInterval(), reservationTime.endInterval());
         if (existInInterval) {
             throw new InvalidCreateArgumentException(RESERVATION_TIME_INTERVAL_INVALID);
         }
     }
 
     public List<ReservationTimeDto> getAll() {
-        val reservationTimes = this.reservationTimes.findAll();
+        List<ReservationTime> reservationTimes = this.reservationTimes.findAll();
         return ReservationTimeDto.fromEntities(reservationTimes);
     }
 
     public List<ReservableReservationTimeDto> getAllByDateAndThemeId(final LocalDate date, final String themeIdValue) {
-        val themeId = Id.create(themeIdValue);
-        val available = reservationTimes.findAvailableByDateAndThemeId(date, themeId);
-        val notAvailable = reservationTimes.findNotAvailableByDateAndThemeId(date, themeId);
+        Id themeId = Id.create(themeIdValue);
+        List<ReservationTime> available = reservationTimes.findAvailableByDateAndThemeId(date, themeId);
+        List<ReservationTime> notAvailable = reservationTimes.findNotAvailableByDateAndThemeId(date, themeId);
 
         return ReservableReservationTimeDto.fromEntities(available, notAvailable);
     }
 
     @Transactional
     public void delete(final String timeIdValue) {
-        val timeId = Id.create(timeIdValue);
+        Id timeId = Id.create(timeIdValue);
         if (reservations.existByTimeId(timeId)) {
             throw new RelatedEntityExistException(RESERVED_RESERVATION_TIME);
         }
