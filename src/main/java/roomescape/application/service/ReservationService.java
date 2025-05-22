@@ -25,17 +25,7 @@ public class ReservationService {
     private final ReservationJpaRepository reservationJpaRepository;
     private final ReservationTimeJpaRepository reservationTimeJpaRepository;
     private final ThemeJpaRepository themeJpaRepository;
-    private final MemberJpaRepository memberJpaRepository;
-
-    public ReservationService(ReservationJpaRepository reservationJpaRepository,
-                              ReservationTimeJpaRepository reservationTimeJpaRepository,
-                              ThemeJpaRepository themeJpaRepository,
-                              MemberJpaRepository memberJpaRepository) {
-        this.reservationJpaRepository = reservationJpaRepository;
-        this.reservationTimeJpaRepository = reservationTimeJpaRepository;
-        this.themeJpaRepository = themeJpaRepository;
-        this.memberJpaRepository = memberJpaRepository;
-    }
+    private final MemberRepository memberRepository;
 
     public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
                                                   LoginMember loginMember) {
@@ -82,7 +72,7 @@ public class ReservationService {
     private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
         ReservationTime time = findTimeById(reservationRegisterDto.timeId());
         Theme theme = findThemeById(reservationRegisterDto.themeId());
-        Member member = findMemberById(loginMember.id());
+        Member member = memberRepository.findById(loginMember.id());
 
         return reservationRegisterDto.convertToReservation(time, theme, member);
     }
