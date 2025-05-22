@@ -11,9 +11,12 @@ public record ReservationResponse(
         String themeName
 ) {
     public static ReservationResponse from(Reservation reservation) {
-        TimeSlotResponse dto = TimeSlotResponse.from(reservation.getTimeSlot());
-        return new ReservationResponse(reservation.getId(), reservation.getMember().getName(), reservation.getDate(),
-                dto,
-                reservation.getTheme().getName());
+        return new ReservationResponse(
+                reservation.getId(),
+                reservation.getMember().getName(),
+                reservation.getDate(),
+                TimeSlotResponse.from(reservation.getTimeSlot()),
+                reservation.getTheme().getName()
+        );
     }
 }
