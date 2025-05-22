@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.response.ApiResponse;
+import roomescape.global.response.PageResponse;
 import roomescape.reservation.controller.request.ReserveByAdminRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
@@ -46,7 +47,7 @@ public class ReservationAdminApiController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<ReservationResponse>>> searchReservations(
+    public ResponseEntity<ApiResponse<PageResponse<ReservationResponse>>> searchReservations(
             @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
             @RequestParam(required = false) LocalDate from,
@@ -55,8 +56,11 @@ public class ReservationAdminApiController {
     ) {
         Page<ReservationResponse> responses = reservedQueryService.getFilteredReserved(themeId, memberId, from,
                 to, pageable);
+
+        PageResponse<ReservationResponse> pageResponse = PageResponse.from(responses);
+
         return ResponseEntity.ok(
-                ApiResponse.success(SEARCH_RESERVATION, responses));
+                ApiResponse.success(SEARCH_RESERVATION, pageResponse));
     }
 
     @DeleteMapping("/{id}")

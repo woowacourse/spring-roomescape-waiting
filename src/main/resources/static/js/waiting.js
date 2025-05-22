@@ -16,7 +16,7 @@ function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
 
-    data = data.data;
+    data = data.data.content;
     data.forEach(item => {
         const row = tableBody.insertRow();
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.response.ApiResponse;
+import roomescape.global.response.PageResponse;
 import roomescape.waiting.controller.response.WaitingInfoResponse;
 import roomescape.waiting.service.WaitingQueryService;
 import roomescape.waiting.service.WaitingService;
@@ -25,10 +26,11 @@ public class WaitingAdminApiController {
     private final WaitingQueryService waitingQueryService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<WaitingInfoResponse>>> readAll(Pageable pageable) {
+    public ResponseEntity<ApiResponse<PageResponse<WaitingInfoResponse>>> readAll(Pageable pageable) {
         Page<WaitingInfoResponse> responses = waitingQueryService.getAllInfo(pageable);
 
-        return ResponseEntity.ok(ApiResponse.success(READ_WAITING_SUCCESS_CODE, responses));
+        PageResponse<WaitingInfoResponse> pageResponse = PageResponse.from(responses);
+        return ResponseEntity.ok(ApiResponse.success(READ_WAITING_SUCCESS_CODE, pageResponse));
     }
 
     @DeleteMapping("/{id}")
