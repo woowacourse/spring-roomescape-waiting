@@ -100,7 +100,7 @@ public class TestFixture {
         return new ReservationTimeResult(TEST_TIME_ID, TEST_TIME);
     }
     
-    public static ReservationResult createReservationResult() {
+    public static ReservationResult createDefaultReservationResult() {
         MemberResult memberResult = createMemberResult();
         ReservationTimeResult timeResult = createReservationTimeResult();
         ThemeResult themeResult = createThemeResult();
