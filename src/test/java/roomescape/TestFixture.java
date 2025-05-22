@@ -4,10 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.Cookie;
 import org.springframework.http.ResponseCookie;
 import roomescape.domain.*;
-import roomescape.service.result.MemberResult;
-import roomescape.service.result.ReservationResult;
-import roomescape.service.result.ReservationTimeResult;
-import roomescape.service.result.ThemeResult;
+import roomescape.service.result.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -38,6 +35,9 @@ public class TestFixture {
     public static final String TEST_THEME_NAME = "테마1";
     public static final String TEST_THEME_DESCRIPTION = "description";
     public static final String TEST_THEME_THUMBNAIL = "thumbnail";
+
+    //예약 대기 관련 상수
+    public static final Long TEST_WAITING_ID = 1L;
 
     //객체 생성 메서드
     public static ReservationTime createDefaultReservationTime() {
@@ -113,6 +113,17 @@ public class TestFixture {
                 themeResult,
                 ReservationStatus.RESERVED
         );
+    }
+
+    public static Waiting createDefaultWaiting() {
+        return Waiting.createNew(TestFixture.createDefaultMember(),
+                TestFixture.TEST_DATE,
+                TestFixture.createDefaultReservationTime(),
+                TestFixture.createDefaultTheme());
+    }
+
+    public static WaitingResult createDefaultWatiingResult() {
+        return WaitingResult.from(createDefaultWaiting());
     }
 
 
