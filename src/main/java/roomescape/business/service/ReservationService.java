@@ -111,9 +111,7 @@ public class ReservationService {
     }
 
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId)))
-                .getReservations()
+        return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(ReservationMineResponse::from)
                 .toList();

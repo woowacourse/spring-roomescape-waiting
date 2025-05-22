@@ -1,6 +1,5 @@
 package roomescape.business.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +19,6 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne
-    @JsonBackReference
     private Member member;
 
     @ManyToOne
@@ -77,12 +75,5 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public void setMember(final Member member) {
-        this.member = member;
-        if (!member.getReservations().contains(this)) {
-            member.getReservations().add(this);
-        }
     }
 }
