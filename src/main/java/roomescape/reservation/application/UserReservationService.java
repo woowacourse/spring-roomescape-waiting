@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,18 @@ public class UserReservationService {
         List<ReservationWaitingWithRank> reservationWaitingWithRanks = reservationWaitingRepository.findAllWithRankByMemberId(
                 memberId);
 
+        List<UserReservationServiceResponse> responses = createUserReservationServiceResponse(
+                reservations,
+                reservationWaitingWithRanks
+        );
+
+        return sortByDateTime(responses);
+    }
+
+    private List<UserReservationServiceResponse> createUserReservationServiceResponse(
+            List<Reservation> reservations,
+            List<ReservationWaitingWithRank> reservationWaitingWithRanks
+    ) {
         List<UserReservationServiceResponse> responses = new ArrayList<>();
         for (Reservation reservation : reservations) {
             ReservationStatus reservationStatus = reservation.determineReservationStatus(LocalDateTime.now());
@@ -65,6 +78,13 @@ public class UserReservationService {
         }
 
         return responses;
+    }
+
+    private List<UserReservationServiceResponse> sortByDateTime(List<UserReservationServiceResponse> responses) {
+        return responses.stream()
+                .sorted(Comparator.comparing(UserReservationServiceResponse::date)
+                        .thenComparing(UserReservationServiceResponse::time))
+                .toList();
     }
 
     private ReservationDetails createReservationDetails(CreateReservationServiceRequest request) {
