@@ -51,12 +51,18 @@ public class WaitingService {
             throw new BadRequestException("사용자가 예약한 항목입니다. 예약 대기가 불가능합니다.");
         }
 
+        boolean isAlreadyExisted = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waitingRequest.date(),
+                waitingRequest.timeId(),
+                waitingRequest.themeId(), loginMember.id());
+
+        if(isAlreadyExisted) {
+            throw new BadRequestException("이미 예약 대기를 하였습니다.");
+        }
+
         final Member member = getMemberById(loginMember.id());
-
-
         final Waiting waiting = new Waiting(member, theme, reservationTime, waitingRequest.date());
         Waiting savedWaiting = waitingRepository.save(waiting);
-        // ToDo: 최적화 필요
+
         return WaitingResponse.from(savedWaiting);
     }
 
