@@ -52,7 +52,7 @@ public class ReservationService {
         validateDuplicateReservation(command);
         final Member member = findMember(command.memberId());
         final Theme theme = findTheme(command.themeId());
-        return command.convertToReservation(member, reservationTime, theme);
+        return command.convertToEntity(member, reservationTime, theme);
     }
 
     private void validatePastDateTime(final LocalDate date, final ReservationTime reservationTime) {

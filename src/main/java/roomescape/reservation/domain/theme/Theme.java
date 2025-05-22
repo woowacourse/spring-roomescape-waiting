@@ -9,7 +9,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import roomescape.reservation.domain.util.ValidationUtils;
 
 @Entity
 @Getter
@@ -31,17 +30,14 @@ public class Theme {
     private ThemeThumbnail themeThumbnail;
 
     public Theme(final Long id, final String name, final String description, final String thumbnail) {
-        validate(name, description, thumbnail);
         this.id = id;
         this.themeName = new ThemeName(name);
         this.themeDescription = new ThemeDescription(description);
         this.themeThumbnail = new ThemeThumbnail(thumbnail);
     }
 
-    private void validate(final String name, final String description, final String thumbnail) {
-        ValidationUtils.validateNonNull(name, "테마 이름은 필수입니다.");
-        ValidationUtils.validateNonNull(description, "테마 설명은 필수입니다.");
-        ValidationUtils.validateNonNull(thumbnail, "테마 썸네일은 필수입니다.");
+    public Theme(final String name, final String description, final String thumbnail) {
+        this(null, name, description, thumbnail);
     }
 
     public boolean isSameId(final long id) {

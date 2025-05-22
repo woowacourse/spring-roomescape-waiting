@@ -5,14 +5,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import roomescape.reservation.domain.util.ValidationUtils;
 
 @Entity
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @Accessors(fluent = true)
 @EqualsAndHashCode(of = "id")
@@ -23,18 +24,8 @@ public class ReservationTime {
 
     private LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
-        validate(startAt);
-        this.id = id;
-        this.startAt = startAt;
-    }
-
     public ReservationTime(final LocalTime startAt) {
         this(null, startAt);
-    }
-
-    private void validate(final LocalTime startAt) {
-        ValidationUtils.validateNonNull(startAt, "예약 시간은 필수입니다.");
     }
 
     public boolean isBefore(final LocalTime other) {

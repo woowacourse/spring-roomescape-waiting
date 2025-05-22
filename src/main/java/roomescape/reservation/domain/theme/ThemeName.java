@@ -5,7 +5,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import roomescape.reservation.domain.util.ValidationUtils;
 
 @Embeddable
 @Getter
@@ -25,9 +24,14 @@ public class ThemeName {
     }
 
     private void validate(final String name) {
-        ValidationUtils.validateNonNull(name, "테마 이름은 필수입니다.");
-        ValidationUtils.validateNonBlank(name, "테마 이름은 공백이 아니어야 합니다.");
+        validateMissing(name);
         validateLength(name);
+    }
+
+    private void validateMissing(final String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("테마 이름은 null 또는 공백이 아니어야 합니다.");
+        }
     }
 
     private void validateLength(final String name) {

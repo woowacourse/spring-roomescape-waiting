@@ -59,14 +59,14 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        member1 = memberRepository.save(new Member(null, "리버1", "river1@gmail.com", "riverpw1", MemberRole.ADMIN));
-        member2 = memberRepository.save(new Member(null, "리버2", "river2@gmail.com", "riverpw2", MemberRole.ADMIN));
+        member1 = memberRepository.save(new Member("리버1", "river1@gmail.com", "riverpw1", MemberRole.ADMIN));
+        member2 = memberRepository.save(new Member("리버2", "river2@gmail.com", "riverpw2", MemberRole.ADMIN));
 
         time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
         time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
 
-        theme1 = themeRepository.save(new Theme(null, "우테코탈출1", "우테코탈출1 설명, ", "우테코탈출1 썸네일.jpg"));
-        theme2 = themeRepository.save(new Theme(null, "우테코탈출2", "우테코탈출2 설명, ", "우테코탈출2 썸네일.jpg"));
+        theme1 = themeRepository.save(new Theme("우테코탈출1", "우테코탈출1 설명, ", "우테코탈출1 썸네일.jpg"));
+        theme2 = themeRepository.save(new Theme("우테코탈출2", "우테코탈출2 설명, ", "우테코탈출2 썸네일.jpg"));
     }
 
     @DisplayName("날짜와 시간과 테마가 중복되는 예약을 할 경우 예외가 발생한다")

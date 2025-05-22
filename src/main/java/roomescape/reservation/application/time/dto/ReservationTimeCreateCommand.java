@@ -5,7 +5,7 @@ import roomescape.reservation.domain.time.ReservationTime;
 
 public record ReservationTimeCreateCommand(LocalTime startAt) {
 
-    public ReservationTime convertToReservationTime() {
-        return new ReservationTime(this.startAt);
+    public ReservationTime convertToEntity() {
+        return new ReservationTime(startAt);
     }
 }

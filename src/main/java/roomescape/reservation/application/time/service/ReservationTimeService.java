@@ -27,7 +27,7 @@ public class ReservationTimeService {
         if (reservationTimeRepository.existsByStartAt(command.startAt())) {
             throw new IllegalArgumentException("이미 존재하는 시간입니다.");
         }
-        final ReservationTime reservationTime = command.convertToReservationTime();
+        final ReservationTime reservationTime = command.convertToEntity();
         final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         return new ReservationTimeInfo(savedReservationTime);
     }

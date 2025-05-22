@@ -28,7 +28,7 @@ public class ThemeService {
     }
 
     public ThemeInfo createTheme(final ThemeCreateCommand command) {
-        final Theme theme = command.convertToTheme();
+        final Theme theme = command.convertToEntity();
         if (themeRepository.existsByThemeName(theme.themeName())) {
             throw new IllegalArgumentException("해당 이름의 테마는 이미 존재합니다.");
         }

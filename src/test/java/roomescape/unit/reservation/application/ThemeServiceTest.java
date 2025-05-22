@@ -95,12 +95,12 @@ class ThemeServiceTest {
         // given
         final ReservationTime reservationTime = new ReservationTime(LocalTime.of(11, 0));
         final ReservationTime saveTime = fakeReservationTimeRepository.save(reservationTime);
-        final Member member = new Member(null, "멤버", "member@email.com", "memberpw", MemberRole.ADMIN);
+        final Member member = new Member("멤버", "member@email.com", "memberpw", MemberRole.ADMIN);
 
         final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");
-        final Theme savedTheme = fakeThemeRepository.save(request.convertToTheme());
+        final Theme savedTheme = fakeThemeRepository.save(request.convertToEntity());
         fakeReservationRepository.save(
-                new Reservation(null, LocalDate.now().plusDays(1), member, saveTime, savedTheme));
+                new Reservation(LocalDate.now().plusDays(1), member, saveTime, savedTheme));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(savedTheme.id()))
@@ -113,7 +113,7 @@ class ThemeServiceTest {
     void deleteThemeById() {
         // given
         final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");
-        final Theme savedTheme = fakeThemeRepository.save(request.convertToTheme());
+        final Theme savedTheme = fakeThemeRepository.save(request.convertToEntity());
         // when
         themeService.deleteThemeById(savedTheme.id());
         // then

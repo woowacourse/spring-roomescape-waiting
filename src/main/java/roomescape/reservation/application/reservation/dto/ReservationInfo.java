@@ -8,7 +8,7 @@ import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationStatus;
 
 public record ReservationInfo(
-        Long id,
+        long id,
         MemberInfo member,
         LocalDate date,
         ReservationTimeInfo time,

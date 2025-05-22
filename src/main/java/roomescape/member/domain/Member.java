@@ -1,5 +1,6 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,9 +31,10 @@ public class Member {
     private String password;
 
     @Enumerated(EnumType.STRING)
+//    @Column(name = "ROLE")
     private MemberRole role;
 
-    public Member(Long id, String name, String email, String password, MemberRole role) {
+    public Member(final Long id, final String name, final String email, final String password, final MemberRole role) {
         this.id = id;
         this.memberName = new MemberName(name);
         this.email = email;
@@ -40,7 +42,15 @@ public class Member {
         this.role = role;
     }
 
+    public Member(final String name, final String email, final String password, final MemberRole role) {
+        this(null, name, email, password, role);
+    }
+
     public boolean isSameId(long id) {
         return this.id == id;
+    }
+
+    public String getNameOfMember() {
+        return this.memberName.name();
     }
 }

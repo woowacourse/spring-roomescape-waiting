@@ -21,8 +21,8 @@ class MemberServiceTest {
     void setUp() {
         final MemberRepository memberRepository = new FakeMemberRepository();
         memberService = new MemberService(memberRepository);
-        memberRepository.save(new Member(null, "리버1", "river1@email.com", "riverpw1", MemberRole.ADMIN));
-        memberRepository.save(new Member(null, "리버2", "river2@email.com", "riverpw2", MemberRole.ADMIN));
+        memberRepository.save(new Member("리버1", "river1@email.com", "riverpw1", MemberRole.ADMIN));
+        memberRepository.save(new Member("리버2", "river2@email.com", "riverpw2", MemberRole.ADMIN));
     }
 
     @DisplayName("모든 멤버 정보를 조회하여 반환할 수 있다")

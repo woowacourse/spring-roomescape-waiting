@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import roomescape.reservation.domain.util.ValidationUtils;
 
 @Embeddable
 @Getter
@@ -25,9 +24,14 @@ public class ThemeThumbnail {
     }
 
     private void validate(final String thumbnail) {
-        ValidationUtils.validateNonNull(thumbnail, "테마 썸네일은 필수입니다.");
-        ValidationUtils.validateNonBlank(thumbnail, "테마 썸네일은 공백이 아니어야 합니다.");
+        validateMissing(thumbnail);
         validateFormat(thumbnail);
+    }
+
+    private void validateMissing(final String thumbnail) {
+        if (thumbnail == null || thumbnail.isBlank()) {
+            throw new IllegalArgumentException("테마 썸네일은 null 또는 공백이 아니어야 합니다.");
+        }
     }
 
     private void validateFormat(final String thumbnail) {
