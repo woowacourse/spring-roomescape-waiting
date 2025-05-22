@@ -40,15 +40,24 @@ public class WaitingService {
     }
 
     public WaitingResponse addWaiting(@Valid MemberReservationRequest request, Long memberId) {
-        ReservationTime reservationTime = getReservationTime(request.themeId());
+        ReservationTime reservationTime = getReservationTime(request.timeId());
         Member member = getMember(memberId);
         Theme theme = getTheme(request.themeId());
         Waiting waiting = new Waiting(member, reservationTime, theme, request.date());
+
         boolean isAlreadyReserved = reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
             member.getId(), theme.getId(), reservationTime.getId(), request.date());
 
         if (isAlreadyReserved) {
-            throw new BadRequestException("이미 예약이 되어있는 상태에서는, 대기할 수 없습니다.");
+            throw new IllegalArgumentException("이미 예약이 되어있는 상태에서는, 대기할 수 없습니다.");
+        }
+
+        boolean isAlreadyWaiting = waitingRepository.existsByMemberIdAndThemeIdAndReservationTimeIdAndDate(
+            member.getId(), theme.getId(), reservationTime.getId(), request.date()
+        );
+
+        if (isAlreadyWaiting) {
+            throw new IllegalArgumentException("이미 대기중인 상태에서는, 추가로 대기할 수 없습니다.");
         }
 
         Waiting savedWaiting = waitingRepository.save(waiting);
