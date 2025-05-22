@@ -24,9 +24,8 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public void performLogin(
-            @RequestBody @Valid final LoginRequest request,
-            final HttpServletResponse response
+    public void login(
+            @RequestBody @Valid final LoginRequest request, final HttpServletResponse response
     ) {
         String issuedToken = authenticationService.issueToken(request.email(), request.password());
         AuthenticationTokenCookie tokenCookie = AuthenticationTokenCookie.forResponse(issuedToken);
@@ -34,12 +33,12 @@ public class LoginController {
     }
 
     @GetMapping("/login/check")
-    public UserResponse getUser(@Authenticated final User user) {
+    public UserResponse checkLogin(@Authenticated final User user) {
         return UserResponse.from(user);
     }
 
     @PostMapping("/logout")
-    public void performLogout(final HttpServletResponse response) throws IOException {
+    public void logout(final HttpServletResponse response) throws IOException {
         AuthenticationTokenCookie tokenCookieForExpire = AuthenticationTokenCookie.forExpire();
         response.addCookie(tokenCookieForExpire);
         response.sendRedirect("/");

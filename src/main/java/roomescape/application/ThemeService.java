@@ -28,13 +28,19 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    public Theme register(final String name, final String description, final String thumbnail) {
+    public Theme saveTheme(final String name, final String description, final String thumbnail) {
         Theme theme = new Theme(name, description, thumbnail);
         return themeRepository.save(theme);
     }
 
     public List<Theme> findAllThemes() {
         return themeRepository.findAll();
+    }
+
+    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {
+        int finalCount = Math.min(count, MAX_THEME_FETCH_COUNT);
+        Pageable pageable = PageRequest.of(0, finalCount);
+        return themeRepository.findRankingByPeriod(startDate, endDate, pageable);
     }
 
     public void removeById(final long id) {
@@ -48,11 +54,5 @@ public class ThemeService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
         themeRepository.deleteById(id);
-    }
-
-    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {
-        int finalCount = Math.min(count, MAX_THEME_FETCH_COUNT);
-        Pageable pageable = PageRequest.of(0, finalCount);
-        return themeRepository.findRankingByPeriod(startDate, endDate, pageable);
     }
 }

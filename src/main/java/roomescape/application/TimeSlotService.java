@@ -26,23 +26,13 @@ public class TimeSlotService {
         this.timeSlotRepository = timeSlotRepository;
     }
 
-    public TimeSlot register(final LocalTime startAt) {
+    public TimeSlot saveTimeSlot(final LocalTime startAt) {
         TimeSlot timeSlot = new TimeSlot(startAt);
         return timeSlotRepository.save(timeSlot);
     }
 
     public List<TimeSlot> findAllTimeSlots() {
         return timeSlotRepository.findAll();
-    }
-
-    public void removeById(final long id) {
-        List<Reservation> reservations = reservationRepository.findByTimeSlotId(id);
-        if (!reservations.isEmpty()) {
-            throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
-        }
-        timeSlotRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 타임슬롯입니다."));
-        timeSlotRepository.deleteById(id);
     }
 
     public List<AvailableTimeSlot> findAvailableTimeSlots(final LocalDate date, final long themeId) {
@@ -57,5 +47,15 @@ public class TimeSlotService {
         return allTimeSlots.stream()
                 .map(ts -> new AvailableTimeSlot(ts, filteredTimeSlots.contains(ts)))
                 .toList();
+    }
+
+    public void removeById(final long id) {
+        List<Reservation> reservations = reservationRepository.findByTimeSlotId(id);
+        if (!reservations.isEmpty()) {
+            throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
+        }
+        timeSlotRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 타임슬롯입니다."));
+        timeSlotRepository.deleteById(id);
     }
 }

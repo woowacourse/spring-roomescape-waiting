@@ -32,22 +32,23 @@ public class TimeSlotController {
 
     @PostMapping("/times")
     @ResponseStatus(CREATED)
-    public TimeSlotResponse register(@RequestBody @Valid final CreateTimeSlotRequest request) {
-        TimeSlot timeSlot = service.register(request.startAt());
+    public TimeSlotResponse createTimeSlot(@RequestBody @Valid final CreateTimeSlotRequest request) {
+        TimeSlot timeSlot = service.saveTimeSlot(request.startAt());
 
         return TimeSlotResponse.from(timeSlot);
     }
 
     @GetMapping("/times")
-    public List<TimeSlotResponse> getAllTimeSlots() {
+    public List<TimeSlotResponse> readAllTimeSlots() {
         List<TimeSlot> timeSlots = service.findAllTimeSlots();
+
         return timeSlots.stream()
                 .map(TimeSlotResponse::from)
                 .toList();
     }
 
     @GetMapping(value = "/availableTimes", params = {"date", "themeId"})
-    public List<AvailableTimeSlotResponse> getAvailableTimes(
+    public List<AvailableTimeSlotResponse> readAvailableTimes(
             @RequestParam("date") final LocalDate date,
             @RequestParam("themeId") final Long themeId) {
 
@@ -60,7 +61,7 @@ public class TimeSlotController {
 
     @DeleteMapping("/times/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable("id") final long id) {
+    public void deleteTimeSlotById(@PathVariable("id") final long id) {
         service.removeById(id);
     }
 }

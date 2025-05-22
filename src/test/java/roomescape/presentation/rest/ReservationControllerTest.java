@@ -25,7 +25,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다")
-    void reserve() {
+    void createReservation() {
         var token = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "popo@email.com", "password", "password"))

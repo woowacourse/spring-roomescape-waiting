@@ -30,12 +30,12 @@ class UserServiceTest {
 
     @Test
     @DisplayName("사용자를 추가할 수 있다.")
-    void registerUser() {
+    void saveUserUser() {
         // given
         var user = JUNK_USER;
 
         // when
-        var created = service.register(user.email(), user.password(), user.name());
+        var created = service.saveUser(user.email(), user.password(), user.name());
 
         // then
         var users = service.findAllUsers();

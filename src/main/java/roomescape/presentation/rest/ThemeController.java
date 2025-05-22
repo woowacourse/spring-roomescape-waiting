@@ -32,14 +32,14 @@ public class ThemeController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ThemeResponse register(@RequestBody @Valid final CreateThemeRequest request) {
-        Theme theme = service.register(request.name(), request.description(), request.thumbnail());
+    public ThemeResponse createTheme(@RequestBody @Valid final CreateThemeRequest request) {
+        Theme theme = service.saveTheme(request.name(), request.description(), request.thumbnail());
 
         return ThemeResponse.from(theme);
     }
 
     @GetMapping
-    public List<ThemeResponse> getAllThemes() {
+    public List<ThemeResponse> readAllThemes() {
         List<Theme> themes = service.findAllThemes();
 
         return themes.stream()
@@ -48,11 +48,11 @@ public class ThemeController {
     }
 
     @GetMapping(value = "/popular", params = {"startDate", "endDate", "count"})
-    public List<ThemeResponse> getAvailableTimes(
+    public List<ThemeResponse> readPopularThemes(
             @RequestParam("startDate") final LocalDate startDate,
             @RequestParam("endDate") final LocalDate endDate,
-            @RequestParam("count") final Integer count) {
-
+            @RequestParam("count") final Integer count
+    ) {
         List<Theme> themes = service.findPopularThemes(startDate, endDate, count);
 
         return themes.stream()
@@ -62,7 +62,7 @@ public class ThemeController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable("id") final long id) {
+    public void deleteThemeById(@PathVariable("id") final long id) {
         service.removeById(id);
     }
 }

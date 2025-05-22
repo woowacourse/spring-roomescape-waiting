@@ -17,12 +17,13 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User register(final String email, final String password, final String name) {
+    public User saveUser(final String email, final String password, final String name) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isPresent()) {
             throw new AlreadyExistedException("이미 해당 이메일로 가입된 사용자가 있습니다.");
         }
+
         User user = User.createUser(name, email, password);
         return userRepository.save(user);
     }

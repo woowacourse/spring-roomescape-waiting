@@ -35,23 +35,22 @@ public class ReservationController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ReservationResponse reserve(
-            @Authenticated final User user,
-            @RequestBody @Valid final CreateReservationRequest request
+    public ReservationResponse createReservation(
+            @Authenticated final User user, @RequestBody @Valid final CreateReservationRequest request
     ) {
-        Reservation reservation = service.reserve(user, request.date(), request.timeId(), request.themeId());
+        Reservation reservation = service.saveReservation(user, request.date(), request.timeId(), request.themeId());
         return ReservationResponse.from(reservation);
     }
 
     @GetMapping
-    public List<ReservationResponse> getAllReservations(
+    public List<ReservationResponse> readAllReservations(
             @RequestParam(name = "themeId", required = false) final Long themeId,
             @RequestParam(name = "userId", required = false) final Long userId,
             @RequestParam(name = "dateFrom", required = false) final LocalDate dateFrom,
             @RequestParam(name = "dateTo", required = false) final LocalDate dateTo
     ) {
         ReservationSearchFilter searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
-        List<Reservation> reservations = service.findAllReservations(searchFilter);
+        List<Reservation> reservations = service.findReservationsByFilter(searchFilter);
 
         return reservations.stream()
                 .map(ReservationResponse::from)
@@ -60,7 +59,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable("id") final long id) {
+    public void deleteReservationById(@PathVariable("id") final long id) {
         service.removeById(id);
     }
 }

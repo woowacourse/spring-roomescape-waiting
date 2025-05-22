@@ -33,15 +33,15 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public UserResponse register(@RequestBody @Valid final SignupRequest request) {
-        User user = userService.register(request.email(), request.password(), request.name());
+    public UserResponse createUser(@RequestBody @Valid final SignupRequest request) {
+        User user = userService.saveUser(request.email(), request.password(), request.name());
 
         return UserResponse.from(user);
     }
 
     @GetMapping("/reservations")
-    public List<UserReservationResponse> getAllReservationsByUser(@Authenticated final User user) {
-        List<Reservation> reservations = reservationService.getReservations(user.id());
+    public List<UserReservationResponse> readAllReservationsByUser(@Authenticated final User user) {
+        List<Reservation> reservations = reservationService.findReservationsByUserId(user.id());
 
         return reservations.stream()
                 .map(UserReservationResponse::from)
