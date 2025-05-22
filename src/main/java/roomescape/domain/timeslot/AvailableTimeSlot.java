@@ -4,5 +4,4 @@ public record AvailableTimeSlot(
         TimeSlot timeSlot,
         boolean alreadyBooked
 ) {
-
 }

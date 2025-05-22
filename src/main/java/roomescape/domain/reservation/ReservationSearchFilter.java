@@ -9,5 +9,4 @@ public record ReservationSearchFilter(
         @Nullable LocalDate dateFrom,
         @Nullable LocalDate dateTo
 ) {
-
 }

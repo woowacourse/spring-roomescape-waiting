@@ -22,6 +22,7 @@ public class User {
 
     private static final int NAME_MAX_LENGTH = 5;
     private static final int PASSWORD_MAX_LENGTH = 30;
+
     private static final String VALID_EMAIL_FORMAT = "\\w+@\\w+\\.\\w+";
 
     @Id
@@ -34,7 +35,11 @@ public class User {
     private String password;
 
 
-    public User(final Long id, final String name, final UserRole role, final String email, final String password) {
+    public User(final Long id,
+                final String name,
+                final UserRole role,
+                final String email,
+                final String password) {
         validateNameLength(name);
         validateEmailFormat(email);
         validatePasswordLength(password);

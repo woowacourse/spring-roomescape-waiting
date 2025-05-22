@@ -28,12 +28,18 @@ public class Theme {
     private String thumbnail;
 
     public Theme(final String name, final String description, final String thumbnail) {
+
         this(null, name, description, thumbnail);
     }
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
+    public Theme(final Long id,
+                 final String name,
+                 final String description,
+                 final String thumbnail) {
+
         validateNameLength(name);
         validateDescriptionLength(description);
+
         this.id = id;
         this.name = name;
         this.description = description;

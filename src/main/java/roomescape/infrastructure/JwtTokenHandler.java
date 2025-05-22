@@ -18,13 +18,16 @@ public class JwtTokenHandler implements AuthenticationTokenHandler {
     private static final SecretKey SECRET_KEY = SIG.HS256.key().build();
     private static final long EXPIRATION_DURATION_IN_MILLISECONDS = 900_000L;
 
+    @Override
     public String createToken(final AuthenticationInfo authenticationInfo) {
         String userId = String.valueOf(authenticationInfo.id());
         String userRole = authenticationInfo.role().name();
+
         Claims claims = Jwts.claims()
                 .subject(userId)
                 .add("role", userRole)
                 .build();
+
         Date now = new Date();
         Date validity = new Date(now.getTime() + EXPIRATION_DURATION_IN_MILLISECONDS);
 
@@ -51,6 +54,7 @@ public class JwtTokenHandler implements AuthenticationTokenHandler {
 
         long id = Long.parseLong(payload.getSubject());
         UserRole role = UserRole.valueOf(payload.get("role", String.class));
+
         return new AuthenticationInfo(id, role);
     }
 
