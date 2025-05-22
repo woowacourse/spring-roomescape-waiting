@@ -1,8 +1,6 @@
 package roomescape.controller.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import roomescape.entity.ReservationTime;
-import roomescape.entity.Theme;
 import roomescape.entity.Waiting;
 import roomescape.entity.WaitingWithRank;
 

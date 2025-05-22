@@ -19,11 +19,11 @@ public record MyReservationAndWaitingResponse(
 
     public static MyReservationAndWaitingResponse fromReservation(Reservation reservation) {
         return new MyReservationAndWaitingResponse(
-            reservation.getId(),
-            reservation.getThemeName(),
-            reservation.getDate(),
-            reservation.getStartAt(),
-            reservation.getStatusText()
+                reservation.getId(),
+                reservation.getThemeName(),
+                reservation.getDate(),
+                reservation.getStartAt(),
+                reservation.getStatusText()
         );
     }
 
@@ -34,7 +34,7 @@ public record MyReservationAndWaitingResponse(
                 waiting.getThemeName(),
                 waiting.getDate(),
                 waiting.getStartAt(),
-                waitingWithRank.getRank()+ ADDITIONAL_RANK + RANK_SUFFIX + waiting.getStatusText()
+                waitingWithRank.getRank() + ADDITIONAL_RANK + RANK_SUFFIX + waiting.getStatusText()
         );
     }
 }

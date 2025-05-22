@@ -7,13 +7,13 @@ import roomescape.entity.ReservationTime;
 public record TimeResponse(
     Long id,
     @JsonFormat(pattern = "HH:mm") LocalTime startAt,
-    Boolean alreadyBooked) {
-
+    Boolean alreadyBooked
+) {
     public static TimeResponse from(ReservationTime reservationTime) {
         return new TimeResponse(
-            reservationTime.getId(),
-            reservationTime.getStartAt(),
-            reservationTime.getAlreadyBooked()
+                reservationTime.getId(),
+                reservationTime.getStartAt(),
+                reservationTime.getAlreadyBooked()
         );
     }
 }
