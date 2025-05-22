@@ -2,7 +2,6 @@ package roomescape.application;
 
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +13,7 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.request.LoginRequestDto;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
-import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.persistence.repository.MemberRepository;
 
 @SpringBootTest
 public class AuthServiceTest {
@@ -23,7 +22,7 @@ public class AuthServiceTest {
     JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @Autowired
-    MemberJpaRepository memberJpaRepository;
+    MemberRepository memberRepository;
 
     @Autowired
     AuthService authService;

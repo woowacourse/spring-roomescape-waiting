@@ -1,13 +1,12 @@
 package roomescape.application;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,15 +20,16 @@ import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.infrastructure.db.MemberJpaRepository;
-import roomescape.infrastructure.db.ReservationJpaRepository;
-import roomescape.infrastructure.db.ReservationTimeJpaRepository;
-import roomescape.infrastructure.db.ThemeJpaRepository;
+import roomescape.persistence.repository.MemberRepository;
+import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
 
 @Slf4j
 @SpringBootTest
@@ -40,10 +40,13 @@ class ReservationServiceTest {
     ReservationService reservationService;
 
     @Autowired
-    ReservationJpaRepository reservationJpaRepository;
+    ReservationRepository reservationRepository;
 
     @Autowired
-    ReservationTimeJpaRepository reservationTimeJpaRepository;
+    ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
 
     @Autowired
     MemberJpaRepository memberJpaRepository;
@@ -128,7 +131,7 @@ class ReservationServiceTest {
     void test6() {
         //given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
-        ReservationTime savedReservationTime = reservationTimeJpaRepository.save(reservationTime);
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
         Theme theme = new Theme("테마", "공포", "image");
         Theme savedTheme = themeJpaRepository.save(theme);
@@ -138,7 +141,7 @@ class ReservationServiceTest {
 
         Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                 savedMember, LocalDate.now());
-        Reservation savedReservation = reservationJpaRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
         LoginMember loginMember = new LoginMember(savedMember);
 

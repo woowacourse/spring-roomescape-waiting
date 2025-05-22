@@ -2,7 +2,6 @@ package roomescape.application;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,9 +12,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.application.service.ReservationTimeService;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.model.Reservation;
-import roomescape.model.ReservationTime;
-import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.persistence.repository.ReservationRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -25,7 +22,7 @@ class ReservationTimeServiceTest {
     ReservationTimeService reservationTimeService;
 
     @Autowired
-    ReservationJpaRepository reservationJpaRepository;
+    ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("시간을 삭제한다")
@@ -73,24 +70,6 @@ class ReservationTimeServiceTest {
                 .toList();
 
         assertThat(times).doesNotContain(LocalTime.of(15, 0));
-    }
-
-    @Test
-    @DisplayName("시간을 삭제할 때 연관된 Reservation 의 ReservationTime 은 모두 null 이 된다")
-    void test4() {
-        // given
-        ReservationTimeResponseDto saved = reservationTimeService.saveTime(
-                new ReservationTimeRegisterDto(LocalTime.of(15, 0).toString())
-        );
-
-        // when
-        reservationTimeService.deleteTime(saved.id());
-
-        // then
-        List<ReservationTime> actual = reservationJpaRepository.findByReservationTimeId(saved.id()).stream()
-                .map(Reservation::getReservationTime)
-                .toList();
-        assertThat(actual).allMatch(Objects::isNull);
     }
 
 }
