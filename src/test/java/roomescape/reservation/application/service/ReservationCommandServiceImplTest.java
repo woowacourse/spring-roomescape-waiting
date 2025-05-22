@@ -13,7 +13,6 @@ import roomescape.common.time.TimeProvider;
 import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
@@ -242,12 +241,12 @@ class ReservationCommandServiceImplTest {
     @DisplayName("존재하지 않는 예약을 삭제하려 하면 예외가 발생한다")
     void deleteNonExistentReservation() {
         // given
-        final ReservationId id = ReservationId.from(-1L);
+        final Long id = -1L;
 
         // when
         // then
         assertThatThrownBy(() -> reservationCommandService.delete(id))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("[RESERVATION] not found. params={ReservationId=ReservationId(-1)}");
+                .hasMessage("[RESERVATION] not found. params={Long=-1}");
     }
 }

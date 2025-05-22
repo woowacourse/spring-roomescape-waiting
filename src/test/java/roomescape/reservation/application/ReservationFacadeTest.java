@@ -14,7 +14,6 @@ import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
@@ -219,7 +218,7 @@ class ReservationFacadeTest {
         reservationFacade.delete(reservationId);
 
         //then
-        then(reservationCommandService).should(times(1)).delete(any(ReservationId.class));
+        then(reservationCommandService).should(times(1)).delete(any(Long.class));
     }
 
     @Test
@@ -228,7 +227,7 @@ class ReservationFacadeTest {
         //given
         Long nonExistentReservationId = 9999L;
         willThrow(new NotFoundException(DomainTerm.RESERVATION))
-                .given(reservationCommandService).delete(any(ReservationId.class));
+                .given(reservationCommandService).delete(any(Long.class));
 
         //when
         //then
@@ -239,7 +238,7 @@ class ReservationFacadeTest {
 
     private Reservation createReservation(Long id) {
         return Reservation.withId(
-                ReservationId.from(id),
+                id,
                 UserId.from(1L),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 ReservationTime.withId(

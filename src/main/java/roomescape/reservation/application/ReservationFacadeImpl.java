@@ -8,7 +8,6 @@ import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
@@ -82,6 +81,6 @@ public class ReservationFacadeImpl implements ReservationFacade {
 
     @Override
     public void delete(final Long id) {
-        reservationCommandService.delete(ReservationId.from(id));
+        reservationCommandService.delete(id);
     }
 }

@@ -9,7 +9,6 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
 import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
@@ -54,7 +53,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     }
 
     @Override
-    public void delete(final ReservationId id) {
+    public void delete(final Long id) {
         if (reservationRepository.existsByParams(id)) {
             reservationRepository.deleteById(id);
             return;

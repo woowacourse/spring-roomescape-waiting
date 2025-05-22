@@ -31,7 +31,7 @@ public record ReservationResponse(Long reservationId,
 
     public static ReservationResponse from(final Reservation domain, final User user) {
         return new ReservationResponse(
-                domain.getId().getValue(),
+                domain.getId(),
                 UserResponse.from(user),
                 domain.getDate().getValue(),
                 domain.getStatus().getSequence(),

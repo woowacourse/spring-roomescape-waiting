@@ -10,13 +10,13 @@ import java.util.Optional;
 
 public interface ReservationRepository {
 
-    boolean existsByParams(ReservationId id);
+    boolean existsByParams(Long id);
 
     boolean existsByParams(ReservationTimeId timeId);
 
     boolean existsByParams(ReservationDate date, ReservationTimeId timeId, ThemeId themeId);
 
-    Optional<Reservation> findById(ReservationId id);
+    Optional<Reservation> findById(Long id);
 
     List<ReservationTimeId> findTimeIdByParams(ReservationDate date, ThemeId themeId);
 
@@ -26,7 +26,7 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    void deleteById(ReservationId id);
+    void deleteById(Long id);
 
     List<ThemeBookingCount> findThemesToBookedCount(ReservationDate startDate, ReservationDate endDate, int count);
 

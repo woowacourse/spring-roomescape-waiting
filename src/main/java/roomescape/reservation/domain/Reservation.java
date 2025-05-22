@@ -46,17 +46,17 @@ public class Reservation {
             column = @Column(name = Fields.date))
     private ReservationDate date;
 
-    @Embedded
-    @AttributeOverride(
-            name = BookedStatus.Fields.sequence,
-            column = @Column(name = Fields.status))
-    private BookedStatus status;
-
     @ManyToOne
     private ReservationTime time;
 
     @ManyToOne
     private Theme theme;
+
+    @Embedded
+    @AttributeOverride(
+            name = BookedStatus.Fields.sequence,
+            column = @Column(name = Fields.status))
+    private BookedStatus status;
 
     public Reservation(final UserId userId,
                        final ReservationDate date,
@@ -72,7 +72,7 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation(final ReservationId id,
+    public Reservation(final Long id,
                        final UserId userId,
                        final ReservationDate date,
                        final ReservationTime time,
@@ -81,7 +81,7 @@ public class Reservation {
     ) {
         validate(id);
         validate(userId, date, time, theme);
-        this.id = id.getValue();
+        this.id = id;
         this.userId = userId;
         this.date = date;
         this.time = time;
@@ -89,7 +89,7 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation withId(final ReservationId id,
+    public static Reservation withId(final Long id,
                                      final UserId userId,
                                      final ReservationDate date,
                                      final ReservationTime time,
@@ -104,11 +104,10 @@ public class Reservation {
         return new Reservation(userId, date, time, theme, BookedStatus.from(0));
     }
 
-    private static void validate(
-            final UserId userId,
-            final ReservationDate date,
-            final ReservationTime time,
-            final Theme theme) {
+    private static void validate(final UserId userId,
+                                 final ReservationDate date,
+                                 final ReservationTime time,
+                                 final Theme theme) {
         Validator.of(Reservation.class)
                 .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label())
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
@@ -116,7 +115,7 @@ public class Reservation {
                 .validateNotNull(Fields.theme, theme, DomainTerm.THEME.label());
     }
 
-    private static void validate(final ReservationId id) {
+    private static void validate(final Long id) {
         Validator.of(Reservation.class)
                 .validateNotNull(Fields.id, id, DomainTerm.RESERVATION_ID.label());
     }
@@ -135,7 +134,4 @@ public class Reservation {
         }
     }
 
-    public ReservationId getId() {
-        return ReservationId.from(id);
-    }
 }

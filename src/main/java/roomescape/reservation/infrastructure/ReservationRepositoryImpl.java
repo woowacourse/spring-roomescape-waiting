@@ -7,7 +7,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 import roomescape.theme.domain.ThemeId;
@@ -25,8 +24,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     private final JpaReservationRepository jpaReservationRepository;
 
     @Override
-    public boolean existsByParams(final ReservationId id) {
-        return jpaReservationRepository.existsById(id.getValue());
+    public boolean existsByParams(final Long id) {
+        return jpaReservationRepository.existsById(id);
     }
 
     @Override
@@ -40,8 +39,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findById(final ReservationId id) {
-        return jpaReservationRepository.findById(id.getValue());
+    public Optional<Reservation> findById(final Long id) {
+        return jpaReservationRepository.findById(id);
     }
 
     @Override
@@ -68,8 +67,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(final ReservationId id) {
-        jpaReservationRepository.deleteById(id.getValue());
+    public void deleteById(final Long id) {
+        jpaReservationRepository.deleteById(id);
     }
 
     @Override
