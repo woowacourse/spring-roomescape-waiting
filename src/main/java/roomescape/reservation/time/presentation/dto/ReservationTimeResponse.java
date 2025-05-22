@@ -1,11 +1,14 @@
 package roomescape.reservation.time.presentation.dto;
 
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import roomescape.reservation.time.domain.ReservationTime;
 
 public class ReservationTimeResponse {
     private Long id;
     private LocalTime startAt;
+
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     private ReservationTimeResponse() {
     }
@@ -19,7 +22,7 @@ public class ReservationTimeResponse {
         return id;
     }
 
-    public LocalTime getStartAt() {
-        return startAt;
+    public String getStartAt() {
+        return startAt.format(TIME_FORMATTER);
     }
 }
