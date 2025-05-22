@@ -23,8 +23,16 @@ class MemberServiceTest {
     @Test
     void 모든_회원을_조회한다() {
         // given
-        Member member1 = new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER);
-        Member member2 = new Member(null, "name2", "email2@domain.com", "password2", Role.MEMBER);
+        Member member1 = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
+        Member member2 = Member.builder()
+                .name("name2")
+                .email("email2@domain.com")
+                .password("password2")
+                .role(Role.MEMBER).build();
         memberRepository.save(member1);
         memberRepository.save(member2);
 

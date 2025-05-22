@@ -31,36 +31,84 @@ class ReservationRepositoryTest {
     @Test
     void 날짜_시간_테마를_기준으로_예약을_조회한다() {
         // given
-        Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         entityManager.persist(member);
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         entityManager.persist(time);
-        Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         entityManager.persist(theme);
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .date(LocalDate.of(2025, 1, 1))
+                .timeSlot(time)
+                .theme(theme).build();
+        entityManager.persist(reservation);
         // when
-        Optional<Reservation> reservation = reservationRepository.findByDateAndTimeSlotAndTheme(
+        Optional<Reservation> findReservation = reservationRepository.findByDateAndTimeSlotAndTheme(
                 LocalDate.of(2025, 1, 1), time, theme);
         // then
-        assertThat(reservation.isPresent()).isTrue();
-        assertThat(reservation.get().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+        assertThat(findReservation.isPresent()).isTrue();
+        assertThat(findReservation.get().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
     }
 
     @Test
     void 테마id를_기준으로_예약을_조회한다() {
         // given
-        Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         entityManager.persist(member);
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         entityManager.persist(time);
-        Theme theme1 = Theme.createWithoutId("theme1", "desc", "thumb");
+        Theme theme1 = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         entityManager.persist(theme1);
-        Theme theme2 = Theme.createWithoutId("theme2", "desc", "thumb");
+        Theme theme2 = Theme.builder()
+                .name("theme2")
+                .description("desc2")
+                .thumbnail("thumb2").build();
         entityManager.persist(theme2);
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme1));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme2));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 2), time, theme1));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 2), time, theme2));
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme1).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme2).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 2))
+                        .timeSlot(time)
+                        .theme(theme1).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 2))
+                        .timeSlot(time)
+                        .theme(theme2).build()
+        );
         // when
         List<Reservation> reservations = reservationRepository.findByThemeId(theme1.getId());
         // then
@@ -74,15 +122,41 @@ class ReservationRepositoryTest {
     @Test
     void 날짜범위를_기준으로_예약을_조회한다() {
         // given
-        Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         entityManager.persist(member);
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         entityManager.persist(time);
-        Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         entityManager.persist(theme);
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 9), time, theme));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 10), time, theme));
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 9))
+                        .timeSlot(time)
+                        .theme(theme).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 10))
+                        .timeSlot(time)
+                        .theme(theme).build()
+        );
         // when
         List<Reservation> reservations = reservationRepository.findByDateBetween(
                 LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 9)
@@ -94,18 +168,53 @@ class ReservationRepositoryTest {
     @Test
     void 테마와_날짜를_기준으로_예약을_조회한다() {
         // given
-        Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         entityManager.persist(member);
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         entityManager.persist(time);
-        Theme theme1 = Theme.createWithoutId("theme1", "desc", "thumb");
+        Theme theme1 = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         entityManager.persist(theme1);
-        Theme theme2 = Theme.createWithoutId("theme1", "desc", "thumb");
+        Theme theme2 = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         entityManager.persist(theme2);
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme1));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 2), time, theme2));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 2), time, theme1));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme2));
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme1).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 2))
+                        .timeSlot(time)
+                        .theme(theme2).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 2))
+                        .timeSlot(time)
+                        .theme(theme1).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme2).build()
+        );
         // when
         List<Reservation> reservations = reservationRepository.findByDateAndTheme(LocalDate.of(2025, 1, 1), theme1);
         // then
@@ -115,16 +224,37 @@ class ReservationRepositoryTest {
     @Test
     void 예약시간id를_기준으로_예약을_조회한다() {
         // given
-        Member member = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         entityManager.persist(member);
-        TimeSlot time1 = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time1 = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         entityManager.persist(time1);
-        TimeSlot time2 = TimeSlot.createWithoutId(LocalTime.of(10, 0));
+        TimeSlot time2 = TimeSlot.builder()
+                .startAt(LocalTime.of(10, 0)).build();
         entityManager.persist(time2);
-        Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         entityManager.persist(theme);
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time1, theme));
-        entityManager.persist(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time2, theme));
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time1)
+                        .theme(theme).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time2)
+                        .theme(theme).build()
+        );
         // when
         List<Reservation> reservations = reservationRepository.findByTimeSlotId(time1.getId());
         // then
@@ -135,16 +265,40 @@ class ReservationRepositoryTest {
     @Test
     void 회원id를_기준으로_예약을_조회한다() {
         // given
-        Member member1 = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
+        Member member1 = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         entityManager.persist(member1);
-        Member member2 = new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER);
+        Member member2 = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         entityManager.persist(member2);
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         entityManager.persist(time);
-        Theme theme = Theme.createWithoutId("theme1", "desc", "thumb");
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         entityManager.persist(theme);
-        entityManager.persist(Reservation.createWithoutId(member1, LocalDate.of(2025, 1, 1), time, theme));
-        entityManager.persist(Reservation.createWithoutId(member2, LocalDate.of(2025, 1, 1), time, theme));
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member1)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme).build()
+        );
+        entityManager.persist(
+                Reservation.builder()
+                        .member(member2)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme).build()
+        );
         // when
         List<Reservation> reservations = reservationRepository.findByMemberId(member1.getId());
         // then

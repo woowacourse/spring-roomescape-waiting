@@ -8,6 +8,6 @@ public record TimeSlotRequest(
         @NotNull(message = "startAt 값이 없습니다.") LocalTime startAt
 ) {
     public TimeSlot toTime() {
-        return TimeSlot.createWithoutId(startAt);
+        return TimeSlot.builder().startAt(startAt).build();
     }
 }

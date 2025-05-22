@@ -37,23 +37,14 @@ public class ThemeService {
             throw new ExistedThemeException();
         }
 
-        Theme theme = Theme.createWithoutId(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
-        Theme themeWithId = themeRepository.save(theme);
-        return new ThemeResponse(themeWithId.getId(), themeWithId.getName(), themeWithId.getDescription(),
-                themeWithId.getThumbnail());
+        Theme theme = themeRepository.save(themeRequest.toTheme());
+        return ThemeResponse.from(theme);
     }
 
     public List<ThemeResponse> findAllThemes() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
-                .map(theme ->
-                        new ThemeResponse(
-                                theme.getId(),
-                                theme.getName(),
-                                theme.getDescription(),
-                                theme.getThumbnail()
-                        )
-                )
+                .map(ThemeResponse::from)
                 .toList();
     }
 

@@ -42,17 +42,7 @@ public class Waiting {
         this.theme = theme;
     }
 
-    public Waiting() {
-    }
-
-    public static Waiting of(final Long id, final Member member, final LocalDate date,
-                             final TimeSlot timeSlot, final Theme theme) {
-        return new Waiting(id, member, date, timeSlot, theme);
-    }
-
-    public static Waiting createWithoutId(final Member member, final LocalDate date,
-                                          final TimeSlot timeSlot, final Theme theme) {
-        return new Waiting(null, member, date, timeSlot, theme);
+    protected Waiting() {
     }
 
     private static void validateNull(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {

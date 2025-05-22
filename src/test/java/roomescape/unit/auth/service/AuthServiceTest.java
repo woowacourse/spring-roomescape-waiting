@@ -40,7 +40,11 @@ class AuthServiceTest {
     @Test
     void 이메일과_비밀번호로_토큰을_생성한다() {
         // given
-        Member member = new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         memberRepository.save(member);
         given(tokenProvider.createToken(any(), any(Role.class))).willReturn("token");
         LoginRequest request = new LoginRequest("email1@domain.com", "password1");
@@ -60,7 +64,11 @@ class AuthServiceTest {
     @Test
     void 잘못된_비밀번호인_경우_예외가_발생한다() {
         // given
-        Member member = new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         memberRepository.save(member);
         LoginRequest request = new LoginRequest("email1@domain.com", "password2");
         // when & then
@@ -71,7 +79,11 @@ class AuthServiceTest {
     @Test
     void 토큰을_분해해서_사용자_정보를_조회한다() {
         // given
-        Member member = new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         memberRepository.save(member);
         // when
         AuthenticatedUserResponse token = authService.getAuthenticatedUser(1L);

@@ -50,20 +50,42 @@ public class AdminApiTest {
     @Test
     void 예약_전체_조회() {
         Member admin = memberRepository.save(
-                new Member(null, "admin", "admin@domain.com", "admin", Role.ADMIN)
+                Member.builder()
+                        .name("admin")
+                        .email("admin@domain.com")
+                        .password("password1")
+                        .role(Role.ADMIN).build()
         );
         Member member = memberRepository.save(
-                new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
+                Member.builder()
+                        .name("name1")
+                        .email("email1@domain.com")
+                        .password("password1")
+                        .role(Role.MEMBER).build()
         );
-        Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("name")
+                        .description("desc")
+                        .thumbnail("thumb").build()
+        );
         TimeSlot timeSlot = timeSlotRepository.save(
-                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
-        reservationRepository.save(Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 1), timeSlot, theme
-        ));
-        reservationRepository.save(Reservation.createWithoutId(
-                member, LocalDate.of(2025, 1, 2), timeSlot, theme
-        ));
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build());
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(timeSlot)
+                        .theme(theme).build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 2))
+                        .timeSlot(timeSlot)
+                        .theme(theme).build()
+        );
         String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
 
         RestAssured.given().log().all()
@@ -77,14 +99,28 @@ public class AdminApiTest {
     @Test
     void 관리자_예약_추가_성공() {
         Member admin = memberRepository.save(
-                new Member(null, "admin", "admin@domain.com", "password1", Role.ADMIN)
+                Member.builder()
+                        .name("admin")
+                        .email("admin@domain.com")
+                        .password("password1")
+                        .role(Role.ADMIN).build()
         );
         Member member = memberRepository.save(
-                new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
+                Member.builder()
+                        .name("member1")
+                        .email("email1@domain.com")
+                        .password("password1")
+                        .role(Role.MEMBER).build()
         );
-        Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme")
+                        .description("desc")
+                        .thumbnail("thumb").build()
+        );
         TimeSlot timeSlot = timeSlotRepository.save(
-                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build());
         String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
 
         Map<String, Object> reservation = new HashMap<>();
@@ -107,11 +143,21 @@ public class AdminApiTest {
     @Test
     void 관리자가_아닌_사용자가_관리자_예약_추가할_경우_403에러가_발생한다() {
         Member member = memberRepository.save(
-                new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
+                Member.builder()
+                        .name("name1")
+                        .email("email1@domain.com")
+                        .password("password1")
+                        .role(Role.MEMBER).build()
         );
-        Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("name")
+                        .description("desc")
+                        .thumbnail("thumb").build()
+        );
         TimeSlot timeSlot = timeSlotRepository.save(
-                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build());
         String token = tokenProvider.createToken(member.getId().toString(), member.getRole());
 
         Map<String, Object> reservation = new HashMap<>();
@@ -131,20 +177,30 @@ public class AdminApiTest {
 
     @Test
     void 관리자가_모든_대기를_조회한다() {
-        Member member = memberRepository.save(
-                new Member(null, "member1", "member1@domain.com", "password1", Role.ADMIN)
+        Member admin = memberRepository.save(
+                Member.builder()
+                        .name("admin")
+                        .email("admin@domain.com")
+                        .password("admin")
+                        .role(Role.ADMIN).build()
         );
-        Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("name")
+                        .description("desc")
+                        .thumbnail("thumb").build()
+        );
         TimeSlot timeSlot = timeSlotRepository.save(
-                TimeSlot.createWithoutId(LocalTime.of(9, 0)));
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build());
         waitingRepository.save(
                 Waiting.builder()
                         .date(LocalDate.of(2025, 1, 1))
                         .theme(theme)
                         .timeSlot(timeSlot)
-                        .member(member).build()
+                        .member(admin).build()
         );
-        String token = tokenProvider.createToken(member.getId().toString(), member.getRole());
+        String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)

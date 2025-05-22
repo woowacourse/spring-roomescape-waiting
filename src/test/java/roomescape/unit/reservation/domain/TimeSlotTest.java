@@ -10,16 +10,7 @@ class TimeSlotTest {
     @Test
     void 시작시간이_null이면_예외가_발생한다() {
         // when & then
-        Assertions.assertThatThrownBy(() -> TimeSlot.createWithoutId(null))
+        Assertions.assertThatThrownBy(() -> TimeSlot.builder().id(1L).build())
                 .isInstanceOf(ArgumentNullException.class);
     }
-
-    @Test
-    void 시작시간이_null이면_예외가_발생한다2() {
-        // when & then
-        Assertions.assertThatThrownBy(() -> new TimeSlot(1L, null))
-                .isInstanceOf(ArgumentNullException.class);
-
-    }
-
 }

@@ -29,8 +29,12 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        Reservation reservationWithId = Reservation.of(index.getAndIncrement(), reservation.getMember(),
-                reservation.getDate(), reservation.getTimeSlot(), reservation.getTheme());
+        Reservation reservationWithId = Reservation.builder()
+                .id(index.getAndIncrement())
+                .member(reservation.getMember())
+                .date(reservation.getDate())
+                .timeSlot(reservation.getTimeSlot())
+                .theme(reservation.getTheme()).build();
         reservations.add(reservationWithId);
         return reservationWithId;
     }

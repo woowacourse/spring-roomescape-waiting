@@ -25,7 +25,13 @@ class AuthApiTest {
     @Test
     void 로그인_성공() {
         //given
-        memberRepository.save(new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER));
+        memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
+        );
         Map<String, Object> body = new HashMap<>();
         body.put("email", "email1@domain.com");
         body.put("password", "password1");
@@ -42,7 +48,13 @@ class AuthApiTest {
     @Test
     void 로그인_비밀번호_불일치로_실패() {
         //given
-        memberRepository.save(new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER));
+        memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
+        );
         Map<String, Object> body = new HashMap<>();
         body.put("email", "email1@domain.com");
         body.put("password", "password2");
@@ -75,7 +87,13 @@ class AuthApiTest {
     @Test
     void 인증_정보_조회_성공() {
         //given
-        memberRepository.save(new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER));
+        memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
+        );
         Map<String, Object> body = Map.of(
                 "email", "email1@domain.com",
                 "password", "password1"
@@ -94,16 +112,18 @@ class AuthApiTest {
                 .when().get("api/auth/check")
                 .then()
                 .statusCode(200)
-                .body("name", equalTo("name1"));
+                .body("name", equalTo("member1"));
     }
 
     @Test
     void 잘못된_토큰으로_인증_정보_조회_시_401에러가_발생한다() {
         //given
-        memberRepository.save(new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER));
-        Map<String, Object> body = Map.of(
-                "email", "email1@domain.com",
-                "password", "password1"
+        memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
         );
 
         RestAssured.given()

@@ -19,17 +19,13 @@ public class TimeSlot {
     @Column(nullable = false)
     private LocalTime startAt;
 
-    public TimeSlot(final Long id, final LocalTime startAt) {
+    private TimeSlot(final Long id, final LocalTime startAt) {
         validateNull(startAt);
         this.id = id;
         this.startAt = startAt;
     }
 
-    public TimeSlot() {
-    }
-
-    public static TimeSlot createWithoutId(final LocalTime startAt) {
-        return new TimeSlot(null, startAt);
+    protected TimeSlot() {
     }
 
     private void validateNull(LocalTime startAt) {
@@ -67,6 +63,11 @@ public class TimeSlot {
     public static class Builder {
         private Long id;
         private LocalTime startAt;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder startAt(LocalTime startAt) {
             this.startAt = startAt;

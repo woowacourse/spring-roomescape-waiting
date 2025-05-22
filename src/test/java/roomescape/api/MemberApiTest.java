@@ -26,7 +26,11 @@ public class MemberApiTest {
     @Test
     void 전체_회원_조회() {
         // given
-        Member member = new Member(null, "name", "email1@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("member1")
+                .password("password1")
+                .email("email1@domain.com")
+                .role(Role.MEMBER).build();
         memberRepository.save(member);
         // when & then
         RestAssured.given()

@@ -62,9 +62,24 @@ public class ThemeApiTest {
     @Test
     void 테마를_전체조회한다() {
         // given
-        themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
-        themeRepository.save(Theme.createWithoutId("theme2", "desc", "thumb2"));
-        themeRepository.save(Theme.createWithoutId("theme3", "desc", "thumb3"));
+        themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        themeRepository.save(
+                Theme.builder()
+                        .name("theme2")
+                        .thumbnail("thumbnail2")
+                        .description("description2").build()
+        );
+        themeRepository.save(
+                Theme.builder()
+                        .name("theme3")
+                        .thumbnail("thumbnail3")
+                        .description("description3").build()
+        );
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -77,8 +92,18 @@ public class ThemeApiTest {
     @Test
     void 테마를_삭제한다() {
         // given
-        themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
-        Theme savedTheme = themeRepository.save(Theme.createWithoutId("theme2", "desc", "thumb2"));
+        themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        Theme savedTheme = themeRepository.save(
+                Theme.builder()
+                        .name("theme2")
+                        .thumbnail("thumbnail2")
+                        .description("description2").build()
+        );
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -95,10 +120,28 @@ public class ThemeApiTest {
     @Test
     void 예약이_존재하는_테마를_삭제하는_경우_400에러가_발생한다() {
         // given
-        Theme theme = themeRepository.save(Theme.createWithoutId("theme3", "desc", "thumb3"));
-        TimeSlot time = timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(9, 0)));
-        Member member = memberRepository.save(new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER));
-        reservationRepository.save(Reservation.createWithoutId(member, LocalDate.now().minusDays(1), time, theme));
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        TimeSlot time = timeSlotRepository.save(TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build());
+        Member member = memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.now().minusDays(1))
+                        .timeSlot(time)
+                        .theme(theme).build()
+        );
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -120,14 +163,50 @@ public class ThemeApiTest {
         Theme theme2 = themeRepository.findById(2L).get();
         Theme theme3 = themeRepository.findById(3L).get();
 
-        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme1));
-        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time1, theme1));
-        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(3), time1, theme1));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member1)
+                        .date(LocalDate.now().minusDays(1))
+                        .timeSlot(time1)
+                        .theme(theme1).build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member1)
+                        .date(LocalDate.now().minusDays(2))
+                        .timeSlot(time1)
+                        .theme(theme1).build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member1)
+                        .date(LocalDate.now().minusDays(3))
+                        .timeSlot(time1)
+                        .theme(theme1).build()
+        );
 
-        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme2));
-        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time1, theme2));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member1)
+                        .date(LocalDate.now().minusDays(1))
+                        .timeSlot(time1)
+                        .theme(theme2).build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member1)
+                        .date(LocalDate.now().minusDays(2))
+                        .timeSlot(time1)
+                        .theme(theme2).build()
+        );
 
-        reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(3), time1, theme3));
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member1)
+                        .date(LocalDate.now().minusDays(3))
+                        .timeSlot(time1)
+                        .theme(theme3).build()
+        );
         // when & then
         RestAssured.given()
                 .contentType(ContentType.JSON)

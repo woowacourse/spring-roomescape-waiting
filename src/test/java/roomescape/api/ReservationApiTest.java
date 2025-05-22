@@ -46,11 +46,21 @@ public class ReservationApiTest {
     @Test
     void 사용자가_예약을_추가한다() {
         Member savedMember = memberRepository.save(
-                new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER)
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
         );
         String token = tokenProvider.createToken(savedMember.getId().toString(), savedMember.getRole());
-        TimeSlot time = timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(9, 0)));
-        Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
+        TimeSlot time = timeSlotRepository.save(TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build());
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("date", "2026-08-05");
         reservation.put("timeId", time.getId());
@@ -64,20 +74,34 @@ public class ReservationApiTest {
                 .then().log().all()
                 .statusCode(201)
                 .body("date", equalTo("2026-08-05"))
-                .body("memberName", equalTo("name1"));
-
+                .body("memberName", equalTo("member1"));
     }
 
     @Test
     void 예약을_삭제한다() {
         // given
         Member member = memberRepository.save(
-                new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER)
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
         );
-        TimeSlot time = timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(9, 0)));
-        Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
+        TimeSlot time = timeSlotRepository.save(TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build());
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
         Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(time)
+                        .theme(theme).build()
+        );
         // when & then
         RestAssured.given().log().all()
                 .when().delete("/api/reservations/{reservationId}", reservation.getId())

@@ -12,8 +12,8 @@ import roomescape.exception.ExistedThemeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.dto.request.ThemeRequest;
 import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -49,23 +49,42 @@ public class ThemeServiceTest {
     @Test
     void 테마_목록을_조회할_수_있다() {
         // given
-        themeRepository.save(Theme.createWithoutId("name1", "description1", "thumbnail1"));
-        themeRepository.save(Theme.createWithoutId("name2", "description2", "thumbnail2"));
+        themeRepository.save(Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build());
+        themeRepository.save(Theme.builder()
+                .name("theme2")
+                .description("desc2")
+                .thumbnail("thumb2").build());
         // when
         List<ThemeResponse> themes = themeService.findAllThemes();
         // then
         assertThat(themes).hasSize(2);
-        assertThat(themes.getFirst().name()).isEqualTo("name1");
-        assertThat(themes.get(1).name()).isEqualTo("name2");
+        assertThat(themes.getFirst().name()).isEqualTo("theme1");
+        assertThat(themes.get(1).name()).isEqualTo("theme2");
     }
 
     @Test
     void 예약이_존재하는_테마를_삭제하면_예외가_발생한다() {
         // given
-        Theme theme = themeRepository.save(Theme.createWithoutId("name1", "description1", "thumbnail1"));
-        Member member = new Member(1L, "name1", "email@domain.com", "password1", Role.MEMBER);
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
-        reservationRepository.save(Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
+        Theme theme = themeRepository.save(Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build());
+        Member member = Member.builder()
+                .id(1L)
+                .name("name1")
+                .email("email@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
+        reservationRepository.save(Reservation.builder()
+                .member(member)
+                .date(LocalDate.of(2025, 1, 1))
+                .timeSlot(time)
+                .theme(theme).build());
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
                 .isInstanceOf(ExistedReservationException.class);
@@ -74,9 +93,14 @@ public class ThemeServiceTest {
     @Test
     void 테마를_삭제할_수_있다() {
         // given
-        Theme savedTheme = themeRepository.save(Theme.createWithoutId("name1", "description1", "thumbnail1"));
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
         // when
-        themeService.deleteThemeById(savedTheme.getId());
+        themeService.deleteThemeById(theme.getId());
         // then
         assertThat(themeRepository.findAll()).hasSize(0);
     }
@@ -84,8 +108,13 @@ public class ThemeServiceTest {
     @Test
     void 중복된_이름으로_테마를_생성할_수_없다() {
         // given
-        themeRepository.save(Theme.createWithoutId("name1", "desc1", "thumb1"));
-        ThemeRequest themeRequest = new ThemeRequest("name1", "desc2", "thumb2");
+        themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
+        ThemeRequest themeRequest = new ThemeRequest("theme1", "desc2", "thumb2");
         // when & then
         assertThatThrownBy(() -> themeService.createTheme(themeRequest))
                 .isInstanceOf(ExistedThemeException.class);
@@ -95,25 +124,67 @@ public class ThemeServiceTest {
     @Test
     void 인기_테마를_조회한다() {
         // given
-        Theme theme1 = themeRepository.save(Theme.createWithoutId("name1", "desc", "thumb"));
-        Theme theme2 = themeRepository.save(Theme.createWithoutId("name2", "desc", "thumb"));
-        Theme theme3 = themeRepository.save(Theme.createWithoutId("name3", "desc", "thumb"));
+        Theme theme1 = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
+        Theme theme2 = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
+        Theme theme3 = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("desc1")
+                        .thumbnail("thumb1").build()
+        );
+        Member member1 = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
 
-        Member member1 = new Member(1L, "name1", "email1@email.com", "password1", Role.MEMBER);
-        Member member2 = new Member(2L, "name2", "email1@email.com", "password1", Role.MEMBER);
+        TimeSlot time1 = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
+        TimeSlot time2 = TimeSlot.builder()
+                .startAt(LocalTime.of(10, 0)).build();
+        TimeSlot time3 = TimeSlot.builder()
+                .startAt(LocalTime.of(11, 0)).build();
 
-        TimeSlot time1 = TimeSlot.createWithoutId(LocalTime.of(9, 0));
-        TimeSlot time2 = TimeSlot.createWithoutId(LocalTime.of(10, 0));
-        TimeSlot time3 = TimeSlot.createWithoutId(LocalTime.of(11, 0));
-
-        Reservation reservation1 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme1);
-        Reservation reservation2 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time2, theme1);
-        Reservation reservation3 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(3), time3, theme1);
-
-        Reservation reservation4 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme2);
-        Reservation reservation5 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time2, theme2);
-
-        Reservation reservation6 = Reservation.createWithoutId(member1, LocalDate.now().minusDays(3), time3, theme3);
+        Reservation reservation1 = Reservation.builder()
+                .member(member1)
+                .date(LocalDate.now().minusDays(1))
+                .timeSlot(time1)
+                .theme(theme1).build();
+        Reservation reservation2 = Reservation.builder()
+                .member(member1)
+                .date(LocalDate.now().minusDays(2))
+                .timeSlot(time2)
+                .theme(theme1).build();
+        Reservation reservation3 = Reservation.builder()
+                .member(member1)
+                .date(LocalDate.now().minusDays(3))
+                .timeSlot(time3)
+                .theme(theme1).build();
+        Reservation reservation4 = Reservation.builder()
+                .member(member1)
+                .date(LocalDate.now().minusDays(1))
+                .timeSlot(time1)
+                .theme(theme2).build();
+        Reservation reservation5 = Reservation.builder()
+                .member(member1)
+                .date(LocalDate.now().minusDays(2))
+                .timeSlot(time2)
+                .theme(theme2).build();
+        Reservation reservation6 = Reservation.builder()
+                .member(member1)
+                .date(LocalDate.now().minusDays(3))
+                .timeSlot(time3)
+                .theme(theme3).build();
 
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);

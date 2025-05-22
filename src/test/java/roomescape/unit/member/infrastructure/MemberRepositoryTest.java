@@ -24,7 +24,13 @@ class MemberRepositoryTest {
     @Test
     void 이메일로_회원을_찾을_수_있다() {
         // given
-        entityManager.persist(new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER));
+        entityManager.persist(
+                Member.builder()
+                        .name("name1")
+                        .email("email1@domain.com")
+                        .password("password1")
+                        .role(Role.MEMBER).build()
+        );
         // when
         Optional<Member> member = memberRepository.findByEmail("email1@domain.com");
         // then

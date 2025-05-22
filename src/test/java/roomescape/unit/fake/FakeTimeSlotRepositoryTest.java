@@ -19,7 +19,8 @@ class FakeTimeSlotRepositoryTest {
     @Test
     void 예약_시간_생성() {
         // given
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         // when
         TimeSlot savedTime = reservationTimeRepository.save(time);
         // then
@@ -31,7 +32,8 @@ class FakeTimeSlotRepositoryTest {
     @Test
     void 예약_시간_삭제() {
         // given
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         TimeSlot savedTime = reservationTimeRepository.save(time);
         // when
         reservationTimeRepository.deleteById(savedTime.getId());
@@ -43,7 +45,8 @@ class FakeTimeSlotRepositoryTest {
     @Test
     void id로_예약_시간_조회() {
         // given
-        TimeSlot time = TimeSlot.createWithoutId(LocalTime.of(9, 0));
+        TimeSlot time = TimeSlot.builder()
+                .startAt(LocalTime.of(9, 0)).build();
         TimeSlot savedTime = reservationTimeRepository.save(time);
         // when
         Optional<TimeSlot> optionalTime = reservationTimeRepository.findById(savedTime.getId());

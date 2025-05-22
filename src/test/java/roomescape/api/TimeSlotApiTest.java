@@ -65,7 +65,9 @@ public class TimeSlotApiTest {
     @Test
     void 예약시간_조회_테스트() {
         // given
-        timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(10, 0)));
+        timeSlotRepository.save(
+                TimeSlot.builder().startAt(LocalTime.of(10, 0)).build()
+        );
         // when
         List<TimeSlotResponse> response = RestAssured.given().log().all()
                 .when().get("/api/times")
@@ -83,7 +85,9 @@ public class TimeSlotApiTest {
     @Test
     void 예약시간_삭제_테스트() {
         // given
-        timeSlotRepository.save(TimeSlot.createWithoutId(LocalTime.of(10, 0)));
+        timeSlotRepository.save(
+                TimeSlot.builder().startAt(LocalTime.of(10, 0)).build()
+        );
         // when
         RestAssured.given().log().all()
                 .when().delete("/api/times/{timeId}", 1L)
@@ -99,16 +103,31 @@ public class TimeSlotApiTest {
     void 가능한_예약시간_조회_테스트() {
         // when
         TimeSlot timeSlot1 = timeSlotRepository.save(
-                TimeSlot.createWithoutId(LocalTime.of(10, 0))
+                TimeSlot.builder().startAt(LocalTime.of(10, 0)).build()
         );
         TimeSlot timeSlot2 = timeSlotRepository.save(
-                TimeSlot.createWithoutId(LocalTime.of(11, 0))
+                TimeSlot.builder().startAt(LocalTime.of(11, 0)).build()
         );
-        Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb"));
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
         Member member = memberRepository.save(
-                new Member(null, "member1", "email1@domain.com", "password1", Role.MEMBER));
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
+        );
         reservationRepository.save(
-                Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), timeSlot1, theme));
+                Reservation.builder()
+                        .member(member)
+                        .date(LocalDate.of(2025, 1, 1))
+                        .timeSlot(timeSlot1)
+                        .theme(theme).build()
+        );
         // when
         List<TimeWithBookedResponse> response = RestAssured.given().log().all()
                 .when().get("/api/times/theme/1?date=2025-01-01")

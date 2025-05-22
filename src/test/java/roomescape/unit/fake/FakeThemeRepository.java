@@ -20,11 +20,11 @@ public class FakeThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        Theme themeWithId = new Theme(index.getAndIncrement(),
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnail()
-        );
+        Theme themeWithId = Theme.builder()
+                .id(index.getAndIncrement())
+                .name(theme.getName())
+                .description(theme.getDescription())
+                .thumbnail(theme.getThumbnail()).build();
         fakeThemes.add(themeWithId);
         return themeWithId;
     }

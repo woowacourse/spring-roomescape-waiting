@@ -12,6 +12,10 @@ public record MemberRequest(
 ) {
 
     public Member toMember() {
-        return new Member(null, name, email, password, Role.MEMBER);
+        return Member.builder()
+                .name(name)
+                .email(email)
+                .password(password)
+                .role(Role.MEMBER).build();
     }
 }

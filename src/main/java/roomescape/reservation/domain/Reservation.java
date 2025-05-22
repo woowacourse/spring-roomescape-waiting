@@ -41,17 +41,7 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public Reservation() {
-    }
-
-    public static Reservation of(final Long id, final Member member, final LocalDate date,
-                                 final TimeSlot timeSlot, final Theme theme) {
-        return new Reservation(id, member, date, timeSlot, theme);
-    }
-
-    public static Reservation createWithoutId(final Member member, final LocalDate date,
-                                              final TimeSlot timeSlot, final Theme theme) {
-        return new Reservation(null, member, date, timeSlot, theme);
+    protected Reservation() {
     }
 
     private static void validateNull(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {
@@ -74,10 +64,6 @@ public class Reservation {
         if (LocalDateTime.now().isAfter(dateTime)) {
             throw new PastDateTimeReservationException();
         }
-    }
-
-    public Reservation withId(Long id) {
-        return new Reservation(id, member, date, timeSlot, theme);
     }
 
     public Long getId() {

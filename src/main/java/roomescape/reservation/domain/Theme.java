@@ -24,7 +24,7 @@ public class Theme {
     @Column(nullable = false)
     private String thumbnail;
 
-    public Theme(Long id, String name, String description, String thumbnail) {
+    private Theme(Long id, String name, String description, String thumbnail) {
         validateNull(name, description, thumbnail);
         this.id = id;
         this.name = name;
@@ -32,7 +32,7 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     private void validateNull(String name, String description, String thumbnail) {
@@ -45,10 +45,6 @@ public class Theme {
         if (thumbnail == null || thumbnail.isBlank()) {
             throw new ArgumentNullException("thumbnail");
         }
-    }
-
-    public static Theme createWithoutId(String name, String description, String thumbnail) {
-        return new Theme(null, name, description, thumbnail);
     }
 
     public Long getId() {
@@ -90,6 +86,11 @@ public class Theme {
         private String name;
         private String description;
         private String thumbnail;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder name(String name) {
             this.name = name;

@@ -19,8 +19,9 @@ public class FakeTimeSlotRepository implements TimeSlotRepository {
 
     @Override
     public TimeSlot save(TimeSlot timeSlot) {
-        TimeSlot timeSlotWithId = new TimeSlot(index.getAndIncrement(),
-                timeSlot.getStartAt());
+        TimeSlot timeSlotWithId = TimeSlot.builder()
+                .id(index.getAndIncrement())
+                .startAt(timeSlot.getStartAt()).build();
         timeSlots.add(timeSlotWithId);
         return timeSlotWithId;
     }

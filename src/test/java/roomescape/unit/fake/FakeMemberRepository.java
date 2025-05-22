@@ -19,7 +19,13 @@ public class FakeMemberRepository implements MemberRepository {
 
     @Override
     public Member save(Member member) {
-        Member newMember = member.withId(index.getAndIncrement());
+        Member newMember = Member.builder()
+                .id(index.getAndIncrement())
+                .name(member.getName())
+                .email(member.getEmail())
+                .password(member.getPassword())
+                .role(member.getRole())
+                .build();
         members.add(newMember);
         return newMember;
     }

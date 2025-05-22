@@ -16,7 +16,10 @@ class FakeThemeRepositoryTest {
     @Test
     void 테마를_생성한다() {
         // given
-        Theme theme = Theme.createWithoutId("theme1", "desc1", "thumb1");
+        Theme theme = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         // when
         themeRepository.save(theme);
         // then
@@ -27,9 +30,15 @@ class FakeThemeRepositoryTest {
     @Test
     void 전체_테마를_조회한다() {
         // given
-        Theme theme1 = Theme.createWithoutId("theme1", "desc1", "thumb1");
+        Theme theme1 = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         themeRepository.save(theme1);
-        Theme theme2 = Theme.createWithoutId("theme2", "desc2", "thumb2");
+        Theme theme2 = Theme.builder()
+                .name("theme2")
+                .description("desc2")
+                .thumbnail("thumb2").build();
         themeRepository.save(theme2);
         // when
         List<Theme> allTheme = themeRepository.findAll();
@@ -44,7 +53,10 @@ class FakeThemeRepositoryTest {
     @Test
     void 테마를_삭제한다() {
         // given
-        Theme theme1 = Theme.createWithoutId("theme1", "desc1", "thumb1");
+        Theme theme1 = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         Theme savedTheme = themeRepository.save(theme1);
         // when
         themeRepository.deleteById(savedTheme.getId());
@@ -56,7 +68,10 @@ class FakeThemeRepositoryTest {
     @Test
     void id로_테마를_조회한다() {
         // given
-        Theme theme1 = Theme.createWithoutId("theme1", "desc1", "thumb1");
+        Theme theme1 = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         Theme savedTheme = themeRepository.save(theme1);
         // when
         Optional<Theme> optionalTheme = themeRepository.findById(savedTheme.getId());
@@ -70,7 +85,10 @@ class FakeThemeRepositoryTest {
     @Test
     void 이름으로_테마를_조회한다() {
         // given
-        Theme theme1 = Theme.createWithoutId("theme1", "desc1", "thumb1");
+        Theme theme1 = Theme.builder()
+                .name("theme1")
+                .description("desc1")
+                .thumbnail("thumb1").build();
         Theme savedTheme = themeRepository.save(theme1);
         // when
         Optional<Theme> optionalTheme = themeRepository.findByName(savedTheme.getName());

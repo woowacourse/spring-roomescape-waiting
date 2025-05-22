@@ -23,7 +23,11 @@ class ThemeRepositoryTest {
     @Test
     void 테마이름으로_테마를_조회한다() {
         // given
-        entityManager.persist(Theme.createWithoutId("theme1", "desc", "thumb"));
+        entityManager.persist(Theme.builder()
+                .name("theme1")
+                .description("desc")
+                .thumbnail("thumb").build()
+        );
         // when
         Optional<Theme> theme = themeRepository.findByName("theme1");
         // then

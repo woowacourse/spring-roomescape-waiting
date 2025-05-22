@@ -30,7 +30,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public Member(Long id, String name, String email, String password, Role role) {
+    private Member(Long id, String name, String email, String password, Role role) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -38,11 +38,7 @@ public class Member {
         this.role = role;
     }
 
-    public Member() {
-    }
-
-    public Member withId(Long id) {
-        return new Member(id, name, email, password, role);
+    protected Member() {
     }
 
     public void validatePassword(String password) {
