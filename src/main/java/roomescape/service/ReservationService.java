@@ -119,6 +119,7 @@ public class ReservationService {
         List<Member> targetMembers = memberRepository.findNextReserveMember(reservation.getDate(),
                 reservation.getReservationTime().getId(),
                 reservation.getTheme().getId(),
+                ReservationStatus.WAIT,
                 PageRequest.of(0, 1));
         if (targetMembers.isEmpty()) {
             return;
@@ -142,7 +143,8 @@ public class ReservationService {
             Long waitRank = reservationRepository.countRankById(reservation.getId(),
                     reservation.getDate(),
                     reservation.getReservationTime().getId(),
-                    reservation.getTheme().getId());
+                    reservation.getTheme().getId(),
+                    ReservationStatus.WAIT);
             responses.add(MyReservationResponse.of(reservation, waitRank));
             return;
         }

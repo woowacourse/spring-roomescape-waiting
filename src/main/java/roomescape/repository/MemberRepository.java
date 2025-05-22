@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.entity.Member;
+import roomescape.global.ReservationStatus;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -30,11 +31,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             where r.date = :date
             and r.reservationTime.id = :timeId
             and r.theme.id = :themeId
-            and r.status = 'WAIT'
+            and r.status = :status
             """)
     List<Member> findNextReserveMember(@Param("date") LocalDate date,
                                        @Param("timeId") Long timeId,
                                        @Param("themeId") Long themeId,
+                                       @Param("status") ReservationStatus status,
                                        Pageable pageable);
 
     boolean existsByEmail(String email);

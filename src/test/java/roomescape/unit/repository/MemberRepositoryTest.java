@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.entity.Member;
+import roomescape.global.ReservationStatus;
 import roomescape.repository.MemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +43,7 @@ class MemberRepositoryTest {
 
         //when
         List<Member> actual = memberRepository.findNextReserveMember(LocalDate.of(2025, 7, 1), 1L, 1L,
-                PageRequest.of(0, 1));
+                ReservationStatus.WAIT, PageRequest.of(0, 1));
 
         //then
         assertAll(

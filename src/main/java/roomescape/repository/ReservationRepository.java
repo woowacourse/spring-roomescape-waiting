@@ -47,10 +47,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 and r.date = :date
                 and r.reservationTime.id = :timeId
                 and r.theme.id = :themeId
-                and r.status = 'WAIT'
+                and r.status = :status
             """)
     Long countRankById(@Param("id") Long reservationId,
                        @Param("date") LocalDate date,
                        @Param("timeId") Long timeId,
-                       @Param("themeId") Long themeId);
+                       @Param("themeId") Long themeId,
+                       @Param("status") ReservationStatus status);
 }

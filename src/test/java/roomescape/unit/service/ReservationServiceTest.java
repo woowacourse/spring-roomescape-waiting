@@ -121,7 +121,7 @@ class ReservationServiceTest {
         when(reservationRepository.findById(any(Long.class)))
                 .thenReturn(Optional.of(reservation));
         when(memberRepository.findNextReserveMember(any(LocalDate.class), any(Long.class), any(Long.class),
-                any(PageRequest.class)))
+                any(ReservationStatus.class), any(PageRequest.class)))
                 .thenReturn(List.of());
 
         //when
@@ -253,7 +253,7 @@ class ReservationServiceTest {
         when(reservationRepository.findById(any(Long.class)))
                 .thenReturn(Optional.of(reserve));
         when(memberRepository.findNextReserveMember(any(LocalDate.class), any(Long.class), any(Long.class),
-                any(PageRequest.class)))
+                any(ReservationStatus.class), any(PageRequest.class)))
                 .thenReturn(List.of(member));
 
         //when
