@@ -7,7 +7,7 @@ import roomescape.model.ReservationTime;
 
 public interface ReservationRepository {
 
-    Optional<Reservation> findDuplicatedReservationByDateAndTime(LocalDate date, ReservationTime time);
+    boolean isDuplicatedForDateAndReservationTime(LocalDate date, ReservationTime time);
 
     List<Reservation> findForThemeAndMemberInPeriod(
             Long themeId,

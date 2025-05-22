@@ -79,10 +79,9 @@ public class ReservationService {
     }
 
     private void assertReservationIsNotDuplicated(Reservation reservation) {
-        reservationRepository.findDuplicatedReservationByDateAndTime(reservation.getDate(),
-                        reservation.getReservationTime())
-                .ifPresent(foundReservation -> {
-                    throw new DuplicatedException("이미 예약이 존재합니다.");
-                });
+        if (reservationRepository.isDuplicatedForDateAndReservationTime(reservation.getDate(),
+                reservation.getReservationTime())) {
+            throw new DuplicatedException("이미 예약이 존재합니다.");
+        }
     }
 }
