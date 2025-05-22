@@ -94,11 +94,11 @@ public class WaitingService {
         Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d".formatted(id)));
 
-        if(LocalDate.now().isBefore(waiting.getDate())) {
+        if(waiting.getDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("이전 날짜의 예약 대기는 삭제할 수 없습니다.");
         }
         if(Objects.equals(waiting.getDate(), LocalDate.now())) {
-            if(LocalTime.now().isBefore(waiting.getTime().getStartAt())) {
+            if(waiting.getTime().getStartAt().isBefore(LocalTime.now())) {
                 throw new BadRequestException("지난 시간의 예약 대기를 삭제할 수 없습니다.");
             }
         }
