@@ -1,12 +1,12 @@
-package roomescape.reservation.domain.repository;
+package roomescape.waiting.repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingWithRank;
 
 @Repository
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
@@ -14,7 +14,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     boolean existsByMemberIdAndThemeIdAndReservationTimeIdAndDate(Long memberId, Long themeId, Long reservationTimeId,
         LocalDate date);
 
-    @Query("SELECT new roomescape.reservation.domain.WaitingWithRank(" +
+    @Query("SELECT new roomescape.waiting.WaitingWithRank(" +
         "    w, " +
         "    (SELECT COUNT(w2) + 1" +
         "     FROM Waiting w2 " +

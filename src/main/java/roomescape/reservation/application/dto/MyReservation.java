@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingWithRank;
 
 public record MyReservation(
         Long id,

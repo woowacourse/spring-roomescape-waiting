@@ -1,4 +1,4 @@
-package roomescape.reservation.application;
+package roomescape.waiting.application;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -8,13 +8,13 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.dto.MemberReservationRequest;
 import roomescape.reservation.application.dto.MyReservation;
-import roomescape.reservation.application.dto.WaitingResponse;
+import roomescape.waiting.application.dto.WaitingResponse;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.WaitingWithRank;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
-import roomescape.reservation.domain.repository.WaitingRepository;
+import roomescape.waiting.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 

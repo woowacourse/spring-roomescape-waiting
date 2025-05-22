@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.login.application.dto.LoginCheckRequest;
-import roomescape.reservation.application.WaitingService;
+import roomescape.waiting.application.WaitingService;
 import roomescape.reservation.application.dto.MemberReservationRequest;
 import roomescape.reservation.application.dto.MyReservation;
-import roomescape.reservation.application.dto.WaitingResponse;
+import roomescape.waiting.application.dto.WaitingResponse;
 
 @RestController
 public class WaitingController {
