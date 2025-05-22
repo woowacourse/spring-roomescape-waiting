@@ -13,14 +13,11 @@ import roomescape.reservation.exception.InvalidReservationTimeException;
 import roomescape.reservation.exception.NotFoundReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.dto.ThemeResponseDto;
 import roomescape.theme.exception.InvalidThemeException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.user.domain.User;
-import roomescape.user.domain.dto.UserResponseDto;
 
 @Service
 @Transactional(readOnly = true)
@@ -97,10 +94,6 @@ public class ReservationService {
     }
 
     private ReservationResponseDto convertReservationResponseDto(Reservation reservation) {
-        ReservationTimeResponseDto reservationTimeResponseDto = ReservationTimeResponseDto.of(
-                reservation.getReservationTime());
-        ThemeResponseDto themeResponseDto = ThemeResponseDto.of(reservation.getTheme());
-        UserResponseDto userResponseDto = UserResponseDto.of(reservation.getUser());
-        return ReservationResponseDto.from(reservation, reservationTimeResponseDto, themeResponseDto, userResponseDto);
+        return ReservationResponseDto.of(reservation);
     }
 }
