@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +21,8 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
@@ -30,6 +34,7 @@ import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reserveticket.ReserveTicketService;
+import roomescape.service.waiting.WaitingService;
 
 @RestController
 @RequestMapping("/reservations")
@@ -40,11 +45,14 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final ReserveTicketService reserveTicketService;
+    private final WaitingService waitingService;
 
     public ReservationController(ReservationService reservationService,
-                                 ReserveTicketService reserveTicketService) {
+                                 ReserveTicketService reserveTicketService,
+                                 WaitingService waitingService) {
         this.reservationService = reservationService;
         this.reserveTicketService = reserveTicketService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -122,13 +130,12 @@ public class ReservationController {
             @AuthenticationPrincipal UserInfo userInfo) {
         List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(userInfo.id());
         List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getReservationId(),
-                        reservationMember.getName(),
-                        reservationMember.getThemeName(),
-                        reservationMember.getDate(),
-                        reservationMember.getStartAt(),
-                        reservationMember.getStatus()))
-                .toList();
+                .map(MyReservationMemberResponseDto::from)
+                .collect(Collectors.toList());
+        List<WaitingWithRank> waitingsWithRank = waitingService.getWaitingsWithRankByMemberId(userInfo.id());
+        for (WaitingWithRank waitingWithRank : waitingsWithRank) {
+            reservationDtos.add(MyReservationMemberResponseDto.from(waitingWithRank));
+        }
         return ResponseEntity.ok(reservationDtos);
     }
 }

@@ -5,6 +5,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.waiting.WaitingRepository;
@@ -15,6 +16,7 @@ import roomescape.service.theme.ThemeService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 public class WaitingService {
@@ -57,5 +59,9 @@ public class WaitingService {
     public Waiting getWaitingById(Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약대기입니다."));
+    }
+
+    public List<WaitingWithRank> getWaitingsWithRankByMemberId(Long memberId) {
+        return waitingRepository.findWaitingsWithRankByMemberId(memberId);
     }
 }
