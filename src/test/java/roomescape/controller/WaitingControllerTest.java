@@ -87,9 +87,9 @@ class WaitingControllerTest {
 
         assertAll(
                 () -> assertThat(waitings).hasSize(1),
-                () -> assertThat(waitings.get(0).getMember()).isEqualTo(member),
-                () -> assertThat(waitings.get(0).getTime()).isEqualTo(reservationTime),
-                () -> assertThat(waitings.get(0).getTheme()).isEqualTo(theme)
+                () -> assertThat(waitings.get(0).getMember().getEmail()).isEqualTo(member.getEmail()),
+                () -> assertThat(waitings.get(0).getTime().getStartAt()).isEqualTo(reservationTime.getStartAt()),
+                () -> assertThat(waitings.get(0).getTheme().getName()).isEqualTo(theme.getName())
         );
     }
 

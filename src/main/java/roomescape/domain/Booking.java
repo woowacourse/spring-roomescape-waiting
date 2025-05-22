@@ -10,9 +10,10 @@ import jakarta.persistence.MappedSuperclass;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import lombok.Getter;
 
 @MappedSuperclass
+@Getter
 public abstract class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,47 +49,5 @@ public abstract class Booking {
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime bookingDateTime = LocalDateTime.of(date, time.getStartAt());
         return bookingDateTime.isBefore(now);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Booking other)) {
-            return false;
-        }
-        if (this.id == null || other.id == null) {
-            return false;
-        }
-        return Objects.equals(id, other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id == null) {
-            return System.identityHashCode(this);
-        }
-        return Objects.hash(id);
     }
 } 

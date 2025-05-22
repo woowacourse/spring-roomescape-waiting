@@ -6,6 +6,7 @@ import static roomescape.TestFixture.DEFAULT_DATE;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +80,13 @@ class ThemeServiceTest {
         ThemeResult themeResult = themeService.create(createThemeParam);
 
         //then
-        assertThat(themeRepository.findById(themeResult.id()))
-                .hasValue(new Theme(themeResult.id(), themeResult.name(), themeResult.description(), themeResult.thumbnail()));
+        SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(themeRepository.findAll()).hasSize(1);
+        Theme savedTheme = themeRepository.findById(themeResult.id()).get();
+        softly.assertThat(savedTheme.getName()).isEqualTo(createThemeParam.name());
+
+        softly.assertAll();
     }
 
     @Test
