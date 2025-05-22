@@ -1,8 +1,11 @@
 package roomescape.reservation.infrastructure;
 
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingRepository;
+
+import java.util.List;
 
 @Repository
 public class JpaWaitingRepositoryAdapter implements WaitingRepository {
@@ -21,5 +24,10 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
     @Override
     public Waiting save(Waiting waiting) {
         return jpaWaitingRepository.save(waiting);
+    }
+
+    @Override
+    public List<WaitingWithRank> findByMemberId(Long memberId) {
+        return jpaWaitingRepository.findByMemberId(memberId);
     }
 }

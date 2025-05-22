@@ -17,7 +17,7 @@
 - [x] "/reservations/{id}" delete 요청 시 해당 id로 설정된 예약을 삭제한다.
     - [x] 만약 해당 예약이 없다면 404 NOT FOUND 상태 코드가 반환된다.
 - [x] "/admin/reservations" post 요청 시 관리자 예약을 할 수 있다.
-- [x] "/reservation-mine" get 요청 시 특정 사용자의 예약을 조회 할 수 있다.
+- [x] "/reservation-mine" get 요청 시 특정 사용자의 예약과 예약 대기를 조회 할 수 있다.
 
 ### 예약 대기
 - [x] "/reservations/waiting" post 요청으로 사용자 예약 대기를 할 수 있다.

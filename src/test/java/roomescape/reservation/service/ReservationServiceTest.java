@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,14 +24,17 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
 import roomescape.member.presentation.dto.MyReservationResponse;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.WaitingRepository;
+import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.infrastructure.JpaWaitingRepository;
 import roomescape.reservation.infrastructure.JpaWaitingRepositoryAdapter;
 import roomescape.reservation.presentation.dto.ReservationRequest;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationServiceTest.ReservationConfig;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
@@ -64,16 +68,16 @@ class ReservationServiceTest {
     @MethodSource
     void cant_not_reserve_before_now(final LocalDate date, final Long timeId) {
         Assertions.assertThatThrownBy(
-                        () -> reservationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
-                .isInstanceOf(ReservationException.class);
+            () -> reservationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
+            .isInstanceOf(ReservationException.class);
     }
 
     private static Stream<Arguments> cant_not_reserve_before_now() {
         return Stream.of(
-                Arguments.of(LocalDate.of(2024, 10, 5), 1L),
-                Arguments.of(LocalDate.of(2024, 9, 5), 1L),
-                Arguments.of(LocalDate.of(2024, 10, 4), 1L),
-                Arguments.of(LocalDate.of(2024, 10, 5), 2L)
+            Arguments.of(LocalDate.of(2024, 10, 5), 1L),
+            Arguments.of(LocalDate.of(2024, 9, 5), 1L),
+            Arguments.of(LocalDate.of(2024, 10, 4), 1L),
+            Arguments.of(LocalDate.of(2024, 10, 5), 2L)
         );
     }
 
@@ -81,8 +85,8 @@ class ReservationServiceTest {
     @Test
     void cant_not_reserve_duplicate() {
         Assertions.assertThatThrownBy(() -> reservationService.createReservation(
-                        new ReservationRequest(LocalDate.of(2024, 10, 6), 1L, 1L), 1L))
-                .isInstanceOf(ReservationException.class);
+                new ReservationRequest(LocalDate.of(2025, 4, 28), 1L, 1L), 1L))
+            .isInstanceOf(ReservationException.class);
     }
 
     @DisplayName("지나간 날짜와 시간에 대한 예약대기를 생성할 수 없다.")
@@ -103,35 +107,50 @@ class ReservationServiceTest {
     }
 
     @DisplayName("예약한 멤버는 예약대기를 생성할 수 없다.")
-    @ParameterizedTest
-    @MethodSource
-    void cant_reserve_waiting_by_reservation_owner(final LocalDate date, final Long timeId, final Long themeId, final Long memberId) {
+    @Test
+    void cant_reserve_waiting_by_reservation_owner() {
         Assertions.assertThatThrownBy(
-                () -> reservationService.createWaiting(new ReservationRequest(date, timeId, themeId), memberId))
+                () -> reservationService.createWaiting(
+                    new ReservationRequest(LocalDate.of(2025, 4, 28), 1L, 1L), 1L))
             .isInstanceOf(ReservationException.class)
             .hasMessage("예약자는 예약대기를 할 수 없습니다.");
     }
 
-    private static Stream<Arguments> cant_reserve_waiting_by_reservation_owner() {
-        return Stream.of(
-            Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 1L),
-            Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, 1L)
-        );
-    }
-
     @DisplayName("동일한 사용자가 중복 예약대기를 할 수 없다.")
-    @ParameterizedTest
-    @MethodSource
-    void cant_reserve_waiting_by_duplicate_member(final LocalDate date, final Long timeId, final Long themeId, final Long memberId) {
+    @Test
+    void cant_reserve_waiting_by_duplicate_member() {
         Assertions.assertThatThrownBy(
-                () -> reservationService.createWaiting(new ReservationRequest(date, timeId, themeId), memberId))
+                () -> reservationService.createWaiting(
+                    new ReservationRequest(LocalDate.of(2025, 4, 28), 1L, 1L), 2L))
             .isInstanceOf(ReservationException.class)
             .hasMessage("이미 예약대기 중입니다.");
     }
 
-    private static Stream<Arguments> cant_reserve_waiting_by_duplicate_member() {
-        return Stream.of(
-            Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 2L)
+    @DisplayName("예약 대기를 생성할 수 있다.")
+    @Test
+    void can_create_waiting() {
+        ReservationRequest request = new ReservationRequest(
+            LocalDate.of(2025, 4, 28),
+            2L,
+            1L
+        );
+        Long memberId = 2L;
+
+        WaitingResponse response = reservationService.createWaiting(request, memberId);
+
+        assertThat(response.theme()).isEqualTo("테마1");
+        assertThat(response.date()).isEqualTo(LocalDate.of(2025, 4, 28));
+        assertThat(response.startAt()).isEqualTo(LocalTime.of(11, 0));
+    }
+
+    @DisplayName("멤버별 예약과 대기 목록을 조회할 수 있다.")
+    @Test
+    void can_find_member_reservations_and_waitings() {
+        List<MyReservationResponse> responses = reservationService.getMemberReservations(new LoginMemberInfo(2L));
+
+        assertThat(responses).containsExactly(
+            new MyReservationResponse(3L, "테마3", LocalDate.of(2025, 4, 26), LocalTime.of(10, 0), "예약"),
+            new MyReservationResponse(1L, "테마1", LocalDate.of(2025, 4, 28), LocalTime.of(10, 0), "1번째 예약대기")
         );
     }
 

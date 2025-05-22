@@ -2,6 +2,8 @@ package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
@@ -10,6 +12,7 @@ import roomescape.common.exception.BusinessException;
 import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
+import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.member.exception.MemberNotFound;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;
@@ -152,8 +155,13 @@ public class ReservationService {
         Member member = memberRepository.findById(loginMemberInfo.id())
             .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
 
-        return member.getReservations().stream()
-            .map(MyReservationResponse::from)
-            .toList();
+        List<Reservation> reservations = member.getReservations();
+
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findByMemberId(loginMemberInfo.id());
+
+        return Stream.concat(
+            reservations.stream().map(MyReservationResponse::from),
+            waitingWithRanks.stream().map(MyReservationResponse::from)
+        ).toList();
     }
 }

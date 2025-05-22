@@ -16,4 +16,7 @@ INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES ('20
 INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES ('2025-04-28', 2, 1, 1, 'RESERVED');
 INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES ('2025-04-26', 1, 3, 2, 'RESERVED');
 INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES ('2025-04-18', 1, 2, 3, 'RESERVED');
+
+-- 대기 테스트를 위한 데이터
 INSERT INTO waiting (reservation_id, member_id) VALUES (1, 2);
+INSERT INTO waiting (reservation_id, member_id) VALUES (1, 3);
