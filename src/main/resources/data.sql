@@ -118,6 +118,18 @@ VALUES
 -- theme_id 9: 2건
 (CURRENT_DATE - 2, 2, 9, 2, 'RESERVED'),
 (CURRENT_DATE - 2, 1, 9, 3, 'RESERVED'),
+(CURRENT_DATE + 1, 2, 9, 4, 'RESERVED'),
 
 -- theme_id 10: 1건
-(CURRENT_DATE - 1, 1, 10, 2, 'RESERVED');
+(CURRENT_DATE - 1, 1, 10, 2, 'RESERVED'),
+(CURRENT_DATE + 2, 1, 10, 2, 'RESERVED');
+
+-- waiting
+INSERT INTO waiting (reservation_id, member_id, rank)
+VALUES
+(55, 5, 1),
+(55, 6, 2),
+(55, 7, 3),
+
+(57, 3, 1),
+(57, 4, 2);
