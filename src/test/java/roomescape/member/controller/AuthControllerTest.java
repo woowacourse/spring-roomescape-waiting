@@ -1,4 +1,4 @@
-package roomescape.auth.controller;
+package roomescape.member.controller;
 
 import static org.hamcrest.Matchers.is;
 
@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.auth.dto.LoginRequest;
+import roomescape.member.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 import roomescape.member.domain.Member;
 

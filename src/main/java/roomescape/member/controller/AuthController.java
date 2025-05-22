@@ -1,4 +1,4 @@
-package roomescape.auth.controller;
+package roomescape.member.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,26 +10,29 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.dto.LoginRequest;
-import roomescape.auth.dto.RegistrationRequest;
-import roomescape.auth.dto.TokenResponse;
-import roomescape.auth.service.LoginService;
-import roomescape.auth.service.SignupService;
+import roomescape.member.dto.LoginRequest;
+import roomescape.member.dto.RegistrationRequest;
+import roomescape.member.dto.TokenResponse;
+import roomescape.member.service.LoginService;
+import roomescape.member.service.SignupService;
 import roomescape.exception.ExceptionCause;
 import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.service.MemberService;
+import roomescape.jwt.TokenProvider;
 
 @RestController
 public class AuthController {
 
+    private final TokenProvider tokenProvider;
     private final SignupService signupService;
     private final LoginService loginService;
     private final MemberService memberService;
 
-    public AuthController(SignupService signupService, LoginService loginService, MemberService memberService) {
+    public AuthController(TokenProvider tokenProvider, SignupService signupService, LoginService loginService, MemberService memberService) {
+        this.tokenProvider = tokenProvider;
         this.signupService = signupService;
         this.loginService = loginService;
         this.memberService = memberService;
@@ -69,7 +72,8 @@ public class AuthController {
 
     @GetMapping("/login/check")
     public ResponseEntity<MemberResponse> checkLogin(@CookieValue(name = "token", required = false) String token) {
-        MemberResponse response = loginService.findMemberByToken(token);
+        Long memberId = tokenProvider.getMemberIdFromToken(token);
+        MemberResponse response = loginService.findMemberById(memberId);
         return ResponseEntity.ok().body(response);
     }
 

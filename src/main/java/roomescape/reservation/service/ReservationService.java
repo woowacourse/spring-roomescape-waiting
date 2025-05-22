@@ -13,7 +13,7 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.util.TokenProvider;
+import roomescape.jwt.TokenProvider;
 
 @Service
 public class ReservationService {

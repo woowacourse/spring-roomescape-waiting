@@ -8,18 +8,18 @@ import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.service.MemberService;
-import roomescape.util.CookieTokenExtractor;
-import roomescape.util.TokenProvider;
+import roomescape.jwt.CookieTokenExtractor;
+import roomescape.jwt.TokenProvider;
 
 public class LoginInterceptor implements HandlerInterceptor {
 
-    private final MemberService memberService;
     private final TokenProvider TokenProvider;
+    private final MemberService memberService;
     private final CookieTokenExtractor authorizationExtractor;
 
-    public LoginInterceptor(MemberService memberService, TokenProvider TokenProvider) {
-        this.memberService = memberService;
+    public LoginInterceptor(TokenProvider TokenProvider, MemberService memberService) {
         this.TokenProvider = TokenProvider;
+        this.memberService = memberService;
         this.authorizationExtractor = new CookieTokenExtractor();
     }
 
@@ -31,7 +31,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         }
 
         Long memberId = TokenProvider.getMemberIdFromToken(token);
-        Member member = memberService.findMemberById(memberId);
+        Member member = memberService.findById(memberId);
 
         if (!Role.isAdmin(member.getRole())) {
             response.setStatus(403);

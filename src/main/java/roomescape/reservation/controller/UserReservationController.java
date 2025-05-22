@@ -1,4 +1,4 @@
-package roomescape.member.controller;
+package roomescape.reservation.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +11,11 @@ import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/member")
-public class MemberController {
+public class UserReservationController {
 
     private final ReservationService reservationService;
 
-    public MemberController(ReservationService reservationService) {
+    public UserReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 

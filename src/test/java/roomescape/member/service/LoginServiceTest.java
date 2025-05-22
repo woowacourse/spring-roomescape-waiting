@@ -1,4 +1,4 @@
-package roomescape.auth.service;
+package roomescape.member.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -6,23 +6,21 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.auth.dto.LoginRequest;
-import roomescape.auth.dto.TokenResponse;
+import roomescape.member.dto.LoginRequest;
+import roomescape.member.dto.TokenResponse;
 import roomescape.exception.NotFoundException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.MemberService;
 import roomescape.repository.FakeTokenProvider;
-import roomescape.util.TokenProvider;
+import roomescape.jwt.TokenProvider;
 
 @DisplayName("사용자 로그인")
 class LoginServiceTest {
 
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
     private final TokenProvider tokenProvider = new FakeTokenProvider();
-    private final LoginService loginService = new LoginService(memberRepository,
-            new MemberService(memberRepository, tokenProvider), tokenProvider);
+    private final LoginService loginService = new LoginService(memberRepository, tokenProvider);
 
     @DisplayName("올바른 사용자 정보를 전달하면 로그인 토큰을 생성한다")
     @Test
@@ -45,7 +43,7 @@ class LoginServiceTest {
         String token = "admin@gmail.com";
 
         // when
-        MemberResponse response = loginService.findMemberByToken(token);
+        MemberResponse response = loginService.findMemberById(1L);
 
         // then
         assertAll(

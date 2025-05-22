@@ -1,7 +1,7 @@
-package roomescape.auth.service;
+package roomescape.member.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.auth.dto.RegistrationRequest;
+import roomescape.member.dto.RegistrationRequest;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ExceptionCause;
 import roomescape.member.repository.MemberRepository;
