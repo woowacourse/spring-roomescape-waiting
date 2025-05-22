@@ -100,9 +100,11 @@ public class ReserveTicketService {
     }
 
     private void validateIsReservationDoesntExist(AddReservationDto addReservationDto, Long reserverId) {
-        if (!reserveTicketRepository.existsBySameReservation(addReservationDto.themeId(),
+        boolean isExistBySameReservation = reserveTicketRepository.existsBySameReservation(addReservationDto.themeId(),
                 addReservationDto.date(),
-                addReservationDto.timeId(), reserverId, ReservationStatus.RESERVATION)) {
+                addReservationDto.timeId(), reserverId, ReservationStatus.RESERVATION);
+
+        if (!isExistBySameReservation) {
             throw new InvalidReservationException("예약이 존재하지 않습니다");
         }
     }

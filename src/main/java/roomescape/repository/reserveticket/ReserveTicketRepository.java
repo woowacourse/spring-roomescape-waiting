@@ -19,7 +19,7 @@ public interface ReserveTicketRepository extends Repository<ReserveTicket, Long>
     List<ReserveTicket> findAll();
 
     @Query("""
-                SELECT rt
+                SELECT CASE WHEN COUNT(rt) > 0 THEN true ELSE false END
                 FROM ReserveTicket rt
                 WHERE rt.reservation.date = :date
                   AND rt.reservation.time.id = :timeId

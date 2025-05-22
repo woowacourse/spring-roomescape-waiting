@@ -10,8 +10,8 @@ import roomescape.domain.theme.Theme;
 
 public record AddReservationDto(
         @NotNull @FutureOrPresent(message = "날짜는 현재보다 미래여야합니다.") LocalDate date,
-        Long timeId,
-        Long themeId) {
+        @NotNull Long timeId,
+        @NotNull Long themeId) {
 
     public Reservation toReservation(ReservationTime reservationTime, Theme theme,
                                      ReservationStatus reservationStatus) {
