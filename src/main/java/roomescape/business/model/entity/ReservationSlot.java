@@ -49,10 +49,6 @@ public class ReservationSlot {
         reservations.add(reservation);
     }
 
-    public void removeReservation(final Reservation reservation) {
-        reservations.remove(reservation);
-    }
-
     public int waitingNumberOf(final Id userId) {
         for (int i = 0; i < reservations.size(); i++) {
             if (reservations.get(i).isSameReserver(userId.value())) {

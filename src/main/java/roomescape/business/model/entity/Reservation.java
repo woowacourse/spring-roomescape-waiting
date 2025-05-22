@@ -34,8 +34,4 @@ public class Reservation {
     public boolean isSameReserver(final String userId) {
         return user.isSameUser(userId);
     }
-
-    public void cancel() {
-        slot.removeReservation(this);
-    }
 }
