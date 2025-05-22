@@ -235,8 +235,8 @@ class ReserveTicketServiceTest {
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
         LocalDate reservationDate = LocalDate.now().plusDays(1L);
 
-        long waitingReservation = reserveTicketService.addWaitingReservation(
-                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId);
-        assertThat(reserveTicketService.memberReservationWaitingTickets(waitingReservation)).hasSize(1);
+        assertThatThrownBy(() -> reserveTicketService.addWaitingReservation(
+                new AddReservationDto("reservationname", reservationDate, timeId, themeId), memberId))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

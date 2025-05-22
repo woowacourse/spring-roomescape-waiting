@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
@@ -44,24 +45,27 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public int countSameWaitingReservation(long themeId, LocalDate date, long timeId) {
-        return (int) reserveTickets.stream()
-                .filter(rt -> rt.getReservation().getTheme().getId() == themeId)
-                .filter(rt -> rt.getReservation().getDate().equals(date))
-                .filter(rt -> rt.getReservation().getReservationTime().getId() == timeId)
-                .toList()
-                .size();
-    }
+    //TODO 삭제
+//    @Override
+//    public int countSameWaitingReservation(long themeId, LocalDate date, long timeId) {
+//        return (int) reserveTickets.stream()
+//                .filter(rt -> rt.getReservation().getTheme().getId() == themeId)
+//                .filter(rt -> rt.getReservation().getDate().equals(date))
+//                .filter(rt -> rt.getReservation().getReservationTime().getId() == timeId)
+//                .toList()
+//                .size();
+//    }
 
     @Override
-    public boolean existsBySameWaitingReservation(long themeId, LocalDate date, long timeId, long reserverId) {
+    public boolean existsBySameReservation(long themeId, LocalDate date, long timeId, long reserverId,
+                                           ReservationStatus reservationStatus) {
         return reserveTickets.stream()
                 .anyMatch(rt ->
                         rt.getReservation().getTheme().getId() == themeId &&
                                 rt.getReservation().getDate().equals(date) &&
                                 rt.getReservation().getReservationTime().getId() == timeId &&
-                                rt.getMemberId() == reserverId
+                                rt.getMemberId() == reserverId &&
+                                rt.getReservationStatus().equals(reservationStatus)
                 );
     }
 }

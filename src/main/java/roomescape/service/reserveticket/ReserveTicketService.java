@@ -90,15 +90,28 @@ public class ReserveTicketService {
         long reservationId = reservationService.addReservation(addReservationDto, new NonDuplicateCheckStrategy(),
                 ReservationStatus.PREPARE);
 
-        if (reserveTicketRepository.existsBySameWaitingReservation(addReservationDto.themeId(),
-                addReservationDto.date(),
-                addReservationDto.timeId(), reserverId)) {
-            throw new InvalidReservationException("중복된 대기 요청입니다.");
-        }
+        validateIsReservationDoesntExist(addReservationDto, reserverId);
+        validateIsSameWaitingExist(addReservationDto, reserverId);
 
         Reservation reservation = reservationService.getReservationById(reservationId);
         Reserver reserver = memberService.getMemberById(reserverId);
         ReserveTicket reserveTicket = new ReserveTicket(null, reservation, reserver);
         return reserveTicketRepository.save(reserveTicket).getId();
+    }
+
+    private void validateIsReservationDoesntExist(AddReservationDto addReservationDto, Long reserverId) {
+        if (!reserveTicketRepository.existsBySameReservation(addReservationDto.themeId(),
+                addReservationDto.date(),
+                addReservationDto.timeId(), reserverId, ReservationStatus.RESERVATION)) {
+            throw new InvalidReservationException("예약이 존재하지 않습니다");
+        }
+    }
+
+    private void validateIsSameWaitingExist(AddReservationDto addReservationDto, Long reserverId) {
+        if (reserveTicketRepository.existsBySameReservation(addReservationDto.themeId(),
+                addReservationDto.date(),
+                addReservationDto.timeId(), reserverId, ReservationStatus.PREPARE)) {
+            throw new InvalidReservationException("중복된 대기 요청입니다.");
+        }
     }
 }
