@@ -27,13 +27,13 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_time_id")
-    private ReservationTime reservationTime;
+    private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime reservationTime,
+    public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime time,
                        final Theme theme
     ) {
         validateDate(date);
@@ -41,12 +41,12 @@ public class Reservation {
         this.id = id;
         this.date = date;
         this.member = member;
-        this.reservationTime = reservationTime;
+        this.time = time;
         this.theme = theme;
     }
 
-    public Reservation(final LocalDate date, final Member member, final ReservationTime reservationTime, final Theme theme) {
-        this(null, date, member, reservationTime, theme);
+    public Reservation(final LocalDate date, final Member member, final ReservationTime time, final Theme theme) {
+        this(null, date, member, time, theme);
     }
 
     public Reservation() {
@@ -65,8 +65,8 @@ public class Reservation {
         return member;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Theme getTheme() {
@@ -74,7 +74,7 @@ public class Reservation {
     }
 
     public boolean isSameReservationTime(final ReservationTime reservationTime) {
-        return this.reservationTime.isSameReservationTime(reservationTime);
+        return this.time.isSameReservationTime(reservationTime);
     }
 
     private void validateDate(final LocalDate date) {

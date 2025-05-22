@@ -18,6 +18,7 @@ import roomescape.presentation.dto.WaitingRequest;
 import roomescape.presentation.dto.WaitingResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -62,7 +63,7 @@ public class WaitingService {
     }
 
     private void validateIfReservationNotExists(final LocalDate date, final Long timeId, final Long themeId) {
-        boolean isReservationExisted = reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId,
+        boolean isReservationExisted = reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId,
                 themeId);
         if (!isReservationExisted) {
             throw new NotFoundException("예약이 존재하지 않아 예약 대기를 할 수 없습니다.");
@@ -72,5 +73,9 @@ public class WaitingService {
     private Member getMemberById(final Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId)));
+    }
+
+    public void deleteById(final Long id) {
+        waitingRepository.deleteById(id);
     }
 }

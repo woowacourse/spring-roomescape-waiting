@@ -20,6 +20,7 @@ import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
 import roomescape.infrastructure.repository.ThemeRepository;
+import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
@@ -41,10 +42,11 @@ public class ReservationServiceTest {
     public ReservationServiceTest(final MemberRepository memberRepository,
                                   final ThemeRepository themeRepository,
                                   final ReservationTimeRepository reservationTimeRepository,
-                                  final ReservationRepository reservationRepository) {
+                                  final ReservationRepository reservationRepository,
+                                  final WaitingRepository waitingRepository) {
 
         this.reservationService = new ReservationService(reservationRepository,
-                memberRepository, reservationTimeRepository, themeRepository);
+                memberRepository, reservationTimeRepository, themeRepository, waitingRepository);
         this.reservationRepository = reservationRepository;
     }
 

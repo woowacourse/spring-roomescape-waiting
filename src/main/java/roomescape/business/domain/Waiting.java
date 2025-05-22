@@ -29,10 +29,10 @@ public class Waiting {
 
     @ManyToOne
     @JoinColumn(name = "reservation_time_id")
-    private ReservationTime reservationTime;
+    private ReservationTime time;
 
     @Column(nullable = false)
-    private LocalDate reservationDate;
+    private LocalDate date;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -41,12 +41,12 @@ public class Waiting {
 
     }
 
-    public Waiting(final Member member, final Theme theme, final ReservationTime reservationTime,
-                   final LocalDate reservationDate) {
+    public Waiting(final Member member, final Theme theme, final ReservationTime time,
+                   final LocalDate date) {
         this.member = member;
         this.theme = theme;
-        this.reservationTime = reservationTime;
-        this.reservationDate = reservationDate;
+        this.time = time;
+        this.date = date;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -62,12 +62,12 @@ public class Waiting {
         return theme;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 
-    public LocalDate getReservationDate() {
-        return reservationDate;
+    public LocalDate getDate() {
+        return date;
     }
 
     public LocalDateTime getCreatedAt() {
