@@ -122,7 +122,11 @@ public class TestFixture {
                 TestFixture.createDefaultTheme());
     }
 
-    public static WaitingResult createDefaultWatiingResult() {
+    public static Waiting createWaiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return Waiting.createNew(member, date, time, theme);
+    }
+
+    public static WaitingResult createDefaultWaitingResult() {
         return WaitingResult.from(createDefaultWaiting());
     }
 

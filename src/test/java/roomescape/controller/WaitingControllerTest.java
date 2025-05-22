@@ -68,7 +68,7 @@ class WaitingControllerTest {
     @DisplayName("전체 예약 대기 목록을 조회할 수 있다.")
     void findWaitings() throws Exception {
         //given
-        WaitingResult waitingResult = TestFixture.createDefaultWatiingResult();
+        WaitingResult waitingResult = TestFixture.createDefaultWaitingResult();
         when(waitingService.findAll()).thenReturn(List.of(waitingResult));
 
         //when & then
@@ -99,7 +99,7 @@ class WaitingControllerTest {
                 TestFixture.TEST_TIME_ID,
                 TestFixture.TEST_THEME_ID
         );
-        WaitingResult waitingResult = TestFixture.createDefaultWatiingResult();
+        WaitingResult waitingResult = TestFixture.createDefaultWaitingResult();
         when(waitingService.create(any(CreateWaitingParam.class)))
                 .thenReturn(waitingResult);
 
