@@ -33,25 +33,26 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
     protected Reservation() {
 
     }
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
-                       final Member member, final Status status) {
+    public Reservation(
+        final Long id,
+        final LocalDate date,
+        final ReservationTime time,
+        final Theme theme,
+        final Member member
+    ) {
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.status = status;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member, final Status status) {
-        this(null, date, time, theme, member, status);
+    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member) {
+        this(null, date, time, theme, member);
     }
 
     public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
@@ -89,14 +90,6 @@ public class Reservation {
 
     public LocalTime getStartAt() {
         return time.getStartAt();
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public String getStatusValue() {
-        return status.getValue();
     }
 
     @Override
