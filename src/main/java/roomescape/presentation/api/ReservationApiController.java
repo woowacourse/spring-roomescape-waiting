@@ -13,12 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthRequired;
 import roomescape.auth.LoginInfo;
 import roomescape.auth.Role;
+import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.vo.UserRole;
 import roomescape.business.service.ReservationService;
 import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
-import roomescape.presentation.dto.response.ReservationMineResponse;
+import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
 
 import java.net.URI;
@@ -63,9 +64,9 @@ public class ReservationApiController {
 
     @GetMapping("/reservations/mine")
     @AuthRequired
-    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(LoginInfo loginInfo) {
-        List<ReservationDto> myReservations = reservationService.getMyReservations(loginInfo.id());
-        List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservations);
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(LoginInfo loginInfo) {
+        List<MyReservationDto> myReservations = reservationService.getMyReservations(loginInfo.id());
+        List<MyReservationResponse> responses = MyReservationResponse.from(myReservations);
         return ResponseEntity.ok(responses);
     }
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
@@ -16,6 +17,8 @@ import roomescape.exception.business.NotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static roomescape.exception.ErrorCode.RESERVATION_DUPLICATED;
 import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
@@ -36,7 +39,7 @@ public class ReservationService {
         val user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
 
-        ReservationSlot slot = slotService.findByDateAndTimeIdAndThemeIdOrElseCreate(date, timeIdValue, themeIdValue);
+        ReservationSlot slot = slotService.getByDateAndTimeIdAndThemeIdOrElseCreate(date, timeIdValue, themeIdValue);
 
         if (!reservations.isSlotFreeFor(slot, user)) {
             throw new DuplicatedException(RESERVATION_DUPLICATED);
@@ -52,9 +55,15 @@ public class ReservationService {
         return ReservationDto.fromEntities(reservations);
     }
 
-    public List<ReservationDto> getMyReservations(final String userIdValue) {
-        val reservations = this.reservations.findAllByUserId(Id.create(userIdValue));
-        return ReservationDto.fromEntities(reservations);
+    public List<MyReservationDto> getMyReservations(final String userIdValue) {
+        List<ReservationSlot> slots = slotService.getAllSlotsContainsReserverOf(userIdValue);
+        Id userId = Id.create(userIdValue);
+        Map<Reservation, Integer> reservationsWithWaitingNumber = slots.stream()
+                .collect(Collectors.toMap(
+                        slot -> slot.reservationOf(userId),
+                        slot -> slot.waitingNumberOf(userId)
+                ));
+        return MyReservationDto.fromMap(reservationsWithWaitingNumber);
     }
 
     @Transactional

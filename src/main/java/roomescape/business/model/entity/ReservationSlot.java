@@ -53,12 +53,19 @@ public class ReservationSlot {
         reservations.remove(reservation);
     }
 
-    public int calculateTurnOf(final Reservation reservation) {
+    public int waitingNumberOf(final Id userId) {
         for (int i = 0; i < reservations.size(); i++) {
-            if (reservations.get(i).equals(reservation)) {
-                return i + 1;
+            if (reservations.get(i).isSameReserver(userId.value())) {
+                return i;
             }
         }
         throw new NotFoundException(RESERVATION_NOT_EXIST);
+    }
+
+    public Reservation reservationOf(final Id userId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.isSameReserver(userId.value()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
     }
 }

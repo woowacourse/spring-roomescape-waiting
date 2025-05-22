@@ -9,6 +9,7 @@ import roomescape.business.model.vo.ReservationDate;
 import roomescape.infrastructure.jpa.dao.JpaReservationSlotDao;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Primary
@@ -24,6 +25,11 @@ public class JpaReservationSlots implements ReservationSlots {
     @Override
     public void save(final ReservationSlot reservationSlot) {
         dao.save(reservationSlot);
+    }
+
+    @Override
+    public List<ReservationSlot> findAllSlotsContainsReserverOf(final Id userId) {
+        return dao.findAllSlotsContainsReserverOf(userId);
     }
 
     @Override
