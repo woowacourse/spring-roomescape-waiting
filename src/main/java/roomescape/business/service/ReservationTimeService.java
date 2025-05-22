@@ -11,8 +11,8 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.PlayTimeRequest;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
 
 @Service
@@ -27,9 +27,9 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ReservationTimeResponse insert(final PlayTimeRequest playTimeRequest) {
-        validateStartAtIsNotDuplicate(playTimeRequest.startAt());
-        final ReservationTime reservationTime = playTimeRequest.toDomain();
+    public ReservationTimeResponse insert(final ReservationTimeRequest reservationTimeRequest) {
+        validateStartAtIsNotDuplicate(reservationTimeRequest.startAt());
+        final ReservationTime reservationTime = reservationTimeRequest.toDomain();
         final ReservationTime insertReservationTime = reservationTimeRepository.save(reservationTime);
         return ReservationTimeResponse.from(insertReservationTime);
     }

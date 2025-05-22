@@ -18,8 +18,8 @@ import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.PlayTimeRequest;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
 
 @DataJpaTest
@@ -41,10 +41,10 @@ class ReservationTimeServiceTest {
     void insert() {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
 
         // when
-        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
 
         // then
         assertThat(reservationTimeResponse.startAt()).isEqualTo(startAt);
@@ -55,11 +55,11 @@ class ReservationTimeServiceTest {
     void insertWhenStartAtIsDuplicate() {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
+        reservationTimeService.insert(reservationTimeRequest);
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.insert(playTimeRequest))
+        assertThatThrownBy(() -> reservationTimeService.insert(reservationTimeRequest))
                 .isInstanceOf(DuplicateException.class);
     }
 
@@ -82,8 +82,8 @@ class ReservationTimeServiceTest {
     void findByIdById() {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
         final Long id = reservationTimeResponse.id();
 
         // when
@@ -112,8 +112,8 @@ class ReservationTimeServiceTest {
     void deleteById() {
         // given
         final LocalTime startAt = LocalTime.of(14, 0);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
         final Long id = reservationTimeResponse.id();
 
         // when
