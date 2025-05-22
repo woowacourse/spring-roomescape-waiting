@@ -30,7 +30,8 @@ class ReservationRepositoryTest {
 
     private Member member1;
     private Member member2;
-    private Theme theme;
+    private Theme theme1;
+    private Theme theme2;
     private ReservationTime time1;
     private ReservationTime time2;
     private LocalDate yesterday;
@@ -54,8 +55,10 @@ class ReservationRepositoryTest {
         entityManager.persist(member2);
 
         // 테마 생성
-        theme = Theme.withoutId("테마1", "테마 1입니다.", "썸네일1");
-        entityManager.persist(theme);
+        theme1 = Theme.withoutId("테마1", "테마 1입니다.", "썸네일1");
+        theme2 = Theme.withoutId("테마2", "테마 2입니다.", "썸네일2");
+        entityManager.persist(theme1);
+        entityManager.persist(theme2);
 
         // 예약 시간 생성
         time1 = ReservationTime.withoutId(LocalTime.of(10, 0));
@@ -69,9 +72,9 @@ class ReservationRepositoryTest {
         tomorrow = LocalDate.of(2025, 3, 3);
 
         // 예약 생성
-        Reservation reservation1 = Reservation.withoutId(member1, theme, yesterday, time1, ReservationStatus.RESERVED);
-        Reservation reservation2 = Reservation.withoutId(member2, theme, today, time2, ReservationStatus.RESERVED);
-        Reservation reservation3 = Reservation.withoutId(member1, theme, tomorrow, time1, ReservationStatus.RESERVED);
+        Reservation reservation1 = Reservation.withoutId(member1, theme1, yesterday, time1, ReservationStatus.RESERVED);
+        Reservation reservation2 = Reservation.withoutId(member2, theme1, today, time2, ReservationStatus.RESERVED);
+        Reservation reservation3 = Reservation.withoutId(member1, theme2, tomorrow, time2, ReservationStatus.RESERVED);
 
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
@@ -81,12 +84,26 @@ class ReservationRepositoryTest {
         entityManager.clear();
     }
 
+    @DisplayName("회원의 예약을 검색한다")
+    @Test
+    void findByMember() {
+        // given
+        Long memberId = member1.getId();
+
+        // when
+        List<Reservation> reservations = reservationRepository.findByMember(member1);
+
+        // then
+        assertThat(reservations).hasSize(2);
+        assertThat(reservations).allMatch(reservation -> reservation.getMember().getId().equals(memberId));
+    }
+
     @DisplayName("회원 ID, 테마 ID, 날짜 범위로 예약을 검색한다")
     @Test
     void findByMemberAndThemeAndDateRange() {
         // given
         Long memberId = member1.getId();
-        Long themeId = theme.getId();
+        Long themeId = theme1.getId();
         LocalDate dateFrom = yesterday;
         LocalDate dateTo = tomorrow;
 
@@ -95,7 +112,7 @@ class ReservationRepositoryTest {
                 memberId, themeId, dateFrom, dateTo);
 
         // then
-        assertThat(reservations).hasSize(2);
+        assertThat(reservations).hasSize(1);
         assertThat(reservations).allMatch(reservation ->
                 reservation.getMember().getId().equals(memberId) &&
                 reservation.getTheme().getId().equals(themeId) &&
@@ -147,7 +164,7 @@ class ReservationRepositoryTest {
     void findByMemberAndThemeAndDateRangeWithOnlyThemeId() {
         // given
         Long memberId = null;
-        Long themeId = theme.getId();
+        Long themeId = theme1.getId();
         LocalDate dateFrom = null;
         LocalDate dateTo = null;
 
@@ -156,7 +173,7 @@ class ReservationRepositoryTest {
                 memberId, themeId, dateFrom, dateTo);
 
         // then
-        assertThat(reservations).hasSize(3);
+        assertThat(reservations).hasSize(2);
         assertThat(reservations).allMatch(reservation -> reservation.getTheme().getId().equals(themeId));
     }
 
