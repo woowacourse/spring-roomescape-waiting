@@ -37,63 +37,63 @@ VALUES ('지하 감옥',
         'https://example.com/jail.jpg');
 
 -- reservation: 오래된 데이터
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-08', 2, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-05-07', 3, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-06', 1, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-05-05', 2, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-04', 3, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-05-03', 1, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-02', 2, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-05-01', 3, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-04-30', 1, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-04-29', 2, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-08', 2, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-05-07', 3, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-06', 1, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-05-05', 2, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-04', 3, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-05-03', 1, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-02', 2, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-05-01', 3, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-04-30', 1, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-04-29', 2, 2, 'RESERVED');
 
 -- reservation: 최근 데이터
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-09', 2, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-05-10', 3, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-11', 1, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-05-12', 2, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-13', 3, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (3, '2025-05-14', 1, 1);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-15', 2, 2);
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-21', 2, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-09', 2, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-05-10', 3, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-11', 1, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-05-12', 2, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-13', 3, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (3, '2025-05-14', 1, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-15', 2, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-21', 2, 2, 'RESERVED');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-22', 2, 1); -- 유저1, 레벨2 탈출, 11:00
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
+VALUES (2, '2025-05-22', 2, 1, 'RESERVED'); -- 유저1, 레벨2 탈출, 11:00
 
--- waiting
-INSERT INTO waiting (member_id, date, theme_id, time_id)
-VALUES (3, '2025-05-22', 1, 2); -- 유저2, 레벨2 탈출, 11:00
+-- waiting 데이터는 reservation 테이블에 status 컬럼을 추가하여 WAITING 상태로 입력
+INSERT INTO reservation (member_id, date, theme_id, time_id, status)
+VALUES (3, '2025-05-22', 1, 2, 'WAITING'); -- 유저2, 레벨2 탈출, 11:00
 
-INSERT INTO waiting (member_id, date, theme_id, time_id)
-VALUES (4, '2025-05-22', 1, 2); -- 유저3, 레벨2 탈출, 11:00
+INSERT INTO reservation (member_id, date, theme_id, time_id, status)
+VALUES (4, '2025-05-22', 1, 2, 'WAITING'); -- 유저3, 레벨2 탈출, 11:00
 
-INSERT INTO waiting (member_id, date, theme_id, time_id)
-VALUES (5, '2025-05-22', 1, 2); -- 유저4, 레벨2 탈출, 11:00
+INSERT INTO reservation (member_id, date, theme_id, time_id, status)
+VALUES (5, '2025-05-22', 1, 2, 'WAITING'); -- 유저4, 레벨2 탈출, 11:00
 
-INSERT INTO waiting (member_id, date, theme_id, time_id)
-VALUES (4, '2025-05-16', 2, 3); -- 유저3, 지하 감옥, 12:00
+INSERT INTO reservation (member_id, date, theme_id, time_id, status)
+VALUES (4, '2025-05-16', 2, 3, 'WAITING'); -- 유저3, 지하 감옥, 12:00
 
-INSERT INTO waiting (member_id, date, theme_id, time_id)
-VALUES (5, '2025-05-15', 2, 2); -- 유저4, 지하 감옥, 11:00
+INSERT INTO reservation (member_id, date, theme_id, time_id, status)
+VALUES (5, '2025-05-15', 2, 2, 'WAITING'); -- 유저4, 지하 감옥, 11:00
 
-INSERT INTO waiting (member_id, date, theme_id, time_id)
-VALUES (6, '2025-05-14', 1, 1); -- 유저5, 레벨2 탈출, 10:00
+INSERT INTO reservation (member_id, date, theme_id, time_id, status)
+VALUES (6, '2025-05-14', 1, 1, 'WAITING'); -- 유저5, 레벨2 탈출, 10:00
