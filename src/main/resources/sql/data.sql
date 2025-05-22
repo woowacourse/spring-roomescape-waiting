@@ -1,7 +1,7 @@
 INSERT INTO member (name, email, password, role)
-VALUES ('어드민', 'admin@gmail.com', 'wooteco7', 'ADMIN');
+VALUES ('어드민', 'admin@gmail.com', '1234', 'ADMIN');
 INSERT INTO member (name, email, password, role)
-VALUES ('회원1', 'user@gmail.com', 'wooteco7', 'USER');
+VALUES ('회원1', 'user@gmail.com', '1234', 'USER');
 INSERT INTO member (name, email, password, role)
 VALUES ('회원2', 'user2@gmail.com', 'wooteco7', 'USER');
 INSERT INTO member (name, email, password, role)
@@ -30,13 +30,13 @@ INSERT INTO theme (name, description, thumbnail)
 VALUES ('테마 E', '테마 E입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
 INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-05', 1, 4, 'RESERVED');
+VALUES (2, '2025-05-22', 1, 4, 'RESERVED');
 INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-05', 2, 3, 'RESERVED');
+VALUES (3, '2025-05-22', 2, 3, 'RESERVED');
 INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (4, '2025-05-06', 3, 3, 'RESERVED');
+VALUES (4, '2025-05-23', 3, 3, 'RESERVED');
 INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-06', 4, 3, 'RESERVED');
+VALUES (2, '2025-05-23', 4, 3, 'RESERVED');
 INSERT INTO reservation (member_id, date, time_id, theme_id, status)
 VALUES (4, '2025-05-06', 1, 2, 'RESERVED');
 INSERT INTO reservation (member_id, date, time_id, theme_id, status)

@@ -13,3 +13,9 @@
     color: #666666;
     cursor: not-allowed;
 }
+
+.booked-slot {
+    border-style: dashed !important;
+    color: gray !important;
+    border-color: #cccccc;
+}
