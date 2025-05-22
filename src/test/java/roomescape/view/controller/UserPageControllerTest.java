@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
@@ -42,6 +43,7 @@ class UserPageControllerTest {
 
     @DisplayName("reservation-mine 페이지를 반환한다")
     @Test
+    @DirtiesContext
     @Sql("/test-data.sql")
     void reservationMinePageTest() {
         Member user = LoginMemberFixture.getUser();
