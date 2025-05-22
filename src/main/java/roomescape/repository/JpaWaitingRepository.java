@@ -1,7 +1,11 @@
 package roomescape.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
 
@@ -34,16 +38,14 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
     List<WaitingWithRank> findByMemberId(long memberId);
 
     @Query("""
-    SELECT new roomescape.domain.waiting.WaitingWithRank(
-        w,
-        (SELECT COUNT(w2) + 1
-         FROM Waiting w2
-         WHERE w2.theme = w.theme
-           AND w2.date = w.date
-           AND w2.time = w.time
-           AND w2.id < w.id)
-    )
-    FROM Waiting w
+    SELECT w FROM Waiting w
+    WHERE w.theme = :theme AND w.date = :date AND w.time = :reservationTime
+    ORDER BY w.id ASC
     """)
-    List<WaitingWithRank> findAllWithRank();
+    List<Waiting> findWaitingsFor(
+            @Param("theme") Theme theme,
+            @Param("date") LocalDate date,
+            @Param("reservationTime") ReservationTime time,
+            Pageable pageable
+    );
 }
