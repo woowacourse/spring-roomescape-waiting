@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   TODO: [2단계] 내 예약 목록 조회 기능
         endpoint 설정
    */
-  fetch('/reservations-mine') // 내 예약 목록 조회 API 호출
+  fetch('/reservations/mine') // 내 예약 목록 조회 API 호출
       .then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
@@ -23,11 +23,16 @@ function render(data) {
     const date = item.date;
     const time = item.time;
     const status = item.status;
+    const rank = item.rank;
 
     row.insertCell(0).textContent = theme;
     row.insertCell(1).textContent = date;
     row.insertCell(2).textContent = time;
-    row.insertCell(3).textContent = status;
+    if (rank === -1) {
+      row.insertCell(3).textContent = "예약";
+    } else {
+      row.insertCell(3).textContent = rank + "번째 예약대기";
+    }
 
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화

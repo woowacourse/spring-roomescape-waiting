@@ -11,7 +11,8 @@ public record UserReservationResponse(
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
-        ReservationStatus status
+        ReservationStatus status,
+        int rank
 ) {
 
     public static UserReservationResponse from(UserReservationServiceResponse response) {
@@ -20,7 +21,8 @@ public record UserReservationResponse(
                 response.themeName(),
                 response.date(),
                 response.time(),
-                response.status()
+                response.status(),
+                response.rank()
         );
     }
 }

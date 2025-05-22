@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationDetails;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
+import roomescape.reservation.model.vo.ReservationStatus;
 
 @Getter
 @Entity
@@ -51,8 +52,8 @@ public class Reservation {
         this.member = member;
     }
 
-    public LocalDateTime getReservationDateTime() {
-        return LocalDateTime.of(date, time.getStartAt());
+    public ReservationStatus determineReservationStatus(LocalDateTime now) {
+        return ReservationStatus.determineStatus(LocalDateTime.of(date, time.getStartAt()), now);
     }
 
     public static Reservation createFuture(ReservationDetails details) {
