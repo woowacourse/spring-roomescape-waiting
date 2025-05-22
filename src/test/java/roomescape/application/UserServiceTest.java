@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDateTime;
 
 @DataJpaTest
 @Import({UserService.class, TestRepositoryHelper.class})
@@ -44,7 +45,8 @@ class UserServiceTest {
         var savedTheme = repositoryHelper.saveAnyTheme();
         var user = service.register("popo@email.com", "pw", "popo");
 
-        var savedReservation = repositoryHelper.saveReservation(new Reservation(user, tomorrow(), savedTimeSlot, savedTheme));
+        var reservation = new Reservation(user, ReservationDateTime.of(tomorrow(), savedTimeSlot), savedTheme);
+        var savedReservation = repositoryHelper.saveReservation(reservation);
         repositoryHelper.flushAndClear();
 
         // when

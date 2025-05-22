@@ -8,14 +8,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.User;
 
 @EqualsAndHashCode(of = {"id"})
@@ -45,8 +43,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation(final User user, final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        this(0L, user, ReservationDateTime.forReserve(date, timeSlot), theme, ReservationStatus.RESERVED);
+    public Reservation(final User user, final ReservationDateTime dateTime, final Theme theme) {
+        this(0L, user, dateTime, theme, ReservationStatus.RESERVED);
     }
 
     @Override

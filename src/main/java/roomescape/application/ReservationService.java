@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.theme.Theme;
@@ -34,10 +35,11 @@ public class ReservationService {
     public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var timeSlot = timeSlotRepository.getById(timeId);
         var theme = themeRepository.getById(themeId);
-        validateDuplicateReservation(date, timeSlot, theme);
+        throwIfDuplicates(date, timeSlot, theme);
         var user = userRepository.getById(userId);
 
-        return reservationRepository.save(new Reservation(user, date, timeSlot, theme));
+        var reservation = new Reservation(user, ReservationDateTime.forReserve(date, timeSlot), theme);
+        return reservationRepository.save(reservation);
     }
 
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
@@ -48,7 +50,7 @@ public class ReservationService {
         reservationRepository.deleteByIdOrElseThrow(id);
     }
 
-    private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
+    private void throwIfDuplicates(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         var byDateTimeAndThemeId = Specification.allOf(byDate(date), byTimeSlotId(timeSlot.id()), byThemeId(theme.id()));
         if (reservationRepository.exists(byDateTimeAndThemeId)) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
