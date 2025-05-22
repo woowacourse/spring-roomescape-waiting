@@ -31,9 +31,9 @@ INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES 
 INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-06-30', 4, 3, 4);
 
 -- 방탈출 예약 대기 삽입
-INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (3, '2025-05-10', 1, 5, '2025-05-22 16:00');
-INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (3, '2025-06-30', 1, 4, '2025-05-22 17:00');
-INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (4, '2025-06-30', 1, 4, '2025-05-22 18:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (3, '2025-05-10', 1, 5, '2025-05-22 17:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (3, '2025-06-30', 1, 4, '2025-05-22 16:00');
+INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (4, '2025-06-30', 1, 4, '2025-05-22 13:00');
 INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (2, '2025-06-30', 2, 4, '2025-05-22 17:00');
 INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (4, '2025-06-30', 2, 4, '2025-05-22 18:00');
 INSERT INTO waiting (member_id, date, reservation_time_id, theme_id, created_at) VALUES (2, '2025-06-30', 4, 4, '2025-05-22 17:00');

@@ -1,7 +1,9 @@
 package roomescape.business.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
@@ -89,6 +91,17 @@ public class WaitingService {
 
     @Transactional
     public void deleteById(final Long id) {
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d".formatted(id)));
+
+        if(LocalDate.now().isBefore(waiting.getDate())) {
+            throw new BadRequestException("이전 날짜의 예약 대기는 삭제할 수 없습니다.");
+        }
+        if(Objects.equals(waiting.getDate(), LocalDate.now())) {
+            if(LocalTime.now().isBefore(waiting.getTime().getStartAt())) {
+                throw new BadRequestException("지난 시간의 예약 대기를 삭제할 수 없습니다.");
+            }
+        }
         waitingRepository.deleteById(id);
     }
 
