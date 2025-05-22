@@ -59,10 +59,8 @@ public class ReservationService {
         final ReservationTime reservationTime = getReservationTime(date, timeId);
         validateNoDuplicateReservation(date, timeId, themeId);
 
-        final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-        final Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+        final Theme theme = getThemeById(themeId);
+        final Member member = getMemberById(memberId);
 
         final Reservation reservation = new Reservation(date, reservationTime, theme, member, status);
 
@@ -70,8 +68,7 @@ public class ReservationService {
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+        final ReservationTime reservationTime = getReservationTimeById(timeId);
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         if (reservationDateTime.isBefore(now)) {
@@ -87,10 +84,8 @@ public class ReservationService {
     }
 
     public void deleteIfOwner(final Long reservationId, final Long memberId) {
-        final Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
-        final Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+        final Reservation reservation = getReservationById(reservationId);
+        final Member member = getMemberById(memberId);
 
         if (!Objects.equals(reservation.getMember(), member)) {
             throw new AuthorizationException("본인이 아니면 삭제할 수 없습니다.");
@@ -136,5 +131,25 @@ public class ReservationService {
         return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(ReservationResponse.ForMember::from)
                 .toList();
+    }
+
+    private Reservation getReservationById(final Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+    }
+
+    private ReservationTime getReservationTimeById(final Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+    }
+
+    private Theme getThemeById(final Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
+    }
+
+    private Member getMemberById(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
     }
 }
