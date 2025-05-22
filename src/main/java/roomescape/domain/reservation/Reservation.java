@@ -44,7 +44,7 @@ public class Reservation {
     }
 
     public static Reservation ofWaiting(final User user, final ReservationSlot slot) {
-        return new Reservation(0L, user, slot, ReservationStatus.HOLD);
+        return new Reservation(0L, user, slot, ReservationStatus.WAITING);
     }
 
     public boolean isOwnedBy(final User user) {

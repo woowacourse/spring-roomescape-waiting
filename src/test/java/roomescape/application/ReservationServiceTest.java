@@ -62,7 +62,7 @@ class ReservationServiceTest {
 
         var reservations = service.findAllReservations(NONE_FILTERING);
         assertAll(
-            () -> assertThat(waited.status()).isEqualTo(ReservationStatus.HOLD),
+            () -> assertThat(waited.status()).isEqualTo(ReservationStatus.WAITING),
             () -> assertThat(reservations).contains(waited)
         );
     }
