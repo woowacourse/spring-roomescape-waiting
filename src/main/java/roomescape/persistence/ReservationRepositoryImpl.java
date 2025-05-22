@@ -64,7 +64,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public void deleteWithId(Long id) {
+    public void deleteById(Long id) {
         reservationJpaRepository.deleteById(id);
     }
 }
