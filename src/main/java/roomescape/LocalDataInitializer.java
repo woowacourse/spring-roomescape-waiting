@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
@@ -32,7 +31,6 @@ public class LocalDataInitializer {
     private final Users users;
     private final Reservations reservations;
     private final ReservationSlots slots;
-    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @PostConstruct
     public void init() {
@@ -40,27 +38,25 @@ public class LocalDataInitializer {
         final Theme theme2 = new Theme("사라진 시간", "시간을 거슬러 단서를 찾아라!", "time.jpg");
         final ReservationTime time1 = new ReservationTime(LocalTime.of(14, 0));
         final ReservationTime time2 = new ReservationTime(LocalTime.of(16, 0));
-        final User user1 = new User("dompoo", "dompoo@gmail.com", encoder.encode("1234"));
-        final User user2 = new User("lemon", "lemon@gmail.com", encoder.encode("1234"));
-        final User admin = User.admin("admin", "admin@gmail.com", encoder.encode("1234"));
+        final User user1 = new User("dompoo", "dompoo@gmail.com", "1234");
+        final User user2 = new User("lemon", "lemon@gmail.com", "1234");
+        final User admin = User.admin("admin", "admin@gmail.com", "1234");
         final ReservationSlot reservationSlot1 = new ReservationSlot(time1, LocalDate.now().plusDays(1), theme1);
         final ReservationSlot reservationSlot2 = new ReservationSlot(time1, LocalDate.now().plusDays(2), theme2);
         final ReservationSlot reservationSlot3 = new ReservationSlot(time1, LocalDate.now().plusDays(3), theme1);
         final ReservationSlot reservationSlot4 = new ReservationSlot(time1, LocalDate.now().plusDays(3), theme2);
-        final ReservationSlot reservationSlot5 = new ReservationSlot(time2, LocalDate.now().plusDays(1), theme2);
-        final ReservationSlot reservationSlot6 = new ReservationSlot(time2, LocalDate.now().plusDays(2), theme1);
-        final ReservationSlot reservationSlot7 = new ReservationSlot(time2, LocalDate.now().plusDays(4), theme2);
-        final Reservation reservation1 = new Reservation(user1, reservationSlot1);
-        final Reservation reservation2 = new Reservation(user1, reservationSlot2);
-        final Reservation reservation3 = new Reservation(user1, reservationSlot3);
-        final Reservation reservation4 = new Reservation(user1, reservationSlot4);
-        final Reservation reservation5 = new Reservation(user2, reservationSlot5);
-        final Reservation reservation6 = new Reservation(user2, reservationSlot6);
-        final Reservation reservation7 = new Reservation(user2, reservationSlot7);
         insertThemes(theme1, theme2);
         insertTimes(time1, time2);
-        insertSlots(reservationSlot1, reservationSlot2, reservationSlot3, reservationSlot4, reservationSlot5, reservationSlot6, reservationSlot7);
+        insertSlots(reservationSlot1, reservationSlot2, reservationSlot3, reservationSlot4);
         insertUsers(user1, user2, admin);
+
+        final Reservation reservation1 = new Reservation(user1, reservationSlot1);
+        final Reservation reservation2 = new Reservation(user1, reservationSlot2);
+        final Reservation reservation3 = new Reservation(user2, reservationSlot2);
+        final Reservation reservation4 = new Reservation(user2, reservationSlot3);
+        final Reservation reservation5 = new Reservation(user1, reservationSlot3);
+        final Reservation reservation6 = new Reservation(user1, reservationSlot4);
+        final Reservation reservation7 = new Reservation(user2, reservationSlot4);
         insertReservations(reservation1, reservation2, reservation3, reservation4, reservation5, reservation6, reservation7);
         logger.info("local 테스트용 데이터 init 성공!");
     }

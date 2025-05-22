@@ -21,7 +21,7 @@ import java.util.List;
 
 import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
 
-@ToString
+@ToString(exclude = "reservations")
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -36,7 +36,7 @@ public class ReservationSlot {
     private ReservationDate date;
     @ManyToOne
     private Theme theme;
-    @OneToMany(mappedBy = "slot", cascade = {CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "slot", cascade = CascadeType.REMOVE)
     private final List<Reservation> reservations = new ArrayList<>();
 
     public ReservationSlot(final ReservationTime time, final LocalDate date, final Theme theme) {
