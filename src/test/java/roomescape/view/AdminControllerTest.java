@@ -100,4 +100,19 @@ class AdminControllerTest {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @Test
+    @DisplayName("예약 대기 관리 페이지 테스트")
+    void waitingPageTest() {
+        // given
+        final Map<String, String> cookies = memberFixture.loginAdmin();
+
+        // when - then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
 }
