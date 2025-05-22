@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.domain.Member;
+import roomescape.reservation.application.repository.ReservationRepository;
 import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.repository.WaitingRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
@@ -22,14 +24,17 @@ import roomescape.reservation.presentation.dto.WaitingResponse;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     public WaitingService(final WaitingRepository waitingRepository,
+                          final ReservationRepository reservationRepository,
                           final ReservationTimeRepository reservationTimeRepository,
                           final ThemeRepository themeRepository, final MemberRepository memberRepository) {
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
@@ -70,10 +75,28 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaiting(final Long id) {
-        final Waiting waiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
+        final Waiting waiting = findWaitingById(id);
 
         waitingRepository.delete(waiting);
+    }
+
+    public void acceptWaiting(final Long id) {
+        final Waiting waiting = findWaitingById(id);
+
+        final Reservation reservation = new Reservation(
+                waiting.getMember(),
+                waiting.getTheme(),
+                waiting.getDate(),
+                waiting.getReservationTime()
+        );
+
+        waitingRepository.delete(waiting);
+        reservationRepository.save(reservation);
+    }
+
+    private Waiting findWaitingById(final Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
     }
 
     private ReservationTime getReservationTime(Long timeId) {

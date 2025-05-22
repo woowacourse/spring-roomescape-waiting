@@ -2,7 +2,9 @@ package roomescape.reservation.presentation.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.Auth;
@@ -27,5 +29,23 @@ public class AdminWaitingController {
         return ResponseEntity.ok().body(
                 waitingService.getWaitings()
         );
+    }
+
+    @Auth(Role.ADMIN)
+    @DeleteMapping("/accept/{id}")
+    public ResponseEntity<Void> acceptWaiting(
+            final @PathVariable Long id
+    ) {
+        waitingService.acceptWaiting(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Auth(Role.ADMIN)
+    @DeleteMapping("/reject/{id}")
+    public ResponseEntity<Void> rejectWaiting(
+            final @PathVariable Long id
+    ) {
+        waitingService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 }

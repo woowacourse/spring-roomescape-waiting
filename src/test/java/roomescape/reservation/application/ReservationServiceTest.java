@@ -207,9 +207,11 @@ class ReservationServiceTest {
                 ReservationTimeRepository reservationTimeRepository,
                 ThemeRepository themeRepository,
                 MemberRepository memberRepository,
-                WaitingRepository waitingRepository
+                WaitingRepository waitingRepository,
+                ReservationRepository reservationRepository
         ) {
-            return new WaitingService(waitingRepository, reservationTimeRepository, themeRepository, memberRepository);
+            return new WaitingService(waitingRepository, reservationRepository, reservationTimeRepository,
+                    themeRepository, memberRepository);
         }
     }
 }
