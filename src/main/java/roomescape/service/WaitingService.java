@@ -13,6 +13,7 @@ import roomescape.exception.local.NotCreateWaitingInEmptyReservationException;
 import roomescape.exception.local.NotFoundMemberException;
 import roomescape.exception.local.NotFoundReservationTimeException;
 import roomescape.exception.local.NotFoundThemeException;
+import roomescape.exception.local.NotFoundWaitingException;
 import roomescape.exception.local.PastWaitingCreationException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -54,6 +55,16 @@ public class WaitingService {
         validateDuplicatedWaiting(waiting);
         Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingResponse(savedWaiting);
+    }
+
+    public void deleteWaitingById(long id) {
+        Waiting waiting = getWaitingById(id);
+        waitingRepository.delete(waiting);
+    }
+
+    private Waiting getWaitingById(long waitingId) {
+        return waitingRepository.findById(waitingId)
+                .orElseThrow(NotFoundWaitingException::new);
     }
 
     private Theme getThemeById(long themeId) {

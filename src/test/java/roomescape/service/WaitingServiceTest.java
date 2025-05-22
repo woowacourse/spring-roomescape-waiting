@@ -28,6 +28,7 @@ import roomescape.exception.local.NotCreateWaitingInEmptyReservationException;
 import roomescape.exception.local.NotFoundMemberException;
 import roomescape.exception.local.NotFoundReservationTimeException;
 import roomescape.exception.local.NotFoundThemeException;
+import roomescape.exception.local.NotFoundWaitingException;
 import roomescape.exception.local.PastWaitingCreationException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -237,6 +238,52 @@ class WaitingServiceTest {
             assertThatThrownBy(() -> waitingService.addWaiting(creationContent))
                     .isInstanceOf(NotCreateWaitingInEmptyReservationException.class)
                     .hasMessage("예약이 존재하지 않습니다.");
+        }
+    }
+
+    @Nested
+    @DisplayName("대기 데이터를 삭제할 수 있다.")
+    public class deleteWaitingById {
+
+        @DisplayName("대기 데이터를 삭제할 수 있다.")
+        @Test
+        void canDeleteWaiting() {
+            // given
+            ReservationTime time = entityManager.persist(
+                    ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+            Theme theme = entityManager.persist(
+                    Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
+            Reservation reservation = entityManager.persist(Reservation.createWithoutId(
+                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+            Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
+
+            // when
+            reservationRepository.deleteById(waiting.getId());
+
+            // then
+            assertThat(entityManager.find(Waiting.class, waiting.getId())).isNull();
+        }
+
+        @DisplayName("존재하지 않는 대기 데이터를 제거할 경우 예외를 발생시킨다.")
+        @Test
+        void cannotDeleteWaiting() {
+            // given
+            ReservationTime time = entityManager.persist(
+                    ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+            Theme theme = entityManager.persist(
+                    Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
+            Reservation reservation = entityManager.persist(Reservation.createWithoutId(
+                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+            Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
+
+            // when & then
+            assertThatThrownBy(() -> reservationRepository.deleteById(waiting.getId()))
+                    .isInstanceOf(NotFoundWaitingException.class)
+                    .hasMessage("해당 대기 데이터를 찾을 수 없습니다.");
         }
     }
 }
