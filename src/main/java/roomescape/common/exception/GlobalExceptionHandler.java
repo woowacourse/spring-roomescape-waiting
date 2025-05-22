@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({ReservationException.class, ThemeException.class, MemberException.class,
-            PastDateException.class})
+            PastDateException.class, WaitingException.class})
     public ResponseEntity<String> handleDomainExceptions(final Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
