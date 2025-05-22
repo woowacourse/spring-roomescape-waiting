@@ -162,14 +162,14 @@
         }
     ]
     ```
-- [ ] 어드민 예약 대기 취소 기능
+- [x] 어드민 예약 대기 취소 기능
   - request
     ```
     DELETE /reservations/waitings/1 HTTP/1.1
     ```
   - response
     ```
-    HTTP/1.1 200
+    HTTP/1.1 204
     ```
 - [ ] 예약 대기 승인 기능
 - [ ] 화면 응답
