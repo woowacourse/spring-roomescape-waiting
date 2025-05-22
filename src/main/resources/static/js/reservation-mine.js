@@ -15,10 +15,9 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        console.log(item)
-        const theme = item.theme;
-        const date = item.date;
-        const time = item.time;
+        const theme = item.schedule.theme.name;
+        const date = item.schedule.date;
+        const time = item.schedule.time.startAt;
         const status = item.status;
 
         row.insertCell(0).textContent = theme;
@@ -32,7 +31,7 @@ function render(data) {
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
-                requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
+                requestDeleteWaiting(item.id).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때

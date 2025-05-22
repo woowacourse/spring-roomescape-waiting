@@ -2,20 +2,18 @@ package roomescape.member;
 
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.auth.AuthenticationPrincipal;
 import roomescape.auth.dto.LoginMember;
 import roomescape.member.dto.MemberRequest;
-import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
+import roomescape.reservation.ReservationWaitingService;
+import roomescape.reservation.reservation.dto.ReservationAndWaitingResponse;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/members")
@@ -23,6 +21,7 @@ import roomescape.member.dto.MemberResponse;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ReservationWaitingService reservationWaitingService;
 
     @PostMapping
     public ResponseEntity<Void> createMember(
@@ -33,10 +32,10 @@ public class MemberController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<MemberReservationResponse>> readAllMemberWithReservations(
-            @AuthenticationPrincipal final LoginMember loginMember
+    public ResponseEntity<List<ReservationAndWaitingResponse>> readAll(
+            @AuthenticationPrincipal final LoginMember member
     ) {
-        final List<MemberReservationResponse> response = memberService.readAllReservationsByMember(loginMember);
+        final List<ReservationAndWaitingResponse> response = reservationWaitingService.readAllByMember(member);
         return ResponseEntity.ok(response);
     }
 
