@@ -2,9 +2,7 @@ package roomescape.persistence;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.stereotype.Repository;
 import roomescape.infrastructure.db.ReservationJpaRepository;
 import roomescape.model.Reservation;
@@ -15,16 +13,15 @@ import roomescape.model.ReservationTime;
 public class ReservationRepositoryImpl implements ReservationRepository {
 
     private final ReservationJpaRepository reservationJpaRepository;
-    private final JpaContext jpaContext;
 
     @Override
-    public Optional<Reservation> findDuplicatedReservationByDateAndTime(LocalDate date, ReservationTime time) {
-        return reservationJpaRepository.findByDateAndReservationTime(date, time);
+    public boolean isDuplicatedForDateAndReservationTime(LocalDate date, ReservationTime time) {
+        return reservationJpaRepository.findByDateAndReservationTime(date, time).isPresent();
     }
 
     @Override
-    public List<Reservation> findReservationsForThemeAndMemberInPeriod(Long themeId, Long memberId, LocalDate startDate,
-                                                                       LocalDate endDate) {
+    public List<Reservation> findForThemeAndMemberInPeriod(Long themeId, Long memberId, LocalDate startDate,
+                                                           LocalDate endDate) {
         return reservationJpaRepository.findByThemeIdAndMemberIdAndDateBetween(
                 themeId,
                 memberId,
@@ -34,32 +31,32 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservationsForThemeOnDate(Long themeId, LocalDate date) {
+    public List<Reservation> findForThemeOnDate(Long themeId, LocalDate date) {
         return reservationJpaRepository.findByThemeIdAndDate(themeId, date);
     }
 
     @Override
-    public List<Reservation> findReservationForMember(Long memberId) {
+    public List<Reservation> findForMember(Long memberId) {
         return reservationJpaRepository.findByMemberId(memberId);
     }
 
     @Override
-    public List<Reservation> findReservationForTheme(Long themeId) {
+    public List<Reservation> findForTheme(Long themeId) {
         return reservationJpaRepository.findByThemeId(themeId);
     }
 
     @Override
-    public List<Reservation> findReservationForReservationTime(Long reservationTimeId) {
+    public List<Reservation> findForReservationTime(Long reservationTimeId) {
         return reservationJpaRepository.findByReservationTimeId(reservationTimeId);
     }
 
     @Override
-    public Reservation saveReservation(Reservation reservation) {
+    public Reservation save(Reservation reservation) {
         return reservationJpaRepository.save(reservation);
     }
 
     @Override
-    public List<Reservation> findAllReservations() {
+    public List<Reservation> findAll() {
         return reservationJpaRepository.findAll();
     }
 

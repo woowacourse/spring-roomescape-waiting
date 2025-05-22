@@ -62,7 +62,7 @@ public class ReservationTimeService {
 
     private List<Reservation> getReservationsBy(String date, Long themeId) {
         LocalDate parsedDate = LocalDate.parse(date);
-        return reservationRepository.findReservationsForThemeOnDate(themeId, parsedDate);
+        return reservationRepository.findForThemeOnDate(themeId, parsedDate);
     }
 
     private Set<ReservationTime> getReservationTimes(List<Reservation> reservations) {

@@ -29,6 +29,6 @@ public class ReservationAdminService {
 
         Reservation reservation = new Reservation(registerDto.date(), reservationTime, theme, member, LocalDate.now());
 
-        reservationRepository.saveReservation(reservation);
+        reservationRepository.save(reservation);
     }
 }

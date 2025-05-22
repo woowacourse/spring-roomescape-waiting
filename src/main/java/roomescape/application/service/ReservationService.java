@@ -33,12 +33,12 @@ public class ReservationService {
         Reservation reservation = createReservation(reservationRegisterDto, loginMember);
         assertReservationIsNotDuplicated(reservation);
 
-        Reservation savedReservation = reservationRepository.saveReservation(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponseDto(savedReservation);
     }
 
     public List<ReservationResponseDto> getAllReservations() {
-        return reservationRepository.findAllReservations().stream()
+        return reservationRepository.findAll().stream()
                 .map(ReservationResponseDto::new)
                 .toList();
     }
@@ -49,7 +49,7 @@ public class ReservationService {
         LocalDate startDate = reservationSearchDto.startDate();
         LocalDate endDate = reservationSearchDto.endDate();
 
-        return reservationRepository.findReservationsForThemeAndMemberInPeriod(
+        return reservationRepository.findForThemeAndMemberInPeriod(
                         themeId,
                         memberId,
                         startDate,
@@ -63,7 +63,7 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findReservationForMember(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findForMember(loginMember.id());
 
         return reservations.stream()
                 .map(MemberReservationResponseDto::new)
