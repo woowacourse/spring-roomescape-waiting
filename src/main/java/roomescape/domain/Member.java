@@ -1,7 +1,6 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
-import roomescape.exception.ReservationException;
 
 import java.util.Objects;
 
@@ -22,9 +21,6 @@ public class Member {
     }
 
     private Member(final Long id, final String name, final MemberRole role, final String email, final String password) {
-        if (name.length() < 2 || name.length() > 10) {
-            throw new ReservationException("예약자명은 2글자에서 10글자까지만 가능합니다.");
-        }
         this.id = id;
         this.name = name;
         this.role = role;
