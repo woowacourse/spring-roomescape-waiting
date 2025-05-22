@@ -27,6 +27,10 @@ public class Waiting {
         this.member = member;
     }
 
+    public Waiting(Reservation reservation, Member member) {
+        this(null, reservation, member);
+    }
+
     public static Waiting create(Reservation reservation, Member member) {
         return new Waiting(null, reservation, member);
     }

@@ -34,7 +34,7 @@ public class WaitingService {
         ReservationDate reservationDate = new ReservationDate(request.date());
 
         Reservation reservation = reservationService.findById(
-                reservationService.findByReservation(request.themeId(), request.timeId(), reservationDate.getDate())
+                reservationService.findByReservationInfo(request.themeId(), request.timeId(), reservationDate.getDate())
                         .id()
         );
 

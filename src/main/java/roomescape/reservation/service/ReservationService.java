@@ -103,7 +103,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse findByReservation(Long themeId, Long timeId, LocalDate date) {
+    public ReservationResponse findByReservationInfo(Long themeId, Long timeId, LocalDate date) {
         Optional<Reservation> reservation = reservationRepository.findByThemeIdAndReservationTimeIdAndReservationDate_reservationDate(
                 themeId, timeId, date);
         if (reservation.isPresent()) {
