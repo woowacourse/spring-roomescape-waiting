@@ -4,10 +4,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
-import roomescape.reservation.reservation.Reservation;
-import roomescape.reservation.reservation.ReservationStatus;
 import roomescape.reservation.waiting.Waiting;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
@@ -21,10 +20,11 @@ public class WaitingTest {
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
         Theme theme = new Theme("데블스플랜", "과연 우승자는", "abc");
         Member member = new Member("may@gmail.com", "1234", "메이", MemberRole.MEMBER);
+        Schedule schedule = new Schedule(LocalDate.now(), reservationTime, theme);
 
         // when
         Long rank = 3L;
-        Waiting waiting = new Waiting(new Reservation(LocalDate.now(), member, reservationTime, theme, ReservationStatus.CONFIRMED), rank);
+        Waiting waiting = new Waiting(schedule, member, rank);
         waiting.decrementRank();
 
         // then

@@ -11,10 +11,10 @@ import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoun
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservation.reservation.Reservation;
 import roomescape.reservation.reservation.ReservationRepository;
-import roomescape.reservation.reservation.ReservationStatus;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
 
@@ -143,7 +143,7 @@ public class ReservationTimeServiceTest {
                     ));
             given(themeRepository.findById(dummyThemeId))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+            given(reservationRepository.findAllBySchedule_ThemeAndSchedule_Date(theme, targetDate))
                     .willReturn(List.of());
 
             // when
@@ -162,15 +162,16 @@ public class ReservationTimeServiceTest {
             final Theme theme = themeWithId(dummyThemeId, new Theme("메이", "테마", "asd"));
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             final ReservationTime savedTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 0)));
+            final Schedule savedSchedule = new Schedule(targetDate, savedTime, theme);
             given(reservationTimeRepository.findAll())
                     .willReturn(List.of(
                             savedTime
                     ));
             given(themeRepository.findById(dummyThemeId))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+            given(reservationRepository.findAllBySchedule_ThemeAndSchedule_Date(theme, targetDate))
                     .willReturn(List.of(
-                            new Reservation(null, null, savedTime, theme, ReservationStatus.CONFIRMED))
+                            new Reservation(null, savedSchedule))
                     );
 
             // when
@@ -194,7 +195,7 @@ public class ReservationTimeServiceTest {
                     ));
             given(themeRepository.findById(dummyThemeId))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+            given(reservationRepository.findAllBySchedule_ThemeAndSchedule_Date(theme, targetDate))
                     .willReturn(List.of());
             // when
             final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
@@ -218,7 +219,7 @@ public class ReservationTimeServiceTest {
             final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
             given(reservationTimeRepository.findById(reservationTime.getId()))
                     .willReturn(Optional.of(reservationTime));
-            given(reservationRepository.existsByReservationTime(reservationTime))
+            given(reservationRepository.existsBySchedule_ReservationTime(reservationTime))
                     .willReturn(false);
 
             // when
@@ -249,7 +250,7 @@ public class ReservationTimeServiceTest {
             final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
             given(reservationTimeRepository.findById(reservationTime.getId()))
                     .willReturn(Optional.of(reservationTime));
-            given(reservationRepository.existsByReservationTime(reservationTime))
+            given(reservationRepository.existsBySchedule_ReservationTime(reservationTime))
                     .willReturn(true);
 
             // when & then

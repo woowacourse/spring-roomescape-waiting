@@ -3,9 +3,10 @@ package roomescape.util;
 import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.member.Member;
 import roomescape.reservation.reservation.Reservation;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.theme.Theme;
 import roomescape.reservation.waiting.Waiting;
+import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
+import roomescape.theme.Theme;
 
 public class TestFactory {
 
@@ -32,5 +33,10 @@ public class TestFactory {
     public static Waiting waitingWithId(Long id, Waiting waiting) {
         ReflectionTestUtils.setField(waiting, "id", id);
         return waiting;
+    }
+
+    public static Schedule scheduleWithId(Long id, Schedule schedule) {
+        ReflectionTestUtils.setField(schedule, "id", id);
+        return schedule;
     }
 }

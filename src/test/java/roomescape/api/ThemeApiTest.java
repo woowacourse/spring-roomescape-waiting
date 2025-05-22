@@ -1,11 +1,7 @@
 package roomescape.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.theme.dto.ThemeRequest;
 
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.is;
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ThemeApiTest {
 
@@ -30,16 +31,18 @@ public class ThemeApiTest {
     public ThemeApiTest(
             @LocalServerPort final int port,
             @Autowired final JdbcTemplate jdbcTemplate
-    ){
+    ) {
         this.port = port;
         this.jdbcTemplate = jdbcTemplate;
     }
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.update("DELETE FROM schedule");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("ALTER TABLE schedule ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
@@ -61,7 +64,7 @@ public class ThemeApiTest {
                     .statusCode(expectedStatusCode.value());
         }
 
-        static Stream<Arguments> post1(){
+        static Stream<Arguments> post1() {
             return Stream.of(
                     Arguments.of(Map.of(
                             "name", "boogie",

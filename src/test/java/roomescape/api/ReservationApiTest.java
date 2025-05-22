@@ -1,18 +1,9 @@
 package roomescape.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookie;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,14 +14,22 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.is;
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ReservationApiTest {
 
-    private static final Map<String, String> RESERVATION_BODY = new HashMap<>();
+    private static final Map<String, Object> RESERVATION_BODY = new HashMap<>();
     private static final Map<String, String> TIME_BODY = new HashMap<>();
     private static final Map<String, String> THEME_BODY = new HashMap<>();
     private static final Map<String, String> MEMBER_BODY = new HashMap<>();
     private static final Map<String, Object> AUTH_BODY = new HashMap<>();
+    private static final Map<String, Object> SCHEDULE_BODY = new HashMap<>();
 
     private final JdbcTemplate jdbcTemplate;
     private final int port;
@@ -45,10 +44,13 @@ public class ReservationApiTest {
 
     @BeforeAll
     static void initParams() {
-        RESERVATION_BODY.put("date", "2026-08-05");
-        RESERVATION_BODY.put("timeId", "1");
-        RESERVATION_BODY.put("themeId", "1");
-        RESERVATION_BODY.put("memberId", "1");
+        SCHEDULE_BODY.put("date", LocalDate.of(2026, 12, 1));
+        SCHEDULE_BODY.put("reservationTimeId", 1L);
+        SCHEDULE_BODY.put("themeId", 1L);
+
+        RESERVATION_BODY.put("date", LocalDate.of(2026, 12, 1));
+        RESERVATION_BODY.put("timeId", 1L);
+        RESERVATION_BODY.put("themeId", 1L);
 
         TIME_BODY.put("startAt", "10:00");
 
@@ -67,9 +69,11 @@ public class ReservationApiTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM schedule");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("DELETE FROM member");
+        jdbcTemplate.update("ALTER TABLE schedule ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
@@ -89,6 +93,7 @@ public class ReservationApiTest {
             final Cookie cookie = givenAuthCookie();
             givenCreateReservationTime();
             givenCreateTheme();
+            givenCreateSchedule();
 
             // when & then
             RestAssured.given().port(port)
@@ -100,7 +105,7 @@ public class ReservationApiTest {
                     .statusCode(expectedStatusCode.value());
         }
 
-        static Stream<Arguments> post(){
+        static Stream<Arguments> post() {
             return Stream.of(
                     Arguments.of(Map.of(
                             "date", "2026-12-01",
@@ -143,11 +148,14 @@ public class ReservationApiTest {
             final Cookie cookie = givenAuthCookie();
             givenCreateTheme();
 
+            Map<String, Object> reservation = new HashMap<>(RESERVATION_BODY);
+            reservation.put("timeId", 2L);
+
             // when & then
             RestAssured.given().port(port).log().all()
                     .contentType(ContentType.JSON)
                     .cookie(cookie)
-                    .body(RESERVATION_BODY)
+                    .body(reservation)
                     .when().post("/reservations")
                     .then().log().all()
                     .statusCode(400);
@@ -161,11 +169,14 @@ public class ReservationApiTest {
             final Cookie cookie = givenAuthCookie();
             givenCreateReservationTime();
 
+            Map<String, Object> reservation = new HashMap<>(RESERVATION_BODY);
+            reservation.put("themeId", 2L);
+
             // when & then
             RestAssured.given().port(port).log().all()
                     .contentType(ContentType.JSON)
                     .cookie(cookie)
-                    .body(RESERVATION_BODY)
+                    .body(reservation)
                     .when().post("/reservations")
                     .then().log().all()
                     .statusCode(400);
@@ -185,6 +196,7 @@ public class ReservationApiTest {
             final Cookie cookie = givenAuthCookie();
             givenCreateReservationTime();
             givenCreateTheme();
+            givenCreateSchedule();
             givenCreateReservation(cookie);
 
             // when & then
@@ -220,6 +232,7 @@ public class ReservationApiTest {
             final Cookie cookie = givenAuthCookie();
             givenCreateReservationTime();
             givenCreateTheme();
+            givenCreateSchedule();
             givenCreateReservation(cookie);
 
             // when & then
@@ -264,6 +277,15 @@ public class ReservationApiTest {
                 .contentType(ContentType.JSON)
                 .body(THEME_BODY)
                 .when().post("/themes")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    private void givenCreateSchedule() {
+        RestAssured.given().port(port).log().all()
+                .contentType(ContentType.JSON)
+                .body(SCHEDULE_BODY)
+                .when().post("/schedules")
                 .then().log().all()
                 .statusCode(201);
     }
