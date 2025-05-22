@@ -8,8 +8,8 @@ import roomescape.service.result.WaitingResult;
 
 public record BookingResponse(
         Long id,
-        String member,
-        String theme,
+        String memberName,
+        String themeName,
         LocalDate date,
         LocalTime time
 ) {
@@ -17,20 +17,20 @@ public record BookingResponse(
     public static BookingResponse from(ReservationResult result) {
         return new BookingResponse(
                 result.id(),
-                result.memberName(),
-                result.themeName(),
+                result.member().name(),
+                result.theme().name(),
                 result.date(),
-                result.time()
+                result.time().startAt()
         );
     }
 
     public static BookingResponse from(WaitingResult result) {
         return new BookingResponse(
                 result.id(),
-                result.waiterName(),
-                result.themeName(),
+                result.waiter().name(),
+                result.theme().name(),
                 result.date(),
-                result.time()
+                result.time().startAt()
         );
     }
 

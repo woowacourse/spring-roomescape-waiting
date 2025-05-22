@@ -91,7 +91,7 @@ class AdminReservationControllerTest {
 
         assertAll(
                 () -> assertThat(response.id()).isNotNull(),
-                () -> assertThat(response.member()).isEqualTo(admin.getName())
+                () -> assertThat(response.memberName()).isEqualTo(admin.getName())
         );
     }
 

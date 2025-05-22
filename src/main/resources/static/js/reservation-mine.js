@@ -15,7 +15,7 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        const theme = item.theme;
+        const theme = item.themeName;
         const date = item.date;
         const time = item.time;
         const status = item.status;

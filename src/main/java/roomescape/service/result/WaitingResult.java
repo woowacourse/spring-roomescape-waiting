@@ -1,24 +1,23 @@
 package roomescape.service.result;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import roomescape.domain.Waiting;
 
 public record WaitingResult(
         Long id,
-        String waiterName,
-        String themeName,
+        MemberResult waiter,
+        ThemeResult theme,
         LocalDate date,
-        LocalTime time
+        ReservationTimeResult time
 ) {
     public static WaitingResult from(Waiting waiting) {
         return new WaitingResult(
                 waiting.getId(),
-                waiting.getMember().getName(),
-                waiting.getTheme().getName(),
+                MemberResult.from(waiting.getMember()),
+                ThemeResult.from(waiting.getTheme()),
                 waiting.getDate(),
-                waiting.getTime().getStartAt()
+                ReservationTimeResult.from(waiting.getTime())
         );
     }
 
