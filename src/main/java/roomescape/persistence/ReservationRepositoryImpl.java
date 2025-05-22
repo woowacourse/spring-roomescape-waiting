@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.infrastructure.db.ReservationJpaRepository;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
+import roomescape.persistence.vo.Period;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,13 +21,12 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findForThemeAndMemberInPeriod(Long themeId, Long memberId, LocalDate startDate,
-                                                           LocalDate endDate) {
+    public List<Reservation> findForThemeAndMemberInPeriod(Long themeId, Long memberId, Period period) {
         return reservationJpaRepository.findByThemeIdAndMemberIdAndDateBetween(
                 themeId,
                 memberId,
-                startDate,
-                endDate
+                period.startDate(),
+                period.endDate()
         );
     }
 
@@ -38,16 +38,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public List<Reservation> findForMember(Long memberId) {
         return reservationJpaRepository.findByMemberId(memberId);
-    }
-
-    @Override
-    public List<Reservation> findForTheme(Long themeId) {
-        return reservationJpaRepository.findByThemeId(themeId);
-    }
-
-    @Override
-    public List<Reservation> findForReservationTime(Long reservationTimeId) {
-        return reservationJpaRepository.findByReservationTimeId(reservationTimeId);
     }
 
     @Override

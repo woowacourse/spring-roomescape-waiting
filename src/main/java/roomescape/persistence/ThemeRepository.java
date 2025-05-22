@@ -1,18 +1,23 @@
 package roomescape.persistence;
 
-import java.time.LocalDate;
 import java.util.List;
 import roomescape.model.Theme;
+import roomescape.persistence.vo.Period;
 
 public interface ThemeRepository {
 
-    boolean isDuplicatedThemeName(String name);
+    boolean isDuplicatedName(String name);
 
     List<Theme> findPopularThemesInPeriod(
-            LocalDate startDate,
-            LocalDate endDate,
+            Period period,
             int size
     );
 
     Theme findById(Long id);
+
+    List<Theme> findAll();
+
+    Theme save(Theme theme);
+
+    void deleteById(Long id);
 }

@@ -18,6 +18,7 @@ import roomescape.persistence.MemberRepository;
 import roomescape.persistence.ReservationRepository;
 import roomescape.persistence.ReservationTimeRepository;
 import roomescape.persistence.ThemeRepository;
+import roomescape.persistence.vo.Period;
 
 @Service
 @RequiredArgsConstructor
@@ -52,8 +53,8 @@ public class ReservationService {
         return reservationRepository.findForThemeAndMemberInPeriod(
                         themeId,
                         memberId,
-                        startDate,
-                        endDate).stream()
+                        new Period(startDate, endDate)
+                ).stream()
                 .map(ReservationResponseDto::new)
                 .toList();
     }
