@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -65,5 +66,9 @@ public class ReservationWaiting {
         if (requestedDateTime.isBefore(LocalDateTime.now())) {
             throw new InvalidReservationTimeException("예약시간이 과거시간이 될 수 없습니다. 미래시간으로 입력해주세요.");
         }
+    }
+
+    public boolean hasNotEqualsMemberId(Long memberId) {
+        return !Objects.equals(member.getId(), memberId);
     }
 }

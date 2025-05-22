@@ -9,4 +9,8 @@ public interface ReservationWaitingRepository {
     void save(ReservationWaiting reservationWaiting);
 
     List<ReservationWaitingWithRank> findAllWithRankByMemberId(Long memberId);
+
+    ReservationWaiting getById(Long reservationWaitingId);
+
+    void remove(ReservationWaiting reservationWaiting);
 }

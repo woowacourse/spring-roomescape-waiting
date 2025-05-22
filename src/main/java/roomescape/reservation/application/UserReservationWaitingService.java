@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.AuthorizationException;
 import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
@@ -35,6 +36,14 @@ public class UserReservationWaitingService {
         } catch (ReservationException e) {
             throw new BusinessRuleViolationException(e.getMessage(), e);
         }
+    }
+
+    public void delete(Long reservationWaitingId, Long memberId) {
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.getById(reservationWaitingId);
+        if (reservationWaiting.hasNotEqualsMemberId(memberId)) {
+            throw new AuthorizationException("해당 웨이팅을 삭제할 권한이 없습니다.");
+        }
+        reservationWaitingRepository.remove(reservationWaiting);
     }
 
     private ReservationWaitingDetails createReservationWaitingDetails(CreateReservationWaitingServiceRequest request) {

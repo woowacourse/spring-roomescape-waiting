@@ -9,7 +9,7 @@ import roomescape.reservation.model.entity.ReservationWaiting;
 import roomescape.reservation.model.vo.ReservationStatus;
 
 public record UserReservationServiceResponse(
-        Long reservationId,
+        Long id,
         String themeName,
         LocalDate date,
         LocalTime time,
