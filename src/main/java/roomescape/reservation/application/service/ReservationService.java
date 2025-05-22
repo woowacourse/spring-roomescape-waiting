@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import roomescape.reservation.application.repository.WaitingRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -121,6 +123,22 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
         reservationRepository.delete(reservation);
+
+        System.out.println("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
+        final Optional<Waiting> waiting = waitingRepository.findFirstByDateAndReservationTimeIdAndThemeIdOrderByIdAsc(
+                reservation.getDate(),
+                reservation.getReservationTime().getId(),
+                reservation.getTheme().getId()
+        );
+
+        waiting.ifPresent(a -> System.out.println("qqqqqqqqqqqqqqqqqqqqqqq"));
+
+        waiting.ifPresent(value -> reservationRepository.save(new Reservation(
+                value.getMember(),
+                value.getTheme(),
+                value.getDate(),
+                value.getReservationTime()
+        )));
     }
 
     private ReservationTime getReservationTime(Long timeId) {

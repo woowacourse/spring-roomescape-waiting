@@ -51,7 +51,7 @@ function approve(event) {
     const id = row.cells[0].textContent;
 
     /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
+    DONE: [4단계] 예약 대기 목록 관리 기능
           예약 대기 승인 API 호출
      */
     const endpoint = '/admin/reservations/waiting/accept/' + id;
@@ -68,7 +68,7 @@ function deny(event) {
     const id = row.cells[0].textContent;
 
     /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
+    DONE: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
     const endpoint = '/admin/reservations/waiting/reject/' + id;
