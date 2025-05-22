@@ -20,7 +20,6 @@ import roomescape.infrastructure.JpaMemberRepository;
 import roomescape.infrastructure.JpaReservationRepository;
 import roomescape.infrastructure.JpaReservationTimeRepository;
 import roomescape.infrastructure.JpaThemeRepository;
-import roomescape.infrastructure.MemberRepositoryAdapter;
 import roomescape.infrastructure.ReservationRepositoryAdaptor;
 
 @DataJpaTest
@@ -62,9 +61,7 @@ class ReservationRepositoryAdaptorTest {
     private Theme theme2;
     private Theme theme3;
     private Theme theme4;
-    @Autowired
-    private MemberRepositoryAdapter memberRepositoryAdapter;
-
+    
     @BeforeEach
     void setUp() {
         reservationRepositoryAdaptor = new ReservationRepositoryAdaptor(jpaReservationRepository);

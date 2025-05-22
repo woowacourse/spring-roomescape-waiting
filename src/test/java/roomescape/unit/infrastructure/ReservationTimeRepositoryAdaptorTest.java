@@ -10,13 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.ReservationTime;
 import roomescape.infrastructure.JpaReservationTimeRepository;
 import roomescape.infrastructure.ReservationTimeRepositoryAdaptor;
 
 @DataJpaTest
-@Sql(value = "/sql/testReservationTime.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(value = "/sql/testReservationTime.sql")
 class ReservationTimeRepositoryAdaptorTest {
 
     @Autowired
@@ -42,9 +41,10 @@ class ReservationTimeRepositoryAdaptorTest {
         //given
         Long id = reservationTimes.getFirst().getId();
         reservationTimeRepositoryAdaptor.deleteById(id);
-        List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
 
         //when & then
+        List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
+
         assertThat(reservationTimes.size()).isEqualTo(2);
     }
 
@@ -55,6 +55,7 @@ class ReservationTimeRepositoryAdaptorTest {
 
         //when & then
         Optional<ReservationTime> reservationTime = reservationTimeRepositoryAdaptor.findById(id);
+
         assertThat(reservationTime).isPresent();
     }
 
@@ -66,6 +67,7 @@ class ReservationTimeRepositoryAdaptorTest {
         //when & then
         reservationTimeRepositoryAdaptor.save(reservationTime);
         List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
+        
         assertThat(reservationTimes.size()).isEqualTo(4);
     }
 }

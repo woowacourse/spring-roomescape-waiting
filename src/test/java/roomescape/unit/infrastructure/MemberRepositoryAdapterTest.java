@@ -42,9 +42,9 @@ class MemberRepositoryAdapterTest {
         //given
         Long id = 4L;
         String expectedName = "스테판커리";
-        Member member = memberRepositoryAdapter.findById(id).get();
 
         //when & then
+        Member member = memberRepositoryAdapter.findById(id).get();
         assertThat(member.getName()).isEqualTo(expectedName);
     }
 
@@ -67,7 +67,7 @@ class MemberRepositoryAdapterTest {
         //when & then
         memberRepositoryAdapter.save(member);
         List<Member> allMember = memberRepositoryAdapter.findAll();
-        
+
         assertThat(allMember.size()).isEqualTo(5);
     }
 }

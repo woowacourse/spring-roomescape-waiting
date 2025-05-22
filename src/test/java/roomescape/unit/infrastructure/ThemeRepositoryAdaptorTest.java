@@ -32,49 +32,53 @@ class ThemeRepositoryAdaptorTest {
     }
 
     @Test
-    void findAll() {
+    void 전체_테마_조회_테스트() {
         assertThat(themes).hasSize(5);
     }
 
     @Test
-    void findByName() {
+    void 이름으로_테마_조회_테스트() {
         //given
         String themeName = "테마1";
 
         //when & then
         Theme theme = themeRepositoryAdaptor.findByName(themeName).get();
+
         assertThat(theme.getName()).isEqualTo(themeName);
     }
 
     @Test
-    void findById() {
+    void id로_테마_조회_테스트() {
         //given
         Long themeId = getFirstId();
 
         //when & then
         Optional<Theme> theme = themeRepositoryAdaptor.findById(themeId);
+
         assertThat(theme).isPresent();
     }
 
     @Test
-    void deleteById() {
+    void id로_테마_삭제_테스트() {
         //given
         Long themeId = getFirstId();
+
+        //when & then
         themeRepositoryAdaptor.deleteById(themeId);
         List<Theme> themes = themeRepositoryAdaptor.findAll();
 
-        //when & then
         assertThat(themes.size()).isEqualTo(4);
     }
 
     @Test
-    void save() {
+    void 테마_저장_테스트() {
         //given
         Theme theme = Theme.createWithoutId("테마6", "설명6", "섬네일6");
+
+        //when & then
         themeRepositoryAdaptor.save(theme);
         List<Theme> themes = themeRepositoryAdaptor.findAll();
 
-        //when & then
         assertThat(themes.size()).isEqualTo(6);
     }
 
