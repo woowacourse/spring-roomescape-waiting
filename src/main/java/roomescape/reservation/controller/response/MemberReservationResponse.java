@@ -34,7 +34,7 @@ public record MemberReservationResponse(
                 ReservationTimeResponse.from(waitingWithRank.waiting().getReservation().getReservationTime()),
                 ThemeResponse.from(waitingWithRank.waiting().getReservation().getTheme()),
                 "예약대기",
-                waitingWithRank.rank()
+                waitingWithRank.rank() + 1L
         );
     }
 }

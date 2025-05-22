@@ -45,7 +45,7 @@ public class MemberReservationApiController {
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse) {
         List<MemberReservationResponse> reservations = reservationService.findAllByMemberId(memberResponse.id());
-        List<MemberReservationResponse> waitings = waitingService.findAllByMemberId(memberResponse.id());
+        List<MemberReservationResponse> waitings = waitingService.findWaitingsWithRankByMemberId(memberResponse.id());
         List<MemberReservationResponse> response = Stream.of(reservations, waitings)
                 .flatMap(Collection::stream)
                 .toList();

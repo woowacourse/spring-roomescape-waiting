@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingWithRank;
 
 public interface WaitingRepository {
 
@@ -20,7 +21,5 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(Long id);
 
-    List<Waiting> findAllByMemberId(Long id);
-
-    List<Waiting> findAll();
+    List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 }
