@@ -9,6 +9,7 @@ import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
+import roomescape.business.domain.WaitInfo;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
@@ -16,6 +17,7 @@ import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
@@ -26,32 +28,39 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitInfoRepository waitInfoRepository;
 
     public ReservationService(final ReservationRepository reservationRepository,
                               final MemberRepository memberRepository,
                               final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository
+                              final ThemeRepository themeRepository,
+                                final WaitInfoRepository waitInfoRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitInfoRepository = waitInfoRepository;
     }
 
     public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId,
                                       final Long themeId
     ) {
         validateMemberIdExists(memberId);
+        final Member member = memberRepository.findById(memberId).get();
         validateTimeIdExists(timeId);
-        validateThemeIdExists(themeId);
-        validateIsDuplicate(date, timeId, themeId);
         final ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        validateThemeIdExists(themeId);
+        final Theme theme = themeRepository.findById(themeId).get();
+
+        validateIsDuplicate(date, timeId, themeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
 
-        final Theme theme = themeRepository.findById(themeId).get();
-        final Member member = memberRepository.findById(memberId).get();
         final Reservation reservation = new Reservation(date, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
+
+        final WaitInfo waitInfo = new WaitInfo(member, reservation);
+        waitInfoRepository.save(waitInfo);
         return ReservationResponse.from(savedReservation);
     }
 
