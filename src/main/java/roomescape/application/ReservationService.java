@@ -77,6 +77,11 @@ public class ReservationService {
         return ReservationServiceResponse.from(reservations);
     }
 
+    public Reservation getReservationEntityById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id));
+    }
+
     public List<ReservationStatusServiceResponse> getReservationsByMember(Long memberId) {
         Member member = memberService.getMemberById(memberId).toEntity();
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
@@ -111,8 +116,7 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         try {
-            Reservation reservation = reservationRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id));
+            Reservation reservation = getReservationEntityById(id);
             reservation.remove();
             reservationRepository.deleteById(id);
             reservationRepository.flush();

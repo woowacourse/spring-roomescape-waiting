@@ -36,9 +36,13 @@ public class TimeService {
     }
 
     public TimeServiceResponse getTimeById(Long id) {
-        ReservationTime reservationTime = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("찾으려는 id가 존재하지 않습니다. id: " + id));
+        ReservationTime reservationTime = getTimeEntityById(id);
         return TimeServiceResponse.from(reservationTime);
+    }
+
+    public ReservationTime getTimeEntityById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("찾으려는 id가 존재하지 않습니다. id: " + id));
     }
 
     public List<TimeDataWithBookingInfo> getTimesWithBookingInfo(LocalDate date, Long themeId) {

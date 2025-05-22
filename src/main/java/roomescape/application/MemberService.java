@@ -39,9 +39,13 @@ public class MemberService {
     }
 
     public MemberServiceResponse getMemberById(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("id에 해당하는 사용자가 없습니다."));
+        Member member = getMemberEntityById(id);
         return MemberServiceResponse.from(member);
+    }
+
+    public Member getMemberEntityById(Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id에 해당하는 사용자가 없습니다."));
     }
 
     public MemberServiceResponse getMemberBy(String email, String password) {

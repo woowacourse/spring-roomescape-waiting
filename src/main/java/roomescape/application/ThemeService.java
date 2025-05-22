@@ -37,9 +37,13 @@ public class ThemeService {
     }
 
     public ThemeServiceResponse getThemeById(Long id) {
-        Theme theme = themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("id에 해당하는 테마가 없습니다."));
+        Theme theme = getThemeEntityById(id);
         return ThemeServiceResponse.from(theme);
+    }
+
+    public Theme getThemeEntityById(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("id에 해당하는 테마가 없습니다."));
     }
 
     public List<ThemeServiceResponse> getThemeRanking() {
