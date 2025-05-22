@@ -83,7 +83,7 @@ class ReservationServiceTest {
         var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
         // when
-        service.removeById(reserved.id());
+        service.removeByIdForce(reserved.id());
 
         // then
         var reservations = service.findAllReservations(NONE_FILTERING);

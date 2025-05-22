@@ -63,7 +63,7 @@ public class ReservationService {
         return reservationRepository.findAll(byFilter(filter));
     }
 
-    public void removeById(final long id) {
+    public void removeByIdForce(final long id) {
         reservationRepository.deleteByIdOrElseThrow(id);
     }
 }

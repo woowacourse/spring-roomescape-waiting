@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.reservation.ReservationSearchFilter;
+import roomescape.exception.AuthorizationException;
 import roomescape.presentation.request.CreateReservationRequest;
 import roomescape.presentation.response.ReservationResponse;
 
@@ -63,7 +64,13 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable("id") final long id) {
-        service.removeById(id);
+    public void delete(
+        final AuthenticationInfo authenticationInfo,
+        @PathVariable("id") final long id
+    ) {
+        if (!authenticationInfo.isAdmin()) {
+            throw new AuthorizationException("관리자에게만 허용된 작업입니다.");
+        }
+        service.removeByIdForce(id);
     }
 }

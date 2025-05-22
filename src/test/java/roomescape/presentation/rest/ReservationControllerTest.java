@@ -3,8 +3,7 @@ package roomescape.presentation.rest;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -22,7 +21,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import roomescape.application.ReservationService;
 import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.user.UserRole;
-import roomescape.exception.NotFoundException;
 import roomescape.presentation.GlobalExceptionHandler;
 import roomescape.presentation.StubAuthenticationInfoArgumentResolver;
 
@@ -86,21 +84,11 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약 삭제 요청시, 주어진 아이디에 해당하는 예약이 있다면 삭제하고 NO CONTENT를 응답한다.")
-    void deleteSuccessfully() throws Exception {
+    @DisplayName("일반 유저가 예약 삭제 요청시, FORBIDDEN을 응답한다.")
+    void deleteUnauthorized() throws Exception {
         mockMvc.perform(delete("/reservations/1"))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isForbidden());
 
-        Mockito.verify(reservationService, times(1)).removeById(1L);
-    }
-
-    @Test
-    @DisplayName("예약 삭제 요청시, 주어진 아이디에 해당하는 예약이 없다면 NOT FOUND를 응답한다.")
-    void deleteWhenNotFound() throws Exception {
-        Mockito.doThrow(new NotFoundException("should be thrown"))
-            .when(reservationService).removeById(eq(999L));
-
-        mockMvc.perform(delete("/reservations/999"))
-            .andExpect(status().isNotFound());
+        Mockito.verify(reservationService, never()).removeByIdForce(1L);
     }
 }
