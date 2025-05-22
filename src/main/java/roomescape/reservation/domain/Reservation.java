@@ -23,11 +23,10 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-
-    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
