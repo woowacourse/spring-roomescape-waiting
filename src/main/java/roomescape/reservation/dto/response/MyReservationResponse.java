@@ -2,15 +2,13 @@ package roomescape.reservation.dto.response;
 
 import roomescape.reservation.domain.Reservation;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingStatus;
 
 public record MyReservationResponse(
         Long reservationId,
         String theme,
         String date,
         String time,
-        WaitingStatus status,
-        Long waitingRank
+        String status
 ) {
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(
@@ -18,8 +16,7 @@ public record MyReservationResponse(
                 reservation.getThemeName(),
                 reservation.getDate().toString(),
                 reservation.getReservationTime().toString(),
-                WaitingStatus.CONFIRMED,
-                null
+                "예약"
         );
     }
 
@@ -29,8 +26,7 @@ public record MyReservationResponse(
                 waiting.getTheme().getName(),
                 waiting.getDate().toString(),
                 waiting.getTime().getStartAt().toString(),
-                WaitingStatus.PENDING,
-                rank
+                "대기 " + rank + "번째"
         );
     }
 }
