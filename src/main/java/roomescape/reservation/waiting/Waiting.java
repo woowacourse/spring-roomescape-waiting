@@ -5,7 +5,8 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.reservation.reservation.Reservation;
+import roomescape.member.Member;
+import roomescape.schedule.Schedule;
 
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -18,13 +19,17 @@ public class Waiting {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @OneToOne
-    private Reservation reservation;
+    @ManyToOne
+    private Member member;
+
+    @ManyToOne
+    private Schedule schedule;
 
     private Long rank;
 
-    public Waiting(final Reservation reservation, final Long rank) {
-        this.reservation = reservation;
+    public Waiting(final Schedule schedule, final Member member, final Long rank) {
+        this.schedule = schedule;
+        this.member = member;
         this.rank = rank;
     }
 

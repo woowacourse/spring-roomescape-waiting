@@ -1,0 +1,20 @@
+package roomescape.schedule.dto;
+
+import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.schedule.Schedule;
+import roomescape.theme.dto.ThemeResponse;
+
+public record ScheduleResponse(
+        Long id,
+        ReservationTimeResponse time,
+        ThemeResponse theme
+) {
+
+    public static ScheduleResponse of(Schedule schedule) {
+        return new ScheduleResponse(
+                schedule.getId(),
+                ReservationTimeResponse.from(schedule.getReservationTime()),
+                ThemeResponse.from(schedule.getTheme())
+        );
+    }
+}

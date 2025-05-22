@@ -6,10 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.Member;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.theme.Theme;
-
-import java.time.LocalDate;
+import roomescape.schedule.Schedule;
 
 @Entity
 @Getter
@@ -24,32 +21,11 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    private LocalDate date;
+    @OneToOne
+    private Schedule schedule;
 
-    @ManyToOne
-    private ReservationTime reservationTime;
-
-    @ManyToOne
-    private Theme theme;
-
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus reservationStatus;
-
-    public Reservation(
-            final LocalDate date,
-            final Member member,
-            final ReservationTime reservationTime,
-            final Theme theme,
-            final ReservationStatus reservationStatus
-    ) {
-        this.date = date;
+    public Reservation(final Member member, final Schedule schedule) {
         this.member = member;
-        this.reservationTime = reservationTime;
-        this.theme = theme;
-        this.reservationStatus = reservationStatus;
-    }
-
-    public void confirmReservation() {
-        this.reservationStatus = ReservationStatus.CONFIRMED;
+        this.schedule = schedule;
     }
 }

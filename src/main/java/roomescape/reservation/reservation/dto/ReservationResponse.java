@@ -1,33 +1,20 @@
 package roomescape.reservation.reservation.dto;
 
-import java.time.LocalDate;
-
-import roomescape.exception.custom.reason.ResponseInvalidException;
 import roomescape.member.dto.MemberResponse;
 import roomescape.reservation.reservation.Reservation;
-import roomescape.reservationtime.dto.ReservationTimeResponse;
-import roomescape.theme.dto.ThemeResponse;
+import roomescape.schedule.dto.ScheduleResponse;
 
 public record ReservationResponse(
         Long id,
-        LocalDate date,
-        MemberResponse member,
-        ReservationTimeResponse time,
-        ThemeResponse theme
+        ScheduleResponse schedule,
+        MemberResponse member
 ) {
-    public ReservationResponse {
-        if (id == null || date == null || time == null || theme == null) {
-            throw new ResponseInvalidException();
-        }
-    }
 
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getDate(),
-                MemberResponse.from(reservation.getMember()),
-                ReservationTimeResponse.from(reservation.getReservationTime()),
-                ThemeResponse.from(reservation.getTheme())
+                ScheduleResponse.of(reservation.getSchedule()),
+                MemberResponse.from(reservation.getMember())
         );
     }
 }

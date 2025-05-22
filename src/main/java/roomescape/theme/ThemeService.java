@@ -55,7 +55,7 @@ public class ThemeService {
         final Theme theme = themeRepository.findById(id)
                 .orElseThrow(ThemeNotFoundException::new);
 
-        if (reservationRepository.existsByTheme(theme)) {
+        if (reservationRepository.existsBySchedule_Theme(theme)) {
             throw new ThemeUsedException();
         }
 

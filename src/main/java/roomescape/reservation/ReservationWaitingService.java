@@ -5,12 +5,10 @@ import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
 import roomescape.reservation.reservation.Reservation;
 import roomescape.reservation.reservation.ReservationRepository;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.theme.Theme;
 import roomescape.reservation.waiting.Waiting;
 import roomescape.reservation.waiting.WaitingRepository;
+import roomescape.schedule.Schedule;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,11 +22,9 @@ public class ReservationWaitingService {
         Reservation reservation = getReservationById(id);
         reservationRepository.deleteById(id);
 
-        LocalDate date = reservation.getDate();
-        ReservationTime reservationTime = reservation.getReservationTime();
-        Theme theme = reservation.getTheme();
+        Schedule schedule = reservation.getSchedule();
 
-        List<Waiting> waitings = waitingRepository.findByReservationSlot(date, reservationTime, theme);
+        List<Waiting> waitings = waitingRepository.findAllBySchedule(schedule);
         if (waitings.isEmpty()) {
             return;
         }
@@ -39,7 +35,8 @@ public class ReservationWaitingService {
 
     private void changeFirstWaitingToReservation(final List<Waiting> waitings) {
         Waiting firstWaiting = waitings.getFirst();
-        firstWaiting.getReservation().confirmReservation();
+        Reservation reservation = new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule());
+        reservationRepository.save(reservation);
         waitingRepository.delete(firstWaiting);
     }
 
