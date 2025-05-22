@@ -2,7 +2,6 @@ package roomescape.controller.api;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.dto.reservation.ReservationAndWaitingResponseDto;
 import roomescape.dto.waiting.WaitingResponseDto;
 import roomescape.service.waiting.WaitingCommandService;
 import roomescape.service.waiting.WaitingQueryService;

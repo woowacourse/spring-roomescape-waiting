@@ -1,7 +1,5 @@
 package roomescape.domain.waiting;
 
-import java.nio.file.Watchable;
-
 public class WaitingWithRank {
     private Waiting waiting;
     private Long rank;

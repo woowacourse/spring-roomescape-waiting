@@ -9,7 +9,6 @@ import roomescape.repository.JpaReservationRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-
 @Service
 public class ReservationQueryService {
 

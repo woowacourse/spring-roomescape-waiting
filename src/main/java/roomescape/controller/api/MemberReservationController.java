@@ -1,9 +1,6 @@
 package roomescape.controller.api;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.auth.CurrentMember;
@@ -11,6 +8,9 @@ import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.ReservationAndWaitingResponseDto;
 import roomescape.service.reservation.ReservationQueryService;
 import roomescape.service.waiting.WaitingQueryService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class MemberReservationController {

@@ -5,22 +5,14 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.domain.member.Member;
-import roomescape.domain.member.Role;
 import roomescape.dto.auth.LoginRequestDto;
-import roomescape.dto.theme.ThemeCreateRequestDto;
-import roomescape.dto.time.ReservationTimeCreateRequestDto;
-import roomescape.repository.JpaMemberRepository;
 
-import java.time.LocalTime;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.List;
 
