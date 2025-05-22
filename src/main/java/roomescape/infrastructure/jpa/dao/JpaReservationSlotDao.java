@@ -12,11 +12,17 @@ import java.util.Optional;
 public interface JpaReservationSlotDao extends JpaRepository<ReservationSlot, Id> {
 
     @Query("""
-            select rs
+            select distinct rs
             from ReservationSlot rs
             join fetch rs.reservations r
-            join fetch r.user u
-            where u.id = :userId
+            join fetch r.user
+            where rs in (
+                select rs2
+                from ReservationSlot rs2
+                join rs2.reservations r2
+                join r2.user u
+                where u.id = :userId
+            )
             """)
     List<ReservationSlot> findAllSlotsContainsReserverOf(Id userId);
 

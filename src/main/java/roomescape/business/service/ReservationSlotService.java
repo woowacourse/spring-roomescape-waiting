@@ -41,7 +41,7 @@ public class ReservationSlotService {
 
     public ReservationSlot getByDateAndTimeIdAndThemeIdOrElseCreate(final LocalDate date, final String reservationTimeIdValue, final String themeIdValue) {
         return reservationSlots.findByDateAndTimeIdAndThemeId(date, Id.create(reservationTimeIdValue), Id.create(themeIdValue))
-                .orElseGet(() -> saveAndGet(date, themeIdValue, reservationTimeIdValue));
+                .orElseGet(() -> saveAndGet(date, reservationTimeIdValue, themeIdValue));
     }
 
     public List<ReservationSlot> getAllSlotsContainsReserverOf(final String userIdValue) {
