@@ -20,15 +20,14 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.role.Role;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.controller.request.ReservationRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
-import roomescape.user.controller.dto.ReservationRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {

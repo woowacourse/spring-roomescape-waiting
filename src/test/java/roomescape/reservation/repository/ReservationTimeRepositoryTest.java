@@ -17,7 +17,6 @@ import roomescape.member.domain.Password;
 import roomescape.member.role.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;

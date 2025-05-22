@@ -20,7 +20,6 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.role.Role;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
