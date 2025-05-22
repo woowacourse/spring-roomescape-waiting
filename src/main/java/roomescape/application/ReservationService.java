@@ -8,6 +8,7 @@ import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationDateTime;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
 import roomescape.presentation.dto.request.LoginMember;
@@ -28,17 +29,20 @@ public class ReservationService {
     private final ThemeService themeService;
     private final MemberService memberService;
     private final CurrentTimeService currentTimeService;
+    private final WaitingService waitingService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeService reservationTimeService,
                               ThemeService themeService,
                               MemberService memberService,
-                              CurrentTimeService currentTimeService) {
+                              CurrentTimeService currentTimeService,
+                              WaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
         this.currentTimeService = currentTimeService;
+        this.waitingService = waitingService;
     }
 
     public List<ReservationResponse> getReservations() {
@@ -106,6 +110,7 @@ public class ReservationService {
     public List<MyReservationResponse> getMyReservations(LoginMember loginMember) {
         Member member = memberService.findMemberById(loginMember.id());
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return MyReservationResponse.from(reservations);
+        List<Waiting> waitings = waitingService.findWaitingsByMember(member);
+        return MyReservationResponse.from(reservations, waitings);
     }
 }

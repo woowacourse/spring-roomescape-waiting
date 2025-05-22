@@ -2,10 +2,13 @@ package roomescape.presentation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Reservation;
+import roomescape.domain.Waiting;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public record MyReservationResponse(
         Long reservationId,
@@ -31,9 +34,22 @@ public record MyReservationResponse(
         );
     }
 
-    public static List<MyReservationResponse> from(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(MyReservationResponse::from)
-                .toList();
+    public static MyReservationResponse from(Waiting waiting) {
+        return new MyReservationResponse(
+                waiting.getReservation().getId(),
+                waiting.getReservation().getTheme().getName(),
+                waiting.getReservation().getDate(),
+                waiting.getReservation().getTime().getStartAt(),
+                waiting.getRank() + "번째 예약대기"
+        );
+    }
+
+    public static List<MyReservationResponse> from(List<Reservation> reservations, List<Waiting> waitings) {
+        return Stream.concat(
+                reservations.stream().map(MyReservationResponse::from),
+                waitings.stream().map(MyReservationResponse::from))
+        .sorted(Comparator.comparing(MyReservationResponse::date)
+                .thenComparing(MyReservationResponse::time))
+        .toList();
     }
 }

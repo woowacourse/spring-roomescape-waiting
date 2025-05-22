@@ -11,7 +11,11 @@ import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.WaitingResponse;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -36,5 +40,9 @@ public class WaitingService {
 
         Waiting saved = waitingRepository.save(waiting);
         return WaitingResponse.from(saved);
+    }
+
+    public List<Waiting> findWaitingsByMember(Member member) {
+        return waitingRepository.findAllByMember(member);
     }
 }
