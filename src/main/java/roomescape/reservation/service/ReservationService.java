@@ -32,8 +32,8 @@ public class ReservationService {
 
     private final ReservationQueryUseCase reservationQueryUseCase;
     private final ReservationCommandUseCase reservationCommandUseCase;
-    private final ReservationWaitCommandUseCase reservationWaitCommandUseCase;
     private final ReservationWaitQueryUseCase reservationWaitQueryUseCase;
+    private final ReservationWaitCommandUseCase reservationWaitCommandUseCase;
 
     public List<ReservationWebResponse> getAll() {
         return ReservationConverter.toDto(

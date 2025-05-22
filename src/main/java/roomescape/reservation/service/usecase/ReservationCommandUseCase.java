@@ -26,13 +26,7 @@ public class ReservationCommandUseCase {
     private final MemberQueryUseCase memberQueryUseCase;
 
     public Reservation create(final CreateReservationServiceRequest createReservationServiceRequest) {
-        if (reservationQueryUseCase.existsByParams(
-                ReservationDate.from(createReservationServiceRequest.date()),
-                createReservationServiceRequest.timeId(),
-                createReservationServiceRequest.themeId())) {
-
-            throw new ConflictException("추가하려는 예약이 이미 존재합니다.");
-        }
+        validateReservationNotExists(createReservationServiceRequest);
 
         final ReservationTime reservationTime = reservationTimeQueryUseCase.get(
                 createReservationServiceRequest.timeId());
@@ -44,6 +38,16 @@ public class ReservationCommandUseCase {
         return reservationRepository.save(
                 ReservationConverter.toDomain(createReservationServiceRequest, member, reservationTime, theme)
         );
+    }
+
+    private void validateReservationNotExists(final CreateReservationServiceRequest createReservationServiceRequest) {
+        if (reservationQueryUseCase.existsByParams(
+                ReservationDate.from(createReservationServiceRequest.date()),
+                createReservationServiceRequest.timeId(),
+                createReservationServiceRequest.themeId())) {
+
+            throw new ConflictException("추가하려는 예약이 이미 존재합니다.");
+        }
     }
 
     public void delete(final Long id) {
