@@ -124,21 +124,22 @@ public class ReservationService {
 
         reservationRepository.delete(reservation);
 
-        System.out.println("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
         final Optional<Waiting> waiting = waitingRepository.findFirstByDateAndReservationTimeIdAndThemeIdOrderByIdAsc(
                 reservation.getDate(),
                 reservation.getReservationTime().getId(),
                 reservation.getTheme().getId()
         );
 
-        waiting.ifPresent(a -> System.out.println("qqqqqqqqqqqqqqqqqqqqqqq"));
+        waiting.ifPresent(value -> {
+            reservationRepository.save(new Reservation(
+                    value.getMember(),
+                    value.getTheme(),
+                    value.getDate(),
+                    value.getReservationTime()
+            ));
 
-        waiting.ifPresent(value -> reservationRepository.save(new Reservation(
-                value.getMember(),
-                value.getTheme(),
-                value.getDate(),
-                value.getReservationTime()
-        )));
+            waitingRepository.delete(waiting.get());
+        });
     }
 
     private ReservationTime getReservationTime(Long timeId) {
