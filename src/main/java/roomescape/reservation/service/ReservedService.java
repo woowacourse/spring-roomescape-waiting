@@ -16,13 +16,13 @@ public class ReservedService {
 
     @Transactional
     public void cancel(Long id, Long userId) {
-        Reservation reservation = reservedQueryService.getReserved(id);
+        Reservation reserved = reservedQueryService.getReserved(id);
 
-        if (!reservation.isOwner(userId)) {
+        if (!reserved.isOwner(userId)) {
             throw new NotAuthorizationException("해당 예약자가 아닙니다.");
         }
 
-        reservation.cancelReservation();
-        waitingService.promoteFirstWaitingToReservation(reservation.getDate(), reservation.getTimeId());
+        reserved.cancelReservation();
+        waitingService.promoteFirstWaitingToReservation(reserved.getDate(), reserved.getTimeId());
     }
 }

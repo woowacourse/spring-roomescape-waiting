@@ -59,5 +59,4 @@ public class ReservedQueryService {
     public boolean existsReserved(LocalDate date, Long timeId) {
         return statusRepository.existsByDateAndTimeIdAndStatus(date, timeId, RESERVED);
     }
-
 }
