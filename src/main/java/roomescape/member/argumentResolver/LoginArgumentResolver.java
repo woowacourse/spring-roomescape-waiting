@@ -20,7 +20,7 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        boolean hasAnnotation = parameter.hasParameterAnnotation(LoginMember.class);
+        boolean hasAnnotation = parameter.hasParameterAnnotation(Authentication.class);
         boolean hasLoginMemberType = roomescape.member.dto.request.LoginMember.class.isAssignableFrom(parameter.getParameterType());
 
         return hasAnnotation && hasLoginMemberType;
