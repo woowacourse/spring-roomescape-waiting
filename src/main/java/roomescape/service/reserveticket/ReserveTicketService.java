@@ -24,21 +24,21 @@ public class ReserveTicketService {
     private final MemberService memberService;
     private final ReservationService reservationService;
     private final ReserveTicketRepository reserveTicketRepository;
-    private final ReservationValidateStrategy reservationRepository;
+    private final ReservationValidateStrategy reservationValidateStrategy;
 
     public ReserveTicketService(MemberService memberService, ReservationService reservationService,
                                 ReserveTicketRepository reserveTicketRepository,
-                                ReservationValidateStrategy reservationRepository) {
+                                ReservationValidateStrategy reservationValidateStrategy) {
         this.memberService = memberService;
         this.reservationService = reservationService;
         this.reserveTicketRepository = reserveTicketRepository;
-        this.reservationRepository = reservationRepository;
+        this.reservationValidateStrategy = reservationValidateStrategy;
     }
 
     @Transactional
     public long addReservation(AddReservationDto newReservationDto, Long memberId) {
         Reserver reserver = memberService.getMemberById(memberId);
-        long reservationId = reservationService.addReservation(newReservationDto, reservationRepository,
+        long reservationId = reservationService.addReservation(newReservationDto, reservationValidateStrategy,
                 ReservationStatus.RESERVATION);
         Reservation reservation = reservationService.getReservationById(reservationId);
 
