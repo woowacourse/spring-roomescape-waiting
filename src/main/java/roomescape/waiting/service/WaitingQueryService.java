@@ -1,35 +1,46 @@
 package roomescape.waiting.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.controller.response.MyReservationResponse;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.repository.ReservationStatusRepository;
 import roomescape.waiting.controller.response.WaitingInfoResponse;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class WaitingQueryService {
 
-    private final WaitingRepository waitingRepository;
+    private static final ReservationStatus WAITING = ReservationStatus.WAITING;
+    private final ReservationStatusRepository statusRepository;
 
     public List<WaitingInfoResponse> getAllInfo() {
-        return waitingRepository.getAll();
-    }
-
-    public Waiting getWaiting(Long id) {
-        return waitingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
+        return statusRepository.findByStatus(WAITING)
+                .stream()
+                .map(WaitingInfoResponse::from)
+                .toList();
     }
 
     public List<MyReservationResponse> getWaitingReservations(Long memberId) {
-        return waitingRepository.findWithRankByMemberId(memberId)
+        return statusRepository.findWithRankByMemberIdAndStatus(memberId, WAITING)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
     }
+
+    public Reservation getWaiting(Long id) {
+        return statusRepository.findByIdAndStatus(id, ReservationStatus.WAITING)
+                .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
+    }
+
+    public boolean existWaiting(Long userId, LocalDate date, Long timeId) {
+        return statusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(userId, date, timeId, WAITING);
+    }
+
 }

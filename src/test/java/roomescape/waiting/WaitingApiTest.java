@@ -22,8 +22,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
 
 @Import(AuthServiceTestConfig.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -46,7 +44,7 @@ class WaitingApiTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
-    private WaitingRepository waitingRepository;
+    private ReservationRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -67,11 +65,7 @@ class WaitingApiTest {
         LocalDate date = reservationDateTime.getDate();
 
         // 예약이 이미 존재해야 대기 등록 가능
-        reservationRepository.save(Reservation.builder()
-                .theme(공포)
-                .reserver(유저2)
-                .reservationDateTime(reservationDateTime)
-                .build());
+        reservationRepository.save(Reservation.reserve(유저2, reservationDateTime, 공포));
 
         HashMap<String, Object> request = new HashMap<>();
         request.put("themeId", themeId);
@@ -104,11 +98,7 @@ class WaitingApiTest {
                 .build());
 
         // 대기 신청
-        Long id = waitingRepository.save(Waiting.builder()
-                .theme(공포)
-                .reserver(유저1)
-                .reservationDateTime(reservationDateTime)
-                .build()).getId();
+        Long id = waitingRepository.save(Reservation.waiting(유저1, reservationDateTime, 공포)).getId();
 
         // 본인 대기 삭제
         RestAssured.given().log().all()

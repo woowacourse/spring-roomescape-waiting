@@ -21,6 +21,7 @@ import roomescape.reservation.controller.request.ReserveByUserRequest;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservedService;
 import roomescape.reservation.service.command.ReserveCommand;
 
 @RestController
@@ -29,6 +30,7 @@ import roomescape.reservation.service.command.ReserveCommand;
 public class ReservationApiController {
 
     private final ReservationService reservationService;
+    private final ReservedService reservedService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> createReservation(
@@ -55,8 +57,8 @@ public class ReservationApiController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id, @Authenticated Long memberId) {
-        reservationService.deleteByUser(id, memberId);
+    public ResponseEntity<ApiResponse<Void>> cancelReservation(@PathVariable Long id, @Authenticated Long memberId) {
+        reservedService.cancel(id, memberId);
 
         return ResponseEntity.noContent().build();
     }

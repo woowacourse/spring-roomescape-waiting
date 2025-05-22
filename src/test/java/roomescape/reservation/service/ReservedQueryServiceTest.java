@@ -17,7 +17,6 @@ import roomescape.fixture.db.ReservationTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.fixture.entity.ReservationDateFixture;
 import roomescape.member.domain.Member;
-import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -26,14 +25,12 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
-public class ReservationQueryServiceTest {
+public class ReservedQueryServiceTest {
 
     @Autowired
-    private ReservationQueryService reservationQueryService;
+    private ReservedQueryService reservedQueryService;
     @Autowired
     private ReservationTimeDbFixture reservationTimeDbFixture;
     @Autowired
@@ -47,8 +44,6 @@ public class ReservationQueryServiceTest {
 
     @Autowired
     private CleanUp cleanUp;
-    @Autowired
-    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -63,7 +58,7 @@ public class ReservationQueryServiceTest {
 
         Reservation reservation = reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
 
-        List<ReservationResponse> responses = reservationQueryService.getFilteredReservations(null, null, null, null);
+        List<ReservationResponse> responses = reservedQueryService.getFilteredReserved(null, null, null, null);
         ReservationResponse response = responses.get(0);
 
         SoftAssertions.assertSoftly(softly -> {
@@ -87,46 +82,34 @@ public class ReservationQueryServiceTest {
         ReservationTime 열시 = reservationTimeDbFixture.열시();
         ReservationTime 열한시 = reservationTimeDbFixture.열한시();
 
-        Reservation reservation1 = Reservation.reserve(
-                member1, ReservationDateTime.create(reservationDate, 열시), theme
-        );
-        Reservation reservation2 = Reservation.reserve(
-                member1, ReservationDateTime.create(reservationDate, 열한시), theme
-        );
-        Reservation reservation3 = Reservation.reserve(
-                member2, ReservationDateTime.create(reservationDate, 열시), theme
-        );
+        Reservation reservation1 = Reservation.reserve(member1, ReservationDateTime.create(reservationDate, 열시), theme);
+        Reservation reservation2 = Reservation.reserve(member1, ReservationDateTime.create(reservationDate, 열한시),
+                theme);
+        Reservation reservation3 = Reservation.reserve(member2, ReservationDateTime.create(reservationDate, 열시), theme);
 
         reservationRepository.saveAll(List.of(reservation1, reservation2, reservation3));
         // when & then
         // 공포 필터링
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(
-                            reservationQueryService.getFilteredReservations(theme.getId(), null, null, null))
-                    .hasSize(3);
+            softly.assertThat(reservedQueryService.getFilteredReserved(theme.getId(), null, null, null)).hasSize(3);
             // 사용자1 필터링
-            softly.assertThat(reservationQueryService.getFilteredReservations(null, member1.getId(), null, null))
-                    .hasSize(2);
+            softly.assertThat(reservedQueryService.getFilteredReserved(null, member1.getId(), null, null)).hasSize(2);
             // 오늘 필터링
-            softly.assertThat(reservationQueryService.getFilteredReservations(null, null, today, today))
-                    .isEmpty();
+            softly.assertThat(reservedQueryService.getFilteredReserved(null, null, today, today)).isEmpty();
             // 공포 테마 & 내일 필터링
-            softly.assertThat(
-                            reservationQueryService.getFilteredReservations(theme.getId(), null, tomorrow, tomorrow))
+            softly.assertThat(reservedQueryService.getFilteredReserved(theme.getId(), null, tomorrow, tomorrow))
                     .hasSize(3);
             // 모든 필터 조합
             softly.assertThat(
-                            reservationQueryService.getFilteredReservations(theme.getId(), member2.getId(), tomorrow, tomorrow))
+                            reservedQueryService.getFilteredReserved(theme.getId(), member2.getId(), tomorrow, tomorrow))
                     .hasSize(1);
             // 일치하는 결과가 없는 필터 조합
-            softly.assertThat(
-                            reservationQueryService.getFilteredReservations(theme.getId(), member2.getId(), today, today))
+            softly.assertThat(reservedQueryService.getFilteredReserved(theme.getId(), member2.getId(), today, today))
                     .isEmpty();
 
             // 모든 결과 조회
-            softly.assertThat(reservationQueryService.getFilteredReservations(null, null, null, null))
-                    .hasSize(3);
+            softly.assertThat(reservedQueryService.getFilteredReserved(null, null, null, null)).hasSize(3);
         });
     }
 
@@ -142,8 +125,8 @@ public class ReservationQueryServiceTest {
         LocalDate pastDate = LocalDate.now().minusDays(10);
         LocalDate pastDateEnd = LocalDate.now().minusDays(5);
 
-        List<ReservationResponse> responses = reservationQueryService.getFilteredReservations(
-                null, null, pastDate, pastDateEnd);
+        List<ReservationResponse> responses = reservedQueryService.getFilteredReserved(null, null, pastDate,
+                pastDateEnd);
 
         assertThat(responses).isEmpty();
     }
@@ -163,8 +146,7 @@ public class ReservationQueryServiceTest {
         reservationRepository.saveAll(List.of(reservation1, reservation2));
 
         // when
-        List<ReservationResponse> responses = reservationQueryService.getFilteredReservations(
-                null, null, null, null);
+        List<ReservationResponse> responses = reservedQueryService.getFilteredReserved(null, null, null, null);
 
         // then
         assertThat(responses).hasSize(2);
@@ -186,14 +168,30 @@ public class ReservationQueryServiceTest {
         reservationRepository.saveAll(List.of(horrorReservation, adventureReservation));
 
         // when - 공포 테마만 필터링
-        List<ReservationResponse> horrorOnly = reservationQueryService.getFilteredReservations(
-                horror.getId(), null, null, null);
+        List<ReservationResponse> horrorOnly = reservedQueryService.getFilteredReserved(horror.getId(), null, null,
+                null);
 
         // then
-
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(horrorOnly).hasSize(1);
             softly.assertThat(horrorOnly.get(0).theme().name()).isEqualTo(horror.getName());
         });
+    }
+
+    @Test
+    void 멤버별로_예약을_확인할_수_있다 (){
+        // given
+        Member member = memberDbFixture.유저1_생성();
+        Theme theme = themeDbFixture.공포();
+        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
+
+        Reservation reservation = Reservation.reserve(member, 내일_열시, theme);
+        reservationRepository.save(reservation);
+
+        // when
+        boolean result = reservedQueryService.existsReserved(member.getId(), 내일_열시.getDate(), 내일_열시.getTimeId());
+
+        // then
+        assertThat(result).isTrue();
     }
 }

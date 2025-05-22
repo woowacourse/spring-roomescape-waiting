@@ -16,11 +16,11 @@ import roomescape.config.AuthServiceTestConfig;
 import roomescape.fixture.db.MemberDbFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
-import roomescape.theme.domain.Theme;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.theme.domain.Theme;
 
 @Import(AuthServiceTestConfig.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -32,7 +32,7 @@ public class WaitingAdminApiTest {
     @Autowired
     private CleanUp cleanUp;
     @Autowired
-    private WaitingRepository waitingRepository;
+    private ReservationRepository reservationRepository;
     @Autowired
     private ThemeDbFixture themeDbFixture;
     @Autowired
@@ -52,11 +52,7 @@ public class WaitingAdminApiTest {
         Theme theme = themeDbFixture.공포();
         ReservationDateTime dateTime = reservationDateTimeDbFixture.내일_열시();
 
-        waitingRepository.save(Waiting.builder()
-                .reserver(member1)
-                .reservationDateTime(dateTime)
-                .theme(theme)
-                .build());
+        reservationRepository.save(Reservation.waiting(member1, dateTime, theme));
 
         RestAssured.given().log().all()
                 .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
@@ -72,11 +68,8 @@ public class WaitingAdminApiTest {
         Theme theme = themeDbFixture.공포();
         ReservationDateTime dateTime = reservationDateTimeDbFixture.내일_열시();
 
-        Long id = waitingRepository.save(Waiting.builder()
-                .reserver(member1)
-                .reservationDateTime(dateTime)
-                .theme(theme)
-                .build()).getId();
+        Long id = reservationRepository.save(Reservation.waiting(member1, dateTime, theme))
+                .getId();
 
         RestAssured.given().log().all()
                 .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)

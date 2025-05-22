@@ -1,68 +1,47 @@
 package roomescape.waiting.service;
 
-import java.util.List;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.web.exception.NotAuthorizationException;
-import roomescape.global.exception.InvalidArgumentException;
-import roomescape.reservation.controller.response.MyReservationResponse;
-import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.service.ReservationQueryService;
-import roomescape.reservation.service.command.ReserveCommand;
-import roomescape.waiting.controller.response.WaitingInfoResponse;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.repository.ReservationStatusRepository;
+import roomescape.reservation.service.ReservationManager;
 
 @Service
 @RequiredArgsConstructor
 public class WaitingService {
 
-    private final WaitingRepository waitingRepository;
-    private final ReservationQueryService reservationQueryService;
-    private final WaitingManager waitingManager;
+    private static final ReservationStatus WAITING = ReservationStatus.WAITING;
+
+    private final ReservationStatusRepository statusRepository;
+    private final ReservationManager reservationManager;
     private final WaitingQueryService waitingQueryService;
 
     @Transactional
-    public ReservationResponse waiting(ReserveCommand reserveCommand) {
-        validateAvailableWaiting(reserveCommand);
-
-        Waiting waiting = waitingManager.getWaiting(reserveCommand);
-        Waiting saved = waitingRepository.save(waiting);
-
-        return ReservationResponse.from(saved);
-    }
-
-    private void validateAvailableWaiting(ReserveCommand reserveCommand) {
-        if (!reservationQueryService.existsReservation(reserveCommand.date(), reserveCommand.timeId())) {
-            throw new InvalidArgumentException("예약 대기를 할 수 없습니다!");
+    public void promoteFirstWaitingToReservation(LocalDate date, Long timeId) {
+        if (statusRepository.existsByDateAndTimeIdAndStatus(date, timeId, WAITING)) {
+            Reservation waiting = statusRepository.findByDateAndTimeIdAndStatus(date, timeId, WAITING).getFirst();
+            waiting.reserved();
         }
-    }
-
-    public List<WaitingInfoResponse> getAllInfo() {
-        return waitingQueryService.getAllInfo();
-    }
-
-    public List<MyReservationResponse> getWaitingReservations(Long memberId) {
-        return waitingQueryService.getWaitingReservations(memberId);
     }
 
     @Transactional
-    public void deleteByUser(Long id, Long memberId) {
-        Waiting waiting = waitingQueryService.getWaiting(id);
-        if (!waiting.isOwner(memberId)) {
-            throw new NotAuthorizationException("해당 예약 대기자가 아닙니다.");
+    public void cancelWaiting(Long id, Long memberId) {
+        Reservation waiting = waitingQueryService.getWaiting(id);
+        if (waiting.isOwner(memberId)) {
+            waiting.cancelWaiting();
+            return;
         }
 
-        delete(id);
+        throw new NotAuthorizationException("해당 예약 대기자가 아닙니다.");
     }
 
     @Transactional
     public void delete(Long id) {
-        Waiting waiting = waitingQueryService.getWaiting(id);
-
-        waitingRepository.delete(waiting);
+        Reservation waiting = waitingQueryService.getWaiting(id);
+        reservationManager.delete(waiting);
     }
-
-
 }

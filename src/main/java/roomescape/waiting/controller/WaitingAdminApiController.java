@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.response.ApiResponse;
 import roomescape.waiting.controller.response.WaitingInfoResponse;
+import roomescape.waiting.service.WaitingQueryService;
 import roomescape.waiting.service.WaitingService;
 
 @RestController
@@ -20,10 +21,11 @@ import roomescape.waiting.service.WaitingService;
 public class WaitingAdminApiController {
 
     private final WaitingService waitingService;
+    private final WaitingQueryService waitingQueryService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<WaitingInfoResponse>>> readAll() {
-        List<WaitingInfoResponse> responses = waitingService.getAllInfo();
+        List<WaitingInfoResponse> responses = waitingQueryService.getAllInfo();
 
         return ResponseEntity.ok(ApiResponse.success(READ_WAITING_SUCCESS_CODE, responses));
     }

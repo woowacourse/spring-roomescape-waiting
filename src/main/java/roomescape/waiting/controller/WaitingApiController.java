@@ -4,7 +4,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static roomescape.waiting.controller.response.WaitingSuccessCode.WAITING_SUCCESS_CODE;
 
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,26 +16,24 @@ import roomescape.auth.web.resolver.Authenticated;
 import roomescape.global.response.ApiResponse;
 import roomescape.reservation.controller.request.ReserveByUserRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.waiting.service.WaitingService;
 
 @RestController
 @RequestMapping("/reservations/waiting")
+@RequiredArgsConstructor
 public class WaitingApiController {
 
     private final WaitingService waitingService;
-
-    @Autowired
-    public WaitingApiController(final WaitingService waitingService) {
-        this.waitingService = waitingService;
-    }
+    private final ReservationService reservationService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<ReservationResponse>> createWaiting(
-            @RequestBody @Valid final ReserveByUserRequest request,
-            @Authenticated final Long memberId
+            @RequestBody @Valid ReserveByUserRequest request,
+            @Authenticated Long memberId
     ) {
-        final ReservationResponse response = waitingService.waiting(
+        final ReservationResponse response = reservationService.waiting(
                 ReserveCommand.byUser(request, memberId)
         );
 
@@ -47,9 +45,9 @@ public class WaitingApiController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> cancelWaiting(
             @PathVariable Long id,
-            @Authenticated final Long memberId
+            @Authenticated Long memberId
     ) {
-        waitingService.deleteByUser(id, memberId);
+        waitingService.cancelWaiting(id, memberId);
 
         return ResponseEntity.noContent().build();
     }

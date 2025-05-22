@@ -5,8 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import roomescape.reservation.domain.Reservation;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.dto.WaitingWithRank;
+import roomescape.reservation.dto.ReservationWithRank;
 
 public record MyReservationResponse(Long id,
                                     String theme,
@@ -24,14 +23,14 @@ public record MyReservationResponse(Long id,
         );
     }
 
-    public static MyReservationResponse from(WaitingWithRank waitingWithRank) {
-        Waiting waiting = waitingWithRank.waiting();
+    public static MyReservationResponse from(ReservationWithRank reservationWithRank) {
+        Reservation waiting = reservationWithRank.waiting();
         return new MyReservationResponse(
                 waiting.getId(),
                 waiting.getTheme().getName(),
                 waiting.getDate(),
                 waiting.getStartAt(),
-                String.valueOf(waitingWithRank.rank())
+                String.valueOf(reservationWithRank.rank())
         );
     }
 

@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.List;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.waiting.domain.Waiting;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
 
@@ -23,16 +22,6 @@ public record ReservationResponse(
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme())
-        );
-    }
-
-    public static ReservationResponse from(Waiting waiting) {
-        return new ReservationResponse(
-                waiting.getId(),
-                MemberResponse.from(waiting.getReserver()),
-                waiting.getDate(),
-                ReservationTimeResponse.from(waiting.getReservationTime()),
-                ThemeResponse.from(waiting.getTheme())
         );
     }
 

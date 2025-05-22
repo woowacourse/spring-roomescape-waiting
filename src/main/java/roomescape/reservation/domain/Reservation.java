@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.sql.BatchUpdateException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
@@ -17,9 +16,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
+import roomescape.reservation.exception.InvalidStatusTransitionException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.waiting.domain.Waiting;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,10 +47,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation reserve(
-            final Member reserver,
-            final ReservationDateTime reservationDateTime,
-            final Theme theme
+    public static Reservation reserve(final Member reserver, final ReservationDateTime reservationDateTime,
+                                      final Theme theme
     ) {
         return Reservation.builder()
                 .reserver(reserver)
@@ -61,11 +58,14 @@ public class Reservation {
                 .build();
     }
 
-    public static Reservation from(Waiting waiting) {
+    public static Reservation waiting(final Member reserver, final ReservationDateTime reservationDateTime,
+                                      final Theme theme
+    ) {
         return Reservation.builder()
-                .reserver(waiting.getReserver())
-                .reservationDateTime(waiting.getReservationDateTime())
-                .theme(waiting.getTheme())
+                .reserver(reserver)
+                .reservationDateTime(reservationDateTime)
+                .theme(theme)
+                .status(ReservationStatus.WAITING)
                 .build();
     }
 
@@ -73,8 +73,36 @@ public class Reservation {
         return reserver.getId().equals(userId);
     }
 
+    public void reserved() {
+        if (status != ReservationStatus.WAITING) {
+            throw new InvalidStatusTransitionException("예약할 수 없는 상태입니다.");
+        }
+
+        status = ReservationStatus.RESERVED;
+    }
+
+    public void cancelReservation() {
+        if (status != ReservationStatus.RESERVED) {
+            throw new InvalidStatusTransitionException("예약이 되어 있지 않습니다.");
+        }
+
+        status = ReservationStatus.CANCELED_RESERVATION;
+    }
+
+    public void cancelWaiting() {
+        if (status != ReservationStatus.WAITING) {
+            throw new InvalidStatusTransitionException("대기 예약이 되어 있지 않습니다.");
+        }
+
+        status = ReservationStatus.CANCELED_WAITING;
+    }
+
     public String getReserverName() {
         return reserver.getName();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     public LocalDate getDate() {
