@@ -202,7 +202,7 @@ class ReserveTicketServiceTest {
     }
 
     @Test
-    void 동일한_유저는_중복된_예약_대기를_할_수_없음() {
+    void 동일한_유저는_중복된_예약_대기를_할_수_없다() {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
 
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
@@ -250,7 +250,7 @@ class ReserveTicketServiceTest {
     }
 
     @Test
-    void 유저는_예약이없어도_예약_대기를_할_수_있다() {
+    void 유저는_예약이_없으면_예약_대기를_할_수_없다() {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
@@ -259,5 +259,46 @@ class ReserveTicketServiceTest {
         assertThatThrownBy(() -> reserveTicketService.addWaitingReservation(
                 new AddReservationDto(reservationDate, timeId, themeId), memberId))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 예약이_삭제됐고_예약대기가_존재하면_그_예약대기가_예약이_된다() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        LocalDate reservationDate = LocalDate.now().plusDays(1L);
+
+        AddReservationDto addReservationDto = new AddReservationDto(reservationDate, timeId, themeId);
+        long reservationId = reserveTicketService.addReservation(addReservationDto, memberId);
+
+        long waitingReservationId = reserveTicketService.addWaitingReservation(
+                new AddReservationDto(reservationDate, timeId, themeId),
+                memberId);
+
+        reserveTicketService.deleteReservation(reservationId);
+        reserveTicketService.changeWaitingToReservation(waitingReservationId);
+
+        ReserveTicketWaiting reserveTicketWaiting = reserveTicketService.memberReservationWaitingTickets(memberId)
+                .getFirst();
+
+        assertThat(reserveTicketWaiting.getReservationStatus()).isEqualTo(ReservationStatus.RESERVATION);
+    }
+
+    @Test
+    void 예약이_존재하면_예약대기를_예약으로_만들_수_없다() {
+        long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
+        long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
+        long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
+        LocalDate reservationDate = LocalDate.now().plusDays(1L);
+
+        AddReservationDto addReservationDto = new AddReservationDto(reservationDate, timeId, themeId);
+        long reservationId = reserveTicketService.addReservation(addReservationDto, memberId);
+
+        long waitingReservationId = reserveTicketService.addWaitingReservation(
+                new AddReservationDto(reservationDate, timeId, themeId),
+                memberId);
+
+        assertThatThrownBy(() -> reserveTicketService.changeWaitingToReservation(waitingReservationId)).isInstanceOf(
+                IllegalArgumentException.class);
     }
 }
