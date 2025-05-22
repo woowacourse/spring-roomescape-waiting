@@ -133,7 +133,7 @@
   - [3단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/ce6b8eef9072409e89b91411b3ef144d4de0b48c)
 
 ### 4단계 - 예약 대기 관리
-- [ ] 예약 대기 관리 페이지 응답
+- [x] 어드민 예약 대기 관리 페이지 응답
   - `/admin/waiting` 요청 시 예약 대기 관리 페이지 응답
 - [ ] 어드민 예약 대기 목록 조회 기능
   - request
