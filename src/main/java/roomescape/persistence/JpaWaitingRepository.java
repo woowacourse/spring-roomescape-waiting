@@ -12,12 +12,12 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
         SELECT new roomescape.domain.WaitingWithRank(
-            w, (SELECT COUNT(wr)
+            w, (SELECT COUNT(wr) + 1
                 FROM Waiting wr
                 WHERE wr.theme = w.theme
                     AND wr.date = w.date
                     AND wr.time = w.time
-                    AND wr.id < w.id))
+                    AND wr.createdAt < w.createdAt))
         FROM Waiting w
         WHERE w.member.id = :memberId
     """)

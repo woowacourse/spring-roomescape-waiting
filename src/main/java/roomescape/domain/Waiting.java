@@ -1,11 +1,15 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Waiting {
 
     @Id
@@ -22,6 +26,9 @@ public class Waiting {
 
     @ManyToOne
     private Theme theme;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     protected Waiting() {
     }
@@ -56,6 +63,10 @@ public class Waiting {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override
