@@ -51,12 +51,9 @@ public class ReservationService {
     }
 
     private Reservation create(Long memberId, Long timeId, Long themeId, LocalDate date) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
-        ReservationTime time = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간 입니다."));
-        Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
+        Member member = getMemberById(memberId);
+        ReservationTime time = getReservationTimeById(timeId);
+        Theme theme = getThemeById(themeId);
 
         Reservation reservation = new Reservation(date, time, theme, member);
         validateDateTime(reservation);
@@ -73,8 +70,7 @@ public class ReservationService {
 
     public List<ReservationReadFilteredResponse> getFilteredReservations(ReservationReadFilteredRequest request) {
         List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
-                request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
-        );
+                request.themeId(), request.memberId(), request.dateFrom(), request.dateTo());
 
         return reservations.stream()
                 .map(ReservationReadFilteredResponse::from)
@@ -82,8 +78,7 @@ public class ReservationService {
     }
 
     public List<ReservationWaitingReadMemberResponse> getReservationsByMember(LoginMember loginMember) {
-        Member member = memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
+        Member member = getMemberById(loginMember.id());
 
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
@@ -111,6 +106,7 @@ public class ReservationService {
             Waiting waiting = waitingRepository.findFirstByDateAndThemeAndTime(
                     reservation.getDate(), reservation.getTheme(), reservation.getTime())
                     .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
+
             waitingRepository.delete(waiting);
 
             Reservation reservationByWaiting = new Reservation(
@@ -133,5 +129,20 @@ public class ReservationService {
         if (hasDuplicate) {
             throw new ConflictException("이미 예약이 존재합니다.");
         }
+    }
+
+    private Member getMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
+    }
+
+    private ReservationTime getReservationTimeById(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간 입니다."));
+    }
+
+    private Theme getThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
     }
 }

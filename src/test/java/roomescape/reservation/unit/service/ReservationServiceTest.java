@@ -177,7 +177,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(LocalDate.class), anyLong(), anyLong()))
+        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong()))
                 .thenReturn(true);
 
         var date = LocalDate.now().plusDays(1);
