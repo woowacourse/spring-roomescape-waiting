@@ -1,6 +1,8 @@
-package roomescape.user.controller;
+package roomescape.reservation.controller;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,18 +11,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.resolver.LoginMember;
+import roomescape.reservation.controller.request.ReservationRequest;
+import roomescape.reservation.controller.response.MemberReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
-import roomescape.user.controller.dto.ReservationRequest;
-import roomescape.user.controller.dto.response.MemberReservationResponse;
+import roomescape.reservation.service.WaitingService;
 
 @RestController
-public class UserReservationApiController {
+public class MemberReservationApiController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public UserReservationApiController(ReservationService reservationService) {
+    public MemberReservationApiController(ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping("/reservations")
@@ -39,7 +44,11 @@ public class UserReservationApiController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse) {
-        List<MemberReservationResponse> allByMemberId = reservationService.findAllByMemberId(memberResponse.id());
-        return ResponseEntity.ok().body(allByMemberId);
+        List<MemberReservationResponse> reservations = reservationService.findAllByMemberId(memberResponse.id());
+        List<MemberReservationResponse> waitings = waitingService.findAllByMemberId(memberResponse.id());
+        List<MemberReservationResponse> response = Stream.of(reservations, waitings)
+                .flatMap(Collection::stream)
+                .toList();
+        return ResponseEntity.ok().body(response);
     }
 }

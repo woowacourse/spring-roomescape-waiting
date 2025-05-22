@@ -36,6 +36,10 @@ public class Member {
         this(null, name, email, password, role);
     }
 
+    public Member(Long id, Name name, Email email, Role role) {
+        this(id, name, email, null, role);
+    }
+
     public String getName() {
         return name.getName();
     }
