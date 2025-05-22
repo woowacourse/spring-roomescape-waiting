@@ -2,6 +2,7 @@ package roomescape.service.reserveticket;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Reserver;
@@ -52,13 +53,11 @@ public class ReserveTicketService {
     }
 
     public List<ReserveTicketWaiting> memberReservationWaitingTickets(Long memberId) {
-        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByReserverId(memberId);
-
-        return reserveTickets.stream()
-                .map((reserveTicket -> new ReserveTicketWaiting(reserveTicket.getId(), reserveTicket.getName(),
-                        reserveTicket.getDate(),
-                        reserveTicket.getStartAt(), reserveTicket.getReservationStatus(), 1,
-                        reserveTicket.getThemeName())))
+        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAll();
+        ReservationTicketWaitings reservationTicketWaitings = new ReservationTicketWaitings(reserveTickets);
+        return reservationTicketWaitings.reserveTicketWaitings()
+                .stream()
+                .filter(reserveTicketWaiting -> reserveTicketWaiting.isSameMember(memberId))
                 .toList();
     }
 
@@ -81,7 +80,7 @@ public class ReserveTicketService {
                 .map((reserveTicket -> new ReserveTicketWaiting(reserveTicket.getId(), reserveTicket.getName(),
                         reserveTicket.getDate(),
                         reserveTicket.getStartAt(), reserveTicket.getReservationStatus(), 1,
-                        reserveTicket.getThemeName())))
+                        reserveTicket.getThemeName(), reserveTicket.getMemberId())))
                 .toList();
     }
 
@@ -90,8 +89,15 @@ public class ReserveTicketService {
         long reservationId = reservationService.addReservation(addReservationDto, new NonDuplicateCheckStrategy(),
                 ReservationStatus.PREPARE);
 
-        validateIsReservationDoesntExist(addReservationDto, reserverId);
-        validateIsSameWaitingExist(addReservationDto, reserverId);
+        validateIsReservationDoesntExist(
+                addReservationDto.themeId(),
+                addReservationDto.date(),
+                addReservationDto.timeId());
+        validateIsSameWaitingExist(
+                addReservationDto.themeId(),
+                addReservationDto.date(),
+                addReservationDto.timeId(),
+                reserverId);
 
         Reservation reservation = reservationService.getReservationById(reservationId);
         Reserver reserver = memberService.getMemberById(reserverId);
@@ -99,21 +105,47 @@ public class ReserveTicketService {
         return reserveTicketRepository.save(reserveTicket).getId();
     }
 
-    private void validateIsReservationDoesntExist(AddReservationDto addReservationDto, Long reserverId) {
-        boolean isExistBySameReservation = reserveTicketRepository.existsBySameReservation(addReservationDto.themeId(),
-                addReservationDto.date(),
-                addReservationDto.timeId(), reserverId, ReservationStatus.RESERVATION);
+    private void validateIsReservationDoesntExist(Long themeId, LocalDate date, Long timeId) {
+        List<ReserveTicket> reserveTicket = reserveTicketRepository.findAllBySameReservation(themeId, date, timeId,
+                ReservationStatus.RESERVATION);
 
-        if (!isExistBySameReservation) {
+        if (reserveTicket.isEmpty()) {
             throw new InvalidReservationException("예약이 존재하지 않습니다");
         }
     }
 
-    private void validateIsSameWaitingExist(AddReservationDto addReservationDto, Long reserverId) {
-        if (reserveTicketRepository.existsBySameReservation(addReservationDto.themeId(),
-                addReservationDto.date(),
-                addReservationDto.timeId(), reserverId, ReservationStatus.PREPARE)) {
+    private void validateIsSameWaitingExist(Long themeId, LocalDate date, Long timeId, Long reserverId) {
+        List<ReserveTicket> reserveTicket = reserveTicketRepository.findAllBySameReservation(themeId, date, timeId,
+                ReservationStatus.PREPARE);
+
+        if (reserveTicket.isEmpty()) {
+            return;
+        }
+
+        Optional<ReserveTicket> existReserveTicket = reserveTicket.stream()
+                .filter((currentReserveTicket) -> currentReserveTicket.getMemberId() == reserverId)
+                .findAny();
+
+        if (existReserveTicket.isPresent()) {
             throw new InvalidReservationException("중복된 대기 요청입니다.");
         }
+    }
+
+    @Transactional
+    public void changeWaitingToReservation(Long id) {
+        ReserveTicket reserveTicket = getReservationTicketById(id);
+        Reservation reservation = reserveTicket.getReservation();
+
+        List<ReserveTicket> reservationTicket = reserveTicketRepository.findAllBySameReservation(
+                reservation.getTheme().getId(), reservation.getDate(),
+                reservation.getReservationTime().getId(), ReservationStatus.RESERVATION);
+        if (!reservationTicket.isEmpty()) {
+            throw new InvalidReservationException("예약이 존재하기 때문에 예약대기를 예약으로 변경할 수 없습니다.");
+        }
+        reservation.waitingToReservation();
+    }
+
+    private ReserveTicket getReservationTicketById(Long id) {
+        return reserveTicketRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("예약 티켓을 찾을 수 없습니다"));
     }
 }

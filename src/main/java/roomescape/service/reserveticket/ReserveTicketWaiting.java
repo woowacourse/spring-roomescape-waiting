@@ -13,10 +13,10 @@ public class ReserveTicketWaiting {
     private final ReservationStatus reservationStatus;
     private final int waitNumber;
     private final String themeName;
+    private final Long memberId;
 
     public ReserveTicketWaiting(Long id, String name, LocalDate date, LocalTime startAt,
-                                ReservationStatus reservationStatus,
-                                int waitNumber, String themeName) {
+                                ReservationStatus reservationStatus, int waitNumber, String themeName, Long memberId) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -24,6 +24,7 @@ public class ReserveTicketWaiting {
         this.reservationStatus = reservationStatus;
         this.waitNumber = waitNumber;
         this.themeName = themeName;
+        this.memberId = memberId;
     }
 
     public Long getId() {
@@ -52,5 +53,9 @@ public class ReserveTicketWaiting {
 
     public String getThemeName() {
         return themeName;
+    }
+
+    public boolean isSameMember(Long memberId) {
+        return this.memberId == memberId;
     }
 }

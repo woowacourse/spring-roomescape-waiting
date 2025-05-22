@@ -46,8 +46,8 @@ public class ReservationTicketWaitings {
             ReserveTicket reserveTicket = reserveTickets.get(ticketRank - 1);
             reserveTicketWaitings.add(
                     new ReserveTicketWaiting(reserveTicket.getId(), reserveTicket.getName(), reservation.getDate(),
-                            reservation.getStartAt(),
-                            reservation.getReservationStatus(), ticketRank, reservation.getThemeName()));
+                            reservation.getStartAt(), reservation.getReservationStatus(), ticketRank,
+                            reservation.getThemeName(), reserveTicket.getMemberId()));
         }
         return reserveTicketWaitings;
     }
