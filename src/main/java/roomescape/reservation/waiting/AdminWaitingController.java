@@ -24,7 +24,7 @@ public class AdminWaitingController {
     public ResponseEntity<Void> deleteById(
             @PathVariable("id") final Long id
     ) {
-        waitingService.deleteById(id);
+        waitingService.deleteByIdForAdmin(id);
         return ResponseEntity.noContent().build();
     }
 }

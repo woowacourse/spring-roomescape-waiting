@@ -6,6 +6,7 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
+import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
@@ -30,7 +31,7 @@ public class ReservationService {
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
         final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
         if (schedule.isPast()) {
-            throw new ReservationPastDateException();
+            throw new PastScheduleException();
         }
         final Member member = getMemberByEmail(loginMember.email());
         return getReservationResponse(schedule, member);
@@ -39,7 +40,7 @@ public class ReservationService {
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
         final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
         if (schedule.isPast()) {
-            throw new ReservationPastDateException();
+            throw new PastScheduleException();
         }
         final Member member = getMemberById(request.memberId());
         return getReservationResponse(schedule, member);
