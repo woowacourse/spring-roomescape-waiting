@@ -40,6 +40,7 @@ public class JwtTokenHandler implements AuthenticationTokenHandler {
         return authenticationInfo.id();
     }
 
+    @Override
     public AuthenticationInfo extractAuthenticationInfo(final String token) {
         var payload = Jwts.parser()
                 .verifyWith(SECRET_KEY)
@@ -52,6 +53,7 @@ public class JwtTokenHandler implements AuthenticationTokenHandler {
         return new AuthenticationInfo(id, role);
     }
 
+    @Override
     public boolean isValidToken(final String token) {
         try {
             var claims = Jwts.parser().verifyWith(SECRET_KEY).build().parseSignedClaims(token);
