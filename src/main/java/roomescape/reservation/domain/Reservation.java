@@ -2,6 +2,8 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,25 +35,34 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    @Enumerated(value = EnumType.STRING)
+    private ReservationStatus status;
+
+    private LocalDateTime createdAt;
+
     protected Reservation() {
     }
 
     private Reservation(final Long id, final Member member, final LocalDate date,
-                        final ReservationTime time, final Theme theme
+                        final ReservationTime time, final Theme theme, final ReservationStatus status,
+                        final LocalDateTime createdAt
     ) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.status = status;
+        this.createdAt = createdAt;
     }
 
     public static Reservation createWithoutId(final LocalDateTime now, final Member member,
                                               final LocalDate reservationDate,
-                                              final ReservationTime time, final Theme theme
+                                              final ReservationTime time, final Theme theme,
+                                              final ReservationStatus status
     ) {
         validateReservationDateTime(now, reservationDate, time);
-        return new Reservation(null, member, reservationDate, time, theme);
+        return new Reservation(null, member, reservationDate, time, theme, status, now);
     }
 
     private static void validateReservationDateTime(final LocalDateTime now, final LocalDate reservationDate,
@@ -68,13 +79,19 @@ public class Reservation {
     }
 
     public static Reservation createWithId(final Long id, final Member member, final LocalDate date,
-                                           final ReservationTime time, final Theme theme
+                                           final ReservationTime time, final Theme theme,
+                                           final ReservationStatus status,
+                                           final LocalDateTime createdAt
     ) {
-        return new Reservation(Objects.requireNonNull(id), member, date, time, theme);
+        return new Reservation(Objects.requireNonNull(id), member, date, time, theme, status, createdAt);
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 
     public Reservation assignId(final Long id) {
-        return new Reservation(Objects.requireNonNull(id), member, date, time, theme);
+        return new Reservation(Objects.requireNonNull(id), member, date, time, theme, status, createdAt);
     }
 
     public boolean isSameTime(final ReservationTime time) {
@@ -131,6 +148,10 @@ public class Reservation {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public String status() {
+        return status.getStatus();
     }
 
     @Override

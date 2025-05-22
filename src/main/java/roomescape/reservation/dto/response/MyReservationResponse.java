@@ -17,7 +17,7 @@ public record MyReservationResponse(
                 reservation.themeName(),
                 reservation.getDate(),
                 reservation.reservationTime(),
-                "예약"
+                reservation.status()
         );
     }
 }
