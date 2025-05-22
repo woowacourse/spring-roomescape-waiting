@@ -49,4 +49,58 @@ public class AdminWaitingControllerTest {
                 .statusCode(200)
                 .body("size()", is(1));
     }
+
+    @Test
+    @DisplayName("대기 승인 테스트")
+    void acceptWaitingTest() {
+        // given
+        final Map<String, String> adminCookies = memberFixture.loginAdmin();
+        final Map<String, String> userCookies = memberFixture.loginUser();
+        reservationFixture.createReservationTime(LocalTime.of(10, 30), adminCookies);
+
+        reservationFixture.createTheme(
+                "레벨2 탈출",
+                "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
+                adminCookies
+        );
+
+        reservationFixture.createReservation(LocalDate.of(2025, 8, 5), 1L, 1L, adminCookies);
+        reservationFixture.createWaiting(LocalDate.of(2025, 8, 5), 1L, 1L, userCookies);
+
+        // when
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(adminCookies)
+                .when().delete("/admin/reservations/waiting/accept/1")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    @DisplayName("대기 거절 테스트")
+    void rejectWaitingTest() {
+        // given
+        final Map<String, String> adminCookies = memberFixture.loginAdmin();
+        final Map<String, String> userCookies = memberFixture.loginUser();
+        reservationFixture.createReservationTime(LocalTime.of(10, 30), adminCookies);
+
+        reservationFixture.createTheme(
+                "레벨2 탈출",
+                "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg",
+                adminCookies
+        );
+
+        reservationFixture.createReservation(LocalDate.of(2025, 8, 5), 1L, 1L, adminCookies);
+        reservationFixture.createWaiting(LocalDate.of(2025, 8, 5), 1L, 1L, userCookies);
+
+        // when
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(adminCookies)
+                .when().delete("/admin/reservations/waiting/reject/1")
+                .then().log().all()
+                .statusCode(204);
+    }
 }
