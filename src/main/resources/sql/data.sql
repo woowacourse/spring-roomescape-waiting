@@ -59,3 +59,5 @@ INSERT INTO reservation (date, time_id, theme_id, member_id)
 VALUES ('2025-05-16', 2, 5, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
 VALUES ('2025-05-23', 2, 5, 2);
+INSERT INTO waiting (date, time_id, theme_id, member_id)
+VALUES ('2025-05-23', 2, 5, 1);
