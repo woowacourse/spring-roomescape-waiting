@@ -2,11 +2,13 @@ package roomescape.infrastructure;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.application.auth.AuthService;
 import roomescape.application.auth.dto.MemberIdDto;
 
+@Component
 public class CheckAdminRoleInterceptor implements HandlerInterceptor {
 
     private final AuthenticatedMemberIdExtractor authenticatedMemberIdExtractor;
