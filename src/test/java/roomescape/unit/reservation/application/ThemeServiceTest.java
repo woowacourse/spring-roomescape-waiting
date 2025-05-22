@@ -100,7 +100,7 @@ class ThemeServiceTest {
         final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");
         final Theme savedTheme = fakeThemeRepository.save(request.convertToTheme());
         fakeReservationRepository.save(
-                new Reservation(null, member, LocalDate.now().plusDays(1), saveTime, savedTheme));
+                new Reservation(null, LocalDate.now().plusDays(1), member, saveTime, savedTheme));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(savedTheme.id()))

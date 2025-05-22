@@ -10,6 +10,6 @@ public record ReservationCreateCommand(LocalDate date, long memberId, Long timeI
 
     public Reservation convertToReservation(final Member member, final ReservationTime reservationTime,
                                             final Theme theme) {
-        return new Reservation(null, member, date, reservationTime, theme);
+        return new Reservation(null, date, member, reservationTime, theme);
     }
 }

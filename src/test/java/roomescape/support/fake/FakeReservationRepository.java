@@ -33,8 +33,7 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation reservation) {
-        final Reservation newReservation = new Reservation(index++, reservation.member(), reservation.date(),
-                reservation.time(), reservation.theme());
+        final Reservation newReservation = new Reservation(index++, reservation.date(), reservation.member(), reservation.time(), reservation.theme());
         reservations.add(newReservation);
         return newReservation;
     }

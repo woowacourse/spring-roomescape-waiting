@@ -96,7 +96,7 @@ class ReservationTimeServiceTest {
         final ReservationTime time = new ReservationTime(response.id(), response.startAt());
         final Theme theme = new Theme(1L, "테마", "설명", "썸네일.png");
         final Member member = new Member(null, "리버", "river@email.com", "riverpw", MemberRole.ADMIN);
-        reservationRepository.save(new Reservation(null, member, LocalDate.now().plusDays(1), time, theme));
+        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), member, time, theme));
         // when
         // then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(response.id()))
@@ -113,7 +113,7 @@ class ReservationTimeServiceTest {
         final Theme theme = new Theme(1L, "테마", "설명", "썸네일.png");
         final Member member = new Member(null, "리버", "river@email.com", "riverpw", MemberRole.ADMIN);
         final LocalDate date = LocalDate.of(2025, 5, 1);
-        reservationRepository.save(new Reservation(1L, member, date, savedTime1, theme));
+        reservationRepository.save(new Reservation(1L, date, member, savedTime1, theme));
         // when
         final List<ReservationTimeAvailabilityInfo> result = reservationTimeService.findAvailableTimes(date, theme.id());
         // then

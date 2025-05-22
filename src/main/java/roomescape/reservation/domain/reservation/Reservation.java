@@ -30,10 +30,10 @@ public class Reservation {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private LocalDate date;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-
-    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
@@ -41,17 +41,17 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
+    public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime time,
                        final Theme theme) {
-        validate(member, date, time, theme);
+        validate(date, member, time, theme);
         this.id = id;
-        this.member = member;
         this.date = date;
+        this.member = member;
         this.time = time;
         this.theme = theme;
     }
 
-    private void validate(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+    private void validate(final LocalDate date, final Member member, final ReservationTime time, final Theme theme) {
         ValidationUtils.validateNonNull(member, "예약 멤버는 필수입니다.");
         ValidationUtils.validateNonNull(date, "예약 날짜는 필수입니다.");
         ValidationUtils.validateNonNull(time, "예약 시간은 필수입니다.");
