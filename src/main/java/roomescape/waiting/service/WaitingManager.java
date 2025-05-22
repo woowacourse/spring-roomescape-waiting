@@ -3,6 +3,7 @@ package roomescape.waiting.service;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.domain.ReservationDate;
@@ -27,6 +28,7 @@ public class WaitingManager {
     private final ReservationQueryService reservationQueryService;
     private final WaitingRepository waitingRepository;
 
+    @Transactional
     public Waiting findAndDelete(LocalDate date, Long timeId) {
         if (!waitingRepository.existsByDateAndTimeId(date, timeId)) {
             return null;

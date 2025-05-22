@@ -12,27 +12,27 @@ import roomescape.waiting.dto.WaitingWithRank;
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
-                    select new roomescape.waiting.controller.response.WaitingInfoResponse(
-                        w.id,
-                        w.reserver.name,
-                        w.theme.name,
-                        w.reservationDatetime.reservationDate.date,
-                        w.reservationDatetime.reservationTime.startAt
-                    )
-                    from Waiting w
+            select new roomescape.waiting.controller.response.WaitingInfoResponse(
+                w.id,
+                w.reserver.name,
+                w.theme.name,
+                w.reservationDateTime.reservationDate.date,
+                w.reservationDateTime.reservationTime.startAt
+            )
+            from Waiting w
             """)
     List<WaitingInfoResponse> getAll();
 
     @Query("""
-            select new roomescape.waiting.dto.WaitingWithRank(
+             select new roomescape.waiting.dto.WaitingWithRank(
                 w,
                 count(w2)
             )
             from Waiting w
-            join ReservationTime rt on rt = w.reservationDatetime.reservationTime
+            join ReservationTime rt on rt = w.reservationDateTime.reservationTime
             join Waiting w2 on
-                w2.reservationDatetime.reservationTime = rt
-                and w2.reservationDatetime.reservationDate.date = w.reservationDatetime.reservationDate.date
+                w2.reservationDateTime.reservationTime = rt
+                and w2.reservationDateTime.reservationDate.date = w.reservationDateTime.reservationDate.date
                 and w2.id <= w.id
             where w.reserver.id = :memberId
             group by w
@@ -41,11 +41,11 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
 
     @Query("""
-            select exists
-            (select w from Waiting w
+            select exists(
+                select w from Waiting w
                 where w.reserver.id = :memberId
-                and w.reservationDatetime.reservationDate.date = :date
-                and w.reservationDatetime.reservationTime.id = :timeId
+                and w.reservationDateTime.reservationDate.date = :date
+                and w.reservationDateTime.reservationTime.id = :timeId
             )
             """)
     boolean existsByMemberIdAndDateAndTimeId(@Param("memberId") Long memberId,
@@ -55,9 +55,9 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
             select exists(
-            select w from Waiting w
-            where w.reservationDatetime.reservationDate.date = :date
-            and w.reservationDatetime.reservationTime.id = :timeId
+                select w from Waiting w
+                where w.reservationDateTime.reservationDate.date = :date
+                and w.reservationDateTime.reservationTime.id = :timeId
             )
             """)
     boolean existsByDateAndTimeId(@Param("date") LocalDate date, @Param("timeId") Long timeId);
@@ -73,11 +73,11 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     boolean existsByIdAndMemberId(@Param("id") Long id, @Param("memberId") Long memberId);
 
     @Query("""
-                select w
-                from Waiting w
-                join fetch w.reserver
-                where w.reservationDatetime.reservationDate.date = :date
-                  and w.reservationDatetime.reservationTime.id = :timeId
+            select w
+            from Waiting w
+            join fetch w.reserver
+            where w.reservationDateTime.reservationDate.date = :date
+              and w.reservationDateTime.reservationTime.id = :timeId
                 order by w.id asc
             """)
     List<Waiting> findByDateAndTimeId(

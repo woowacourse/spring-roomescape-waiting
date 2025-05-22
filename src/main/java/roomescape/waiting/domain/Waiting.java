@@ -32,7 +32,7 @@ public class Waiting {
     @JoinColumn(name = "member_id")
     private Member reserver;
     @Embedded
-    private ReservationDateTime reservationDatetime;
+    private ReservationDateTime reservationDateTime;
     @ManyToOne
     @JoinColumn(name = "theme_id")
     private Theme theme;
@@ -40,7 +40,7 @@ public class Waiting {
     @Builder
     public Waiting(Member reserver, ReservationDateTime reservationDateTime, Theme theme) {
         this.reserver = reserver;
-        this.reservationDatetime = reservationDateTime;
+        this.reservationDateTime = reservationDateTime;
         this.theme = theme;
     }
 
@@ -49,14 +49,14 @@ public class Waiting {
     }
 
     public LocalDate getDate() {
-        return reservationDatetime.getDate();
+        return reservationDateTime.getDate();
     }
 
     public ReservationTime getReservationTime() {
-        return reservationDatetime.getReservationTime();
+        return reservationDateTime.getReservationTime();
     }
 
     public LocalTime getStartAt() {
-        return reservationDatetime.getStartAt();
+        return reservationDateTime.getStartAt();
     }
 }

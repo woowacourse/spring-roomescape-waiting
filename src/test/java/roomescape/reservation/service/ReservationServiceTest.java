@@ -209,8 +209,8 @@ class ReservationServiceTest {
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations)
                 .anyMatch(r -> r.getReserver().getId().equals(유저2.getId())
-                        && r.getReservationDatetime().getTimeId().equals(내일_열시.getTimeId())
-                        && r.getReservationDatetime().getDate().equals(내일_열시.getDate())
+                        && r.getTimeId().equals(내일_열시.getTimeId())
+                        && r.getDate().equals(내일_열시.getDate())
                         && r.getTheme().getId().equals(공포.getId()));
     }
 

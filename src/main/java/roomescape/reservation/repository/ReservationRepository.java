@@ -14,7 +14,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select exists
                 (select r from Reservation r
-                where r.reservationDatetime.reservationDate.date = :date and r.reservationDatetime.reservationTime.id = :timeId)
+                where r.reservationDateTime.reservationDate.date = :date and r.reservationDateTime.reservationTime.id = :timeId)
             """)
     boolean existsByDateAndTimeId(@Param(value = "date") LocalDate date, @Param(value = "timeId") Long timeId);
 
@@ -22,8 +22,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             select exists
             (select r from Reservation r
                 where r.reserver.id = :memberId
-                and r.reservationDatetime.reservationDate.date = :date
-                and r.reservationDatetime.reservationTime.id = :timeId
+                and r.reservationDateTime.reservationDate.date = :date
+                and r.reservationDateTime.reservationTime.id = :timeId
             )
             """)
     boolean existsByMemberIdAndDateAndTimeId(
@@ -35,7 +35,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
              select exists
                 (select r from Reservation r
-                where r.reservationDatetime.reservationTime.id = :timeId)
+                where r.reservationDateTime.reservationTime.id = :timeId)
             """)
     boolean existsByTimeId(@Param(value = "timeId") Long timeId);
 
@@ -51,7 +51,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select count(*) from Reservation r
             where r.theme.id = :themeId
-            and r.reservationDatetime.reservationDate.date between :from and :to
+            and r.reservationDateTime.reservationDate.date between :from and :to
             """)
     long countReservationByThemeIdAndDuration(
             @Param("from") LocalDate from,
@@ -60,22 +60,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("""
-            select r.reservationDatetime.reservationTime.id
+            select r.reservationDateTime.reservationTime.id
             from Reservation r
-            where r.reservationDatetime.reservationDate.date = :date and r.theme.id = :themeId
+            where r.reservationDateTime.reservationDate.date = :date and r.theme.id = :themeId
             """)
     List<Long> findReservedTimeIdsByDateAndTheme(@Param(value = "date") LocalDate date,
                                                  @Param(value = "themeId") Long themeId);
 
     @Query("""
                 select r from Reservation r
-                join fetch r.reservationDatetime.reservationTime t
+                join fetch r.reservationDateTime.reservationTime t
                 join fetch r.theme th
                 join fetch r.reserver m
                 where (:themeId is null or r.theme.id = :themeId)
                   and (:memberId is null or r.reserver.id = :memberId)
-                  and (:fromDate is null or r.reservationDatetime.reservationDate.date >= :fromDate)
-                  and (:toDate is null or r.reservationDatetime.reservationDate.date <= :toDate)
+                  and (:fromDate is null or r.reservationDateTime.reservationDate.date >= :fromDate)
+                  and (:toDate is null or r.reservationDateTime.reservationDate.date <= :toDate)
             """)
     List<Reservation> findFilteredReservations(
             @Param("themeId") Long themeId,
@@ -88,7 +88,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             select r
             from Reservation r
             join fetch r.reserver
-            join fetch r.reservationDatetime.reservationTime
+            join fetch r.reservationDateTime.reservationTime
             join fetch r.theme
             where r.reserver.id = :memberId
             """)

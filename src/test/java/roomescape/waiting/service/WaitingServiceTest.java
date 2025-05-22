@@ -99,7 +99,6 @@ class WaitingServiceTest {
     void 예약이_존재하지_않는다면_대기를_할_수_없다() {
         // given
         Member 유저1 = memberDbFixture.유저1_생성();
-        Member 유저2 = memberDbFixture.유저2_생성();
         Theme 공포 = themeDbFixture.공포();
         ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
 

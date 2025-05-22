@@ -234,8 +234,8 @@ class WaitingRepositoryTest {
         // then
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(firstWaiting).isNotNull();
-            softly.assertThat(firstWaiting.getReservationDatetime().getDate()).isEqualTo(date);
-            softly.assertThat(firstWaiting.getReservationDatetime().getTimeId()).isEqualTo(timeId);
+            softly.assertThat(firstWaiting.getDate()).isEqualTo(date);
+            softly.assertThat(firstWaiting.getReservationTime().getId()).isEqualTo(timeId);
             softly.assertThat(firstWaiting.getId()).isEqualTo(waiting1.getId());
         });
     }

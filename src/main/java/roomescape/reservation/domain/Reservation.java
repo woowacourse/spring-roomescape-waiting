@@ -2,11 +2,14 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.sql.BatchUpdateException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AccessLevel;
@@ -29,20 +32,20 @@ public class Reservation {
     @JoinColumn(name = "member_id")
     private Member reserver;
     @Embedded
-    private ReservationDateTime reservationDatetime;
+    private ReservationDateTime reservationDateTime;
     @ManyToOne
     @JoinColumn(name = "theme_id")
     private Theme theme;
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
 
     @Builder
-    private Reservation(
-            final Member reserver,
-            final ReservationDateTime reservationDateTime,
-            final Theme theme
-    ) {
+    public Reservation(Member reserver, ReservationDateTime reservationDateTime, Theme theme,
+                       ReservationStatus status) {
         this.reserver = reserver;
-        this.reservationDatetime = reservationDateTime;
+        this.reservationDateTime = reservationDateTime;
         this.theme = theme;
+        this.status = status;
     }
 
     public static Reservation reserve(
@@ -54,13 +57,14 @@ public class Reservation {
                 .reserver(reserver)
                 .reservationDateTime(reservationDateTime)
                 .theme(theme)
+                .status(ReservationStatus.RESERVED)
                 .build();
     }
 
     public static Reservation from(Waiting waiting) {
         return Reservation.builder()
                 .reserver(waiting.getReserver())
-                .reservationDateTime(waiting.getReservationDatetime())
+                .reservationDateTime(waiting.getReservationDateTime())
                 .theme(waiting.getTheme())
                 .build();
     }
@@ -74,18 +78,18 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return reservationDatetime.getDate();
+        return reservationDateTime.getDate();
     }
 
     public LocalTime getStartAt() {
-        return reservationDatetime.getStartAt();
+        return reservationDateTime.getStartAt();
     }
 
     public ReservationTime getReservationTime() {
-        return reservationDatetime.getReservationTime();
+        return reservationDateTime.getReservationTime();
     }
 
     public Long getTimeId() {
-        return reservationDatetime.getTimeId();
+        return reservationDateTime.getTimeId();
     }
 }
