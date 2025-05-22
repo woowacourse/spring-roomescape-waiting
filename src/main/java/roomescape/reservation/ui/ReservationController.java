@@ -14,6 +14,7 @@ import roomescape.auth.session.Session;
 import roomescape.auth.session.annotation.UserSession;
 import roomescape.common.uri.UriFactory;
 import roomescape.reservation.application.ReservationFacade;
+import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
@@ -28,6 +29,7 @@ import java.util.List;
 public class ReservationController {
 
     public static final String BASE_PATH = "/reservations";
+    private static final String WAITING_PATH = BASE_PATH + "/waiting";
 
     private final ReservationFacade reservationFacade;
 
@@ -64,16 +66,24 @@ public class ReservationController {
 
     @GetMapping("/waiting")
     public ResponseEntity<Void> getWaiting() {
-        return null;
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<Void> createWaiting() {
-        return null;
+    public ResponseEntity<WaitingReservationResponse> addWaiting(
+            @RequestBody final CreateReservationWebRequest request,
+            @UserSession final Session session
+    ) {
+        final WaitingReservationResponse reservationResponse = reservationFacade.addWaiting(
+                request.toRequestWithUserId(session.userId())
+        );
+        final URI location = UriFactory.buildPath(WAITING_PATH, String.valueOf(reservationResponse.waitingReservationId()));
+        return ResponseEntity.created(location)
+                .body(reservationResponse);
     }
 
     @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable final Long id) {
-        return null;
+        return ResponseEntity.noContent().build();
     }
 }

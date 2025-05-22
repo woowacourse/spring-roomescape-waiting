@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
+import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
@@ -80,5 +82,15 @@ public class ReservationFacadeImpl implements ReservationFacade {
     @Override
     public void delete(final Long id) {
         reservationCommandService.delete(id);
+    }
+
+    @Override
+    public WaitingReservationResponse addWaiting(final CreateReservationWithUserIdWebRequest request) {
+        final User user = userQueryService.getById(request.userId());
+
+        final WaitingReservation waitingReservation = reservationCommandService.createWaitingReservation(
+                request.toServiceRequest());
+
+        return WaitingReservationResponse.from(waitingReservation, user);
     }
 }

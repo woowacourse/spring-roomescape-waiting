@@ -9,7 +9,10 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
 import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.WaitingReservation;
+import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 import roomescape.time.application.service.ReservationTimeQueryService;
@@ -21,6 +24,7 @@ import roomescape.time.domain.ReservationTime;
 public class ReservationCommandServiceImpl implements ReservationCommandService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingReservationRepository waitingReservationRepository;
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
@@ -28,11 +32,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
 
     @Override
     public Reservation create(final CreateReservationServiceRequest request) {
-        if (reservationQueryService.existsByParams(
-                request.date(),
-                request.timeId(),
-                request.themeId())
-        ) {
+        if (isExistsByParams(request.date(), request.timeId(), request.themeId())) {
             throw new DuplicateException(
                     DomainTerm.RESERVATION,
                     request.date(),
@@ -40,13 +40,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
                     request.themeId());
         }
 
-        final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());
-
-        final Theme theme = themeQueryService.get(request.themeId());
-
-        final Reservation reservation = request.toDomain(reservationTime, theme);
-        reservation.validatePast(timeProvider.now());
-
+        Reservation reservation = createReservation(request);
         return reservationRepository.save(reservation);
     }
 
@@ -58,5 +52,46 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
         }
 
         throw new NotFoundException(DomainTerm.RESERVATION, id);
+    }
+
+    @Override
+    public WaitingReservation createWaitingReservation(final CreateReservationServiceRequest request) {
+        final Reservation reservation = reservationRepository.findByParams(
+                request.date(), request.timeId(), request.themeId()).orElseThrow(
+                () -> new NotFoundException(DomainTerm.RESERVATION,
+                        request.date(),
+                        DomainTerm.THEME_ID,
+                        DomainTerm.RESERVATION_TIME_ID)
+        );
+        System.out.println(DomainTerm.THEME_ID.getClass().getSimpleName());
+
+        final Integer currentMaxOrder = waitingReservationRepository
+                .findMaxWaitingOrderByReservationId(reservation.getId());
+        final int nextOrder = (currentMaxOrder != null) ? currentMaxOrder + 1 : 1;
+
+        final WaitingReservation waitingReservation = reservation
+                .addWaitingReservation(request.userId(), nextOrder);
+
+        return waitingReservationRepository.save(waitingReservation);
+    }
+
+    private Reservation createReservation(final CreateReservationServiceRequest request) {
+        final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());
+
+        final Theme theme = themeQueryService.get(request.themeId());
+
+        final Reservation reservation = request.toDomain(reservationTime, theme);
+        reservation.validatePast(timeProvider.now());
+        return reservation;
+    }
+
+    private boolean isExistsByParams(final ReservationDate date,
+                                     final Long timeId,
+                                     final Long themeId) {
+        return reservationQueryService.existsByParams(
+                date,
+                timeId,
+                themeId
+        );
     }
 }

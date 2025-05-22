@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
@@ -21,4 +22,6 @@ public interface ReservationFacade {
     ReservationResponse create(CreateReservationWithUserIdWebRequest request);
 
     void delete(Long id);
+
+    WaitingReservationResponse addWaiting(CreateReservationWithUserIdWebRequest request);
 }
