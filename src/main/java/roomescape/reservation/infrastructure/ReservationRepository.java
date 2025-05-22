@@ -3,6 +3,7 @@ package roomescape.reservation.infrastructure;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
@@ -26,9 +27,17 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
 
     List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
 
-    List<Reservation> findByTimeSlotId(Long reservationTimeId);
-
+    @Query("""
+                SELECT r
+                FROM Reservation r
+                JOIN FETCH r.member
+                JOIN FETCH r.theme
+                JOIN FETCH r.timeSlot
+                WHERE r.member.id = :memberId
+            """)
     List<Reservation> findByMemberId(Long memberId);
+
+    List<Reservation> findByTimeSlotId(Long reservationTimeId);
 
     boolean existsByDateAndMemberAndThemeAndTimeSlot(LocalDate date, Member member, Theme theme, TimeSlot timeSlot);
 
