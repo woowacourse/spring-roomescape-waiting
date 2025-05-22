@@ -30,7 +30,7 @@ public class WaitingController {
 
     @DeleteMapping("/{waitingId}")
     public ResponseEntity<Void> deleteWaiting(@LoginMember LoginMemberInfo loginMemberInfo, @PathVariable Long waitingId) {
-        waitingService.delete(loginMemberInfo.id(), waitingId); //TODO: Service로 넘기는 포맷 고민. memberId와 waitingId를 그대로 넘기기 or DTO
+        waitingService.deleteByMemberIdAndWaitingId(loginMemberInfo.id(), waitingId); //TODO: Service로 넘기는 포맷 고민. memberId와 waitingId를 그대로 넘기기 or DTO
         return ResponseEntity.noContent().build();
     }
 

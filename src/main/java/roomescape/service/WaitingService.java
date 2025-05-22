@@ -63,7 +63,7 @@ public class WaitingService {
         return WaitingResult.from(waiting);
     }
 
-    public void delete(Long memberId, Long waitingId) {
+    public void deleteByMemberIdAndWaitingId(Long memberId, Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(
                 () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
         if(!Objects.equals(waiting.getMember().getId(), memberId)) { //TODO: 한번에 쿼리로 할지 고민, 내부에 물어볼지 고민
