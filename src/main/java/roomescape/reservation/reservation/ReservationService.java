@@ -29,14 +29,19 @@ public class ReservationService {
 
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
         final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
+        if (schedule.isPast()) {
+            throw new ReservationPastDateException();
+        }
         final Member member = getMemberByEmail(loginMember.email());
         return getReservationResponse(schedule, member);
     }
 
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
         final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
+        if (schedule.isPast()) {
+            throw new ReservationPastDateException();
+        }
         final Member member = getMemberById(request.memberId());
-
         return getReservationResponse(schedule, member);
     }
 

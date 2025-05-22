@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.member.Member;
+import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
 import roomescape.reservation.reservation.Reservation;
 import roomescape.reservation.reservation.ReservationRepository;
@@ -40,7 +41,8 @@ class ReservationWaitingServiceTest {
     void setUp() {
         reservationRepository = mock(ReservationRepository.class);
         waitingRepository = mock(WaitingRepository.class);
-        reservationWaitingService = new ReservationWaitingService(reservationRepository, waitingRepository);
+        MemberRepository memberRepository = mock(MemberRepository.class);
+        reservationWaitingService = new ReservationWaitingService(reservationRepository, waitingRepository, memberRepository);
 
         ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
         Theme theme = themeWithId(1L, new Theme("테마명", "테마 설명", "썸네일 URL"));
