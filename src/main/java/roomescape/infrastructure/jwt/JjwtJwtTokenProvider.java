@@ -1,4 +1,4 @@
-package roomescape.application;
+package roomescape.infrastructure.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -10,10 +10,11 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.application.provider.JwtTokenProvider;
 import roomescape.common.exception.UnauthorizedException;
 
 @Component
-public class JwtProvider {
+public class JjwtJwtTokenProvider implements JwtTokenProvider {
 
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
 
@@ -23,6 +24,7 @@ public class JwtProvider {
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
+    @Override
     public String createToken(String payload) {
         Claims claims = Jwts.claims().setSubject(payload);
         Date now = new Date();
@@ -36,6 +38,7 @@ public class JwtProvider {
                 .compact();
     }
 
+    @Override
     public String createToken(String payload, Date now) {
         Claims claims = Jwts.claims().setSubject(payload);
         Date expiredDate = new Date(now.getTime() + validityInMilliseconds);
@@ -48,6 +51,7 @@ public class JwtProvider {
                 .compact();
     }
 
+    @Override
     public String getPayload(String token) {
 
         validateToken(token);
@@ -59,6 +63,7 @@ public class JwtProvider {
                 .getSubject();
     }
 
+    @Override
     public void validateToken(String token) {
         try {
             Jwts.parser()
@@ -71,6 +76,5 @@ public class JwtProvider {
         } catch (IllegalArgumentException e) {
             throw new UnauthorizedException("토큰이 비어 있습니다.");
         }
-
     }
 }

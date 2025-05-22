@@ -11,14 +11,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.model.Role;
-import roomescape.application.JwtProvider;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class AuthAcceptanceTest {
 
     @Autowired
-    private JwtProvider jwtProvider;
+    private JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -30,7 +30,7 @@ public class AuthAcceptanceTest {
         String email = "email@gmail.com";
         String name = "히로";
 
-        String token = jwtProvider.createToken(email);
+        String token = jjwtJwtTokenProvider.createToken(email);
 
         jdbcTemplate.update("INSERT INTO member"
                         + " (name, email,password, role) VALUES (?, ?, ?, ?)"

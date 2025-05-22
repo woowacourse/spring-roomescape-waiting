@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.application.JwtProvider;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationAdminAcceptanceTest {
 
     @Autowired
-    private JwtProvider jwtProvider;
+    private JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     private String token;
 
@@ -26,7 +26,7 @@ class ReservationAdminAcceptanceTest {
     void setUp() {
         final String email = "example@gmail.com";
 
-        this.token = jwtProvider.createToken(email);
+        this.token = jjwtJwtTokenProvider.createToken(email);
     }
 
     @Test

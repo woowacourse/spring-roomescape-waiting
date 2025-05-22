@@ -11,16 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.common.exception.UnauthorizedException;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 
 @TestPropertySource(properties = {
         "security.jwt.token.secret-key=your-secret-key",
         "security.jwt.token.expire-length=3600000"
 })
-@SpringBootTest(classes = JwtProvider.class)
-class JwtProviderTest {
+@SpringBootTest(classes = JjwtJwtTokenProvider.class)
+class JjwtJwtTokenProviderTest {
 
     @Autowired
-    JwtProvider jwtProvider;
+    JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @Test
     @DisplayName("토큰을 정상적으로 생성한다")
@@ -29,7 +30,7 @@ class JwtProviderTest {
         String email = "example@gmail.com";
 
         // when
-        String token = jwtProvider.createToken(email, new Date());
+        String token = jjwtJwtTokenProvider.createToken(email, new Date());
 
         // then
         assertThat(token).isNotBlank();
@@ -40,10 +41,10 @@ class JwtProviderTest {
     void test2() {
         // given
         String email = "example@gmail.com";
-        String token = jwtProvider.createToken(email, new Date());
+        String token = jjwtJwtTokenProvider.createToken(email, new Date());
 
         // when
-        String payload = jwtProvider.getPayload(token);
+        String payload = jjwtJwtTokenProvider.getPayload(token);
 
         // then
         assertThat(payload).isEqualTo(email);
@@ -57,10 +58,10 @@ class JwtProviderTest {
         Date issuedAt = Date.from(LocalDate.of(2023, 12, 30)
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant());
-        String token = jwtProvider.createToken(email, issuedAt);
+        String token = jjwtJwtTokenProvider.createToken(email, issuedAt);
 
         // when & then
-        assertThatThrownBy(() -> jwtProvider.getPayload(token))
+        assertThatThrownBy(() -> jjwtJwtTokenProvider.getPayload(token))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("토큰이 만료되었습니다.");
     }
@@ -72,7 +73,7 @@ class JwtProviderTest {
         String token = "invalidToken";
 
         // when & then
-        assertThatThrownBy(() -> jwtProvider.getPayload(token))
+        assertThatThrownBy(() -> jjwtJwtTokenProvider.getPayload(token))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("유효하지 않은 토큰입니다.");
     }
@@ -84,7 +85,7 @@ class JwtProviderTest {
         String token = " ";
 
         // when & then
-        assertThatThrownBy(() -> jwtProvider.getPayload(token))
+        assertThatThrownBy(() -> jjwtJwtTokenProvider.getPayload(token))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("토큰이 비어 있습니다.");
     }

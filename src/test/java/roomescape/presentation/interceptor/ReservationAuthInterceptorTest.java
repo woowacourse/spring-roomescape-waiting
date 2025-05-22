@@ -16,7 +16,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.presentation.support.CookieUtils;
-import roomescape.application.AuthService;
+import roomescape.application.service.AuthService;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationAuthInterceptorTest {

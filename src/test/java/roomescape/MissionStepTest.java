@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.application.JwtProvider;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 import roomescape.dto.response.ReservationResponseDto;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
@@ -42,7 +42,7 @@ public class MissionStepTest {
     private String email;
 
     @Autowired
-    private JwtProvider jwtProvider;
+    private JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @BeforeEach
     void beforeEachTest() {
@@ -229,6 +229,6 @@ public class MissionStepTest {
     }
 
     private String createToken() {
-        return jwtProvider.createToken(email);
+        return jjwtJwtTokenProvider.createToken(email);
     }
 }

@@ -1,6 +1,7 @@
-package roomescape.application;
+package roomescape.application.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.application.provider.JwtTokenProvider;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.request.LoginRequestDto;
@@ -12,11 +13,11 @@ import roomescape.repository.MemberRepository;
 @Service
 public class AuthService {
 
-    private final JwtProvider jwtProvider;
+    private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
 
-    public AuthService(JwtProvider jwtProvider, MemberRepository memberRepository) {
-        this.jwtProvider = jwtProvider;
+    public AuthService(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository) {
+        this.jwtTokenProvider = jwtTokenProvider;
         this.memberRepository = memberRepository;
     }
 
@@ -29,19 +30,19 @@ public class AuthService {
     }
 
     public TokenResponseDto createToken(String email) {
-        String token = jwtProvider.createToken(email);
+        String token = jwtTokenProvider.createToken(email);
         return new TokenResponseDto(token);
     }
 
     public MemberResponseDto getMemberByToken(String tokenFromCookie) {
-        String payload = jwtProvider.getPayload(tokenFromCookie);
+        String payload = jwtTokenProvider.getPayload(tokenFromCookie);
         Member member = findMemberByEmail(payload);
 
         return new MemberResponseDto(member);
     }
 
     public Member getAuthenticatedMember(String tokenFromCookie) {
-        String payload = jwtProvider.getPayload(tokenFromCookie);
+        String payload = jwtTokenProvider.getPayload(tokenFromCookie);
         return findMemberByEmail(payload);
     }
 

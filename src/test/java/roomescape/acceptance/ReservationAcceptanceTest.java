@@ -21,7 +21,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.response.ReservationResponseDto;
 import roomescape.model.Role;
-import roomescape.application.JwtProvider;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -31,7 +31,7 @@ class ReservationAcceptanceTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private JwtProvider jwtProvider;
+    private JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     private String email;
 
@@ -204,6 +204,6 @@ class ReservationAcceptanceTest {
     }
 
     private String createToken() {
-        return jwtProvider.createToken(email);
+        return jjwtJwtTokenProvider.createToken(email);
     }
 }

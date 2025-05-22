@@ -9,16 +9,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.application.service.AuthService;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.request.LoginRequestDto;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest
 public class AuthServiceTest {
 
     @Autowired
-    JwtProvider jwtProvider;
+    JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @Autowired
     MemberRepository memberRepository;

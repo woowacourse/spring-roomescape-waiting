@@ -22,15 +22,15 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.application.JwtProvider;
-import roomescape.application.ReservationService;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
+import roomescape.application.service.ReservationService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class MemberReservationAcceptanceTest {
 
     @Autowired
-    JwtProvider jwtProvider;
+    JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @Autowired
     MemberRepository memberRepository;
@@ -63,7 +63,7 @@ class MemberReservationAcceptanceTest {
                 savedMember, LocalDate.now());
         Reservation savedReservation = this.reservationRepository.save(reservation);
 
-        String token = jwtProvider.createToken(savedMember.getEmail());
+        String token = jjwtJwtTokenProvider.createToken(savedMember.getEmail());
 
         //when
         List<MemberReservationResponseDto> responses = RestAssured.given().log().all()

@@ -16,7 +16,7 @@ import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
 import roomescape.dto.response.ReservationResponseDto;
-import roomescape.application.ReservationService;
+import roomescape.application.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")

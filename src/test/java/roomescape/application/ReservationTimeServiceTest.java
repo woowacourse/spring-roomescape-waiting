@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import roomescape.application.service.ReservationTimeService;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
 import roomescape.model.Reservation;
