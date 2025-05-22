@@ -22,8 +22,8 @@ import roomescape.reservation.repository.WaitingRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class ReservationService {
 
     private final ReservationRepositoryInterface reservationRepository;
@@ -108,13 +108,13 @@ public class ReservationService {
             final LocalDate date,
             final Long timeId,
             final Long themeId) {
+        validatePastDate(date);
         final ReservationTime reservationTime = findReservationTimeById(timeId);
         final Theme theme = findThemeById(themeId);
 
         boolean reservationExists = reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
-        boolean waitingExists = waitingRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
 
-        if (reservationExists || waitingExists) {
+        if (reservationExists) {
             final Waiting waiting = new Waiting(member, reservationTime, theme, date);
             return waitingRepository.save(waiting);
         }
