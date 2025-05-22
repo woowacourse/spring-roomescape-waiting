@@ -3,7 +3,6 @@ package roomescape.theme.infrastructure;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -17,8 +16,8 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     private final JpaThemeRepository jpaThemeRepository;
 
     @Override
-    public boolean existsById(final ThemeId id) {
-        return jpaThemeRepository.existsById(id.getValue());
+    public boolean existsById(final Long id) {
+        return jpaThemeRepository.existsById(id);
     }
 
     @Override
@@ -32,8 +31,8 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> findById(final ThemeId id) {
-        return jpaThemeRepository.findById(id.getValue());
+    public Optional<Theme> findById(final Long id) {
+        return jpaThemeRepository.findById(id);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     }
 
     @Override
-    public void deleteById(final ThemeId id) {
-        jpaThemeRepository.deleteById(id.getValue());
+    public void deleteById(final Long id) {
+        jpaThemeRepository.deleteById(id);
     }
 }

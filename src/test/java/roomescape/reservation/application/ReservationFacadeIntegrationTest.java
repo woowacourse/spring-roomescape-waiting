@@ -106,7 +106,7 @@ class ReservationFacadeIntegrationTest {
         // when
         List<AvailableReservationTimeWebResponse> responses = reservationFacade.getAvailable(
                 targetDate,
-                theme.getId().getValue()
+                theme.getId()
         );
 
         // then
@@ -129,7 +129,7 @@ class ReservationFacadeIntegrationTest {
         CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
                 time.getId().getValue(),
-                theme.getId().getValue(),
+                theme.getId(),
                 user.getId().getValue()
         );
 

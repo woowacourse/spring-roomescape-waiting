@@ -143,7 +143,7 @@ class ReservationCommandServiceImplTest {
                         "RESERVATION already exists.",
                         "params={ReservationDate=ReservationDate(value=",
                         "ReservationTimeId=ReservationTimeId(",
-                        "ThemeId=ThemeId("
+                        "Long="
                 );
     }
 

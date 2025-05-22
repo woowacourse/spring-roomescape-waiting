@@ -12,7 +12,6 @@ import roomescape.reservation.domain.BookedStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.theme.domain.ThemeId;
 import roomescape.time.application.service.ReservationTimeQueryService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeId;
@@ -92,7 +91,7 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
     @Override
     public boolean existsByParams(final ReservationDate date,
                                   final ReservationTimeId timeId,
-                                  final ThemeId themeId) {
+                                  final Long themeId) {
         return reservationRepository.existsByParams(date, timeId, themeId);
     }
 }

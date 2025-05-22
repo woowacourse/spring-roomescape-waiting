@@ -8,7 +8,6 @@ import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.theme.application.dto.CreateThemeServiceRequest;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -33,7 +32,7 @@ public class ThemeCommandServiceImpl implements ThemeCommandService {
     }
 
     @Override
-    public void delete(final ThemeId id) {
+    public void delete(final Long id) {
         if (themeQueryService.existsById(id)) {
             themeRepository.deleteById(id);
             return;

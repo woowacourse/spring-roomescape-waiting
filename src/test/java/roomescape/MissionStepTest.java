@@ -149,7 +149,7 @@ public class MissionStepTest {
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
                 time.getId().getValue(),
-                theme.getId().getValue(),
+                theme.getId(),
                 user.getId().getValue()
         );
 
@@ -280,7 +280,7 @@ public class MissionStepTest {
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
                 time.getId().getValue(),
-                theme.getId().getValue(),
+                theme.getId(),
                 user.getId().getValue()
         );
 

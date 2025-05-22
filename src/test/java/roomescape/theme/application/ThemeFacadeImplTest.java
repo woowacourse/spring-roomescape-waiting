@@ -11,7 +11,6 @@ import roomescape.theme.application.service.ThemeCommandService;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.theme.ui.dto.CreateThemeWebRequest;
@@ -100,12 +99,12 @@ class ThemeFacadeImplTest {
         themeFacade.delete(themeId);
 
         //then
-        then(themeCommandService).should(times(1)).delete(any(ThemeId.class));
+        then(themeCommandService).should(times(1)).delete(any(Long.class));
     }
 
     private Theme createTheme(Long id, String name, String description, String thumbnail) {
         return Theme.withId(
-                ThemeId.from(id),
+                id,
                 ThemeName.from(name),
                 ThemeDescription.from(description),
                 ThemeThumbnail.from(thumbnail)

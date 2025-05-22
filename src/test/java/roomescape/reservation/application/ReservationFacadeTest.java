@@ -19,7 +19,6 @@ import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
@@ -246,7 +245,7 @@ class ReservationFacadeTest {
                         LocalTime.of(15, 0)
                 ),
                 Theme.withId(
-                        ThemeId.from(1L),
+                        1L,
                         ThemeName.from("테스트테마"),
                         ThemeDescription.from("설명"),
                         ThemeThumbnail.from("thumbnail.jpg")

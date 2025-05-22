@@ -6,7 +6,6 @@ import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.theme.domain.ThemeId;
 import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
 
@@ -26,5 +25,5 @@ public interface ReservationQueryService {
 
     boolean existsByTimeId(ReservationTimeId timeId);
 
-    boolean existsByParams(ReservationDate date, ReservationTimeId timeId, ThemeId themeId);
+    boolean existsByParams(ReservationDate date, ReservationTimeId timeId, Long themeId);
 }

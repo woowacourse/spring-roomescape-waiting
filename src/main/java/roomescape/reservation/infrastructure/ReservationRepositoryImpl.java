@@ -9,7 +9,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
-import roomescape.theme.domain.ThemeId;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.domain.UserId;
@@ -34,8 +33,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByParams(final ReservationDate date, final ReservationTimeId timeId, final ThemeId themeId) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId.getValue(), themeId.getValue());
+    public boolean existsByParams(final ReservationDate date, final ReservationTimeId timeId, final Long themeId) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId.getValue(), themeId);
     }
 
     @Override
@@ -44,8 +43,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
-        return jpaReservationRepository.findAllByDateAndThemeId(date, themeId.getValue()).stream()
+    public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final Long themeId) {
+        return jpaReservationRepository.findAllByDateAndThemeId(date, themeId).stream()
                 .map(Reservation::getTime)
                 .map(ReservationTime::getId)
                 .toList();
@@ -78,7 +77,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByParams(final UserId userId, final ThemeId themeId, final ReservationDate from, final ReservationDate to) {
+    public List<Reservation> findAllByParams(final UserId userId, final Long themeId, final ReservationDate from, final ReservationDate to) {
         Specification<Reservation> spec = Specification.where(ReservationSpecs.isMemberReservation(userId))
                 .and(ReservationSpecs.isThemeReservation(themeId))
                 .and(ReservationSpecs.isReservationByPeriod(from, to));

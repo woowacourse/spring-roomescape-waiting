@@ -9,7 +9,6 @@ import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -24,7 +23,7 @@ public class ThemeQueryServiceImpl implements ThemeQueryService {
     private final ReservationQueryService reservationQueryService;
 
     @Override
-    public boolean existsById(final ThemeId id) {
+    public boolean existsById(final Long id) {
         return themeRepository.existsById(id);
     }
 
@@ -39,7 +38,7 @@ public class ThemeQueryServiceImpl implements ThemeQueryService {
     }
 
     @Override
-    public Theme get(final ThemeId id) {
+    public Theme get(final Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(DomainTerm.THEME, id));
     }

@@ -5,15 +5,15 @@ import java.util.Optional;
 
 public interface ThemeRepository {
 
-    boolean existsById(ThemeId id);
+    boolean existsById(Long id);
 
     boolean existsByName(ThemeName name);
 
     List<Theme> findAll();
 
-    Optional<Theme> findById(ThemeId id);
+    Optional<Theme> findById(Long id);
 
     Theme save(Theme theme);
 
-    void deleteById(ThemeId id);
+    void deleteById(Long id);
 }

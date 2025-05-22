@@ -10,7 +10,6 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.theme.application.dto.CreateThemeServiceRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
@@ -105,12 +104,12 @@ class ThemeCommandServiceImplTest {
     @DisplayName("저장되지 않은 테마를 삭제할 수 없다")
     void cannotDelete() {
         // given
-        final ThemeId unassigned = ThemeId.from(12345L);
+        final Long unassigned = Long.MAX_VALUE;
 
         // when
         // then
         assertThatThrownBy(() -> themeCommandService.delete(unassigned))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("[THEME] not found. params={ThemeId=ThemeId(12345)}");
+                .hasMessage("[THEME] not found. params={Long=9223372036854775807}");
     }
 }

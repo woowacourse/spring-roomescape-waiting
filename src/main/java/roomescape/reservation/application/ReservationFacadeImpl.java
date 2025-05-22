@@ -12,7 +12,6 @@ import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
-import roomescape.theme.domain.ThemeId;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
@@ -43,7 +42,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
     public List<AvailableReservationTimeWebResponse> getAvailable(final LocalDate date, final Long themeId) {
         final AvailableReservationTimeServiceRequest request = new AvailableReservationTimeServiceRequest(
                 ReservationDate.from(date),
-                ThemeId.from(themeId));
+                themeId);
 
         return reservationQueryService.getTimesWithAvailability(request).stream()
                 .map(AvailableReservationTimeWebResponse::from)
