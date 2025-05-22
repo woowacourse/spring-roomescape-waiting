@@ -20,6 +20,8 @@ VALUES ('테마 E', '테마 E입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6e
 
 INSERT INTO member (name, email, password, role)
 VALUES ('가이온', 'jumdo12', 'jumdo12', 'ADMIN');
+INSERT INTO member (name, email, password, role)
+VALUES ('플린트', 'a', 'aa', 'USER');
 
 INSERT INTO reservation (date, time_id, theme_id, member_id)
 VALUES ('2025-04-22', 2, 4, 1);
@@ -55,3 +57,5 @@ INSERT INTO reservation (date, time_id, theme_id, member_id)
 VALUES ('2025-05-15', 2, 1, 1);
 INSERT INTO reservation (date, time_id, theme_id, member_id)
 VALUES ('2025-05-16', 2, 5, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES ('2025-05-23', 2, 5, 2);

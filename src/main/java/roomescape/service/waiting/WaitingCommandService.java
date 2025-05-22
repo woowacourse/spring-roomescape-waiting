@@ -63,4 +63,11 @@ public class WaitingCommandService {
             throw new DuplicateContentException("[ERROR] 이미 예약 대기가 존재합니다.");
         }
     }
+
+    public void cancelWaiting(long id) {
+        if(!waitingRepository.existsById(id)){
+            throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+        }
+        waitingRepository.deleteById(id);
+    }
 }
