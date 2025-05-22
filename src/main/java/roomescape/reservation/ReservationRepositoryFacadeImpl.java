@@ -31,7 +31,7 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
     }
 
     @Override
-    public List<Reservation> findAllByMember(final Member member) {
+    public List<WaitingRankReservation> findAllWaitingRankByMember(final Member member) {
         return reservationRepository.findAllByMember(member);
     }
 

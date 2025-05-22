@@ -35,7 +35,7 @@ public class ReservationController {
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponse> createForAdmin(
+    public ResponseEntity<ReservationResponse> createWaiting(
             @RequestBody @Valid final ReservationRequest request,
             @AuthenticationPrincipal final LoginMember member
     ) {

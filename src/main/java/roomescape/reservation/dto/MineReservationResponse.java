@@ -3,23 +3,26 @@ package roomescape.reservation.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.WaitingRankReservation;
 
 public record MineReservationResponse(
         Long reservationId,
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
-        String status
+        String status,
+        Long rank
 ) {
 
-    public static MineReservationResponse from(final Reservation reservation) {
+    public static MineReservationResponse from(final WaitingRankReservation waitingRankReservation){
         return new MineReservationResponse(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getReservationTime().getStartAt(),
-                reservation.getReservationStatus().getMessage()
+                waitingRankReservation.getReservation().getId(),
+                waitingRankReservation.getReservation().getTheme().getName(),
+                waitingRankReservation.getReservation().getDate(),
+                waitingRankReservation.getReservation().getReservationTime().getStartAt(),
+                waitingRankReservation.getReservation().getReservationStatus().getMessage(),
+                waitingRankReservation.getWaitingRank()
         );
     }
+
 }

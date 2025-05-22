@@ -13,7 +13,6 @@ public interface ReservationRepositoryFacade {
     Optional<Reservation> findById(Long id);
 
     List<Reservation> findAll();
-    List<Reservation> findAllByMember(Member member);
     List<Reservation> findAllByThemeAndDate(Theme theme, LocalDate date);
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
     List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
@@ -23,6 +22,7 @@ public interface ReservationRepositoryFacade {
             Theme theme,
             ReservationStatus reservationStatus
     );
+    List<WaitingRankReservation> findAllWaitingRankByMember(Member member);
 
     void deleteById(Long id);
 

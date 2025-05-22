@@ -18,6 +18,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
+import roomescape.exception.custom.reason.reservation.ReservationNotExistsPendingException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
@@ -52,6 +53,8 @@ public class ReservationServiceTest {
     private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
     private final ThemeRepositoryFacadeImpl themeRepositoryFacade;
     private final MemberRepositoryFacadeImpl memberRepositoryFacade;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Autowired
     public ReservationServiceTest(
@@ -505,7 +508,7 @@ public class ReservationServiceTest {
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
             final MineReservationResponse expected = new MineReservationResponse(
                     1L, "테마", LocalDate.of(2026, 12, 31),
-                    LocalTime.of(12, 40), "예약"
+                    LocalTime.of(12, 40), "예약", 0L
             );
 
             final Member member = new Member(loginMember.email(), "pass", "boogie", MemberRole.MEMBER);
@@ -552,14 +555,20 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
+            final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
+            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
+                    theme, ReservationStatus.PENDING);
+
             memberRepositoryFacade.save(member);
+            memberRepositoryFacade.save(anotherMember);
             reservationTimeRepositoryFacade.save(reservationTime);
             themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
             final ReservationResponse expected = ReservationResponse.from(
-                    new Reservation(1L, LocalDate.of(2025, 12, 30), member, reservationTime, theme,
+                    new Reservation(2L, LocalDate.of(2025, 12, 30), member, reservationTime, theme,
                             ReservationStatus.WAITING));
 
             // when
@@ -575,8 +584,14 @@ public class ReservationServiceTest {
             // given
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
+            final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
+            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
+                    theme, ReservationStatus.PENDING);
+
             reservationTimeRepositoryFacade.save(reservationTime);
+            memberRepositoryFacade.save(anotherMember);
             themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -594,10 +609,18 @@ public class ReservationServiceTest {
             // given
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final Theme theme = new Theme("야당", "야당당", "123");
-            memberRepositoryFacade.save(member);
-            themeRepositoryFacade.save(theme);
+            final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 41));
+            final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
+            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
+                    theme, ReservationStatus.PENDING);
 
-            final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
+            reservationTimeRepositoryFacade.save(reservationTime);
+            memberRepositoryFacade.save(member);
+            memberRepositoryFacade.save(anotherMember);
+            themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(reservation);
+
+            final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 2L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
 
             // when & then
@@ -613,10 +636,18 @@ public class ReservationServiceTest {
             // given
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
-            memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            final Theme theme = new Theme("야당", "야당당", "123");
+            final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
+            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
+                    theme, ReservationStatus.PENDING);
 
-            final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
+            themeRepositoryFacade.save(theme);
+            memberRepositoryFacade.save(member);
+            memberRepositoryFacade.save(anotherMember);
+            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationRepositoryFacade.save(reservation);
+
+            final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 2L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
 
             // when & then
@@ -635,6 +666,7 @@ public class ReservationServiceTest {
             final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), member, reservationTime,
                     theme,
                     ReservationStatus.PENDING);
+
             memberRepositoryFacade.save(member);
             reservationTimeRepositoryFacade.save(reservationTime);
             themeRepositoryFacade.save(theme);
@@ -649,20 +681,17 @@ public class ReservationServiceTest {
             }).isInstanceOf(ReservationConflictException.class);
         }
 
-        @DisplayName("이미 해당 시간, 날짜, 테마에 waiting 예약이 존재한다면 예외가 발생한다.")
+        @DisplayName("이미 해당 시간, 날짜, 테마에 waiting 예약이 존재하지 않는다면 예외가 발생한다.")
         @Test
         void create6() {
             // given
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), member, reservationTime,
-                    theme,
-                    ReservationStatus.WAITING);
+
             memberRepositoryFacade.save(member);
             reservationTimeRepositoryFacade.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -670,7 +699,7 @@ public class ReservationServiceTest {
             // when
             assertThatThrownBy(() -> {
                 reservationService.createWaiting(request, loginMember);
-            }).isInstanceOf(ReservationConflictException.class);
+            }).isInstanceOf(ReservationNotExistsPendingException.class);
         }
 
         @DisplayName("과거 날짜로 예약하면, 예외가 발생한다.")
@@ -681,9 +710,15 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
 
+            final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
+            final Reservation reservation = new Reservation(LocalDate.of(2024, 12, 30), anotherMember, reservationTime,
+                    theme, ReservationStatus.PENDING);
+
             memberRepositoryFacade.save(member);
+            memberRepositoryFacade.save(anotherMember);
             reservationTimeRepositoryFacade.save(reservationTime);
             themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -702,9 +737,16 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.now().minusMinutes(1));
             final Theme theme = new Theme("야당", "야당당", "123");
 
+            final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
+            final Reservation reservation = new Reservation(LocalDate.now(), anotherMember, reservationTime,
+                    theme, ReservationStatus.PENDING);
+
             memberRepositoryFacade.save(member);
+            memberRepositoryFacade.save(anotherMember);
+
             reservationTimeRepositoryFacade.save(reservationTime);
             themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.now(), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -723,14 +765,22 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.now().plusMinutes(1));
             final Theme theme = new Theme("야당", "야당당", "123");
 
+            final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
+            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
+                    theme, ReservationStatus.PENDING);
+
+            memberRepositoryFacade.save(member);
+            memberRepositoryFacade.save(anotherMember);
+
             memberRepositoryFacade.save(member);
             reservationTimeRepositoryFacade.save(reservationTime);
             themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(reservation);
 
-            final ReservationRequest request = new ReservationRequest(LocalDate.now(), 1L, 1L);
+            final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
             final ReservationResponse expected = ReservationResponse.from(
-                    new Reservation(1L, LocalDate.now(), member, reservationTime, theme,
+                    new Reservation(2L, LocalDate.of(2025, 12, 30), member, reservationTime, theme,
                             ReservationStatus.WAITING));
 
             // when
@@ -779,5 +829,43 @@ public class ReservationServiceTest {
 
         }
 
+    }
+
+    @Nested
+    @DisplayName("존재하는 예약 대기를 모두 조회한다.")
+    class ReadAllWaiting {
+
+        @DisplayName("예약 대기를 모두 조회한다.")
+        @Test
+        void readAllWaitingByMember() {
+            // given
+            final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
+            final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
+            final Theme theme = new Theme("야당", "야당당", "123");
+            final Reservation reservation = new Reservation(LocalDate.of(2026, 12, 1), member, reservationTime, theme,
+                    ReservationStatus.WAITING);
+
+            memberRepositoryFacade.save(member);
+            reservationTimeRepositoryFacade.save(reservationTime);
+            themeRepositoryFacade.save(theme);
+            reservationRepositoryFacade.save(reservation);
+
+            // when
+            final List<ReservationResponse> actual = reservationService.readAllWaiting();
+
+            // then
+            assertThat(actual).hasSize(1);
+        }
+
+        @DisplayName("예약 대기가 비어 있다면 빈 컬렉션을 응답한다.")
+        @Test
+        void readAllWaitingByMember1() {
+            // given
+            // when
+            final List<ReservationResponse> actual = reservationService.readAllWaiting();
+
+            // then
+            assertThat(actual).isEmpty();
+        }
     }
 }

@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error fetching reservations:', error));
 });
 
+function renderStatus(row, item) {
+    if (item.status === '예약') {
+        row.insertCell(3).textContent = item.status;
+        return;
+    }
+    row.insertCell(3).textContent = `${item.rank}번째 예약 대기`;
+}
+
 function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
@@ -24,7 +32,8 @@ function render(data) {
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+
+        renderStatus(row, item);
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화

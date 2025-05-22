@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
+import roomescape.exception.custom.reason.reservation.ReservationNotExistsPendingException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
@@ -70,6 +71,7 @@ public class ReservationService {
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberByEmail(loginMember.email());
 
+        validateNotExistsPendingReservation(request.date(), reservationTime, theme);
         validateDuplicateReservation(request, reservationTime, theme, member);
         validatePastDateTime(request.date(), reservationTime);
 
@@ -81,7 +83,7 @@ public class ReservationService {
 
     public List<MineReservationResponse> readAllMine(final LoginMember loginMember) {
         final Member member = getMemberByEmail(loginMember.email());
-        return reservationRepositoryFacade.findAllByMember(member).stream()
+        return reservationRepositoryFacade.findAllWaitingRankByMember(member).stream()
                 .map(MineReservationResponse::from)
                 .toList();
     }
@@ -162,6 +164,16 @@ public class ReservationService {
         if (reservationRepositoryFacade.existsByReservationTimeAndDateAndThemeAndReservationStatus(
                 reservationTime, date, theme, ReservationStatus.PENDING)) {
             throw new ReservationConflictException();
+        }
+    }
+
+    private void validateNotExistsPendingReservation(
+            final LocalDate date, final ReservationTime reservationTime,
+            final Theme theme
+    ) {
+        if (!reservationRepositoryFacade.existsByReservationTimeAndDateAndThemeAndReservationStatus(
+                reservationTime, date, theme, ReservationStatus.PENDING)) {
+            throw new ReservationNotExistsPendingException();
         }
     }
 
