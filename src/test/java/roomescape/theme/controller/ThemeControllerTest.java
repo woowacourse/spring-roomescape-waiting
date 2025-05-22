@@ -15,10 +15,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.ui.AdminAuthorizationInterceptor;
 import roomescape.common.security.TokenAuthorizationHandler;
 import roomescape.member.application.MemberService;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.application.ThemeService;
+import roomescape.theme.ui.ThemeController;
 
-@WebMvcTest(ThemeApiController.class)
-class ThemeApiControllerTest {
+@WebMvcTest(ThemeController.class)
+class ThemeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;

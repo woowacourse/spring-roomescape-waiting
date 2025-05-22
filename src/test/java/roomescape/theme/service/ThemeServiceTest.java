@@ -18,9 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
+import roomescape.theme.application.ThemeService;
+import roomescape.theme.application.dto.ThemeRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.theme.dto.ThemeRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {

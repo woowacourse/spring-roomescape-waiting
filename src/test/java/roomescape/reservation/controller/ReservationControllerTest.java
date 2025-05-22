@@ -38,8 +38,8 @@ import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.ui.ReservationController;
 import roomescape.reservationTime.application.dto.TimeResponse;
 import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.ThemeResponse;
 
 @WebMvcTest(ReservationController.class)
 @Import({WebMvcConfiguration.class, GlobalExceptionHandler.class})

@@ -26,8 +26,8 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByMemberId(Long id) {
-        return reservationJpaRepository.findAllByMemberId(id);
+    public List<Reservation> findAllByMemberId(Long memberId) {
+        return reservationJpaRepository.findAllByMemberId(memberId);
     }
 
     @Override
@@ -63,5 +63,10 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     @Override
     public boolean existsByTimeId(Long timeId) {
         return reservationJpaRepository.existsBySpecTimeId(timeId);
+    }
+
+    @Override
+    public boolean existsByThemeId(Long themeId) {
+        return reservationJpaRepository.existsBySpecThemeId(themeId);
     }
 }

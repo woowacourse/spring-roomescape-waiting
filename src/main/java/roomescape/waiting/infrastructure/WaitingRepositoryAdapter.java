@@ -39,4 +39,9 @@ public class WaitingRepositoryAdapter implements WaitingRepository {
     public Optional<WaitingWithRank> findWithRankById(Long id) {
         return waitingJpaRepository.findWithRankById(id);
     }
+
+    @Override
+    public Optional<Waiting> findById(Long id) {
+        return waitingJpaRepository.findById(id);
+    }
 }

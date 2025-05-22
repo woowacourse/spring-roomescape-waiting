@@ -29,8 +29,8 @@ import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.ui.AdminReservationController;
 import roomescape.reservationTime.application.dto.TimeResponse;
 import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.ThemeResponse;
 
 @WebMvcTest(AdminReservationController.class)
 class AdminReservationControllerTest {

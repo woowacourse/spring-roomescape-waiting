@@ -16,8 +16,8 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             JOIN FETCH r.spec.time
             WHERE (:memberId IS NULL OR r.member.id = :memberId)
               AND (:themeId IS NULL OR r.spec.theme.id = :themeId)
-              AND (:from IS NULL OR r.spec.date >= :from)
-              AND (:to IS NULL OR r.spec.date <= :to)
+              AND (:from IS NULL OR r.spec.date.value >= :from)
+              AND (:to IS NULL OR r.spec.date.value <= :to)
             """)
     List<Reservation> findFiltered(
             @Param("memberId") Long memberId,
@@ -41,7 +41,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             JOIN FETCH r.spec.time
             WHERE (r.member.id = :memberId)
             """)
-    List<Reservation> findAllByMemberId(Long id);
+    List<Reservation> findAllByMemberId(Long memberId);
 
     @Query("""
             SELECT r FROM Reservation r
@@ -59,4 +59,6 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     List<Long> findTimeIdsByDateAndThemeId(LocalDate date, Long themeId);
 
     boolean existsBySpecTimeId(Long timeId);
+
+    boolean existsBySpecThemeId(Long themeId);
 }

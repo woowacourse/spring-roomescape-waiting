@@ -51,6 +51,9 @@ public class Waiting {
         this.createdAt = LocalDateTime.now();
     }
 
+    public boolean isOwnedBy(Long memberId) {
+        return member.getId().equals(memberId);
+    }
 
     public LocalDate getDate() {
         return spec.getDate().getValue();

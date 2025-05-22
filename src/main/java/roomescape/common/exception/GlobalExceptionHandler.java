@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
         ErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_ERROR;
-        ApiResponse<?> response = ApiResponse.createError(errorCode.getMessage());
+        ApiResponse<?> response = ApiResponse.createError(e.getMessage());
         return ResponseEntity.status(errorCode.getStatus()).body(response);
     }
 }

@@ -27,7 +27,7 @@ public class ReservationTimeService {
         validateTimeNotExists(startedAt);
 
         ReservationTime reservationTime = new ReservationTime(timeRequest.startAt());
-        return TimeResponse.from(reservationTime);
+        return TimeResponse.from(timeRepository.save(reservationTime));
     }
 
     private void validateTimeNotExists(LocalTime startedAt) {

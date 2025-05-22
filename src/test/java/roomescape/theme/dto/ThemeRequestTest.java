@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.InvalidNameException;
 import roomescape.common.exception.InvalidStringException;
+import roomescape.theme.application.dto.ThemeRequest;
 
 class ThemeRequestTest {
 

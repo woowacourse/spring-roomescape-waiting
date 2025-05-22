@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead(RESERVATION_API_ENDPOINT)
+    requestRead(`/admin${RESERVATION_API_ENDPOINT}`)
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
@@ -43,7 +43,7 @@ function render(data) {
 }
 
 function fetchTimes() {
-    requestRead(TIME_API_ENDPOINT)
+    requestRead(`/admin${TIME_API_ENDPOINT}`)
         .then(data => {
             timesOptions.push(...data);
         })
@@ -60,7 +60,7 @@ function fetchThemes() {
 }
 
 function fetchMembers() {
-    requestRead(MEMBER_API_ENDPOINT)
+    requestRead(`/admin${MEMBER_API_ENDPOINT}`)
         .then(data => {
             membersOptions.push(...data);
             populateSelect('member', membersOptions, 'name');
@@ -234,7 +234,7 @@ function requestDelete(id) {
         method: 'DELETE',
     };
 
-    return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+    return fetch(`/admin${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
         .then(response => {
             if (response.status !== 204) throw new Error('Delete failed');
         });

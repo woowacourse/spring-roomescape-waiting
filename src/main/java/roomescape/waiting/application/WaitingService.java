@@ -3,6 +3,7 @@ package roomescape.waiting.application;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.auth.exception.AccessForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.exception.MemberNotFoundException;
@@ -65,7 +66,23 @@ public class WaitingService {
         }
     }
 
-    public void deleteById(Long id) {
+    public void deleteByUser(Long id, Long memberId) {
+        Waiting waiting = waitingRepository.findById(id).orElseThrow(WaitingNotFoundException::new);
+        validateIsOwner(memberId, waiting);
+        deleteById(id);
+    }
+
+    private void validateIsOwner(Long memberId, Waiting waiting) {
+        if (!waiting.isOwnedBy(memberId)) {
+            throw new AccessForbiddenException();
+        }
+    }
+
+    public void deleteByAdmin(Long id) {
+        deleteById(id);
+    }
+
+    private void deleteById(Long id) {
         waitingRepository.deleteById(id);
     }
 

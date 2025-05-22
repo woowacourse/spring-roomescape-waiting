@@ -1,5 +1,6 @@
 package roomescape.reservationTime.ui;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class AdminReservationTimeController {
     private final ReservationTimeService timeService;
 
     @PostMapping
-    public ResponseEntity<TimeResponse> create(@RequestBody TimeRequest request) {
+    public ResponseEntity<TimeResponse> create(@Valid @RequestBody TimeRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(timeService.add(request));
     }
 
@@ -32,7 +33,7 @@ public class AdminReservationTimeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         timeService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

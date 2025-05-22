@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import roomescape.member.application.dto.MemberResponse;
 import roomescape.reservationTime.application.dto.TimeResponse;
-import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.waiting.domain.Waiting;
 
 public record WaitingResponse(
