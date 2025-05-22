@@ -133,6 +133,9 @@ public class ReservationService {
     }
 
     public List<BookedReservationTimeResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
+        // TODO: repository에서 처리
+        // return reservationTimeRepository.findAllWithBooked(date, themeId);
+
         Map<ReservationTime, Boolean> allTimes = processAlreadyBookedTimesMap(date, themeId);
 
         return allTimes.entrySet()
