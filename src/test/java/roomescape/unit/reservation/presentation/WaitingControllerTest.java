@@ -74,7 +74,7 @@ public class WaitingControllerTest {
                 .member(
                         Member.builder()
                                 .id(1L)
-                                .name("name1").bulid()
+                                .name("name1").build()
                 ).theme(
                         Theme.builder()
                                 .name("theme1")

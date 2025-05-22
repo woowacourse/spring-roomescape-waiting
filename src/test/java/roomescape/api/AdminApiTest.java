@@ -162,7 +162,7 @@ public class AdminApiTest {
                         .name("member1")
                         .password("password1")
                         .email("email1@domain.com")
-                        .role(Role.ADMIN).bulid()
+                        .role(Role.ADMIN).build()
         );
         Theme theme = themeRepository.save(
                 Theme.builder()
@@ -199,7 +199,7 @@ public class AdminApiTest {
                         .name("member1")
                         .password("password1")
                         .email("email1@domain.com")
-                        .role(Role.ADMIN).bulid()
+                        .role(Role.ADMIN).build()
         );
         Theme theme = themeRepository.save(
                 Theme.builder()

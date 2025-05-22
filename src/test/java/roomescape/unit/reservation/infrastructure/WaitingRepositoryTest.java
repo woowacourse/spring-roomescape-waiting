@@ -32,7 +32,7 @@ public class WaitingRepositoryTest {
                 .name("member1")
                 .email("email1@domain.com")
                 .password("password1")
-                .role(Role.MEMBER).bulid();
+                .role(Role.MEMBER).build();
         Theme theme = Theme.builder()
                 .name("theme1")
                 .description("description")

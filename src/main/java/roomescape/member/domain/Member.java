@@ -121,7 +121,7 @@ public class Member {
             return this;
         }
 
-        public Member bulid() {
+        public Member build() {
             return new Member(id, name, email, password, role);
         }
     }

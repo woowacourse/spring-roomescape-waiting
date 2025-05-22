@@ -31,7 +31,7 @@ class FakeWaitingRepositoryTest {
                 .name("name1")
                 .email("email1@domain.com")
                 .password("password1")
-                .bulid();
+                .build();
         Waiting waiting = Waiting.builder()
                 .theme(theme)
                 .timeSlot(timeSlot)
@@ -56,7 +56,7 @@ class FakeWaitingRepositoryTest {
                 .name("name1")
                 .email("email1@domain.com")
                 .password("password1")
-                .bulid();
+                .build();
         LocalDate date = LocalDate.of(2025, 1, 1);
         Waiting waiting = Waiting.builder()
                 .date(date)
@@ -87,13 +87,13 @@ class FakeWaitingRepositoryTest {
                 .name("name1")
                 .email("email1@domain.com")
                 .password("password1")
-                .bulid();
+                .build();
         Member member2 = Member.builder()
                 .id(2L)
                 .name("name2")
                 .email("email2@domain.com")
                 .password("password2")
-                .bulid();
+                .build();
         LocalDate date = LocalDate.of(2025, 1, 1);
         waitingRepository.save(
                 Waiting.builder()
@@ -130,7 +130,7 @@ class FakeWaitingRepositoryTest {
                 .name("name1")
                 .email("email1@domain.com")
                 .password("password1")
-                .bulid();
+                .build();
         Waiting waiting = Waiting.builder()
                 .date(LocalDate.of(2025, 1, 1))
                 .member(member)
@@ -159,7 +159,7 @@ class FakeWaitingRepositoryTest {
                 .name("name1")
                 .email("email1@domain.com")
                 .password("password1")
-                .bulid();
+                .build();
         Waiting waiting = Waiting.builder()
                 .date(LocalDate.of(2025, 1, 1))
                 .member(member)

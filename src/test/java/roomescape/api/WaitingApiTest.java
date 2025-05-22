@@ -56,14 +56,14 @@ public class WaitingApiTest {
                         .name("member1")
                         .password("password1")
                         .email("email1@domain.com")
-                        .role(Role.MEMBER).bulid()
+                        .role(Role.MEMBER).build()
         );
         Member member2 = memberRepository.save(
                 Member.builder()
                         .name("member2")
                         .password("password2")
                         .email("email2@domain.com")
-                        .role(Role.MEMBER).bulid()
+                        .role(Role.MEMBER).build()
         );
         Theme theme = themeRepository.save(
                 Theme.builder()
@@ -108,7 +108,7 @@ public class WaitingApiTest {
                         .name("member1")
                         .password("password1")
                         .email("email1@domain.com")
-                        .role(Role.MEMBER).bulid()
+                        .role(Role.MEMBER).build()
         );
         Theme theme = themeRepository.save(
                 Theme.builder()
@@ -146,7 +146,7 @@ public class WaitingApiTest {
                         .name("member1")
                         .password("password1")
                         .email("email1@domain.com")
-                        .role(Role.MEMBER).bulid()
+                        .role(Role.MEMBER).build()
         );
         Theme theme = themeRepository.save(
                 Theme.builder()
@@ -183,7 +183,7 @@ public class WaitingApiTest {
                         .name("member1")
                         .password("password1")
                         .email("email1@domain.com")
-                        .role(Role.MEMBER).bulid()
+                        .role(Role.MEMBER).build()
         );
         String token = tokenProvider.createToken(member1.getId().toString(), Role.MEMBER);
         // when & then

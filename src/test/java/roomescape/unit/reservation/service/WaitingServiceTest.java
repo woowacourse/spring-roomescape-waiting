@@ -60,12 +60,12 @@ class WaitingServiceTest {
                 .name("member1")
                 .email("email1@domain.com")
                 .password("password1")
-                .role(Role.MEMBER).bulid();
+                .role(Role.MEMBER).build();
         Member member2 = Member.builder()
                 .name("member2")
                 .email("email2@domain.com")
                 .password("password2")
-                .role(Role.MEMBER).bulid();
+                .role(Role.MEMBER).build();
         Theme theme = Theme.builder()
                 .name("theme1")
                 .description("description")
@@ -95,7 +95,7 @@ class WaitingServiceTest {
                 .name("member1")
                 .email("email1@domain.com")
                 .password("password1")
-                .role(Role.MEMBER).bulid();
+                .role(Role.MEMBER).build();
         Theme theme = Theme.builder()
                 .name("theme1")
                 .description("description")
@@ -118,7 +118,7 @@ class WaitingServiceTest {
                 .name("member1")
                 .email("email1@domain.com")
                 .password("password1")
-                .role(Role.MEMBER).bulid();
+                .role(Role.MEMBER).build();
         Theme theme = Theme.builder()
                 .name("theme1")
                 .description("description")
@@ -147,7 +147,7 @@ class WaitingServiceTest {
                 .name("member1")
                 .email("email1@domain.com")
                 .password("password1")
-                .role(Role.MEMBER).bulid();
+                .role(Role.MEMBER).build();
         Theme theme = Theme.builder()
                 .name("theme1")
                 .description("description")
@@ -186,13 +186,13 @@ class WaitingServiceTest {
                 Member.builder()
                         .name("name1")
                         .email("email1@domain.com")
-                        .password("password1").bulid()
+                        .password("password1").build()
         );
         Member member2 = memberRepository.save(
                 Member.builder()
                         .name("name2")
                         .email("email2@domain.com")
-                        .password("password2").bulid()
+                        .password("password2").build()
         );
         LocalDate date = LocalDate.of(2025, 1, 1);
         waitingRepository.save(
@@ -235,13 +235,13 @@ class WaitingServiceTest {
                 Member.builder()
                         .name("name1")
                         .email("email1@domain.com")
-                        .password("password1").bulid()
+                        .password("password1").build()
         );
         Member member2 = memberRepository.save(
                 Member.builder()
                         .name("name2")
                         .email("email2@domain.com")
-                        .password("password2").bulid()
+                        .password("password2").build()
         );
         LocalDate date = LocalDate.of(2025, 1, 1);
         waitingRepository.save(
@@ -274,7 +274,7 @@ class WaitingServiceTest {
                 Member.builder()
                         .name("name1")
                         .email("email1@domain.com")
-                        .password("password1").bulid()
+                        .password("password1").build()
         );
         // when & then
         assertThatThrownBy(() -> waitingService.deleteWaitingById(member1.getId(), 1L))
@@ -293,7 +293,7 @@ class WaitingServiceTest {
         Member member = Member.builder()
                 .name("name1")
                 .email("email1@domain.com")
-                .password("password1").bulid();
+                .password("password1").build();
         waitingRepository.save(
                 Waiting.builder()
                         .date(LocalDate.of(2025, 1, 1))
@@ -327,12 +327,12 @@ class WaitingServiceTest {
                 .id(1L)
                 .name("name1")
                 .email("email1@domain.com")
-                .password("password1").bulid();
+                .password("password1").build();
         Member member2 = Member.builder()
                 .id(2L)
                 .name("name2")
                 .email("email2@domain.com")
-                .password("password2").bulid();
+                .password("password2").build();
         Reservation waiting1 = reservationRepository.save(
                 Reservation.builder()
                         .date(LocalDate.of(2025, 1, 1))
@@ -371,7 +371,7 @@ class WaitingServiceTest {
                 Member.builder()
                         .name("name1")
                         .email("email1@domain.com")
-                        .password("password1").bulid()
+                        .password("password1").build()
         );
         Waiting waiting = waitingRepository.save(
                 Waiting.builder()
