@@ -47,11 +47,11 @@ public class ReservationService {
     }
 
     private Reservation makeReservation(final ReservationCreateCommand command) {
-        final ReservationTime reservationTime = findReservationTime(command.timeId());
+        final ReservationTime reservationTime = getReservationTime(command.timeId());
         validatePastDateTime(command.date(), reservationTime);
         validateDuplicateReservation(command);
-        final Member member = findMember(command.memberId());
-        final Theme theme = findTheme(command.themeId());
+        final Member member = getMember(command.memberId());
+        final Theme theme = getTheme(command.themeId());
         return command.convertToReservation(member, reservationTime, theme);
     }
 
@@ -71,17 +71,17 @@ public class ReservationService {
         }
     }
 
-    private Member findMember(final long memberId) {
+    private Member getMember(final long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
     }
 
-    private ReservationTime findReservationTime(final long timeId) {
+    private ReservationTime getReservationTime(final long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
     }
 
-    private Theme findTheme(final long themeId) {
+    private Theme getTheme(final long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
     }
