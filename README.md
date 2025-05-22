@@ -131,3 +131,46 @@
 - [x] 중복 예약 불가능 기능
 - [x] 화면 응답
   - [3단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/ce6b8eef9072409e89b91411b3ef144d4de0b48c)
+
+### 4단계 - 예약 대기 관리
+- [ ] 예약 대기 관리 페이지 응답
+  - `/admin/waiting` 요청 시 예약 대기 관리 페이지 응답
+- [ ] 어드민 예약 대기 목록 조회 기능
+  - request
+    ```
+    GET /reservations/waitings HTTP/1.1
+    ```
+  - response
+    ```
+    HTTP/1.1 200 
+    Content-Type: application/json
+    
+    [
+        {
+            "id": 1,
+            "name": "브라운",
+            "theme": "테마1",
+            "date": "2023-01-01",
+            "startAt": "10:00"
+        },
+        {
+            "id": 2,
+            "name": "브라운",
+            "theme": "테마2",
+            "date": "2023-01-02",
+            "startAt": "11:00"
+        }
+    ]
+    ```
+- [ ] 어드민 예약 대기 취소 기능
+  - request
+    ```
+    DELETE /reservations/waitings/1 HTTP/1.1
+    ```
+  - response
+    ```
+    HTTP/1.1 200
+    ```
+- [ ] 예약 대기 승인 기능
+- [ ] 화면 응답
+  - [4단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/5f72af44aff4b1064fce95c3c00ffafae23569af)
