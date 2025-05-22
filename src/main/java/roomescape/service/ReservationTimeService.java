@@ -1,0 +1,74 @@
+package roomescape.service;
+
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.repository.ReservationRepository;
+import roomescape.domain.repository.ReservationTimeRepository;
+import roomescape.domain.repository.ThemeRepository;
+import roomescape.dto.request.ReservationTimeRequest;
+import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.TimeWithBookedResponse;
+import roomescape.exception.ExistedReservationException;
+import roomescape.exception.ReservationTimeNotFoundException;
+import roomescape.exception.ThemeNotFoundException;
+
+@Service
+@Transactional
+public class ReservationTimeService {
+
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
+
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+                                  ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationRepository = reservationRepository;
+        this.themeRepository = themeRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationTimeResponse> findAllTimes() {
+        List<ReservationTime> reservationTimeDaoAll = reservationTimeRepository.findAll();
+
+        return reservationTimeDaoAll.stream()
+                .map(ReservationTimeResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TimeWithBookedResponse> findTimesByDateAndThemeIdWithBooked(LocalDate date, Long themeId) {
+        Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
+        List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
+
+        List<ReservationTime> bookedReservationTimes = reservations.stream()
+                .map(Reservation::getReservationTime)
+                .toList();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+
+        return reservationTimes.stream()
+                .map(time -> TimeWithBookedResponse.of(time, bookedReservationTimes.contains(time)))
+                .toList();
+    }
+
+    public ReservationTimeResponse createTime(ReservationTimeRequest reservationTimeRequest) {
+        ReservationTime reservationTime = reservationTimeRequest.toTime();
+        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        return ReservationTimeResponse.from(savedReservationTime);
+    }
+
+    public void deleteTimeById(Long id) {
+        if (reservationTimeRepository.findById(id).isEmpty()) {
+            throw new ReservationTimeNotFoundException();
+        }
+        if (!reservationRepository.findByReservationTimeId(id).isEmpty()) {
+            throw new ExistedReservationException();
+        }
+        reservationTimeRepository.deleteById(id);
+    }
+}
