@@ -65,7 +65,7 @@ class WaitingControllerTest {
         Member member = createDefaultMember();
         ReservationTime reservationTime = createDefaultReservationTime();
         Theme theme = createDefaultTheme();
-        dbHelper.prepareForReservation(member, reservationTime, theme);
+        dbHelper.prepareForBooking(member, reservationTime, theme);
 
         String token = jwtTokenProvider.createToken(MemberResult.from(member));
 

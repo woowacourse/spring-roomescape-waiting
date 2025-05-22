@@ -66,7 +66,7 @@ class AdminReservationControllerTest {
         Member admin = createAdminMember();
         ReservationTime reservationTime = createDefaultReservationTime();
         Theme theme = createDefaultTheme();
-        dbHelper.prepareForReservation(admin, reservationTime, theme);
+        dbHelper.prepareForBooking(admin, reservationTime, theme);
 
         String token = jwtTokenProvider.createToken(MemberResult.from(admin));
 

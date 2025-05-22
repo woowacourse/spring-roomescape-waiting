@@ -66,7 +66,7 @@ public class DBHelper {
         em.flush();
     }
 
-    public void prepareForReservation(Member member, ReservationTime time, Theme theme) {
+    public void prepareForBooking(Member member, ReservationTime time, Theme theme) {
         insertMember(member);
         insertTime(time);
         insertTheme(theme);
