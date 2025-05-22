@@ -1,4 +1,4 @@
-package roomescape.waiting.integration.service;
+package roomescape.waiting.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

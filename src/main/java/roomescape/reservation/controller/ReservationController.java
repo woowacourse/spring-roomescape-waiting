@@ -47,7 +47,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationWaitingReadMemberResponse>> getMyReservations2(
+    public ResponseEntity<List<ReservationWaitingReadMemberResponse>> getMyReservations(
             @AuthenticationPrincipal LoginMember loginMember
     ) {
         List<ReservationWaitingReadMemberResponse> responses = reservationService.getReservationsByMember(loginMember);
