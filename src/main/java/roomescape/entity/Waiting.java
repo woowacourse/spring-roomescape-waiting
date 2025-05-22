@@ -6,8 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "RESERVATION")
-public class Reservation {
+@Table(name = "WAITING")
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,10 +33,10 @@ public class Reservation {
     @Column(name = "STATUS")
     private Status status;
 
-    public Reservation() {
+    public Waiting() {
     }
 
-    public Reservation(
+    public Waiting(
             Member member,
             LocalDate date,
             ReservationTime time,
@@ -46,7 +46,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = Status.RESERVATION;
+        this.status = Status.WAITING;
     }
 
     public Long getId() {

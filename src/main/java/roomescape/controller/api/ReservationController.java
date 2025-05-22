@@ -1,25 +1,21 @@
 package roomescape.controller.api;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.config.annotation.AuthMember;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.response.MyReservationResponse;
+import roomescape.controller.dto.response.MyWaitingResponse;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.entity.Member;
 import roomescape.service.ReservationService;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/reservations")
@@ -37,14 +33,23 @@ public class ReservationController {
             @AuthMember Member member,
             @RequestBody @Valid ReservationRequest request
     ) {
-        return ReservationResponse.from(reservationService.addReservationAfterNow(member, request));
+        return ReservationResponse.from(reservationService.addReservation(member, request));
+    }
+
+    @PostMapping("/waiting")
+    @ResponseStatus(HttpStatus.CREATED)
+    public MyWaitingResponse createReservationWaiting(
+            @AuthMember Member member,
+            @RequestBody @Valid ReservationRequest request
+    ) {
+        return MyWaitingResponse.from(reservationService.addWaiting(member, request));
     }
 
     @GetMapping
     public List<ReservationResponse> readReservations() {
         return reservationService.findAllReservations().stream()
-            .map(ReservationResponse::from)
-            .toList();
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     @GetMapping("/filter")
@@ -62,9 +67,16 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public List<MyReservationResponse> readMyReservations(@AuthMember Member member) {
-        return reservationService.findReservationsByMemberId(member).stream()
-            .map(MyReservationResponse::from)
-            .toList();
+
+        List<MyReservationResponse> responseFromReservation = reservationService.findReservationsByMemberId(member).stream()
+                .map(MyReservationResponse::fromReservation)
+                .toList();
+        List<MyReservationResponse> responseFromWaiting = reservationService.findAllWaitingWithRankByMemberId(member).stream()
+                .map(MyReservationResponse::fromWaiting)
+                .toList();
+        return Stream.of(responseFromReservation, responseFromWaiting)
+                .flatMap(Collection::stream)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

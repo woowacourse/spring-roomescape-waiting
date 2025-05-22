@@ -1,12 +1,12 @@
 package roomescape.entity;
 
-public enum ReservationStatus {
+public enum Status {
     RESERVATION("예약"),
     WAITING("예약대기");
 
     private final String text;
 
-    ReservationStatus(String text) {
+    Status(String text) {
         this.text = text;
     }
 

@@ -132,6 +132,7 @@ function checkDateAndThemeAndTime() {
   const selectedThemeElement = document.querySelector('.theme-slot.active');
   const selectedTimeElement = document.querySelector('.time-slot.active');
   const reserveButton = document.getElementById("reserve-button");
+  const waitButton = document.getElementById("wait-button");
 
   if (selectedDate && selectedThemeElement && selectedTimeElement) {
     if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
@@ -201,14 +202,14 @@ function onWaitButtonClick() {
   if (selectedDate && selectedThemeId && selectedTimeId) {
     const reservationData = {
       date: selectedDate,
-      theme: selectedThemeId,
-      time: selectedTimeId
+      themeId: selectedThemeId,
+      timeId: selectedTimeId
     };
 
     /*
     TODO: [3단계] 예약 대기 생성 요청 API 호출
      */
-    fetch('', {
+    fetch('/reservations/waiting', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
