@@ -25,6 +25,6 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.DELETE_CONFLICT;
         return ResponseEntity
             .status(errorCode.getHttpStatus())
-            .body(new ErrorResponse(LocalDateTime.now(), errorCode.name(), e.getMessage()));
+            .body(new ErrorResponse(LocalDateTime.now(), errorCode.name(), errorCode.getMessage()));
     }
 }

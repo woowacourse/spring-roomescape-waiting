@@ -24,8 +24,7 @@ public class CheckLoginInterceptor implements HandlerInterceptor {
         Member member = authService.findMemberByToken(token);
 
         if (member == null || member.getRole() != Role.ADMIN) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return false;
+            throw new AuthenticatedException("관리자 권한 필요");
         }
         return true;
     }
