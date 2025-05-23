@@ -15,6 +15,7 @@ import roomescape.entity.Theme;
 import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
+import roomescape.repository.jpa.JpaMemberRepository;
 import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaReservationTimeRepository;
 import roomescape.repository.jpa.JpaThemeRepository;
@@ -26,13 +27,15 @@ public class ReservationService {
     private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
+    private final JpaMemberRepository memberRepository;
 
     public ReservationService(JpaReservationRepository reservationRepository,
         JpaReservationTimeRepository reservationTimeRepository,
-        JpaThemeRepository themeRepository) {
+        JpaThemeRepository themeRepository, JpaMemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
     @Transactional(readOnly = true)
@@ -59,22 +62,31 @@ public class ReservationService {
 
     public ReservationResponse addReservationAfterNow(Member member, ReservationRequest request) {
         LocalDate date = request.date();
-        ReservationTime time = reservationTimeRepository.findById(request.timeId())
-            .orElseThrow(() -> new NotFoundException("time"));
-
-        validateDateTimeAfterNow(date, time);
-
-        return addReservation(member, request);
-    }
-
-    public ReservationResponse addReservation(Member member, ReservationRequest request) {
-        validateDuplicateReservation(request);
 
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
             .orElseThrow(() -> new NotFoundException("time"));
 
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new NotFoundException("theme"));
+
+        validateDateTimeAfterNow(date, time);
+        validateDuplicateReservation(request);
+
+        return ReservationResponse.from(
+            reservationRepository.save(new Reservation(member, request.date(), time, theme)));
+    }
+
+    public ReservationResponse addReservation(ReservationRequest request) {
+        Member member = memberRepository.findById(request.memberId())
+            .orElseThrow(() -> new NotFoundException("member"));
+
+        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+            .orElseThrow(() -> new NotFoundException("time"));
+
+        Theme theme = themeRepository.findById(request.themeId())
+            .orElseThrow(() -> new NotFoundException("theme"));
+
+        validateDuplicateReservation(request);
 
         return ReservationResponse.from(
             reservationRepository.save(new Reservation(member, request.date(), time, theme)));
