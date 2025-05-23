@@ -49,12 +49,6 @@ public class ReservationController {
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
     }
 
-    @PostMapping("/waiting")
-    public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody final WaitingRequest request, Member member) {
-        WaitingResponse responseDto = waitingService.createWaiting(request, member);
-        return ResponseEntity.created(URI.create("reservations/waiting/" + responseDto.id())).body(responseDto);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id, Member member) {
         if (Role.isUser(member.getRole())) {
@@ -62,6 +56,18 @@ public class ReservationController {
         }
 
         reservationService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody final WaitingRequest request, Member member) {
+        WaitingResponse responseDto = waitingService.createWaiting(request, member);
+        return ResponseEntity.created(URI.create("reservations/waiting/" + responseDto.id())).body(responseDto);
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable final Long id, Member member) {
+        waitingService.deleteWaiting(id, member.getId());
         return ResponseEntity.noContent().build();
     }
 }

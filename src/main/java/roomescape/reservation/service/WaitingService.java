@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.DuplicateContentException;
+import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
@@ -41,5 +42,14 @@ public class WaitingService {
         Long memberId = tokenProvider.getMemberIdFromToken(token);
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
         return waitingWithRanks.stream().map(MemberReservationResponse::from).toList();
+    }
+
+    @Transactional
+    public void deleteWaiting(Long id, Long memberId) {
+        if (waitingRepository.findByIdAndMemberId(id, memberId).isEmpty()) {
+            throw new NotFoundException("[ERROR] 등록된 예약대기만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+        }
+
+        waitingRepository.deleteById(id);
     }
 }

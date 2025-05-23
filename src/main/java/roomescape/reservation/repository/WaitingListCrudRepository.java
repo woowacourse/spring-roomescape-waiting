@@ -2,12 +2,15 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 
 public interface WaitingListCrudRepository extends ListCrudRepository<Waiting, Long> {
+
+    Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
     @Query("""
             SELECT new roomescape.reservation.domain.WaitingWithRank(
