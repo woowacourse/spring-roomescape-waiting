@@ -2,18 +2,16 @@ package roomescape.waiting.infrastructure;
 
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.domain.WaitingWithRank;
 
 @Repository
+@AllArgsConstructor
 public class WaitingRepositoryAdapter implements WaitingRepository {
     private final WaitingJpaRepository waitingJpaRepository;
-
-    public WaitingRepositoryAdapter(WaitingJpaRepository waitingJpaRepository) {
-        this.waitingJpaRepository = waitingJpaRepository;
-    }
 
     @Override
     public Waiting save(Waiting waiting) {

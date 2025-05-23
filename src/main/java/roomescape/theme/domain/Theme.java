@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,15 +28,8 @@ public class Theme {
     private String thumbnail;
 
     public Theme(String name, String description, String thumbnail) {
-        this.name = Objects.requireNonNull(name);
-        this.description = Objects.requireNonNull(description);
-        this.thumbnail = Objects.requireNonNull(thumbnail);
-    }
-
-    public Theme(Long id, String name, String description, String thumbnail) {
-        this.id = Objects.requireNonNull(id);
-        this.name = Objects.requireNonNull(name);
-        this.description = Objects.requireNonNull(description);
-        this.thumbnail = Objects.requireNonNull(thumbnail);
+        this.name = name;
+        this.description = description;
+        this.thumbnail = thumbnail;
     }
 }

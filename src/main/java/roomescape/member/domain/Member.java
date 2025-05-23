@@ -40,12 +40,4 @@ public class Member {
         this.password = password;
         this.role = Role.USER;
     }
-
-    public Member(Long id, Name name, Email email, Password password, Role role) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
 }

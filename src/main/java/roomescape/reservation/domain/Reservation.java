@@ -9,7 +9,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,14 +33,8 @@ public class Reservation {
     ReservationSpec spec;
 
     public Reservation(Member member, ReservationSpec spec) {
-        this.member = Objects.requireNonNull(member);
-        this.spec = Objects.requireNonNull(spec);
-    }
-
-    public Reservation(Long id, Member member, ReservationSpec spec) {
-        this.id = Objects.requireNonNull(id);
-        this.member = Objects.requireNonNull(member);
-        this.spec = Objects.requireNonNull(spec);
+        this.member = member;
+        this.spec = spec;
     }
 
     public LocalDate getDate() {
