@@ -52,7 +52,7 @@ class ReserveTicketServiceTest {
         BCryptPasswordEncoder bCryptPasswordEncoder = ServiceFixture.passwordEncoder();
         memberService = new MemberService(bCryptPasswordEncoder, fakeMemberRepository, jwtTokenProvider);
 
-        FakeReserveTicketRepository reservationMemberRepository = ServiceFixture.fakeReservationMemberRepository();
+        FakeReserveTicketRepository reservationMemberRepository = ServiceFixture.fakeReserveTicketRepository();
         reserveTicketService = new ReserveTicketService(memberService, reservationService,
                 reservationMemberRepository);
     }

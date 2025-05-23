@@ -36,7 +36,7 @@ public class ServiceFixture {
         return new FakeThemeRepository();
     }
 
-    public static FakeReserveTicketRepository fakeReservationMemberRepository() {
+    public static FakeReserveTicketRepository fakeReserveTicketRepository() {
         return new FakeReserveTicketRepository();
     }
 }
