@@ -1,4 +1,4 @@
-package roomescape.reservation.application;
+package roomescape.theme.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -14,12 +14,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.reservation.time.application.ReservationTimeService;
-import roomescape.theme.application.ThemeService;
+import roomescape.reservation.application.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.time.application.ReservationTimeService;
 import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.presentation.ThemeRequest;
 import roomescape.theme.presentation.ThemeResponse;
 
@@ -56,7 +56,7 @@ public class ThemeServiceTest {
 
     @Test
     @DisplayName("테마 전체 조회 테스트")
-    void getThemesTest() {
+    void getThemesTestById() {
         // given
         ThemeRequest themeRequest = new ThemeRequest(
                 "레벨2 탈출",

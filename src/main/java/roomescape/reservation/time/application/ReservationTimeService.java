@@ -2,6 +2,7 @@ package roomescape.reservation.time.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.ReservationRepository;
@@ -56,6 +57,11 @@ public class ReservationTimeService {
                     return new AvailableReservationTimeResponse(reservationTime, alreadyBooked);
                 })
                 .toList();
+    }
+
+    public ReservationTime getReservationTimeById(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NoSuchElementException("예약 시간 정보를 찾을 수 없습니다."));
     }
 
     private void validateIsDuplicatedTime(ReservationTimeRequest reservationTimeRequest) {

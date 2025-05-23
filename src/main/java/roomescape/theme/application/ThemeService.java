@@ -1,6 +1,7 @@
 package roomescape.theme.application;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.ReservationRepository;
@@ -44,6 +45,11 @@ public class ThemeService {
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
         themeRepository.delete(theme);
+    }
+
+    public Theme getThemeById(final Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NoSuchElementException("테마 정보를 찾을 수 없습니다."));
     }
 
     private void validateThemeHasNoReservations(final Long themeId) {
