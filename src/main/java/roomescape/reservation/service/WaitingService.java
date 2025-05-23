@@ -1,10 +1,13 @@
 package roomescape.reservation.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.DuplicateContentException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.WaitingRepository;
@@ -32,5 +35,11 @@ public class WaitingService {
         }
         Waiting newWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(newWaiting, newWaiting.getTime(), newWaiting.getTheme());
+    }
+
+    public List<MemberReservationResponse> findAllMemberWaitings(String token) {
+        Long memberId = tokenProvider.getMemberIdFromToken(token);
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
+        return waitingWithRanks.stream().map(MemberReservationResponse::from).toList();
     }
 }
