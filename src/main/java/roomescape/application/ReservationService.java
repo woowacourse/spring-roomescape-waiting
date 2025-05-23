@@ -13,6 +13,8 @@ import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.ReservationSpecifications;
@@ -21,17 +23,20 @@ import roomescape.infrastructure.ReservationSpecifications;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final UserRepository userRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
+            final WaitingRepository waitingRepository,
             final TimeSlotRepository timeSlotRepository,
             final ThemeRepository themeRepository,
             final UserRepository userRepository
     ) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.userRepository = userRepository;
@@ -81,8 +86,20 @@ public class ReservationService {
     }
 
     public void removeById(final long id) {
-        reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+
+        Optional<Waiting> waiting =
+                waitingRepository.findFirstByDateAndTimeSlotIdAndThemeIdOrderByIdAsc(
+                        reservation.date(),
+                        reservation.timeSlot().id(),
+                        reservation.theme().id());
+
+        waiting.ifPresent(firstWaiting -> {
+            Reservation waitingReservation = Reservation.fromWaiting(firstWaiting);
+            reservationRepository.save(waitingReservation);
+            waitingRepository.deleteById(firstWaiting.id());
+        });
 
         reservationRepository.deleteById(id);
     }

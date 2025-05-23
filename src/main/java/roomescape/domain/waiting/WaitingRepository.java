@@ -8,8 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    Optional<Waiting> findByDateAndTimeSlotIdAndThemeIdAndUserId(LocalDate date, long timeId, long themeId,
-                                                                 long userId);
+    Optional<Waiting> findFirstByDateAndTimeSlotIdAndThemeIdOrderByIdAsc(LocalDate date, long timeSlotId, long themeId);
 
     @Query("""
                 SELECT new roomescape.domain.waiting.WaitingWithRank(

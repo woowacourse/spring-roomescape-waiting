@@ -14,6 +14,7 @@ import lombok.experimental.Accessors;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.User;
+import roomescape.domain.waiting.Waiting;
 import roomescape.exception.BusinessRuleViolationException;
 
 @EqualsAndHashCode(of = {"id"})
@@ -64,6 +65,10 @@ public class Reservation {
 
         validateNotPastDateTime(date, timeSlot);
         return new Reservation(null, user, date, timeSlot, theme);
+    }
+
+    public static Reservation fromWaiting(final Waiting waiting) {
+        return new Reservation(null, waiting.user(), waiting.date(), waiting.timeSlot(), waiting.theme());
     }
 
     private static void validateNotPastDateTime(final LocalDate date, final TimeSlot timeSlot) {
