@@ -44,7 +44,7 @@ public class Waiting {
         return Reservation.create(this.bookingInfo);
     }
 
-    public boolean sameWaiterWith(Long memberId) {
+    public boolean isOwnedBy(Long memberId) {
         return getMember().getId().equals(memberId);
     }
 

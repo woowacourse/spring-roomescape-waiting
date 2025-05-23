@@ -38,7 +38,7 @@ public class MyPageController {
             @PathVariable("waitingId") Long waitingId,
             @LoginMember LoginMemberInfo loginMemberInfo) {
 
-        waitingService.cancelWaitingById(waitingId, loginMemberInfo);
+        waitingService.cancelWaitingByIdForMember(waitingId, loginMemberInfo);
         return ResponseEntity.noContent().build();
     }
 }

@@ -29,7 +29,7 @@ public class AdminWaitingController {
 
     @DeleteMapping("/{waitingId}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable("waitingId") Long waitingId) {
-        waitingService.denyWaitingById(waitingId);
+        waitingService.denyWaitingByIdForAdmin(waitingId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -71,14 +71,14 @@ public class WaitingService {
     }
 
     @Transactional
-    public void denyWaitingById(Long waitingId) {
+    public void denyWaitingByIdForAdmin(Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new NotFoundException("waitingId", waitingId));
         waitingRepository.delete(waiting);
     }
 
     @Transactional
-    public void cancelWaitingById(Long waitingId, LoginMemberInfo loginMemberInfo) {
+    public void cancelWaitingByIdForMember(Long waitingId, LoginMemberInfo loginMemberInfo) {
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new NotFoundException("waitingId", waitingId));
         validateCancelPermission(loginMemberInfo, waiting);
@@ -87,7 +87,7 @@ public class WaitingService {
     }
 
     private void validateCancelPermission(LoginMemberInfo loginMemberInfo, Waiting waiting) {
-        boolean notSameMember = !waiting.sameWaiterWith(loginMemberInfo.id());
+        boolean notSameMember = !waiting.isOwnedBy(loginMemberInfo.id());
         if (notSameMember) {
             throw new DeletionNotAllowedException("자신의 예약만 삭제할 수 있습니다.");
         }

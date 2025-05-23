@@ -143,7 +143,7 @@ class WaitingServiceTest {
         LoginMemberInfo loginMemberInfo = new LoginMemberInfo(member.getId());
 
         //when
-        waitingService.cancelWaitingById(waiting.getId(), loginMemberInfo);
+        waitingService.cancelWaitingByIdForMember(waiting.getId(), loginMemberInfo);
 
         //then
         assertThat(waitingRepository.findById(waiting.getId())).isEmpty();
@@ -162,12 +162,25 @@ class WaitingServiceTest {
         LoginMemberInfo loginMemberInfo = new LoginMemberInfo(member2.getId());
 
         //when & then
-        assertThatThrownBy(() -> waitingService.cancelWaitingById(waiting.getId(), loginMemberInfo))
+        assertThatThrownBy(() -> waitingService.cancelWaitingByIdForMember(waiting.getId(), loginMemberInfo))
                 .isInstanceOf(DeletionNotAllowedException.class)
                 .hasMessage("자신의 예약만 삭제할 수 있습니다.");
     }
 
+    @DisplayName("(관리자는) 대기 id로 대기를 거절할 수 있다")
     @Test
     void denyWaitingById() {
+        // given
+        Theme theme = themeRepository.save(createDefaultTheme());
+        ReservationTime reservationTime = reservationTimeRepository.save(createDefaultReservationTime());
+        Member member = memberRepository.save(createDefaultMember());
+
+        Waiting waiting = waitingRepository.save(createWaiting(member, DEFAULT_DATE, reservationTime, theme));
+
+        //when
+        waitingService.denyWaitingByIdForAdmin(waiting.getId());
+
+        //then
+        assertThat(waitingRepository.findById(waiting.getId())).isEmpty();
     }
 }
