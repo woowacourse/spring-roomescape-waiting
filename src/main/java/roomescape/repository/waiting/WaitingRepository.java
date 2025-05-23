@@ -10,6 +10,8 @@ public interface WaitingRepository {
 
     long save(Waiting waiting);
 
+    List<Waiting> findAll();
+
     Optional<Waiting> findById(Long id);
 
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);

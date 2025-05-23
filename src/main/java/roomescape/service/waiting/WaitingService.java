@@ -56,6 +56,10 @@ public class WaitingService {
         }
     }
 
+    public List<Waiting> getAllWaitings() {
+        return waitingRepository.findAll();
+    }
+
     public Waiting getWaitingById(Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약대기입니다."));

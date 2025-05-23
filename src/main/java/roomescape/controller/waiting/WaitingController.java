@@ -3,6 +3,7 @@ package roomescape.controller.waiting;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import roomescape.infrastructure.auth.member.UserInfo;
 import roomescape.service.waiting.WaitingService;
 
 import java.net.URI;
+import java.util.List;
 
 @Controller
 @RequestMapping("/reservations/waiting")
@@ -33,5 +35,14 @@ public class WaitingController {
 
         WaitingResponseDto waitingResponseDto = new WaitingResponseDto(addedWaitingId, waiting.getName(), waiting.getStartAt(), waiting.getDate(), waiting.getThemeName());
         return ResponseEntity.created(URI.create("/reservations/waiting/" + addedWaitingId)).body(waitingResponseDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<WaitingResponseDto>> waitings() {
+        List<Waiting> waitings = waitingService.getAllWaitings();
+        List<WaitingResponseDto> waitingResponseDtos = waitings.stream()
+                .map(waiting -> new WaitingResponseDto(waiting.getId(), waiting.getName(), waiting.getStartAt(), waiting.getDate(), waiting.getThemeName()))
+                .toList();
+        return ResponseEntity.ok(waitingResponseDtos);
     }
 }
