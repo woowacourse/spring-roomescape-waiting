@@ -8,12 +8,13 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.dto.MemberReservationRequest;
 import roomescape.reservation.application.dto.MyReservation;
-import roomescape.waiting.application.dto.WaitingResponse;
+import roomescape.waiting.application.dto.WaitingIdResponse;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingWithRank;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.waiting.application.dto.WaitingInfoResponse;
 import roomescape.waiting.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
@@ -41,7 +42,7 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
-    public WaitingResponse addWaiting(@Valid MemberReservationRequest request, Long memberId) {
+    public WaitingIdResponse addWaiting(@Valid MemberReservationRequest request, Long memberId) {
         ReservationTime reservationTime = getReservationTime(request.timeId());
         Member member = getMember(memberId);
         Theme theme = getTheme(request.themeId());
@@ -63,7 +64,7 @@ public class WaitingService {
         }
 
         Waiting savedWaiting = waitingRepository.save(waiting);
-        return WaitingResponse.from(savedWaiting);
+        return WaitingIdResponse.from(savedWaiting);
     }
 
     public List<MyReservation> getWaitingsFromMember(Long memberId) {
@@ -74,6 +75,23 @@ public class WaitingService {
             .map(MyReservation::from)
             .toList();
     }
+
+    public void cancel(Long memberId, Long waitingId) {
+        Waiting waiting = getWaiting(waitingId);
+        if (!waiting.getMember().getId().equals(memberId)) {
+            throw new IllegalArgumentException("본인의 대기만 삭제할 수 있습니다.");
+        }
+        waitingRepository.deleteById(waitingId);
+    }
+
+    public List<WaitingInfoResponse> getAllWaitingInfos() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        System.out.println("waitingSize = " + waitings.size());
+        return waitings.stream()
+            .map(WaitingInfoResponse::from)
+            .toList();
+    }
+
 
     private ReservationTime getReservationTime(final Long timeId) {
         return reservationTimeRepository.findById(timeId)
@@ -93,13 +111,5 @@ public class WaitingService {
     private Waiting getWaiting(final Long waitingId) {
         return waitingRepository.findById(waitingId)
             .orElseThrow(() -> new NotFoundException("선택한 웨이팅이 존재하지 않습니다."));
-    }
-
-    public void cancel(Long memberId, Long waitingId) {
-        Waiting waiting = getWaiting(waitingId);
-        if (!waiting.getMember().getId().equals(memberId)) {
-            throw new IllegalArgumentException("본인의 대기만 삭제할 수 있습니다.");
-        }
-        waitingRepository.deleteById(waitingId);
     }
 }

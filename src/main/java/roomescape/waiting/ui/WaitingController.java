@@ -1,4 +1,4 @@
-package roomescape.reservation.ui;
+package roomescape.waiting.ui;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -14,7 +14,8 @@ import roomescape.login.application.dto.LoginCheckRequest;
 import roomescape.waiting.application.WaitingService;
 import roomescape.reservation.application.dto.MemberReservationRequest;
 import roomescape.reservation.application.dto.MyReservation;
-import roomescape.waiting.application.dto.WaitingResponse;
+import roomescape.waiting.application.dto.WaitingIdResponse;
+import roomescape.waiting.application.dto.WaitingInfoResponse;
 
 @RestController
 public class WaitingController {
@@ -26,13 +27,13 @@ public class WaitingController {
     }
 
     @PostMapping("/waitings")
-    public ResponseEntity<WaitingResponse> add(
+    public ResponseEntity<WaitingIdResponse> add(
         @Valid @RequestBody final MemberReservationRequest request,
         final LoginCheckRequest loginCheckRequest
     ) {
-        WaitingResponse waitingResponse = waitingService.addWaiting(request,
+        WaitingIdResponse waitingIdResponse = waitingService.addWaiting(request,
             loginCheckRequest.id());
-        return new ResponseEntity<>(waitingResponse, HttpStatus.CREATED);
+        return new ResponseEntity<>(waitingIdResponse, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/waitings/{waitingId}")
@@ -49,6 +50,12 @@ public class WaitingController {
         List<MyReservation> waitingsFromMember = waitingService.getWaitingsFromMember(
             loginCheckRequest.id());
         return new ResponseEntity<>(waitingsFromMember, HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/waitings")
+    public ResponseEntity<List<WaitingInfoResponse>> findAllWaitings() {
+        List<WaitingInfoResponse> allWaitingInfos = waitingService.getAllWaitingInfos();
+        return new ResponseEntity<>(allWaitingInfos, HttpStatus.OK);
     }
 
 }
