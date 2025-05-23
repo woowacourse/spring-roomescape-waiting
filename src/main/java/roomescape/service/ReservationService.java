@@ -52,11 +52,7 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationResponse> findReservationsByFilters(Long themeId, Long memberId,
         LocalDate dateFrom, LocalDate dateTo) {
-        return reservationRepository.findAll().stream()
-            .filter(r -> themeId == null || r.getTheme().getId().equals(themeId))
-            .filter(r -> memberId == null || r.getMember().getId().equals(memberId))
-            .filter(r -> dateFrom == null || !r.getDate().isBefore(dateFrom))
-            .filter(r -> dateTo == null || !r.getDate().isAfter(dateTo))
+        return reservationRepository.findByFilters(themeId, memberId, dateFrom, dateTo).stream()
             .map(ReservationResponse::from)
             .toList();
     }
