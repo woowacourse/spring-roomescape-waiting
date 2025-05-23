@@ -1,11 +1,11 @@
 package roomescape.persistence;
 
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Schedule;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingRepository;
 import roomescape.domain.WaitingWithRank;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,8 +39,8 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByMemberIdAndDateAndTimeIdAndThemeId(final Long memberId, final LocalDate date, final Long timeId, final Long themeId) {
-        return jpaWaitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(memberId, date, timeId, themeId);
+    public boolean existsByMemberIdAndSchedule(Long memberId, Schedule schedule) {
+        return jpaWaitingRepository.existsByMemberIdAndSchedule(memberId, schedule);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId) {
-        return jpaWaitingRepository.findByThemeIdAndDateAndTimeId(themeId, date, timeId);
+    public List<Waiting> findBySchedule(Schedule schedule) {
+        return jpaWaitingRepository.findBySchedule(schedule);
     }
 }

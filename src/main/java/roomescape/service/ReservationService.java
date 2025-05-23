@@ -76,7 +76,7 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
+        if (reservationRepository.existsBySchedule(new Schedule(createReservationParam.date(), reservationTime, theme))) {
             throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
     }

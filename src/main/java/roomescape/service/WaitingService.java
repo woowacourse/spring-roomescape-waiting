@@ -44,12 +44,10 @@ public class WaitingService {
 
     @Transactional
     public WaitingResult create(CreateWaitingParam createWaitingParam) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(createWaitingParam.timeId()).orElseThrow(
-                () -> new NotFoundReservationTimeException(createWaitingParam.timeId() + "에 해당하는 정보가 없습니다."));
-        Theme theme = themeRepository.findById(createWaitingParam.themeId()).orElseThrow(
-                () -> new NotFoundThemeException(createWaitingParam.themeId() + "에 해당하는 정보가 없습니다."));
-        Member member = memberRepository.findById(createWaitingParam.memberId()).orElseThrow(
-                () -> new NotFoundMemberException(createWaitingParam.memberId() + "에 해당하는 정보가 없습니다."));
+        ReservationTime reservationTime = getReservationTimeFromRepository(createWaitingParam.timeId());
+        Theme theme = getThemeFromRepository(createWaitingParam.themeId());
+        Member member = getMemberFromRepository(createWaitingParam);
+
         LocalDate date = createWaitingParam.date();
         validateDuplicateWaiting(member, date, reservationTime, theme);
 
@@ -80,14 +78,21 @@ public class WaitingService {
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(
                 () -> new NotFoundWaitingException(waitingId + "에 해당하는 정보가 없습니다."));
 
-        Reservation newReservation = Reservation.createNew(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
+        Reservation newReservation = Reservation.createNew(
+                waiting.getMember(),
+                waiting.getSchedule().getDate(),
+                waiting.getSchedule().getTime(),
+                waiting.getSchedule().getTheme());
         reservationRepository.save(newReservation);
         waitingRepository.deleteById(waitingId);
     }
 
     @Transactional
     public void approveFirst(Long themeId, LocalDate date, Long timeId) {
-        List<Waiting> waitings = waitingRepository.findByThemeIdAndDateAndTimeId(themeId, date, timeId);
+        ReservationTime reservationTime = getReservationTimeFromRepository(timeId);
+        Theme theme = getThemeFromRepository(themeId);
+
+        List<Waiting> waitings = waitingRepository.findBySchedule(new Schedule(date, reservationTime, theme));
         approve(waitings.getFirst().getId()); //TODO: 1순위 대기 가져오는 로직 수정 필요
     }
 
@@ -100,14 +105,28 @@ public class WaitingService {
     }
 
     private void validateDuplicateWaiting(final Member member, final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
-        boolean isExistWaiting = waitingRepository.existsByMemberIdAndDateAndTimeIdAndThemeId(
+        boolean isExistWaiting = waitingRepository.existsByMemberIdAndSchedule(
                 member.getId(),
-                date,
-                reservationTime.getId(),
-                theme.getId());
+                new Schedule(date, reservationTime, theme));
 
         if (isExistWaiting) {
             throw new UnAvailableReservationException("예약 대기가 이미 존재합니다.");
         }
+    }
+
+    private Theme getThemeFromRepository(final Long themeId) {
+        return themeRepository.findById(themeId).orElseThrow(
+                () -> new NotFoundThemeException(themeId + "에 해당하는 정보가 없습니다."));
+    }
+
+    private ReservationTime getReservationTimeFromRepository(final Long createWaitingParam) {
+        return reservationTimeRepository.findById(createWaitingParam).orElseThrow(
+                () -> new NotFoundReservationTimeException(createWaitingParam + "에 해당하는 정보가 없습니다."));
+    }
+
+    private Member getMemberFromRepository(final CreateWaitingParam createWaitingParam) {
+        Member member = memberRepository.findById(createWaitingParam.memberId()).orElseThrow(
+                () -> new NotFoundMemberException(createWaitingParam.memberId() + "에 해당하는 정보가 없습니다."));
+        return member;
     }
 }

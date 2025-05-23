@@ -15,13 +15,8 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    private LocalDate date;
-
-    @ManyToOne
-    private ReservationTime time;
-
-    @ManyToOne
-    private Theme theme;
+    @Embedded
+    private Schedule schedule;
 
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
@@ -33,9 +28,7 @@ public class Reservation {
     private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.schedule = new Schedule(date, time, theme);
         this.status = status;
     }
 
@@ -52,15 +45,15 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return schedule.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return schedule.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return schedule.getTheme();
     }
 
     public ReservationStatus getStatus() {
@@ -69,14 +62,12 @@ public class Reservation {
 
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
+        if (!(o instanceof Reservation that)) return false;
+        return Objects.equals(id, that.id) && Objects.equals(member, that.member) && Objects.equals(schedule, that.schedule) && status == that.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
+        return Objects.hash(id, member, schedule, status);
     }
-
 }

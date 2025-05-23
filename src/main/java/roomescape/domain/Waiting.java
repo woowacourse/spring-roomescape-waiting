@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,10 +17,8 @@ public class Waiting {
     @ManyToOne
     private Member member;
 
-    private LocalDate date;
-
-    @ManyToOne
-    private ReservationTime time;
+    @Embedded
+    private Schedule schedule;
 
     @ManyToOne
     private Theme theme;
@@ -33,16 +29,15 @@ public class Waiting {
     protected Waiting() {
     }
 
-    private Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Waiting(Long id, Member member, Schedule schedule) {
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.schedule = schedule;
+
     }
 
     public static Waiting createNew(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Waiting(null, member, date, time, theme);
+        return new Waiting(null, member, new Schedule(date, time, theme));
     }
 
     public Long getId() {
@@ -53,16 +48,20 @@ public class Waiting {
         return member;
     }
 
+    public Schedule getSchedule() {
+        return schedule;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return schedule.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return schedule.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return schedule.getTheme();
     }
 
     public LocalDateTime getCreatedAt() {
@@ -71,12 +70,13 @@ public class Waiting {
 
     @Override
     public boolean equals(final Object o) {
-        if (!(o instanceof Waiting waiting)) return false;
-        return Objects.equals(id, waiting.id) && Objects.equals(member, waiting.member) && Objects.equals(date, waiting.date) && Objects.equals(time, waiting.time) && Objects.equals(theme, waiting.theme);
+        if (!(o instanceof Waiting)) return false;
+        Waiting waiting = (Waiting) o;
+        return Objects.equals(id, waiting.id) && Objects.equals(member, waiting.member) && Objects.equals(schedule, waiting.schedule) && Objects.equals(createdAt, waiting.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, date, time, theme);
+        return Objects.hash(id, member, schedule, createdAt);
     }
 }

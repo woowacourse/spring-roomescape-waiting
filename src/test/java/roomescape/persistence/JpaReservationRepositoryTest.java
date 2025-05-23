@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.TestFixture;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,7 +52,7 @@ class JpaReservationRepositoryTest {
 
     @Test
     @DisplayName("예약 시간 ID를 통해 해당 시간에 대한 예약이 존재함을 확인할 수 있다.")
-    void existsByTimeId() {
+    void existsBySchedule_TimeId() {
         //given
         Member member = TestFixture.createDefaultMember();
         entityManager.persist(member);
@@ -67,7 +64,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(reservation);
 
         //when
-        boolean result = jpaReservationRepository.existsByTimeId(time.getId());
+        boolean result = jpaReservationRepository.existsBySchedule_TimeId(time.getId());
 
         //then
         assertThat(result).isTrue();
@@ -75,7 +72,7 @@ class JpaReservationRepositoryTest {
 
     @Test
     @DisplayName("날짜, 예약 시간 ID, 테마 ID가 같은 예약이 존재함을 확인할 수 있다.")
-    void existsByDateAndTimeIdAndThemeId() {
+    void existsBySchedule() {
         //given
         Member member = TestFixture.createDefaultMember();
         entityManager.persist(member);
@@ -87,7 +84,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(reservation);
 
         //when
-        boolean result = jpaReservationRepository.existsByDateAndTimeIdAndThemeId(LocalDate.of(2025, 1, 1), time.getId(), theme.getId());
+        boolean result = jpaReservationRepository.existsBySchedule(new Schedule(TEST_DATE, time, theme));
 
         //then
         assertThat(result).isTrue();
@@ -95,7 +92,7 @@ class JpaReservationRepositoryTest {
 
     @Test
     @DisplayName("테마 ID에 예약이 존재하는지 확인할 수 있다.")
-    void existsByThemeId() {
+    void existsBySchedule_ThemeId() {
         // given
         Member member = TestFixture.createDefaultMember();
         entityManager.persist(member);
@@ -107,7 +104,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(reservation);
 
         // when
-        boolean result = jpaReservationRepository.existsByThemeId(theme.getId());
+        boolean result = jpaReservationRepository.existsBySchedule_ThemeId(theme.getId());
 
         //then
         assertThat(result).isTrue();
@@ -115,7 +112,7 @@ class JpaReservationRepositoryTest {
 
     @Test
     @DisplayName("테마 ID와 날짜로 예약을 조회할 수 있다.")
-    void findByThemeIdAndDate() {
+    void findBySchedule_ThemeIdAndSchedule_Date() {
         // given
         Member member = TestFixture.createDefaultMember();
         entityManager.persist(member);
@@ -127,7 +124,7 @@ class JpaReservationRepositoryTest {
         entityManager.persist(reservation);
 
         // when
-        List<Reservation> result = jpaReservationRepository.findByThemeIdAndDate(theme.getId(), TEST_DATE);
+        List<Reservation> result = jpaReservationRepository.findBySchedule_ThemeIdAndSchedule_Date(theme.getId(), TEST_DATE);
 
         // then
         assertAll(

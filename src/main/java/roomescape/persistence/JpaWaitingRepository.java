@@ -2,10 +2,10 @@ package roomescape.persistence;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.domain.Schedule;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
@@ -14,17 +14,17 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
         SELECT new roomescape.domain.WaitingWithRank(
             w, (SELECT COUNT(wr) + 1
                 FROM Waiting wr
-                WHERE wr.theme = w.theme
-                    AND wr.date = w.date
-                    AND wr.time = w.time
+                WHERE wr.schedule.theme = w.schedule.theme
+                    AND wr.schedule.date = w.schedule.date
+                    AND wr.schedule.time = w.schedule.time
                     AND wr.createdAt < w.createdAt))
         FROM Waiting w
         WHERE w.member.id = :memberId
-        ORDER BY w.date ASC, w.time.startAt ASC
+        ORDER BY w.schedule.date ASC, w.schedule.time.startAt ASC
     """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(final Long memberId);
 
-    boolean existsByMemberIdAndDateAndTimeIdAndThemeId(Long memberId, LocalDate date, Long timeId, Long themeId);
+    boolean existsByMemberIdAndSchedule(Long memberId, Schedule schedule);
 
-    List<Waiting> findByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId);
+    List<Waiting> findBySchedule(Schedule schedule);
 }

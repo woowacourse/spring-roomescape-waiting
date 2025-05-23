@@ -34,9 +34,6 @@ class WaitingServiceTest {
     private WaitingRepository waitingRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
-
-    @Autowired
     private ThemeRepository themeRepository;
 
     @Autowired
@@ -98,7 +95,7 @@ class WaitingServiceTest {
         //then
         assertAll(
                 () -> assertThat(waitingWithRankResults).hasSize(2),
-                () -> assertThat(waitingWithRankResults.getFirst().rank()).isEqualTo(0)
+                () -> assertThat(waitingWithRankResults.getFirst().rank()).isEqualTo(1)
         );
     }
 
