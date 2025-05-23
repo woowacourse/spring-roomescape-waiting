@@ -25,19 +25,4 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
                                                                          long themeId, long memberId);
 
     List<Reservation> findReservationsByMemberId(long id);
-
-    @Query(
-        "select new roomescape.domain.reservation.ReservationWaitingRank(" +
-        "cast(count(r) as int)) " +
-        "from Reservation r " +
-        "where r.status = 'WAITING' " +
-        "and r.theme.id = :themeId " +
-        "and r.date = :date " +
-        "and r.time.id = :timeId"
-    )
-    ReservationWaitingRank findWaitingRankByThemeIdAndDateAndTimeId(
-        @Param("themeId") Long themeId,
-        @Param("date") LocalDate date,
-        @Param("timeId") Long timeId
-    );
 }

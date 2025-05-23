@@ -9,6 +9,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.ReservationWaitingRank;
+import roomescape.domain.reservation.ReservationWaitingTicket;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MyReservationResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -17,6 +18,7 @@ import roomescape.exception.NotFoundException;
 import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.repository.JpaReservationWaitingTicketRepository;
 import roomescape.repository.JpaThemeRepository;
 import roomescape.service.dto.ReservationCreateDto;
 
@@ -28,16 +30,19 @@ public class ReservationService {
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
     private final JpaMemberRepository memberRepository;
+    private final JpaReservationWaitingTicketRepository waitingTicketRepository;
 
     public ReservationService(final JpaReservationRepository reservationRepository,
                               final JpaReservationTimeRepository reservationTimeRepository,
                               final JpaThemeRepository themeRepository,
-                              final JpaMemberRepository memberRepository
+                              final JpaMemberRepository memberRepository,
+                              JpaReservationWaitingTicketRepository waitingTicketRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingTicketRepository = waitingTicketRepository;
     }
 
     public ReservationResponseDto createReservation(ReservationCreateDto dto) {
@@ -96,6 +101,7 @@ public class ReservationService {
 
         Reservation requestReservation = Reservation.createWaitingWithoutId(member, createDto.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
+        waitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
         return ReservationResponseDto.of(
                 newReservation,
                 reservationTime,
@@ -129,10 +135,13 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
         return reservations.stream().map(reservation -> {
             if (reservation.isReservationWaiting()) {
-                ReservationWaitingRank rank = reservationRepository.findWaitingRankByThemeIdAndDateAndTimeId(
+                ReservationWaitingTicket reservationWaitingTicket = waitingTicketRepository.findByReservationId(
+                        reservation.getId());
+                ReservationWaitingRank rank = waitingTicketRepository.countReservationWaitingsByThemeIdAndDateAndTimeIdAndCreatedAt(
                         reservation.getTheme().getId(),
                         reservation.getDate(),
-                        reservation.getTime().getId()
+                        reservation.getTime().getId(),
+                        reservationWaitingTicket.getCreatedAt()
                 );
                 return new MyReservationResponseDto(
                         reservation, rank
