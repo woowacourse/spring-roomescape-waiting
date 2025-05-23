@@ -87,10 +87,8 @@ public class ReservationService {
     }
 
     public void cancelReservationById(final long id) {
-        // 해당 아이디를 가지는 waiting이 있는지 확인
         final Optional<Waiting> waiting = waitingRepository.findFirstByReservationIdOrderByCreatedAtAsc(id);
         if (waiting.isPresent()) {
-            // 업데이트
             Waiting waiting2 = waiting.get();
             final Reservation reservation = reservationRepository.findById(id)
                     .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));

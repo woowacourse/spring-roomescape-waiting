@@ -59,7 +59,7 @@ Content-Type: application/json
 ### Request
 
 ```
-DELETE /themes/1 HTTP/1.1
+DELETE /themes/{id} HTTP/1.1
 ```
 
 ### Response
