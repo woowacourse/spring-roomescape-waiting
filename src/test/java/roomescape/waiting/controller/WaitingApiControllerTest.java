@@ -18,7 +18,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.web.interceptor.AdminMemberHandlerInterceptor;
 import roomescape.auth.web.resolver.AuthenticatedMemberArgumentResolver;
-import roomescape.config.AuthServiceTestConfig;
+import roomescape.config.WebMvcTestConfig;
 import roomescape.fixture.entity.MemberFixture;
 import roomescape.fixture.entity.ReservationDateTimeFixture;
 import roomescape.fixture.entity.ThemeFixture;
@@ -27,15 +27,17 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.controller.request.ReserveByUserRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.exception.InAlreadyReservationException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
+import roomescape.waiting.exception.InAlreadyWaitingException;
 import roomescape.waiting.service.WaitingService;
 
 @WebMvcTest(controllers = WaitingApiController.class)
-@Import(AuthServiceTestConfig.class)
+@Import({WebMvcTestConfig.class})
 class WaitingApiControllerTest {
 
     @Autowired
@@ -74,11 +76,36 @@ class WaitingApiControllerTest {
         given(reservationService.waiting(any())).willReturn(reservationResponse);
 
         // when & then
+        mockMvc.perform(post("/reservations/waiting").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reserveByUserRequest))).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.id").value(1L)).andDo(print());
+    }
+
+    @Test
+    void 이미_예약한_사람이면_409_상태_코드를_반환한다() throws Exception {
+        // given
+        ReserveByUserRequest reserveByUserRequest = new ReserveByUserRequest(LocalDate.now(), 1L, 1L);
+        given(reservationService.waiting(any()))
+                .willThrow(new InAlreadyReservationException("이미 예약한 사용자입니다."));
+
+        // when & then
         mockMvc.perform(post("/reservations/waiting")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reserveByUserRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.id").value(1L))
-                .andDo(print());
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void 이미_예약_대기를_했다면_409_상태_코드를_반환한다() throws Exception {
+        // given
+        ReserveByUserRequest reserveByUserRequest = new ReserveByUserRequest(LocalDate.now(), 1L, 1L);
+        given(reservationService.waiting(any()))
+                .willThrow(new InAlreadyWaitingException("이미 예약 대기를 한 사용자입니다."));
+
+        // when & then
+        mockMvc.perform(post("/reservations/waiting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reserveByUserRequest)))
+                .andExpect(status().isConflict());
     }
 }

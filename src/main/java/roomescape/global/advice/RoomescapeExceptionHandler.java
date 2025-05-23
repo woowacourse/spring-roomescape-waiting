@@ -2,14 +2,10 @@ package roomescape.global.advice;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static roomescape.global.response.GlobalErrorCode.IN_ALREADY_EXCEPTION;
 import static roomescape.global.response.GlobalErrorCode.NO_ELEMENTS;
-import static roomescape.global.response.GlobalErrorCode.ROOMESCAPE_SERVER_ERROR;
 import static roomescape.global.response.GlobalErrorCode.WRONG_ARGUMENT;
-import static roomescape.reservation.controller.response.ReservationErrorCode.PAST_RESERVATION;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +16,6 @@ import roomescape.global.exception.InAlreadyException;
 import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.response.ApiResponse;
-import roomescape.reservation.exception.PastReservationException;
 
 @Slf4j
 @RestControllerAdvice

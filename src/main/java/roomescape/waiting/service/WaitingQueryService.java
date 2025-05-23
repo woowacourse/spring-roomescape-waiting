@@ -57,7 +57,6 @@ public class WaitingQueryService {
         throw new NotFoundException("예약 대기를 찾을 수 없습니다.");
     }
 
-
     public Reservation getWaiting(Long id) {
         return statusRepository.findByIdAndStatus(id, ReservationStatus.WAITING)
                 .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));

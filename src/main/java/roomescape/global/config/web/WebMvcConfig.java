@@ -17,12 +17,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final AdminMemberHandlerInterceptor adminMemberHandlerInterceptor;
 
     @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(authenticatedMemberArgumentResolver);
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(adminMemberHandlerInterceptor).addPathPatterns("/admin/**");
     }
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(adminMemberHandlerInterceptor).addPathPatterns("/admin/**");
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(authenticatedMemberArgumentResolver);
     }
 }
