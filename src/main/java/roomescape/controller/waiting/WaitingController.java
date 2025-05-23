@@ -3,7 +3,9 @@ package roomescape.controller.waiting;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,5 +46,11 @@ public class WaitingController {
                 .map(waiting -> new WaitingResponseDto(waiting.getId(), waiting.getName(), waiting.getStartAt(), waiting.getDate(), waiting.getThemeName()))
                 .toList();
         return ResponseEntity.ok(waitingResponseDtos);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
+        waitingService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 }

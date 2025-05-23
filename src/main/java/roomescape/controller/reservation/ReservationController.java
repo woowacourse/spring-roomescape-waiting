@@ -21,7 +21,6 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;

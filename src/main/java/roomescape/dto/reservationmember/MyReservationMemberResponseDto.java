@@ -6,7 +6,7 @@ import roomescape.domain.waiting.WaitingWithRank;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record MyReservationMemberResponseDto(Long reservationId, String name, String themeName,
+public record MyReservationMemberResponseDto(Long id, String name, String themeName,
                                              LocalDate date, LocalTime startAt, String status) {
 
     public static MyReservationMemberResponseDto from(ReserveTicket reserveTicket) {

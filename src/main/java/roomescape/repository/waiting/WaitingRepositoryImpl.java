@@ -40,4 +40,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     public boolean existsByDateAndTimeAndThemeAndMember(Waiting waiting) {
         return jpaWaitingRepository.existsByDateAndTimeAndThemeAndMember(waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember());
     }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaWaitingRepository.deleteById(id);
+    }
 }

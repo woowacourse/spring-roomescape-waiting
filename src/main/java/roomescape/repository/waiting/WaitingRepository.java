@@ -17,4 +17,6 @@ public interface WaitingRepository {
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
     boolean existsByDateAndTimeAndThemeAndMember(Waiting waiting);
+
+    void deleteById(Long id);
 }
