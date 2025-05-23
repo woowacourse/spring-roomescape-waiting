@@ -74,6 +74,10 @@ public class Reservation {
         return new Reservation(null, member, date, time, theme, ReservationStatus.WAITING);
     }
 
+    public void setStatus(ReservationStatus reservationStatus) {
+        this.status = reservationStatus;
+    }
+
     public static void validateReservableTime(final LocalDate date, final LocalTime startAt) {
        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
         if (dateTime.isBefore(LocalDateTime.now())) {

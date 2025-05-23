@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class ReservationService {
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId) {
-        List<Reservation> reservations = reservationRepository.findReservationByDateAndTimeIdAndThemeId(date, timeId,
+        List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId,
                 themeId);
         if (!reservations.isEmpty()) {
             throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 예약 대기 기능을 사용해주세요.");
@@ -150,19 +151,49 @@ public class ReservationService {
     }
 
     public void deleteReservation(Long id) {
-        if (!reservationRepository.existsById(id)) {
+        Optional<Reservation> reservation = reservationRepository.findById(id);
+        if (reservation.isEmpty()) {
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
         reservationRepository.deleteById(id);
 
-   //todo findById()를 바로 해오면 쿼리가 3번 -> 2번이 됨
+        updateReservationWaitingToReservation(reservation.get());
     }
 
     public void deleteReservationWaiting(Long id) {
-        Optional<ReservationWaitingTicket> reservationWaitingTicket = waitingTicketRepository.findById(id);
-        if (reservationWaitingTicket.isEmpty()) {
+        Optional<Reservation> reservationWaiting = reservationRepository.findById(id);
+        if (reservationWaiting.isEmpty()) {
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
-        waitingTicketRepository.deleteById(id);
+        reservationRepository.deleteById(id);
+    }
+
+    private void updateReservationWaitingToReservation(Reservation deletedReservation) {
+        List<Reservation> reservationWaitings = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
+                deletedReservation.getDate(),
+                deletedReservation.getTime().getId(),
+                deletedReservation.getTheme().getId()
+        );
+
+        if (reservationWaitings.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime earliestCreatedAt = LocalDateTime.MAX;
+        Long earliestReservationWaitingId = null;
+        for (Reservation waiting : reservationWaitings) {
+            ReservationWaitingTicket reservationWaitingTicket = waitingTicketRepository.findByReservationId(
+                    waiting.getId());
+            if (reservationWaitingTicket.getCreatedAt().isBefore(earliestCreatedAt)) {
+                earliestCreatedAt = reservationWaitingTicket.getCreatedAt();
+                earliestReservationWaitingId = reservationWaitingTicket.getId();
+            }
+        }
+
+        ReservationWaitingTicket earliestReservationWaiting = waitingTicketRepository.findById(earliestReservationWaitingId).get();
+        waitingTicketRepository.deleteById(earliestReservationWaitingId);
+        Reservation updatingReservation = reservationRepository.findById(
+                earliestReservationWaiting.getReservation().getId()).get();
+        updatingReservation.setStatus(ReservationStatus.RESERVED);
     }
 }
