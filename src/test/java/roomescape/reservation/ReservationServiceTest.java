@@ -25,7 +25,7 @@ import roomescape.exception.custom.reason.reservation.ReservationNotFoundExcepti
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
 import roomescape.exception.custom.reason.reservation.ReservationPastTimeException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepositoryFacadeImpl;
+import roomescape.member.MemberRepositoryImpl;
 import roomescape.member.MemberRole;
 import roomescape.reservation.dto.AdminFilterReservationRequest;
 import roomescape.reservation.dto.AdminReservationRequest;
@@ -33,45 +33,45 @@ import roomescape.reservation.dto.MineReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepositoryFacade;
-import roomescape.reservationtime.ReservationTimeRepositoryFacadeImpl;
+import roomescape.reservationtime.ReservationTimeRepository;
+import roomescape.reservationtime.ReservationTimeRepositoryImpl;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepositoryFacadeImpl;
+import roomescape.theme.ThemeRepositoryImpl;
 
 @DataJpaTest
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
-        MemberRepositoryFacadeImpl.class,
-        ThemeRepositoryFacadeImpl.class,
-        ReservationTimeRepositoryFacadeImpl.class,
-        ReservationRepositoryFacadeImpl.class,
+        MemberRepositoryImpl.class,
+        ThemeRepositoryImpl.class,
+        ReservationTimeRepositoryImpl.class,
+        ReservationRepositoryImpl.class,
         ReservationService.class
 })
 public class ReservationServiceTest {
 
     @MockitoSpyBean
-    private final ReservationRepositoryFacade reservationRepositoryFacade;
+    private final ReservationRepository reservationRepository;
     private final ReservationService reservationService;
 
-    private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
-    private final ThemeRepositoryFacadeImpl themeRepositoryFacade;
-    private final MemberRepositoryFacadeImpl memberRepositoryFacade;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepositoryImpl themeRepositoryFacade;
+    private final MemberRepositoryImpl memberRepositoryFacade;
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ReservationJpaRepository reservationJpaRepository;
 
     @Autowired
     public ReservationServiceTest(
-            final ReservationRepositoryFacade reservationRepositoryFacade,
+            final ReservationRepository reservationRepository,
             final ReservationService reservationService,
 
-            final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade,
-            final ThemeRepositoryFacadeImpl themeRepositoryFacade,
-            final MemberRepositoryFacadeImpl memberRepositoryFacade
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepositoryImpl themeRepositoryFacade,
+            final MemberRepositoryImpl memberRepositoryFacade
     ) {
-        this.reservationRepositoryFacade = reservationRepositoryFacade;
+        this.reservationRepository = reservationRepository;
         this.reservationService = reservationService;
 
-        this.reservationTimeRepositoryFacade = reservationTimeRepositoryFacade;
+        this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepositoryFacade = themeRepositoryFacade;
         this.memberRepositoryFacade = memberRepositoryFacade;
 
@@ -89,7 +89,7 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
@@ -112,7 +112,7 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -148,7 +148,7 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
 
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
@@ -171,9 +171,9 @@ public class ReservationServiceTest {
                     ReservationStatus.PENDING);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -192,7 +192,7 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.now().minusDays(1), 1L, 1L);
@@ -212,7 +212,7 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.now().minusMinutes(1));
             final Theme theme = new Theme("야당", "야당당", "123");
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.now(), 1L, 1L);
@@ -237,7 +237,7 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(22, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final AdminReservationRequest request = new AdminReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L, 1L);
@@ -259,7 +259,7 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
 
             final AdminReservationRequest request = new AdminReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L, 1L);
 
@@ -292,7 +292,7 @@ public class ReservationServiceTest {
             // given
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final AdminReservationRequest request = new AdminReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L, 1L);
@@ -314,9 +314,9 @@ public class ReservationServiceTest {
                     theme,
                     ReservationStatus.PENDING);
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final AdminReservationRequest request = new AdminReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L, 1L);
 
@@ -334,7 +334,7 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final AdminReservationRequest request = new AdminReservationRequest(LocalDate.now().minusDays(1), 1L, 1L,
@@ -354,7 +354,7 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.now().minusMinutes(1));
             final Theme theme = new Theme("야당", "야당당", "123");
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final AdminReservationRequest request = new AdminReservationRequest(LocalDate.now(), 1L, 1L, 1L);
@@ -392,9 +392,9 @@ public class ReservationServiceTest {
                     ReservationStatus.PENDING);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             // when
             final List<ReservationResponse> actual = reservationService.readAll();
@@ -447,10 +447,10 @@ public class ReservationServiceTest {
                     ReservationStatus.PENDING);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservationMin);
-            reservationRepositoryFacade.save(reservationMax);
+            reservationRepository.save(reservationMin);
+            reservationRepository.save(reservationMax);
 
             final AdminFilterReservationRequest request = new AdminFilterReservationRequest(
                     1L, 1L,
@@ -482,15 +482,15 @@ public class ReservationServiceTest {
                     ReservationStatus.PENDING);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             // when
             reservationService.deleteById(1L);
 
             // then
-            then(reservationRepositoryFacade).should().deleteById(1L);
+            then(reservationRepository).should().deleteById(1L);
         }
 
         @DisplayName("주어진 id에 해당하는 reservation이 없다면 예외가 발생한다.")
@@ -521,9 +521,9 @@ public class ReservationServiceTest {
                     reservationTime, theme, ReservationStatus.PENDING);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             // when
             final List<MineReservationResponse> actual = reservationService.readAllMine(loginMember);
@@ -564,9 +564,9 @@ public class ReservationServiceTest {
 
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -591,10 +591,10 @@ public class ReservationServiceTest {
             final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
                     theme, ReservationStatus.PENDING);
 
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             memberRepositoryFacade.save(anotherMember);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -617,11 +617,11 @@ public class ReservationServiceTest {
             final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
                     theme, ReservationStatus.PENDING);
 
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 2L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -647,8 +647,8 @@ public class ReservationServiceTest {
             themeRepositoryFacade.save(theme);
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
-            reservationTimeRepositoryFacade.save(reservationTime);
-            reservationRepositoryFacade.save(reservation);
+            reservationTimeRepository.save(reservationTime);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 2L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -671,9 +671,9 @@ public class ReservationServiceTest {
                     ReservationStatus.PENDING);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -693,7 +693,7 @@ public class ReservationServiceTest {
             final Theme theme = new Theme("야당", "야당당", "123");
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
@@ -719,9 +719,9 @@ public class ReservationServiceTest {
 
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2024, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -747,9 +747,9 @@ public class ReservationServiceTest {
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
 
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.now(), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -776,9 +776,9 @@ public class ReservationServiceTest {
             memberRepositoryFacade.save(anotherMember);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
@@ -816,20 +816,20 @@ public class ReservationServiceTest {
             memberRepositoryFacade.save(pendingMember);
             memberRepositoryFacade.save(waitingMember);
             memberRepositoryFacade.save(waitingMember1);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(pendingReservation);
-            reservationRepositoryFacade.save(waitingReservation);
-            reservationRepositoryFacade.save(waitingReservation1);
+            reservationRepository.save(pendingReservation);
+            reservationRepository.save(waitingReservation);
+            reservationRepository.save(waitingReservation1);
 
             // when
             reservationService.deleteById(1L);
 
             // then
-            final Reservation actual1 = reservationRepositoryFacade.findById(2L).get();
+            final Reservation actual1 = reservationRepository.findById(2L).get();
             assertThat(actual1.getReservationStatus()).isEqualTo(ReservationStatus.PENDING);
 
-            final Reservation actual2 = reservationRepositoryFacade.findById(3L).get();
+            final Reservation actual2 = reservationRepository.findById(3L).get();
             assertThat(actual2.getReservationStatus()).isEqualTo(ReservationStatus.WAITING);
 
 
@@ -852,9 +852,9 @@ public class ReservationServiceTest {
                     ReservationStatus.WAITING);
 
             memberRepositoryFacade.save(member);
-            reservationTimeRepositoryFacade.save(reservationTime);
+            reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepositoryFacade.save(reservation);
+            reservationRepository.save(reservation);
 
             // when
             final List<ReservationResponse> actual = reservationService.readAllWaiting();

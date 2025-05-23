@@ -11,45 +11,45 @@ import roomescape.theme.Theme;
 
 @Repository
 @RequiredArgsConstructor
-public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFacade {
+public class ReservationRepositoryImpl implements ReservationRepository {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationJpaRepository reservationJpaRepository;
 
     @Override
     public Reservation save(final Reservation reservation) {
-        return reservationRepository.save(reservation);
+        return reservationJpaRepository.save(reservation);
     }
 
     @Override
     public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+        return reservationJpaRepository.findAll();
     }
 
     @Override
     public Optional<Reservation> findById(final Long id) {
-        return reservationRepository.findById(id);
+        return reservationJpaRepository.findById(id);
     }
 
     @Override
     public List<WaitingRankReservation> findAllWaitingRankByMember(final Member member) {
-        return reservationRepository.findAllByMember(member);
+        return reservationJpaRepository.findAllByMember(member);
     }
 
     @Override
     public List<Reservation> findAllByThemeAndDate(final Theme theme, final LocalDate date) {
-        return reservationRepository.findAllByThemeAndDate(theme, date);
+        return reservationJpaRepository.findAllByThemeAndDate(theme, date);
     }
 
     @Override
     public List<Reservation> findAllByMemberAndThemeAndDateBetween(final Member member, final Theme theme,
                                                                    final LocalDate from,
                                                                    final LocalDate to) {
-        return reservationRepository.findAllByMemberAndThemeAndDateBetween(member, theme, from, to);
+        return reservationJpaRepository.findAllByMemberAndThemeAndDateBetween(member, theme, from, to);
     }
 
     @Override
     public List<Reservation> findAllByReservationStatus(final ReservationStatus reservationStatus) {
-        return reservationRepository.findAllByReservationStatus(reservationStatus);
+        return reservationJpaRepository.findAllByReservationStatus(reservationStatus);
     }
 
     @Override
@@ -57,26 +57,26 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
                                                                                          final ReservationTime reservationTime,
                                                                                          final Theme theme,
                                                                                          final ReservationStatus reservationStatus) {
-        return reservationRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByIdAsc(date, reservationTime,
+        return reservationJpaRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByIdAsc(date, reservationTime,
                 theme,
                 reservationStatus);
     }
 
     @Override
     public void deleteById(final Long id) {
-        reservationRepository.deleteById(id);
+        reservationJpaRepository.deleteById(id);
     }
 
     @Override
     public boolean existsByReservationTime(final ReservationTime reservationTime) {
-        return reservationRepository.existsByReservationTime(reservationTime);
+        return reservationJpaRepository.existsByReservationTime(reservationTime);
     }
 
     @Override
     public boolean existsByDuplicateMember(final LocalDate date,
                                            final ReservationTime reservationTime,
                                            final Theme theme, final Member member) {
-        return reservationRepository.existsByDateAndReservationTimeAndThemeAndMember(date, reservationTime, theme,
+        return reservationJpaRepository.existsByDateAndReservationTimeAndThemeAndMember(date, reservationTime, theme,
                 member);
     }
 
@@ -87,7 +87,7 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
             final Theme theme,
             final ReservationStatus reservationStatus
     ) {
-        return reservationRepository.existsByReservationTimeAndDateAndThemeAndReservationStatus(reservationTime, date,
+        return reservationJpaRepository.existsByReservationTimeAndDateAndThemeAndReservationStatus(reservationTime, date,
                 theme, reservationStatus);
     }
 }

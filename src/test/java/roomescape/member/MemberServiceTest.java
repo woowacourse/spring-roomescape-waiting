@@ -23,23 +23,23 @@ import roomescape.member.dto.MemberResponse;
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
         MemberService.class,
-        MemberRepositoryFacadeImpl.class,
+        MemberRepositoryImpl.class,
         PasswordEncoder.class
 })
 class MemberServiceTest {
 
     @MockitoSpyBean
-    private final MemberRepositoryFacade memberRepositoryFacade;
+    private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public MemberServiceTest(
-            final MemberRepositoryFacade memberRepositoryFacade,
+            final MemberRepository memberRepository,
             final PasswordEncoder passwordEncoder,
             final MemberService memberService
     ) {
-        this.memberRepositoryFacade = memberRepositoryFacade;
+        this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
         this.memberService = memberService;
     }
@@ -57,7 +57,7 @@ class MemberServiceTest {
 
         // then
         final ArgumentCaptor<Member> captor = ArgumentCaptor.forClass(Member.class);
-        then(memberRepositoryFacade).should().save(captor.capture());
+        then(memberRepository).should().save(captor.capture());
 
         assertSoftly(s -> {
             final Member actual = captor.getValue();
@@ -74,7 +74,7 @@ class MemberServiceTest {
         // given
         final MemberRequest memberRequest = new MemberRequest("admin@email.com", "password", "부기");
         final Member member = new Member("admin@email.com", "password", "부기", MemberRole.MEMBER);
-        memberRepositoryFacade.save(member);
+        memberRepository.save(member);
 
         // when & then
         assertThatThrownBy(() -> {
@@ -87,7 +87,7 @@ class MemberServiceTest {
     void readAll() {
         // given
         final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
-        memberRepositoryFacade.save(member);
+        memberRepository.save(member);
 
         // when
         final List<MemberResponse> actual = memberService.readAllMember();

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.ReservationJpaRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -17,8 +17,8 @@ public class ThemeService {
     private static final int BETWEEN_DAY_START = 7;
     private static final int BETWEEN_DAY_END = 1;
 
-    private final ThemeRepositoryFacade themeRepositoryFacade;
-    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
+    private final ReservationJpaRepository reservationJpaRepository;
 
     public ThemeResponse create(
             final ThemeRequest request
@@ -29,12 +29,12 @@ public class ThemeService {
                 request.thumbnail()
         );
 
-        final Theme theme = themeRepositoryFacade.save(notSavedTheme);
+        final Theme theme = themeRepository.save(notSavedTheme);
         return ThemeResponse.from(theme);
     }
 
     public List<ThemeResponse> findAll() {
-        return themeRepositoryFacade.findAll().stream()
+        return themeRepository.findAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
@@ -43,7 +43,7 @@ public class ThemeService {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
         final LocalDate to = now.minusDays(BETWEEN_DAY_END);
-        return themeRepositoryFacade.findAllOrderByRank(from, to, size).stream()
+        return themeRepository.findAllOrderByRank(from, to, size).stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
@@ -51,13 +51,13 @@ public class ThemeService {
     public void deleteById(
             final Long id
     ) {
-        final Theme theme = themeRepositoryFacade.findById(id)
+        final Theme theme = themeRepository.findById(id)
                 .orElseThrow(ThemeNotFoundException::new);
 
-        if (reservationRepository.existsByTheme(theme)) {
+        if (reservationJpaRepository.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
 
-        themeRepositoryFacade.delete(theme);
+        themeRepository.delete(theme);
     }
 }

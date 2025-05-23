@@ -8,32 +8,32 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @AllArgsConstructor
-public class ReservationTimeRepositoryFacadeImpl implements ReservationTimeRepositoryFacade {
+public class ReservationTimeRepositoryImpl implements ReservationTimeRepository {
 
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Override
     public ReservationTime save(final ReservationTime reservationTime) {
-        return reservationTimeRepository.save(reservationTime);
+        return reservationTimeJpaRepository.save(reservationTime);
     }
 
     @Override
     public Optional<ReservationTime> findById(final Long id) {
-        return reservationTimeRepository.findById(id);
+        return reservationTimeJpaRepository.findById(id);
     }
 
     @Override
     public List<ReservationTime> findAll() {
-        return reservationTimeRepository.findAll();
+        return reservationTimeJpaRepository.findAll();
     }
 
     @Override
     public void delete(final ReservationTime reservationTime) {
-        reservationTimeRepository.delete(reservationTime);
+        reservationTimeJpaRepository.delete(reservationTime);
     }
 
     @Override
     public boolean existsByStartAt(final LocalTime startAt) {
-        return reservationTimeRepository.existsByStartAt(startAt);
+        return reservationTimeJpaRepository.existsByStartAt(startAt);
     }
 }

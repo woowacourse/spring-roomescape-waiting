@@ -14,33 +14,33 @@ import roomescape.auth.dto.LoginRequest;
 import roomescape.exception.custom.reason.auth.AuthNotExistsEmailException;
 import roomescape.exception.custom.reason.auth.AuthNotValidPasswordException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepositoryFacade;
-import roomescape.member.MemberRepositoryFacadeImpl;
+import roomescape.member.MemberRepository;
+import roomescape.member.MemberRepositoryImpl;
 import roomescape.member.MemberRole;
 
 @DataJpaTest
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
         AuthService.class,
-        MemberRepositoryFacadeImpl.class,
+        MemberRepositoryImpl.class,
         PasswordEncoder.class,
         JwtProvider.class
 })
 public class AuthServiceTest {
 
     private final AuthService authService;
-    private final MemberRepositoryFacade memberRepositoryFacade;
+    private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public AuthServiceTest(
-            final MemberRepositoryFacade memberRepositoryFacade,
+            final MemberRepository memberRepository,
             final JwtProvider jwtProvider,
             final PasswordEncoder passwordEncoder,
             final AuthService authService
     ) {
-        this.memberRepositoryFacade = memberRepositoryFacade;
+        this.memberRepository = memberRepository;
         this.jwtProvider = jwtProvider;
         this.passwordEncoder = passwordEncoder;
         this.authService = authService;
@@ -54,7 +54,7 @@ public class AuthServiceTest {
         void generateToken() {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "pw1234");
-            memberRepositoryFacade.save(new Member(request.email(), passwordEncoder.encode(request.password()), "부기", MemberRole.MEMBER));
+            memberRepository.save(new Member(request.email(), passwordEncoder.encode(request.password()), "부기", MemberRole.MEMBER));
 
             // when
             final String actual = authService.generateToken(request);
@@ -80,7 +80,7 @@ public class AuthServiceTest {
         void generateToken2() {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "not matches password");
-            memberRepositoryFacade.save(new Member(request.email(), passwordEncoder.encode("pw1234"), "부기", MemberRole.MEMBER));
+            memberRepository.save(new Member(request.email(), passwordEncoder.encode("pw1234"), "부기", MemberRole.MEMBER));
 
             // when & then
             assertThatThrownBy(() -> {

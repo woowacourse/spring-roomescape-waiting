@@ -16,25 +16,25 @@ import roomescape.exception.custom.reason.reservation.ReservationNotFoundExcepti
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
 import roomescape.exception.custom.reason.reservation.ReservationPastTimeException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepositoryFacade;
+import roomescape.member.MemberRepository;
 import roomescape.reservation.dto.AdminFilterReservationRequest;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MineReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepositoryFacade;
+import roomescape.reservationtime.ReservationTimeRepository;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepositoryFacade;
+import roomescape.theme.ThemeRepository;
 
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final ReservationRepositoryFacade reservationRepositoryFacade;
-    private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
-    private final ThemeRepositoryFacade themeRepositoryFacade;
-    private final MemberRepositoryFacade memberRepositoryFacade;
+    private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
         final ReservationTime reservationTime = getReservationTimeById(request.timeId());
@@ -52,14 +52,14 @@ public class ReservationService {
         return save(request.date(), reservationTime, theme, member);
     }
 
-    private ReservationResponse save(final LocalDate request, final ReservationTime reservationTime,
+    private ReservationResponse save(final LocalDate date, final ReservationTime reservationTime,
                                      final Theme theme, final Member member) {
-        validateDuplicatePending(request, reservationTime, theme);
-        validatePastDateTime(request, reservationTime);
+        validateDuplicatePending(date, reservationTime, theme);
+        validatePastDateTime(date, reservationTime);
 
-        final Reservation notSavedReservation = new Reservation(request, member, reservationTime, theme,
+        final Reservation notSavedReservation = new Reservation(date, member, reservationTime, theme,
                 ReservationStatus.PENDING);
-        final Reservation savedReservation = reservationRepositoryFacade.save(notSavedReservation);
+        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
 
@@ -76,19 +76,19 @@ public class ReservationService {
 
         final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
                 ReservationStatus.WAITING);
-        final Reservation savedReservation = reservationRepositoryFacade.save(notSavedReservation);
+        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
 
     public List<MineReservationResponse> readAllMine(final LoginMember loginMember) {
         final Member member = getMemberByEmail(loginMember.email());
-        return reservationRepositoryFacade.findAllWaitingRankByMember(member).stream()
+        return reservationRepository.findAllWaitingRankByMember(member).stream()
                 .map(MineReservationResponse::from)
                 .toList();
     }
 
     public List<ReservationResponse> readAll() {
-        return reservationRepositoryFacade.findAll().stream()
+        return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
@@ -97,7 +97,7 @@ public class ReservationService {
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberById(request.memberId());
 
-        return reservationRepositoryFacade.findAllByMemberAndThemeAndDateBetween(
+        return reservationRepository.findAllByMemberAndThemeAndDateBetween(
                         member, theme,
                         request.from(), request.to()
                 ).stream()
@@ -106,19 +106,19 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> readAllWaiting() {
-        return reservationRepositoryFacade.findAllByReservationStatus(ReservationStatus.WAITING).stream()
+        return reservationRepository.findAllByReservationStatus(ReservationStatus.WAITING).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     @Transactional
     public void deleteById(final Long id) {
-        final Reservation reservation = reservationRepositoryFacade.findById(id)
+        final Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(ReservationNotFoundException::new);
 
         pendingNextReservation(reservation);
 
-        reservationRepositoryFacade.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 
     private void pendingNextReservation(final Reservation reservation) {
@@ -126,7 +126,7 @@ public class ReservationService {
             return;
         }
 
-        final List<Reservation> waitingReservations = reservationRepositoryFacade.findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByAsc(
+        final List<Reservation> waitingReservations = reservationRepository.findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByAsc(
                 reservation.getDate(),
                 reservation.getReservationTime(),
                 reservation.getTheme(),
@@ -159,7 +159,7 @@ public class ReservationService {
             final LocalDate date, final ReservationTime reservationTime,
             final Theme theme
     ) {
-        if (reservationRepositoryFacade.existsDuplicateStatus(
+        if (reservationRepository.existsDuplicateStatus(
                 reservationTime, date, theme, ReservationStatus.PENDING)) {
             throw new ReservationConflictException();
         }
@@ -169,7 +169,7 @@ public class ReservationService {
             final LocalDate date, final ReservationTime reservationTime,
             final Theme theme
     ) {
-        if (!reservationRepositoryFacade.existsDuplicateStatus(
+        if (!reservationRepository.existsDuplicateStatus(
                 reservationTime, date, theme, ReservationStatus.PENDING)) {
             throw new ReservationNotExistsPendingException();
         }
@@ -178,29 +178,29 @@ public class ReservationService {
     private void validateDuplicateMember(final ReservationRequest request, final ReservationTime reservationTime,
                                          final Theme theme,
                                          final Member member) {
-        if (reservationRepositoryFacade.existsByDuplicateMember(
+        if (reservationRepository.existsByDuplicateMember(
                 request.date(), reservationTime, theme, member)) {
             throw new ReservationConflictException();
         }
     }
 
     private Theme getThemeById(final Long themeId) {
-        return themeRepositoryFacade.findById(themeId)
+        return themeRepository.findById(themeId)
                 .orElseThrow(ReservationNotExistsThemeException::new);
     }
 
     private ReservationTime getReservationTimeById(final Long reservationTimeId) {
-        return reservationTimeRepositoryFacade.findById(reservationTimeId)
+        return reservationTimeRepository.findById(reservationTimeId)
                 .orElseThrow(ReservationNotExistsTimeException::new);
     }
 
     private Member getMemberById(final Long memberId) {
-        return memberRepositoryFacade.findById(memberId)
+        return memberRepository.findById(memberId)
                 .orElseThrow(ReservationNotExistsMemberException::new);
     }
 
     private Member getMemberByEmail(final String email) {
-        return memberRepositoryFacade.findByEmail(email)
+        return memberRepository.findByEmail(email)
                 .orElseThrow(ReservationNotExistsMemberException::new);
     }
 }

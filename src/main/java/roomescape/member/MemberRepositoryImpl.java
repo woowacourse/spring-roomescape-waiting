@@ -7,31 +7,31 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @AllArgsConstructor
-public class MemberRepositoryFacadeImpl implements MemberRepositoryFacade{
+public class MemberRepositoryImpl implements MemberRepository {
 
-    private final MemberRepository memberRepository;
+    private final MemberJpaRepository memberJpaRepository;
 
     public void save(Member member) {
-        memberRepository.save(member);
+        memberJpaRepository.save(member);
     }
 
     @Override
     public Optional<Member> findByEmail(final String email) {
-        return memberRepository.findByEmail(email);
+        return memberJpaRepository.findByEmail(email);
     }
 
     @Override
     public Optional<Member> findById(final Long id) {
-        return memberRepository.findById(id);
+        return memberJpaRepository.findById(id);
     }
 
     @Override
     public List<Member> findAll() {
-        return memberRepository.findAll();
+        return memberJpaRepository.findAll();
     }
 
     @Override
     public boolean existsByEmail(final String email) {
-        return memberRepository.existsByEmail(email);
+        return memberJpaRepository.existsByEmail(email);
     }
 }

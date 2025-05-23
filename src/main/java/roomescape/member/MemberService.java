@@ -12,7 +12,7 @@ import roomescape.member.dto.MemberResponse;
 @AllArgsConstructor
 public class MemberService {
 
-    private final MemberRepositoryFacade memberRepositoryFacade;
+    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
     public void createMember(final MemberRequest request) {
@@ -21,17 +21,17 @@ public class MemberService {
         final String encodedPassword = passwordEncoder.encode(request.password());
 
         final Member notSavedMember = new Member(request.email(), encodedPassword, request.name(), MemberRole.MEMBER);
-        memberRepositoryFacade.save(notSavedMember);
+        memberRepository.save(notSavedMember);
     }
 
     public List<MemberResponse> readAllMember() {
-        return memberRepositoryFacade.findAll().stream()
+        return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
                 .toList();
     }
 
     private void validateDuplicationEmail(final MemberRequest request) {
-        if (memberRepositoryFacade.existsByEmail(request.email())) {
+        if (memberRepository.existsByEmail(request.email())) {
             throw new MemberEmailConflictException();
         }
     }

@@ -8,32 +8,32 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @AllArgsConstructor
-public class ThemeRepositoryFacadeImpl implements ThemeRepositoryFacade {
+public class ThemeRepositoryImpl implements ThemeRepository {
 
-    private final ThemeRepository themeRepository;
+    private final ThemeJpaRepository themeJpaRepository;
 
     @Override
     public Theme save(final Theme theme) {
-        return themeRepository.save(theme);
+        return themeJpaRepository.save(theme);
     }
 
     @Override
     public Optional<Theme> findById(final Long id) {
-        return themeRepository.findById(id);
+        return themeJpaRepository.findById(id);
     }
 
     @Override
     public List<Theme> findAll() {
-        return themeRepository.findAll();
+        return themeJpaRepository.findAll();
     }
 
     @Override
     public List<Theme> findAllOrderByRank(final LocalDate from, final LocalDate to, final int size) {
-        return themeRepository.findAllOrderByRank(from, to, size);
+        return themeJpaRepository.findAllOrderByRank(from, to, size);
     }
 
     @Override
     public void delete(final Theme theme) {
-        themeRepository.delete(theme);
+        themeJpaRepository.delete(theme);
     }
 }

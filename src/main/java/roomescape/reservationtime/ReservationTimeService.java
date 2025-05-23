@@ -11,41 +11,41 @@ import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExis
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepositoryFacade;
+import roomescape.reservation.ReservationRepository;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepositoryFacade;
+import roomescape.theme.ThemeRepository;
 
 @Service
 @AllArgsConstructor
 public class ReservationTimeService {
 
-    private final ReservationTimeRepositoryFacade reservationTimeRepositoryFacade;
-    private final ReservationRepositoryFacade reservationRepositoryFacade;
-    private final ThemeRepositoryFacade themeRepositoryFacade;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
 
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
         validateDuplicate(request);
 
         final ReservationTime reservationTime = new ReservationTime(request.startAt());
-        final ReservationTime savedReservationTime = reservationTimeRepositoryFacade.save(reservationTime);
+        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
     public List<ReservationTimeResponse> findAll() {
-        return reservationTimeRepositoryFacade.findAll().stream()
+        return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public List<AvailableReservationTimeResponse> findAllAvailable(final Long themeId, final LocalDate date) {
-        final List<ReservationTime> times = reservationTimeRepositoryFacade.findAll();
-        final Theme theme = themeRepositoryFacade.findById(themeId)
+        final List<ReservationTime> times = reservationTimeRepository.findAll();
+        final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(ReservationTimeNotExistsThemeException::new);
 
-        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepositoryFacade.findAllByThemeAndDate(
+        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(
                         theme,
                         date).stream()
                 .map(Reservation::getReservationTime)
@@ -62,18 +62,18 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final Long id) {
-        final ReservationTime reservationTime = reservationTimeRepositoryFacade.findById(id)
+        final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(ReservationTimeNotFoundException::new);
 
-        if (reservationRepositoryFacade.existsByReservationTime(reservationTime)) {
+        if (reservationRepository.existsByReservationTime(reservationTime)) {
             throw new ReservationTimeUsedException();
         }
 
-        reservationTimeRepositoryFacade.delete(reservationTime);
+        reservationTimeRepository.delete(reservationTime);
     }
 
     private void validateDuplicate(final ReservationTimeRequest request) {
-        if (reservationTimeRepositoryFacade.existsByStartAt(request.startAt())) {
+        if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new ReservationTimeConflictException();
         }
     }
