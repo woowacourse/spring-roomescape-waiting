@@ -41,13 +41,7 @@ public class ReservationService {
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberByEmail(loginMember.email());
 
-        validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
-        validatePastDateTime(request.date(), reservationTime);
-
-        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
-                ReservationStatus.PENDING);
-        final Reservation savedReservation = reservationRepositoryFacade.save(notSavedReservation);
-        return ReservationResponse.from(savedReservation);
+        return save(request.date(), reservationTime, theme, member);
     }
 
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
@@ -55,10 +49,15 @@ public class ReservationService {
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberById(request.memberId());
 
-        validateDuplicateDateTimeAndTheme(request.date(), reservationTime, theme);
-        validatePastDateTime(request.date(), reservationTime);
+        return save(request.date(), reservationTime, theme, member);
+    }
 
-        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
+    private ReservationResponse save(final LocalDate request, final ReservationTime reservationTime,
+                                     final Theme theme, final Member member) {
+        validateDuplicatePending(request, reservationTime, theme);
+        validatePastDateTime(request, reservationTime);
+
+        final Reservation notSavedReservation = new Reservation(request, member, reservationTime, theme,
                 ReservationStatus.PENDING);
         final Reservation savedReservation = reservationRepositoryFacade.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
@@ -71,8 +70,8 @@ public class ReservationService {
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberByEmail(loginMember.email());
 
-        validateNotExistsPendingReservation(request.date(), reservationTime, theme);
-        validateDuplicateReservation(request, reservationTime, theme, member);
+        validateNotExistsPending(request.date(), reservationTime, theme);
+        validateDuplicateMember(request, reservationTime, theme, member);
         validatePastDateTime(request.date(), reservationTime);
 
         final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
@@ -156,23 +155,32 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicateDateTimeAndTheme(
+    private void validateDuplicatePending(
             final LocalDate date, final ReservationTime reservationTime,
             final Theme theme
     ) {
-        if (reservationRepositoryFacade.existsByReservationTimeAndDateAndThemeAndReservationStatus(
+        if (reservationRepositoryFacade.existsDuplicateStatus(
                 reservationTime, date, theme, ReservationStatus.PENDING)) {
             throw new ReservationConflictException();
         }
     }
 
-    private void validateNotExistsPendingReservation(
+    private void validateNotExistsPending(
             final LocalDate date, final ReservationTime reservationTime,
             final Theme theme
     ) {
-        if (!reservationRepositoryFacade.existsByReservationTimeAndDateAndThemeAndReservationStatus(
+        if (!reservationRepositoryFacade.existsDuplicateStatus(
                 reservationTime, date, theme, ReservationStatus.PENDING)) {
             throw new ReservationNotExistsPendingException();
+        }
+    }
+
+    private void validateDuplicateMember(final ReservationRequest request, final ReservationTime reservationTime,
+                                         final Theme theme,
+                                         final Member member) {
+        if (reservationRepositoryFacade.existsByDuplicateMember(
+                request.date(), reservationTime, theme, member)) {
+            throw new ReservationConflictException();
         }
     }
 
@@ -194,14 +202,5 @@ public class ReservationService {
     private Member getMemberByEmail(final String email) {
         return memberRepositoryFacade.findByEmail(email)
                 .orElseThrow(ReservationNotExistsMemberException::new);
-    }
-
-    private void validateDuplicateReservation(final ReservationRequest request, final ReservationTime reservationTime,
-                                              final Theme theme,
-                                              final Member member) {
-        if (reservationRepositoryFacade.existsByDateAndReservationTimeAndThemeAndMember(
-                request.date(), reservationTime, theme, member)) {
-            throw new ReservationConflictException();
-        }
     }
 }

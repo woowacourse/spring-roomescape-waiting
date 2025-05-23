@@ -27,13 +27,13 @@ public interface ReservationRepositoryFacade {
     void deleteById(Long id);
 
     boolean existsByReservationTime(ReservationTime reservationTime);
-    boolean existsByDateAndReservationTimeAndThemeAndMember(
+    boolean existsByDuplicateMember(
             LocalDate date,
             ReservationTime reservationTime,
             Theme theme,
             Member member
     );
-    boolean existsByReservationTimeAndDateAndThemeAndReservationStatus(
+    boolean existsDuplicateStatus(
             ReservationTime reservationTime,
             LocalDate date,
             Theme theme,

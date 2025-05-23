@@ -73,15 +73,15 @@ public class ReservationRepositoryFacadeImpl implements ReservationRepositoryFac
     }
 
     @Override
-    public boolean existsByDateAndReservationTimeAndThemeAndMember(final LocalDate date,
-                                                                   final ReservationTime reservationTime,
-                                                                   final Theme theme, final Member member) {
+    public boolean existsByDuplicateMember(final LocalDate date,
+                                           final ReservationTime reservationTime,
+                                           final Theme theme, final Member member) {
         return reservationRepository.existsByDateAndReservationTimeAndThemeAndMember(date, reservationTime, theme,
                 member);
     }
 
     @Override
-    public boolean existsByReservationTimeAndDateAndThemeAndReservationStatus(
+    public boolean existsDuplicateStatus(
             final ReservationTime reservationTime,
             final LocalDate date,
             final Theme theme,
