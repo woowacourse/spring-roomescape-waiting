@@ -1,15 +1,14 @@
-package roomescape.reservationwaiting.controller;
+package roomescape.application.reservationwaiting.controller;
 
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.application.reservationwaiting.controller.dto.MyReservationAndWaitingResponse;
+import roomescape.application.reservationwaiting.service.ReservationWaitingService;
+import roomescape.application.reservationwaiting.service.dto.ReservationInfoAndWaitingInfo;
 import roomescape.member.service.dto.LoginMemberInfo;
-import roomescape.reservationwaiting.controller.dto.MyReservationAndWaitingResponse;
-import roomescape.reservation.service.dto.ReservationInfo;
-import roomescape.reservationwaiting.service.ReservationWaitingService;
-import roomescape.waiting.service.dto.WaitingInfo;
 
 @RestController
 public class ReservationWaitingController {
@@ -24,12 +23,15 @@ public class ReservationWaitingController {
     public ResponseEntity<List<MyReservationAndWaitingResponse>> findAllMyReservationAndWaiting(
             LoginMemberInfo loginMemberInfo
     ) {
-        List<ReservationInfo> reservationInfos = reservationWaitingService.findMyReservations(
+        ReservationInfoAndWaitingInfo myReservationAndWaiting = reservationWaitingService.findMyReservationAndWaiting(
                 loginMemberInfo.id());
-        List<WaitingInfo> waitingInfos = reservationWaitingService.findMyWaiting(loginMemberInfo.id());
         List<MyReservationAndWaitingResponse> responses = Stream.concat(
-                reservationInfos.stream().map(MyReservationAndWaitingResponse::new),
-                waitingInfos.stream().map(MyReservationAndWaitingResponse::new)
+                myReservationAndWaiting.reservationInfos()
+                        .stream()
+                        .map(MyReservationAndWaitingResponse::new),
+                myReservationAndWaiting.waitingInfos()
+                        .stream()
+                        .map(MyReservationAndWaitingResponse::new)
         ).toList();
         return ResponseEntity.ok().body(responses);
     }

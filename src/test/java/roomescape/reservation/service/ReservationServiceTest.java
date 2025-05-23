@@ -187,7 +187,7 @@ class ReservationServiceTest {
         reservationService.createReservation(command2);
 
         // when
-        List<ReservationInfo> result = reservationService.findReservationsByMemberId(savedMember.getId());
+        List<ReservationInfo> result = reservationService.findAllByMemberId(savedMember.getId());
 
         // then
         assertThat(result).containsExactlyElementsOf(List.of(createdReservation));

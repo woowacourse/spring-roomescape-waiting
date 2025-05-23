@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
@@ -116,5 +117,9 @@ public class WaitingService {
     private Member getMember(long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
+    }
+
+    public List<WaitingInfo> findAllByMemberId(long memberId) {
+        return null;
     }
 }

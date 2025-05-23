@@ -95,7 +95,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationInfo> findReservationsByMemberId(final Long id) {
+    public List<ReservationInfo> findAllByMemberId(final Long id) {
         return reservationRepository.findAllByMemberId(id)
                 .stream()
                 .map(ReservationInfo::new)
