@@ -21,25 +21,25 @@ public class AuthService {
     }
 
     @Transactional
-    public String createToken(LoginRequest request) {
-       Member member = memberRepository.findByEmail(request.email())
-               .orElseThrow(() -> new NotFoundException("member"));
-
+    public String createToken(final LoginRequest request) {
+        Member member = memberRepository.findByEmail(request.email())
+                .orElseThrow(() -> new NotFoundException("member"));
         validatePassword(request.password(), member);
+
         return jwtTokenProvider.createToken(member);
     }
 
-    private void validatePassword(String password, Member member) {
+    private void validatePassword(final String password,final Member member) {
         if (!password.equals(member.getPassword())) {
             throw new AuthenticatedException();
         }
     }
 
     @Transactional(readOnly = true)
-    public Member findMemberByToken(String token) {
+    public Member findMemberByToken(final String token) {
         Long memberId = jwtTokenProvider.getMemberIdFromToken(token);
 
         return memberRepository.findById(memberId)
-            .orElseThrow(() -> new NotFoundException("member"));
+                .orElseThrow(() -> new NotFoundException("member"));
     }
 }

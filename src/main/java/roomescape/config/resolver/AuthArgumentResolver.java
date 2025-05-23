@@ -23,7 +23,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(AuthMember.class)
-            && parameter.getParameterType().equals(Member.class);
+                && parameter.getParameterType().equals(Member.class);
     }
 
     @Override
@@ -33,7 +33,6 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
             NativeWebRequest webRequest,
             WebDataBinderFactory binderFactory
     ) {
-
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = extractTokenFromCookie(request.getCookies());
 

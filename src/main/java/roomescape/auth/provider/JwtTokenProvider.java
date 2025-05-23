@@ -14,21 +14,21 @@ public class JwtTokenProvider {
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
-    public String createToken(Member member) {
+    public String createToken(final Member member) {
         return Jwts.builder()
-            .setSubject(member.getId().toString())
-            .claim("email", member.getEmail())
-            .claim("name", member.getName())
-            .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
-            .compact();
+                .setSubject(member.getId().toString())
+                .claim("email", member.getEmail())
+                .claim("name", member.getName())
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .compact();
     }
 
-    public Long getMemberIdFromToken(String token) {
+    public Long getMemberIdFromToken(final String token) {
         return Long.valueOf(Jwts.parserBuilder()
-            .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
-            .build()
-            .parseClaimsJws(token)
-            .getBody()
-            .getSubject());
+                .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject());
     }
 }

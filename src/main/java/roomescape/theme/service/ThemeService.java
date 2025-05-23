@@ -17,7 +17,7 @@ public class ThemeService {
 
     private final JpaThemeRepository themeRepository;
 
-    public ThemeService(JpaThemeRepository themeRepository) {
+    public ThemeService(final JpaThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
     }
 
@@ -49,7 +49,7 @@ public class ThemeService {
     }
 
     @Transactional
-    public void removeTheme(long id) {
+    public void removeTheme(final long id) {
         if (!themeRepository.existsById(id)) {
             throw new NotFoundException("theme");
         }

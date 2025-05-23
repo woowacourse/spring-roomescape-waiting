@@ -18,7 +18,7 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    private ReservationController(ReservationService reservationService) {
+    private ReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
@@ -28,7 +28,6 @@ public class ReservationController {
             @AuthMember Member member,
             @RequestBody @Valid ReservationRequest request
     ) {
-
         return ReservationResponse.from(
                 reservationService.addReservation(
                         member,

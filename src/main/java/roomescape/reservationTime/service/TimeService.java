@@ -15,7 +15,7 @@ public class TimeService {
 
     private final JpaReservationTimeRepository reservationTimeRepository;
 
-    public TimeService(JpaReservationTimeRepository reservationTimeRepository) {
+    public TimeService(final JpaReservationTimeRepository reservationTimeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
@@ -25,7 +25,7 @@ public class TimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTime> findAllTimesWithBooked(LocalDate date, long themeId) {
+    public List<ReservationTime> findAllTimesWithBooked(final LocalDate date, final long themeId) {
         return reservationTimeRepository.findAllTimesWithBooked(date, themeId);
     }
 
@@ -43,7 +43,7 @@ public class TimeService {
     }
 
     @Transactional
-    public void removeReservationTime(Long id) {
+    public void removeReservationTime(final long id) {
         if (!reservationTimeRepository.existsById(id)) {
             throw new NotFoundException("reservationTime");
         }

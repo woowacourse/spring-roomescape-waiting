@@ -23,7 +23,7 @@ public class TimeController {
 
     private final TimeService timeService;
 
-    private TimeController(TimeService timeService) {
+    private TimeController(final TimeService timeService) {
         this.timeService = timeService;
     }
 
@@ -42,8 +42,8 @@ public class TimeController {
 
     @GetMapping("/{date}/{themeId}")
     public List<TimeResponse> readReservationTimesWithBooked(
-            @PathVariable("date") LocalDate date,
-            @PathVariable("themeId") long themeId
+            final @PathVariable("date") LocalDate date,
+            final @PathVariable("themeId") long themeId
     ) {
         return timeService.findAllTimesWithBooked(date, themeId).stream()
                 .map(TimeResponse::from)
@@ -52,7 +52,7 @@ public class TimeController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteReservationTime(@PathVariable("id") long id) {
+    public void deleteReservationTime(final @PathVariable("id") long id) {
         timeService.removeReservationTime(id);
     }
 }

@@ -30,7 +30,7 @@ public class WaitingFacadeService {
     }
 
     @Transactional(readOnly = true)
-    public List<MyReservationAndWaitingResponse> readMyReservations(@AuthMember Member member) {
+    public List<MyReservationAndWaitingResponse> readMyReservations(final @AuthMember Member member) {
 
         List<MyReservationAndWaitingResponse> responseFromReservation = reservationService.findReservationsByMemberId(member).stream()
                 .map(MyReservationAndWaitingResponse::fromReservation)
@@ -45,7 +45,7 @@ public class WaitingFacadeService {
     }
 
     @Transactional
-    public void removeReservation(long id) {
+    public void removeReservation(final long id) {
         Reservation reservation = reservationService.removeReservation(id);
 
         Optional<Waiting> waiting = waitingService.removeWaiting(

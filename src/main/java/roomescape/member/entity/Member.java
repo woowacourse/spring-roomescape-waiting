@@ -40,7 +40,11 @@ public class Member {
         this.role = role;
     }
 
-    public static Member createUser(String name, String email, String password) {
+    public static Member createUser(
+            String name,
+            String email,
+            String password
+    ) {
         return new Member(name, email, password, Role.USER);
     }
 

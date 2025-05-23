@@ -22,7 +22,7 @@ public class ThemeController {
 
     private final ThemeService themeService;
 
-    private ThemeController(ThemeService themeService) {
+    private ThemeController(final ThemeService themeService) {
         this.themeService = themeService;
     }
 
@@ -48,7 +48,7 @@ public class ThemeController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTheme(@PathVariable("id") long id) {
+    public void deleteTheme(final @PathVariable("id") long id) {
         themeService.removeTheme(id);
     }
 }

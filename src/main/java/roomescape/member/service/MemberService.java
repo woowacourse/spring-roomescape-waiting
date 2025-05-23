@@ -28,11 +28,11 @@ public class MemberService {
         validateDuplicateMember(request);
 
         return memberRepository.save(
-            Member.createUser(
-                    request.name(),
-                    request.email(),
-                    request.password()
-            )
+                Member.createUser(
+                        request.name(),
+                        request.email(),
+                        request.password()
+                )
         );
     }
 

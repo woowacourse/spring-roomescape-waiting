@@ -6,21 +6,16 @@ import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.member.entity.Member;
-import roomescape.member.repository.JpaMemberRepository;
-import roomescape.reservation.controller.dto.request.ReservationRequest;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservationTime.entity.ReservationTime;
 import roomescape.reservationTime.repository.JpaReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.JpaThemeRepository;
-import roomescape.waiting.entity.WaitingWithRank;
-import roomescape.waiting.service.WaitingService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -28,19 +23,15 @@ public class ReservationService {
     private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
-    private final WaitingService waitingService;
 
     public ReservationService(
-            JpaReservationRepository reservationRepository,
-            JpaMemberRepository memberRepository,
-            JpaReservationTimeRepository reservationTimeRepository,
-            JpaThemeRepository themeRepository,
-            WaitingService waitingService
+            final JpaReservationRepository reservationRepository,
+            final JpaReservationTimeRepository reservationTimeRepository,
+            final JpaThemeRepository themeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.waitingService = waitingService;
     }
 
     @Transactional(readOnly = true)
@@ -49,17 +40,17 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findReservationsByMemberId(Member member) {
+    public List<Reservation> findReservationsByMemberId(final Member member) {
         return reservationRepository.findByMemberId(member.getId())
                 .orElseThrow(() -> new NotFoundException("reservations"));
     }
 
     @Transactional(readOnly = true)
     public List<Reservation> findReservationsByFilters(
-            long themeId,
-            long memberId,
-            LocalDate dateFrom,
-            LocalDate dateTo
+            final long themeId,
+            final long memberId,
+            final LocalDate dateFrom,
+            final LocalDate dateTo
     ) {
         return reservationRepository.findReservationsByFilters(themeId, memberId, dateFrom, dateTo)
                 .orElseThrow(() -> new NotFoundException("reservation"));
@@ -67,10 +58,10 @@ public class ReservationService {
 
     @Transactional
     public Reservation addReservation(
-            Member member,
-            LocalDate date,
-            long themeId,
-            long timeId
+            final Member member,
+            final LocalDate date,
+            final long themeId,
+            final long timeId
     ) {
         ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundException("time"));
@@ -80,11 +71,12 @@ public class ReservationService {
 
         validateDuplicateReservation(date,timeId,themeId);
         validateDateTimeAfterNow(date, time);
+
         return reservationRepository.save(new Reservation(member, date, time, theme));
     }
 
 
-    private void validateDateTimeAfterNow(LocalDate date, ReservationTime time) {
+    private void validateDateTimeAfterNow(final LocalDate date, final ReservationTime time) {
         LocalDateTime now = LocalDateTime.now();
 
         if (date.isBefore(now.toLocalDate()) ||
@@ -104,11 +96,11 @@ public class ReservationService {
         }
     }
 
-    public Reservation removeReservation(long id) {
+    public Reservation removeReservation(final long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("reservation"));
-
         reservationRepository.deleteById(id);
+
         return reservation;
     }
 }

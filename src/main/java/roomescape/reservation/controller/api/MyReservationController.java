@@ -20,13 +20,13 @@ public class MyReservationController {
     }
 
     @GetMapping("/mine")
-    public List<MyReservationAndWaitingResponse> readMyReservations(@AuthMember Member member) {
+    public List<MyReservationAndWaitingResponse> readMyReservations(final @AuthMember Member member) {
         return waitingFacadeService.readMyReservations(member);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteReservation(@PathVariable("id") long id) {
+    public void deleteReservation(final @PathVariable("id") long id) {
         waitingFacadeService.removeReservation(id);
     }
 }

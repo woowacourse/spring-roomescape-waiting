@@ -41,12 +41,12 @@ public class WaitingService {
         return jpaWaitingRepository.findAllWaitingWithRank();
     }
 
-    public List<WaitingWithRank> findAllWaitingWithRankByMemberId(Member member) {
+    public List<WaitingWithRank> findAllWaitingWithRankByMemberId(final Member member) {
         return jpaWaitingRepository.findWaitingsWithRankByMemberId(member.getId());
     }
 
     @Transactional
-    public Waiting addWaiting(Member member, WaitingRequest request) {
+    public Waiting addWaiting(final Member member, WaitingRequest request) {
         LocalDate date = request.date();
 
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
@@ -59,7 +59,7 @@ public class WaitingService {
         return jpaWaitingRepository.save(new Waiting(member, date, time, theme));
     }
 
-    private void validateDateTimeAfterNow(LocalDate date, ReservationTime time) {
+    private void validateDateTimeAfterNow(final LocalDate date,final ReservationTime time) {
         LocalDateTime now = LocalDateTime.now();
 
         if (date.isBefore(now.toLocalDate()) ||

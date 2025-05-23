@@ -4,7 +4,7 @@ import roomescape.member.entity.Member;
 
 public record LoginResponse(String name) {
 
-    public static LoginResponse from(Member member) {
+    public static LoginResponse from(final Member member) {
         return new LoginResponse(member.getName());
     }
 }

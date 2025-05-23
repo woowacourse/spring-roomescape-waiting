@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.auth.controller.dto.request.LoginRequest;
 import roomescape.auth.provider.JwtTokenProvider;
+import roomescape.member.controller.dto.request.MemberRequest;
 import roomescape.member.repository.JpaMemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -68,6 +70,34 @@ class AuthControllerTest {
             .then().log().all()
             .statusCode(200)
             .body("name", is("Lemon"));
+    }
+
+
+    @Test
+    @DisplayName("로그인 테스트")
+    void loginTest() {
+        // given
+        MemberRequest signupRequest = new MemberRequest(
+                "레몬",
+                "suwon@naver.com",
+                "123"
+        );
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(signupRequest)
+                .when().post("/members")
+                .then().statusCode(201)
+                .extract().response();
+
+        LoginRequest tokenRequest = new LoginRequest("suwon@naver.com", "123");
+        // when
+        // then
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(tokenRequest)
+                .when().post("/login")
+                .then().statusCode(200);
     }
 
     private Map<String, String> getTestParamsWithLogin() {

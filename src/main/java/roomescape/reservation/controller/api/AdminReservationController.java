@@ -15,17 +15,16 @@ public class AdminReservationController {
 
     private final ReservationService reservationService;
 
-    private AdminReservationController(ReservationService reservationService) {
+    private AdminReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse createReservation(
-        @AuthMember Member member,
-        @RequestBody @Valid ReservationRequest request
+            final @AuthMember Member member,
+            @RequestBody @Valid ReservationRequest request
     ) {
-
         return ReservationResponse.from(
                 reservationService.addReservation(
                         member,
@@ -35,5 +34,4 @@ public class AdminReservationController {
                 )
         );
     }
-
 }
