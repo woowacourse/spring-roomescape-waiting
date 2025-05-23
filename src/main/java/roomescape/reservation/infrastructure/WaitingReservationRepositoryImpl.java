@@ -8,6 +8,7 @@ import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,8 +18,8 @@ public class WaitingReservationRepositoryImpl implements WaitingReservationRepos
     private final JpaWaitingReservationRepository jpaWaitingReservationRepository;
 
     @Override
-    public boolean existsByParams(final Long id) {
-        return jpaWaitingReservationRepository.existsById(id);
+    public List<WaitingReservation> findAllByUserId(final Long userId) {
+        return jpaWaitingReservationRepository.findAllByUserId(userId);
     }
 
     @Override

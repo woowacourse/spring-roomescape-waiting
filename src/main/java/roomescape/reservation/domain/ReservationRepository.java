@@ -15,8 +15,6 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    Optional<Reservation> findByParams(ReservationDate date, Long timeId, Long themeId);
-
     List<Long> findTimeIdByParams(ReservationDate date, Long themeId);
 
     List<Reservation> findAll();

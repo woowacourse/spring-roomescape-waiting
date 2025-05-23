@@ -10,6 +10,7 @@ import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.domain.Email;
 import roomescape.common.exception.NotFoundException;
+import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
@@ -97,16 +98,17 @@ class ReservationFacadeTest {
     void getAllByUserId() {
         //then
         Long userId = 1L;
-        given(userQueryService.getById(any())).willReturn(createUser(1L));
         List<Reservation> reservations = List.of(createReservation(1L));
-        given(reservationQueryService.getAllByUserId(any(Long.class))).willReturn(reservations);
+        given(reservationQueryService.getAllReservationsByUserId(any(Long.class))).willReturn(reservations);
+        given(reservationQueryService.getWaitingByUserId(any(Long.class))).willReturn(List.of());
 
         //when
-        List<ReservationResponse> result = reservationFacade.getAllByUserId(userId);
+        List<MyReservationsResponse> result = reservationFacade.getAllByUserId(userId);
 
         //then
         assertThat(result).hasSize(1);
-        then(reservationQueryService).should(times(1)).getAllByUserId(any(Long.class));
+        then(reservationQueryService).should(times(1)).getAllReservationsByUserId(any(Long.class));
+        then(reservationQueryService).should(times(1)).getWaitingByUserId(any(Long.class));
     }
 
     @Test
@@ -115,7 +117,7 @@ class ReservationFacadeTest {
         //given
         Long nonExistentUserId = 9999L;
         given(userQueryService.getById(any())).willReturn(createUser(nonExistentUserId));
-        given(reservationQueryService.getAllByUserId(any(Long.class)))
+        given(reservationQueryService.getAllReservationsByUserId(any(Long.class)))
                 .willThrow(new NotFoundException(DomainTerm.USER_ID));
 
         //when

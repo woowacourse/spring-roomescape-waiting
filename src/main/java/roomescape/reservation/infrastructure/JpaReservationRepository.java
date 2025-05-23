@@ -36,6 +36,5 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             @Param("startDate") ReservationDate startDate,
             @Param("endDate") ReservationDate endDate,
             Pageable pageable);
-
 }
 

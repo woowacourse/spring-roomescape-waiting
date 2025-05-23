@@ -14,6 +14,7 @@ import roomescape.auth.session.Session;
 import roomescape.auth.session.annotation.UserSession;
 import roomescape.common.uri.UriFactory;
 import roomescape.reservation.application.ReservationFacade;
+import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWebRequest;
@@ -34,8 +35,8 @@ public class ReservationController {
     private final ReservationFacade reservationFacade;
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationResponse>> getMine(@UserSession final Session session) {
-        final List<ReservationResponse> reservations = reservationFacade.getAllByUserId(session.userId());
+    public ResponseEntity<List<MyReservationsResponse>> getMine(@UserSession final Session session) {
+        final List<MyReservationsResponse> reservations = reservationFacade.getAllByUserId(session.userId());
         return ResponseEntity.ok(reservations);
     }
 

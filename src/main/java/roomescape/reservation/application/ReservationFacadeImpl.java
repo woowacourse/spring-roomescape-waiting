@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
+import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
@@ -18,7 +19,10 @@ import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,9 +67,22 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public List<ReservationResponse> getAllByUserId(final Long userId) {
-        final User user = userQueryService.getById(userId);
-        return ReservationResponse.from(reservationQueryService.getAllByUserId(userId), user);
+    public List<MyReservationsResponse> getAllByUserId(final Long userId) {
+        final List<MyReservationsResponse> responses = new ArrayList<>();
+
+        responses.addAll(reservationQueryService.getAllReservationsByUserId(userId)
+                .stream()
+                .map(MyReservationsResponse::fromReservation)
+                .toList());
+
+        responses.addAll(reservationQueryService.getWaitingByUserId(userId)
+                .stream()
+                .map(MyReservationsResponse::fromWaiting)
+                .toList());
+
+        return responses.stream()
+                .sorted(Comparator.comparing(MyReservationsResponse::sequence))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
@@ -17,7 +18,7 @@ public interface ReservationFacade {
 
     List<ReservationResponse> getByParams(ReservationSearchWebRequest request);
 
-    List<ReservationResponse> getAllByUserId(Long userId);
+    List<MyReservationsResponse> getAllByUserId(Long userId);
 
     ReservationResponse create(CreateReservationWithUserIdWebRequest request);
 

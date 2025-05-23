@@ -9,7 +9,11 @@ import roomescape.reservation.domain.WaitingReservation;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
+import java.util.List;
+
 public interface JpaWaitingReservationRepository extends JpaRepository<WaitingReservation, Long> {
+
+    List<WaitingReservation> findAllByUserId(Long userId);
 
     @Query("""
             SELECT COALESCE(MAX(w.waitingOrder), 0) FROM WaitingReservation w WHERE
@@ -32,5 +36,6 @@ public interface JpaWaitingReservationRepository extends JpaRepository<WaitingRe
                                    @Param("themeId") Long themeId,
                                    @Param("date") ReservationDate date,
                                    @Param("waitingOrder") int waitingOrder);
+
 }
 
