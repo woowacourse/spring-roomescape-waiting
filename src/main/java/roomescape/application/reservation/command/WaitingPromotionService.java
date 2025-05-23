@@ -52,7 +52,7 @@ public class WaitingPromotionService {
     }
 
     private void validateControlPermission(Member member, Waiting waiting) {
-        if (!waiting.hasApproveControlPermission(member)) {
+        if (!waiting.canBeApprovedBy(member)) {
             throw new WaitingException("대기 승인 권한이 없습니다.");
         }
     }

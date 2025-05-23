@@ -22,54 +22,54 @@ class WaitingTest {
     private final Theme theme = new Theme(1L, "테마", "설명", "이미지");
 
     @Test
-    void 관리자만_대기_승인_권한이_있다() {
+    void 관리자인_경우_대기가_승인될_수_있다() {
         // given
         Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
 
         // when
-        boolean hasPermission = waiting.hasApproveControlPermission(admin);
+        boolean canBeApproved = waiting.canBeApprovedBy(admin);
 
         // then
-        assertThat(hasPermission)
+        assertThat(canBeApproved)
                 .isTrue();
     }
 
     @Test
-    void 관리자가_아니라면_대기_승인_권한이_없다() {
+    void 관리자가_아니라면_대기가_승인될_수_없다() {
         // given
         Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
 
         // when
-        boolean hasPermission = waiting.hasCancelControlPermission(member);
+        boolean canBeApproved = waiting.canBeApprovedBy(member);
 
         // then
-        assertThat(hasPermission)
+        assertThat(canBeApproved)
                 .isTrue();
     }
 
     @Test
-    void 본인의_대기라면_취소_권한이_있다() {
+    void 본인이_요청한_대기인_경우_취소될_수_있다() {
         // given
         Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
 
         // when
-        boolean hasPermission = waiting.hasCancelControlPermission(member);
+        boolean canBeCanceled = waiting.canBeCanceledBy(member);
 
         // then
-        assertThat(hasPermission)
+        assertThat(canBeCanceled)
                 .isTrue();
     }
 
     @Test
-    void 본인의_대기가_아니라면_취소_권한이_없다() {
+    void 본인이_요청한_대기가_아닌_경우_취소될_수_없다() {
         // given
         Waiting waiting = new Waiting(member, LocalDate.now().plusDays(1), time, theme);
 
         // when
-        boolean hasPermission = waiting.hasCancelControlPermission(other);
+        boolean canBeCanceled = waiting.canBeCanceledBy(other);
 
         // then
-        assertThat(hasPermission)
+        assertThat(canBeCanceled)
                 .isFalse();
     }
 

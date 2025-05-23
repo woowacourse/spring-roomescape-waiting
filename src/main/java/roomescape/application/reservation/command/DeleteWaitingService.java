@@ -30,7 +30,7 @@ public class DeleteWaitingService {
     }
 
     private void validateControlPermission(Member member, Waiting waiting) {
-        if (!waiting.hasCancelControlPermission(member)) {
+        if (!waiting.canBeCanceledBy(member)) {
             throw new WaitingException("대기 취소 권한이 없습니다.");
         }
     }
