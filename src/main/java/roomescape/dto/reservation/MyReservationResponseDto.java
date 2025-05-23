@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationWaitingRank;
 
 public record MyReservationResponseDto(
         long reservationId,
         String theme,
         LocalDate date,
-        @JsonFormat(pattern = "HH:mm")
-        LocalTime time,
-        String status
+        @JsonFormat(pattern = "HH:mm") LocalTime time,
+        String statusMessage
 ) {
 
     public MyReservationResponseDto(Reservation reservation) {
@@ -20,7 +20,17 @@ public record MyReservationResponseDto(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                "예약"
+                reservation.getStatus().getMessage()
+        );
+    }
+
+    public MyReservationResponseDto(Reservation reservation, ReservationWaitingRank rank) {
+        this(
+                reservation.getId(),
+                reservation.getTheme().getName(),
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                rank.getStatusMessage()
         );
     }
 }

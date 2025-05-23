@@ -8,7 +8,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
-import roomescape.domain.reservation.ReservationWaiting;
+import roomescape.domain.reservation.ReservationWaitingRank;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MyReservationResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -56,11 +56,15 @@ public class ReservationService {
         Reservation requestReservation = Reservation.createWithoutId(member, dto.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
 
-        return ReservationResponseDto.of(newReservation, newReservation.getTime(), theme);
+        return ReservationResponseDto.of(
+                newReservation,
+                newReservation.getTime(),
+                theme
+        );
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId) {
-        List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId,
+        List<Reservation> reservations = reservationRepository.findReservationByDateAndTimeIdAndThemeId(date, timeId,
                 themeId);
         if (!reservations.isEmpty()) {
             throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 예약 대기 기능을 사용해주세요.");
@@ -68,6 +72,7 @@ public class ReservationService {
     }
 
     public ReservationResponseDto createReservationWaiting(ReservationCreateDto createDto) {
+        //todo 같은 멤버 검증
         // 1. 요청한 시간, 테마, 멤버 반환
         ReservationTime reservationTime = reservationTimeRepository.findById(createDto.timeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + createDto.timeId()));
@@ -81,25 +86,18 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + createDto.memberId()));
 
         // 2. 예약 대기 등록
-        List<Reservation> existingReservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
+       if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
                 createDto.date(),
                 createDto.timeId(),
-                createDto.themeId());
-
-        if (existingReservations.isEmpty()) {
+                createDto.themeId())
+       ) {
             throw new IllegalArgumentException("[ERROR] 현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
         }
-        ReservationWaiting reservationWaiting = new ReservationWaiting(
-                createDto.date(),
-                reservationTime,
-                theme,
-                member,
-                existingReservations.size() //todo : rank는 이것만 해주면 되나? 다시 생각해보기
-        );
 
-        Reservation savedReservation = reservationRepository.save(reservationWaiting.getReservation());
+        Reservation requestReservation = Reservation.createWaitingWithoutId(member, createDto.date(), reservationTime, theme);
+        Reservation newReservation = reservationRepository.save(requestReservation);
         return ReservationResponseDto.of(
-                savedReservation,
+                newReservation,
                 reservationTime,
                 theme
         );
@@ -129,7 +127,19 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<MyReservationResponseDto> findMyReservations(LoginInfo loginInfo) {
         List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
-        return reservations.stream().map(MyReservationResponseDto::new).toList();
+        return reservations.stream().map(reservation -> {
+            if (reservation.isReservationWaiting()) {
+                ReservationWaitingRank rank = reservationRepository.findWaitingRankByThemeIdAndDateAndTimeId(
+                        reservation.getTheme().getId(),
+                        reservation.getDate(),
+                        reservation.getTime().getId()
+                );
+                return new MyReservationResponseDto(
+                        reservation, rank
+                );
+            }
+            return new MyReservationResponseDto(reservation);
+        }).toList();
     }
 
     public void deleteReservation(Long id) {
@@ -137,5 +147,7 @@ public class ReservationService {
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
         reservationRepository.deleteById(id);
+
+   //todo findById()를 바로 해오면 쿼리가 3번 -> 2번이 됨
     }
 }

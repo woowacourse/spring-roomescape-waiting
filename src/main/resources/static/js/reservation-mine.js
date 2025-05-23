@@ -18,7 +18,7 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        const status = item.statusMessage;
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;

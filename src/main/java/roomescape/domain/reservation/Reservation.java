@@ -114,6 +114,10 @@ public class Reservation {
         return Objects.hash(id, member, date, time, theme);
     }
 
+    public boolean isReservationWaiting() {
+        return status == ReservationStatus.WAITING;
+    }
+
     public Long getId() {
         return id;
     }
