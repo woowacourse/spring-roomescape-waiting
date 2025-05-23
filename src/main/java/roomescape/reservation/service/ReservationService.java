@@ -34,41 +34,34 @@ public class ReservationService {
     @Transactional
     public Reservation save(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
         validatePastDate(date);
+
         final ReservationTime reservationTime = findReservationTimeById(timeId);
         final Theme theme = findThemeById(themeId);
+
         validateExistReservation(date, reservationTime, theme);
         validateExistWaiting(date, reservationTime, theme);
+
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);
 
         return reservationRepository.save(reservation);
     }
 
-    //TODO : 어드민만 사용하는 메서드임 사실상, 추후에 어드민 서비스로 분리 하는 것이 적절해 보인다.
     @Transactional
     public void deleteById(final Long id) {
-        //TODO : 대기 정보가 있는지 파악하기 O
-        //TODO : 대기 정보가 있으면 첫 번째 대기 정보를 예약으로 바꾸기 O
-        //TODO : 대기 삭제하기
         final Reservation reservation = findReservationById(id);
         final Theme theme = reservation.getTheme();
         final LocalDate date = reservation.getDate();
         final ReservationTime time = reservation.getTime();
-        if (waitingRepository.existsByDateAndTimeAndTheme(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
-        )) {
-            //대기 정보가 있는 것임
+
+        if (waitingRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
             waitingRepository.findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date, time)
                     .ifPresent(waiting -> {
-                        //TODO : 대기 정보를 예약으로 바꾸기
                         reservationRepository.save(new Reservation(
                                 waiting.getMember(),
                                 waiting.getDate(),
                                 waiting.getTime(),
                                 waiting.getTheme()
                         ));
-                        //TODO : 대기 삭제하기
                         waitingRepository.deleteById(waiting.getId());
                     });
         }
@@ -91,11 +84,7 @@ public class ReservationService {
             availableReservationTimes.add(new AvailableReservationTime(
                     reservationTime.getId(),
                     reservationTime.getStartAt(),
-                    reservationRepository.existsByDateAndTimeAndTheme(
-                            date,
-                            reservationTime,
-                            theme
-                    ))
+                    reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme))
             );
         }
 
@@ -114,10 +103,13 @@ public class ReservationService {
 
     @Transactional
     public void deleteWaitingById(final Long id) {
-        final Waiting waiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("해당 대기 데이터가 존재하지 않습니다. id = " + id));
-
-        waitingRepository.deleteById(waiting.getId());
+        waitingRepository.findById(id)
+                .ifPresentOrElse(
+                        waiting -> waitingRepository.deleteById(id),
+                        () -> {
+                            throw new DataNotFoundException("해당 대기 데이터가 존재하지 않습니다. id = " + id);
+                        }
+                );
     }
 
     @Transactional(readOnly = true)
@@ -136,11 +128,13 @@ public class ReservationService {
             final LocalDate date,
             final Long timeId,
             final Long themeId) {
+
         validatePastDate(date);
+
         final ReservationTime reservationTime = findReservationTimeById(timeId);
         final Theme theme = findThemeById(themeId);
-
-        boolean reservationExists = reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
+        final boolean reservationExists = reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime,
+                theme);
 
         if (reservationExists) {
             final Waiting waiting = new Waiting(member, reservationTime, theme, date);
@@ -162,12 +156,6 @@ public class ReservationService {
         }
     }
 
-    private void validatePastDate(final LocalDate date) {
-        if (!date.isAfter(LocalDate.now())) {
-            throw new PastDateException(date);
-        }
-    }
-
     private ReservationTime findReservationTimeById(final Long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
@@ -181,5 +169,11 @@ public class ReservationService {
     private Reservation findReservationById(final Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + reservationId));
+    }
+
+    private void validatePastDate(final LocalDate date) {
+        if (!date.isAfter(LocalDate.now())) {
+            throw new PastDateException(date);
+        }
     }
 }
