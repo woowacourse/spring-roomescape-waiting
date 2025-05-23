@@ -18,7 +18,15 @@ public interface WaitingRepositoryInterface {
 
     Optional<Waiting> findById(final Long id);
 
+    Optional<Waiting> findFirstByThemeAndDateAndTimeOrderByIdAsc(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime time
+    );
+
     void deleteById(final Long id);
 
     long countBefore(final Theme theme, final LocalDate date, final ReservationTime time, final Long id);
+
+    List<Waiting> findAll();
 }

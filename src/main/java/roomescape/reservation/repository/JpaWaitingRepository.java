@@ -45,4 +45,17 @@ public class JpaWaitingRepository implements WaitingRepositoryInterface {
     public long countBefore(final Theme theme, final LocalDate date, final ReservationTime time, final Long id) {
         return waitingRepository.countBefore(theme, date, time, id);
     }
+
+    @Override
+    public List<Waiting> findAll() {
+        return waitingRepository.findAll();
+    }
+
+    @Override
+    public Optional<Waiting> findFirstByThemeAndDateAndTimeOrderByIdAsc(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime time) {
+        return waitingRepository.findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date, time);
+    }
 }

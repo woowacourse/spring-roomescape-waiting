@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import roomescape.member.domain.Member;
@@ -31,4 +32,19 @@ public interface WaitingRepository extends CrudRepository<Waiting, Long> {
               AND w.id < :id
             """)
     long countBefore(final Theme theme, final LocalDate date, final ReservationTime time, final Long id);
+
+    @Query("""
+            SELECT w
+            FROM Waiting w
+            JOIN FETCH w.time
+            JOIN FETCH w.theme
+            JOIN FETCH w.member
+            """)
+    List<Waiting> findAll();
+
+    Optional<Waiting> findFirstByThemeAndDateAndTimeOrderByIdAsc(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime time
+    );
 }
