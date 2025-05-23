@@ -1,4 +1,4 @@
-package roomescape.reservation.controller;
+package roomescape.waiting.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.service.dto.LoginMemberInfo;
-import roomescape.reservation.controller.dto.WaitingAddRequest;
-import roomescape.reservation.controller.dto.WaitingAddResponse;
-import roomescape.reservation.service.WaitingService;
-import roomescape.reservation.service.dto.WaitingAddCommand;
-import roomescape.reservation.service.dto.WaitingInfo;
+import roomescape.waiting.controller.dto.WaitingAddRequest;
+import roomescape.waiting.controller.dto.WaitingAddResponse;
+import roomescape.waiting.service.WaitingService;
+import roomescape.waiting.service.dto.WaitingAddCommand;
+import roomescape.waiting.service.dto.WaitingInfo;
 
 @RestController
 @RequestMapping("/waiting")

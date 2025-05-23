@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.waiting.service;
 
 import java.time.LocalDate;
 import org.springframework.stereotype.Service;
@@ -7,13 +7,13 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.Waiting;
+import roomescape.waiting.domain.Waiting;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
-import roomescape.reservation.repository.WaitingRepository;
-import roomescape.reservation.service.dto.WaitingAddCommand;
-import roomescape.reservation.service.dto.WaitingInfo;
+import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.dto.WaitingAddCommand;
+import roomescape.waiting.service.dto.WaitingInfo;
 
 @Service
 public class WaitingService {

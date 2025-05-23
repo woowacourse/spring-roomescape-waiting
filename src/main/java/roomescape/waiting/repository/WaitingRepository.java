@@ -1,7 +1,7 @@
-package roomescape.reservation.repository;
+package roomescape.waiting.repository;
 
 import java.time.LocalDate;
-import roomescape.reservation.domain.Waiting;
+import roomescape.waiting.domain.Waiting;
 
 public interface WaitingRepository {
     Waiting save(Waiting waiting);

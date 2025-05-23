@@ -1,9 +1,9 @@
-package roomescape.reservation.controller.dto;
+package roomescape.waiting.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.service.dto.WaitingInfo;
+import roomescape.waiting.service.dto.WaitingInfo;
 
 public record WaitingAddResponse(
         long id,
@@ -15,9 +15,9 @@ public record WaitingAddResponse(
 ) {
         public WaitingAddResponse(WaitingInfo waitingInfo) {
                 this(waitingInfo.id(),
-                        waitingInfo.themeInfo().name(),
+                        waitingInfo.theme().name(),
                         waitingInfo.date(),
-                        waitingInfo.timeInfo().startAt(),
+                        waitingInfo.time().startAt(),
                         "대기"
                 );
         }

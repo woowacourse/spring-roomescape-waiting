@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.waiting.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,9 +26,9 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
-import roomescape.reservation.repository.WaitingRepository;
-import roomescape.reservation.service.dto.WaitingAddCommand;
-import roomescape.reservation.service.dto.WaitingInfo;
+import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.dto.WaitingAddCommand;
+import roomescape.waiting.service.dto.WaitingInfo;
 
 public class WaitingServiceTest {
 
@@ -118,9 +118,9 @@ public class WaitingServiceTest {
         // then
         assertAll(
                 () -> assertThat(result.date()).isEqualTo(date),
-                () -> assertThat(result.themeInfo().id()).isEqualTo(themeId),
-                () -> assertThat(result.timeInfo().id()).isEqualTo(timeId),
-                () -> assertThat(result.memberInfo().id()).isEqualTo(memberId),
+                () -> assertThat(result.theme().id()).isEqualTo(themeId),
+                () -> assertThat(result.time().id()).isEqualTo(timeId),
+                () -> assertThat(result.member().id()).isEqualTo(memberId),
                 () -> assertThat(result.order()).isEqualTo(1L)
         );
     }

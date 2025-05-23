@@ -1,9 +1,9 @@
-package roomescape.reservation.controller.dto;
+package roomescape.waiting.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
-import roomescape.reservation.service.dto.WaitingAddCommand;
+import roomescape.waiting.service.dto.WaitingAddCommand;
 
 public record WaitingAddRequest(
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,

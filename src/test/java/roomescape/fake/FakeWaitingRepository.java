@@ -3,8 +3,8 @@ package roomescape.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.repository.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 public class FakeWaitingRepository implements WaitingRepository {
 

@@ -1,8 +1,8 @@
-package roomescape.reservation.repository.jpa;
+package roomescape.waiting.repository.jpa;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.repository.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>, WaitingRepository {
 }

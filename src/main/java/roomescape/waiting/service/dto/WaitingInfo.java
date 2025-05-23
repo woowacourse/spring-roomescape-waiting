@@ -1,11 +1,20 @@
-package roomescape.reservation.service.dto;
+package roomescape.waiting.service.dto;
 
 import java.time.LocalDate;
 import roomescape.member.service.dto.MemberInfo;
-import roomescape.reservation.domain.Waiting;
+import roomescape.waiting.domain.Waiting;
+import roomescape.reservation.service.dto.ReservationTimeInfo;
+import roomescape.reservation.service.dto.ThemeInfo;
 
-public record WaitingInfo(long id, LocalDate date, ReservationTimeInfo timeInfo, ThemeInfo themeInfo,
-                          MemberInfo memberInfo, long order) {
+public record WaitingInfo(
+        long id,
+        LocalDate date,
+        ReservationTimeInfo time,
+        ThemeInfo theme,
+        MemberInfo member,
+        long order
+) {
+
     public WaitingInfo(Waiting waiting) {
         this(waiting.getId(),
                 waiting.getDate(),
