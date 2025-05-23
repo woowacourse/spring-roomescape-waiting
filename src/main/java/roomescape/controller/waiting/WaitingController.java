@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.AddReservationDto;
+import roomescape.dto.waiting.ApplyWaitingRequestDto;
 import roomescape.dto.waiting.WaitingResponseDto;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
@@ -52,5 +53,11 @@ public class WaitingController {
     public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/apply")
+    public ResponseEntity<Void> applyWaiting(@RequestBody ApplyWaitingRequestDto applyWaitingRequestDto) {
+        waitingService.apply(applyWaitingRequestDto);
+        return ResponseEntity.ok().build();
     }
 }
