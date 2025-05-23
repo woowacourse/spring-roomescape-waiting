@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.reservation.InvalidReservationException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,11 +40,24 @@ public class Waiting {
     }
 
     public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validate(date, time, member);
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
+    }
+
+    private void validate(LocalDate date, ReservationTime time, Member member) {
+        if (date == null || time == null) {
+            throw new InvalidReservationException("시간은 공백일 수 없습니다.");
+        }
+        if (theme == null) {
+            throw new InvalidReservationException("테마는 공백일 수 없습니다.");
+        }
+        if (member == null) {
+            throw new InvalidReservationException("멤버는 공백일 수 없습니다.");
+        }
     }
 
     public boolean isBeforeDateTime(LocalDateTime compareDateTime) {
