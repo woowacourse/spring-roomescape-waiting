@@ -8,6 +8,7 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationWaitingRequest;
@@ -38,7 +39,7 @@ public class ReservationService {
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
-
+    // TODO: 중복되는 코드 제거
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
@@ -100,7 +101,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(final Long id) {
-        List<Reservation> reservations = reservationRepository.findByMemberId(id);
+        List<ReservationWithRank> reservations = reservationRepository.findReservationWithRankByMemberId(id);
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();

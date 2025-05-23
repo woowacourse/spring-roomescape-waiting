@@ -35,7 +35,6 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    // TODO: 대기 상태 추가
     @GetMapping(RESERVATION_BASE_URL)
     public ResponseEntity<List<ReservationResponse>> getReservations(
             @ModelAttribute ReservationConditionRequest request) {
@@ -51,7 +50,6 @@ public class ReservationController {
         return ResponseEntity.created(locationUri).body(response);
     }
 
-    // TODO: ReservationResponse 통일
     @PostMapping("/waiting-reservations")
     public ResponseEntity<ReservationResponse> createWaitingReservation(
             @RequestBody final ReservationWaitingRequest request,
@@ -67,17 +65,17 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping(RESERVATION_BASE_URL + "/mine")
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@Authentication LoginMember loginMember) {
+        List<MyReservationResponse> myReservationResponses = reservationService.getMyReservations(loginMember.id());
+        return ResponseEntity.ok().body(myReservationResponses);
+    }
+
     @ExceptionHandler(value = DateTimeParseException.class)
     public ResponseEntity<ExceptionResponse> noMatchDateType(final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(
                 "[ERROR] 요청 날짜 형식이 맞지 않습니다.", request.getRequestURI()
         );
         return ResponseEntity.badRequest().body(exceptionResponse);
-    }
-
-    @GetMapping(RESERVATION_BASE_URL + "/mine")
-    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@Authentication LoginMember loginMember) {
-        List<MyReservationResponse> myReservationResponses = reservationService.getMyReservations(loginMember.id());
-        return ResponseEntity.ok().body(myReservationResponses);
     }
 }
