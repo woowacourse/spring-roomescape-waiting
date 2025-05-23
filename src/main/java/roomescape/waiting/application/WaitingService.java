@@ -74,7 +74,7 @@ public class WaitingService {
     }
 
     private void validateIsOwner(Long memberId, Waiting waiting) {
-        if (!waiting.isOwnedBy(memberId)) {
+        if (!waiting.getMember().getId().equals(memberId)) {
             throw new AccessForbiddenException();
         }
     }
