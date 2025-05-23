@@ -9,8 +9,8 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.TimeValueProjection;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.TimeSlotId;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByParams(final ReservationDate date, final TimeValue time, final ThemeId themeId) {
+    public boolean existsByParams(final ReservationDate date, final ReservationTime time, final ThemeId themeId) {
         return jpaReservationRepository.existsByDateAndTimeAndThemeId(date, time, themeId.getValue());
     }
 
@@ -40,14 +40,14 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<TimeValue> findTimeValuesByParams(final ReservationDate date, final ThemeId themeId) {
+    public List<ReservationTime> findTimeValuesByParams(final ReservationDate date, final ThemeId themeId) {
         return jpaReservationRepository.findTimeByDateAndThemeId(date, themeId.getValue()).stream()
                 .map(TimeValueProjection::getTime)
                 .toList();
     }
 
     @Override
-    public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
+    public List<TimeSlotId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
         return List.of();
     }
 

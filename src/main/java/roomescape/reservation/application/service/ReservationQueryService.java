@@ -13,7 +13,7 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
@@ -58,7 +58,7 @@ public class ReservationQueryService {
     }
 
     public boolean existsByParams(final ReservationDate date,
-                                  final TimeValue time,
+                                  final ReservationTime time,
                                   final ThemeId themeId) {
         return reservationRepository.existsByParams(date, time, themeId);
     }

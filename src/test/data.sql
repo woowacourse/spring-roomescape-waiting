@@ -3,7 +3,7 @@ VALUES (1, 'admin', 'admin@email.com', 'a(단방향) 해시 처리 완료', 'ADM
        (2, 'normal1', 'normal1@email.com', 'a(단방향) 해시 처리 완료', 'NORMAL'),
        (3, 'normal2', 'normal2@email.com', 'a(단방향) 해시 처리 완료', 'NORMAL');
 
-INSERT INTO reservation_times (start_at)
+INSERT INTO time_slots (start_at)
 VALUES ('10:00'),
        ('11:00'),
        ('12:00');

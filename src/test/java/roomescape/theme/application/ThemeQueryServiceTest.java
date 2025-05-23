@@ -17,9 +17,9 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -45,7 +45,7 @@ class ThemeQueryServiceTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -152,8 +152,8 @@ class ThemeQueryServiceTest {
                 ThemeThumbnail.from("https://example.com/train.jpg")));
 
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1L));
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(TimeValue.from(LocalTime.of(12, 0))));
+        final TimeSlot time = timeSlotRepository.save(
+                TimeSlot.withoutId(ReservationTime.from(LocalTime.of(12, 0))));
 
         final Theme[] themes = {
                 theme1, theme2, theme3, theme4, theme5, theme6,

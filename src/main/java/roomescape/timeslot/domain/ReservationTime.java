@@ -1,5 +1,6 @@
-package roomescape.reservation.domain;
+package roomescape.timeslot.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,6 @@ import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
-import roomescape.timeslot.domain.TimeSlot;
 
 import java.time.LocalTime;
 
@@ -21,21 +21,22 @@ import java.time.LocalTime;
 @EqualsAndHashCode
 @ToString
 @Embeddable
-public class ReservationTimeWithoutId {
+public class ReservationTime {
 
-    private LocalTime startAt;
+    @Column(name = "start_at")
+    private LocalTime value;
 
-    public static ReservationTimeWithoutId from(final LocalTime startAt) {
+    public static ReservationTime from(final LocalTime startAt) {
         validate(startAt);
-        return new ReservationTimeWithoutId(startAt);
+        return new ReservationTime(startAt);
     }
 
     private static void validate(final LocalTime startAt) {
-        Validator.of(TimeSlot.class)
-                .validateNotNull(Fields.startAt, startAt, DomainTerm.RESERVATION_TIME.label());
+        Validator.of(ReservationTime.class)
+                .validateNotNull(Fields.value, startAt, DomainTerm.RESERVATION_TIME.label());
     }
 
     public boolean isBefore(final LocalTime time) {
-        return startAt.isBefore(time);
+        return value.isBefore(time);
     }
 }

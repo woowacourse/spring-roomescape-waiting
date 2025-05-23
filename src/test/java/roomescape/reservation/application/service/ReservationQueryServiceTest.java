@@ -16,10 +16,9 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
-import roomescape.time.domain.TimeValue;
-import roomescape.user.application.service.UserQueryService;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -43,7 +42,7 @@ class ReservationQueryServiceTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -55,9 +54,9 @@ class ReservationQueryServiceTest {
     @DisplayName("예약을 조회할 수 있다")
     void createAndFindReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(LocalTime.of(10, 0))));
+        final TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -75,13 +74,13 @@ class ReservationQueryServiceTest {
         final Reservation given1 = Reservation.withoutId(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                reservationTime.getStartAt(),
+                timeSlot.getStartAt(),
                 theme);
 
         final Reservation given2 = Reservation.withoutId(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                reservationTime.getStartAt(),
+                timeSlot.getStartAt(),
                 theme);
 
         final Reservation saved1 = reservationRepository.save(given1);
@@ -123,9 +122,9 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(LocalTime.of(10, 0))));
+        final TimeSlot time = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme1 = themeRepository.save(
                 Theme.withoutId(ThemeName.from("공포1"),
@@ -190,9 +189,9 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(LocalTime.of(10, 0))));
+        final TimeSlot time = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(ThemeName.from("공포1"),

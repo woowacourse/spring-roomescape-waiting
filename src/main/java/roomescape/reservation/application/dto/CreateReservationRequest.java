@@ -8,21 +8,21 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.TimeSlotId;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public record CreateReservationRequest(UserId userId,
                                        ReservationDate date,
-                                       ReservationTimeId timeId,
+                                       TimeSlotId timeId,
                                        ThemeId themeId) {
 
     public CreateReservationRequest {
         validate(userId, date, timeId, themeId);
     }
 
-    public Reservation toDomain(final Theme theme, final TimeValue time) {
+    public Reservation toDomain(final Theme theme, final ReservationTime time) {
         return Reservation.withoutId(
                 userId,
                 date,
@@ -32,12 +32,12 @@ public record CreateReservationRequest(UserId userId,
 
     private void validate(final UserId userId,
                           final ReservationDate date,
-                          final ReservationTimeId timeId,
+                          final TimeSlotId timeId,
                           final ThemeId themeId) {
         Validator.of(CreateReservationRequest.class)
                 .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label())
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
-                .validateNotNull(Fields.timeId, timeId, DomainTerm.RESERVATION_TIME_ID.label())
+                .validateNotNull(Fields.timeId, timeId, DomainTerm.TIME_SLOT.label())
                 .validateNotNull(Fields.themeId, themeId, DomainTerm.THEME_ID.label());
     }
 }

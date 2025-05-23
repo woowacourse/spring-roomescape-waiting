@@ -1,8 +1,8 @@
 package roomescape.reservation.infrastructure.projection;
 
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.ReservationTime;
 
 public interface TimeValueProjection {
 
-    TimeValue getTime();
+    ReservationTime getTime();
 }

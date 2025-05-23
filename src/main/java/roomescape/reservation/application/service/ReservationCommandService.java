@@ -13,8 +13,8 @@ import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
-import roomescape.time.application.service.ReservationTimeQueryService;
-import roomescape.time.domain.ReservationTime;
+import roomescape.timeslot.application.service.ReservationTimeQueryService;
+import roomescape.timeslot.domain.TimeSlot;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class ReservationCommandService {
     private final TimeProvider timeProvider;
 
     public Reservation create(final CreateReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeQueryService.get(
+        final TimeSlot timeSlot = reservationTimeQueryService.get(
                 request.timeId());
 
         final Theme theme = themeQueryService.get(
@@ -36,17 +36,17 @@ public class ReservationCommandService {
 
         if (reservationQueryService.existsByParams(
                 request.date(),
-                reservationTime.getStartAt(),
+                timeSlot.getStartAt(),
                 request.themeId())
         ) {
             throw new DuplicateException(
                     DomainTerm.RESERVATION,
                     request.date(),
-                    reservationTime.getStartAt(),
+                    timeSlot.getStartAt(),
                     request.themeId());
         }
 
-        final Reservation reservation = request.toDomain(theme, reservationTime.getStartAt());
+        final Reservation reservation = request.toDomain(theme, timeSlot.getStartAt());
         reservation.validatePast(timeProvider.now());
 
         return reservationRepository.save(reservation);

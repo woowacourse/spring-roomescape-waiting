@@ -2,8 +2,8 @@ package roomescape.reservation.domain;
 
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.TimeSlotId;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
@@ -14,13 +14,13 @@ public interface ReservationRepository {
 
     boolean existsByParams(ReservationId id);
 
-    boolean existsByParams(ReservationDate date, TimeValue time, ThemeId themeId);
+    boolean existsByParams(ReservationDate date, ReservationTime time, ThemeId themeId);
 
     Optional<Reservation> findById(ReservationId id);
 
-    List<TimeValue> findTimeValuesByParams(ReservationDate date, ThemeId themeId);
+    List<ReservationTime> findTimeValuesByParams(ReservationDate date, ThemeId themeId);
 
-    List<ReservationTimeId> findTimeIdByParams(ReservationDate date, ThemeId themeId);
+    List<TimeSlotId> findTimeIdByParams(ReservationDate date, ThemeId themeId);
 
     List<Reservation> findAll();
 

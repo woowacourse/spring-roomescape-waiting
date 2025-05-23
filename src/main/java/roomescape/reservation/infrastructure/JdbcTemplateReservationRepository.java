@@ -13,7 +13,7 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class JdbcTemplateReservationRepository {
                 ReservationId.from(resultSet.getLong("id")),
                 UserId.from(resultSet.getLong("user_id")),
                 ReservationDate.from(resultSet.getDate("date").toLocalDate()),
-                TimeValue.from(resultSet.getTime("time").toLocalTime()),
+                ReservationTime.from(resultSet.getTime("time").toLocalTime()),
                 theme
         );
     };

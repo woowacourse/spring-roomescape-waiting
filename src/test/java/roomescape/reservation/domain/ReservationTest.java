@@ -12,9 +12,9 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotId;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
@@ -36,7 +36,7 @@ class ReservationTest {
         // given
         final UserId userId = UserId.from(1L);
         final ReservationDate date = ReservationDate.from(LocalDate.now());
-        final TimeValue time = TimeValue.from(LocalTime.of(10, 0));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
         final Theme theme = Theme.withId(
                 ThemeId.from(1L),
                 ThemeName.from("테마 이름"),
@@ -74,7 +74,7 @@ class ReservationTest {
         // given
         final UserId userId = UserId.from(1L);
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
-        final ReservationTime time = ReservationTime.withId(ReservationTimeId.from(1L), TimeValue.from(LocalTime.of(10, 0)));
+        final TimeSlot time = TimeSlot.withId(TimeSlotId.from(1L), ReservationTime.from(LocalTime.of(10, 0)));
         final Theme theme = Theme.withId(
                 ThemeId.from(1L),
                 ThemeName.from("테마 이름"),
@@ -118,13 +118,13 @@ class ReservationTest {
         final Reservation minusDay = Reservation.withoutId(
                 savedUser.getId(),
                 ReservationDate.from(nowDate.minusDays(1L)),
-                TimeValue.from(nowTime),
+                ReservationTime.from(nowTime),
                 savedTheme);
 
         final Reservation minusTime = Reservation.withoutId(
                 savedUser.getId(),
                 ReservationDate.from(nowDate),
-                TimeValue.from(nowTime.minusMinutes(1L)),
+                ReservationTime.from(nowTime.minusMinutes(1L)),
                 savedTheme);
 
         assertAll(() -> {

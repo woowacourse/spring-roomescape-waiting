@@ -22,9 +22,9 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeRepository;
-import roomescape.time.domain.TimeValue;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -50,7 +50,7 @@ class ReservationCommandServiceTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -65,9 +65,9 @@ class ReservationCommandServiceTest {
     @DisplayName("예약을 생성할 수 있다")
     void createAndFindReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(LocalTime.of(10, 0))));
+        final TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -85,7 +85,7 @@ class ReservationCommandServiceTest {
         final CreateReservationRequest requestDto = new CreateReservationRequest(
                 user.getId(),
                 ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                reservationTime.getId(),
+                timeSlot.getId(),
                 theme.getId());
 
         // when
@@ -107,9 +107,9 @@ class ReservationCommandServiceTest {
     @DisplayName("중복된 예약을 생성할 수 없다.")
     void existsReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(LocalTime.of(10, 0))));
+        final TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -128,7 +128,7 @@ class ReservationCommandServiceTest {
                 new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        reservationTime.getId(),
+                        timeSlot.getId(),
                         theme.getId()
                 ));
 
@@ -138,14 +138,14 @@ class ReservationCommandServiceTest {
                 new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        reservationTime.getId(),
+                        timeSlot.getId(),
                         theme.getId())))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessageContainingAll(
                         "RESERVATION already exists.",
-                        "params={ReservationDate=ReservationDate(value=",
-                        "TimeValue=TimeValue(value=",
-                        "ThemeId=ThemeId("
+                        "ReservationDate",
+                        "ReservationTime",
+                        "ThemeId"
                 );
     }
 
@@ -153,9 +153,9 @@ class ReservationCommandServiceTest {
     @DisplayName("예약을 삭제할 수 있다")
     void deleteReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(LocalTime.of(10, 0))));
+        final TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -174,7 +174,7 @@ class ReservationCommandServiceTest {
                 Reservation.withoutId(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        reservationTime.getStartAt(),
+                        timeSlot.getStartAt(),
                         theme));
 
         // when
@@ -190,13 +190,13 @@ class ReservationCommandServiceTest {
         // given
         final LocalDateTime now = timeProvider.now();
 
-        final ReservationTime validReservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(now.toLocalTime().plusNanos(1))));
+        final TimeSlot validTimeSlot = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(now.toLocalTime().plusNanos(1))));
 
-        final ReservationTime pastReservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        TimeValue.from(now.toLocalTime().minusNanos(1))));
+        final TimeSlot pastTimeSlot = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(now.toLocalTime().minusNanos(1))));
 
         final User user = userRepository.save(
                 User.withoutId(
@@ -214,7 +214,7 @@ class ReservationCommandServiceTest {
                 new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(now.toLocalDate().minusDays(1)),
-                        validReservationTime.getId(),
+                        validTimeSlot.getId(),
                         theme.getId()
                 );
 
@@ -222,7 +222,7 @@ class ReservationCommandServiceTest {
                 new CreateReservationRequest(
                         user.getId(),
                         ReservationDate.from(now.toLocalDate()),
-                        pastReservationTime.getId(),
+                        pastTimeSlot.getId(),
                         theme.getId()
                 );
 
