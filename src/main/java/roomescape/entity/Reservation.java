@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Reservation {
 
     @Id

@@ -1,11 +1,9 @@
 package roomescape.entity;
 
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.time.LocalDate;
 
 @Entity
-@DiscriminatorValue(value = "waiting")
 public class WaitingReservation extends Reservation{
 
     public WaitingReservation() {
