@@ -18,9 +18,13 @@ public interface ReservationRepository {
 
     List<Reservation> findBy(Long themeId, LocalDate date);
 
+    List<Reservation> findBy(Long memberId);
+
     List<Reservation> findAll();
 
     boolean existsByTimeId(Long timeId);
 
     boolean existByThemeId(Long themeId);
+
+    Optional<Reservation> findBy(LocalDate date, Long aLong, Long aLong1);
 }

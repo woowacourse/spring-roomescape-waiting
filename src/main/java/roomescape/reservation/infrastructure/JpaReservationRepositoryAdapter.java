@@ -42,6 +42,11 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findBy(Long memberId) {
+        return jpaReservationRepository.findByMemberId(memberId);
+    }
+
+    @Override
     public List<Reservation> findBy(final Long themeId, final LocalDate date) {
         return jpaReservationRepository.findByThemeIdAndDate(themeId, date);
     }
@@ -59,5 +64,10 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     @Override
     public boolean existByThemeId(final Long themeId) {
         return jpaReservationRepository.existsByThemeId(themeId);
+    }
+
+    @Override
+    public Optional<Reservation> findBy(LocalDate date, Long timeId, Long themeId) {
+        return jpaReservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 }

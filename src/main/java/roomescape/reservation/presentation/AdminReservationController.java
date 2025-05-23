@@ -3,12 +3,10 @@ package roomescape.reservation.presentation;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import roomescape.auth.login.presentation.dto.LoginAdminInfo;
 import roomescape.auth.login.presentation.dto.SearchCondition;
+import roomescape.auth.login.presentation.dto.annotation.LoginAdmin;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -46,5 +44,16 @@ public class AdminReservationController {
         List<ReservationResponse> responses = reservationService.searchReservationWithCondition(condition);
 
         return ResponseEntity.ok().body(responses);
+    }
+
+    @GetMapping("/admin/waitings")
+    public ResponseEntity<List<ReservationResponse>> getWaitings(@LoginAdmin LoginAdminInfo adminInfo) {
+        return ResponseEntity.ok(reservationService.findAllWaitings());
+    }
+
+    @DeleteMapping("/admin/waiting/{id}")
+    public ResponseEntity<Void> deleteWaiting(@LoginAdmin LoginAdminInfo adminInfo, @PathVariable("id") Long waitingId) {
+        reservationService.deleteWaiting(waitingId);
+        return ResponseEntity.ok().build();
     }
 }

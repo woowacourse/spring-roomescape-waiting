@@ -9,6 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import roomescape.reservation.domain.Reservation;
 
 @Entity
@@ -24,9 +26,6 @@ public class Member {
     private Email email;
     @Embedded
     private Password password;
-
-    @OneToMany(mappedBy = "member")
-    private List<Reservation> reservations = new ArrayList<>();
 
     protected Member() {
     }
@@ -63,7 +62,15 @@ public class Member {
         return password.password();
     }
 
-    public List<Reservation> getReservations() {
-        return reservations;
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Member member = (Member) o;
+        return Objects.equals(id, member.id) && Objects.equals(name, member.name) && Objects.equals(email, member.email) && Objects.equals(password, member.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email, password);
     }
 }
