@@ -17,12 +17,15 @@ public class GlobalExceptionHandler {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /*
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handle(final Exception e) {
         log.error("Unexpected error occured", e);
         return new ResponseEntity<>("서버 내부에 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+
+     */
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<String> handle(final BadRequestException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
