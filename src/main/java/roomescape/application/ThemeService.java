@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
@@ -40,19 +39,30 @@ public class ThemeService {
     public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {
         int finalCount = Math.min(count, MAX_THEME_FETCH_COUNT);
         Pageable pageable = PageRequest.of(0, finalCount);
+
         return themeRepository.findRankingByPeriod(startDate, endDate, pageable);
     }
 
     public void removeById(final long id) {
-        List<Reservation> reservations = reservationRepository.findByThemeId(id);
-
-        if (!reservations.isEmpty()) {
-            throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
-        }
-
-        themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+        validateThemeNotInUse(id);
+        validateThemeExists(id);
 
         themeRepository.deleteById(id);
+    }
+
+    private void validateThemeNotInUse(long id) {
+        boolean isThemeInUse = reservationRepository.existsByThemeId(id);
+
+        if (isThemeInUse) {
+            throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
+        }
+    }
+
+    private void validateThemeExists(long id) {
+        boolean isThemeExists = themeRepository.existsById(id);
+
+        if (!isThemeExists) {
+            throw new NotFoundException("존재하지 않는 테마입니다.");
+        }
     }
 }
