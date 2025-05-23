@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
+import roomescape.member.domain.MemberFixtures;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -28,9 +28,10 @@ class MemberRepositoryTest {
     void findByEmailSuccess() {
         // given
         String testEmail = "email1@email.com";
-        createAndPersistMember(testEmail);
-        createAndPersistMember("email2@email.com");
-        createAndPersistMember("email3@email.com");
+
+        MemberFixtures.persistUserMember(entityManager, testEmail);
+        MemberFixtures.persistUserMember(entityManager, "email2@email.com");
+        MemberFixtures.persistUserMember(entityManager, "email3@email.com");
         flushAndClear();
 
         // when
@@ -47,7 +48,7 @@ class MemberRepositoryTest {
     @DisplayName("존재하지 않는 이메일로 조회하면 빈 Optional을 반환한다")
     void findByNonExistentEmailReturnsEmpty() {
         // given
-        createAndPersistMember("email1@email.com");
+        MemberFixtures.persistUserMember(entityManager, "email1@email.com");
         flushAndClear();
 
         // when
@@ -55,12 +56,6 @@ class MemberRepositoryTest {
 
         // then
         assertThat(result).isEmpty();
-    }
-
-    private Member createAndPersistMember(String email) {
-        Member member = new Member(email, "password123", "사용자", Role.USER);
-        entityManager.persist(member);
-        return member;
     }
 
     private void flushAndClear() {

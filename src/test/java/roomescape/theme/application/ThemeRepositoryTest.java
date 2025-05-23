@@ -55,7 +55,7 @@ class ThemeRepositoryTest {
     }
 
     private TestEntities createTestEntities() {
-        Member member = MemberFixtures.createAndPersistMember(entityManager);
+        Member member = MemberFixtures.persistUserMember(entityManager);
         ReservationTime time = ReservationTimeFixtures.persistReservationTime(entityManager);
         List<Theme> themes = createTestThemes();
         return new TestEntities(themes, member, time);
