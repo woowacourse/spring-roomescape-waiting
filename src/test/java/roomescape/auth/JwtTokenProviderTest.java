@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.domain.MemberRole;
 import roomescape.exception.UnAuthorizedException;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.result.MemberResult;
 
 import java.util.Date;
 

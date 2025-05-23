@@ -1,0 +1,21 @@
+package roomescape.controller.dto.request;
+
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalTime;
+import roomescape.service.dto.param.CreateReservationTimeParam;
+
+public record CreateReservationTimeRequest(
+
+        @NotNull
+        LocalTime startAt
+) {
+    public CreateReservationTimeRequest {
+        if (startAt == null) {
+            throw new IllegalArgumentException("startAt은 필수값입니다.");
+        }
+    }
+
+    public CreateReservationTimeParam toServiceParam() {
+        return new CreateReservationTimeParam(startAt);
+    }
+}

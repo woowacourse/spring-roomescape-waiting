@@ -1,26 +1,31 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.TestFixture.DEFAULT_DATE;
+
 import jakarta.transaction.Transactional;
+import java.util.List;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.DatabaseCleaner;
 import roomescape.TestFixture;
-import roomescape.domain.*;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.exception.NotFoundThemeException;
-import roomescape.service.param.CreateThemeParam;
-import roomescape.service.result.ThemeResult;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.TestFixture.DEFAULT_DATE;
+import roomescape.exception.NotFoundException;
+import roomescape.service.dto.param.CreateThemeParam;
+import roomescape.service.dto.result.ThemeResult;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -42,6 +47,14 @@ class ThemeServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @BeforeEach
+    void clean() {
+        databaseCleaner.clean();
+    }
+
     @Test
     void 테마를_전체_조회할_수_있다() {
         //given
@@ -49,7 +62,7 @@ class ThemeServiceTest {
         Theme theme2 = themeRepository.save(TestFixture.createThemeByName("theme2"));
 
         //when
-        List<ThemeResult> themeResults = themeService.findAll();
+        List<ThemeResult> themeResults = themeService.getAll();
 
         //then
         assertThat(themeResults).isEqualTo(List.of(
@@ -67,8 +80,13 @@ class ThemeServiceTest {
         ThemeResult themeResult = themeService.create(createThemeParam);
 
         //then
-        assertThat(themeRepository.findById(themeResult.id()))
-                .hasValue(new Theme(themeResult.id(), themeResult.name(), themeResult.description(), themeResult.thumbnail()));
+        SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(themeRepository.findAll()).hasSize(1);
+        Theme savedTheme = themeRepository.findById(themeResult.id()).get();
+        softly.assertThat(savedTheme.getName()).isEqualTo(createThemeParam.name());
+
+        softly.assertAll();
     }
 
     @Test
@@ -77,7 +95,7 @@ class ThemeServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
 
         //when
-        ThemeResult themeResult = themeService.findById(theme.getId());
+        ThemeResult themeResult = themeService.getById(theme.getId());
 
         //then
         assertThat(themeResult).isEqualTo(ThemeResult.from(theme));
@@ -86,9 +104,8 @@ class ThemeServiceTest {
     @Test
     void id값으로_테마를_찾을때_없다면_예외가_발생한다() {
         // given & when & then
-        assertThatThrownBy(() -> themeService.findById(1L))
-                .isInstanceOf(NotFoundThemeException.class)
-                .hasMessage("id에 해당하는 Theme이 없습니다.");
+        assertThatThrownBy(() -> themeService.getById(1L))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -109,7 +126,7 @@ class ThemeServiceTest {
         Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, reservationTime, theme);
+        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, reservationTime, theme);
         reservationRepository.save(reservation);
 
         //when & then

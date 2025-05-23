@@ -1,12 +1,11 @@
 package roomescape.persistence;
 
-import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.repository.ReservationRepository;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
+import roomescape.domain.repository.ReservationRepository;
 
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -15,11 +14,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     public ReservationRepositoryImpl(final JpaReservationRepository jpaReservationRepository) {
         this.jpaReservationRepository = jpaReservationRepository;
-    }
-
-    @Override
-    public List<Reservation> findAll() {
-        return jpaReservationRepository.findAll();
     }
 
     @Override
@@ -48,8 +42,13 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate reservationDate, final Long timeId, final Long themeId) {
+    public boolean existsDuplicateReservation(final LocalDate reservationDate, final Long timeId, final Long themeId) {
         return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(reservationDate, timeId, themeId);
+    }
+
+    @Override
+    public boolean isBookingSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId) {
+        return jpaReservationRepository.isBookingSlotEmpty(reservationDate, timeId, themeId);
     }
 
     @Override
@@ -58,12 +57,12 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate reservationDate) {
-        return jpaReservationRepository.findByThemeIdAndDate(themeId, reservationDate);
+    public List<Reservation> findReservationsInConditions(final Long memberId, final Long themeId, final LocalDate dateFrom, final LocalDate dateTo) {
+        return jpaReservationRepository.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
     }
 
     @Override
-    public List<Reservation> findReservationsInConditions(final Long memberId, final Long themeId, final LocalDate dateFrom, final LocalDate dateTo) {
-        return jpaReservationRepository.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
+    public boolean hasAlreadyReserved(Long memberId, Long themeId, Long timeId, LocalDate date) {
+        return jpaReservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(memberId, themeId, timeId, date);
     }
 }

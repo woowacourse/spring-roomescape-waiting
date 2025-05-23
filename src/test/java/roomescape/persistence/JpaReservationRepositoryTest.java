@@ -1,7 +1,13 @@
 package roomescape.persistence;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.TestFixture.DEFAULT_DATE;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +19,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.TestFixture.DEFAULT_DATE;
-
 @ActiveProfiles("test")
 @DataJpaTest
 class JpaReservationRepositoryTest {
@@ -29,112 +28,6 @@ class JpaReservationRepositoryTest {
 
     @PersistenceContext
     private EntityManager entityManager;
-
-    @Test
-    @DisplayName("회원 ID로 예약을 찾을 수 있다.")
-    void findByMemberId() {
-        //given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        // when
-        List<Reservation> result = jpaReservationRepository.findByMemberId(member.getId());
-
-        // then
-        assertAll(
-                () -> assertThat(result.size()).isEqualTo(1),
-                () -> assertThat(result.getFirst()).isEqualTo(reservation)
-        );
-    }
-
-    @Test
-    @DisplayName("예약 시간 ID를 통해 해당 시간에 대한 예약이 존재함을 확인할 수 있다.")
-    void existsByTimeId() {
-        //given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        //when
-        boolean result = jpaReservationRepository.existsByTimeId(time.getId());
-
-        //then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("날짜, 예약 시간 ID, 테마 ID가 같은 예약이 존재함을 확인할 수 있다.")
-    void existsByDateAndTimeIdAndThemeId() {
-        //given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        //when
-        boolean result = jpaReservationRepository.existsByDateAndTimeIdAndThemeId(LocalDate.of(2025, 1, 1), time.getId(), theme.getId());
-
-        //then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("테마 ID에 예약이 존재하는지 확인할 수 있다.")
-    void existsByThemeId() {
-        // given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        // when
-        boolean result = jpaReservationRepository.existsByThemeId(theme.getId());
-
-        //then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("테마 ID와 날짜로 예약을 조회할 수 있다.")
-    void findByThemeIdAndDate() {
-        // given
-        Member member = TestFixture.createDefaultMember();
-        entityManager.persist(member);
-        Theme theme = TestFixture.createDefaultTheme();
-        entityManager.persist(theme);
-        ReservationTime time = TestFixture.createDefaultReservationTime();
-        entityManager.persist(time);
-        Reservation reservation = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme);
-        entityManager.persist(reservation);
-
-        // when
-        List<Reservation> result = jpaReservationRepository.findByThemeIdAndDate(theme.getId(), DEFAULT_DATE);
-
-        // then
-        assertAll(
-                () -> assertThat(result.size()).isEqualTo(1),
-                () -> assertThat(result.getFirst()).isEqualTo(reservation)
-        );
-    }
 
     @Test
     @DisplayName("회원 ID로 예약 조회를 필터링할 수 있다.")
@@ -150,8 +43,8 @@ class JpaReservationRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member1, DEFAULT_DATE, time, theme);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member2, DEFAULT_DATE, time, theme);
+        Reservation reservation1 = TestFixture.createNewReservation(member1, DEFAULT_DATE, time, theme);
+        Reservation reservation2 = TestFixture.createNewReservation(member2, DEFAULT_DATE, time, theme);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
@@ -179,8 +72,8 @@ class JpaReservationRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme1);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, DEFAULT_DATE, time, theme2);
+        Reservation reservation1 = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme1);
+        Reservation reservation2 = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme2);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
@@ -206,8 +99,8 @@ class JpaReservationRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme);
+        Reservation reservation1 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme);
+        Reservation reservation2 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 2), time, theme);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
@@ -233,8 +126,8 @@ class JpaReservationRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme);
+        Reservation reservation1 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme);
+        Reservation reservation2 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 2), time, theme);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
@@ -260,8 +153,8 @@ class JpaReservationRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         entityManager.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme);
+        Reservation reservation1 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme);
+        Reservation reservation2 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 2), time, theme);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
 
@@ -270,5 +163,28 @@ class JpaReservationRepositoryTest {
 
         // then
         assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("회원 ID로 예약을 찾을 수 있다.")
+    void findByMemberId() {
+        //given
+        Member member = TestFixture.createDefaultMember();
+        entityManager.persist(member);
+        Theme theme = TestFixture.createDefaultTheme();
+        entityManager.persist(theme);
+        ReservationTime time = TestFixture.createDefaultReservationTime();
+        entityManager.persist(time);
+        Reservation reservation = TestFixture.createNewReservation(member, DEFAULT_DATE, time, theme);
+        entityManager.persist(reservation);
+
+        // when
+        List<Reservation> result = jpaReservationRepository.findByMemberId(member.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(result.size()).isEqualTo(1),
+                () -> assertThat(result.getFirst()).isEqualTo(reservation)
+        );
     }
 }

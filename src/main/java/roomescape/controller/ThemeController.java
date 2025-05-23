@@ -1,12 +1,13 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.controller.request.CreateThemeRequest;
-import roomescape.controller.response.ThemeResponse;
+import roomescape.controller.dto.request.CreateThemeRequest;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
-import roomescape.service.result.ThemeResult;
+import roomescape.service.dto.result.ThemeResult;
 
 import java.util.List;
 
@@ -21,8 +22,8 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> findAll() {
-        List<ThemeResult> themeResults = themeService.findAll();
+    public ResponseEntity<List<ThemeResponse>> getAll() {
+        List<ThemeResult> themeResults = themeService.getAll();
         List<ThemeResponse> themeResponses = themeResults.stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -30,7 +31,7 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> create(@RequestBody CreateThemeRequest createThemeRequest) {
+    public ResponseEntity<ThemeResponse> create(@Valid @RequestBody CreateThemeRequest createThemeRequest) {
         ThemeResult themeResult = themeService.create(createThemeRequest.toServiceParam());
         return ResponseEntity.status(HttpStatus.CREATED).body(ThemeResponse.from(themeResult));
     }
@@ -42,8 +43,8 @@ public class ThemeController {
     }
 
     @GetMapping("/rank")
-    public ResponseEntity<List<ThemeResponse>> rank() {
-        List<ThemeResult> rankForWeek = themeService.findRankByTheme();
+    public ResponseEntity<List<ThemeResponse>> getRankingTheme() {
+        List<ThemeResult> rankForWeek = themeService.getRankByTheme();
 
         List<ThemeResponse> themeResponses = rankForWeek.stream()
                 .map(ThemeResponse::from)
