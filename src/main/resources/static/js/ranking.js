@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     /*
-    TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출
+    인기 테마 - 인기 테마 목록 조회 API 호출
     */
     const today = new Date();
     const startDate = new Date();
@@ -25,7 +25,7 @@ function render(data) {
     const container = document.getElementById('theme-ranking');
 
     /*
-    TODO: [3단계] 인기 테마 - 인기 테마 목록 조회 API 호출 후 렌더링
+    인기 테마 - 인기 테마 목록 조회 API 호출 후 렌더링
           response 명세에 맞춰 name, thumbnail, description 값 설정
     */
 
