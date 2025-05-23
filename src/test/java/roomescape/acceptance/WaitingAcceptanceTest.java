@@ -3,6 +3,8 @@ package roomescape.acceptance;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -12,8 +14,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.application.provider.JwtTokenProvider;
 import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
+import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
+import roomescape.model.PendingReservation;
+import roomescape.model.ReservationTime;
 import roomescape.model.Role;
+import roomescape.model.Theme;
+import roomescape.model.Waiting;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -24,6 +33,14 @@ public class WaitingAcceptanceTest {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    private WaitingJpaRepository waitingJpaRepository;
+
+    @Autowired
+    private ThemeJpaRepository themeJpaRepository;
+    @Autowired
+    private ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Test
     @DisplayName("웨이팅을 등록할 수 있다")
@@ -43,6 +60,31 @@ public class WaitingAcceptanceTest {
                 .when().post("/waiting")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @Test
+    @DisplayName("웨이팅을 삭제할 수 있다")
+    void test2() {
+        // given
+        Member member = memberJpaRepository.save(new Member("name", "email@gmail.com", "password", Role.ADMIN));
+        Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "설명", "썸네일"));
+        ReservationTime reservationTime = reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(12, 30)));
+
+        Waiting waiting = waitingJpaRepository.save(
+                new Waiting(
+                        LocalDateTime.now(),
+                        new PendingReservation(LocalDate.now().plusDays(1), reservationTime, theme, member,
+                                LocalDate.now())
+                )
+        );
+
+        // when
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", jwtTokenProvider.createToken(member.getEmail()))
+                .when().delete("/waiting/" + waiting.getId())
+                .then().log().all()
+                .statusCode(204);
     }
 
 }
