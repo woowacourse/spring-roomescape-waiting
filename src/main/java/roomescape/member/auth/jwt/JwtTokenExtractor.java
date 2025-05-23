@@ -2,6 +2,7 @@ package roomescape.member.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.http.Cookie;
@@ -53,6 +54,8 @@ public class JwtTokenExtractor {
             throw new AuthenticationException("잘못된 토큰입니다.", ErrorCode.INVALID_AUTH_INFO);
         } catch (ExpiredJwtException e) {
             throw new AuthenticationException("만료된 토큰입니다.", ErrorCode.EXPIRED_TOKEN);
+        } catch (JwtException e) {
+            throw new AuthenticationException("토큰이 유효하지 않습니다.", ErrorCode.INVALID_AUTH_INFO);
         }
     }
 }
