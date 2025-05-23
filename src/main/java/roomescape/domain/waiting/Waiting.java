@@ -40,7 +40,7 @@ public class Waiting {
     }
 
     public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validate(date, time, member);
+        validate(date, time, theme, member);
         this.id = id;
         this.date = date;
         this.time = time;
@@ -48,7 +48,7 @@ public class Waiting {
         this.member = member;
     }
 
-    private void validate(LocalDate date, ReservationTime time, Member member) {
+    private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
         if (date == null || time == null) {
             throw new InvalidReservationException("시간은 공백일 수 없습니다.");
         }
