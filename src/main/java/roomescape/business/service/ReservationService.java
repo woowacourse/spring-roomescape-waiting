@@ -52,6 +52,7 @@ public class ReservationService {
 
         Reservation reservation = Reservation.create(user, date, reservationTime, theme, status, LocalDateTime.now());
         reservationRepository.save(reservation);
+        waitingService.updateWaitingReservations(reservation);
         return ReservationDto.fromEntity(reservation);
     }
 
