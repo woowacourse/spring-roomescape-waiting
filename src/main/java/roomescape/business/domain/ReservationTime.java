@@ -49,4 +49,8 @@ public class ReservationTime {
             throw new IllegalArgumentException("startAt이 null 입니다.");
         }
     }
+
+    public boolean isPast() {
+        return startAt.isBefore(LocalTime.now());
+    }
 }
