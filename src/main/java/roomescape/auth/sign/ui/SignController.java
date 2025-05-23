@@ -48,4 +48,11 @@ public class SignController {
 
         return ResponseEntity.created(location).body(userId);
     }
+
+    @PostMapping("/sign-out")
+    public ResponseEntity<Void> create(final HttpServletResponse httpServletResponse) {
+        signFacade.signOut(httpServletResponse::addCookie);
+
+        return ResponseEntity.ok().build();
+    }
 }

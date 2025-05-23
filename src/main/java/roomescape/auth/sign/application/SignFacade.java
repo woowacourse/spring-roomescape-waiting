@@ -12,4 +12,6 @@ public interface SignFacade {
     void signIn(SignInRequest request, Consumer<Cookie> cookieSetter);
 
     UserId signUp(SignUpRequest request);
+
+    void signOut(Consumer<Cookie> cookieSetter);
 }

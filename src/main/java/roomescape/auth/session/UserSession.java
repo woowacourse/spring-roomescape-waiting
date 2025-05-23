@@ -20,7 +20,7 @@ public record UserSession(UserId id,
         if (role == UserRole.ADMIN) {
             return true;
         }
-        return this.id == userId;
+        return this.id.equals(userId);
     }
 
     private void validate(final UserId id, final UserName name, final UserRole role) {

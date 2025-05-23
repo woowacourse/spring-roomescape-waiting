@@ -2,9 +2,9 @@ document.addEventListener('DOMContentLoaded', function () {
     updateUIBasedOnSignIn();
 });
 
-document.getElementById('logout-btn').addEventListener('click', function (event) {
+document.getElementById('sign-out-btn').addEventListener('click', function (event) {
     event.preventDefault();
-    fetch('/logout', {
+    fetch('/sign-out', {
         method: 'POST', // 또는 서버 설정에 따라 GET 일 수도 있음
         credentials: 'include' // 쿠키를 포함시키기 위해 필요
     })
@@ -14,7 +14,7 @@ document.getElementById('logout-btn').addEventListener('click', function (event)
                 window.location.reload();
             } else {
                 // 로그아웃 실패 처리
-                console.error('Logout failed');
+                console.error('Sign Out failed');
             }
         })
         .catch(error => {
