@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -30,7 +29,7 @@ public class FakeReservationRepository implements ReservationRepository {
             throw new DuplicateKeyException("동일한 예약이 존재합니다.");
         }
         long id = reservationId.getAndIncrement();
-        Reservation newReservation = new Reservation(id, reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED);
+        Reservation newReservation = new Reservation(id, reservation.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
         reservations.add(newReservation);
         return newReservation;
     }

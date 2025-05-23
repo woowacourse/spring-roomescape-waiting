@@ -13,7 +13,6 @@ import roomescape.member.domain.Role;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeReservationTimeRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
@@ -83,7 +82,7 @@ class ReservationTimeServiceTest {
             ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
             Theme theme = new Theme(1L, "ABC", "DEF", "https://");
             Member member = new Member(1L, "어드민", "admin@gmail.com", "wooteco7", Role.ADMIN);
-            Reservation reservation = new Reservation(1L, member, LocalDate.now().plusDays(1), reservationTime, theme, ReservationStatus.RESERVED);
+            Reservation reservation = new Reservation(1L, member, LocalDate.now().plusDays(1), reservationTime, theme);
             reservationRepository.save(reservation);
 
             List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.findAvailableReservationTimes(LocalDate.now().plusDays(1), 1L);
