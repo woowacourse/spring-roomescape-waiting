@@ -361,4 +361,42 @@ class ReservationRepositoryTest {
         assertThat(actual).isFalse();
     }
 
+    @DisplayName("날짜, 테마, 시간으로 예약을 조회할 수 있다.")
+    @Test
+    void findByDateAndThemeIdAndReservationTimeId() {
+        //given
+        Reservation reservation = createReservation();
+
+        //when
+        Optional<Reservation> actual = reservationRepository.findByDateAndThemeIdAndReservationTimeId(
+                reservation.getDate(),
+                reservation.getTheme().getId(),
+                reservation.getReservationTime().getId()
+        );
+
+        //then
+        assertThat(actual.get()).isEqualTo(reservation);
+    }
+
+    private Reservation createReservation() {
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(23, 30));
+        reservationTimeRepository.save(reservationTime);
+
+        Member member = new Member("도기", "email@example.com", "1234", Role.USER);
+        memberRepository.save(member);
+
+        Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        Reservation reservation = new Reservation(
+                date,
+                reservationTime,
+                theme,
+                member,
+                LocalDate.of(2025, 1, 1)
+        );
+        return reservationRepository.save(reservation);
+    }
 }

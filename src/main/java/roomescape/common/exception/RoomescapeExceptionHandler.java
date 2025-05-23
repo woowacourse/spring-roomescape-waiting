@@ -61,4 +61,6 @@ public class RoomescapeExceptionHandler {
     public String handleNoResourceFound(NoResourceFoundException ex) {
         return "";
     }
+
+
 }
