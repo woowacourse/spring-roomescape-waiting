@@ -1,15 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    TODO: [2단계] 내 예약 목록 조회 기능
-          endpoint 설정
-     */
-    fetch('/reservations-mine') // 내 예약 목록 조회 API 호출
-        .then(response => {
-            if (response.status === 200) return response.json();
-            throw new Error('Read failed');
+    Promise.all([
+        fetch('/reservations-mine')
+            .then(response => {
+                if (response.status === 200) return response.json();
+                throw new Error('Reservation read failed');
+            }),
+        fetch('/waiting/mine')
+            .then(response => {
+                if (response.status === 200) return response.json();
+                throw new Error('Waiting read failed');
+            })
+    ])
+        .then(([reservations, waitings]) => {
+            const combined = [
+                ...reservations.map(r => ({
+                    id: r.id,
+                    theme: r.theme,
+                    date: r.date,
+                    time: r.time,
+                    status: '예약'
+                })),
+                ...waitings.map(w => ({
+                    id: w.id,
+                    theme: w.theme,
+                    date: w.date,
+                    time: w.time,
+                    status: '대기',
+                    order: w.order
+                }))
+            ].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            render(combined);
         })
-        .then(render)
-        .catch(error => console.error('Error fetching reservations:', error));
 });
 
 function render(data) {
@@ -19,25 +41,17 @@ function render(data) {
     data.forEach(item => {
         const row = tableBody.insertRow();
 
-        /*
-        TODO: [2단계] 내 예약 목록 조회 기능
-              response 명세에 맞춰 값 설정
-         */
+        row.insertCell(0).textContent = item.theme;
+        row.insertCell(1).textContent = item.date;
+        row.insertCell(2).textContent = item.time;
 
-        const theme = item.themeId;
-        const date = item.date
-        const time = item.time
-        const status = item.status
+        const statusText = item.status === '대기'
+            ? `${item.order}번째로 대기중`
+            : '예약';
 
-        row.insertCell(0).textContent = theme;
-        row.insertCell(1).textContent = date;
-        row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+        row.insertCell(3).textContent = statusText;
 
-        /*
-        TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
-         */
-        if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+        if (item.status === '대기') {
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '취소';
@@ -46,21 +60,8 @@ function render(data) {
                 requestDeleteWaiting(item.id).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
-        } else { // 예약 완료 상태일 때
+        } else {
             row.insertCell(4).textContent = '';
         }
-    });
-}
-
-function requestDeleteWaiting(id) {
-    /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
-     */
-    const endpoint = '/waiting/' + $(id);
-    return fetch(endpoint, {
-        method: 'DELETE'
-    }).then(response => {
-        if (response.status === 204) return;
-        throw new Error('Delete failed');
     });
 }
