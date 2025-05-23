@@ -32,7 +32,7 @@ class JpaReservationRepositoryTest {
 
     @Test
     @DisplayName("예약이 존재하는 시간 ID를 찾을 수 있다.")
-    void findBookedTimeIds() {
+    void findByDateAndThemeId() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
         Theme theme = new Theme("이름", "설명", "썸네일");
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
@@ -48,8 +48,8 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
 
-        assertThat(jpaReservationRepository.findBookedTimeIds(date, 1L).getFirst())
-            .isEqualTo(1L);
+        assertThat(jpaReservationRepository.findByDateAndThemeId(date, 1L).getFirst().getTime().getStartAt())
+            .isEqualTo(time.getStartAt());
     }
 
     @Test

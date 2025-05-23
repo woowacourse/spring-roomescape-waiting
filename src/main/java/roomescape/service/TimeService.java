@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.TimeRequest;
@@ -35,11 +36,11 @@ public class TimeService {
 
     @Transactional(readOnly = true)
     public List<TimeResponse> findAllTimesWithBooked(LocalDate date, Long themeId) {
-        List<ReservationTime> allTimes = reservationTimeRepository.findAllByOrderByStartAtAsc();
-        Set<Long> bookedTimeIds = new HashSet<>(
-            reservationRepository.findBookedTimeIds(date, themeId));
+        Set<Long> bookedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId).stream()
+            .map(reservation -> reservation.getTime().getId())
+            .collect(Collectors.toSet());
 
-        return allTimes.stream()
+        return reservationTimeRepository.findAllByOrderByStartAtAsc().stream()
             .map(time -> TimeResponse.from(time, bookedTimeIds.contains(time.getId())))
             .toList();
     }
