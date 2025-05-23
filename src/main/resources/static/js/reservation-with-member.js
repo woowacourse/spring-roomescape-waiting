@@ -59,7 +59,7 @@ function fetchMembers() {
     requestRead(USER_API_ENDPOINT)
         .then(data => {
             membersOptions.push(...data);
-            populateSelect('member', membersOptions, 'name');
+            populateSelect('user', membersOptions, 'name');
         })
         .catch(error => console.error('Error fetching member:', error));
 }
