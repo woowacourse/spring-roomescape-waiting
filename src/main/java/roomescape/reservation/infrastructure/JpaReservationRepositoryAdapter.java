@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 
 @Repository
 public class JpaReservationRepositoryAdapter implements ReservationRepository {
@@ -42,8 +43,13 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findBy(final Long themeId, final LocalDate date) {
-        return jpaReservationRepository.findByThemeIdAndDate(themeId, date);
+    public List<Reservation> findBy(final Long themeId, final Long timeId, final LocalDate date) {
+        return jpaReservationRepository.findByThemeIdAndTimeIdAndDate(themeId, timeId, date);
+    }
+
+    @Override
+    public List<Reservation> findByMemberId(Long memberId) {
+        return jpaReservationRepository.findByMemberId(memberId);
     }
 
     @Override
@@ -67,7 +73,7 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberId(Long memberId) {
-        return jpaReservationRepository.findByMemberId(memberId);
+    public boolean existsByThemeIdAndTimeIdAndDateAndReserved(Long themeId, Long timeId, LocalDate date, ReservationStatus status) {
+        return jpaReservationRepository.existsByThemeIdAndTimeIdAndDateAndReservationStatus(themeId, timeId, date, status);
     }
 }

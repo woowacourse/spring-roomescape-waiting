@@ -28,10 +28,8 @@ public class MemberReservationController {
     }
 
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
-        @RequestBody final ReservationRequest request,
-        @LoginMember final LoginMemberInfo memberInfo)
-    {
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody final ReservationRequest request,
+                                                                 @LoginMember final LoginMemberInfo memberInfo) {
         ReservationResponse response = reservationService.createReservation(request, memberInfo.id());
         return ResponseEntity.created(URI.create("/reservation")).body(response);
     }
@@ -40,6 +38,14 @@ public class MemberReservationController {
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
         List<MyReservationResponse> response = reservationService.getMemberReservations(loginMemberInfo);
 
+        return ResponseEntity.ok().body(response);
+    }
+
+    @PostMapping("/reservation-waiting")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(@RequestBody final ReservationRequest request,
+                                                                        @LoginMember final LoginMemberInfo memberInfo) {
+        System.out.println(request.timeId());
+        ReservationResponse response = reservationService.createWaitingReservation(request, memberInfo.id());
         return ResponseEntity.ok().body(response);
     }
 

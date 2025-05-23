@@ -52,8 +52,8 @@ public class ReservationFacadeService {
         Theme theme = themeQueryService.findById(request.themeId());
         Member member = memberQueryService.findById(memberId);
 
-        List<Reservation> reservations = reservationQueryService.findByThemeIdAndDate(request.themeId(), request.date());
-        validateExistDuplicateReservation(reservations, time);
+        List<Reservation> reservations = reservationQueryService.findByThemeIdAndTimeIdAndDate(request.themeId(), request.timeId(), request.date());
+        validateExistDuplicateReservation(reservations);
 
         LocalDateTime now = LocalDateTime.now();
         Reservation reservation = new Reservation(request.date(), time, theme, member, ReservationStatus.RESERVED);
@@ -63,13 +63,34 @@ public class ReservationFacadeService {
         return ReservationResponse.from(reservation);
     }
 
-    private void validateExistDuplicateReservation(final List<Reservation> reservations, final ReservationTime time) {
+    private void validateExistDuplicateReservation(final List<Reservation> reservations) {
         boolean isBooked = reservations.stream()
-            .anyMatch(reservation -> reservation.isSameTime(time));
+            .anyMatch(reservation -> reservation.getReservationStatus() == ReservationStatus.RESERVED);
 
         if (isBooked) {
             throw new BusinessException("이미 예약이 존재합니다.");
         }
+    }
+
+    public ReservationResponse createWaitingReservation(ReservationRequest request, Long memberId) {
+        ReservationTime time = reservationTimeQueryService.findById(request.timeId());
+        Theme theme = themeQueryService.findById(request.themeId());
+        Member member = memberQueryService.findById(memberId);
+
+        boolean existsReservedReservation = reservationQueryService.isExistsReservedReservation(request.themeId(),
+            request.timeId(), request.date());
+
+        if (!existsReservedReservation) {
+            throw new BusinessException("");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        Reservation reservation = new Reservation(request.date(), time, theme, member, ReservationStatus.WAITING);
+        validateCanReserveDateTime(reservation, now);
+
+        Reservation responseReservation = reservationCommandService.save(reservation);
+
+        return ReservationResponse.from(responseReservation);
     }
 
     private void validateCanReserveDateTime(final Reservation reservation, final LocalDateTime now) {
