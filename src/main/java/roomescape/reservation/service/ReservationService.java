@@ -84,13 +84,7 @@ public class ReservationService {
     }
 
     private void promoteWaitingToReservation(Waiting waiting) {
-        Reservation newReservation = Reservation.builder()
-                .date(waiting.getDate())
-                .theme(waiting.getTheme())
-                .timeSlot(waiting.getTimeSlot())
-                .member(waiting.getMember())
-                .build();
-
+        Reservation newReservation = waiting.convertToReservation();
         reservationRepository.save(newReservation);
         waitingRepository.delete(waiting);
     }

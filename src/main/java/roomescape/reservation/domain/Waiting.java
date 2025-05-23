@@ -100,6 +100,14 @@ public class Waiting {
         return new Builder();
     }
 
+    public Reservation convertToReservation() {
+        return Reservation.builder()
+                .date(date)
+                .theme(theme)
+                .member(member)
+                .timeSlot(timeSlot).build();
+    }
+
     public static class Builder {
 
         private Long id;

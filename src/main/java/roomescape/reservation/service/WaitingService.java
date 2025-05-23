@@ -111,11 +111,7 @@ public class WaitingService {
         reservationRepository.findByDateAndTimeSlotAndTheme(
                 waiting.getDate(), waiting.getTimeSlot(), waiting.getTheme()
         ).ifPresent(reservationRepository::delete);
-        Reservation reservation = Reservation.builder()
-                .date(waiting.getDate())
-                .theme(waiting.getTheme())
-                .member(waiting.getMember())
-                .timeSlot(waiting.getTimeSlot()).build();
+        Reservation reservation = waiting.convertToReservation();
         reservationRepository.save(reservation);
         waitingRepository.delete(waiting);
     }
