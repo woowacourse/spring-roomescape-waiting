@@ -7,9 +7,9 @@ import roomescape.entity.Reservation;
 public record ReservationWaitResponse(
         Long id,
         String name,
-        LocalTime time,
+        LocalTime startAt,
         LocalDate date,
-        String themeName
+        String theme
 ) {
     public static ReservationWaitResponse from(Reservation reservation) {
 
