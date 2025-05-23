@@ -1,10 +1,12 @@
-package roomescape.member.repository;
+package roomescape.member.repository.impl;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Account;
 import roomescape.member.domain.MemberEmail;
+import roomescape.member.repository.AccountRepository;
+import roomescape.member.repository.JpaAccountRepository;
 
 @Repository
 @RequiredArgsConstructor

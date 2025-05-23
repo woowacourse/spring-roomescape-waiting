@@ -1,4 +1,4 @@
-package roomescape.theme.repository;
+package roomescape.theme.repository.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.JpaThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 
 @Repository
 @RequiredArgsConstructor

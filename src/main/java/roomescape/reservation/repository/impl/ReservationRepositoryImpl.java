@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.reservation.repository.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.repository.JpaReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
 
 @Repository
 @RequiredArgsConstructor
