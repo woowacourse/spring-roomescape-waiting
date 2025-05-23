@@ -22,5 +22,4 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             "FROM Waiting w " +
             "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
-
 }
