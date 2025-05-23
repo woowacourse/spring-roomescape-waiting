@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.BaseTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -158,21 +159,21 @@ class ReservationServiceTest extends BaseTest {
     }
 
     @Test
+    @Transactional
     void 예약을_삭제한다() {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
         Member member = memberDbFixture.한스_사용자();
         Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
 
-        reservationService.deleteReservationById(reservation.getId());
+        reservationService.cancelReservationById(reservation.getId());
 
-        List<ReservationResponse> responses = reservationService.getReservations();
-        assertThat(responses).hasSize(0);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
     }
 
     @Test
     void 존재하지_않는_예약을_삭제하면_예외가_발생한다() {
-        assertThatThrownBy(() -> reservationService.deleteReservationById(3L))
+        assertThatThrownBy(() -> reservationService.cancelReservationById(3L))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
