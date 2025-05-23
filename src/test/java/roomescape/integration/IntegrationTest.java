@@ -167,6 +167,26 @@ class IntegrationTest extends BaseTest {
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value());
         }
+
+        @Test
+        void 사용자_내예약목록_페이지를_응답한다() {
+            RestAssured.given().log().all()
+                    .when().get("/reservation-mine")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value());
+        }
+
+        @Test
+        void 방탈출_예약대기관리_페이지를_응답한다() {
+            givenCreatedAdmin();
+            String token = givenAdminLoginToken();
+
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().get("/admin/waiting")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value());
+        }
     }
 
     @Nested
