@@ -28,6 +28,10 @@ public class ReservationWait {
     @Embedded
     private ReservationInfo info;
 
+    public Reservation toReservation() {
+        return Reservation.withoutId(getMember(), getDate(), getTime(), getTheme());
+    }
+
     private static ReservationWait of(Long id, ReservationInfo info) {
         return new ReservationWait(id, info);
     }

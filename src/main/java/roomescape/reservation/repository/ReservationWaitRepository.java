@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.util.List;
+import java.util.Optional;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationWait;
 import roomescape.reservation.service.dto.ReservationWaitWithRankResponse;
@@ -21,4 +22,6 @@ public interface ReservationWaitRepository {
             Long themeId,
             Long memberId
     );
+
+    Optional<ReservationWait> findByParamsAt(ReservationDate date, Long timeId, Long themeId, int index);
 }

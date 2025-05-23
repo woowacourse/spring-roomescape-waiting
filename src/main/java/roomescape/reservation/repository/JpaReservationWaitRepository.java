@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -28,4 +29,13 @@ public interface JpaReservationWaitRepository extends JpaRepository<ReservationW
            "WHERE w.info.member.id = :memberId")
     List<ReservationWaitWithRankResponse> findWithRankByInfoMemberId(Long memberId);
 
+    @Override
+    @Query("SELECT w " +
+           "FROM ReservationWait w " +
+           "WHERE w.info.date = :date " +
+           "  AND w.info.time.id = :timeId " +
+           "  AND w.info.theme.id = :themeId " +
+           "ORDER BY w.id ASC " +
+           "OFFSET :index ROWS FETCH NEXT 1 ROW ONLY")
+    Optional<ReservationWait> findByParamsAt(ReservationDate date, Long timeId, Long themeId, int index);
 }

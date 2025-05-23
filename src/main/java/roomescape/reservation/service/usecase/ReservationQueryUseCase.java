@@ -23,6 +23,11 @@ public class ReservationQueryUseCase {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeQueryUseCase reservationTimeQueryUseCase;
 
+    public Reservation get(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(NotFoundException::new);
+    }
+
     public List<Reservation> getAll() {
         return reservationRepository.findAll();
     }

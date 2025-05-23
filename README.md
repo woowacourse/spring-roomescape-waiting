@@ -49,6 +49,7 @@
 - [x] `DELETE /reservations/{id}`  
   예약 삭제
   - 예약에서 참조 중인 시간은 삭제 불가능
+  - 해당 예약에 예약대기가 있다면, 우선 순위가 가장 높은 예약대기를 예약으로 승격
 
 
 - [x] `DELETE /reservations/wait/{id}`  
