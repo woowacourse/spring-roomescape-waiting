@@ -58,10 +58,10 @@ public class Reservation {
         return new Reservation(id, user, date, timeSlot, theme);
     }
 
-    public static Reservation reserveNewly(final User user,
-                                           final LocalDate date,
-                                           final TimeSlot timeSlot,
-                                           final Theme theme) {
+    public static Reservation register(final User user,
+                                       final LocalDate date,
+                                       final TimeSlot timeSlot,
+                                       final Theme theme) {
 
         validateNotPastDateTime(date, timeSlot);
         return new Reservation(null, user, date, timeSlot, theme);

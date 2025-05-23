@@ -20,7 +20,7 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(
-                () -> Reservation.reserveNewly(JUNK_USER, yesterday, JUNK_TIME_SLOT, JUNK_THEME))
+                () -> Reservation.register(JUNK_USER, yesterday, JUNK_TIME_SLOT, JUNK_THEME))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 }

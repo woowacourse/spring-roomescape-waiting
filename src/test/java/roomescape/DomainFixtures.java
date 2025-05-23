@@ -8,9 +8,9 @@ import roomescape.domain.user.UserRole;
 
 public class DomainFixtures {
 
-    public static final User JUNK_USER = new User(1L, "라젤", UserRole.USER, "razel@email.com", "password");
-    public static final TimeSlot JUNK_TIME_SLOT = new TimeSlot(1L, LocalTime.of(10, 0));
-    public static final Theme JUNK_THEME = new Theme(
+    public static final User JUNK_USER = User.ofExisting(1L, "라젤", UserRole.USER, "razel@email.com", "password");
+    public static final TimeSlot JUNK_TIME_SLOT = TimeSlot.ofExisting(1L, LocalTime.of(10, 0));
+    public static final Theme JUNK_THEME = Theme.ofExisting(
             1L,
             "레벨2 탈출",
             "우테코 레벨2를 탈출하는 내용입니다.",

@@ -27,7 +27,7 @@ public class TimeSlotService {
     }
 
     public TimeSlot saveTimeSlot(final LocalTime startAt) {
-        TimeSlot timeSlot = new TimeSlot(startAt);
+        TimeSlot timeSlot = TimeSlot.register(startAt);
 
         return timeSlotRepository.save(timeSlot);
     }

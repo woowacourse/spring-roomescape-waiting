@@ -17,7 +17,7 @@ public class UserService {
 
     public User saveUser(final String email, final String password, final String name) {
         validateEmailNotRegistered(email);
-        User user = User.createUser(name, email, password);
+        User user = User.register(name, email, password);
 
         return userRepository.save(user);
     }

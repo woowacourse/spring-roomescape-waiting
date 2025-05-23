@@ -179,7 +179,7 @@ class ReservationServiceTest {
         var savedTheme = themeRepository.save(JUNK_THEME);
         var createdUser = userRepository.save(JUNK_USER);
         var savedReservation = reservationRepository.save(
-                Reservation.reserveNewly(createdUser, tomorrow(), savedTimeSlot, savedTheme));
+                Reservation.register(createdUser, tomorrow(), savedTimeSlot, savedTheme));
 
         // when
         var reservations = service.findReservationsByUserId(createdUser.id());

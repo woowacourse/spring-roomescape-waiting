@@ -49,10 +49,10 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public static Waiting reserveNewly(final User user,
-                                       final LocalDate date,
-                                       final TimeSlot timeSlot,
-                                       final Theme theme) {
+    public static Waiting register(final User user,
+                                   final LocalDate date,
+                                   final TimeSlot timeSlot,
+                                   final Theme theme) {
 
         validateNotPastDateTime(date, timeSlot);
         return new Waiting(null, user, date, timeSlot, theme);

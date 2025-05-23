@@ -52,7 +52,7 @@ public class ReservationService {
         Theme theme = getThemeById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
 
-        Reservation reservation = Reservation.reserveNewly(user, date, timeSlot, theme);
+        Reservation reservation = Reservation.register(user, date, timeSlot, theme);
 
         return reservationRepository.save(reservation);
     }

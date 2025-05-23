@@ -50,7 +50,7 @@ public class WaitingService {
         validateDuplicateWaiting(date, timeSlot.id(), theme.id(), user.id());
         validateNotAlreadyReserved(date, timeSlot.id(), theme.id(), user.id());
 
-        Waiting waiting = Waiting.reserveNewly(user, date, timeSlot, theme);
+        Waiting waiting = Waiting.register(user, date, timeSlot, theme);
         return waitingRepository.save(waiting);
     }
 

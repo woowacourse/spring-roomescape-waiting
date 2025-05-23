@@ -22,16 +22,20 @@ public class TimeSlot {
     private Long id;
     private LocalTime startAt;
 
-    public TimeSlot(final LocalTime startAt) {
-        this(null, startAt);
-    }
-
-    public TimeSlot(final Long id, final LocalTime startAt) {
+    private TimeSlot(final Long id, final LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
 
     protected TimeSlot() {
+    }
+
+    public static TimeSlot ofExisting(final long id, final LocalTime startAt) {
+        return new TimeSlot(id, startAt);
+    }
+
+    public static TimeSlot register(final LocalTime startAt) {
+        return new TimeSlot(null, startAt);
     }
 
     public boolean isTimeBefore(final LocalTime time) {

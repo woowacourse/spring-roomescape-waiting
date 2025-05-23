@@ -28,7 +28,7 @@ public class ThemeService {
     }
 
     public Theme saveTheme(final String name, final String description, final String thumbnail) {
-        Theme theme = new Theme(name, description, thumbnail);
+        Theme theme = Theme.register(name, description, thumbnail);
         return themeRepository.save(theme);
     }
 
