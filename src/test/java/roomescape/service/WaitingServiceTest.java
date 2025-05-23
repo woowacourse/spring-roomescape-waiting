@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -75,7 +74,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+                    NEXT_DAY, time, theme, member));
 
             entityManager.flush();
 
@@ -107,7 +106,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+                    NEXT_DAY, time, theme, member));
 
             entityManager.flush();
 
@@ -132,7 +131,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+                    NEXT_DAY, time, theme, member));
 
             entityManager.flush();
 
@@ -156,7 +155,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+                    NEXT_DAY, time, theme, member));
 
             entityManager.flush();
 
@@ -180,7 +179,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    YESTERDAY, ReservationStatus.BOOKED, time, theme, member));
+                    YESTERDAY, time, theme, member));
 
             entityManager.flush();
 
@@ -204,7 +203,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+                    NEXT_DAY, time, theme, member));
             Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
 
             entityManager.flush();
@@ -256,7 +255,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+                    NEXT_DAY, time, theme, member));
             Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
 
             // when
@@ -277,7 +276,7 @@ class WaitingServiceTest {
             Member member = entityManager.persist(
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
+                    NEXT_DAY, time, theme, member));
 
             // when & then
             assertThatThrownBy(() -> waitingService.deleteWaitingById(100L))

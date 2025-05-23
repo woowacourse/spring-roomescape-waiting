@@ -2,8 +2,6 @@ package roomescape.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,12 +18,9 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(nullable = false)
     private LocalDate date;
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private ReservationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -41,23 +36,21 @@ public class Reservation {
     }
 
     public Reservation(
-            Long id, LocalDate date, ReservationStatus status,
-            ReservationTime time, Theme theme, Member member
+            Long id, LocalDate date, ReservationTime time, Theme theme, Member member
     ) {
-        validate(date, status, time, theme, member);
+        validate(date, time, theme, member);
         this.id = id;
         this.date = date;
-        this.status = status;
         this.reservationTime = time;
         this.theme = theme;
         this.member = member;
     }
 
     public static Reservation createWithoutId(
-            LocalDate date, ReservationStatus status, ReservationTime time,
+            LocalDate date, ReservationTime time,
             Theme theme, Member member
     ) {
-        return new Reservation(null, date, status, time, theme, member);
+        return new Reservation(null, date, time, theme, member);
     }
 
     public boolean isPastDateTime() {
@@ -71,10 +64,6 @@ public class Reservation {
 
     public LocalDate getDate() {
         return date;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 
     public ReservationTime getReservationTime() {
@@ -106,9 +95,8 @@ public class Reservation {
         return Objects.hashCode(id);
     }
 
-    private void validate(LocalDate date, ReservationStatus status, ReservationTime time, Theme theme, Member member) {
+    private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
         validateDate(date);
-        validateStatus(status);
         validateTime(time);
         validateTheme(theme);
         validateMember(member);
@@ -117,12 +105,6 @@ public class Reservation {
     private void validateDate(LocalDate date) {
         if (date == null) {
             throw new IllegalArgumentException("비어있는 예약날짜로 예약을 생성할 수 없습니다.");
-        }
-    }
-
-    private void validateStatus(ReservationStatus status) {
-        if (status == null) {
-            throw new IllegalArgumentException("비어있는 예약상태로 예약을 생성할 수 없습니다.");
         }
     }
 

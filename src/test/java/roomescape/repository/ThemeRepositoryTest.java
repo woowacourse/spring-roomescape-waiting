@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -57,19 +56,19 @@ class ThemeRepositoryTest {
                     Theme.createWithoutId("테마2", "테마 설명", "thumbnail.jpg"));
 
             entityManager.persist(Reservation.createWithoutId(
-                    YESTERDAY, ReservationStatus.BOOKED, reservationTime, firstTheme, member));
+                    YESTERDAY, reservationTime, firstTheme, member));
             entityManager.persist(Reservation.createWithoutId(
-                    TODAY, ReservationStatus.BOOKED, reservationTime, firstTheme, member));
+                    TODAY, reservationTime, firstTheme, member));
             entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, reservationTime, firstTheme, member));
+                    NEXT_DAY, reservationTime, firstTheme, member));
 
             entityManager.persist(Reservation.createWithoutId(
-                    YESTERDAY, ReservationStatus.BOOKED, reservationTime, secondTheme, member));
+                    YESTERDAY, reservationTime, secondTheme, member));
             entityManager.persist(Reservation.createWithoutId(
-                    TODAY, ReservationStatus.BOOKED, reservationTime, secondTheme, member));
+                    TODAY, reservationTime, secondTheme, member));
 
             entityManager.persist(Reservation.createWithoutId(
-                    YESTERDAY, ReservationStatus.BOOKED, reservationTime, thirdTheme, member));
+                    YESTERDAY, reservationTime, thirdTheme, member));
 
             // when
             List<Theme> themes = themeRepository.findThemesOrderByReservationCount(YESTERDAY, NEXT_DAY, 3);
@@ -88,9 +87,9 @@ class ThemeRepositoryTest {
                     Theme.createWithoutId("테마2", "테마 설명", "thumbnail.jpg"));
 
             entityManager.persist(Reservation.createWithoutId(
-                    TODAY, ReservationStatus.BOOKED, reservationTime, firstTheme, member));
+                    TODAY, reservationTime, firstTheme, member));
             entityManager.persist(Reservation.createWithoutId(
-                    NEXT_DAY, ReservationStatus.BOOKED, reservationTime, secondTheme, member));
+                    NEXT_DAY, reservationTime, secondTheme, member));
 
             // when
             List<Theme> themes = themeRepository.findThemesOrderByReservationCount(YESTERDAY, TODAY, 2);

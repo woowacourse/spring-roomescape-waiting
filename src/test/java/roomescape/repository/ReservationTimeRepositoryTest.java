@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -39,9 +38,9 @@ class ReservationTimeRepositoryTest {
         ReservationTime timeAt12 = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(12, 0)));
 
         entityManager.persist(Reservation.createWithoutId(
-                NEXT_DAY, ReservationStatus.BOOKED, timeAt10, theme, member));
+                NEXT_DAY, timeAt10, theme, member));
         entityManager.persist(Reservation.createWithoutId(
-                NEXT_DAY, ReservationStatus.BOOKED, timeAt11, theme, member));
+                NEXT_DAY, timeAt11, theme, member));
 
         entityManager.flush();
 

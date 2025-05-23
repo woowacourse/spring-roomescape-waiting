@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -77,7 +76,7 @@ public class ReservationService {
         ReservationTime time = getReservationTimeById(request.timeId());
 
         Reservation reservation = Reservation.createWithoutId(
-                request.date(), ReservationStatus.BOOKED, time, theme, member);
+                request.date(), time, theme, member);
 
         validateDuplicateReservation(theme, request.date(), time);
         validatePastReservationCreation(reservation);
