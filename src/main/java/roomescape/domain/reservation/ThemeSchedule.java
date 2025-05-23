@@ -1,41 +1,34 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import roomescape.domain.BusinessRuleViolationException;
 
-@Entity
-public class ThemeSchedule {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Embeddable
+public record ThemeSchedule(
+        LocalDate date,
 
-    private LocalDate date;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "time_id")
+        ReservationTime time,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_id")
-    private ReservationTime time;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id")
-    private Theme theme;
-
-    public ThemeSchedule(Long id, LocalDate date, ReservationTime time, Theme theme) {
-        this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-    }
-
-    protected ThemeSchedule() {
-    }
-
-    public static ThemeSchedule create(LocalDate date, ReservationTime time, Theme theme) {
-        return new ThemeSchedule(null, date, time, theme);
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "theme_id")
+        Theme theme
+) {
+    public void validateReservable(LocalDateTime currentDateTime) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        if (reservationDateTime.isBefore(currentDateTime)) {
+            throw new BusinessRuleViolationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
+        }
+        Duration duration = Duration.between(currentDateTime, reservationDateTime);
+        if (duration.toMinutes() < 10) {
+            throw new BusinessRuleViolationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
+        }
     }
 }

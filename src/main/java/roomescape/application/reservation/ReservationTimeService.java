@@ -59,7 +59,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId,
                                                                                    LocalDate reservationDate) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findByThemeIdAndDate(
+        List<Reservation> reservations = reservationRepository.findByThemeScheduleThemeIdAndThemeScheduleDate(
                 themeId,
                 reservationDate
         );
@@ -82,7 +82,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteById(Long reservationTimeId) {
-        if (reservationRepository.existsByTimeId(reservationTimeId)) {
+        if (reservationRepository.existsByThemeScheduleTimeId(reservationTimeId)) {
             throw new BusinessRuleViolationException("해당 예약 시간에 예약이 존재합니다.");
         }
         reservationTimeRepository.deleteById(reservationTimeId);

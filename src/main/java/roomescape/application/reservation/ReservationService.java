@@ -20,6 +20,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.ThemeSchedule;
 
 @Service
 public class ReservationService {
@@ -76,7 +77,7 @@ public class ReservationService {
     }
 
     private boolean isAlreadyReservedAt(LocalDate date, ReservationTime reservationTime, Theme theme) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, reservationTime.getId(), theme.getId());
+        return reservationRepository.existsByThemeSchedule(new ThemeSchedule(date, reservationTime, theme));
     }
 
     public void deleteById(Long reservationId) {
@@ -101,7 +102,7 @@ public class ReservationService {
     }
 
     public List<ReservationResult> findReservationsBy(ReservationSearchParam reservationSearchParam) {
-        List<Reservation> reservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findByThemeScheduleThemeIdAndMemberIdAndThemeScheduleDateBetween(
                 reservationSearchParam.themeId(),
                 reservationSearchParam.memberId(),
                 reservationSearchParam.from(),

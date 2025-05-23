@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -18,7 +19,7 @@ public class Waiting {
 
     private LocalDateTime startedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Embedded
     private ThemeSchedule themeSchedule;
 
     @ManyToOne(fetch = FetchType.LAZY)
