@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlot;
@@ -14,22 +16,26 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;
 import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.exception.AlreadyExistedException;
+import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 
 @Service
 public class WaitingService {
 
+    private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final UserRepository userRepository;
 
     public WaitingService(
+            final ReservationRepository reservationRepository,
             final WaitingRepository waitingRepository,
             final TimeSlotRepository timeSlotRepository,
             final ThemeRepository themeRepository,
             final UserRepository userRepository
     ) {
+        this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
@@ -42,7 +48,9 @@ public class WaitingService {
                                final long themeId) {
         TimeSlot timeSlot = getTimeSlotById(timeId);
         Theme theme = getThemeById(themeId);
+
         validateDuplicateWaiting(date, timeSlot, theme, user);
+        validateNotAlreadyReserved(date, timeSlot, theme, user);
 
         Waiting waiting = Waiting.reserveNewly(user, date, timeSlot, theme);
         return waitingRepository.save(waiting);
@@ -56,6 +64,17 @@ public class WaitingService {
     private Theme getThemeById(final long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private void validateNotAlreadyReserved(final LocalDate date, final TimeSlot timeSlot,
+                                            final Theme theme, final User user) {
+        Reservation reservation = reservationRepository.findByDateAndTimeSlotIdAndThemeId(
+                        date, timeSlot.id(), theme.id())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+
+        if (reservation.user().id().equals(user.id())) {
+            throw new BusinessRuleViolationException("해당 테마의 시간대에 이미 예약되어 있습니다.");
+        }
     }
 
     private void validateDuplicateWaiting(final LocalDate date,
