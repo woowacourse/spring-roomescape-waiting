@@ -22,7 +22,6 @@ import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
-import roomescape.reservation.ui.dto.response.AdminReservationResponse;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.BookingStateResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
@@ -35,7 +34,7 @@ public class ReservationRestController {
 
     @PostMapping("/reservations")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<AdminReservationResponse> create(
+    public ResponseEntity<MemberReservationResponse> create(
             @RequestBody @Valid final MemberCreateReservationRequest request,
             final MemberAuthInfo memberAuthInfo
     ) {
@@ -49,7 +48,7 @@ public class ReservationRestController {
             @PathVariable final Long id,
             final MemberAuthInfo memberAuthInfo
     ) {
-        reservationService.deleteIfOwner(id, memberAuthInfo);
+        reservationService.deleteReservation(id, memberAuthInfo);
 
         return ResponseEntity.noContent().build();
     }
@@ -78,5 +77,4 @@ public class ReservationRestController {
                         .map(BookingStateResponse::from)
                         .toList());
     }
-
 }

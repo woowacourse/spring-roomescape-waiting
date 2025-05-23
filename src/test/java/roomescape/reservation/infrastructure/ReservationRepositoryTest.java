@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_1;
+import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_2;
+import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_3;
 import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVATION_TIME_1;
 import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVATION_TIME_2;
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_1;
@@ -118,6 +120,29 @@ class ReservationRepositoryTest {
                         .containsExactlyInAnyOrderElementsOf(times)
         );
 
+    }
+
+    @Test
+    void 해당_예약의_대기_순번을_조회한다() {
+        // given
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+
+        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
+        final Member member3 = memberRepository.save(NOT_SAVED_MEMBER_3());
+
+        reservationRepository.save(Reservation.createForRegister(date, time, theme, member1, BookingState.CONFIRMED));
+        reservationRepository.save(Reservation.createForRegister(date, time, theme, member2, BookingState.WAITING));
+        final Reservation target = reservationRepository.save(
+                Reservation.createForRegister(date, time, theme, member3, BookingState.WAITING));
+
+        // when
+        final Long rank = reservationRepository.getReservationRankByReservationId(target.getId());
+
+        // then
+        assertThat(rank).isEqualTo(3);
     }
 
     static Stream<Arguments> 테마ID_사용자ID_날짜_범위에_해당하는_예약_목록을_조회한다() {

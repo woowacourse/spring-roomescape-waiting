@@ -1,11 +1,12 @@
 package roomescape.reservation.ui;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.ui.LoginApiFixture.adminLoginAndGetCookies;
 import static roomescape.fixture.ui.LoginApiFixture.memberLoginAndGetCookies;
 import static roomescape.fixture.ui.MemberApiFixture.signUpMembers;
 import static roomescape.fixture.ui.MemberApiFixture.signUpParams1;
+import static roomescape.fixture.ui.MemberApiFixture.signUpParams2;
 import static roomescape.fixture.ui.ReservationTimeApiFixture.createReservationTimes;
 import static roomescape.fixture.ui.ThemeApiFixture.createThemes;
 
@@ -27,6 +28,7 @@ import roomescape.fixture.ui.LoginApiFixture;
 import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.BookingStateResponse;
+import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -72,6 +74,51 @@ class ReservationRestControllerTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    void 예약_추가_시_이미_예약이_존재하면_예약_대기_상태로_예약된다() {
+        // given
+        final Map<String, String> member1Cookies = memberLoginAndGetCookies(signUpParams1());
+        final Map<String, String> reservationParams1 = reservationParams1();
+
+        final Map<String, String> member2Cookies = memberLoginAndGetCookies(signUpParams2());
+        final Map<String, String> reservationParams2 = reservationParams1();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(member1Cookies)
+                .body(reservationParams1)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(member2Cookies)
+                .body(reservationParams2)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        // when
+        final MemberReservationResponse response = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(member2Cookies)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract().jsonPath()
+                .getList(".", MemberReservationResponse.class)
+                .getFirst();
+
+        // then
+        assertAll(
+                () -> assertThat(response.date()).isEqualTo(reservationParams2.get("date")),
+                () -> assertThat(response.status()).isEqualTo(BookingState.WAITING.getDescription()),
+                () -> assertThat(response.rank()).isEqualTo(2L)
+        );
+
     }
 
     @Test
@@ -160,14 +207,26 @@ class ReservationRestControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
 
-        RestAssured.given().log().all()
+        final List<MemberReservationResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(memberCookies)
                 .body(reservationParams2)
                 .when().get("/reservations-mine")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .body("size()", is(2));
+                .extract().jsonPath()
+                .getList(".", MemberReservationResponse.class);
+
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses).extracting(MemberReservationResponse::id)
+                        .containsExactlyInAnyOrder(1L, 2L),
+                () -> assertThat(responses).extracting(response -> response.date().toString())
+                        .containsExactlyInAnyOrder(reservationParams1.get("date"), reservationParams2().get("date")),
+                () -> assertThat(responses).extracting(MemberReservationResponse::status)
+                        .containsExactlyInAnyOrder(BookingState.CONFIRMED.getDescription(),
+                                BookingState.CONFIRMED.getDescription())
+        );
     }
 
     @Test
@@ -195,6 +254,7 @@ class ReservationRestControllerTest {
                 .get("id").toString();
 
         return createReservationParams(date, timeId, themeId);
+
     }
 
     private Map<String, String> reservationParams2() {

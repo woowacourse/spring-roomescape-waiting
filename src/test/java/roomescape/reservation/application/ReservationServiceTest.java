@@ -32,8 +32,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ReservationTimeRepository;
+import roomescape.reservation.ui.dto.request.AdminCreateReservationRequest;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
+import roomescape.reservation.ui.dto.response.AdminReservationResponse;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 import roomescape.theme.domain.Theme;
@@ -60,7 +62,7 @@ class ReservationServiceTest {
     private MemberRepository memberRepository;
 
     @Test
-    void 예약을_추가한다() {
+    void 사용자_예약_생성_시_이전_예약이_존재하지_않으면_예약_상태로_예약을_생성한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
@@ -70,9 +72,68 @@ class ReservationServiceTest {
                 theme.getId());
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
-        // when & then
-        assertThatCode(() -> reservationService.createForMember(request, memberAuthInfo.id()))
-                .doesNotThrowAnyException();
+        // when
+        MemberReservationResponse response = reservationService.createForMember(request, memberAuthInfo.id());
+
+        // then
+        assertAll(
+                () -> assertThat(response.theme()).isEqualTo(theme.getName()),
+                () -> assertThat(response.date()).isEqualTo(date),
+                () -> assertThat(response.time()).isEqualTo(time.getStartAt()),
+                () -> assertThat(response.status()).isEqualTo(BookingState.CONFIRMED.getDescription()),
+                () -> assertThat(response.rank()).isEqualTo(1L)
+        );
+    }
+
+    @Test
+    void 사용자_예약_생성_시_이전_예약이_존재하면_대기_상태로_예약을_생성한다() {
+        // given
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+
+        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final MemberCreateReservationRequest request = new MemberCreateReservationRequest(date, time.getId(),
+                theme.getId());
+        reservationService.createForMember(request, member1.getId());
+
+        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
+
+        // when
+        final MemberReservationResponse response = reservationService.createForMember(request, member2.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(response.theme()).isEqualTo(theme.getName()),
+                () -> assertThat(response.date()).isEqualTo(date),
+                () -> assertThat(response.time()).isEqualTo(time.getStartAt()),
+                () -> assertThat(response.status()).isEqualTo(BookingState.WAITING.getDescription()),
+                () -> assertThat(response.rank()).isEqualTo(2L)
+        );
+    }
+
+    @Test
+    void 관리자_권한으로_예약을_생성한다() {
+        // given
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+        final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final BookingState status = BookingState.WAITING;
+
+        final AdminCreateReservationRequest request = new AdminCreateReservationRequest(member.getId(), date,
+                time.getId(), theme.getId(), status);
+
+        // when
+        final AdminReservationResponse response = reservationService.createForAdmin(request);
+
+        // then
+        assertAll(
+                () -> assertThat(response.theme().name()).isEqualTo(theme.getName()),
+                () -> assertThat(response.date()).isEqualTo(date),
+                () -> assertThat(response.time().startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(response.status()).isEqualTo(status.getDescription())
+        );
     }
 
     @Test
@@ -90,7 +151,7 @@ class ReservationServiceTest {
 
         // when & then
         assertAll(
-                () -> assertThatCode(() -> reservationService.deleteIfOwner(saved.getId(), memberAuthInfo))
+                () -> assertThatCode(() -> reservationService.deleteReservation(saved.getId(), memberAuthInfo))
                         .doesNotThrowAnyException(),
                 () -> assertThatThrownBy(() -> reservationRepository.getByIdOrThrow(saved.getId()))
                         .isInstanceOf(ResourceNotFoundException.class)
@@ -113,7 +174,7 @@ class ReservationServiceTest {
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteIfOwner(savedReservation.getId(), member2AuthInfo))
+        assertThatThrownBy(() -> reservationService.deleteReservation(savedReservation.getId(), member2AuthInfo))
                 .isInstanceOf(AuthorizationException.class)
                 .hasMessage("삭제할 권한이 없습니다.");
     }
@@ -277,10 +338,12 @@ class ReservationServiceTest {
                         .containsExactlyInAnyOrder(
                                 new MemberReservationResponse(saved1.getId(), "테마1", LocalDate.now().plusDays(1),
                                         LocalTime.of(10, 0),
-                                        "대기"),
+                                        "대기",
+                                        1L),
                                 new MemberReservationResponse(saved2.getId(), "테마2", LocalDate.now().plusDays(2),
                                         LocalTime.of(11, 0),
-                                        "대기")
+                                        "대기",
+                                        1L)
                         )
         );
     }

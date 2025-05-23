@@ -11,17 +11,19 @@ public record AdminReservationResponse(
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        String status
+        String status,
+        Long rank
 ) {
 
-    public static AdminReservationResponse from(final Reservation reservation) {
+    public static AdminReservationResponse from(final Reservation reservation, final Long rank) {
         return new AdminReservationResponse(
                 reservation.getId(),
                 IdName.from(reservation.getMember()),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservation.getState().getDescription()
+                reservation.getState().getDescription(),
+                rank
         );
     }
 }

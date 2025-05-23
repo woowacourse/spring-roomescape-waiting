@@ -31,30 +31,40 @@ import roomescape.theme.infrastructure.ThemeRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private static final BookingState DEFAULT_MEMBER_RESERVATION_STATUS = BookingState.WAITING;
-
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
-    public AdminReservationResponse createForAdmin(final AdminCreateReservationRequest request) {
-        return registerReservation(request.date(), request.timeId(), request.themeId(), request.memberId(),
-                request.status());
-    }
-
-    @Transactional
-    public AdminReservationResponse createForMember(
+    public MemberReservationResponse createForMember(
             final MemberCreateReservationRequest request,
             final Long memberId
     ) {
-        return registerReservation(request.date(), request.timeId(), request.themeId(), memberId,
-                DEFAULT_MEMBER_RESERVATION_STATUS);
+        validateMemberDuplicateReservation(request.date(), request.timeId(), request.themeId(), memberId);
+        final BookingState bookingState = getBookingState(request.date(), request.timeId(), request.themeId());
+
+        final Reservation reservation = registerReservation(request.date(), request.timeId(), request.themeId(),
+                memberId,
+                bookingState);
+
+        return MemberReservationResponse.from(reservation,
+                reservationRepository.getReservationRankByReservationId(reservation.getId()));
     }
 
     @Transactional
-    public void deleteIfOwner(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
+    public AdminReservationResponse createForAdmin(final AdminCreateReservationRequest request) {
+        validateMemberDuplicateReservation(request.date(), request.timeId(), request.themeId(), request.memberId());
+        final Reservation reservation = registerReservation(request.date(), request.timeId(), request.themeId(),
+                request.memberId(),
+                request.status());
+
+        return AdminReservationResponse.from(reservation,
+                reservationRepository.getReservationRankByReservationId(reservation.getId()));
+    }
+
+    @Transactional
+    public void deleteReservation(final Long reservationId, final MemberAuthInfo memberAuthInfo) {
         final Reservation reservation = reservationRepository.getByIdOrThrow(reservationId);
         final Member member = memberRepository.getByIdOrThrow(memberAuthInfo.id());
 
@@ -74,7 +84,8 @@ public class ReservationService {
     public List<AdminReservationResponse> findAll() {
         return reservationRepository.findAll()
                 .stream()
-                .map(AdminReservationResponse::from)
+                .map(reservation -> AdminReservationResponse.from(reservation,
+                        reservationRepository.getReservationRankByReservationId(reservation.getId())))
                 .toList();
     }
 
@@ -88,7 +99,8 @@ public class ReservationService {
                         request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
                 )
                 .stream()
-                .map(AdminReservationResponse::from)
+                .map(reservation -> AdminReservationResponse.from(reservation,
+                        reservationRepository.getReservationRankByReservationId(reservation.getId())))
                 .toList();
     }
 
@@ -118,25 +130,30 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> findReservationsByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(MemberReservationResponse::from)
+                .map(reservation -> MemberReservationResponse.from(reservation,
+                        reservationRepository.getReservationRankByReservationId(reservation.getId())))
                 .toList();
     }
 
-    private AdminReservationResponse registerReservation(final LocalDate date, final Long timeId, final Long themeId,
-                                                         final Long memberId, final BookingState state) {
-        validateNoDuplicateReservation(date, timeId, themeId);
+    private BookingState getBookingState(final LocalDate date, final Long timeId, final Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            return BookingState.WAITING;
+        }
+        return BookingState.CONFIRMED;
+    }
+
+    private Reservation registerReservation(final LocalDate date, final Long timeId, final Long themeId,
+                                            final Long memberId, final BookingState state) {
         final ReservationTime time = reservationTimeRepository.getByIdOrThrow(timeId);
         final Theme theme = themeRepository.getByIdOrThrow(themeId);
         final Member member = memberRepository.getByIdOrThrow(memberId);
         final Reservation reservation = Reservation.createForRegister(date, time, theme, member, state);
-
-        final Reservation saved = reservationRepository.save(reservation);
-
-        return AdminReservationResponse.from(saved);
+        return reservationRepository.save(reservation);
     }
 
-    private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+    private void validateMemberDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId,
+                                                    final Long memberId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
             throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
         }
     }
