@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservationtime.domain.ReservationTime;
 
 @Repository
 public class JpaReservationRepository implements ReservationRepository {
@@ -62,6 +64,11 @@ public class JpaReservationRepository implements ReservationRepository {
     @Override
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return reservationListCrudRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
+    public boolean existsByMemberAndDateAndTime(Member member, LocalDate date, ReservationTime time) {
+        return reservationListCrudRepository.existsByMemberAndDateAndTime(member, date, time);
     }
 
     @Override

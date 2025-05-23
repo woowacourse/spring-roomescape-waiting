@@ -1,5 +1,6 @@
 const THEME_API_ENDPOINT = '/themes';
 const AVAILABLE_TIME_API_ENDPOINT = '/times/available';
+const WAITING_API_ENDPOINT = "/waitings";
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
@@ -189,10 +190,7 @@ function onWaitButtonClick() {
             time: selectedTimeId
         };
 
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
-        fetch('', {
+        fetch(WAITING_API_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -204,12 +202,12 @@ function onWaitButtonClick() {
                 return response.json();
             })
             .then(data => {
-                alert('Reservation waiting successful!');
+                alert(data.message);
                 window.location.href = "/";
             })
             .catch(error => {
-                alert("An error occurred while making the reservation waiting.");
-                console.error(error);
+                alert(error);
+                console.error('Error:', error);
             });
     } else {
         alert("Please select a date, theme, and time before making a reservation waiting.");

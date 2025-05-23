@@ -2,8 +2,6 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
@@ -28,12 +27,13 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JoinColumn(name = "member_id")
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
+    @NotNull
     private Member member;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "date", nullable = false)
+    @Temporal(TemporalType.DATE)
     private LocalDate date;
 
     @ManyToOne
@@ -44,15 +44,10 @@ public class Reservation {
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private ReservationStatus status;
-
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         validateMember(member);
         validateDate(date);
         validateReservationTime(time);
@@ -63,8 +58,20 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
+
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        validateMember(member);
+        validateDate(date);
+        validateReservationTime(time);
+        validateTheme(theme);
+
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+    }
+
 
     private void validateMember(Member member) {
         if (member == null) {
@@ -108,10 +115,6 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 
     @Override

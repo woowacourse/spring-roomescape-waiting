@@ -1,51 +1,61 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ExceptionCause;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MemberReservationResponse;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.AdminReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.UserReservationRequest;
+import roomescape.reservation.dto.UserReservationCreateRequest;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.jwt.TokenProvider;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationChecker reservationChecker;
-    private final TokenProvider tokenProvider;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker,
-                              TokenProvider tokenProvider) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              MemberRepository memberRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
-        this.reservationChecker = reservationChecker;
-        this.tokenProvider = tokenProvider;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
-    public ReservationResponse createUserReservation(UserReservationRequest dto, Member member) {
-        Reservation reservation = reservationChecker.createReservationWithoutId(dto, member);
-        return createReservation(reservation);
-    }
-
-    public ReservationResponse createAdminReservation(ReservationRequest dto) {
-        Reservation reservation = reservationChecker.createReservationWithoutId(dto);
-        return createReservation(reservation);
-    }
-
-    private ReservationResponse createReservation(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId())) {
-            throw new ConflictException(ExceptionCause.RESERVATION_ALREADY_BOOKED);
+    public ReservationResponse createUserReservation(UserReservationCreateRequest dto, Member member) {
+        Reservation reservation = getReservation(dto.date(), dto.themeId(), dto.timeId(), member.getId());
+        if (reservationRepository.existsByMemberAndDateAndTime(reservation.getMember(), reservation.getDate(),
+                reservation.getTime())) {
+            throw new BadRequestException(ExceptionCause.RESERVATION_TIME_AND_DATE_DUPLICATE);
         }
-        Reservation newReservation = reservationRepository.save(reservation);
-        return ReservationResponse.from(newReservation, newReservation.getTime(), newReservation.getTheme());
+        if (waitingRepository.existsByMemberAndDateAndTime(reservation.getMember(), reservation.getDate(),
+                reservation.getTime())) {
+            throw new BadRequestException(ExceptionCause.WAITING_TIME_AND_DATE_DUPLICATE);
+        }
+        return createReservation(reservation);
+    }
+
+    public ReservationResponse createAdminReservation(AdminReservationCreateRequest dto) {
+        Reservation reservation = getReservation(dto.date(), dto.themeId(), dto.timeId(), dto.memberId());
+        return createReservation(reservation);
     }
 
     public List<ReservationResponse> findAllReservationResponses() {
@@ -75,11 +85,30 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<MemberReservationResponse> findAllMemberReservations(String token) {
-        Long memberId = tokenProvider.getMemberIdFromToken(token);
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        return reservations.stream()
-                .map(MemberReservationResponse::from)
-                .toList();
+    private ReservationResponse createReservation(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId())) {
+            throw new ConflictException(ExceptionCause.RESERVATION_ALREADY_BOOKED);
+        }
+        Reservation newReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(newReservation, newReservation.getTime(), newReservation.getTheme());
+    }
+
+    private Reservation getReservation(LocalDate date, Long themeId, Long timeId, Long memberId) {
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.THEME_NOTFOUND));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.MEMBER_NOTFOUND));
+        ReservationTime time = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.RESERVATION_TIME_NOTFOUND));
+        validateRequestDateTime(LocalDateTime.of(date, time.getStartAt()));
+        return new Reservation(member, date, time, theme);
+    }
+
+    private void validateRequestDateTime(LocalDateTime requestDateTime) {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        if (requestDateTime.isBefore(currentDateTime) || requestDateTime.equals(currentDateTime)) {
+            throw new BadRequestException(ExceptionCause.RESERVATION_INVALID_FOR_PAST);
+        }
     }
 }
