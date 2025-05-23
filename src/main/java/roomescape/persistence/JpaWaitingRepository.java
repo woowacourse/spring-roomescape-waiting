@@ -20,6 +20,7 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
                     AND wr.createdAt < w.createdAt))
         FROM Waiting w
         WHERE w.member.id = :memberId
+        ORDER BY w.date ASC, w.time.startAt ASC
     """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(final Long memberId);
 
