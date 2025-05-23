@@ -39,6 +39,6 @@ public class Waiting {
     }
 
     public boolean ownBy(Member comparedMember) {
-        return pendingReservation.getMember().equals(comparedMember);
+        return pendingReservation.getMember().getId().equals(comparedMember.getId());
     }
 }

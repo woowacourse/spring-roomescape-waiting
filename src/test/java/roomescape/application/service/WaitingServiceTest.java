@@ -1,19 +1,31 @@
 package roomescape.application.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRegisterDto;
 import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
+import roomescape.model.PendingReservation;
+import roomescape.model.ReservationTime;
 import roomescape.model.Role;
+import roomescape.model.Theme;
+import roomescape.model.Waiting;
 
 @SpringBootTest
 public class WaitingServiceTest {
@@ -27,40 +39,165 @@ public class WaitingServiceTest {
     @Autowired
     private MemberJpaRepository memberJpaRepository;
 
-    @Test
-    @DisplayName("정상적으로 Waiting 이 등록된다")
-    void test1() {
-        // given
-        Member member = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
-        LoginMember loginMember = new LoginMember(member);
+    @Autowired
+    private ThemeJpaRepository themeJpaRepository;
 
-        LocalDate date = LocalDate.now().plusDays(1);
-        WaitingRegisterDto waitingRegisterDto = new WaitingRegisterDto(1L, 1L, date);
+    @Autowired
+    private ReservationTimeJpaRepository reservationTimeJpaRepository;
 
-        // when
-        waitingService.registerWaiting(loginMember, waitingRegisterDto);
-
-        // then
-        assertAll(
-                () -> assertThat(waitingJpaRepository.findAll()).hasSize(1),
-                () -> assertThat(waitingJpaRepository.findAll().getFirst().getId()).isEqualTo(1L)
-        );
+    @BeforeEach
+    void cleanDatabase() {
+        waitingJpaRepository.deleteAll();
+        memberJpaRepository.deleteAll();
+        themeJpaRepository.deleteAll();
+        reservationTimeJpaRepository.deleteAll();
     }
 
-    @Test
-    @DisplayName("현재보다 이전의 날짜로 대기를 등록하는 경우 예외를 던진다")
-    void test2() {
-        // given
-        Member member = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
-        LoginMember loginMember = new LoginMember(member);
+    @Nested
+    @DisplayName("Waiting 을 등록할 때")
+    class Test1 {
+        @Test
+        @DisplayName("정상적으로 등록된다")
+        void test1() {
+            // given
+            Member member = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
+            LoginMember loginMember = new LoginMember(member);
 
-        LocalDate date = LocalDate.now().minusDays(1);
-        WaitingRegisterDto waitingRegisterDto = new WaitingRegisterDto(1L, 1L, date);
+            ReservationTime reservationTime = reservationTimeJpaRepository.save(
+                    new ReservationTime(LocalTime.of(12, 30)));
+            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
 
-        // when
-        assertThatThrownBy(() -> waitingService.registerWaiting(loginMember, waitingRegisterDto))
-                .isInstanceOf(IllegalStateException.class);
+            LocalDate date = LocalDate.now().plusDays(1);
+            WaitingRegisterDto waitingRegisterDto = new WaitingRegisterDto(
+                    theme.getId(),
+                    reservationTime.getId(),
+                    date
+            );
+
+            // when
+            waitingService.registerWaiting(loginMember, waitingRegisterDto);
+
+            // then
+            assertAll(
+                    () -> assertThat(waitingJpaRepository.findAll()).hasSize(1),
+                    () -> assertThat(
+                            waitingJpaRepository.findAll()
+                                    .getFirst()
+                                    .getPendingReservation()
+                                    .getMember()
+                                    .getId()
+                    ).isEqualTo(member.getId()),
+                    () -> assertThat(
+                            waitingJpaRepository.findAll()
+                                    .getFirst()
+                                    .getPendingReservation()
+                                    .getDate()
+                    ).isEqualTo(date),
+                    () -> assertThat(
+                            waitingJpaRepository.findAll()
+                                    .getFirst()
+                                    .getPendingReservation()
+                                    .getTheme()
+                                    .getId()
+                    ).isEqualTo(theme.getId())
+            );
+        }
+
+        @Test
+        @DisplayName("현재보다 이전인 경우 예외를 던진다")
+        void test2() {
+            // given
+            Member member = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
+            LoginMember loginMember = new LoginMember(member);
+
+            ReservationTime reservationTime = reservationTimeJpaRepository.save(
+                    new ReservationTime(LocalTime.of(12, 30)));
+            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
+
+            LocalDate date = LocalDate.now().minusDays(1);
+            WaitingRegisterDto waitingRegisterDto = new WaitingRegisterDto(theme.getId(), reservationTime.getId(),
+                    date);
+
+            // when
+            assertThatThrownBy(() -> waitingService.registerWaiting(loginMember, waitingRegisterDto))
+                    .isInstanceOf(IllegalStateException.class);
+        }
+
     }
 
+    @Nested
+    @DisplayName("Waiting 을 삭제할 때")
+    class Test2 {
 
+        @Test
+        @DisplayName("존재하지 않는 id 로 요청하는 경우 예외를 던진다")
+        void test1() {
+            // given
+            Member member = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
+            LoginMember loginMember = new LoginMember(member);
+
+            // when
+            assertThatThrownBy(() -> waitingService.deleteWaiting(loginMember, 999L))
+                    .isInstanceOf(NotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("권한이 없는 사용자가 요청하면 예외를 던진다")
+        void test2() {
+            // given
+            Member owner = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
+            Member invalidOwner = memberJpaRepository.save(
+                    new Member("다른 이름", "example@gmail.com", "password", Role.ADMIN));
+            LoginMember loginMember = new LoginMember(invalidOwner);
+
+            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
+            ReservationTime reservationTime = reservationTimeJpaRepository.save(
+                    new ReservationTime(LocalTime.of(12, 30)));
+
+            Waiting waiting = waitingJpaRepository.save(new Waiting(
+                    LocalDateTime.now(),
+                    new PendingReservation(
+                            LocalDate.now().plusDays(1),
+                            reservationTime,
+                            theme,
+                            owner,
+                            LocalDate.now()
+                    )
+            ));
+
+            // when
+            assertThatThrownBy(() -> waitingService.deleteWaiting(loginMember, waiting.getId()))
+                    .isInstanceOf(UnauthorizedException.class);
+        }
+
+        @Test
+        @DisplayName("정상적으로 삭제 된다")
+        void test3() {
+            // given
+            Member owner = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
+            LoginMember loginMember = new LoginMember(owner);
+
+            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
+            ReservationTime reservationTime = reservationTimeJpaRepository.save(
+                    new ReservationTime(LocalTime.of(12, 30)));
+
+            Waiting waiting = waitingJpaRepository.save(new Waiting(
+                    LocalDateTime.now(),
+                    new PendingReservation(
+                            LocalDate.now().plusDays(1),
+                            reservationTime,
+                            theme,
+                            owner,
+                            LocalDate.now()
+                    )
+            ));
+
+            // when
+            waitingService.deleteWaiting(loginMember, waiting.getId());
+
+            // then
+            assertThat(waitingJpaRepository.findAll()).isEmpty();
+        }
+
+    }
 }

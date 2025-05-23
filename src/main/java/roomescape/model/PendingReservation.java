@@ -5,9 +5,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Embeddable
+@Getter
 @NoArgsConstructor
 public class PendingReservation {
 
@@ -42,9 +44,5 @@ public class PendingReservation {
         if (!this.date.isAfter(today)) {
             throw new IllegalStateException("과거 및 당일 예약은 불가능합니다.");
         }
-    }
-
-    public Member getMember() {
-        return member;
     }
 }
