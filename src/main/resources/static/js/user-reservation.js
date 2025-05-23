@@ -182,14 +182,14 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            timeId: selectedTimeId,
+            themeId: selectedThemeId
         };
 
         /*
         TODO: [3단계] 예약 대기 생성 요청 API 호출
          */
-        fetch('', {
+        fetch('/waiting', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
