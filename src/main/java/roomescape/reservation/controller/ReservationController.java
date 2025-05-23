@@ -18,10 +18,10 @@ import roomescape.global.auth.dto.LoginMember;
 import roomescape.member.entity.RoleType;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.dto.response.ReservationByMemberResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
 import roomescape.reservation.dto.response.ReservationReadResponse;
-import roomescape.reservation.dto.response.ReservationWaitingReadMemberResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -47,10 +47,10 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationWaitingReadMemberResponse>> getMyReservations(
+    public ResponseEntity<List<ReservationByMemberResponse>> getMyReservations(
             @AuthenticationPrincipal LoginMember loginMember
     ) {
-        List<ReservationWaitingReadMemberResponse> responses = reservationService.getReservationsByMember(loginMember);
+        List<ReservationByMemberResponse> responses = reservationService.getReservationsByMember(loginMember);
         return ResponseEntity.ok(responses);
     }
 

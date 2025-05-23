@@ -8,31 +8,31 @@ import roomescape.reservation.entity.Reservation;
 import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.entity.WaitingWithRank;
 
-public record ReservationWaitingReadMemberResponse(
+public record ReservationByMemberResponse(
         Long id,
         String theme,
         LocalDate date,
         LocalTime time,
         String status
 ) {
-    public static List<ReservationWaitingReadMemberResponse> of(List<Reservation> reservations,
-                                                                List<WaitingWithRank> waitingWithRanks) {
-        List<ReservationWaitingReadMemberResponse> responsesByReservation = reservations.stream()
-                .map(ReservationWaitingReadMemberResponse::from)
+    public static List<ReservationByMemberResponse> of(List<Reservation> reservations,
+                                                       List<WaitingWithRank> waitingWithRanks) {
+        List<ReservationByMemberResponse> responsesByReservation = reservations.stream()
+                .map(ReservationByMemberResponse::from)
                 .toList();
 
-        List<ReservationWaitingReadMemberResponse> responsesByWaiting = waitingWithRanks.stream()
-                .map(ReservationWaitingReadMemberResponse::from)
+        List<ReservationByMemberResponse> responsesByWaiting = waitingWithRanks.stream()
+                .map(ReservationByMemberResponse::from)
                 .toList();
 
-        List<ReservationWaitingReadMemberResponse> responses = new ArrayList<>();
+        List<ReservationByMemberResponse> responses = new ArrayList<>();
         responses.addAll(responsesByReservation);
         responses.addAll(responsesByWaiting);
         return responses;
     }
 
-    public static ReservationWaitingReadMemberResponse from(Reservation reservation) {
-        return new ReservationWaitingReadMemberResponse(
+    public static ReservationByMemberResponse from(Reservation reservation) {
+        return new ReservationByMemberResponse(
                 reservation.getId(),
                 reservation.getReservationSlot().getTheme().getName(),
                 reservation.getReservationSlot().getDate(),
@@ -41,9 +41,9 @@ public record ReservationWaitingReadMemberResponse(
         );
     }
 
-    public static ReservationWaitingReadMemberResponse from(WaitingWithRank waitingWithRank) {
+    public static ReservationByMemberResponse from(WaitingWithRank waitingWithRank) {
         Waiting waiting = waitingWithRank.getWaiting();
-        return new ReservationWaitingReadMemberResponse(
+        return new ReservationByMemberResponse(
                 waiting.getId(),
                 waiting.getReservationSlot().getTheme().getName(),
                 waiting.getReservationSlot().getDate(),

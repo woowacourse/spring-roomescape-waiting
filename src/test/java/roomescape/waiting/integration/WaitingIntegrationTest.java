@@ -52,6 +52,7 @@ public class WaitingIntegrationTest {
 
     @Autowired
     private WaitingRepository waitingRepository;
+
     @Autowired
     private ReservationSlotRepository reservationSlotRepository;
 
@@ -76,7 +77,6 @@ public class WaitingIntegrationTest {
         var response = waitingService.createWaiting(loginMember, request);
 
         //then
-        // TODO: 추가 검증 사항
         assertThat(response).isNotNull();
     }
 

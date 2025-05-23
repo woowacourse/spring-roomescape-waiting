@@ -121,8 +121,6 @@ class ReservationTimeServiceTest {
     @DisplayName("시간을 삭제한다.")
     void deleteTime() {
         // given
-//        given(reservationRepository.existsByTimeId(anyLong()))
-//                .willReturn(false);
         given(reservationRepository.existsByReservationSlot_TimeId(anyLong()))
                 .willReturn(false);
 
@@ -137,8 +135,6 @@ class ReservationTimeServiceTest {
     @DisplayName("예약이 있는 시간을 삭제하면 예외가 발생한다.")
     void deleteTimeWithReservation() {
         // given
-//        given(reservationRepository.existsByTimeId(anyLong()))
-//                .willReturn(true);
         given(reservationRepository.existsByReservationSlot_TimeId(anyLong()))
                 .willReturn(true);
 

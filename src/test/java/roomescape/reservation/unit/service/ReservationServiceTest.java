@@ -271,16 +271,6 @@ class ReservationServiceTest {
         );
     }
 
-    @Test
-    @DisplayName("예약을 삭제한다.")
-    void deleteReservation() {
-        // when
-        reservationService.deleteReservation(1L);
-
-        // then
-        verify(reservationRepository).deleteById(anyLong());
-    }
-
     @DisplayName("예약을 삭제하고, 예약 대기를 예약으로 변환한다.")
     @Test
     void deleteAndChangeWaitingToReservation() {
@@ -295,8 +285,6 @@ class ReservationServiceTest {
         var member = new Member("훌라", "hula@email.com", "password", RoleType.USER);
         var waiting = new Waiting(reservationSlot, member);
 
-        when(reservationRepository.existsById(anyLong()))
-                .thenReturn(true);
         when(reservationRepository.findById(anyLong()))
                 .thenReturn(Optional.of(reservation));
         when(waitingRepository.findFirstByReservationSlot(any(ReservationSlot.class)))

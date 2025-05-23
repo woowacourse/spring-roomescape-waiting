@@ -52,7 +52,7 @@ public class WaitingService {
     }
 
     public void deleteWaiting(Long waitingId, LoginMember loginMember) {
-        validateLoginMemberWithWaiting(waitingId, loginMember);
+        validateLoginMember(waitingId, loginMember);
         waitingRepository.deleteById(waitingId);
     }
 
@@ -77,7 +77,7 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
     }
 
-    private void validateLoginMemberWithWaiting(Long waitingId, LoginMember loginMember) {
+    private void validateLoginMember(Long waitingId, LoginMember loginMember) {
         Waiting waiting = getWaitingById(waitingId);
         if (waiting.matchesMemberById(loginMember.id()) || loginMember.isAdmin()) {
             return;

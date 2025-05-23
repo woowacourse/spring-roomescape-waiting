@@ -53,6 +53,7 @@ public class WaitingAcceptanceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
     @Autowired
     private ReservationSlotRepository reservationSlotRepository;
 

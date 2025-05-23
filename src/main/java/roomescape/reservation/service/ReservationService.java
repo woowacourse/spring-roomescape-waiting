@@ -16,10 +16,10 @@ import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
 import roomescape.reservation.dto.response.ReservationAdminCreateResponse;
+import roomescape.reservation.dto.response.ReservationByMemberResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
 import roomescape.reservation.dto.response.ReservationReadResponse;
-import roomescape.reservation.dto.response.ReservationWaitingReadMemberResponse;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
@@ -83,25 +83,23 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationWaitingReadMemberResponse> getReservationsByMember(LoginMember loginMember) {
+    public List<ReservationByMemberResponse> getReservationsByMember(LoginMember loginMember) {
         Member member = getMemberById(loginMember.id());
 
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
 
-        return ReservationWaitingReadMemberResponse.of(reservations, waitingWithRanks);
+        return ReservationByMemberResponse.of(reservations, waitingWithRanks);
     }
 
     @Transactional
     public void deleteReservation(Long id) {
-        if (reservationRepository.existsById(id)) {
-            Reservation reservation = getReservationById(id);
-            reservationRepository.deleteById(id);
-            reservationRepository.flush();
-            changeWaitingToReservation(reservation);
-            return;
-        }
-        reservationRepository.deleteById(id);
+        reservationRepository.findById(id)
+                .ifPresent(reservation -> {
+                    reservationRepository.deleteById(id);
+                    reservationRepository.flush();
+                    changeWaitingToReservation(reservation);
+                });
     }
 
     private void changeWaitingToReservation(Reservation reservation) {
@@ -126,11 +124,6 @@ public class ReservationService {
         if (hasDuplicate) {
             throw new ConflictException("이미 예약이 존재합니다.");
         }
-    }
-
-    private Reservation getReservationById(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
     }
 
     private Member getMemberById(Long memberId) {
