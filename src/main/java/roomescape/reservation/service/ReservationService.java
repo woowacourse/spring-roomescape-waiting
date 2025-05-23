@@ -65,7 +65,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new ThemeException("테마를 찾을 수 없습니다."));
         Member member = memberRepository.findById(memberId)
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
 
         List<Reservation> reservations = reservationRepository.findBy(request.themeId(), request.date());
         validateExistDuplicateReservation(reservations, time);
@@ -171,7 +171,7 @@ public class ReservationService {
 
     public List<MyReservationResponse> getMemberReservations(final LoginMemberInfo loginMemberInfo) {
         Member member = memberRepository.findById(loginMemberInfo.id())
-            .orElseThrow(() -> new BusinessException("멤버를 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
 
         List<Reservation> reservations = reservationRepository.findBy(loginMemberInfo.id());
 
