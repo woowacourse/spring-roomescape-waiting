@@ -79,18 +79,19 @@
 
 ### 사용자(User)
 
-| URL                       | 메서드  | 기능               |
-|---------------------------|------|------------------|
-| `/reservation`            | GET  | 사용자 예약 페이지 보기    |
-| `/reservations`           | POST | 사용자 페이지에서 예약 추가  |
-| `/reservations/mine`      | GET  | 사용자 예약 목록 조회     |
-| `/times/{date}/{themeId}` | GET  | 예약 가능한 상태의 시간 조회 |
-| `/members`                | POST | 사용자 회원가입 추가      |
-| `/signup`                 | GET  | 사용자 회원가입 페이지 보기  |
-| `/login`                  | GET  | 사용자 로그인 페이지 보기   |
-| `/login`                  | POST | 사용자 로그인 후 토큰 생성  |
-| `/login/check`            | GET  | 사용자 인증 정보 확인     |
-| `/logout`                 | POST | 사용자 로그아웃 후 토큰 만료 |
+| URL                       | 메서드  | 기능                 |
+|---------------------------|------|--------------------|
+| `/reservation`            | GET  | 사용자 예약 페이지 보기      |
+| `/reservations`           | POST | 사용자 페이지에서 예약 추가    |
+| `/waitings`               | POST | 사용자 페이지에서 예약 대기 추가 |
+| `/reservations/mine`      | GET  | 사용자 예약 목록 조회       |
+| `/times/{date}/{themeId}` | GET  | 예약 가능한 상태의 시간 조회   |
+| `/members`                | POST | 사용자 회원가입 추가        |
+| `/signup`                 | GET  | 사용자 회원가입 페이지 보기    |
+| `/login`                  | GET  | 사용자 로그인 페이지 보기     |
+| `/login`                  | POST | 사용자 로그인 후 토큰 생성    |
+| `/login/check`            | GET  | 사용자 인증 정보 확인       |
+| `/logout`                 | POST | 사용자 로그아웃 후 토큰 만료   |
 
 ### Common
 
