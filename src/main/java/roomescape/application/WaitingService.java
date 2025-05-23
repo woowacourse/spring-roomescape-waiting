@@ -70,6 +70,10 @@ public class WaitingService {
         }
     }
 
+    public List<Waiting> findAllWaitings() {
+        return waitingRepository.findAll();
+    }
+
     public List<WaitingWithRank> findWaitingByUserId(final long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + userId));

@@ -41,7 +41,7 @@ public class WaitingController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void deleteReservationById(@PathVariable("id") final long id) {
+    public void deleteWaitingById(@PathVariable("id") final long id) {
         service.removeById(id);
     }
 }
