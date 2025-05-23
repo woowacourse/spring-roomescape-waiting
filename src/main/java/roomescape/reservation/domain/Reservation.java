@@ -86,6 +86,10 @@ public class Reservation {
         return new Reservation(Objects.requireNonNull(id), member, date, time, theme, status, createdAt);
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     public ReservationStatus getStatus() {
         return status;
     }
@@ -150,8 +154,8 @@ public class Reservation {
         return date;
     }
 
-    public String status() {
-        return status.getStatus();
+    public boolean isWaitingStatus() {
+        return status.equals(ReservationStatus.WAITED);
     }
 
     @Override

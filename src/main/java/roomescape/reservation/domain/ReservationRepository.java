@@ -25,4 +25,6 @@ public interface ReservationRepository {
     boolean existsByThemeId(Long themeId);
 
     List<Reservation> findByMemberId(Long memberId);
+
+    List<ReservationWithRank> findReservationWithRankByMemberId(Long memberId);
 }

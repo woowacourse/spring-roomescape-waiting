@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationWithRank;
 
 @Repository
 public class ReservationCustomRepositoryImpl implements ReservationCustomRepository {
@@ -46,6 +47,22 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
                 .setParameter("memberId", memberId)
                 .setParameter("status", status)
                 .getSingleResult();
+    }
+
+    @Override
+    public List<ReservationWithRank> findReservationWithRankById(Long memberId) {
+        return em.createQuery("""
+                        select new roomescape.reservation.domain.ReservationWithRank(r,
+                                (select COUNT(r2) from Reservation r2
+                         where r2.theme.id = r.theme.id
+                            and r2.date = r.date 
+                            and r2.time = r.time 
+                            and r2.createdAt < r.createdAt)) 
+                         from Reservation r 
+                         where r.member.id = :memberId
+                        """)
+                .setParameter("memberId", memberId)
+                .getResultList();
     }
 
     private StringBuilder createQuery(Long memberId, Long themeId, LocalDate from, LocalDate to) {

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationWithRank;
 
 @Repository
 public class ReservationJpaRepository implements ReservationRepository {
@@ -67,5 +68,10 @@ public class ReservationJpaRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByMemberId(Long memberId) {
         return jpaReservationRepository.findByMemberId(memberId);
+    }
+
+    @Override
+    public List<ReservationWithRank> findReservationWithRankByMemberId(Long memberId) {
+        return jpaReservationRepository.findReservationWithRankById(memberId);
     }
 }

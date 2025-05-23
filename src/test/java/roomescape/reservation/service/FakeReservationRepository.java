@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationWithRank;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -73,6 +74,26 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.stream()
                 .filter(reservation -> reservation.memberId().equals(memberId))
                 .toList();
+    }
+
+    @Override
+    public List<ReservationWithRank> findReservationWithRankByMemberId(Long memberId) {
+        List<Reservation> memberReservations = reservations.stream()
+                .filter(reservation -> reservation.memberId().equals(memberId))
+                .toList();
+
+        return memberReservations.stream()
+                .map(reservation -> new ReservationWithRank(reservation, findRank(reservation)))
+                .toList();
+    }
+
+    private Long findRank(Reservation memberReservation) {
+        return reservations.stream()
+                .filter(reservation -> reservation.timeId().equals(memberReservation.timeId()))
+                .filter(reservation -> reservation.themeId().equals(memberReservation.themeId()))
+                .filter(reservation -> reservation.getDate().equals(memberReservation.getDate()))
+                .filter(reservation -> reservation.getCreatedAt().isBefore(memberReservation.getCreatedAt()))
+                .count();
     }
 
 

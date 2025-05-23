@@ -21,6 +21,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.infrastructure.jpa.JpaReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -267,6 +268,36 @@ class JpaReservationRepositoryTest {
                 Arguments.of(LocalDate.of(2025, 4, 28), 2L, 1L, 2L, ReservationStatus.RESERVED, false),
                 Arguments.of(LocalDate.of(2025, 4, 28), 1L, 1L, 2L, ReservationStatus.RESERVED, false),
                 Arguments.of(LocalDate.of(2025, 4, 27), 2L, 1L, 1L, ReservationStatus.RESERVED, false)
+        );
+    }
+
+    @Test
+    @DisplayName("등수와 함께 특정 맴버의 예약 기록을 가져온다.")
+    void findReservationWithRank_test() {
+        // given
+        ReservationTime reservationTime = em.find(ReservationTime.class, 1L);
+        Theme theme = em.find(Theme.class, 1L);
+        Member member1 = em.find(Member.class, 2L);
+        Member member2 = em.find(Member.class, 3L);
+        Reservation reservation1 = Reservation.createWithoutId(LocalDateTime.of(2025, 3, 22, 21, 10), member1,
+                LocalDate.of(2025, 4, 28), reservationTime, theme, ReservationStatus.WAITED);
+        Reservation reservation2 = Reservation.createWithoutId(LocalDateTime.of(2025, 3, 22, 20, 10), member2,
+                LocalDate.of(2025, 4, 28), reservationTime, theme, ReservationStatus.WAITED);
+        em.persist(reservation1);
+        em.persist(reservation2);
+        em.flush();
+        // when
+        List<ReservationWithRank> reservations1 = repository.findReservationWithRankById(2L);
+        List<ReservationWithRank> reservations2 = repository.findReservationWithRankById(3L);
+        // then
+        assertAll(
+                () -> assertThat(reservations1).hasSize(2),
+                () -> assertThat(reservations1.get(0).getRank()).isEqualTo(0),
+                () -> assertThat(reservations1.get(1).getRank()).isEqualTo(2)
+        );
+        assertAll(
+                () -> assertThat(reservations2).hasSize(1),
+                () -> assertThat(reservations2.get(0).getRank()).isEqualTo(1)
         );
     }
 }
