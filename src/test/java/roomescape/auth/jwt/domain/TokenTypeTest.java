@@ -17,7 +17,7 @@ class TokenTypeTest {
         final int periodInMillis = accessTokenType.getPeriodInMillis();
 
         // then
-        assertThat(periodInMillis).isEqualTo(600_000);
+        assertThat(periodInMillis).isEqualTo(1_800_000);
     }
 
     @Test
@@ -30,6 +30,6 @@ class TokenTypeTest {
         final int periodInSeconds = accessTokenType.getPeriodInSeconds();
 
         // then
-        assertThat(periodInSeconds).isEqualTo(600);
+        assertThat(periodInSeconds).isEqualTo(1800);
     }
 }
