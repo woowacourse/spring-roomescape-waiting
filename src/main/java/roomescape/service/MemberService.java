@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.dto.business.MemberCreationContent;
 import roomescape.dto.response.MemberProfileResponse;
-import roomescape.exception.local.DuplicatedEmailException;
-import roomescape.exception.local.NotFoundMemberException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 
 @Service
@@ -22,7 +22,7 @@ public class MemberService {
 
     public Member getMemberById(long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(NotFoundMemberException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 회원을 찾을 수 없습니다."));
     }
 
     public List<MemberProfileResponse> findAllMemberProfile() {
@@ -42,7 +42,7 @@ public class MemberService {
     private void validateDuplicatedEmail(String email) {
         boolean isDuplicatedEmail = memberRepository.existsByEmail(email);
         if (isDuplicatedEmail) {
-            throw new DuplicatedEmailException();
+            throw new BadRequestException("이미 존재하는 계정입니다.");
         }
     }
 }

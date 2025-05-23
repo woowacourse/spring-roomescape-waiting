@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
-import roomescape.exception.global.ForbiddenException;
+import roomescape.exception.ForbiddenException;
 import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
@@ -46,7 +46,7 @@ class CheckAdminInterceptorTest {
             // when & then
             assertThatThrownBy(() -> interceptor.preHandle(request, response, handler))
                     .isInstanceOf(ForbiddenException.class)
-                    .hasMessage("접근 권한이 없습니다.");
+                    .hasMessage("해당 요청은 관리자 권한이 필요합니다.");
         }
 
         @DisplayName("어드민 요청인데 어드민이 접속한 경우 통과")

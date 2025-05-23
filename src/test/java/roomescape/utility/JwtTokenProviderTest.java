@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
-import roomescape.exception.global.AuthorizationException;
+import roomescape.exception.UnauthorizedException;
 
 class JwtTokenProviderTest {
 
@@ -79,8 +79,8 @@ class JwtTokenProviderTest {
 
             // when & then
             assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(damagedAccessToken))
-                    .isInstanceOf(AuthorizationException.class)
-                    .hasMessage("토큰 파싱 실패");
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessage("토큰이 유효하지 않습니다.");
         }
 
         @DisplayName("토큰의 유효기간이 지난 경우를 검증할 수 있다.")
@@ -96,9 +96,8 @@ class JwtTokenProviderTest {
 
             // when & then
             assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(expiredToken))
-                    .isInstanceOf(AuthorizationException.class)
-                    .hasMessage("토큰 파싱 실패");
-
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessage("토큰이 유효하지 않습니다.");
         }
     }
 }

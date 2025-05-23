@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.dto.business.AccessTokenContent;
-import roomescape.exception.global.ForbiddenException;
+import roomescape.exception.ForbiddenException;
 import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
@@ -34,7 +34,7 @@ public class CheckAdminInterceptor implements HandlerInterceptor {
             if (tokenContent.isAdminToken()) {
                 return true;
             }
-            throw new ForbiddenException();
+            throw new ForbiddenException("해당 요청은 관리자 권한이 필요합니다.");
         }
         return true;
     }

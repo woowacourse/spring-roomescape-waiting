@@ -24,8 +24,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.exception.local.AlreadyReservedThemeException;
-import roomescape.exception.local.AlreadyWaitingThemeException;
+import roomescape.exception.BadRequestException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -226,8 +225,8 @@ class ThemeServiceTest {
 
             // when & then
             assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
-                    .isInstanceOf(AlreadyReservedThemeException.class)
-                    .hasMessage("예약에서 사용 중인 테마입니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("이미 예약이 존재하는 테마입니다.");
         }
 
         @DisplayName("이미 예약 대기가 존재하는 경우 테마를 삭제할 수 없다.")
@@ -250,8 +249,8 @@ class ThemeServiceTest {
 
             // when & then
             assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
-                    .isInstanceOf(AlreadyWaitingThemeException.class)
-                    .hasMessage("이미 예약대기 중인 테마입니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("이미 예약이 존재하는 예약시간입니다.");
         }
     }
 }

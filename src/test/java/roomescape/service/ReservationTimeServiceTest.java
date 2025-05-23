@@ -23,9 +23,7 @@ import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.exception.local.AlreadyReservedTimeException;
-import roomescape.exception.local.AlreadyWaitingTimeException;
-import roomescape.exception.local.DuplicateReservationException;
+import roomescape.exception.BadRequestException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.WaitingRepository;
@@ -139,8 +137,8 @@ class ReservationTimeServiceTest {
 
             // when & then
             assertThatThrownBy(() -> timeService.addReservationTime(duplicationCreation))
-                    .isInstanceOf(DuplicateReservationException.class)
-                    .hasMessage("이미 등록되어 있는 예약 시간입니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("중복된 예약시간입니다.");
         }
     }
 
@@ -182,8 +180,8 @@ class ReservationTimeServiceTest {
 
             // when & then
             assertThatThrownBy(() -> timeService.deleteReservationTimeById(time.getId()))
-                    .isInstanceOf(AlreadyReservedTimeException.class)
-                    .hasMessage("예약에서 사용 중인 시간입니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("이미 예약이 존재하는 예약 시간입니다.");
         }
 
         @DisplayName("이미 해당 시간에 예약 대기가 존재할 경우 예약을 추가할 수 없다.")
@@ -204,8 +202,8 @@ class ReservationTimeServiceTest {
 
             // when & then
             assertThatThrownBy(() -> timeService.deleteReservationTimeById(time.getId()))
-                    .isInstanceOf(AlreadyWaitingTimeException.class)
-                    .hasMessage("이미 예약대기 중인 예약시간입니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("이미 예약 대기가 존재하는 예약 시간입니다.");
         }
     }
 }

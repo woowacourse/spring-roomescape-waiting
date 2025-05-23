@@ -19,8 +19,8 @@ import roomescape.config.annotation.RequiredAccessToken;
 import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
-import roomescape.exception.global.AuthorizationException;
-import roomescape.exception.local.NotFoundCookieException;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.utility.CookieUtility;
 import roomescape.utility.JwtTokenProvider;
 
@@ -126,7 +126,7 @@ class LoginMemberArgumentResolverTest {
             // when & then
             assertThatThrownBy(
                     () -> argumentResolver.resolveArgument(parameter, modelAndViewContainer, request, binderFactory))
-                    .isInstanceOf(NotFoundCookieException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessage("쿠키가 존재하지 않습니다.");
         }
 
@@ -150,8 +150,8 @@ class LoginMemberArgumentResolverTest {
             // when & then
             assertThatThrownBy(
                     () -> argumentResolver.resolveArgument(parameter, modelAndViewContainer, request, binderFactory))
-                    .isInstanceOf(AuthorizationException.class)
-                    .hasMessage("토큰 파싱 실패");
+                    .isInstanceOf(UnauthorizedException.class)
+                    .hasMessage("토큰이 유효하지 않습니다.");
         }
     }
 }

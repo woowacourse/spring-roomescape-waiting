@@ -14,12 +14,8 @@ import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.business.WaitingWithRank;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationStatusResponse;
-import roomescape.exception.local.DuplicateReservationException;
-import roomescape.exception.local.NotFoundMemberException;
-import roomescape.exception.local.NotFoundReservationException;
-import roomescape.exception.local.NotFoundReservationTimeException;
-import roomescape.exception.local.NotFoundThemeException;
-import roomescape.exception.local.PastReservationCreationException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -115,34 +111,34 @@ public class ReservationService {
         boolean isDuplicatedReservation =
                 reservationRepository.existsByThemeAndDateAndReservationTime(theme, date, time);
         if (isDuplicatedReservation) {
-            throw new DuplicateReservationException();
+            throw new BadRequestException("중복된 예약 입니다.");
         }
     }
 
     private void validatePastReservationCreation(Reservation reservation) {
         if (reservation.isPastDateTime()) {
-            throw new PastReservationCreationException();
+            throw new BadRequestException("과거 예약은 생성할 수 없습니다.");
         }
     }
 
     private Member getMemberById(long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(NotFoundMemberException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 회원을 찾을 수 없습니다."));
     }
 
     private Theme getThemeById(long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(NotFoundThemeException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 테마을 찾을 수 없습니다."));
     }
 
     private ReservationTime getReservationTimeById(long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(NotFoundReservationTimeException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 예약 시간을 찾을 수 없습니다."));
     }
 
     private Reservation getReservationById(long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(NotFoundReservationException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 예약을 찾을 수 없습니다."));
     }
 
     private Optional<Waiting> findFirstWaitingByReservation(Reservation deletedReservation) {

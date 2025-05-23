@@ -28,12 +28,8 @@ import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationStatusResponse;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.dto.response.WaitingWithRankResponse;
-import roomescape.exception.local.DuplicateReservationException;
-import roomescape.exception.local.NotFoundMemberException;
-import roomescape.exception.local.NotFoundReservationException;
-import roomescape.exception.local.NotFoundReservationTimeException;
-import roomescape.exception.local.NotFoundThemeException;
-import roomescape.exception.local.PastReservationCreationException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -295,8 +291,8 @@ class ReservationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationService.addReservation(wrongMemberId, creationContent))
-                    .isInstanceOf(NotFoundMemberException.class)
-                    .hasMessage("해당 유저를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 회원을 찾을 수 없습니다.");
         }
 
         @DisplayName("테마가 존재하지 않을 경우 예약을 추가할 수 없다.")
@@ -309,8 +305,8 @@ class ReservationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationService.addReservation(member.getId(), creationContent))
-                    .isInstanceOf(NotFoundThemeException.class)
-                    .hasMessage("해당 테마를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 테마을 찾을 수 없습니다.");
         }
 
         @DisplayName("예약시간이 존재하지 않을 경우 예약을 추가할 수 없다.")
@@ -323,8 +319,8 @@ class ReservationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationService.addReservation(member.getId(), creationContent))
-                    .isInstanceOf(NotFoundReservationTimeException.class)
-                    .hasMessage("해당 예약시간이 존재하지 않습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 예약 시간을 찾을 수 없습니다.");
         }
     }
 
@@ -344,8 +340,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.addReservation(member.getId(), duplicatedCreationContent))
-                .isInstanceOf(DuplicateReservationException.class)
-                .hasMessage("이미 등록되어 있는 예약 시간입니다.");
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("중복된 예약 입니다.");
     }
 
     @DisplayName("과거의 시간으로 예약을 할 수 없다.")
@@ -357,8 +353,8 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.addReservation(member.getId(), creationContentWithPast))
-                .isInstanceOf(PastReservationCreationException.class)
-                .hasMessage("과거의 예약을 추가할 수 없습니다.");
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("과거 예약은 생성할 수 없습니다.");
     }
 
     @Nested
@@ -390,8 +386,8 @@ class ReservationServiceTest {
 
             // when & then
             assertThatThrownBy(() -> reservationService.deleteReservationById(invalidReservationId))
-                    .isInstanceOf(NotFoundReservationException.class)
-                    .hasMessage("예약을 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 예약을 찾을 수 없습니다.");
         }
 
         @DisplayName("예약 대기가 존재할 경우 첫번째 예약 대기를 예약으로 등록한다.")

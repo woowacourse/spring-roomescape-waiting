@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.exception.local.NotFoundCookieException;
+import roomescape.exception.NotFoundException;
 
 class CookieUtilityTest {
 
@@ -51,7 +51,7 @@ class CookieUtilityTest {
 
             // when & then
             assertThatThrownBy(() -> cookieUtility.getCookie(request, "target_key"))
-                    .isInstanceOf(NotFoundCookieException.class)
+                    .isInstanceOf(NotFoundException.class)
                     .hasMessage("쿠키가 존재하지 않습니다.");
         }
 
@@ -67,8 +67,8 @@ class CookieUtilityTest {
 
             // when & then
             assertThatThrownBy(() -> cookieUtility.getCookie(request, "target_key"))
-                    .isInstanceOf(NotFoundCookieException.class)
-                    .hasMessage("쿠키가 존재하지 않습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("쿠키를 찾을 수 없습니다.");
         }
     }
 }

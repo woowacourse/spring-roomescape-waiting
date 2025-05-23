@@ -7,9 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.response.ThemeResponse;
-import roomescape.exception.local.AlreadyReservedThemeException;
-import roomescape.exception.local.AlreadyWaitingThemeException;
-import roomescape.exception.local.NotFoundThemeException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
@@ -60,20 +59,20 @@ public class ThemeService {
 
     private Theme getThemeById(Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(NotFoundThemeException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 회원은 존재하지 않습니다."));
     }
 
     private void validateReservationInTheme(Theme theme) {
         boolean isExistReservation = reservationRepository.existsByTheme(theme);
         if (isExistReservation) {
-            throw new AlreadyReservedThemeException();
+            throw new BadRequestException("이미 예약이 존재하는 테마입니다.");
         }
     }
 
     private void validateMemberInTime(Theme theme) {
         boolean isExistWaiting = waitingRepository.existsByTheme(theme);
         if (isExistWaiting) {
-            throw new AlreadyWaitingThemeException();
+            throw new BadRequestException("이미 예약이 존재하는 예약시간입니다.");
         }
     }
 }

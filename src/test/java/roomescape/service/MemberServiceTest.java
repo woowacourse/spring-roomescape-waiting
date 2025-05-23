@@ -16,8 +16,8 @@ import roomescape.domain.Member;
 import roomescape.domain.Role;
 import roomescape.dto.business.MemberCreationContent;
 import roomescape.dto.response.MemberProfileResponse;
-import roomescape.exception.local.DuplicatedEmailException;
-import roomescape.exception.local.NotFoundMemberException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 
 @DataJpaTest
@@ -63,8 +63,8 @@ class MemberServiceTest {
 
             // when & then
             assertThatThrownBy(() -> memberService.getMemberById(wrongMemberId))
-                    .isInstanceOf(NotFoundMemberException.class)
-                    .hasMessage("해당 유저를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 회원을 찾을 수 없습니다.");
         }
     }
 
@@ -125,8 +125,8 @@ class MemberServiceTest {
 
             // when & then
             assertThatThrownBy(() -> memberService.addMember(creationContent))
-                    .isInstanceOf(DuplicatedEmailException.class)
-                    .hasMessage("중복된 이메일입니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("이미 존재하는 계정입니다.");
         }
     }
 }

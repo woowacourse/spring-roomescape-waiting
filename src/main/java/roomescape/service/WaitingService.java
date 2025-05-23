@@ -9,13 +9,8 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.business.WaitingCreationContent;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.exception.local.DuplicatedWaitingException;
-import roomescape.exception.local.NotCreateWaitingInEmptyReservationException;
-import roomescape.exception.local.NotFoundMemberException;
-import roomescape.exception.local.NotFoundReservationTimeException;
-import roomescape.exception.local.NotFoundThemeException;
-import roomescape.exception.local.NotFoundWaitingException;
-import roomescape.exception.local.PastWaitingCreationException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -71,28 +66,28 @@ public class WaitingService {
 
     private Waiting getWaitingById(long waitingId) {
         return waitingRepository.findById(waitingId)
-                .orElseThrow(NotFoundWaitingException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 대기가 존재하지 않습니다."));
     }
 
     private Theme getThemeById(long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(NotFoundThemeException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 테마가 존재하지 않습니다."));
     }
 
     private ReservationTime getTimeById(long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(NotFoundReservationTimeException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 예약시간이 존재하지 않습니다."));
     }
 
     private Member getMemberById(long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(NotFoundMemberException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 회원이 존재하지 않습니다."));
     }
 
     private void validatePastWaitingCreation(Waiting waiting) {
         boolean isPast = waiting.isPastWaiting();
         if (isPast) {
-            throw new PastWaitingCreationException();
+            throw new BadRequestException("과거 날짜와 시간으로 예약 대기를 생성할 수 없습니다.");
         }
     }
 
@@ -100,7 +95,7 @@ public class WaitingService {
         boolean isDuplicated = waitingRepository.existsDuplicated(
                 waiting.getTheme().getId(), waiting.getDate(), waiting.getTime().getId(), waiting.getMember().getId());
         if (isDuplicated) {
-            throw new DuplicatedWaitingException();
+            throw new BadRequestException("중복된 예약 대기는 허용하지 않습니다.");
         }
     }
 
@@ -108,7 +103,7 @@ public class WaitingService {
         boolean isExisted = reservationRepository.existsByThemeAndDateAndReservationTime(
                 waiting.getTheme(), waiting.getDate(), waiting.getTime());
         if (!isExisted) {
-            throw new NotCreateWaitingInEmptyReservationException();
+            throw new BadRequestException("예약이 존재하지 않는 예약 대기는 허용하지 않습니다.");
         }
     }
 }

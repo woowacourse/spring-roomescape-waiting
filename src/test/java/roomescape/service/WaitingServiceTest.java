@@ -22,13 +22,8 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.business.WaitingCreationContent;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.exception.local.DuplicatedWaitingException;
-import roomescape.exception.local.NotCreateWaitingInEmptyReservationException;
-import roomescape.exception.local.NotFoundMemberException;
-import roomescape.exception.local.NotFoundReservationTimeException;
-import roomescape.exception.local.NotFoundThemeException;
-import roomescape.exception.local.NotFoundWaitingException;
-import roomescape.exception.local.PastWaitingCreationException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -115,8 +110,8 @@ class WaitingServiceTest {
 
             // when & then
             assertThatThrownBy(() -> waitingService.addWaiting(creationContent))
-                    .isInstanceOf(NotFoundThemeException.class)
-                    .hasMessage("해당 테마를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 테마가 존재하지 않습니다.");
 
         }
 
@@ -140,8 +135,8 @@ class WaitingServiceTest {
 
             // when & then
             assertThatThrownBy(() -> waitingService.addWaiting(creationContent))
-                    .isInstanceOf(NotFoundReservationTimeException.class)
-                    .hasMessage("해당 예약시간이 존재하지 않습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 예약시간이 존재하지 않습니다.");
         }
 
         @DisplayName("회원이 유효하지 않은 경우 대기 데이터를 추가할 수 없다.")
@@ -164,8 +159,8 @@ class WaitingServiceTest {
 
             // when & then
             assertThatThrownBy(() -> waitingService.addWaiting(creationContent))
-                    .isInstanceOf(NotFoundMemberException.class)
-                    .hasMessage("해당 유저를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 회원이 존재하지 않습니다.");
         }
 
         @DisplayName("과거의 대기 데이터를 저장하는 것은 허용하지 않는다.")
@@ -188,8 +183,8 @@ class WaitingServiceTest {
 
             // when & then
             assertThatThrownBy(() -> waitingService.addWaiting(creationContent))
-                    .isInstanceOf(PastWaitingCreationException.class)
-                    .hasMessage("과거의 예약 대기를 추가할 수 없습니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("과거 날짜와 시간으로 예약 대기를 생성할 수 없습니다.");
         }
 
         @DisplayName("대기 데이터의 중복 저장은 허용하지 않늗다.")
@@ -213,8 +208,8 @@ class WaitingServiceTest {
 
             // when & then
             assertThatThrownBy(() -> waitingService.addWaiting(creationContent))
-                    .isInstanceOf(DuplicatedWaitingException.class)
-                    .hasMessage("중복된 대기 데이터입니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("중복된 예약 대기는 허용하지 않습니다.");
         }
 
         @DisplayName("예약이 존재하지 않는 경우 대기 데이터를 저장할 수 없다.")
@@ -235,8 +230,8 @@ class WaitingServiceTest {
 
             // when & then
             assertThatThrownBy(() -> waitingService.addWaiting(creationContent))
-                    .isInstanceOf(NotCreateWaitingInEmptyReservationException.class)
-                    .hasMessage("예약이 존재하지 않습니다.");
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessage("예약이 존재하지 않는 예약 대기는 허용하지 않습니다.");
         }
     }
 
@@ -280,8 +275,8 @@ class WaitingServiceTest {
 
             // when & then
             assertThatThrownBy(() -> waitingService.deleteWaitingById(100L))
-                    .isInstanceOf(NotFoundWaitingException.class)
-                    .hasMessage("해당 대기 데이터를 찾을 수 없습니다.");
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 대기가 존재하지 않습니다.");
         }
     }
 }
