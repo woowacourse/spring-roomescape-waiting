@@ -1,7 +1,6 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.TestFixture.createDefaultMember;
 import static roomescape.TestFixture.createDefaultTheme;
 import static roomescape.TestFixture.createTimeFrom;
 import static roomescape.TestFixture.fixedClockAt;
@@ -13,9 +12,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class BookingInfoTest {
+class BookingSlotTest {
 
-    @DisplayName("예약 정보가 과거인지 확인한다")
+    @DisplayName("예약 슬롯이 과거인지 확인한다")
     @ParameterizedTest
     @CsvSource({
             "2025-01-01T23:59, 2025-01-02T00:00",
@@ -26,8 +25,7 @@ class BookingInfoTest {
         LocalDate bookingDate = bookingDateTime.toLocalDate();
         ReservationTime bookingTime = createTimeFrom(bookingDateTime.toLocalTime());
 
-        BookingInfo bookingInfo = new BookingInfo(
-                createDefaultMember(),
+        BookingSlot bookingSlot = new BookingSlot(
                 bookingDate,
                 bookingTime,
                 createDefaultTheme()
@@ -35,13 +33,13 @@ class BookingInfoTest {
 
         // when
         Clock clock = fixedClockAt(currentDateTime);
-        boolean past = bookingInfo.isPast(clock);
+        boolean past = bookingSlot.isPast(clock);
 
         // then
         assertThat(past).isTrue();
     }
 
-    @DisplayName("예약 정보가 과거가 아닌지를 확인한다")
+    @DisplayName("예약 슬롯이 과거가 아닌지를 확인한다")
     @ParameterizedTest
     @CsvSource({
             "2025-01-02T00:00, 2025-01-01T00:00",
@@ -52,8 +50,7 @@ class BookingInfoTest {
         LocalDate bookingDate = bookingDateTime.toLocalDate();
         ReservationTime bookingTime = createTimeFrom(bookingDateTime.toLocalTime());
 
-        BookingInfo bookingInfo = new BookingInfo(
-                createDefaultMember(),
+        BookingSlot bookingSlot = new BookingSlot(
                 bookingDate,
                 bookingTime,
                 createDefaultTheme()
@@ -61,7 +58,7 @@ class BookingInfoTest {
 
         // when
         Clock clock = fixedClockAt(currentDateTime);
-        boolean past = bookingInfo.isPast(clock);
+        boolean past = bookingSlot.isPast(clock);
 
         // then
         assertThat(past).isFalse();

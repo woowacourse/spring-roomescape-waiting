@@ -11,10 +11,7 @@ import lombok.Getter;
 
 @Embeddable
 @Getter
-public class BookingInfo {
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+public class BookingSlot {
 
     @ManyToOne
     @JoinColumn(name = "time_id", nullable = false)
@@ -27,11 +24,10 @@ public class BookingInfo {
     @Column(nullable = false)
     private LocalDate date;
 
-    protected BookingInfo() {
+    protected BookingSlot() {
     }
 
-    public BookingInfo(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this.member = member;
+    public BookingSlot(LocalDate date, ReservationTime time, Theme theme) {
         this.date = date;
         this.time = time;
         this.theme = theme;

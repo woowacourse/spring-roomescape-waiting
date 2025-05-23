@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.request.LoginMemberInfo;
-import roomescape.domain.BookingInfo;
+import roomescape.domain.BookingSlot;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -48,8 +48,10 @@ public class WaitingService {
     @Transactional
     public WaitingResult create(CreateBookingParam param) {
         WaitingComponents components = loadComponents(param);
-        Waiting waiting = Waiting.create(new BookingInfo(
-                components.member, param.date(), components.time, components.theme));
+        Waiting waiting = Waiting.create(
+                components.member,
+                new BookingSlot(param.date(), components.time, components.theme)
+        );
         waitingValidator.validateCanWaiting(waiting);
         Waiting saved = waitingRepository.save(waiting);
 

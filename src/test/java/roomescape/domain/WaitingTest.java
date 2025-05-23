@@ -23,12 +23,10 @@ class WaitingTest {
     @Test
     void confirm() {
         // given
-        Waiting waiting = Waiting.create(new BookingInfo(
+        Waiting waiting = Waiting.create(
                 createDefaultMember(),
-                DEFAULT_DATE,
-                createDefaultReservationTime(),
-                createDefaultTheme()
-        ));
+                new BookingSlot(DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme())
+        );
 
         // when
         Reservation reservation = waiting.confirm();
@@ -49,12 +47,10 @@ class WaitingTest {
         Member member = createDefaultMember();
         ReservationTime time = createDefaultReservationTime();
         Theme theme = createDefaultTheme();
-        Waiting waiting = Waiting.create(new BookingInfo(
+        Waiting waiting = Waiting.create(
                 member,
-                DEFAULT_DATE,
-                time,
-                theme
-        ));
+                new BookingSlot(DEFAULT_DATE, time, theme)
+        );
         em.persist(member);
         em.persist(time);
         em.persist(theme);

@@ -24,7 +24,7 @@ public interface ReservationRepository {
 
     boolean existsByThemeId(Long themeId);
 
-    boolean isReservationSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId);
+    boolean isBookingSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean hasAlreadyReserved(Long memberId, Long themeId, Long timeId, LocalDate date);
 }

@@ -47,8 +47,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean isReservationSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId) {
-        return jpaReservationRepository.isReservationSlotEmpty(reservationDate, timeId, themeId);
+    public boolean isBookingSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId) {
+        return jpaReservationRepository.isBookingSlotEmpty(reservationDate, timeId, themeId);
     }
 
     @Override

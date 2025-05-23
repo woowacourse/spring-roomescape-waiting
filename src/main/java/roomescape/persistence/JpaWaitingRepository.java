@@ -13,19 +13,19 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
     @Query("""
     SELECT EXISTS (
         SELECT 1 FROM Waiting w
-        WHERE w.bookingInfo.member.id = :memberId
-          AND w.bookingInfo.theme.id = :themeId
-          AND w.bookingInfo.time.id = :timeId
-          AND w.bookingInfo.date = :date
+        WHERE w.member.id = :memberId
+          AND w.bookingSlot.theme.id = :themeId
+          AND w.bookingSlot.time.id = :timeId
+          AND w.bookingSlot.date = :date
         )
     """)
     boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(Long memberId, Long themeId, Long timeId, LocalDate date);
 
     @Query("""
         SELECT w FROM Waiting w
-        WHERE w.bookingInfo.theme.id = :themeId
-          AND w.bookingInfo.time.id = :timeId
-          AND w.bookingInfo.date = :date
+        WHERE w.bookingSlot.theme.id = :themeId
+          AND w.bookingSlot.time.id = :timeId
+          AND w.bookingSlot.date = :date
         ORDER BY w.id ASC
         LIMIT 1
     """)
@@ -33,10 +33,10 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
         SELECT w FROM Waiting w
-        JOIN FETCH w.bookingInfo.member
-        JOIN FETCH w.bookingInfo.time
-        JOIN FETCH w.bookingInfo.theme
-        WHERE w.bookingInfo.member.id = :memberId
+        JOIN FETCH w.member
+        JOIN FETCH w.bookingSlot.time
+        JOIN FETCH w.bookingSlot.theme
+        WHERE w.member.id = :memberId
         ORDER BY w.id
     """)
     List<Waiting> findByMemberId(Long memberId);
@@ -47,9 +47,9 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             (
                 SELECT COUNT(w2)
                 FROM Waiting w2
-                WHERE w2.bookingInfo.date = w.bookingInfo.date
-                  AND w2.bookingInfo.time = w.bookingInfo.time
-                  AND w2.bookingInfo.theme = w.bookingInfo.theme
+                WHERE w2.bookingSlot.date = w.bookingSlot.date
+                  AND w2.bookingSlot.time = w.bookingSlot.time
+                  AND w2.bookingSlot.theme = w.bookingSlot.theme
                   AND (
                        w2.waitingStartedAt < w.waitingStartedAt OR
                        (w2.waitingStartedAt = w.waitingStartedAt AND w2.id < w.id)
@@ -57,16 +57,16 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             )
         )
         FROM Waiting w
-        WHERE w.bookingInfo.member.id = :memberId
+        WHERE w.member.id = :memberId
         ORDER BY w.waitingStartedAt, w.id
     """)
     List<WaitingWithRankData> findWaitingsWithRankByMemberId(Long memberId);
 
     @Query("""
         SELECT w FROM Waiting w
-        JOIN FETCH w.bookingInfo.member
-        JOIN FETCH w.bookingInfo.time
-        JOIN FETCH w.bookingInfo.theme
+        JOIN FETCH w.member
+        JOIN FETCH w.bookingSlot.time
+        JOIN FETCH w.bookingSlot.theme
         ORDER BY w.id ASC
     """)
     List<Waiting> findAllWaitings();

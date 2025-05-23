@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import roomescape.domain.BookingInfo;
+import roomescape.domain.BookingSlot;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
@@ -25,11 +25,11 @@ public class TestFixture {
     }
 
     public static Reservation createReservationByMember(Member member) {
-        return Reservation.create(new BookingInfo(member, DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme()));
+        return Reservation.create(member, new BookingSlot(DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme()));
     }
 
     public static Reservation createNewReservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return Reservation.create(new BookingInfo(member, date, time, theme));
+        return Reservation.create(member, new BookingSlot(date, time, theme));
     }
 
     public static Waiting createDefaultWaiting_1() {
@@ -42,11 +42,11 @@ public class TestFixture {
 
 
     public static Waiting createWaiting(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return Waiting.create(new BookingInfo(member, date, time, theme));
+        return Waiting.create(member, new BookingSlot(date, time, theme));
     }
 
     public static Waiting createWaitingByMember(Member member) {
-        return Waiting.create(new BookingInfo(member,DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme()));
+        return Waiting.create(member, new BookingSlot(DEFAULT_DATE, createDefaultReservationTime(), createDefaultTheme()));
     }
 
     public static ReservationTime createDefaultReservationTime() {

@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.TestFixture.createDefaultMember;
+import static roomescape.TestFixture.createDefaultTheme;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -22,12 +24,10 @@ class ReservationTest {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 1, 2, 0, 0);
         Clock clock = TestFixture.fixedClockAt(fixedDateTime);
 
-        Reservation reservation = Reservation.create(new BookingInfo(
-                TestFixture.createDefaultMember(),
-                date,
-                time,
-                TestFixture.createDefaultTheme()
-        ));
+        Reservation reservation = Reservation.create(
+                createDefaultMember(),
+                new BookingSlot(date, time, createDefaultTheme())
+        );
 
         // when & then
         assertThat(reservation.isPast(clock)).isTrue();
@@ -43,12 +43,10 @@ class ReservationTest {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 1, 1, 0, 0);
         Clock clock = TestFixture.fixedClockAt(fixedDateTime);
 
-        Reservation reservation = Reservation.create(new BookingInfo(
-                TestFixture.createDefaultMember(),
-                date,
-                time,
-                TestFixture.createDefaultTheme()
-        ));
+        Reservation reservation = Reservation.create(
+                createDefaultMember(),
+                new BookingSlot(date, time, createDefaultTheme())
+        );
 
         // when & then
         assertThat(reservation.isPast(clock)).isFalse();
@@ -64,12 +62,10 @@ class ReservationTest {
         LocalDateTime fixedDateTime = LocalDateTime.of(2025, 1, 1, 11, 30);
         Clock clock = TestFixture.fixedClockAt(fixedDateTime);
 
-        Reservation reservation = Reservation.create(new BookingInfo(
-                TestFixture.createDefaultMember(),
-                date,
-                time,
-                TestFixture.createDefaultTheme()
-        ));
+        Reservation reservation = Reservation.create(
+                createDefaultMember(),
+                new BookingSlot(date, time, createDefaultTheme())
+        );
 
         // when
         long minutes = reservation.calculateMinutesUntilStart(clock);

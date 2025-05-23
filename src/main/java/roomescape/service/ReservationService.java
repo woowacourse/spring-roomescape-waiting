@@ -44,7 +44,7 @@ public class ReservationService {
 
         reservationRepository.deleteById(reservationId);
 
-        boolean reservationSlotEmpty = reservationRepository.isReservationSlotEmpty(
+        boolean reservationSlotEmpty = reservationRepository.isBookingSlotEmpty(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         if(reservationSlotEmpty) {
             autoReserveNextWaiting(reservation);

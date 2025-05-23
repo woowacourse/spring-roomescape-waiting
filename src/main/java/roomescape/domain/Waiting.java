@@ -7,6 +7,8 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,8 +23,12 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
     @Embedded
-    private BookingInfo bookingInfo;
+    private BookingSlot bookingSlot;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -31,17 +37,18 @@ public class Waiting {
     protected Waiting() {
     }
 
-    private Waiting(Long id, BookingInfo bookingInfo) {
+    private Waiting(Long id, Member member, BookingSlot bookingSlot) {
         this.id = id;
-        this.bookingInfo = bookingInfo;
+        this.member = member;
+        this.bookingSlot = bookingSlot;
     }
 
-    public static Waiting create(BookingInfo bookingInfo) {
-        return new Waiting(null, bookingInfo);
+    public static Waiting create(Member member, BookingSlot bookingSlot) {
+        return new Waiting(null, member, bookingSlot);
     }
 
     public Reservation confirm() {
-        return Reservation.create(this.bookingInfo);
+        return Reservation.create(this.member, this.bookingSlot);
     }
 
     public boolean isOwnedBy(Long memberId) {
@@ -53,22 +60,22 @@ public class Waiting {
     }
 
     public Member getMember() {
-        return bookingInfo.getMember();
+        return member;
     }
 
     public LocalDate getDate() {
-        return bookingInfo.getDate();
+        return bookingSlot.getDate();
     }
 
     public ReservationTime getTime() {
-        return bookingInfo.getTime();
+        return bookingSlot.getTime();
     }
 
     public Theme getTheme() {
-        return bookingInfo.getTheme();
+        return bookingSlot.getTheme();
     }
 
     public boolean isPast(Clock clock) {
-        return bookingInfo.isPast(clock);
+        return bookingSlot.isPast(clock);
     }
 }

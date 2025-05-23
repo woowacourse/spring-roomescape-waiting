@@ -11,13 +11,13 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     @Query("""
         SELECT r
         FROM Reservation r
-        JOIN FETCH r.bookingInfo.time t
-        JOIN FETCH r.bookingInfo.theme tm
-        JOIN FETCH r.bookingInfo.member m
-        WHERE (:memberId IS NULL OR r.bookingInfo.member.id = :memberId)
-          AND (:themeId IS NULL OR r.bookingInfo.theme.id = :themeId)
-          AND (:dateFrom IS NULL OR r.bookingInfo.date >= :dateFrom)
-          AND (:dateTo IS NULL OR r.bookingInfo.date <= :dateTo)
+        JOIN FETCH r.bookingSlot.time t
+        JOIN FETCH r.bookingSlot.theme tm
+        JOIN FETCH r.member m
+        WHERE (:memberId IS NULL OR r.member.id = :memberId)
+          AND (:themeId IS NULL OR r.bookingSlot.theme.id = :themeId)
+          AND (:dateFrom IS NULL OR r.bookingSlot.date >= :dateFrom)
+          AND (:dateTo IS NULL OR r.bookingSlot.date <= :dateTo)
         ORDER BY r.id
     """)
     List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
@@ -25,10 +25,10 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     @Query("""
         SELECT r
         FROM Reservation r
-        JOIN FETCH r.bookingInfo.time
-        JOIN FETCH r.bookingInfo.theme
-        JOIN FETCH r.bookingInfo.member
-        WHERE r.bookingInfo.member.id = :memberId
+        JOIN FETCH r.bookingSlot.time
+        JOIN FETCH r.bookingSlot.theme
+        JOIN FETCH r.member
+        WHERE r.member.id = :memberId
     """)
     List<Reservation> findByMemberId(Long memberId);
 
@@ -36,17 +36,17 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         SELECT CASE WHEN EXISTS (
             SELECT 1
             FROM Reservation r
-            WHERE r.bookingInfo.theme.id = :themeId
-              AND r.bookingInfo.time.id = :timeId
-              AND r.bookingInfo.date = :date
+            WHERE r.bookingSlot.theme.id = :themeId
+              AND r.bookingSlot.time.id = :timeId
+              AND r.bookingSlot.date = :date
         ) THEN false ELSE true END
     """)
-    boolean isReservationSlotEmpty(LocalDate date, Long timeId, Long themeId);
+    boolean isBookingSlotEmpty(LocalDate date, Long timeId, Long themeId);
 
     @Query("""
     SELECT EXISTS (
         SELECT 1 FROM Reservation r
-        WHERE r.bookingInfo.time.id = :reservationTimeId
+        WHERE r.bookingSlot.time.id = :reservationTimeId
       )
     """)
     boolean existsByTimeId(Long reservationTimeId);
@@ -54,7 +54,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     @Query("""
     SELECT EXISTS (
         SELECT 1 FROM Reservation r
-        WHERE r.bookingInfo.theme.id = :themeId
+        WHERE r.bookingSlot.theme.id = :themeId
       )
     """)
     boolean existsByThemeId(Long themeId);
@@ -62,9 +62,9 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     @Query("""
     SELECT EXISTS (
         SELECT 1 FROM Reservation r
-        WHERE r.bookingInfo.date = :reservationDate
-          AND r.bookingInfo.time.id = :timeId
-          AND r.bookingInfo.theme.id = :themeId
+        WHERE r.bookingSlot.date = :reservationDate
+          AND r.bookingSlot.time.id = :timeId
+          AND r.bookingSlot.theme.id = :themeId
         )
     """)
     boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
@@ -72,10 +72,10 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     @Query("""
     SELECT EXISTS (
         SELECT 1 FROM Reservation r
-        WHERE r.bookingInfo.member.id = :memberId
-          AND r.bookingInfo.theme.id = :themeId
-          AND r.bookingInfo.time.id = :timeId
-          AND r.bookingInfo.date = :date
+        WHERE r.member.id = :memberId
+          AND r.bookingSlot.theme.id = :themeId
+          AND r.bookingSlot.time.id = :timeId
+          AND r.bookingSlot.date = :date
         )
     """)
     boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(Long memberId, Long themeId, Long timeId, LocalDate date);

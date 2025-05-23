@@ -2,7 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.BookingInfo;
+import roomescape.domain.BookingSlot;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationPolicy;
@@ -42,7 +42,9 @@ public class ReservationCreationService {
     public ReservationResult create(CreateBookingParam param) {
         ReservationComponents components = loadComponents(param);
         Reservation reservation = Reservation.create(
-                new BookingInfo(components.member, param.date(), components.time, components.theme));
+                components.member,
+                new BookingSlot(param.date(), components.time, components.theme)
+        );
         validateCanReservation(reservation);
         reservationRepository.save(reservation);
 
