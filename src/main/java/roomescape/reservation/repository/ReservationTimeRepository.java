@@ -11,9 +11,9 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
             SELECT rt
             FROM ReservationTime rt
             WHERE rt.id IN (
-                SELECT r.time.id
+                SELECT r.reservationSlot.time.id
                 FROM Reservation r
-                WHERE r.date = :date AND r.theme.id = :themeId
+                WHERE r.reservationSlot.date = :date AND r.reservationSlot.theme.id = :themeId
             )
             """)
     List<ReservationTime> findAllReservedTimeByDateAndThemeId(LocalDate date, Long themeId);

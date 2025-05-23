@@ -16,8 +16,10 @@ import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -51,6 +53,8 @@ public class WaitingAcceptanceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
 
     @BeforeEach
     void init() {
@@ -86,7 +90,8 @@ public class WaitingAcceptanceTest {
         var date = createTomorrow();
         var theme = createDefaultTheme();
         var time = createDefaultReservationTime();
-        createOtherMemberReservation(date, theme, time);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        createOtherMemberReservation(reservationSlot);
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
         // when & then
@@ -107,7 +112,8 @@ public class WaitingAcceptanceTest {
         var date = createTomorrow();
         var theme = createDefaultTheme();
         var time = createDefaultReservationTime();
-        createOtherMemberReservation(date, theme, time);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        createOtherMemberReservation(reservationSlot);
 
         // when & then
         TestHelper.getWithToken("/waitings", token)
@@ -124,8 +130,9 @@ public class WaitingAcceptanceTest {
         var date = createTomorrow();
         var theme = createDefaultTheme();
         var time = createDefaultReservationTime();
-        createOtherMemberReservation(date, theme, time);
-        createWaiting(date, theme, time);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        createOtherMemberReservation(reservationSlot);
+        createWaiting(reservationSlot);
 
         // when & then
         TestHelper.getWithToken("/waitings", token)
@@ -147,8 +154,9 @@ public class WaitingAcceptanceTest {
         var date = createTomorrow();
         var theme = createDefaultTheme();
         var time = createDefaultReservationTime();
-        createOtherMemberReservation(date, theme, time);
-        var waiting = createWaiting(date, theme, time);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        createOtherMemberReservation(reservationSlot);
+        var waiting = createWaiting(reservationSlot);
 
         // when & then
         TestHelper.postWithToken("/waitings/accept/" + waiting.getId(), token)
@@ -164,8 +172,9 @@ public class WaitingAcceptanceTest {
         var date = createTomorrow();
         var theme = createDefaultTheme();
         var time = createDefaultReservationTime();
-        createOtherMemberReservation(date, theme, time);
-        var waiting = createWaiting(date, theme, time);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        createOtherMemberReservation(reservationSlot);
+        var waiting = createWaiting(reservationSlot);
 
         // when & then
         TestHelper.deleteWithToken("/waitings/" + waiting.getId(), token)
@@ -173,17 +182,17 @@ public class WaitingAcceptanceTest {
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
 
-    private Waiting createWaiting(LocalDate date, Theme theme, ReservationTime time) {
+    private Waiting createWaiting(ReservationSlot reservationSlot) {
         Member member = memberRepository.findByEmail(DEFAULT_EMAIL)
                 .orElse(null);
-        Waiting waiting = new Waiting(date, theme, time, member);
+        Waiting waiting = new Waiting(reservationSlot, member);
         return waitingRepository.save(waiting);
     }
 
-    private void createOtherMemberReservation(LocalDate date, Theme theme, ReservationTime time) {
+    private void createOtherMemberReservation(ReservationSlot reservationSlot) {
         Member other = new Member("other", "other@email.com", "password", RoleType.USER);
         memberRepository.save(other);
-        var reservation = new Reservation(date, time, theme, other);
+        var reservation = new Reservation(reservationSlot, other);
         reservationRepository.save(reservation);
     }
 

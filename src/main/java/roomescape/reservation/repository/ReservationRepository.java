@@ -6,21 +6,26 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.member.entity.Member;
 import roomescape.reservation.entity.Reservation;
-import roomescape.reservation.entity.ReservationTime;
-import roomescape.theme.entity.Theme;
+import roomescape.reservation.entity.ReservationSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    Optional<Reservation> findByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
+
+    Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot);
 
     List<Reservation> findAllByMember(Member member);
 
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateBetween(Long themeId, Long memberId, LocalDate dateAfter, LocalDate dateBefore);
+    List<Reservation> findAllByReservationSlot_ThemeIdAndMemberIdAndReservationSlot_DateBetween(Long reservationSlot_theme_id,
+                                                                              Long member_id,
+                                                                              LocalDate dateFrom,
+                                                                              LocalDate dateTo);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByReservationSlot_TimeId(Long reservationSlotTimeId);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByReservationSlot_ThemeId(Long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(LocalDate date, Long timeId, Long themeId);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByReservationSlot(ReservationSlot reservationSlot);
+
+    boolean existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 }

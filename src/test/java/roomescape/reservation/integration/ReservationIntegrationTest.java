@@ -22,8 +22,10 @@ import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
@@ -37,6 +39,9 @@ class ReservationIntegrationTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -214,18 +219,19 @@ class ReservationIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
-        var reservation = new Reservation(date, time, theme, otherMember);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, otherMember);
         var savedReservation = reservationRepository.save(reservation);
 
         var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
-        var waiting = new Waiting(date, theme, time, member);
-        var savedWaiting = waitingRepository.save(waiting);
+        var waiting = new Waiting(reservationSlot, member);
+        waitingRepository.save(waiting);
 
         //when
         reservationService.deleteReservation(savedReservation.getId());
 
         //then
-        var found = reservationRepository.findByDateAndThemeAndTime(date, theme, time)
+        var found = reservationRepository.findByReservationSlot(reservationSlot)
                 .orElse(null);
         assertThat(found.getMember().getName()).isEqualTo(member.getName());
     }

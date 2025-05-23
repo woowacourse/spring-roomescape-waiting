@@ -29,8 +29,10 @@ import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
@@ -59,6 +61,9 @@ class ReservationServiceTest {
     @Mock
     private WaitingRepository waitingRepository;
 
+    @Mock
+    private ReservationSlotRepository reservationSlotRepository;
+
     @Test
     @DisplayName("예약을 생성한다.")
     void createReservation() {
@@ -67,6 +72,7 @@ class ReservationServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(tomorrow, time, theme);
 
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
@@ -74,8 +80,10 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), anyLong()))
+                .thenReturn(Optional.of(reservationSlot));
         when(reservationRepository.save(any(Reservation.class)))
-                .thenReturn(new Reservation(anyLong(), tomorrow, time, theme, member));
+                .thenReturn(new Reservation(anyLong(), reservationSlot, member));
 
         var request = new ReservationCreateRequest(
                 tomorrow,
@@ -104,6 +112,7 @@ class ReservationServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(tomorrow, time, theme);
 
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
@@ -111,8 +120,10 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), anyLong()))
+                .thenReturn(Optional.of(reservationSlot));
         when(reservationRepository.save(any(Reservation.class)))
-                .thenReturn(new Reservation(anyLong(), tomorrow, time, theme, member));
+                .thenReturn(new Reservation(anyLong(), reservationSlot, member));
 
         var request = new ReservationAdminCreateRequest(
                 LocalDate.now().plusDays(1),
@@ -141,6 +152,7 @@ class ReservationServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(LocalDate.now(), time, theme);
 
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
@@ -148,6 +160,8 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), anyLong()))
+                .thenReturn(Optional.of(reservationSlot));
 
         var request = new ReservationCreateRequest(
                 LocalDate.now().minusDays(1),
@@ -170,6 +184,8 @@ class ReservationServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
+        var date = LocalDate.now().plusDays(1);
+        var reservationSlot = new ReservationSlot(date, time, theme);
 
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
@@ -177,10 +193,11 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong()))
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), anyLong()))
+                .thenReturn(Optional.of(reservationSlot));
+        when(reservationRepository.existsByReservationSlot(any(ReservationSlot.class)))
                 .thenReturn(true);
 
-        var date = LocalDate.now().plusDays(1);
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
 
         // when & then
@@ -198,8 +215,9 @@ class ReservationServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(LocalDate.now(), time, theme);
         var inDbReservations = List.of(
-                new Reservation(1L, LocalDate.now(), time, theme, member)
+                new Reservation(1L, reservationSlot, member)
         );
 
         when(reservationRepository.findAll())
@@ -226,10 +244,11 @@ class ReservationServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(LocalDate.now().plusDays(1), time, theme);
         var inDbReservations = List.of(
-                new Reservation(1L, date, time, theme, member)
+                new Reservation(1L, reservationSlot, member)
         );
-        when(reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(anyLong(), anyLong(), any(LocalDate.class), any(LocalDate.class)))
+        when(reservationRepository.findAllByReservationSlot_ThemeIdAndMemberIdAndReservationSlot_DateBetween(anyLong(), anyLong(), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(inDbReservations);
 
         var filterRequest = new ReservationReadFilteredRequest(
@@ -270,18 +289,17 @@ class ReservationServiceTest {
         var theme = new Theme("테마", "설명", "썸네일");
         var time = new ReservationTime(LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
-        var reservation = new Reservation(1L, date, time, theme, otherMember);
+        var reservationSlot = new ReservationSlot(date, time, theme);
+        var reservation = new Reservation(1L, reservationSlot, otherMember);
 
         var member = new Member("훌라", "hula@email.com", "password", RoleType.USER);
-        var waiting = new Waiting(date, theme, time, member);
+        var waiting = new Waiting(reservationSlot, member);
 
         when(reservationRepository.existsById(anyLong()))
                 .thenReturn(true);
         when(reservationRepository.findById(anyLong()))
                 .thenReturn(Optional.of(reservation));
-        when(waitingRepository.existsByDateAndThemeAndTime(any(), any(), any()))
-                .thenReturn(true);
-        when(waitingRepository.findFirstByDateAndThemeAndTime(any(), any(), any()))
+        when(waitingRepository.findFirstByReservationSlot(any(ReservationSlot.class)))
                 .thenReturn(Optional.of(waiting));
 
         //when
@@ -301,8 +319,9 @@ class ReservationServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(date, time, theme);
         var inDbReservations = List.of(
-                new Reservation(1L, date, time, theme, member)
+                new Reservation(1L, reservationSlot, member)
         );
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));

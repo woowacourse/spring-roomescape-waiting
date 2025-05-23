@@ -21,12 +21,13 @@ import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
 import roomescape.reservation.dto.response.ReservationReadResponse;
 import roomescape.reservation.dto.response.ReservationWaitingReadMemberResponse;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.entity.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -39,6 +40,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
 
     public ReservationCreateResponse createReservation(Long memberId, ReservationCreateRequest request) {
         Reservation saved = create(memberId, request.timeId(), request.themeId(), request.date());
@@ -55,7 +57,11 @@ public class ReservationService {
         ReservationTime time = getReservationTimeById(timeId);
         Theme theme = getThemeById(themeId);
 
-        Reservation reservation = new Reservation(date, time, theme, member);
+        ReservationSlot reservationSlot = reservationSlotRepository.findByDateAndTimeIdAndThemeId(
+                        date, timeId, themeId)
+                .orElse(reservationSlotRepository.save(new ReservationSlot(date, time, theme)));
+
+        Reservation reservation = new Reservation(reservationSlot, member);
         validateDateTime(reservation);
         validateDuplicated(reservation);
 
@@ -69,7 +75,7 @@ public class ReservationService {
     }
 
     public List<ReservationReadFilteredResponse> getFilteredReservations(ReservationReadFilteredRequest request) {
-        List<Reservation> reservations = reservationRepository.findAllByThemeIdAndMemberIdAndDateBetween(
+        List<Reservation> reservations = reservationRepository.findAllByReservationSlot_ThemeIdAndMemberIdAndReservationSlot_DateBetween(
                 request.themeId(), request.memberId(), request.dateFrom(), request.dateTo());
 
         return reservations.stream()
@@ -89,30 +95,22 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         if (reservationRepository.existsById(id)) {
-            Reservation reservation = reservationRepository.findById(id)
-                    .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
-
+            Reservation reservation = getReservationById(id);
+            reservationRepository.deleteById(id);
+            reservationRepository.flush();
             changeWaitingToReservation(reservation);
+            return;
         }
-
         reservationRepository.deleteById(id);
     }
 
     private void changeWaitingToReservation(Reservation reservation) {
-        boolean existsWaiting = waitingRepository.existsByDateAndThemeAndTime(
-                reservation.getDate(), reservation.getTheme(), reservation.getTime());
-
-        if (existsWaiting) {
-            Waiting waiting = waitingRepository.findFirstByDateAndThemeAndTime(
-                    reservation.getDate(), reservation.getTheme(), reservation.getTime())
-                    .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
-
-            waitingRepository.delete(waiting);
-
-            Reservation reservationByWaiting = new Reservation(
-                    waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember());
-            reservationRepository.save(reservationByWaiting);
-        }
+        waitingRepository.findFirstByReservationSlot(reservation.getReservationSlot())
+                .ifPresent(waiting -> {
+                    waitingRepository.delete(waiting);
+                    Reservation reservationByWaiting = new Reservation(waiting.getReservationSlot(), waiting.getMember());
+                    reservationRepository.save(reservationByWaiting);
+                });
     }
 
     private void validateDateTime(Reservation reservation) {
@@ -124,11 +122,15 @@ public class ReservationService {
     }
 
     private void validateDuplicated(Reservation reservation) {
-        boolean hasDuplicate = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        boolean hasDuplicate = reservationRepository.existsByReservationSlot(reservation.getReservationSlot());
         if (hasDuplicate) {
             throw new ConflictException("이미 예약이 존재합니다.");
         }
+    }
+
+    private Reservation getReservationById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약이 존재하지 않습니다."));
     }
 
     private Member getMemberById(Long memberId) {

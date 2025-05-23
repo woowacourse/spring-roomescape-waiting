@@ -15,9 +15,9 @@ public record WaitingCreateResponse(
     public static WaitingCreateResponse from(Waiting waiting, Long rank) {
         return new WaitingCreateResponse(
                 waiting.getId(),
-                waiting.getDate(),
-                waiting.getTheme().getName(),
-                waiting.getTime().getStartAt(),
+                waiting.getReservationSlot().getDate(),
+                waiting.getReservationSlot().getTheme().getName(),
+                waiting.getReservationSlot().getTime().getStartAt(),
                 rank
         );
     }

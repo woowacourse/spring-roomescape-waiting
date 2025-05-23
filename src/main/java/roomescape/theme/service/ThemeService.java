@@ -46,7 +46,7 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByReservationSlot_ThemeId(id)) {
             throw new BadRequestException("해당 테마에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);

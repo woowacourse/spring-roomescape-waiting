@@ -24,8 +24,10 @@ import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -44,16 +46,19 @@ public class WaitingServiceTest {
     private ReservationRepository reservationRepository;
 
     @Mock
-    private ReservationTimeRepository reservationTimeRepository;
+    private WaitingRepository waitingRepository;
 
     @Mock
     private ThemeRepository themeRepository;
 
     @Mock
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @Mock
     private MemberRepository memberRepository;
 
     @Mock
-    private WaitingRepository waitingRepository;
+    private ReservationSlotRepository reservationSlotRepository;
 
     @Test
     @DisplayName("예약 대기를 생성할 수 있다.")
@@ -62,22 +67,26 @@ public class WaitingServiceTest {
         var theme = new Theme(1L, "테마", "설명", "썸네일");
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
+        var reservationSlot = new ReservationSlot(date, time, theme);
 
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
+                any(), anyLong(), anyLong()))
                 .thenReturn(true);
-        when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), anyLong(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(
+                any(), anyLong(), anyLong(), anyLong()))
                 .thenReturn(false);
-        when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), anyLong(), anyLong(), anyLong()))
+        when(waitingRepository.existsByReservationSlot_DateAndReservationSlot_ThemeIdAndReservationSlot_TimeIdAndMemberId(
+                any(), anyLong(), anyLong(), anyLong()))
                 .thenReturn(false);
 
         var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
         var loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        var waiting = new Waiting(1L, date, theme, time, member);
+        var waiting = new Waiting(1L, reservationSlot, member);
         when(waitingRepository.save(any()))
                 .thenReturn(waiting);
-        when(waitingRepository.countByDateAndThemeAndMember(any(), any(), any()))
+        when(waitingRepository.countByReservationSlot_DateAndReservationSlot_ThemeAndMember(any(), any(), any()))
                 .thenReturn(1L);
 
         when(themeRepository.findById(anyLong()))
@@ -86,6 +95,8 @@ public class WaitingServiceTest {
                 .thenReturn(Optional.of(time));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
+                .thenReturn(Optional.of(reservationSlot));
 
         //when
         var response = waitingService.createWaiting(loginMember, request);
@@ -106,7 +117,8 @@ public class WaitingServiceTest {
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
+                any(), anyLong(), anyLong()))
                 .thenReturn(false);
 
         //when & then
@@ -126,9 +138,11 @@ public class WaitingServiceTest {
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
+                any(), anyLong(), anyLong()))
                 .thenReturn(true);
-        when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), anyLong(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(
+                any(), anyLong(), anyLong(), anyLong()))
                 .thenReturn(true);
 
         //when & then
@@ -148,11 +162,14 @@ public class WaitingServiceTest {
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
+                any(), anyLong(), anyLong()))
                 .thenReturn(true);
-        when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), anyLong(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(
+                any(), anyLong(), anyLong(), anyLong()))
                 .thenReturn(false);
-        when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(any(), anyLong(), anyLong(), anyLong()))
+        when(waitingRepository.existsByReservationSlot_DateAndReservationSlot_ThemeIdAndReservationSlot_TimeIdAndMemberId(
+                any(), anyLong(), anyLong(), anyLong()))
                 .thenReturn(true);
 
         //when & then
@@ -168,7 +185,8 @@ public class WaitingServiceTest {
         var theme = new Theme(1L, "테마", "설명", "썸네일");
         var time = new ReservationTime(LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
-        var otherMemberWaiting = new Waiting(1L, date, theme, time, otherMember);
+        var reservationSlot = new ReservationSlot(1L, date, time, theme);
+        var otherMemberWaiting = new Waiting(1L, reservationSlot, otherMember);
 
         var member = new Member(2L, "훌라", "hula@email.com", "password", RoleType.USER);
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
@@ -189,7 +207,8 @@ public class WaitingServiceTest {
         var theme = new Theme(1L, "테마", "설명", "썸네일");
         var time = new ReservationTime(LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
-        var otherMemberWaiting = new Waiting(1L, date, theme, time, otherMember);
+        var reservationSlot = new ReservationSlot(1L, date, time, theme);
+        var otherMemberWaiting = new Waiting(1L, reservationSlot, otherMember);
 
         var admin = new Member(2L, "admin", "admin@email.com", "password", RoleType.ADMIN);
         var loginMember = new LoginMember(admin.getId(), admin.getPassword(), admin.getRole());
@@ -213,16 +232,17 @@ public class WaitingServiceTest {
         var theme = new Theme(1L, "테마", "설명", "썸네일");
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
-        var reservation = new Reservation(1L, date, time, theme, otherMember);
+        var reservationSlot = new ReservationSlot(1L, date, time, theme);
+        var reservation = new Reservation(1L, reservationSlot, otherMember);
 
         var member = new Member("훌라", "hula@email.com", "password", RoleType.USER);
-        var waiting = new Waiting(1L, date, theme, time, member);
+        var waiting = new Waiting(1L, reservationSlot, member);
 
         when(waitingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(any(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot(reservationSlot))
                 .thenReturn(true);
-        when(reservationRepository.findByDateAndThemeAndTime(any(), any(), any()))
+        when(reservationRepository.findByReservationSlot(any()))
                 .thenReturn(Optional.of(reservation));
 
         //when & then

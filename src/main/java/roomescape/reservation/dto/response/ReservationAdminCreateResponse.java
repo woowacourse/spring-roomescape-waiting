@@ -11,9 +11,9 @@ public record ReservationAdminCreateResponse(
 ) {
     public static ReservationAdminCreateResponse from(Reservation reservation) {
         return new ReservationAdminCreateResponse(
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                reservation.getTheme().getName()
+                reservation.getReservationSlot().getDate(),
+                reservation.getReservationSlot().getTime().getStartAt(),
+                reservation.getReservationSlot().getTheme().getName()
         );
     }
 }

@@ -5,14 +5,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.entity.Member;
-import roomescape.reservation.entity.ReservationTime;
-import roomescape.theme.entity.Theme;
+import roomescape.reservation.entity.ReservationSlot;
 
 @Entity
 @Getter
@@ -24,18 +22,25 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate date;
+//    private LocalDate date;
+//
+//    @ManyToOne
+//    private Theme theme;
+//
+//    @ManyToOne
+//    private ReservationTime time;
 
     @ManyToOne
-    private Theme theme;
-
-    @ManyToOne
-    private ReservationTime time;
+    private ReservationSlot reservationSlot;
 
     @ManyToOne
     private Member member;
 
-    public Waiting(LocalDate date, Theme theme, ReservationTime time, Member member) {
-        this(null, date, theme, time, member);
+//    public Waiting(LocalDate date, Theme theme, ReservationTime time, Member member) {
+//        this(null, date, theme, time, member);
+//    }
+
+    public Waiting(ReservationSlot reservationSlot, Member member) {
+        this(null, reservationSlot, member);
     }
 }

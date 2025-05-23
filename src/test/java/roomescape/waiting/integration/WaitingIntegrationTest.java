@@ -19,8 +19,10 @@ import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -50,6 +52,8 @@ public class WaitingIntegrationTest {
 
     @Autowired
     private WaitingRepository waitingRepository;
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
 
     @Test
     @DisplayName("예약 대기를 생성할 수 있다.")
@@ -60,7 +64,8 @@ public class WaitingIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
-        var reservation = new Reservation(date, time, theme, otherMember);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, otherMember);
         reservationRepository.save(reservation);
 
         var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
@@ -100,7 +105,8 @@ public class WaitingIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
-        var reservation = new Reservation(date, time, theme, member);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, member);
         reservationRepository.save(reservation);
 
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
@@ -120,12 +126,13 @@ public class WaitingIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
-        var reservation = new Reservation(date, time, theme, otherMember);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, otherMember);
         reservationRepository.save(reservation);
 
         // 본인의 예약 대기 생성
         var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
-        var waiting = new Waiting(date, theme, time, member);
+        var waiting = new Waiting(reservationSlot, member);
         waitingRepository.save(waiting);
 
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
@@ -144,7 +151,8 @@ public class WaitingIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
-        var waiting = new Waiting(date, theme, time, otherMember);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var waiting = new Waiting(reservationSlot, otherMember);
         var savedWaiting = waitingRepository.save(waiting);
 
         var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
@@ -163,7 +171,8 @@ public class WaitingIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
-        var waiting = new Waiting(date, theme, time, otherMember);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var waiting = new Waiting(reservationSlot, otherMember);
         var savedWaiting = waitingRepository.save(waiting);
 
         var admin = memberRepository.save(new Member("어드민", "admin@email.com", "password", RoleType.ADMIN));
@@ -183,11 +192,12 @@ public class WaitingIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
-        var reservation = new Reservation(date, time, theme, otherMember);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, otherMember);
         reservationRepository.save(reservation);
 
         var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
-        var waiting = new Waiting(date, theme, time, member);
+        var waiting = new Waiting(reservationSlot, member);
         var savedWaiting = waitingRepository.save(waiting);
 
         //when & then

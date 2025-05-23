@@ -34,9 +34,9 @@ public record ReservationWaitingReadMemberResponse(
     public static ReservationWaitingReadMemberResponse from(Reservation reservation) {
         return new ReservationWaitingReadMemberResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
+                reservation.getReservationSlot().getTheme().getName(),
+                reservation.getReservationSlot().getDate(),
+                reservation.getReservationSlot().getTime().getStartAt(),
                 "예약"
         );
     }
@@ -45,9 +45,9 @@ public record ReservationWaitingReadMemberResponse(
         Waiting waiting = waitingWithRank.getWaiting();
         return new ReservationWaitingReadMemberResponse(
                 waiting.getId(),
-                waiting.getTheme().getName(),
-                waiting.getDate(),
-                waiting.getTime().getStartAt(),
+                waiting.getReservationSlot().getTheme().getName(),
+                waiting.getReservationSlot().getDate(),
+                waiting.getReservationSlot().getTime().getStartAt(),
                 String.format("%d번째 예약대기", waitingWithRank.getRank() + 1)
         );
     }

@@ -16,9 +16,9 @@ public record WaitingReadResponse(
         return new WaitingReadResponse(
                 waiting.getId(),
                 waiting.getMember().getName(),
-                waiting.getDate(),
-                waiting.getTheme().getName(),
-                waiting.getTime().getStartAt()
+                waiting.getReservationSlot().getDate(),
+                waiting.getReservationSlot().getTheme().getName(),
+                waiting.getReservationSlot().getTime().getStartAt()
         );
     }
 }

@@ -13,9 +13,9 @@ public record ReservationCreateResponse(
     public static ReservationCreateResponse from(Reservation reservation) {
         return new ReservationCreateResponse(
                 reservation.getId(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                reservation.getTheme().getName()
+                reservation.getReservationSlot().getDate(),
+                reservation.getReservationSlot().getTime().getStartAt(),
+                reservation.getReservationSlot().getTheme().getName()
         );
     }
 }
