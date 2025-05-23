@@ -57,7 +57,7 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    public User getUserById(final long userId) {
+    private User getUserById(final long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
     }
@@ -86,10 +86,17 @@ public class ReservationService {
     }
 
     public List<Reservation> findReservationsByUserId(final long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + userId));
+        validateUserExists(userId);
 
-        return reservationRepository.findByUserId(user.id());
+        return reservationRepository.findByUserId(userId);
+    }
+
+    private void validateUserExists(long userId) {
+        boolean isUserExists = userRepository.existsById(userId);
+
+        if (!isUserExists) {
+            throw new NotFoundException("존재하지 않는 사용자입니다.");
+        }
     }
 
     public void removeById(final long id) {

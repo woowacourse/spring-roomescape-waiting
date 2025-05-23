@@ -100,9 +100,16 @@ public class WaitingService {
     }
 
     public void removeById(final long id) {
-        waitingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
+        validateWaitingExists(id);
 
         waitingRepository.deleteById(id);
+    }
+
+    private void validateWaitingExists(long id) {
+        boolean isWaitingExisted = waitingRepository.existsById(id);
+
+        if (isWaitingExisted) {
+            throw new NotFoundException("존재하지 않는 예약 대기입니다.");
+        }
     }
 }
