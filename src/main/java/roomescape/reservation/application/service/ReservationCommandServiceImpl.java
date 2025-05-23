@@ -58,7 +58,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     public WaitingReservation createWaitingReservation(final CreateReservationServiceRequest request) {
         if (!reservationRepository.existsByParams(
                 request.date(), request.timeId(), request.themeId())) {
-            throw new NotFoundException(DomainTerm.RESERVATION,
+            throw new NotFoundException(DomainTerm.RESERVATION, //Todo 개선 및 검증 필요
                     request.date(),
                     DomainTerm.THEME_ID,
                     DomainTerm.RESERVATION_TIME_ID);
@@ -78,6 +78,19 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
         );
 
         return waitingReservationRepository.save(waitingReservation);
+    }
+
+    @Override
+    public void deleteWaiting(final Long id) {
+        final WaitingReservation waitingReservation = waitingReservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(DomainTerm.RESERVATION_WAITING, id));
+
+        waitingReservationRepository.decrementWaitingOrderAfter(
+                waitingReservation.getDate(),
+                waitingReservation.getTime(),
+                waitingReservation.getTheme(),
+                waitingReservation.getWaitingOrder());
+        waitingReservationRepository.deleteById(id);
     }
 
     private Reservation createReservation(final CreateReservationServiceRequest request) {

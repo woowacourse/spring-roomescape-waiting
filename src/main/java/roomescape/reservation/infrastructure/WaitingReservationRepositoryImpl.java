@@ -17,6 +17,30 @@ public class WaitingReservationRepositoryImpl implements WaitingReservationRepos
     private final JpaWaitingReservationRepository jpaWaitingReservationRepository;
 
     @Override
+    public boolean existsByParams(final Long id) {
+        return jpaWaitingReservationRepository.existsById(id);
+    }
+
+    @Override
+    public int decrementWaitingOrderAfter(
+            final ReservationDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final int waitingOrder) {
+        return jpaWaitingReservationRepository.decrementWaitingOrderAfter(
+                time.getId(),
+                theme.getId(),
+                date,
+                waitingOrder
+        );
+    }
+
+    @Override
+    public void deleteById(final Long id) {
+        jpaWaitingReservationRepository.deleteById(id);
+    }
+
+    @Override
     public Optional<WaitingReservation> findById(final Long id) {
         return jpaWaitingReservationRepository.findById(id);
     }

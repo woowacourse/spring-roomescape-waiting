@@ -93,4 +93,9 @@ public class ReservationFacadeImpl implements ReservationFacade {
 
         return WaitingReservationResponse.from(waitingReservation, user);
     }
+
+    @Override
+    public void deleteWaiting(final Long id) {
+        reservationCommandService.deleteWaiting(id);
+    }
 }

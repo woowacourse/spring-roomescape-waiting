@@ -228,6 +228,90 @@ class ReservationCommandServiceImplTest {
         assertThat(waitingReservation.getTheme()).isEqualTo(found.getTheme());
     }
 
+    @Test
+    @DisplayName("예약 대기를 삭제할 수 있다")
+    void deleteWaitingReservation() {
+        // given
+        final ReservationTime reservationTime = createAndSaveReservationTime(LocalTime.of(10, 0));
+        final Theme theme = createAndSaveTheme();
+        final User user = createAndSaveUser();
+
+        final WaitingReservation waitingReservation = waitingReservationRepository.save(
+                WaitingReservation.withoutId(
+                        user.getId(),
+                        1,
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        reservationTime,
+                        theme
+                ));
+
+        // when
+        Long id = waitingReservation.getId();
+        reservationCommandService.deleteWaiting(id);
+
+        // then
+        assertThat(waitingReservationRepository.findById(id)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제 시 뒤의 순서들이 자동으로 업데이트된다")
+    void deleteWaitingReservationUpdatesOrder() {
+        //given
+        final ReservationTime reservationTime = createAndSaveReservationTime(LocalTime.of(10, 0));
+        final Theme theme = createAndSaveTheme();
+        final User user = createAndSaveUser();
+
+        final WaitingReservation waiting1 = waitingReservationRepository.save(
+                WaitingReservation.withoutId(
+                        user.getId(),
+                        1,
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        reservationTime,
+                        theme));
+
+        final WaitingReservation waiting2 = waitingReservationRepository.save(
+                WaitingReservation.withoutId(
+                        user.getId(),
+                        2,
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        reservationTime,
+                        theme));
+
+        final WaitingReservation waiting3 = waitingReservationRepository.save(
+                WaitingReservation.withoutId(
+                        user.getId(),
+                        3,
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        reservationTime,
+                        theme));
+
+        final WaitingReservation waiting4 = waitingReservationRepository.save(
+                WaitingReservation.withoutId(
+                        user.getId(),
+                        4,
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        reservationTime,
+                        theme));
+
+        //when
+        reservationCommandService.deleteWaiting(waiting2.getId());
+
+        //then
+        assertThat(waitingReservationRepository.findById(waiting2.getId())).isEmpty();
+
+        final WaitingReservation updatedWaiting1 = waitingReservationRepository.findById(waiting1.getId())
+                .orElseThrow(NoSuchElementException::new);
+        assertThat(updatedWaiting1.getWaitingOrder()).isEqualTo(1);
+
+        final WaitingReservation updatedWaiting3 = waitingReservationRepository.findById(waiting3.getId())
+                .orElseThrow(NoSuchElementException::new);
+        assertThat(updatedWaiting3.getWaitingOrder()).isEqualTo(2);
+
+        final WaitingReservation updatedWaiting4 = waitingReservationRepository.findById(waiting4.getId())
+                .orElseThrow(NoSuchElementException::new);
+        assertThat(updatedWaiting4.getWaitingOrder()).isEqualTo(3);
+    }
+
     // Helper 메서드들
     private ReservationTime createAndSaveReservationTime(LocalTime time) {
         return reservationTimeRepository.save(

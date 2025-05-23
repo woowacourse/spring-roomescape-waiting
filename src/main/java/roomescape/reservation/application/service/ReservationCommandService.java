@@ -11,4 +11,6 @@ public interface ReservationCommandService {
     void delete(Long id);
 
     WaitingReservation createWaitingReservation(CreateReservationServiceRequest request);
+
+    void deleteWaiting(Long id);
 }

@@ -24,4 +24,6 @@ public interface ReservationFacade {
     void delete(Long id);
 
     WaitingReservationResponse addWaiting(CreateReservationWithUserIdWebRequest request);
+
+    void deleteWaiting(Long id);
 }
