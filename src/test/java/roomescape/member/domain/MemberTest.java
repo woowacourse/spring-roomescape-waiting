@@ -50,6 +50,7 @@ class MemberTest {
                 .build();
 
         SoftAssertions.assertSoftly(soft -> {
+            soft.assertThat(member.getPassword()).isEqualTo("secret");
             soft.assertThat(member.matchesPassword("secret")).isTrue();
             soft.assertThat(member.matchesPassword("wrong")).isFalse();
         });

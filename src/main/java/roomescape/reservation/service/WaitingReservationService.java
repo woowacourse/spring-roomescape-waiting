@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
@@ -10,7 +9,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.RoomEscapeInformation;
 import roomescape.reservation.domain.WaitingReservation;
-import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingReservationRequest;
 import roomescape.reservation.dto.WaitingReservationResponse;
 import roomescape.reservation.repository.RoomEscapeInformationRepository;
@@ -51,16 +49,6 @@ public class WaitingReservationService {
                 .member(member)
                 .build();
         return new WaitingReservationResponse(waitingReservationRepository.save(waitingReservation));
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ReservationResponse saveAsWaitingIfReserved(final WaitingReservation waitingReservation) {
-        return new ReservationResponse(waitingReservationRepository.save(waitingReservation));
-    }
-
-    public WaitingReservation findWaitingReservationById(final Long id) {
-        return waitingReservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
     }
 
     public void deleteById(final Long id) {

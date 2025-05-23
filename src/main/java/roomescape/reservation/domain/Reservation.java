@@ -21,7 +21,7 @@ import roomescape.member.domain.Member;
 @Table(
         uniqueConstraints = @UniqueConstraint(
                 name = "unique_reservation_per_time",
-                columnNames = {"roomEscapeInformation_id"}
+                columnNames = {"room_escape_information_id"}
         )
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -2,7 +2,6 @@ package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.constant.TestData.RESERVATION_COUNT;
 
 import java.time.LocalDate;
@@ -15,17 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.domain.Password;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.RoomEscapeInformation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @DataJpaTest
 @Sql("/data.sql")
-class JdbcReservationRepositoryTest {
+class ReservationRepositoryTest {
 
     @Autowired
     private TestEntityManager tm;
@@ -72,19 +71,31 @@ class JdbcReservationRepositoryTest {
         tm.persistAndFlush(member1);
         tm.persistAndFlush(member2);
 
-        Reservation reservation1 = Reservation.builder()
+        RoomEscapeInformation info1 = RoomEscapeInformation.builder()
                 .date(date)
                 .time(time1)
                 .theme(theme1)
+                .build();
+
+        RoomEscapeInformation info2 = RoomEscapeInformation.builder()
+                .date(date)
+                .time(time2)
+                .theme(theme2)
+                .build();
+
+        tm.persistAndFlush(info1);
+        tm.persistAndFlush(info2);
+
+        Reservation reservation1 = Reservation.builder()
+                .roomEscapeInformation(info1)
                 .member(member1)
                 .build();
 
         Reservation reservation2 = Reservation.builder()
-                .date(date)
-                .time(time2)
-                .theme(theme2)
+                .roomEscapeInformation(info2)
                 .member(member2)
                 .build();
+
         tm.persistAndFlush(reservation1);
         tm.persistAndFlush(reservation2);
 
@@ -108,9 +119,31 @@ class JdbcReservationRepositoryTest {
         LocalDate date2 = LocalDate.of(2999, 7, 2);
         LocalDate date3 = LocalDate.of(2999, 7, 3);
 
-        tm.persistAndFlush(Reservation.builder().date(date1).time(time1).theme(theme1).member(member1).build());
-        tm.persistAndFlush(Reservation.builder().date(date2).time(time1).theme(theme1).member(member1).build());
-        tm.persistAndFlush(Reservation.builder().date(date3).time(time1).theme(theme1).member(member1).build());
+        RoomEscapeInformation info1 = RoomEscapeInformation.builder()
+                .date(date1)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        RoomEscapeInformation info2 = RoomEscapeInformation.builder()
+                .date(date2)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        RoomEscapeInformation info3 = RoomEscapeInformation.builder()
+                .date(date3)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        tm.persistAndFlush(info1);
+        tm.persistAndFlush(info2);
+        tm.persistAndFlush(info3);
+
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info1).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info2).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info3).member(member1).build());
 
         tm.clear();
 
@@ -120,8 +153,8 @@ class JdbcReservationRepositoryTest {
         // then
         SoftAssertions.assertSoftly(soft -> {
             assertThat(reservations).hasSize(2);
-            assertThat(reservations.get(0).getDate()).isEqualTo(date2);
-            assertThat(reservations.get(1).getDate()).isEqualTo(date3);
+            assertThat(reservations.get(0).getRoomEscapeInformation().getDate()).isEqualTo(date2);
+            assertThat(reservations.get(1).getRoomEscapeInformation().getDate()).isEqualTo(date3);
         });
     }
 
@@ -135,17 +168,51 @@ class JdbcReservationRepositoryTest {
         LocalDate date5 = LocalDate.of(2999, 7, 5);
 
         tm.persistAndFlush(time1);
-
-        tm.persistAndFlush(time1);
         tm.persistAndFlush(theme1);
         tm.persistAndFlush(member1);
         tm.persistAndFlush(member2);
 
-        tm.persistAndFlush(Reservation.builder().date(date5).time(time1).theme(theme1).member(member1).build());
-        tm.persistAndFlush(Reservation.builder().date(date4).time(time1).theme(theme1).member(member1).build());
-        tm.persistAndFlush(Reservation.builder().date(date3).time(time1).theme(theme1).member(member1).build());
-        tm.persistAndFlush(Reservation.builder().date(date2).time(time1).theme(theme1).member(member2).build());
-        tm.persistAndFlush(Reservation.builder().date(date1).time(time1).theme(theme1).member(member2).build());
+        RoomEscapeInformation info1 = RoomEscapeInformation.builder()
+                .date(date1)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        RoomEscapeInformation info2 = RoomEscapeInformation.builder()
+                .date(date2)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        RoomEscapeInformation info3 = RoomEscapeInformation.builder()
+                .date(date3)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        RoomEscapeInformation info4 = RoomEscapeInformation.builder()
+                .date(date4)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        RoomEscapeInformation info5 = RoomEscapeInformation.builder()
+                .date(date5)
+                .time(time1)
+                .theme(theme1)
+                .build();
+
+        tm.persistAndFlush(info1);
+        tm.persistAndFlush(info2);
+        tm.persistAndFlush(info3);
+        tm.persistAndFlush(info4);
+        tm.persistAndFlush(info5);
+
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info5).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info4).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info3).member(member1).build());
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info2).member(member2).build());
+        tm.persistAndFlush(Reservation.builder().roomEscapeInformation(info1).member(member2).build());
 
         tm.clear();
 
@@ -172,11 +239,18 @@ class JdbcReservationRepositoryTest {
         tm.persistAndFlush(theme1);
         tm.persistAndFlush(member1);
         tm.persistAndFlush(futureTime);
-        final Reservation booked = Reservation.builder()
+
+        RoomEscapeInformation info = RoomEscapeInformation.builder()
                 .date(today)
-                .theme(theme1)
-                .member(member1)
                 .time(futureTime)
+                .theme(theme1)
+                .build();
+
+        tm.persistAndFlush(info);
+
+        final Reservation booked = Reservation.builder()
+                .roomEscapeInformation(info)
+                .member(member1)
                 .build();
 
         tm.clear();
@@ -184,32 +258,5 @@ class JdbcReservationRepositoryTest {
         // when
         // then
         assertThatCode(() -> repository.save(booked)).doesNotThrowAnyException();
-    }
-
-    @Test
-    void 예약_시간이_현재_이전이면_ReservationException이_발생한다() {
-        // given
-        Theme defaultTheme = Theme.of("테마", "설명", "썸네일");
-        Member defaultMember = Member.builder()
-                .name("김철수")
-                .email("member@naver.com")
-                .password(Password.createForMember("1234"))
-                .role(MemberRole.MEMBER)
-                .build();
-        LocalDate today = LocalDate.now();
-        LocalTime oneMinuteBefore = LocalTime.now().minusMinutes(1);
-        ReservationTime pastTime = ReservationTime.from(oneMinuteBefore);
-        final Reservation booked = Reservation.builder()
-                .date(today)
-                .time(pastTime)
-                .theme(defaultTheme)
-                .member(defaultMember)
-                .build();
-        // when
-
-        // then
-        assertThatThrownBy(() -> repository.save(booked))
-                .isInstanceOf(ReservationException.class)
-                .hasMessage("예약은 현재 시간 이후로 가능합니다.");
     }
 }

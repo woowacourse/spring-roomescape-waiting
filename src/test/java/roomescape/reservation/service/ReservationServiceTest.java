@@ -21,6 +21,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.domain.Password;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.RoomEscapeInformation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -43,19 +44,15 @@ class ReservationServiceTest {
     private ReservationService service;
 
     private ReservationTime time;
-
     private Theme theme;
-
     private Member member;
-
+    private RoomEscapeInformation roomEscapeInformation;
     private Reservation reservation;
 
     @BeforeEach
     void setUp() {
         time = ReservationTime.from(LocalTime.of(14, 0));
-
         theme = Theme.of("테마1", "설명1", "썸네일1");
-
         member = Member.builder()
                 .name("김철수")
                 .email("member@example.com")
@@ -63,10 +60,14 @@ class ReservationServiceTest {
                 .role(MemberRole.MEMBER)
                 .build();
 
-        reservation = Reservation.builder()
+        roomEscapeInformation = RoomEscapeInformation.builder()
                 .date(LocalDate.of(2999, 5, 11))
                 .time(time)
                 .theme(theme)
+                .build();
+
+        reservation = Reservation.builder()
+                .roomEscapeInformation(roomEscapeInformation)
                 .member(member)
                 .build();
     }
@@ -78,7 +79,9 @@ class ReservationServiceTest {
                 new ReservationSearchRequest(null, null, null, null));
 
         // then
-        assertThat(responses).hasSize(RESERVATION_COUNT);
+        assertThat(responses).hasSize(RESERVATION_COUNT)
+                .extracting(ReservationResponse::id)
+                .doesNotContain(0L);
     }
 
     @Test
@@ -131,6 +134,7 @@ class ReservationServiceTest {
         tm.persistAndFlush(member);
         tm.persistAndFlush(time);
         tm.persistAndFlush(theme);
+        tm.persistAndFlush(roomEscapeInformation);
         tm.persistAndFlush(reservation);
 
         // when
