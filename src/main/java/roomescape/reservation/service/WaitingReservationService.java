@@ -13,10 +13,6 @@ import roomescape.reservation.dto.WaitingReservationRequest;
 import roomescape.reservation.dto.WaitingReservationResponse;
 import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.reservation.repository.WaitingReservationRepository;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -24,25 +20,15 @@ public class WaitingReservationService {
 
     private final WaitingReservationRepository waitingReservationRepository;
     private final MemberRepository memberRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
     private final RoomEscapeInformationRepository roomEscapeInformationRepository;
-
-
+    
     @Transactional
     public WaitingReservationResponse save(final WaitingReservationRequest request, final LoginMember loginMember) {
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
         final Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
-        final RoomEscapeInformation roomEscapeInformation = RoomEscapeInformation.builder()
-                .date(request.date())
-                .theme(theme)
-                .time(reservationTime)
-                .build();
-        roomEscapeInformationRepository.save(roomEscapeInformation);
+        final RoomEscapeInformation roomEscapeInformation = roomEscapeInformationRepository.findByDateAndTimeIdAndThemeId(
+                        request.date(), request.timeId(), request.themeId())
+                .orElseThrow(() -> new NotFoundException("방탈출 정보가 존재하지 않습니다."));
 
         final WaitingReservation waitingReservation = WaitingReservation.builder()
                 .roomEscapeInformation(roomEscapeInformation)
