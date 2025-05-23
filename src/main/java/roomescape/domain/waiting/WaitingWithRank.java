@@ -2,6 +2,7 @@ package roomescape.domain.waiting;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 
 public class WaitingWithRank {
 
@@ -39,5 +40,18 @@ public class WaitingWithRank {
 
     public LocalTime getStartAt() {
         return waiting.getStartAt();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WaitingWithRank that = (WaitingWithRank) o;
+        return Objects.equals(waiting, that.waiting) && Objects.equals(rank, that.rank);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(waiting, rank);
     }
 }
