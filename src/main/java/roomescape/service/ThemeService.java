@@ -8,9 +8,11 @@ import roomescape.domain.Theme;
 import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.local.AlreadyReservedThemeException;
+import roomescape.exception.local.AlreadyWaitingThemeException;
 import roomescape.exception.local.NotFoundThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 @Transactional
@@ -18,10 +20,16 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(
+            ThemeRepository themeRepository,
+            ReservationRepository reservationRepository,
+            WaitingRepository waitingRepository
+    ) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ThemeResponse> findAllThemes() {
@@ -45,7 +53,8 @@ public class ThemeService {
 
     public void deleteThemeById(Long id) {
         Theme theme = getThemeById(id);
-        validateReservationInTime(theme);
+        validateReservationInTheme(theme);
+        validateMemberInTime(theme);
         themeRepository.deleteById(id);
     }
 
@@ -54,10 +63,17 @@ public class ThemeService {
                 .orElseThrow(NotFoundThemeException::new);
     }
 
-    private void validateReservationInTime(Theme theme) {
+    private void validateReservationInTheme(Theme theme) {
         boolean isExistReservation = reservationRepository.existsByTheme(theme);
         if (isExistReservation) {
             throw new AlreadyReservedThemeException();
+        }
+    }
+
+    private void validateMemberInTime(Theme theme) {
+        boolean isExistWaiting = waitingRepository.existsByTheme(theme);
+        if (isExistWaiting) {
+            throw new AlreadyWaitingThemeException();
         }
     }
 }

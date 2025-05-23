@@ -21,12 +21,15 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.local.AlreadyReservedThemeException;
+import roomescape.exception.local.AlreadyWaitingThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @DataJpaTest
 class ThemeServiceTest {
@@ -39,12 +42,14 @@ class ThemeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private ThemeRepository themeRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     private ThemeService themeService;
 
     @BeforeEach
     void setup() {
-        themeService = new ThemeService(themeRepository, reservationRepository);
+        themeService = new ThemeService(themeRepository, reservationRepository, waitingRepository);
     }
 
     @DisplayName("모든 테마를 조회할 수 있다.")
@@ -223,6 +228,30 @@ class ThemeServiceTest {
             assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
                     .isInstanceOf(AlreadyReservedThemeException.class)
                     .hasMessage("예약에서 사용 중인 테마입니다.");
+        }
+
+        @DisplayName("이미 예약 대기가 존재하는 경우 테마를 삭제할 수 없다.")
+        @Test
+        void cannotDeleteThemeByWaiting() {
+            // given
+            ReservationTime time = entityManager.persist(
+                    ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
+
+            Theme theme = entityManager.persist(
+                    Theme.createWithoutId("테마1", "테마 설명", "thumbnail.jpg"));
+
+            Waiting waiting = entityManager.persist(Waiting.createWithoutId(
+                    TODAY, theme, time, member));
+
+            entityManager.flush();
+
+            // when & then
+            assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
+                    .isInstanceOf(AlreadyWaitingThemeException.class)
+                    .hasMessage("이미 예약대기 중인 테마입니다.");
         }
     }
 }
