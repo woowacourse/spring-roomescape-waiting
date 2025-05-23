@@ -74,7 +74,7 @@ public class ReservationService {
             final LocalDate date,
             final ReservationTime reservationTime,
             final Theme theme,
-            Member member
+            final Member member
     ) {
         if (hasReservation(date, reservationTime, theme)) {
             throw new ReservationException("이미 해당 날짜에 예약이 존재합니다.");
