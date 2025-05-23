@@ -52,4 +52,13 @@ public class JpaReservationRepository implements ReservationRepositoryInterface 
     public void deleteById(Long id) {
         reservationRepository.deleteById(id);
     }
+
+    @Override
+    public List<Reservation> findByThemeAndMemberAndDateBetween(
+            final Theme theme,
+            final Member member,
+            final LocalDate dateFrom,
+            final LocalDate dateTo) {
+        return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
+    }
 }

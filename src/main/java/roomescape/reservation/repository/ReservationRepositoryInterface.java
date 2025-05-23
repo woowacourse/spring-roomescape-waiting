@@ -29,5 +29,8 @@ public interface ReservationRepositoryInterface {
     Reservation save(final Reservation reservation);
 
     void deleteById(final Long id);
+
+    List<Reservation> findByThemeAndMemberAndDateBetween(final Theme theme, final Member member,
+                                                         final LocalDate dateFrom, final LocalDate dateTo);
 }
 
