@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-public record CreateReservationAdminRequest(
+public record CreateWaitingRequest(
         @JsonFormat(pattern = "yyyy-MM-dd")
         @NotNull
         LocalDate date,
@@ -13,9 +13,6 @@ public record CreateReservationAdminRequest(
         Long timeId,
 
         @NotNull
-        Long themeId,
-
-        @NotNull
-        Long userId
+        Long themeId
 ) {
 }

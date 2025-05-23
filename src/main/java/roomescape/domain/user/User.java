@@ -22,6 +22,7 @@ public class User {
 
     private static final int NAME_MAX_LENGTH = 5;
     private static final int PASSWORD_MAX_LENGTH = 30;
+
     private static final String VALID_EMAIL_FORMAT = "\\w+@\\w+\\.\\w+";
 
     @Id
@@ -34,7 +35,11 @@ public class User {
     private String password;
 
 
-    public User(final Long id, final String name, final UserRole role, final String email, final String password) {
+    private User(final Long id,
+                 final String name,
+                 final UserRole role,
+                 final String email,
+                 final String password) {
         validateNameLength(name);
         validateEmailFormat(email);
         validatePasswordLength(password);
@@ -48,16 +53,20 @@ public class User {
     protected User() {
     }
 
-    public static User createUser(final String name, final String email, final String password) {
+    public static User ofExisting(final long id,
+                                  final String name,
+                                  final UserRole role,
+                                  final String email,
+                                  final String password) {
+        return new User(id, name, role, email, password);
+    }
+
+    public static User register(final String name, final String email, final String password) {
         return new User(null, name, UserRole.USER, email, password);
     }
 
     public boolean matchesPassword(final String passwordToCompare) {
         return password.equals(passwordToCompare);
-    }
-
-    public boolean isAdmin() {
-        return role == UserRole.ADMIN;
     }
 
     private void validateNameLength(final String name) {

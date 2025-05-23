@@ -4,15 +4,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
 public record SignupRequest(
-    @NotEmpty
-    @Email
-    String email,
+        @NotEmpty
+        @Email
+        String email,
 
-    @NotEmpty
-    String password,
+        @NotEmpty
+        String password,
 
-    @NotEmpty
-    String name
+        @NotEmpty
+        String name
 ) {
-
 }

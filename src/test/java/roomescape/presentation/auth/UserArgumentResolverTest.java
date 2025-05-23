@@ -41,7 +41,7 @@ class UserArgumentResolverTest {
     @DisplayName("@Authenticated 유저를 바인딩할 때 쿠키에 유효한 토큰이 있으면 바인딩된다.")
     void bindUserWhenRequestWithValidToken() throws Exception {
         var cookie = AuthenticationTokenCookie.forResponse("validToken");
-        var user = new User(1L, "유저1", UserRole.USER, "email@email.com", "password");
+        var user = User.ofExisting(1L, "유저1", UserRole.USER, "email@email.com", "password");
         Mockito.when(authenticationService.getUserByToken("validToken")).thenReturn(user);
 
         mockMvc.perform(get("/authenticatedUser").cookie(cookie))

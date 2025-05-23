@@ -1,7 +1,6 @@
 package roomescape.presentation.response;
 
 import java.time.LocalDate;
-import java.util.List;
 import roomescape.domain.reservation.Reservation;
 
 public record ReservationResponse(
@@ -20,11 +19,5 @@ public record ReservationResponse(
                 TimeSlotResponse.from(reservation.timeSlot()),
                 ThemeResponse.from(reservation.theme())
         );
-    }
-
-    public static List<ReservationResponse> from(final List<Reservation> reservations) {
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.user.User;
 import roomescape.presentation.auth.Authenticated;
@@ -34,29 +35,32 @@ public class ReservationController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ReservationResponse reserve(
-            @Authenticated final User user,
-            @RequestBody @Valid final CreateReservationRequest request
+    public ReservationResponse createReservation(
+            @Authenticated final User user, @RequestBody @Valid final CreateReservationRequest request
     ) {
-        var reservation = service.reserve(user, request.date(), request.timeId(), request.themeId());
+        Reservation reservation = service.saveReservation(user.id(), request.date(), request.timeId(),
+                request.themeId());
         return ReservationResponse.from(reservation);
     }
 
     @GetMapping
-    public List<ReservationResponse> getAllReservations(
+    public List<ReservationResponse> readAllReservations(
             @RequestParam(name = "themeId", required = false) final Long themeId,
             @RequestParam(name = "userId", required = false) final Long userId,
             @RequestParam(name = "dateFrom", required = false) final LocalDate dateFrom,
             @RequestParam(name = "dateTo", required = false) final LocalDate dateTo
     ) {
-        var searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
-        var reservations = service.findAllReservations(searchFilter);
-        return ReservationResponse.from(reservations);
+        ReservationSearchFilter searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
+        List<Reservation> reservations = service.findReservationsByFilter(searchFilter);
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable("id") final long id) {
+    public void deleteReservationById(@PathVariable("id") final long id) {
         service.removeById(id);
     }
 }

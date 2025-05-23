@@ -39,12 +39,12 @@ class TimeSlotServiceTest {
 
     @Test
     @DisplayName("예약 시간을 추가할 수 있다.")
-    void registerTimeSlot() {
+    void saveTimeSlotTimeSlot() {
         // given
         var startAt = LocalTime.of(11, 0);
 
         // when
-        var created = service.register(startAt);
+        var created = service.saveTimeSlot(startAt);
 
         // then
         var timeSlots = service.findAllTimeSlots();
@@ -56,7 +56,7 @@ class TimeSlotServiceTest {
     void deleteTimeSlot() {
         // given
         var startAt = LocalTime.of(11, 0);
-        var target = service.register(startAt);
+        var target = service.saveTimeSlot(startAt);
 
         // when
         service.removeById(target.id());
@@ -70,7 +70,7 @@ class TimeSlotServiceTest {
     @DisplayName("예약 시간을 삭제할 때 해당 시간에 대한 예약이 존재하면 예외 발생")
     void deleteTimeSlotWithReservation() {
         // given
-        var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
+        var timeSlotToBeRemoved = service.saveTimeSlot(LocalTime.of(10, 0));
         var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, DateUtils.tomorrow(),
                 timeSlotToBeRemoved, JUNK_THEME);
         reservationRepository.save(reservationWithTheTimeSlot);

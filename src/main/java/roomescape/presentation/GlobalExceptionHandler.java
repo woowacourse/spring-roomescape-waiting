@@ -12,6 +12,7 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import com.fasterxml.jackson.databind.JsonMappingException.Reference;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import java.util.Map;
+import lombok.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -37,20 +38,27 @@ import roomescape.exception.NotFoundException;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex, final HttpHeaders headers, final HttpStatusCode status, final WebRequest request) {
-        var problemDetail = ProblemDetail.forStatusAndDetail(ex.getStatusCode(), "유효성 검증에 실패했습니다.");
-        var fieldErrors = ex.getFieldErrors()
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex,
+                                                                  @NonNull final HttpHeaders headers,
+                                                                  @NonNull final HttpStatusCode status,
+                                                                  @NonNull final WebRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(ex.getStatusCode(), "유효성 검증에 실패했습니다.");
+        Map<String, Object> fieldErrors = ex.getFieldErrors()
                 .stream()
-                .collect(toMap(FieldError::getField, err -> (Object) err.getDefaultMessage()));
+                .collect(toMap(FieldError::getField, err -> err.getDefaultMessage()));
         problemDetail.setProperties(Map.of("message", fieldErrors));
         return ResponseEntity.badRequest().body(problemDetail);
     }
 
     @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex, final HttpHeaders headers, final HttpStatusCode status, final WebRequest request) {
-        var problemDetail = ProblemDetail.forStatusAndDetail(BAD_REQUEST, "해석할 수 없는 요청입니다.");
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(final HttpMessageNotReadableException ex,
+                                                                  @NonNull final HttpHeaders headers,
+                                                                  @NonNull final HttpStatusCode status,
+                                                                  @NonNull final WebRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(BAD_REQUEST, "해석할 수 없는 요청입니다.");
         if (ex.getCause() instanceof InvalidFormatException ife) {
-            var invalidFields = ife.getPath().stream().collect(toMap(Reference::getFieldName, r -> ife.getValue()));
+            Map<String, Object> invalidFields = ife.getPath().stream()
+                    .collect(toMap(Reference::getFieldName, r -> ife.getValue()));
             problemDetail.setProperties(Map.of("message", invalidFields));
         }
         return ResponseEntity.badRequest().body(problemDetail);
@@ -104,8 +112,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(INTERNAL_SERVER_ERROR, "예기치 못한 오류가 발생했습니다.");
     }
 
-    private ProblemDetail createProblemDetail(final HttpStatus status, final String detail, final String exceptionMessage) {
-        var problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
+    private ProblemDetail createProblemDetail(final HttpStatus status, final String detail,
+                                              final String exceptionMessage) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, detail);
         problemDetail.setProperties(Map.of("message", exceptionMessage));
         return problemDetail;
     }

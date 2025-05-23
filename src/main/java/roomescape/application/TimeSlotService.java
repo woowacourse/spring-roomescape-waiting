@@ -26,8 +26,9 @@ public class TimeSlotService {
         this.timeSlotRepository = timeSlotRepository;
     }
 
-    public TimeSlot register(final LocalTime startAt) {
-        var timeSlot = new TimeSlot(startAt);
+    public TimeSlot saveTimeSlot(final LocalTime startAt) {
+        TimeSlot timeSlot = TimeSlot.register(startAt);
+
         return timeSlotRepository.save(timeSlot);
     }
 
@@ -35,26 +36,43 @@ public class TimeSlotService {
         return timeSlotRepository.findAll();
     }
 
+    public List<AvailableTimeSlot> findAvailableTimeSlots(final LocalDate date, final long themeId) {
+        List<TimeSlot> reservedTimeSlots = findReservedTimeSlots(date, themeId);
+        List<TimeSlot> allTimeSlots = timeSlotRepository.findAll();
+
+        return allTimeSlots.stream()
+                .map(ts -> new AvailableTimeSlot(ts, reservedTimeSlots.contains(ts)))
+                .toList();
+    }
+
+    private List<TimeSlot> findReservedTimeSlots(LocalDate date, long themeId) {
+        List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
+
+        return reservations.stream()
+                .map(Reservation::timeSlot)
+                .toList();
+    }
+
     public void removeById(final long id) {
-        var reservations = reservationRepository.findByTimeSlotId(id);
-        if (!reservations.isEmpty()) {
-            throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
-        }
-        timeSlotRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 타임슬롯입니다."));
+        validateTimSlotNotInUse(id);
+        validateTimeSlotExists(id);
+
         timeSlotRepository.deleteById(id);
     }
 
-    public List<AvailableTimeSlot> findAvailableTimeSlots(final LocalDate date, final long themeId) {
-        var filteredReservations = reservationRepository.findByDateAndThemeId(date, themeId);
-        var filteredTimeSlots = filteredReservations.stream()
-                .map(Reservation::timeSlot)
-                .toList();
+    private void validateTimSlotNotInUse(long id) {
+        boolean isTimeSlotInUse = reservationRepository.existsByTimeSlotId(id);
 
-        var allTimeSlots = timeSlotRepository.findAll();
+        if (isTimeSlotInUse) {
+            throw new InUseException("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
+        }
+    }
 
-        return allTimeSlots.stream()
-                .map(ts -> new AvailableTimeSlot(ts, filteredTimeSlots.contains(ts)))
-                .toList();
+    private void validateTimeSlotExists(long id) {
+        boolean isTimeSlotExists = timeSlotRepository.existsById(id);
+
+        if (!isTimeSlotExists) {
+            throw new NotFoundException("존재하지 않는 타임슬롯입니다.");
+        }
     }
 }

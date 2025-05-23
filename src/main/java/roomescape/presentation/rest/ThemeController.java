@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ThemeService;
+import roomescape.domain.theme.Theme;
 import roomescape.presentation.request.CreateThemeRequest;
 import roomescape.presentation.response.ThemeResponse;
 
@@ -31,30 +32,37 @@ public class ThemeController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ThemeResponse register(@RequestBody @Valid final CreateThemeRequest request) {
-        var theme = service.register(request.name(), request.description(), request.thumbnail());
+    public ThemeResponse createTheme(@RequestBody @Valid final CreateThemeRequest request) {
+        Theme theme = service.saveTheme(request.name(), request.description(), request.thumbnail());
+
         return ThemeResponse.from(theme);
     }
 
     @GetMapping
-    public List<ThemeResponse> getAllThemes() {
-        var themes = service.findAllThemes();
-        return ThemeResponse.from(themes);
+    public List<ThemeResponse> readAllThemes() {
+        List<Theme> themes = service.findAllThemes();
+
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     @GetMapping(value = "/popular", params = {"startDate", "endDate", "count"})
-    public List<ThemeResponse> getAvailableTimes(
+    public List<ThemeResponse> readPopularThemes(
             @RequestParam("startDate") final LocalDate startDate,
             @RequestParam("endDate") final LocalDate endDate,
             @RequestParam("count") final Integer count
     ) {
-        var themes = service.findPopularThemes(startDate, endDate, count);
-        return ThemeResponse.from(themes);
+        List<Theme> themes = service.findPopularThemes(startDate, endDate, count);
+
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable("id") final long id) {
+    public void deleteThemeById(@PathVariable("id") final long id) {
         service.removeById(id);
     }
 }

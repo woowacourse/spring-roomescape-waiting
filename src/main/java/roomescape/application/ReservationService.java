@@ -2,6 +2,7 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
@@ -12,6 +13,8 @@ import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.ReservationSpecifications;
@@ -20,39 +23,43 @@ import roomescape.infrastructure.ReservationSpecifications;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final UserRepository userRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
+            final WaitingRepository waitingRepository,
             final TimeSlotRepository timeSlotRepository,
             final ThemeRepository themeRepository,
             final UserRepository userRepository
     ) {
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.userRepository = userRepository;
     }
 
-    public Reservation reserve(final User user, final LocalDate date, final long timeId, final long themeId) {
-        var timeSlot = getTimeSlotById(timeId);
-        var theme = getThemeById(themeId);
+    public Reservation saveReservation(final long userId,
+                                       final LocalDate date,
+                                       final long timeId,
+                                       final long themeId) {
+
+        User user = getUserById(userId);
+        TimeSlot timeSlot = getTimeSlotById(timeId);
+        Theme theme = getThemeById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
 
-        var reservation = Reservation.reserveNewly(user, date, timeSlot, theme);
+        Reservation reservation = Reservation.register(user, date, timeSlot, theme);
+
         return reservationRepository.save(reservation);
     }
 
-    public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
-        return reservationRepository.findAll(ReservationSpecifications.byFilter(filter));
-    }
-
-    public void removeById(final long id) {
-        reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
-        reservationRepository.deleteById(id);
+    private User getUserById(final long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
     }
 
     private TimeSlot getTimeSlotById(final long timeId) {
@@ -66,16 +73,52 @@ public class ReservationService {
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        var reservation = reservationRepository.findByDateAndTimeSlotIdAndThemeId(date, timeSlot.id(), theme.id());
+        Optional<Reservation> reservation =
+                reservationRepository.findByDateAndTimeSlotIdAndThemeId(date, timeSlot.id(), theme.id());
+
         if (reservation.isPresent()) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
     }
 
-    public List<Reservation> getReservations(final long userId) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + userId));
+    public List<Reservation> findReservationsByFilter(ReservationSearchFilter filter) {
+        return reservationRepository.findAll(ReservationSpecifications.byFilter(filter));
+    }
 
-        return reservationRepository.findByUserId(user.id());
+    public List<Reservation> findReservationsByUserId(final long userId) {
+        validateUserExists(userId);
+
+        return reservationRepository.findByUserId(userId);
+    }
+
+    private void validateUserExists(long userId) {
+        boolean isUserExists = userRepository.existsById(userId);
+
+        if (!isUserExists) {
+            throw new NotFoundException("존재하지 않는 사용자입니다.");
+        }
+    }
+
+    public void removeById(final long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+
+        approveNextWaitingIfExists(reservation);
+
+        reservationRepository.deleteById(id);
+    }
+
+    private void approveNextWaitingIfExists(Reservation reservation) {
+        Optional<Waiting> nextWaitingOpt =
+                waitingRepository.findFirstByDateAndTimeSlotIdAndThemeIdOrderByIdAsc(
+                        reservation.date(),
+                        reservation.timeSlot().id(),
+                        reservation.theme().id());
+
+        nextWaitingOpt.ifPresent(nextWaiting -> {
+            Reservation approvedReservation = Reservation.fromWaiting(nextWaiting);
+            reservationRepository.save(approvedReservation);
+            waitingRepository.deleteById(nextWaiting.id());
+        });
     }
 }

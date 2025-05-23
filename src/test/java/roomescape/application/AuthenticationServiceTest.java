@@ -28,7 +28,7 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
-        var user = User.createUser("라젤", "razel@email.com", "password");
+        var user = User.register("라젤", "razel@email.com", "password");
         userRepository.save(user);
     }
 

@@ -11,7 +11,7 @@ class ThemeTest {
     @Test
     @DisplayName("이름이 10자 초과이면 예외가 발생한다")
     void nameLengthException() {
-        assertThatThrownBy(() -> new Theme(
+        assertThatThrownBy(() -> Theme.ofExisting(
                 1L,
                 "가".repeat(11),
                 "우테코 레벨2를 탈출하는 내용입니다.",
@@ -22,7 +22,7 @@ class ThemeTest {
     @Test
     @DisplayName("설명이 50자 초과이면 예외가 발생한다")
     void descriptionLengthException() {
-        assertThatThrownBy(() -> new Theme(
+        assertThatThrownBy(() -> Theme.ofExisting(
                 1L,
                 "레벨2 탈출",
                 "가".repeat(51),

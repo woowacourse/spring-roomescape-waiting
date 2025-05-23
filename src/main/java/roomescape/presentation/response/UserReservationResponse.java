@@ -1,32 +1,35 @@
 package roomescape.presentation.response;
 
 import java.time.LocalDate;
-import java.util.List;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.waiting.WaitingWithRank;
 
 public record UserReservationResponse(
-        long reservationId,
+        long id,
         ThemeResponse theme,
         LocalDate date,
         TimeSlotResponse time,
-        ReservationStatus status
+        String status
 
 ) {
 
-    public static UserReservationResponse from(final Reservation reservation) {
+    public static UserReservationResponse fromReservation(final Reservation reservation) {
         return new UserReservationResponse(
                 reservation.id(),
                 ThemeResponse.from(reservation.theme()),
                 reservation.date(),
                 TimeSlotResponse.from(reservation.timeSlot()),
-                reservation.status()
+                "예약"
         );
     }
 
-    public static List<UserReservationResponse> from(final List<Reservation> reservations) {
-        return reservations.stream()
-                .map(UserReservationResponse::from)
-                .toList();
+    public static UserReservationResponse fromWaitingWithRank(final WaitingWithRank waitingWithRank) {
+        return new UserReservationResponse(
+                waitingWithRank.waiting().id(),
+                ThemeResponse.from(waitingWithRank.waiting().theme()),
+                waitingWithRank.waiting().date(),
+                TimeSlotResponse.from(waitingWithRank.waiting().timeSlot()),
+                waitingWithRank.rank() + "번째 예약대기"
+        );
     }
 }

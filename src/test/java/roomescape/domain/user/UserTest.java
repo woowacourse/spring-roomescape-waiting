@@ -16,7 +16,7 @@ class UserTest {
     @Test
     @DisplayName("이름이 6글자 이상이면 예외가 발생한다")
     void nameLengthException() {
-        assertThatThrownBy(() -> new User(
+        assertThatThrownBy(() -> User.ofExisting(
                 1L,
                 "여섯글자이름",
                 UserRole.USER,
@@ -29,7 +29,7 @@ class UserTest {
     @DisplayName("이메일 형식이 맞지 않으면 예외가 발생한다")
     @CsvSource({"abc@email", "abc@email.", "abc@.com", "abc@.", "@email.com", "@email"})
     void emailFormatException(final String invalidEmail) {
-        assertThatThrownBy(() -> new User(
+        assertThatThrownBy(() -> User.ofExisting(
                 1L,
                 "이름",
                 UserRole.USER,
@@ -41,7 +41,7 @@ class UserTest {
     @Test
     @DisplayName("비밀번호가 30글자 이상이면 예외가 발생한다")
     void passwordLengthException() {
-        assertThatThrownBy(() -> new User(
+        assertThatThrownBy(() -> User.ofExisting(
                 1L,
                 "이름",
                 UserRole.USER,
@@ -53,7 +53,7 @@ class UserTest {
     @Test
     @DisplayName("비밀번호 일치 여부를 알 수 있다.")
     void matchesPassword() {
-        var user = new User(1L, "포포", UserRole.USER, "popo@email.com", "password");
+        var user = User.ofExisting(1L, "포포", UserRole.USER, "popo@email.com", "password");
         assertAll(
                 () -> assertThat(user.matchesPassword("password")).isTrue(),
                 () -> assertThat(user.matchesPassword("PASSWORD")).isFalse()

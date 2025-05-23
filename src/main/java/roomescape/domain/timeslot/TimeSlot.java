@@ -22,11 +22,7 @@ public class TimeSlot {
     private Long id;
     private LocalTime startAt;
 
-    public TimeSlot(final LocalTime startAt) {
-        this(null, startAt);
-    }
-
-    public TimeSlot(final Long id, final LocalTime startAt) {
+    private TimeSlot(final Long id, final LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
     }
@@ -34,11 +30,15 @@ public class TimeSlot {
     protected TimeSlot() {
     }
 
-    public boolean isTimeBefore(final LocalTime time) {
-        return this.startAt.isBefore(time);
+    public static TimeSlot ofExisting(final long id, final LocalTime startAt) {
+        return new TimeSlot(id, startAt);
     }
 
-    public boolean isSameAs(final TimeSlot timeSlot) {
-        return this.id.equals(timeSlot.id());
+    public static TimeSlot register(final LocalTime startAt) {
+        return new TimeSlot(null, startAt);
+    }
+
+    public boolean isTimeBefore(final LocalTime time) {
+        return this.startAt.isBefore(time);
     }
 }

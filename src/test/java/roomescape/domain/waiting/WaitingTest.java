@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.waiting;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static roomescape.DomainFixtures.JUNK_THEME;
@@ -10,17 +10,17 @@ import org.junit.jupiter.api.Test;
 import roomescape.DateUtils;
 import roomescape.exception.BusinessRuleViolationException;
 
-class ReservationTest {
+class WaitingTest {
 
     @Test
-    @DisplayName("예약 일시가 현재 일시보다 이전이면 예외가 발생한다.")
+    @DisplayName("예약 대기 생성 일시가 현재 일시보다 이전이면 예외가 발생한다.")
     void isBefore() {
         // given
         var yesterday = DateUtils.yesterday();
 
         // when & then
         assertThatThrownBy(
-                () -> Reservation.register(JUNK_USER, yesterday, JUNK_TIME_SLOT, JUNK_THEME))
+                () -> Waiting.register(JUNK_USER, yesterday, JUNK_TIME_SLOT, JUNK_THEME))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 }

@@ -31,14 +31,14 @@ class ThemeServiceTest {
 
     @Test
     @DisplayName("테마를 추가할 수 있다.")
-    void register() {
+    void saveTheme() {
         // given
         var name = "포포는 힘들다";
         var description = "우테코 레벨2를 탈출하는 내용입니다.";
         var thumbnail = "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg";
 
         // when
-        var created = service.register(name, description, thumbnail);
+        var created = service.saveTheme(name, description, thumbnail);
 
         // then
         var themes = service.findAllThemes();
@@ -52,7 +52,7 @@ class ThemeServiceTest {
         var name = "포포는 힘들다";
         var description = "우테코 레벨2를 탈출하는 내용입니다.";
         var thumbnail = "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg";
-        var created = service.register(name, description, thumbnail);
+        var created = service.saveTheme(name, description, thumbnail);
 
         // when
         service.removeById(created.id());
