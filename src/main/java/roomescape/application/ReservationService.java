@@ -6,11 +6,14 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationDateTime;
+import roomescape.domain.ReservationInfo;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.infrastructure.repository.ReservationRepository;
-import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
+import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
@@ -28,78 +31,84 @@ public class ReservationService {
     private final ThemeService themeService;
     private final MemberService memberService;
     private final CurrentTimeService currentTimeService;
+    private final WaitingService waitingService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeService reservationTimeService,
                               ThemeService themeService,
                               MemberService memberService,
-                              CurrentTimeService currentTimeService) {
+                              CurrentTimeService currentTimeService,
+                              WaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
         this.currentTimeService = currentTimeService;
+        this.waitingService = waitingService;
     }
 
     public List<ReservationResponse> getReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
+        List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.RESERVED);
 
         return ReservationResponse.from(reservations);
     }
 
     @Transactional
-    public ReservationResponse createReservation(ReservationCreateRequest request, LoginMember loginMember) {
-        ReservationDate reservationDate = new ReservationDate(request.date());
-        Long timeId = request.timeId();
-        Long themeId = request.themeId();
-        ReservationTime time = reservationTimeService.findReservationTimeById(timeId);
-        Theme theme = themeService.findThemeById(themeId);
-
-        validateExistsReservation(reservationDate, time, theme);
-
+    public ReservationResponse createMemberReservation(ReservationCreateRequest request, LoginMember loginMember) {
         Member member = memberService.findMemberByEmail(loginMember.email());
-        ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
-        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
-        reservation.reserve();
-        Reservation created = reservationRepository.save(reservation);
+        Reservation created = createReservation(request.date(), request.timeId(), request.themeId(), member);
 
         return ReservationResponse.from(created);
     }
 
     @Transactional
     public ReservationResponse createAdminReservation(AdminReservationCreateRequest request) {
-        ReservationDate reservationDate = new ReservationDate(request.date());
-        Long timeId = request.timeId();
-        Long themeId = request.themeId();
-        ReservationTime time = reservationTimeService.findReservationTimeById(timeId);
-        Theme theme = themeService.findThemeById(themeId);
-
-        validateExistsReservation(reservationDate, time, theme);
-
         Member member = memberService.findMemberById(request.memberId());
-        ReservationDateTime reservationDateTime = getReservationDateTime(timeId, reservationDate);
-        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
-        reservation.reserve();
-        Reservation created = reservationRepository.save(reservation);
+        Reservation created = createReservation(request.date(), request.timeId(), request.themeId(), member);
 
         return ReservationResponse.from(created);
     }
 
-    private ReservationDateTime getReservationDateTime(Long timeId, ReservationDate reservationDate) {
+    private Reservation createReservation(LocalDate date, Long timeId, Long themeId, Member member) {
+        ReservationDate reservationDate = new ReservationDate(date);
         ReservationTime reservationTime = reservationTimeService.findReservationTimeById(timeId);
-        return ReservationDateTime.create(reservationDate, reservationTime, currentTimeService.now());
+        ReservationDateTime reservationDateTime = ReservationDateTime.create(reservationDate, reservationTime, currentTimeService.now());
+
+        Theme theme = themeService.findThemeById(themeId);
+        validateExistsReservation(reservationDate, reservationTime, theme);
+
+        Reservation reservation = Reservation.create(member, reservationDateTime.reservationDate().getDate(), reservationDateTime.reservationTime(), theme);
+        return reservationRepository.save(reservation);
     }
 
     private void validateExistsReservation(ReservationDate reservationDate, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(reservationDate.getDate(), time, theme)) {
+        if (reservationRepository.existsByDateAndTimeAndThemeAndStatus(reservationDate.getDate(), time, theme, ReservationStatus.RESERVED)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
     }
 
     @Transactional
-    public void deleteReservationById(Long id) {
+    public void cancelReservationById(Long id) {
         Reservation reservation = findReservationById(id);
-        reservationRepository.deleteById(reservation.getId());
+        reservation.cancel();
+        ReservationInfo reservationInfo = ReservationInfo.create(reservation);
+        if (waitingService.existsWaitings(reservationInfo)) {
+            processWaitingToReservation(reservationInfo);
+        }
+    }
+
+    private void processWaitingToReservation(ReservationInfo reservationInfo) {
+        Waiting firstRankWaiting = waitingService.findFirstRankWaitingByReservationInfo(reservationInfo);
+
+        LocalDate date = reservationInfo.getDate();
+        Long timeId = reservationInfo.getTime().getId();
+        Long themeId = reservationInfo.getTheme().getId();
+        Member member = firstRankWaiting.getMember();
+        Reservation newReservation = createReservation(date, timeId, themeId, member);
+        ReservationInfo newReservationInfo = ReservationInfo.create(newReservation);
+
+        waitingService.deleteWaitingById(firstRankWaiting.getId());
+        waitingService.updateWaitings(reservationInfo, newReservationInfo);
     }
 
     private Reservation findReservationById(Long id) {
@@ -121,6 +130,7 @@ public class ReservationService {
     public List<MyReservationResponse> getMyReservations(LoginMember loginMember) {
         Member member = memberService.findMemberById(loginMember.id());
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return MyReservationResponse.from(reservations);
+        List<Waiting> waitings = waitingService.findWaitingsByMember(member);
+        return MyReservationResponse.from(reservations, waitings);
     }
 }

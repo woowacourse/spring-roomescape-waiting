@@ -4,18 +4,22 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.BaseTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationInfo;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.fixture.MemberDbFixture;
 import roomescape.fixture.ReservationDateFixture;
 import roomescape.fixture.ReservationDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
+import roomescape.fixture.WaitingDbFixture;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
 import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
@@ -29,9 +33,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -51,6 +53,9 @@ class ReservationServiceTest extends BaseTest {
 
     @Autowired
     private ReservationDbFixture reservationDbFixture;
+
+    @Autowired
+    private WaitingDbFixture waitingDbFixture;
 
     @Test
     void 예약을_모두_조회한다() {
@@ -85,7 +90,7 @@ class ReservationServiceTest extends BaseTest {
         );
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
-        ReservationResponse response = reservationService.createReservation(request, loginMember);
+        ReservationResponse response = reservationService.createMemberReservation(request, loginMember);
 
         assertAll(
                 () -> assertThat(response.id()).isEqualTo(1L),
@@ -135,7 +140,7 @@ class ReservationServiceTest extends BaseTest {
         );
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
-        assertThatCode(() -> reservationService.createReservation(request, loginMember))
+        assertThatCode(() -> reservationService.createMemberReservation(request, loginMember))
                 .doesNotThrowAnyException();
     }
 
@@ -153,26 +158,26 @@ class ReservationServiceTest extends BaseTest {
         );
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
-        assertThatThrownBy(() -> reservationService.createReservation(request, loginMember))
+        assertThatThrownBy(() -> reservationService.createMemberReservation(request, loginMember))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
+    @Transactional
     void 예약을_삭제한다() {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
         Member member = memberDbFixture.한스_사용자();
         Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
 
-        reservationService.deleteReservationById(reservation.getId());
+        reservationService.cancelReservationById(reservation.getId());
 
-        List<ReservationResponse> responses = reservationService.getReservations();
-        assertThat(responses).hasSize(0);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
     }
 
     @Test
     void 존재하지_않는_예약을_삭제하면_예외가_발생한다() {
-        assertThatThrownBy(() -> reservationService.deleteReservationById(3L))
+        assertThatThrownBy(() -> reservationService.cancelReservationById(3L))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -203,20 +208,32 @@ class ReservationServiceTest extends BaseTest {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
         Member member = memberDbFixture.한스_사용자();
-
         Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
+
+        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
+        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, member);
+
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
         List<MyReservationResponse> responses = reservationService.getMyReservations(loginMember);
-        MyReservationResponse response = responses.getFirst();
+        MyReservationResponse reservationResponse = responses.getFirst();
+        MyReservationResponse waitingResponse = responses.getLast();
 
         assertAll(
-                () -> assertThat(responses).hasSize(1),
-                () -> assertThat(response.reservationId()).isEqualTo(reservation.getId()),
-                () -> assertThat(response.date()).isEqualTo(reservation.getDate()),
-                () -> assertThat(response.time()).isEqualTo(reservationTime.getStartAt()),
-                () -> assertThat(response.theme()).isEqualTo(theme.getName()),
-                () -> assertThat(response.status()).isEqualTo(ReservationStatus.RESERVED.getName())
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(reservationResponse.id()).isEqualTo(reservation.getId()),
+                () -> assertThat(reservationResponse.date()).isEqualTo(reservation.getDate()),
+                () -> assertThat(reservationResponse.time()).isEqualTo(reservation.getTime().getStartAt()),
+                () -> assertThat(reservationResponse.theme()).isEqualTo(reservation.getTheme().getName()),
+                () -> assertThat(reservationResponse.status()).isEqualTo(reservation.getStatus().getName()),
+
+                () -> assertThat(waitingResponse.id()).isEqualTo(waiting.getId()),
+                () -> assertThat(waitingResponse.date()).isEqualTo(waiting.getReservationInfo().getDate()),
+                () -> assertThat(waitingResponse.time()).isEqualTo(waiting.getReservationInfo().getTime().getStartAt()),
+                () -> assertThat(waitingResponse.theme()).isEqualTo(waiting.getReservationInfo().getTheme().getName()),
+                () -> assertThat(waitingResponse.status()).isEqualTo("1번째 예약대기")
         );
     }
 }

@@ -1,8 +1,7 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,51 +12,40 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Embedded
+    private ReservationInfo reservationInfo;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    private LocalDate date;
+    private long rank;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
-
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
-
-    public static Reservation create(
-            Member member,
-            LocalDate date,
-            ReservationTime time,
-            Theme theme
-    ) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
+    public static Waiting create(ReservationInfo reservationInfo, Member member, long rank) {
+        return new Waiting(null, reservationInfo, member, rank);
     }
 
-    public void cancel() {
-        this.status = ReservationStatus.CANCELED;
+    public void updateRankAndReservationInfo(ReservationInfo reservationInfo) {
+        this.rank -= 1;
+        this.reservationInfo = reservationInfo;
     }
 
     @Override
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
+        Waiting waiting = (Waiting) o;
+        return Objects.equals(id, waiting.id);
     }
 
     @Override

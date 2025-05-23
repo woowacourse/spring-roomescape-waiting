@@ -18,6 +18,7 @@ public record ReservationResponse(
 
         ThemeResponse theme
 ) {
+
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),

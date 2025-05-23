@@ -167,6 +167,26 @@ class IntegrationTest extends BaseTest {
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value());
         }
+
+        @Test
+        void 사용자_내예약목록_페이지를_응답한다() {
+            RestAssured.given().log().all()
+                    .when().get("/reservation-mine")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value());
+        }
+
+        @Test
+        void 방탈출_예약대기관리_페이지를_응답한다() {
+            givenCreatedAdmin();
+            String token = givenAdminLoginToken();
+
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().get("/admin/waiting")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value());
+        }
     }
 
     @Nested
@@ -356,8 +376,8 @@ class IntegrationTest extends BaseTest {
                     "테마1", "설명1", "썸네일1");
             jdbcTemplate.update("INSERT INTO member (name, role, email, password) VALUES (?, ?, ?, ?)",
                     "브라운", "USER", "test@email.com", "pass1");
-            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                    "2025-08-05", 1, 1, 1);
+            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (?, ?, ?, ?, ?)",
+                    "2025-08-05", 1, 1, 1, "RESERVED");
 
             List<ReservationResponse> response = RestAssured.given().log().all()
                     .when().get("/reservations")
@@ -365,7 +385,7 @@ class IntegrationTest extends BaseTest {
                     .statusCode(HttpStatus.OK.value()).extract()
                     .jsonPath().getList(".", ReservationResponse.class);
 
-            Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+            Integer count = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
 
             assertThat(response.size()).isEqualTo(count);
         }
@@ -388,14 +408,14 @@ class IntegrationTest extends BaseTest {
                     .then().log().all()
                     .statusCode(HttpStatus.CREATED.value());
 
-            Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+            Integer count = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation", Integer.class);
             assertThat(count).isEqualTo(1);
 
             RestAssured.given().log().all()
                     .when().delete("/reservations/1")
                     .then().log().all()
                     .statusCode(HttpStatus.NO_CONTENT.value());
-            Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+            Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) FROM reservation WHERE status = 'RESERVED'", Integer.class);
             assertThat(countAfterDelete).isEqualTo(0);
         }
     }
