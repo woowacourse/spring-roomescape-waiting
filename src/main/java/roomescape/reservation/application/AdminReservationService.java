@@ -7,12 +7,14 @@ import roomescape.reservation.application.dto.request.ReservationSearchServiceRe
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.repository.ReservationRepository;
+import roomescape.reservation.model.service.ReservationOperation;
 
 @Service
 @RequiredArgsConstructor
 public class AdminReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationOperation reservationOperation;
 
     public List<ReservationServiceResponse> getAll() {
         List<Reservation> reservations = reservationRepository.getAll();
@@ -35,6 +37,6 @@ public class AdminReservationService {
 
     public void delete(Long id) {
         Reservation reservation = reservationRepository.getById(id);
-        reservationRepository.remove(reservation);
+        reservationOperation.cancel(reservation);
     }
 }

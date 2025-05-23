@@ -59,7 +59,12 @@ public class ReservationWaiting {
     public static ReservationWaiting createFuture(ReservationWaitingDetails details) {
         LocalDateTime requestedDateTime = LocalDateTime.of(details.date(), details.reservationTime().getStartAt());
         validateFutureTime(requestedDateTime);
-        return details.toReservationWaiting();
+        return new ReservationWaiting(
+                details.date(),
+                details.reservationTime(),
+                details.reservationTheme(),
+                details.member()
+        );
     }
 
     private static void validateFutureTime(LocalDateTime requestedDateTime) {

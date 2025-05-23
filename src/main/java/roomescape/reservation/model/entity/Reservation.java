@@ -52,14 +52,22 @@ public class Reservation {
         this.member = member;
     }
 
+    public static Reservation fromWaiting(ReservationWaiting waiting) {
+        return new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember());
+    }
+
     public ReservationStatus determineReservationStatus(LocalDateTime now) {
         return ReservationStatus.determineStatus(LocalDateTime.of(date, time.getStartAt()), now);
+    }
+
+    public boolean hasNotEqualsMemberId(Long memberId) {
+        return !Objects.equals(member.getId(), memberId);
     }
 
     public static Reservation createFuture(ReservationDetails details) {
         LocalDateTime requestedDateTime = LocalDateTime.of(details.date(), details.reservationTime().getStartAt());
         validateFutureTime(requestedDateTime);
-        return details.toReservation();
+        return new Reservation(details.date(), details.reservationTime(), details.reservationTheme(), details.member());
     }
 
     private static void validateFutureTime(LocalDateTime requestedDateTime) {
