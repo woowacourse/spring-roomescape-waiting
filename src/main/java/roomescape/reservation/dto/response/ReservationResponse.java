@@ -10,9 +10,13 @@ public record ReservationResponse(Long id, String status, ReservationMemberRespo
                                   ReservationTimeResponse time,
                                   ThemeResponse theme) {
     public static ReservationResponse from(final Reservation reservation) {
+        String status = "예약";
+        if(reservation.isWaitingStatus()){
+            status = "대기";
+        }
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.status(),
+                status,
                 new ReservationMemberResponse(reservation.name()),
                 reservation.getDate(),
                 new ReservationTimeResponse(
