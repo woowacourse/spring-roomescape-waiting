@@ -31,4 +31,8 @@ public class Waiting {
     public Waiting(ReservationSlot reservationSlot, Member member) {
         this(null, reservationSlot, member);
     }
+
+    public boolean matchesMemberById(Long id) {
+        return member.matchesId(id);
+    }
 }

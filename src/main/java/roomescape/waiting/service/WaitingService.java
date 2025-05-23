@@ -9,7 +9,6 @@ import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ForbiddenException;
 import roomescape.global.error.exception.NotFoundException;
 import roomescape.member.entity.Member;
-import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationSlot;
@@ -61,20 +60,16 @@ public class WaitingService {
     public void acceptWaiting(Long id) {
         Waiting waiting = getWaitingById(id);
 
-        deleteReserved(waiting);
+        deleteReservationByWaiting(waiting);
         reservationRepository.flush();
         waitingRepository.delete(waiting);
         Reservation reservation = new Reservation(waiting.getReservationSlot(), waiting.getMember());
         reservationRepository.save(reservation);
     }
 
-    private void deleteReserved(Waiting waiting) {
-        boolean alreadyReserved = reservationRepository.existsByReservationSlot(waiting.getReservationSlot());
-
-        if (alreadyReserved) {
-            reservationRepository.findByReservationSlot(waiting.getReservationSlot())
-                    .ifPresent(reservationRepository::delete);
-        }
+    private void deleteReservationByWaiting(Waiting waiting) {
+        reservationRepository.findByReservationSlot(waiting.getReservationSlot())
+                .ifPresent(reservationRepository::delete);
     }
 
     private Waiting getWaitingById(Long id) {
@@ -84,26 +79,32 @@ public class WaitingService {
 
     private void validateLoginMemberWithWaiting(Long waitingId, LoginMember loginMember) {
         Waiting waiting = getWaitingById(waitingId);
-        if (!waiting.getMember().getId().equals(loginMember.id()) && loginMember.role() != RoleType.ADMIN) {
-            throw new ForbiddenException("예약 대기를 삭제할 수 있는 권한이 없습니다.");
+        if (waiting.matchesMemberById(loginMember.id()) || loginMember.isAdmin()) {
+            return;
         }
+        throw new ForbiddenException("예약 대기를 삭제할 수 있는 권한이 없습니다.");
     }
 
     private void validateAvailableWaiting(ReservationSlot reservationSlot, LoginMember loginMember) {
-        boolean hasReservation = reservationRepository.existsByReservationSlot(reservationSlot);
-        if (!hasReservation) {
+        validateReserved(reservationSlot);
+        validateDuplicateReservation(reservationSlot, loginMember);
+        validateDuplicateWaiting(reservationSlot, loginMember);
+    }
+
+    private void validateReserved(ReservationSlot reservationSlot) {
+        if (!reservationRepository.existsByReservationSlot(reservationSlot)) {
             throw new BadRequestException("예약이 존재하지 않아 대기를 생성할 수 없습니다.");
         }
+    }
 
-        boolean alreadyReservedByMember = reservationRepository.existsByReservationSlotAndMemberId(
-                reservationSlot, loginMember.id());
-        if (alreadyReservedByMember) {
+    private void validateDuplicateReservation(ReservationSlot reservationSlot, LoginMember loginMember) {
+        if (reservationRepository.existsByReservationSlotAndMemberId(reservationSlot, loginMember.id())) {
             throw new BadRequestException("중복된 예약이 존재합니다.");
         }
+    }
 
-        boolean alreadyWaitingByMember = waitingRepository.existsByReservationSlotAndMemberId(
-                reservationSlot, loginMember.id());
-        if (alreadyWaitingByMember) {
+    private void validateDuplicateWaiting(ReservationSlot reservationSlot, LoginMember loginMember) {
+        if (waitingRepository.existsByReservationSlotAndMemberId(reservationSlot, loginMember.id())) {
             throw new BadRequestException("중복된 예약 대기가 존재합니다.");
         }
     }

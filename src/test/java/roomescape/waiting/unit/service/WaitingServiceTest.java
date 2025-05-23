@@ -234,8 +234,6 @@ public class WaitingServiceTest {
 
         when(waitingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.existsByReservationSlot(reservationSlot))
-                .thenReturn(true);
         when(reservationRepository.findByReservationSlot(any()))
                 .thenReturn(Optional.of(reservation));
 
