@@ -27,4 +27,10 @@ public class AdminWaitingController {
             .map(MyWaitingResponse::from)
             .toList();
     }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void remove(@PathVariable Long id) {
+        myReservationService.deleteById(id);
+    }
 }

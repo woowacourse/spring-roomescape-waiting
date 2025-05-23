@@ -44,7 +44,7 @@ public class ReservationWaitingService {
         return WaitingServiceResponse.from(savedWaiting);
     }
 
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         Waiting waiting = waitingRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약 대기가 존재하지 않습니다."));
         waitingRepository.delete(waiting);

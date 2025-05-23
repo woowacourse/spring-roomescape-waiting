@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.Waiting;
 import roomescape.reservation.model.vo.WaitingWithRank;
-
+//TODO: MyReservationServiceResponse 이름 변경하기
 public record MyReservationServiceResponse(
     Long reservationId,
     String themeName,
