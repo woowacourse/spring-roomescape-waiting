@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -96,6 +97,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservationById(final Long id) {
         reservationRepository.deleteById(id);
     }
