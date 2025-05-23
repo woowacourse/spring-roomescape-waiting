@@ -78,10 +78,6 @@ public class ReservationRestController {
         );
     }
 
-    //TODO : 몇 번째 예약 대기인지,,,
-    //TODO : 그러면, 서비스에서 총 몇개인지 파악을 해야함
-    //그러면, waiting에 저장된 애들을 (테마 & 날짜 & 시간) 기준으로 일치하는 애들끼리
-    //그 안에서 id를 기준으로 내림차순 정렬을 해서 member몇 번째에 있는지 파악해야함
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
         final List<ReservationMineResponse> reservationMineResponses = reservationService.findByMember(member)
