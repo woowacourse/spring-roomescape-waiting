@@ -2,7 +2,6 @@ package roomescape.domain.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
@@ -22,28 +21,6 @@ public class ReservationTest {
     private final LocalDate date = LocalDate.of(2020, 1, 1);
     private final TimeSlot timeSlot = TestFixtures.anyTimeSlotWithNewId();
     private final Theme theme = TestFixtures.anyThemeWithNewId();
-
-    @Test
-    @DisplayName("예약자를 비교할 수 있다.")
-    void isOwnedBy() {
-        // given
-        var reservation = new Reservation(
-            1L,
-            user1,
-            ReservationSlot.of(date, timeSlot, theme),
-            ReservationStatus.RESERVED
-        );
-
-        // when
-        var ownedByUser1 = reservation.isOwnedBy(user1);
-        var ownedByUser2 = reservation.isOwnedBy(user2);
-
-        // then
-        assertAll(
-            () -> assertThat(ownedByUser1).isTrue(),
-            () -> assertThat(ownedByUser2).isFalse()
-        );
-    }
 
     @Test
     @DisplayName("주어진 예약과 같은 예약 슬롯인 지 비교할 수 있다.")

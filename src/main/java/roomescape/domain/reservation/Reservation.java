@@ -52,10 +52,6 @@ public class Reservation {
         return this.slot.equals(reservation.slot);
     }
 
-    public boolean isOwnedBy(final User user) {
-        return this.user.equals(user);
-    }
-
     public boolean isWaiting() {
         return this.status == ReservationStatus.WAITING;
     }

@@ -25,6 +25,7 @@ import roomescape.domain.user.User;
 import roomescape.domain.user.UserName;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.NotFoundException;
 
 @DataJpaTest
 @Import({ReservationService.class, TestRepositoryHelper.class})
@@ -107,7 +108,7 @@ class ReservationServiceTest {
         service.cancelWaiting(user2.id(), waited.id());
 
         // then
-        var reservations = service.findAllReservations(NONE_FILTERING);
+        var reservations = user.reservations();
         assertThat(reservations).doesNotContain(waited);
     }
 
@@ -132,7 +133,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> service.cancelWaiting(anotherUser.id(), waited.id()))
-            .isInstanceOf(BusinessRuleViolationException.class);
+            .isInstanceOf(NotFoundException.class);
     }
 
     @Test

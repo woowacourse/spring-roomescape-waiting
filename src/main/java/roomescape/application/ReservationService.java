@@ -1,9 +1,7 @@
 package roomescape.application;
 
-import static org.springframework.data.jpa.domain.Specification.allOf;
 import static roomescape.infrastructure.ReservationSpecs.byFilter;
 import static roomescape.infrastructure.ReservationSpecs.bySlot;
-import static roomescape.infrastructure.ReservationSpecs.byUserId;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,7 +16,6 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
-import roomescape.exception.BusinessRuleViolationException;
 
 @Service
 @AllArgsConstructor
@@ -35,16 +32,19 @@ public class ReservationService {
         throwIfDuplicates(slot);
 
         var user = userRepository.getById(userId);
-        return reservationRepository.save(new Reservation(user, slot));
+        var reservation = new Reservation(user, slot);
+        user.reserve(reservation);
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
     public Reservation waitFor(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var slot = toReservationSlot(date, timeId, themeId);
-        throwIfDuplicates(userId, slot);
-
         var user = userRepository.getById(userId);
-        return reservationRepository.save(Reservation.ofWaiting(user, slot));
+
+        var reservation = Reservation.ofWaiting(user, slot);
+        user.reserve(reservation);
+        return reservationRepository.save(reservation);
     }
 
     private ReservationSlot toReservationSlot(final LocalDate date, final long timeId, final long themeId) {
@@ -56,13 +56,6 @@ public class ReservationService {
     private void throwIfDuplicates(final ReservationSlot slot) {
         if (reservationRepository.exists(bySlot(slot))) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
-        }
-    }
-
-    private void throwIfDuplicates(final long userId, final ReservationSlot slot) {
-        var alreadyReserved = reservationRepository.exists(allOf(byUserId(userId), bySlot(slot)));
-        if (alreadyReserved) {
-            throw new AlreadyExistedException("이미 해당 예약 슬롯에 예약 또는 대기하셨습니다.");
         }
     }
 
@@ -78,11 +71,6 @@ public class ReservationService {
     public void cancelWaiting(final long userId, final long reservationId) {
         var user = userRepository.getById(userId);
         var reservation = reservationRepository.getById(reservationId);
-        if (!reservation.isOwnedBy(user)) {
-            throw new BusinessRuleViolationException("다른 사용자의 예약 대기를 취소할 수 없습니다.");
-        }
-
-        reservation.cancel();
-        reservationRepository.delete(reservation);
+        user.cancelReservation(reservation);
     }
 }

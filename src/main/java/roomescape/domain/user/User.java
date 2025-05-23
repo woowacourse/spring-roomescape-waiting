@@ -1,5 +1,6 @@
 package roomescape.domain.user;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +18,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.exception.AlreadyExistedException;
+import roomescape.exception.NotFoundException;
 
 @EqualsAndHashCode(of = {"id"})
 @Getter
@@ -36,8 +39,8 @@ public class User {
     private Email email;
     @Embedded
     private Password password;
-    @OneToMany(mappedBy = "user")
-    private final List<Reservation> reservations = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private List<Reservation> reservations = new ArrayList<>();
 
     public User(final long id, final UserName name, final UserRole role, final Email email,
         final Password password) {
@@ -64,6 +67,26 @@ public class User {
         return reservations.stream()
             .map(Reservation::slot)
             .toList();
+    }
+
+    public void reserve(final Reservation reservation) {
+        if (alreadyReservedAt(reservation.slot())) {
+            throw new AlreadyExistedException("이미 해당 예약 슬롯에 예약 또는 대기하셨습니다.");
+        }
+        reservations.add(reservation);
+    }
+
+    private boolean alreadyReservedAt(final ReservationSlot slot) {
+        return reservedSlots().contains(slot);
+    }
+
+    public void cancelReservation(final Reservation reservation) {
+        if (!reservations.contains(reservation)) {
+            throw new NotFoundException("해당 예약 내역이 존재하지 않습니다.");
+        }
+
+        reservation.cancel();
+        reservations.remove(reservation);
     }
 
     public List<Reservation> reservations() {
