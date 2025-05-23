@@ -159,6 +159,15 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).existsByDateAndTimeId(LocalDate.now(), 1L);
     }
 
+    @DisplayName("관리자가 예약 대기 추가 시 대기 상태인 예약 아이디가 존재하지 않는 경우 예외를 발생시킨다")
+    @Test
+    void exception_invalid_id_waiting() {
+        assertThatThrownBy(() -> reservationService.addFromWaiting(1L))
+                .isInstanceOf(InvalidIdException.class);
+
+        verify(reservationRepository, times(1)).findByWaitingId(1L);
+    }
+
     @DisplayName("예약 삭제 시 예약 아이디가 존재하지 않는 경우 예외를 발생시킨다")
     @Test
     void exception_invalid_id() {

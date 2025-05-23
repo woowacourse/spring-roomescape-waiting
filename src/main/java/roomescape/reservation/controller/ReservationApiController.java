@@ -51,7 +51,7 @@ public class ReservationApiController {
                 memberResponse.id(),
                 userReservationRequest
         );
-        return ResponseEntity.ok(ReservationResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse);
     }
 
     @PostMapping("/{id}")
