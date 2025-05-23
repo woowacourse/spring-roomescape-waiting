@@ -89,18 +89,22 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
 
-        Optional<Waiting> waiting =
+        approveNextWaitingIfExists(reservation);
+
+        reservationRepository.deleteById(id);
+    }
+
+    private void approveNextWaitingIfExists(Reservation reservation) {
+        Optional<Waiting> nextWaitingOpt =
                 waitingRepository.findFirstByDateAndTimeSlotIdAndThemeIdOrderByIdAsc(
                         reservation.date(),
                         reservation.timeSlot().id(),
                         reservation.theme().id());
 
-        waiting.ifPresent(firstWaiting -> {
-            Reservation waitingReservation = Reservation.fromWaiting(firstWaiting);
-            reservationRepository.save(waitingReservation);
-            waitingRepository.deleteById(firstWaiting.id());
+        nextWaitingOpt.ifPresent(nextWaiting -> {
+            Reservation approvedReservation = Reservation.fromWaiting(nextWaiting);
+            reservationRepository.save(approvedReservation);
+            waitingRepository.deleteById(nextWaiting.id());
         });
-
-        reservationRepository.deleteById(id);
     }
 }
