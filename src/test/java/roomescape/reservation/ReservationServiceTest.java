@@ -41,8 +41,11 @@ import roomescape.theme.ThemeRepositoryFacadeImpl;
 @DataJpaTest
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
-        MemberRepositoryFacadeImpl.class, ThemeRepositoryFacadeImpl.class, ReservationTimeRepositoryFacadeImpl.class,
-        ReservationRepositoryFacadeImpl.class, ReservationService.class
+        MemberRepositoryFacadeImpl.class,
+        ThemeRepositoryFacadeImpl.class,
+        ReservationTimeRepositoryFacadeImpl.class,
+        ReservationRepositoryFacadeImpl.class,
+        ReservationService.class
 })
 public class ReservationServiceTest {
 
@@ -800,11 +803,14 @@ public class ReservationServiceTest {
             final Member waitingMember1 = new Member("email2", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.now().plusMinutes(1));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation pendingReservation = new Reservation(LocalDate.now(), pendingMember, reservationTime, theme,
+            final Reservation pendingReservation = new Reservation(LocalDate.now(), pendingMember, reservationTime,
+                    theme,
                     ReservationStatus.PENDING);
-            final Reservation waitingReservation = new Reservation(LocalDate.now(), waitingMember, reservationTime, theme,
+            final Reservation waitingReservation = new Reservation(LocalDate.now(), waitingMember, reservationTime,
+                    theme,
                     ReservationStatus.WAITING);
-            final Reservation waitingReservation1 = new Reservation(LocalDate.now(), waitingMember1, reservationTime, theme,
+            final Reservation waitingReservation1 = new Reservation(LocalDate.now(), waitingMember1, reservationTime,
+                    theme,
                     ReservationStatus.WAITING);
 
             memberRepositoryFacade.save(pendingMember);

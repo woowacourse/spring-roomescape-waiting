@@ -18,18 +18,12 @@ import roomescape.auth.PasswordEncoder;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.ReservationRepositoryFacadeImpl;
-import roomescape.reservationtime.ReservationTimeRepositoryFacadeImpl;
-import roomescape.theme.ThemeRepositoryFacadeImpl;
 
 @DataJpaTest
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
         MemberService.class,
         MemberRepositoryFacadeImpl.class,
-        ReservationRepositoryFacadeImpl.class,
-        ReservationTimeRepositoryFacadeImpl.class,
-        ThemeRepositoryFacadeImpl.class,
         PasswordEncoder.class
 })
 class MemberServiceTest {

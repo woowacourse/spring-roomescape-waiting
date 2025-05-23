@@ -37,8 +37,11 @@ import roomescape.theme.dto.ThemeResponse;
 @Transactional(propagation = Propagation.SUPPORTS)
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import({
-        MemberRepositoryFacadeImpl.class, ReservationTimeRepositoryFacadeImpl.class,
-        ReservationRepositoryFacadeImpl.class, ThemeRepositoryFacadeImpl.class, ThemeService.class
+        MemberRepositoryFacadeImpl.class,
+        ReservationTimeRepositoryFacadeImpl.class,
+        ReservationRepositoryFacadeImpl.class,
+        ThemeRepositoryFacadeImpl.class,
+        ThemeService.class
 })
 class ThemeServiceTest {
 
