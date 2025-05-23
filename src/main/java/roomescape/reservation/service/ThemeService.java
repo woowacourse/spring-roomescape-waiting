@@ -49,8 +49,7 @@ public class ThemeService {
     }
 
     public void deleteThemeById(long id) {
-        List<Reservation> reservations = reservationRepository.findByThemeId(id);
-        if (reservations.size() > 0) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new ExistedReservationException();
         }
         themeRepository.deleteById(id);

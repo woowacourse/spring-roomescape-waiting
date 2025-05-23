@@ -19,7 +19,7 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findByThemeId(Long themeId);
+    boolean existsByThemeId(Long themeId);
 
     @Query("""
                 SELECT r

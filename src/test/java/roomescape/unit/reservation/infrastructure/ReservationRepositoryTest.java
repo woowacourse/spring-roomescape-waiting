@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -60,7 +59,7 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    void 테마id를_기준으로_예약을_조회한다() {
+    void 테마id를_기준으로_예약이_존재하는지_조회한다() {
         // given
         Member member = Member.builder()
                 .name("name1")
@@ -95,28 +94,10 @@ class ReservationRepositoryTest {
                         .timeSlot(time)
                         .theme(theme2).build()
         );
-        entityManager.persist(
-                Reservation.builder()
-                        .member(member)
-                        .date(LocalDate.of(2025, 1, 2))
-                        .timeSlot(time)
-                        .theme(theme1).build()
-        );
-        entityManager.persist(
-                Reservation.builder()
-                        .member(member)
-                        .date(LocalDate.of(2025, 1, 2))
-                        .timeSlot(time)
-                        .theme(theme2).build()
-        );
         // when
-        List<Reservation> reservations = reservationRepository.findByThemeId(theme1.getId());
+        boolean existReservation = reservationRepository.existsByThemeId(theme1.getId());
         // then
-        SoftAssertions soft = new SoftAssertions();
-        soft.assertThat(reservations).hasSize(2);
-        soft.assertThat(reservations.get(0).getTheme().getName()).isEqualTo("theme1");
-        soft.assertThat(reservations.get(1).getTheme().getName()).isEqualTo("theme1");
-        soft.assertAll();
+        assertThat(existReservation).isTrue();
     }
 
     @Test

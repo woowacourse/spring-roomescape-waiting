@@ -108,7 +108,7 @@ class FakeReservationRepositoryTest {
     }
 
     @Test
-    void 테마id로_예약을_조회한다() {
+    void 테마id로_예약이_존재하는지_조회한다() {
         // given
         Member member = Member.builder()
                 .name("name1")
@@ -127,16 +127,10 @@ class FakeReservationRepositoryTest {
                 .date(LocalDate.of(2025, 1, 1))
                 .timeSlot(timeSlot)
                 .theme(theme).build();
-        Reservation reservation2 = Reservation.builder()
-                .member(member)
-                .date(LocalDate.of(2025, 1, 2))
-                .timeSlot(timeSlot)
-                .theme(theme).build();
         reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
         // when
-        List<Reservation> reservations = reservationRepository.findByThemeId(theme.getId());
+        boolean exist = reservationRepository.existsByThemeId(theme.getId());
         // then
-        assertThat(reservations).hasSize(2);
+        assertThat(exist).isTrue();
     }
 }
