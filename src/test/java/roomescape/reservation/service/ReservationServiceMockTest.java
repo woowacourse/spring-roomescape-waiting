@@ -31,6 +31,9 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.domain.WaitingStatus;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +55,8 @@ class ReservationServiceMockTest {
     private ThemeRepository themeRepository;
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private WaitingRepository waitingRepository;
     @Mock
     private DateTime dateTime;
 
@@ -165,17 +170,19 @@ class ReservationServiceMockTest {
         List<Reservation> reservations = createReservations();
         when(reservationRepository.findByMemberId(1L))
                 .thenReturn(reservations);
+        List<Waiting> waitings = createWaitings();
+        when(waitingRepository.findByMemberIdAndStatus(1L, WaitingStatus.PENDING))
+                .thenReturn(waitings);
         MyReservationResponse expected1 = MyReservationResponse.from(reservations.get(0));
         MyReservationResponse expected2 = MyReservationResponse.from(reservations.get(1));
         MyReservationResponse expected3 = MyReservationResponse.from(reservations.get(2));
+        MyReservationResponse expected4 = MyReservationResponse.fromWaiting(waitings.get(0), 1L);
 
         // when
         List<MyReservationResponse> responses = reservationService.getMyReservations(1L);
         // then
-        assertThat(responses).hasSize(3);
-        assertThat(responses.get(0)).isEqualTo(expected1);
-        assertThat(responses.get(1)).isEqualTo(expected2);
-        assertThat(responses.get(2)).isEqualTo(expected3);
+        assertThat(responses).hasSize(4);
+        assertThat(responses).containsExactlyInAnyOrder(expected1, expected2, expected3, expected4);
     }
 
     private List<Reservation> createReservations() {
@@ -197,5 +204,23 @@ class ReservationServiceMockTest {
                 reservationTime1, theme2);
 
         return List.of(reservation1, reservation2, reservation3);
+    }
+
+    private List<Waiting> createWaitings() {
+        Theme theme1 = Theme.createWithId(1L, "테스트1", "설명", "localhost:8080");
+        ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
+        Member member = Member.createWithId(1L, "홍길동", "a", "a", Role.USER);
+
+        Waiting waiting = Waiting.createWithoutId(
+                member,
+                LocalDate.of(2024, 10, 6),
+                reservationTime1,
+                theme1,
+                WaitingStatus.PENDING,
+                LocalDateTime.of(2025, 5, 22, 10, 0
+                )
+        );
+
+        return List.of(waiting);
     }
 }
