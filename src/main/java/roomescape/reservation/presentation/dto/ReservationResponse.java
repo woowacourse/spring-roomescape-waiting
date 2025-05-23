@@ -40,8 +40,8 @@ public record ReservationResponse(Long id, LocalDate date, ReservationTimeRespon
                 reservation.getTheme().getDescription(),
                 reservation.getTheme().getThumbnail()
             ),
-            new MemberResponse(reservation.getMember().getId(),
-                reservation.getMember().getName())
+            new MemberResponse(waiting.getMember().getId(),
+                waiting.getMember().getName())
         );
     }
 }

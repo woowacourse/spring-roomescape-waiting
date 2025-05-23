@@ -5,7 +5,7 @@ import roomescape.reservation.domain.Waiting;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record WaitingResponse(long id, String name, String theme, LocalDate date, LocalTime startAt) {
+public record WaitingResponse(Long id, String name, String theme, LocalDate date, LocalTime startAt) {
 
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
