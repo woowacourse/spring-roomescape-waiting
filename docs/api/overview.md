@@ -13,7 +13,7 @@
 ### [시간 API](time.md)
 
 - 시간 추가: [`POST /times`](time.md#시간-추가-api)
-- 시간 목록 조회: [`GET /times`](time.md#시간-조회-api)
+- 시간 목록 조회: [`GET /times`](time.md#시간-목록-조회-api)
 - 시간 삭제: [`DELETE /times/{id}`](time.md#시간-삭제-api)
 - 예약 가능 시간 조회: [`GET /times/availability?date=2025-03-30&themeId=1`](time.md#예약-가능-시간-조회-api)
 
