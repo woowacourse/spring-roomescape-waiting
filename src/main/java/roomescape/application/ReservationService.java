@@ -42,17 +42,24 @@ public class ReservationService {
         this.userRepository = userRepository;
     }
 
-    public Reservation saveReservation(final User user,
+    public Reservation saveReservation(final long userId,
                                        final LocalDate date,
                                        final long timeId,
                                        final long themeId) {
 
+        User user = getUserById(userId);
         TimeSlot timeSlot = getTimeSlotById(timeId);
         Theme theme = getThemeById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
 
         Reservation reservation = Reservation.reserveNewly(user, date, timeSlot, theme);
+
         return reservationRepository.save(reservation);
+    }
+
+    public User getUserById(final long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
     }
 
     private TimeSlot getTimeSlotById(final long timeId) {

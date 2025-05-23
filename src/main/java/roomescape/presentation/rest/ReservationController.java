@@ -38,7 +38,8 @@ public class ReservationController {
     public ReservationResponse createReservation(
             @Authenticated final User user, @RequestBody @Valid final CreateReservationRequest request
     ) {
-        Reservation reservation = service.saveReservation(user, request.date(), request.timeId(), request.themeId());
+        Reservation reservation = service.saveReservation(user.id(), request.date(), request.timeId(),
+                request.themeId());
         return ReservationResponse.from(reservation);
     }
 

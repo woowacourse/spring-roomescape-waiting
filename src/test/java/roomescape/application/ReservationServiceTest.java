@@ -65,7 +65,7 @@ class ReservationServiceTest {
         var themeId = JUNK_THEME.id();
 
         // when
-        Reservation reserved = service.saveReservation(JUNK_USER, date, timeSlotId, themeId);
+        Reservation reserved = service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId);
 
         // then
         var reservations = reservationRepository.findAll();
@@ -79,7 +79,7 @@ class ReservationServiceTest {
         var date = tomorrow();
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
-        var reserved = service.saveReservation(JUNK_USER, date, timeSlotId, themeId);
+        var reserved = service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId);
 
         // when
         service.removeById(reserved.id());
@@ -93,9 +93,9 @@ class ReservationServiceTest {
     @DisplayName("검색 필터로 예약을 조회할 수 있다.")
     void findReservationsByFilterWithFilter() {
         // given
-        var afterOneDay = service.saveReservation(JUNK_USER, tomorrow(), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
-        var afterTwoDay = service.saveReservation(JUNK_USER, afterNDay(2), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
-        var afterThreeDay = service.saveReservation(JUNK_USER, afterNDay(3), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
+        var afterOneDay = service.saveReservation(JUNK_USER.id(), tomorrow(), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
+        var afterTwoDay = service.saveReservation(JUNK_USER.id(), afterNDay(2), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
+        var afterThreeDay = service.saveReservation(JUNK_USER.id(), afterNDay(3), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
 
         // when
         var fromYesterday_toToday = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), yesterday(), today());
@@ -121,7 +121,7 @@ class ReservationServiceTest {
         var themeId = JUNK_THEME.id();
 
         // when & then
-        assertThatThrownBy(() -> service.saveReservation(JUNK_USER, date, timeSlotId, themeId))
+        assertThatThrownBy(() -> service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
@@ -134,7 +134,7 @@ class ReservationServiceTest {
         var themeId = JUNK_THEME.id();
 
         // when & then
-        assertThatCode(() -> service.saveReservation(JUNK_USER, date, timeSlotId, themeId))
+        assertThatCode(() -> service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId))
                 .doesNotThrowAnyException();
     }
 
@@ -148,10 +148,10 @@ class ReservationServiceTest {
         var themeId = JUNK_THEME.id();
 
         // when
-        service.saveReservation(user, date, timeSlotId, themeId);
+        service.saveReservation(user.id(), date, timeSlotId, themeId);
 
         // then
-        assertThatThrownBy(() -> service.saveReservation(user, date, timeSlotId, themeId))
+        assertThatThrownBy(() -> service.saveReservation(user.id(), date, timeSlotId, themeId))
                 .isInstanceOf(AlreadyExistedException.class);
     }
 
@@ -164,10 +164,10 @@ class ReservationServiceTest {
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
-        service.saveReservation(user, date, timeSlotId, themeId);
+        service.saveReservation(user.id(), date, timeSlotId, themeId);
 
         // when & then
-        assertThatThrownBy(() -> service.saveReservation(user, date, timeSlotId, themeId))
+        assertThatThrownBy(() -> service.saveReservation(user.id(), date, timeSlotId, themeId))
                 .isInstanceOf(AlreadyExistedException.class);
     }
 

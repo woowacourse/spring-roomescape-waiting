@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
-import roomescape.exception.NotFoundException;
 
 @Service
 public class UserService {
@@ -33,10 +32,5 @@ public class UserService {
 
     public List<User> findAllUsers() {
         return userRepository.findAll();
-    }
-
-    public User getById(final long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + id));
     }
 }
