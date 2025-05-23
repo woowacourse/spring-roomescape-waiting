@@ -5,7 +5,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
+import roomescape.reservation.application.dto.response.MyWaitingServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.Waiting;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.WaitingRepository;
 import roomescape.reservation.model.vo.WaitingWithRank;
@@ -32,5 +34,13 @@ public class MyReservationService {
         }
 
         return response;
+    }
+
+    public List<MyWaitingServiceResponse> getAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        return waitings.stream()
+            .map(MyWaitingServiceResponse::from)
+            .toList();
     }
 }

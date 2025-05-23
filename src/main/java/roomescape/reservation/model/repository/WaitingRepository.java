@@ -12,11 +12,11 @@ public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
-    List<Waiting> findAllByMemberId(Long memberId);
-
     void delete(Waiting waiting);
 
     Optional<Waiting> findById(Long id);
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
+
+    List<Waiting> findAll();
 }
