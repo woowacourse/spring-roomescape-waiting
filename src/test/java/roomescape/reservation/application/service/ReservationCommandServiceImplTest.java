@@ -14,6 +14,8 @@ import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.WaitingReservation;
+import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
 import roomescape.theme.domain.Theme;
@@ -59,30 +61,20 @@ class ReservationCommandServiceImplTest {
     @Autowired
     private TimeProvider timeProvider;
 
+    @Autowired
+    private WaitingReservationRepository waitingReservationRepository;
+
     @Test
     @DisplayName("예약을 생성할 수 있다")
     void createAndFindReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+        final ReservationTime reservationTime = createAndSaveReservationTime(LocalTime.of(10, 0));
+        final Theme theme = createAndSaveTheme();
+        final User user = createAndSaveUser();
 
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(
-                        ThemeName.from("공포"),
-                        ThemeDescription.from("지구별 방탈출 최고"),
-                        ThemeThumbnail.from("www.making.com")));
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
-
-        final CreateReservationServiceRequest requestDto = new CreateReservationServiceRequest(
+        final CreateReservationServiceRequest requestDto = createReservationRequest(
                 user.getId(),
-                ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                LocalDate.of(2025, 8, 5),
                 reservationTime.getId(),
                 theme.getId());
 
@@ -105,39 +97,20 @@ class ReservationCommandServiceImplTest {
     @DisplayName("중복된 예약을 생성할 수 없다.")
     void existsReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+        final ReservationTime reservationTime = createAndSaveReservationTime(LocalTime.of(10, 0));
+        final Theme theme = createAndSaveTheme();
+        final User user = createAndSaveUser();
 
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(
-                        ThemeName.from("공포"),
-                        ThemeDescription.from("지구별 방탈출 최고"),
-                        ThemeThumbnail.from("www.making.com")));
+        final CreateReservationServiceRequest requestDto = createReservationRequest(
+                user.getId(),
+                LocalDate.of(2025, 8, 5),
+                reservationTime.getId(),
+                theme.getId());
 
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
+        final Reservation savedReservation = reservationCommandService.create(requestDto);
 
-        final Reservation savedReservation = reservationCommandService.create(
-                new CreateReservationServiceRequest(
-                        user.getId(),
-                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        reservationTime.getId(),
-                        theme.getId()
-                ));
-
-        // when
-        // then
-        assertThatThrownBy(() -> reservationCommandService.create(
-                new CreateReservationServiceRequest(
-                        user.getId(),
-                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        reservationTime.getId(),
-                        theme.getId())))
+        // when & then
+        assertThatThrownBy(() -> reservationCommandService.create(requestDto))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessageContainingAll(
                         "RESERVATION already exists.",
@@ -151,22 +124,9 @@ class ReservationCommandServiceImplTest {
     @DisplayName("예약을 삭제할 수 있다")
     void deleteReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
-
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(
-                        ThemeName.from("공포"),
-                        ThemeDescription.from("지구별 방탈출 최고"),
-                        ThemeThumbnail.from("www.making.com")));
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
+        final ReservationTime reservationTime = createAndSaveReservationTime(LocalTime.of(10, 0));
+        final Theme theme = createAndSaveTheme();
+        final User user = createAndSaveUser();
 
         final Reservation reservation = reservationRepository.save(
                 Reservation.withoutId(
@@ -188,44 +148,27 @@ class ReservationCommandServiceImplTest {
         // given
         final LocalDateTime now = timeProvider.now();
 
-        final ReservationTime validReservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        now.toLocalTime().plusNanos(1)));
+        final ReservationTime validReservationTime = createAndSaveReservationTime(
+                now.toLocalTime().plusNanos(1));
+        final ReservationTime pastReservationTime = createAndSaveReservationTime(
+                now.toLocalTime().minusNanos(1));
 
-        final ReservationTime pastReservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        now.toLocalTime().minusNanos(1)));
+        final User user = createAndSaveUser();
+        final Theme theme = createAndSaveTheme();
 
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
+        final CreateReservationServiceRequest pastDateReservationRequest = createReservationRequest(
+                user.getId(),
+                now.toLocalDate().minusDays(1),
+                validReservationTime.getId(),
+                theme.getId());
 
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(ThemeName.from("공포"),
-                        ThemeDescription.from("지구별 방탈출 최고"),
-                        ThemeThumbnail.from("www.making.com")));
+        final CreateReservationServiceRequest pastTimeReservationRequest = createReservationRequest(
+                user.getId(),
+                now.toLocalDate(),
+                pastReservationTime.getId(),
+                theme.getId());
 
-        final CreateReservationServiceRequest pastDateReservationRequest =
-                new CreateReservationServiceRequest(
-                        user.getId(),
-                        ReservationDate.from(now.toLocalDate().minusDays(1)),
-                        validReservationTime.getId(),
-                        theme.getId()
-                );
-
-        final CreateReservationServiceRequest pastTimeReservationRequest =
-                new CreateReservationServiceRequest(
-                        user.getId(),
-                        ReservationDate.from(now.toLocalDate()),
-                        pastReservationTime.getId(),
-                        theme.getId()
-                );
-
-        // when
-        // then
+        // when & then
         assertAll(() -> {
             assertThatThrownBy(() -> reservationCommandService.create(pastDateReservationRequest))
                     .isInstanceOf(PastDateReservationException.class)
@@ -243,10 +186,76 @@ class ReservationCommandServiceImplTest {
         // given
         final Long id = -1L;
 
-        // when
-        // then
+        // when & then
         assertThatThrownBy(() -> reservationCommandService.delete(id))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[RESERVATION] not found. params={Long=-1}");
+    }
+
+    @Test
+    @DisplayName("예약이 존재할 때, 예약 대기를 추가한다")
+    void createWaitingReservation() {
+        // given
+        final ReservationTime reservationTime = createAndSaveReservationTime(LocalTime.of(10, 0));
+        final Theme theme = createAndSaveTheme();
+        final User user = createAndSaveUser();
+
+        final CreateReservationServiceRequest requestDto = createReservationRequest(
+                user.getId(),
+                LocalDate.of(2025, 8, 5),
+                reservationTime.getId(),
+                theme.getId());
+
+        final Reservation reservation = reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        reservationTime,
+                        theme));
+
+        // when
+        final WaitingReservation waitingReservation = reservationCommandService.createWaitingReservation(requestDto);
+
+        // then
+        final WaitingReservation found = waitingReservationRepository.findById(waitingReservation.getId())
+                .orElseThrow(NoSuchElementException::new);
+
+        assertThat(waitingReservation).isEqualTo(found);
+        assertThat(waitingReservation.getId()).isEqualTo(found.getId());
+        assertThat(waitingReservation.getUserId()).isEqualTo(found.getUserId());
+        assertThat(waitingReservation.getDate()).isEqualTo(found.getDate());
+        assertThat(waitingReservation.getTime()).isEqualTo(found.getTime());
+        assertThat(waitingReservation.getTheme()).isEqualTo(found.getTheme());
+    }
+
+    // Helper 메서드들
+    private ReservationTime createAndSaveReservationTime(LocalTime time) {
+        return reservationTimeRepository.save(
+                ReservationTime.withoutId(time));
+    }
+
+    private Theme createAndSaveTheme() {
+        return themeRepository.save(
+                Theme.withoutId(
+                        ThemeName.from("공포"),
+                        ThemeDescription.from("지구별 방탈출 최고"),
+                        ThemeThumbnail.from("www.making.com")));
+    }
+
+    private User createAndSaveUser() {
+        return userRepository.save(
+                User.withoutId(
+                        UserName.from("강산"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("1234"),
+                        UserRole.NORMAL));
+    }
+
+    private CreateReservationServiceRequest createReservationRequest(Long userId, LocalDate date, Long timeId, Long themeId) {
+        return new CreateReservationServiceRequest(
+                userId,
+                ReservationDate.from(date),
+                timeId,
+                themeId);
     }
 }

@@ -12,6 +12,7 @@ public enum DomainTerm {
 
     RESERVATION_WAITING_Id("예약 대기 식별자"),
     RESERVATION_WAITING("예약 대기"),
+    RESERVATION_WAITING_ORDER("예약 대기 순서"),
 
     // Theme 도메인
     THEME("테마"),

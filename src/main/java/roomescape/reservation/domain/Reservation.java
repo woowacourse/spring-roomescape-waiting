@@ -1,24 +1,19 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
-import roomescape.common.exception.DuplicateException;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
@@ -26,7 +21,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -53,12 +47,6 @@ public class Reservation {
 
     @ManyToOne
     private Theme theme;
-
-    @OneToMany(mappedBy = WaitingReservation.Fields.reservation,
-            fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @OrderBy("waitingOrder ASC")
-    private List<WaitingReservation> waitingReservations;
 
     public Reservation(final Long userId,
                        final ReservationDate date,
@@ -130,17 +118,5 @@ public class Reservation {
         if (time.isBefore(now.toLocalTime())) {
             throw new PastTimeReservationException(time, now);
         }
-    }
-
-    public WaitingReservation addWaitingReservation(final Long userId, final int waitingOrder) {
-        final WaitingReservation waitingReservation = WaitingReservation.withoutId(
-                userId, waitingOrder, this);
-        if (waitingReservations.contains(waitingReservation)) {
-            throw new DuplicateException(DomainTerm.RESERVATION_WAITING,
-                    waitingReservation.getUserId(),
-                    waitingReservation.getWaitingOrder(),
-                    waitingReservation.getReservation());
-        }
-        return waitingReservation;
     }
 }

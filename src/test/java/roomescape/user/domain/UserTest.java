@@ -22,7 +22,7 @@ class UserTest {
         // when & then
         assertThatThrownBy(() -> User.withId(null, name, email, password, role))
                 .isInstanceOf(InvalidInputException.class)
-                .hasMessageContaining("Validation failed [while checking null]: User.waitingReseravtionId");
+                .hasMessageContaining("Validation failed [while checking null]: User.id");
     }
 
     @Test

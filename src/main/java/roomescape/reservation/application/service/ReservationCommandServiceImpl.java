@@ -56,21 +56,26 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
 
     @Override
     public WaitingReservation createWaitingReservation(final CreateReservationServiceRequest request) {
-        final Reservation reservation = reservationRepository.findByParams(
-                request.date(), request.timeId(), request.themeId()).orElseThrow(
-                () -> new NotFoundException(DomainTerm.RESERVATION,
-                        request.date(),
-                        DomainTerm.THEME_ID,
-                        DomainTerm.RESERVATION_TIME_ID)
+        if (!reservationRepository.existsByParams(
+                request.date(), request.timeId(), request.themeId())) {
+            throw new NotFoundException(DomainTerm.RESERVATION,
+                    request.date(),
+                    DomainTerm.THEME_ID,
+                    DomainTerm.RESERVATION_TIME_ID);
+        }
+
+        final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());
+        final Theme theme = themeQueryService.get(request.themeId());
+        final int nextOrder = waitingReservationRepository
+                .findMaxWaitingByParams(request.date(), reservationTime, theme) + 1;
+
+        final WaitingReservation waitingReservation = WaitingReservation.withoutId(
+                request.userId(),
+                nextOrder,
+                request.date(),
+                reservationTime,
+                theme
         );
-        System.out.println(DomainTerm.THEME_ID.getClass().getSimpleName());
-
-        final Integer currentMaxOrder = waitingReservationRepository
-                .findMaxWaitingOrderByReservationId(reservation.getId());
-        final int nextOrder = (currentMaxOrder != null) ? currentMaxOrder + 1 : 1;
-
-        final WaitingReservation waitingReservation = reservation
-                .addWaitingReservation(request.userId(), nextOrder);
 
         return waitingReservationRepository.save(waitingReservation);
     }

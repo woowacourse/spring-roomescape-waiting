@@ -59,6 +59,6 @@ class ThemeTest {
         // when & then
         assertThatThrownBy(() -> Theme.withId(null, themeName, themeDescription, themeThumbnail))
                 .isInstanceOf(InvalidInputException.class)
-                .hasMessage("Validation failed [while checking null]: Theme.waitingReseravtionId");
+                .hasMessage("Validation failed [while checking null]: Theme.id");
     }
 }

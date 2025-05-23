@@ -168,7 +168,7 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("user.waitingReseravtionId", is(user.getId().intValue()));
+                .body("user.id", is(user.getId().intValue()));
 
         RestAssured.given().log().all()
                 .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())

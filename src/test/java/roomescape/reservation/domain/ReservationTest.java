@@ -89,7 +89,7 @@ class ReservationTest {
         // when & then
         assertThatThrownBy(() -> Reservation.withId(null, userId, date, time, theme))
                 .isInstanceOf(InvalidInputException.class)
-                .hasMessageContaining("Validation failed [while checking null]: Reservation.waitingReseravtionId");
+                .hasMessageContaining("Validation failed [while checking null]: Reservation.id");
     }
 
     @Test
