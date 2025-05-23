@@ -17,20 +17,20 @@ VALUES ('공포의 방', '소름 끼치는 공포 테마', 'url'),
 INSERT INTO reservation_time (start_at)
 VALUES ('10:00'), ('12:00'), ('14:00'), ('16:00');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id, type)
-VALUES
-(1, '2025-05-25', 1, 1, 'confirm'),
-(1, '2025-05-26', 2, 1, 'confirm'),
-(3, '2025-06-01', 3, 2, 'confirm'),
-(4, '2025-06-02', 1, 3, 'confirm'),
-(3, '2025-06-03', 2, 2, 'confirm'),
-(4, '2025-06-03', 4, 3, 'confirm'),
-(3, '2025-06-04', 3, 1, 'confirm'),
-(4, '2025-06-05', 4, 2, 'confirm');
-
-INSERT INTO reservation (member_id, date, time_id, theme_id, type)
-VALUES
-(2, '2025-05-25', 1, 1, 'waiting'),
-(2, '2025-05-26', 2, 1, 'waiting'),
-(1, '2025-06-03', 2, 2, 'waiting'),
-(2, '2025-06-05', 4, 2, 'waiting');
+--INSERT INTO reservation (id, member_id, date, time_id, theme_id)
+--VALUES
+--(1, 1, '2025-05-25', 1, 1),
+--(2, 3, '2025-06-01', 3, 2),
+--(3, 4, '2025-06-02', 1, 3),
+--(4, 1, '2025-06-03', 2, 2);
+--
+--INSERT INTO confirmed_reservation (id) VALUES (1), (2), (3), (4);
+--
+--INSERT INTO reservation (id, member_id, date, time_id, theme_id)
+--VALUES
+--(5, 2, '2025-05-25', 1, 1),
+--(6, 4, '2025-06-01', 3, 2),
+--(7, 3, '2025-06-02', 1, 3),
+--(8, 2, '2025-06-03', 2, 2);
+--
+--INSERT INTO waiting_reservation (id) VALUES (5), (6), (7), (8);
