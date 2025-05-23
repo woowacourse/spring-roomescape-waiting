@@ -1,37 +1,35 @@
 package roomescape.model;
 
+
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.Embeddable;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Getter
+@Embeddable
 @NoArgsConstructor
-public class Reservation {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class PendingReservation {
 
     @Column(nullable = false)
     private LocalDate date;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private ReservationTime reservationTime;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Theme theme;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Member member;
 
-    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member, LocalDate today) {
+    public PendingReservation(
+            LocalDate date,
+            ReservationTime reservationTime,
+            Theme theme,
+            Member member,
+            LocalDate today
+    ) {
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
