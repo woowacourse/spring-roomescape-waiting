@@ -1,5 +1,6 @@
 package roomescape.persistence.repository;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.common.exception.NotFoundException;
@@ -26,5 +27,15 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     @Override
     public void delete(Waiting waiting) {
         waitingJpaRepository.delete(waiting);
+    }
+
+    @Override
+    public List<Waiting> findForMember(Long id) {
+        return waitingJpaRepository.findByPendingReservation_MemberId(id);
+    }
+
+    @Override
+    public int countWaitingBefore(Waiting waiting) {
+        return waitingJpaRepository.countWaitingBefore(waiting.getRegisteredAt());
     }
 }

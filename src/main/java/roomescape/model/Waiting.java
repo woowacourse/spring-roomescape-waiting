@@ -9,7 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,5 +42,17 @@ public class Waiting {
 
     public boolean ownBy(Member comparedMember) {
         return pendingReservation.getMember().getId().equals(comparedMember.getId());
+    }
+
+    public String getThemeName() {
+        return this.pendingReservation.getTheme().getName();
+    }
+
+    public LocalDate getReservationDate() {
+        return this.pendingReservation.getDate();
+    }
+
+    public LocalTime getReservationTime() {
+        return this.pendingReservation.getReservationTime().getStartAt();
     }
 }

@@ -2,11 +2,13 @@ package roomescape.application.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRegisterDto;
+import roomescape.dto.response.MemberWaitingResponseDto;
 import roomescape.dto.response.WaitingResponseDto;
 import roomescape.model.Member;
 import roomescape.model.PendingReservation;
@@ -56,4 +58,16 @@ public class WaitingService {
 
         waitingRepository.delete(waiting);
     }
+
+    public List<MemberWaitingResponseDto> getMyWaitings(LoginMember loginMember) {
+        List<Waiting> myWaitings = waitingRepository.findForMember(loginMember.id());
+
+        return myWaitings.stream()
+                .map(waiting -> {
+                    int count = waitingRepository.countWaitingBefore(waiting);
+                    return new MemberWaitingResponseDto(waiting, count + 1);
+                })
+                .toList();
+    }
 }
+
