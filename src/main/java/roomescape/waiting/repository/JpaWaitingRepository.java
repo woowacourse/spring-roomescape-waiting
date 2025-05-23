@@ -11,6 +11,7 @@ import roomescape.waiting.entity.WaitingWithRank;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting,Long> {
 
@@ -49,4 +50,7 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting,Long> {
             "       AND w2.id < w.id)) " +
             "FROM Waiting w ")
     List<WaitingWithRank> findAllWaitingWithRank();
+
+    Optional<Waiting> findFirstByThemeAndDateAndTimeOrderByIdAsc(Theme theme, LocalDate date, ReservationTime time);
+
 }

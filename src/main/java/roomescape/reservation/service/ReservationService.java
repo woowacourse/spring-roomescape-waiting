@@ -14,13 +14,13 @@ import roomescape.reservationTime.entity.ReservationTime;
 import roomescape.reservationTime.repository.JpaReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.JpaThemeRepository;
-import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.entity.WaitingWithRank;
-import roomescape.waiting.repository.JpaWaitingRepository;
+import roomescape.waiting.service.WaitingService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReservationService {
@@ -28,33 +28,24 @@ public class ReservationService {
     private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
-    private final JpaWaitingRepository waitingRepository;
+    private final WaitingService waitingService;
 
     public ReservationService(
             JpaReservationRepository reservationRepository,
             JpaMemberRepository memberRepository,
             JpaReservationTimeRepository reservationTimeRepository,
             JpaThemeRepository themeRepository,
-            JpaWaitingRepository waitingRepository
+            WaitingService waitingService
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.waitingRepository = waitingRepository;
+        this.waitingService = waitingService;
     }
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllReservations() {
         return reservationRepository.findAll();
-    }
-
-    public List<WaitingWithRank> findAllWaiting() {
-        return waitingRepository.findAllWaitingWithRank();
-    }
-
-    @Transactional(readOnly = true)
-    public List<WaitingWithRank> findAllWaitingWithRankByMemberId(Member member) {
-        return waitingRepository.findWaitingsWithRankByMemberId(member.getId());
     }
 
     @Transactional(readOnly = true)
@@ -75,11 +66,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation addReservation(Member member, ReservationRequest request) {
-        LocalDate date = request.date();
-        long timeId = request.timeId();
-        long themeId  = request.themeId();
-
+    public Reservation addReservation(
+            Member member,
+            LocalDate date,
+            long themeId,
+            long timeId
+    ) {
         ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundException("time"));
 
@@ -112,11 +104,11 @@ public class ReservationService {
         }
     }
 
-    @Transactional
-    public void removeReservation(long id) {
-        if (reservationRepository.existsById(id)) {
-            throw new NotFoundException("reservation");
-        }
+    public Reservation removeReservation(long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("reservation"));
+
         reservationRepository.deleteById(id);
+        return reservation;
     }
 }

@@ -12,10 +12,13 @@ import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.JpaThemeRepository;
 import roomescape.waiting.controller.dto.request.WaitingRequest;
 import roomescape.waiting.entity.Waiting;
+import roomescape.waiting.entity.WaitingWithRank;
 import roomescape.waiting.repository.JpaWaitingRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class WaitingService {
@@ -32,6 +35,14 @@ public class WaitingService {
         this.jpaWaitingRepository = jpaWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+    }
+
+    public List<WaitingWithRank> findAllWaiting() {
+        return jpaWaitingRepository.findAllWaitingWithRank();
+    }
+
+    public List<WaitingWithRank> findAllWaitingWithRankByMemberId(Member member) {
+        return jpaWaitingRepository.findWaitingsWithRankByMemberId(member.getId());
     }
 
     @Transactional
@@ -55,5 +66,18 @@ public class WaitingService {
                 (date.isEqual(now.toLocalDate()) && time.isBefore(now.toLocalTime()))) {
             throw new InvalidInputException("과거 예약은 불가능");
         }
+    }
+
+    public Optional<Waiting> removeWaiting(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime time
+    ) {
+        return jpaWaitingRepository
+                .findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date, time)
+                .map(waiting -> {
+                    jpaWaitingRepository.delete(waiting);
+                    return waiting;
+                });
     }
 }

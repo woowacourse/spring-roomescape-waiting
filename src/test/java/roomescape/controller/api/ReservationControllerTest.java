@@ -10,6 +10,18 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ReservationControllerTest {
+/*
+    @Test
+    @DisplayName("예약 생성 테스트")
+    void createReservations(){
+
+
+        RestAssured.given().log().all()
+                .body()
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(204);
+    }*/
 
     @Test
     @DisplayName("/reservations 요청 시 예약 정보 조회")
@@ -20,9 +32,13 @@ class ReservationControllerTest {
             .statusCode(200);
     }
 
+
     @Test
     @DisplayName("예약 관리 페이지 내에서 예약 삭제")
     void deleteReservation() {
+
+
+
         RestAssured.given().log().all()
             .when().delete("/reservations/1")
             .then().log().all()
@@ -36,8 +52,8 @@ class ReservationControllerTest {
 
     private Map<String, String> getTestParamsWithMember() {
         return Map.of(
-            "email", "sa123",
-            "password", "na123"
+            "email", "admin",
+            "password", "1234"
         );
     }
 }
