@@ -39,7 +39,7 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<ThemeResponse> findTopRankThemes(final int size) {
+    public List<ThemeResponse> findTopRank(final int size) {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
         final LocalDate to = now.minusDays(BETWEEN_DAY_END);

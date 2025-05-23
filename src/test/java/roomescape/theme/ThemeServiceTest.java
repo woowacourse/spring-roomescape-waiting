@@ -172,7 +172,7 @@ class ThemeServiceTest {
             }
 
             // when
-            final List<ThemeResponse> actual = themeService.findTopRankThemes(3);
+            final List<ThemeResponse> actual = themeService.findTopRank(3);
 
             // then
             assertThat(actual)

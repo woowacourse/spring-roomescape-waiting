@@ -158,7 +158,7 @@ public class ReservationTimeServiceTest {
             reservationTimeRepositoryFacade.save(new ReservationTime(LocalTime.of(14, 0)));
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailable(
                     1L, targetDate);
 
             // then
@@ -181,7 +181,7 @@ public class ReservationTimeServiceTest {
             reservationRepositoryFacade.save(reservation);
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailable(
                     1L, targetDate);
 
             // then
@@ -200,7 +200,7 @@ public class ReservationTimeServiceTest {
             reservationTimeRepositoryFacade.save(time);
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailable(
                     1L, targetDate);
 
             // then

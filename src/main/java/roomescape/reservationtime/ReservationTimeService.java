@@ -27,7 +27,7 @@ public class ReservationTimeService {
     private final ThemeRepositoryFacade themeRepositoryFacade;
 
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
-        validateDuplicateTime(request);
+        validateDuplicate(request);
 
         final ReservationTime reservationTime = new ReservationTime(request.startAt());
         final ReservationTime savedReservationTime = reservationTimeRepositoryFacade.save(reservationTime);
@@ -40,7 +40,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
+    public List<AvailableReservationTimeResponse> findAllAvailable(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepositoryFacade.findAll();
         final Theme theme = themeRepositoryFacade.findById(themeId)
                 .orElseThrow(ReservationTimeNotExistsThemeException::new);
@@ -72,7 +72,7 @@ public class ReservationTimeService {
         reservationTimeRepositoryFacade.delete(reservationTime);
     }
 
-    private void validateDuplicateTime(final ReservationTimeRequest request) {
+    private void validateDuplicate(final ReservationTimeRequest request) {
         if (reservationTimeRepositoryFacade.existsByStartAt(request.startAt())) {
             throw new ReservationTimeConflictException();
         }
