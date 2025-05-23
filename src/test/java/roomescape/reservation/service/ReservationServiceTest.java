@@ -123,7 +123,7 @@ class ReservationServiceTest {
         final String thumbnail = "귀신사진";
         final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
 
-        Reservation savedReservation = reservationRepository.save(new Reservation(
+        final Reservation savedReservation = reservationRepository.save(new Reservation(
                 savedMember,
                 date,
                 savedTime,
@@ -133,6 +133,44 @@ class ReservationServiceTest {
         // when & then
         Assertions.assertThatCode(() -> reservationService.deleteById(savedReservation.getId()))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 예약_정보를_삭제하면_첫번째_대기가_예약이_된다() {
+        // given
+        final Member member = new Member("이스트", "east@email.com", "1234", Role.ADMIN);
+        final Member member2 = new Member("우가", "wooga@gmail.com", "1234", Role.USER);
+        final Member savedMember = memberRepository.save(member);
+        final Member savedMember2 = memberRepository.save(member2);
+        final LocalTime time = LocalTime.parse("20:00");
+        final LocalDate date = LocalDate.parse("2025-11-28");
+        final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+
+        final String themeName = "공포";
+        final String description = "무섭다";
+        final String thumbnail = "귀신사진";
+        final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
+
+        final Reservation savedReservation = reservationRepository.save(new Reservation(
+                savedMember,
+                date,
+                savedTime,
+                savedTheme
+        ));
+        
+        waitingRepository.save(new Waiting(
+                savedMember2,
+                savedTime,
+                savedTheme,
+                date
+        ));
+
+        // when
+        reservationService.deleteById(savedReservation.getId());
+
+        // then
+        Assertions.assertThat(reservationRepository.findByMember(savedMember2).getFirst().getMember())
+                .isEqualTo(savedMember2);
     }
 
     @Test
@@ -414,6 +452,14 @@ class ReservationServiceTest {
         // then
         Assertions.assertThat(waitingRepository.findByMember(savedMember))
                 .doesNotContain(savedWaiting);
+    }
+
+    @Test
+    void 아이디를_기준으로_예약_대기_삭제_예외_발생() {
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> reservationService.deleteWaitingById(Long.MAX_VALUE))
+                .isInstanceOf(DataNotFoundException.class);
     }
 
     @Test
