@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -9,6 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.local.DuplicateReservationException;
@@ -21,6 +23,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 @Transactional
@@ -30,16 +33,18 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository, MemberRepository memberRepository
+            ThemeRepository themeRepository, MemberRepository memberRepository, WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findAllReservations() {
@@ -84,6 +89,18 @@ public class ReservationService {
     public void deleteReservationById(long reservationId) {
         Reservation reservation = getReservationById(reservationId);
         reservationRepository.delete(reservation);
+        addReservationWithWaiting(reservation);
+    }
+
+    private void addReservationWithWaiting(Reservation deletedReservation) {
+        Optional<Waiting> firstWaiting = findFirstWaitingByReservation(deletedReservation);
+        if (firstWaiting.isPresent()) {
+            Waiting waiting = firstWaiting.get();
+            long memberId = waiting.getMember().getId();
+            ReservationCreationContent creationContent = new ReservationCreationContent(waiting);
+            addReservation(memberId, creationContent);
+            waitingRepository.delete(waiting);
+        }
     }
 
     private void validateDuplicateReservation(Theme theme, LocalDate date, ReservationTime time) {
@@ -118,5 +135,12 @@ public class ReservationService {
     private Reservation getReservationById(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(NotFoundReservationException::new);
+    }
+
+    private Optional<Waiting> findFirstWaitingByReservation(Reservation deletedReservation) {
+        return waitingRepository.findFirstWaiting(
+                deletedReservation.getTheme().getId(),
+                deletedReservation.getDate(),
+                deletedReservation.getReservationTime().getId());
     }
 }

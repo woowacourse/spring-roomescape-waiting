@@ -91,7 +91,7 @@ public class WaitingService {
 
     private void validateDuplicatedWaiting(Waiting waiting) {
         boolean isDuplicated = waitingRepository.existsDuplicated(
-                waiting.getTheme().getId(), waiting.getTime().getId(), waiting.getMember().getId());
+                waiting.getTheme().getId(), waiting.getDate(), waiting.getTime().getId(), waiting.getMember().getId());
         if (isDuplicated) {
             throw new DuplicatedWaitingException();
         }

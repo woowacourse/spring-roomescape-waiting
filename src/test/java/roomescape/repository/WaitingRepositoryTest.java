@@ -1,9 +1,11 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.test.fixture.DateFixture.NEXT_DAY;
 
 import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,7 +44,8 @@ class WaitingRepositoryTest {
             entityManager.flush();
 
             // when
-            boolean isDuplicated = waitingRepository.existsDuplicated(theme.getId(), time.getId(), member.getId());
+            boolean isDuplicated = waitingRepository.existsDuplicated(
+                    theme.getId(), NEXT_DAY, time.getId(), member.getId());
 
             // then
             assertThat(isDuplicated).isFalse();
@@ -63,11 +66,37 @@ class WaitingRepositoryTest {
             entityManager.flush();
 
             // when
-            boolean isDuplicated = waitingRepository.existsDuplicated(theme.getId(), time.getId(), member.getId());
+            boolean isDuplicated = waitingRepository.existsDuplicated(
+                    theme.getId(), NEXT_DAY, time.getId(), member.getId());
 
             // then
             assertThat(isDuplicated).isTrue();
 
         }
+    }
+
+    @DisplayName("특정 테마의 날짜시간에 대한 첫번째 예약 대기를 조회할 수 있다.")
+    @Test
+    void findFirstWaiting() {
+        // given
+        ReservationTime time = entityManager.persist(
+                ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        Theme theme = entityManager.persist(
+                Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+        Member firstMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원", "member1@test.com", "qwer1234!"));
+        Member secondMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원", "member2@test.com", "qwer1234!"));
+        Waiting firstWaiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, firstMember));
+        Waiting secondWaiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, secondMember));
+
+        // when
+        Optional<Waiting> findWaiting = waitingRepository.findFirstWaiting(theme.getId(), NEXT_DAY, time.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(findWaiting).isPresent(),
+                () -> assertThat(findWaiting.get()).isEqualTo(firstWaiting)
+        );
     }
 }

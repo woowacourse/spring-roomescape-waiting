@@ -22,6 +22,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.MemberProfileResponse;
 import roomescape.dto.response.ReservationResponse;
@@ -36,6 +37,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @DataJpaTest
 class ReservationServiceTest {
@@ -50,6 +52,8 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     private ReservationService reservationService;
 
@@ -63,7 +67,8 @@ class ReservationServiceTest {
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
-                memberRepository);
+                memberRepository,
+                waitingRepository);
 
         reservationTime = entityManager.persist(
                 ReservationTime.createWithoutId(LocalTime.of(10, 0)));
@@ -357,6 +362,75 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.deleteReservationById(invalidReservationId))
                     .isInstanceOf(NotFoundReservationException.class)
                     .hasMessage("예약을 찾을 수 없습니다.");
+        }
+
+        @DisplayName("예약 대기가 존재할 경우 첫번째 예약 대기를 예약으로 등록한다.")
+        @Test
+        void canAddNewReservationWithWaiting() {
+            // given
+            Reservation reservation = entityManager.persist(
+                    Reservation.createWithoutId(NEXT_DAY, ReservationStatus.BOOKED, reservationTime, theme, member));
+
+            Member firstWaitingMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원1", "waiting1@email.com", "qwer1234!"));
+            Member secondWaitingMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원2", "waiting2@email.com", "qwer1234!"));
+
+            Waiting firstWaiting = entityManager.persist(
+                    Waiting.createWithoutId(
+                            reservation.getDate(), reservation.getTheme(),
+                            reservation.getReservationTime(), firstWaitingMember));
+            Waiting secondWaiting = entityManager.persist(
+                    Waiting.createWithoutId(
+                            reservation.getDate(), reservation.getTheme(),
+                            reservation.getReservationTime(), secondWaitingMember));
+
+            entityManager.flush();
+
+            // when
+            reservationService.deleteReservationById(reservation.getId());
+
+            // then
+            List<Reservation> newReservation = reservationRepository.findByMember(firstWaitingMember);
+            assertAll(
+                    () -> assertThat(newReservation).hasSize(1),
+                    () -> assertThat(newReservation.getFirst().getDate()).isEqualTo(firstWaiting.getDate()),
+                    () -> assertThat(newReservation.getFirst().getTheme()).isEqualTo(firstWaiting.getTheme()),
+                    () -> assertThat(newReservation.getFirst().getReservationTime()).isEqualTo(firstWaiting.getTime()),
+                    () -> assertThat(newReservation.getFirst().getMember()).isEqualTo(firstWaiting.getMember())
+            );
+        }
+
+        @DisplayName("예약 대기가 존재해서 첫번째 예약 대기가 예약으로 등록된 경우 첫번째 예약 대기는 삭제된다.")
+        @Test
+        void canDeleteFirstWaiting() {
+            // given
+            Reservation reservation = entityManager.persist(
+                    Reservation.createWithoutId(NEXT_DAY, ReservationStatus.BOOKED, reservationTime, theme, member));
+
+            Member firstWaitingMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원1", "waiting1@email.com", "qwer1234!"));
+            Member secondWaitingMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원2", "waiting2@email.com", "qwer1234!"));
+
+            Waiting firstWaiting = entityManager.persist(
+                    Waiting.createWithoutId(
+                            reservation.getDate(), reservation.getTheme(),
+                            reservation.getReservationTime(), firstWaitingMember));
+            Waiting secondWaiting = entityManager.persist(
+                    Waiting.createWithoutId(
+                            reservation.getDate(), reservation.getTheme(),
+                            reservation.getReservationTime(), secondWaitingMember));
+
+            entityManager.flush();
+            entityManager.clear();
+
+            // when
+            reservationService.deleteReservationById(reservation.getId());
+
+            // then
+            Waiting deletedFirstWaiting = entityManager.find(Waiting.class, firstWaiting.getId());
+            assertThat(deletedFirstWaiting).isNull();
         }
     }
 }

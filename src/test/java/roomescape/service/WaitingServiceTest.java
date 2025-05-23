@@ -260,7 +260,7 @@ class WaitingServiceTest {
             Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
 
             // when
-            reservationRepository.deleteById(waiting.getId());
+            waitingService.deleteWaitingById(waiting.getId());
 
             // then
             assertThat(entityManager.find(Waiting.class, waiting.getId())).isNull();
@@ -278,10 +278,9 @@ class WaitingServiceTest {
                     Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
             Reservation reservation = entityManager.persist(Reservation.createWithoutId(
                     NEXT_DAY, ReservationStatus.BOOKED, time, theme, member));
-            Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
 
             // when & then
-            assertThatThrownBy(() -> reservationRepository.deleteById(waiting.getId()))
+            assertThatThrownBy(() -> waitingService.deleteWaitingById(100L))
                     .isInstanceOf(NotFoundWaitingException.class)
                     .hasMessage("해당 대기 데이터를 찾을 수 없습니다.");
         }
