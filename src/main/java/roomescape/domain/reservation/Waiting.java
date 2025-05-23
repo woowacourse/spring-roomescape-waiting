@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.domain.BaseEntity;
 import roomescape.domain.member.Member;
 import roomescape.infrastructure.error.exception.WaitingException;
@@ -61,11 +62,11 @@ public class Waiting extends BaseEntity {
     }
 
     public boolean canBeCanceledBy(Member member) {
-        return isOwner(member) || member.isAdmin();
+        return isOwner(member.getId()) || member.isAdmin();
     }
 
-    private boolean isOwner(Member member) {
-        return this.member.equals(member);
+    private boolean isOwner(Long memberId) {
+        return Objects.equals(this.member.getId(), memberId);
     }
 
     public Long getId() {
