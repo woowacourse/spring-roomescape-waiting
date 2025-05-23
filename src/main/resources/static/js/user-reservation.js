@@ -133,7 +133,6 @@ function checkDateAndThemeAndTime() {
   const selectedTimeElement = document.querySelector('.time-slot.active');
   const reserveButton = document.getElementById("reserve-button");
   const waitButton = document.getElementById("wait-button");
-
   if (selectedDate && selectedThemeElement && selectedTimeElement) {
     if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
       // 선택된 시간이 이미 예약된 경우

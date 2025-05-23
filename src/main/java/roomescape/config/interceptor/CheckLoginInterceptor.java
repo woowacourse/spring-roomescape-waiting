@@ -9,6 +9,7 @@ import roomescape.reservation.entity.Role;
 import roomescape.exception.custom.AuthenticatedException;
 import roomescape.auth.service.AuthService;
 
+
 public class CheckLoginInterceptor implements HandlerInterceptor {
 
     private final AuthService authService;

@@ -1,7 +1,6 @@
 package roomescape.controller.api;
 
 import io.restassured.RestAssured;
-
 import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -58,6 +57,7 @@ class ReservationControllerTest {
     @DisplayName("예약 관리 페이지 내에서 예약 삭제")
     void deleteReservation() {
 
+
         RestAssured.given().log().all()
             .when().delete("/reservations/1")
             .then().log().all()
@@ -74,6 +74,7 @@ class ReservationControllerTest {
         return Map.of(
             "email", "admin",
             "password", "1234"
+
         );
     }
 }

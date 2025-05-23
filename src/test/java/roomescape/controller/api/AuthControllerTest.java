@@ -72,7 +72,6 @@ class AuthControllerTest {
             .body("name", is("Lemon"));
     }
 
-
     @Test
     @DisplayName("로그인 테스트")
     void loginTest() {
