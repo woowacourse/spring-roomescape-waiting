@@ -10,7 +10,6 @@ import roomescape.member.exception.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationInfo;
-import roomescape.reservation.dto.response.MyReservationOutput;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -21,39 +20,25 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
-public class ReservationService {
+public class ReservationModuleService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository) {
+    public ReservationModuleService(final ReservationRepository reservationRepository,
+                                    final ReservationTimeRepository reservationTimeRepository,
+                                    final ThemeRepository themeRepository,
+                                    final MemberRepository memberRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
 
-    public List<ReservationResponse> findReservations(final Long themeId, final Long memberId,
-                                                      final LocalDate startDate,
-                                                      final LocalDate endDate) {
-        return getReservations(themeId, memberId, startDate, endDate)
-                .stream()
-                .map(reservation -> {
-                    ReservationTime time = reservation.getInfo().getTime();
-                    Theme theme = reservation.getInfo().getTheme();
-                    Member member = reservation.getInfo().getMember();
-                    return ReservationResponse.of(reservation, time, theme, member);
-                })
-                .toList();
-    }
-
-    private List<Reservation> getReservations(final Long themeId, final Long memberId,
-                                              final LocalDate startDate, final LocalDate endDate) {
+    public List<Reservation> getReservations(final Long themeId, final Long memberId,
+                                             final LocalDate startDate, final LocalDate endDate) {
         if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
             return reservationRepository.findAll();
         }
@@ -72,35 +57,53 @@ public class ReservationService {
         Member member = findUserByMemberId(memberId);
         Reservation newReservation = reservationRepository.save(
                 Reservation.createUpcomingReservationWithUnassignedId(
-                        new ReservationInfo(member, date, time, theme), now));
+                        member,
+                        new ReservationInfo(date, time, theme), now));
         return ReservationResponse.of(newReservation, time, theme, member);
     }
 
-    private Member findUserByMemberId(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
-    }
-
-    private Theme findTheme(final Long request) {
-        return themeRepository.findById(request)
-                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
-    }
-
-    private ReservationTime findReservationTime(final Long reservationTimeId) {
-        return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
-    }
-
-    private void checkIfReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+    public void checkIfReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
+        boolean exists = isReservationExists(date, timeId, themeId);
+        if (exists) {
             throw new ReservationAlreadyExistsException("해당 시간에 이미 예약이 존재합니다.");
         }
     }
 
-    public List<MyReservationOutput> findMyReservations(final UserInfo userInfo) {
-        return reservationRepository.findByMemberId(userInfo.id())
-                .stream()
-                .map(MyReservationOutput::from)
-                .toList();
+    public Member findUserByMemberId(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
     }
+
+    public Theme findTheme(final Long request) {
+        return themeRepository.findById(request)
+                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
+    }
+
+    public ReservationTime findReservationTime(final Long reservationTimeId) {
+        return reservationTimeRepository.findById(reservationTimeId)
+                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
+    }
+
+    public boolean isReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            return true;
+        }
+        return false;
+    }
+
+//    public List<MyReservationOutput> findMyReservationsOutput(final UserInfo userInfo) {
+//        return reservationRepository.findByMemberId(userInfo.id())
+//                .stream()
+//                .map(MyReservationOutput::from)
+//                .toList();
+//    }
+
+    public List<Reservation> findMyReservations(final UserInfo userInfo) {
+        return reservationRepository.findByMemberId(userInfo.id());
+    }
+
+    public Reservation save(final Reservation reservation) {
+        return reservationRepository.save(reservation);
+    }
+
 }

@@ -18,7 +18,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationModuleService;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
@@ -41,7 +41,7 @@ class ReservationTimeServiceTest {
     private Theme theme = TestFixture.makeTheme(1L);
     private Member member = TestFixture.makeMember();
 
-    private ReservationService reservationService;
+    private ReservationModuleService reservationModuleService;
     private ReservationTimeService reservationTimeService;
 
     @Autowired
@@ -61,7 +61,8 @@ class ReservationTimeServiceTest {
         reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
+        reservationModuleService = new ReservationModuleService(reservationRepository, reservationTimeRepository,
+                themeRepository,
                 memberRepository);
     }
 
@@ -112,7 +113,7 @@ class ReservationTimeServiceTest {
     void deleteReservationTime_shouldThrowException_WhenReservationExists() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
                 new ReservationTimeCreateRequest(LocalTime.now()));
-        reservationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationModuleService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
         assertThatThrownBy(() -> reservationTimeService.delete(reservationTimeResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
@@ -126,7 +127,7 @@ class ReservationTimeServiceTest {
         reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
         reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
-        reservationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationModuleService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
         List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.getAvailableReservationTimes(
                 futureDate, theme.getId());

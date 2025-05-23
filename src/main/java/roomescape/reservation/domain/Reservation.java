@@ -2,12 +2,17 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.member.domain.Member;
 import roomescape.reservation.exception.InvalidReservationException;
+
 
 @Entity
 public class Reservation {
@@ -16,21 +21,26 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
     @Embedded
     private ReservationInfo info;
-
 
     protected Reservation() {
     }
 
-    public Reservation(final ReservationInfo info) {
+    public Reservation(final Member member, final ReservationInfo info) {
+        this.member = member;
         this.info = info;
     }
 
-    public static Reservation createUpcomingReservationWithUnassignedId(final ReservationInfo reservationInfo,
+    public static Reservation createUpcomingReservationWithUnassignedId(final Member member,
+                                                                        final ReservationInfo reservationInfo,
                                                                         LocalDateTime now) {
         validateDateTime(reservationInfo, now);
-        return new Reservation(reservationInfo);
+        return new Reservation(member, reservationInfo);
     }
 
     private static void validateDateTime(ReservationInfo reservationInfo, LocalDateTime now) {
@@ -54,6 +64,10 @@ public class Reservation {
 
     public Long getId() {
         return id;
+    }
+
+    public Member getMember() {
+        return member;
     }
 
     public ReservationInfo getInfo() {

@@ -30,7 +30,7 @@ import roomescape.theme.repository.ThemeRepository;
 @TestPropertySource(properties = {
         "spring.sql.init.data-locations="
 })
-class ReservationServiceTest {
+class ReservationModuleServiceTest {
 
     private static final LocalDate futureDate = TestFixture.makeFutureDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
@@ -39,7 +39,7 @@ class ReservationServiceTest {
     private Long themeId;
     private Long memberId;
 
-    private ReservationService reservationService;
+    private ReservationModuleService reservationModuleService;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -55,7 +55,8 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
+        reservationModuleService = new ReservationModuleService(reservationRepository, reservationTimeRepository,
+                themeRepository,
                 memberRepository);
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
@@ -66,7 +67,8 @@ class ReservationServiceTest {
 
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
-        ReservationResponse response = reservationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        ReservationResponse response = reservationModuleService.create(futureDate, timeId, themeId, memberId,
+                afterOneHour);
 
         Assertions.assertAll(
                 () -> assertThat(response.member().name()).isEqualTo("Mint"),
@@ -78,19 +80,20 @@ class ReservationServiceTest {
     @Test
     void getReservations_shouldReturnAllCreatedReservations() {
         Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
-        reservationService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
+        reservationModuleService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        reservationModuleService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
 
-        List<ReservationResponse> result = reservationService.findReservations(null, null, null, null);
+        List<ReservationResponse> result = reservationModuleService.findReservations(null, null, null, null);
         assertThat(result).hasSize(2);
     }
 
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
-        ReservationResponse response = reservationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
-        reservationService.delete(response.id());
+        ReservationResponse response = reservationModuleService.create(futureDate, timeId, themeId, memberId,
+                afterOneHour);
+        reservationModuleService.delete(response.id());
 
-        List<ReservationResponse> result = reservationService.findReservations(themeId, memberId, futureDate,
+        List<ReservationResponse> result = reservationModuleService.findReservations(themeId, memberId, futureDate,
                 futureDate.plusDays(1));
         assertThat(result).isEmpty();
     }
@@ -98,16 +101,16 @@ class ReservationServiceTest {
     @Test
     void createReservation_shouldThrowException_WhenDuplicated() {
         reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
-        reservationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        reservationModuleService.create(futureDate, timeId, themeId, memberId, afterOneHour);
 
-        assertThatThrownBy(() -> reservationService.create(futureDate, timeId, themeId, memberId, afterOneHour))
+        assertThatThrownBy(() -> reservationModuleService.create(futureDate, timeId, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationAlreadyExistsException.class)
                 .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
 
     @Test
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
-        assertThatThrownBy(() -> reservationService.create(futureDate, 999L, themeId, memberId, afterOneHour))
+        assertThatThrownBy(() -> reservationModuleService.create(futureDate, 999L, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
