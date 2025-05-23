@@ -208,7 +208,7 @@ function onWaitButtonClick() {
         /*
         TODO: [3단계] 예약 대기 생성 요청 API 호출
          */
-        fetch('', {
+        fetch('/waitings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -217,9 +217,6 @@ function onWaitButtonClick() {
         })
             .then(response => {
                 if (!response.ok) throw new Error('Reservation waiting failed');
-                return response.json();
-            })
-            .then(data => {
                 alert('Reservation waiting successful!');
                 window.location.href = "/";
             })

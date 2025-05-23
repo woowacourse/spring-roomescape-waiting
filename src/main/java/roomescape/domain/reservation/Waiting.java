@@ -36,6 +36,7 @@ public class Waiting {
     }
 
     public static Waiting create(LocalDateTime startedAt, ThemeSchedule themeSchedule, Member member) {
+        themeSchedule.validateReservable(startedAt);
         return new Waiting(null, startedAt, themeSchedule, member);
     }
 }

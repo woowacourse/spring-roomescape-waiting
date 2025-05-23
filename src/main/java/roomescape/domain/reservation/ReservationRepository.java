@@ -22,7 +22,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                                                        @Param("memberId") Long memberId,
                                                                                        @Param("from") LocalDate from,
                                                                                        @Param("to") LocalDate to);
-    
+
     @EntityGraph(attributePaths = {"member", "themeSchedule.time"})
     List<Reservation> findAllByMemberId(@Param("memberId") Long memberId);
 
@@ -33,4 +33,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 JOIN FETCH r.themeSchedule.theme th
             """)
     List<Reservation> findAllWithMemberAndTimeAndTheme();
+
+    boolean existsByThemeScheduleAndMemberId(@Param("themeSchedule") ThemeSchedule themeSchedule,
+                                             @Param("memberId") Long memberId);
 }
