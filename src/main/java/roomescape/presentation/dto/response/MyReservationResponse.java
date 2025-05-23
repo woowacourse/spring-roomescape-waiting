@@ -40,9 +40,9 @@ public record MyReservationResponse(
     public static MyReservationResponse from(Waiting waiting) {
         return new MyReservationResponse(
                 waiting.getId(),
-                waiting.getReservation().getTheme().getName(),
-                waiting.getReservation().getDate(),
-                waiting.getReservation().getTime().getStartAt(),
+                waiting.getReservationInfo().getTheme().getName(),
+                waiting.getReservationInfo().getDate(),
+                waiting.getReservationInfo().getTime().getStartAt(),
                 waiting.getRank() + "번째 예약대기",
                 true
         );

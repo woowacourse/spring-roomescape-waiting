@@ -125,11 +125,11 @@ VALUES
 (CURRENT_DATE + 2, 1, 10, 2, 'RESERVED');
 
 -- waiting
-INSERT INTO waiting (reservation_id, member_id, rank)
+INSERT INTO waiting (reservation_id, date, time_id, theme_id, member_id, rank)
 VALUES
-(55, 5, 1),
-(55, 6, 2),
-(55, 7, 3),
+(55, CURRENT_DATE +1, 2, 9, 5, 1),
+(55, CURRENT_DATE +1, 2, 9, 6, 2),
+(55, CURRENT_DATE +1, 2, 9, 7, 3),
 
-(57, 3, 1),
-(57, 4, 2);
+(57, CURRENT_DATE + 2, 1, 10, 3, 1),
+(57, CURRENT_DATE + 2, 1, 10, 4, 2);

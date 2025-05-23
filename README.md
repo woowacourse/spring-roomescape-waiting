@@ -171,6 +171,6 @@
     ```
     HTTP/1.1 204
     ```
-- [ ] 예약 대기 승인 기능
-- [ ] 화면 응답
+- [x] 예약 대기 승인 기능(자동 승인 기능)
+- [x] 화면 응답
   - [4단계 클라이언트 코드 커밋](https://github.com/woowacourse/spring-roomescape-member/commit/5f72af44aff4b1064fce95c3c00ffafae23569af)

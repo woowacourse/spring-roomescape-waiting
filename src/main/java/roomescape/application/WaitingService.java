@@ -3,7 +3,8 @@ package roomescape.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
-import roomescape.domain.Reservation;
+import roomescape.domain.ReservationInfo;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.Waiting;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
@@ -11,6 +12,7 @@ import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.WaitingResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -36,31 +38,35 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse createWaiting(ReservationCreateRequest request, LoginMember loginMember) {
-        Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
+        ReservationInfo reservationInfo = reservationRepository.findReservationInfo(request.date(), request.timeId(), request.themeId(), ReservationStatus.RESERVED);
+        validateWaitingTime(reservationInfo);
         Member member = memberService.findMemberByEmail(loginMember.email());
-        validateExistsReservation(reservation, member);
+        validateExistsReservationByMember(reservationInfo, member);
 
-        long rank = waitingRepository.countByReservation(reservation) + 1;
-        Waiting waiting = Waiting.create(reservation, member, rank);
-        validateWaiting(waiting, member);
+        long rank = waitingRepository.countByReservationInfo(reservationInfo) + 1;
+        Waiting waiting = Waiting.create(reservationInfo, member, rank);
+        validateExistsWaitingByMember(waiting, member);
 
         Waiting saved = waitingRepository.save(waiting);
         return WaitingResponse.from(saved);
     }
 
-    private void validateExistsReservation(Reservation reservation, Member member) {
-        if (reservationRepository.existsByDateAndTimeAndThemeAndMember(reservation.getDate(), reservation.getTime(), reservation.getTheme(), member)) {
+    private void validateWaitingTime(ReservationInfo reservationInfo) {
+        LocalDateTime waitingDateTime = LocalDateTime.of(reservationInfo.getDate(), reservationInfo.getTime().getStartAt());
+        if (!waitingDateTime.isAfter(currentTimeService.now())) {
+            throw new IllegalArgumentException("[ERROR] 현재 시간 이후로 예약 대기할 수 있습니다.");
+        }
+    }
+
+    private void validateExistsReservationByMember(ReservationInfo reservationInfo, Member member) {
+        if (reservationRepository.existsByDateAndTimeAndThemeAndMember(reservationInfo.getDate(), reservationInfo.getTime(), reservationInfo.getTheme(), member)) {
             throw new IllegalArgumentException("[ERROR] 이미 해당 날짜, 해당 테마, 해당 시간에 예약이 존재합니다.");
         }
     }
 
-    private void validateWaiting(Waiting waiting, Member member) {
-        if (waitingRepository.existsByReservationAndMember(waiting.getReservation(), member)) {
+    private void validateExistsWaitingByMember(Waiting waiting, Member member) {
+        if (waitingRepository.existsByReservationInfoAndMember(waiting.getReservationInfo(), member)) {
             throw new IllegalArgumentException("[ERROR] 이미 해당 날짜, 해당 테마, 해당 시간에 예약 대기 중입니다.");
-        }
-
-        if (waiting.isPast(currentTimeService.now())) {
-            throw new IllegalArgumentException("[ERROR] 현재 시간 이후로 예약 대기할 수 있습니다.");
         }
     }
 
@@ -83,5 +89,21 @@ public class WaitingService {
         List<Waiting> waitings = waitingRepository.findAll();
 
         return WaitingResponse.from(waitings);
+    }
+
+    public boolean existsWaitings(ReservationInfo reservationInfo) {
+        return waitingRepository.existsByReservationInfo(reservationInfo);
+    }
+
+    public Waiting findFirstRankWaitingByReservationInfo(ReservationInfo reservationInfo) {
+        return waitingRepository.findAllByReservationInfo(reservationInfo)
+                .getFirst();
+    }
+
+    @Transactional
+    public void updateWaitings(ReservationInfo reservationInfo, ReservationInfo newReservationInfo) {
+        List<Waiting> waitings = waitingRepository.findAllByReservationInfo(reservationInfo);
+        waitings.forEach(waiting ->
+                waiting.updateRankAndReservationInfo(newReservationInfo));
     }
 }

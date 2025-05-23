@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationInfo;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -12,7 +14,7 @@ import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    boolean existsByDateAndTimeAndThemeAndStatus(LocalDate date, ReservationTime time, Theme theme, ReservationStatus status);
 
     boolean existsByTime(ReservationTime time);
 
@@ -29,7 +31,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByMember(Member member);
 
-    Reservation findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    @Query("""
+        SELECT new roomescape.domain.ReservationInfo(
+            r.id, r.date, r.time, r.theme
+        )
+        FROM Reservation r
+        WHERE r.date = :date
+        AND r.time.id = :timeId
+        AND r.theme.id = :themeId
+        AND r.status = :status
+    """)
+    ReservationInfo findReservationInfo(LocalDate date, Long timeId, Long themeId, ReservationStatus status);
 
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
+
+    List<Reservation> findAllByStatus(ReservationStatus status);
 }

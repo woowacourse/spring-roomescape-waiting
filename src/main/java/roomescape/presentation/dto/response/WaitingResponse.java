@@ -23,9 +23,9 @@ public record WaitingResponse(
         return new WaitingResponse(
                 waiting.getId(),
                 MemberResponse.from(waiting.getMember()),
-                ThemeResponse.from(waiting.getReservation().getTheme()),
-                waiting.getReservation().getDate(),
-                ReservationTimeResponse.from(waiting.getReservation().getTime())
+                ThemeResponse.from(waiting.getReservationInfo().getTheme()),
+                waiting.getReservationInfo().getDate(),
+                ReservationTimeResponse.from(waiting.getReservationInfo().getTime())
         );
     }
 

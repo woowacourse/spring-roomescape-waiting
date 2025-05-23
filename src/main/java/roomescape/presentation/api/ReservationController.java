@@ -55,8 +55,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        // TODO : 예약 대기가 있는 경우 처리
-        reservationService.deleteReservationById(id);
+        reservationService.cancelReservationById(id);
 
         return ResponseEntity.noContent().build();
     }

@@ -6,6 +6,8 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
 import roomescape.domain.ReservationDateTime;
+import roomescape.domain.ReservationInfo;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -46,7 +48,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
+        List<Reservation> reservations = reservationRepository.findAllByStatus(ReservationStatus.RESERVED);
 
         return ReservationResponse.from(reservations);
     }
@@ -80,15 +82,33 @@ public class ReservationService {
     }
 
     private void validateExistsReservation(ReservationDate reservationDate, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(reservationDate.getDate(), time, theme)) {
+        if (reservationRepository.existsByDateAndTimeAndThemeAndStatus(reservationDate.getDate(), time, theme, ReservationStatus.RESERVED)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
     }
 
     @Transactional
-    public void deleteReservationById(Long id) {
+    public void cancelReservationById(Long id) {
         Reservation reservation = findReservationById(id);
-        reservationRepository.deleteById(reservation.getId());
+        reservation.cancel();
+        ReservationInfo reservationInfo = ReservationInfo.create(reservation);
+        if (waitingService.existsWaitings(reservationInfo)) {
+            processWaitingToReservation(reservationInfo);
+        }
+    }
+
+    private void processWaitingToReservation(ReservationInfo reservationInfo) {
+        Waiting firstRankWaiting = waitingService.findFirstRankWaitingByReservationInfo(reservationInfo);
+        waitingService.deleteWaitingById(firstRankWaiting.getId());
+
+        LocalDate date = reservationInfo.getDate();
+        Long timeId = reservationInfo.getTime().getId();
+        Long themeId = reservationInfo.getTheme().getId();
+        Member member = firstRankWaiting.getMember();
+        Reservation newReservation = createReservation(date, timeId, themeId, member);
+        ReservationInfo newReservationInfo = ReservationInfo.create(newReservation);
+
+        waitingService.updateWaitings(reservationInfo, newReservationInfo);
     }
 
     private Reservation findReservationById(Long id) {

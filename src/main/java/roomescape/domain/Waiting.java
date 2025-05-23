@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -24,21 +24,21 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Reservation reservation;
+    @Embedded
+    private ReservationInfo reservationInfo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
     private long rank;
 
-    public static Waiting create(Reservation reservation, Member member, long rank) {
-        return new Waiting(null, reservation, member, rank);
+    public static Waiting create(ReservationInfo reservationInfo, Member member, long rank) {
+        return new Waiting(null, reservationInfo, member, rank);
     }
 
-    public boolean isPast(LocalDateTime now) {
-        return reservation.getDate().isBefore(now.toLocalDate())
-                && reservation.getTime().getStartAt().isBefore(now.toLocalTime());
+    public void updateRankAndReservationInfo(ReservationInfo reservationInfo) {
+        this.rank -= 1;
+        this.reservationInfo = reservationInfo;
     }
 
     @Override
