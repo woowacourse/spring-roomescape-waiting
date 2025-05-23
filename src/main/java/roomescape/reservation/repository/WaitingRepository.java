@@ -12,6 +12,8 @@ public interface WaitingRepository {
 
     List<Waiting> findAll();
 
+    Optional<Waiting> findById(Long id);
+
     Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);

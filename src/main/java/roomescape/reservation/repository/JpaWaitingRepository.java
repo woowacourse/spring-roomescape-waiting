@@ -27,6 +27,11 @@ public class JpaWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findById(Long id) {
+        return waitingListCrudRepository.findById(id);
+    }
+
+    @Override
     public Optional<Waiting> findByIdAndMemberId(Long id, Long memberId) {
         return waitingListCrudRepository.findByIdAndMemberId(id, memberId);
     }
