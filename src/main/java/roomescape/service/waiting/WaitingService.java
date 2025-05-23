@@ -44,8 +44,7 @@ public class WaitingService {
         Theme theme = themeService.getThemeById(newReservationDto.themeId());
         Waiting waiting = new Waiting(null, newReservationDto.date(), reservationTime, theme, member);
         validateDuplicateWaiting(waiting);
-        LocalDateTime currentDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.now());
-        validateAddReservationDateTime(waiting, currentDateTime);
+        validateAddReservationDateTime(waiting);
         return waitingRepository.save(waiting);
     }
 
@@ -55,7 +54,8 @@ public class WaitingService {
         }
     }
 
-    private void validateAddReservationDateTime(Waiting waiting, LocalDateTime currentDateTime) {
+    private void validateAddReservationDateTime(Waiting waiting) {
+        LocalDateTime currentDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.now());
         if (waiting.isBeforeDateTime(currentDateTime)) {
             throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
         }

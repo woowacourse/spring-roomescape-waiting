@@ -44,14 +44,11 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final ReserveTicketService reserveTicketService;
-    private final WaitingService waitingService;
 
     public ReservationController(ReservationService reservationService,
-                                 ReserveTicketService reserveTicketService,
-                                 WaitingService waitingService) {
+                                 ReserveTicketService reserveTicketService) {
         this.reservationService = reservationService;
         this.reserveTicketService = reserveTicketService;
-        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -122,19 +119,5 @@ public class ReservationController {
                         theme.getName(), theme.getThumbnail()))
                 .toList();
         return ResponseEntity.ok(themeResponseDtos);
-    }
-
-    @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(
-            @AuthenticationPrincipal UserInfo userInfo) {
-        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(userInfo.id());
-        List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map(MyReservationMemberResponseDto::from)
-                .collect(Collectors.toList());
-        List<WaitingWithRank> waitingsWithRank = waitingService.getWaitingsWithRankByMemberId(userInfo.id());
-        for (WaitingWithRank waitingWithRank : waitingsWithRank) {
-            reservationDtos.add(MyReservationMemberResponseDto.from(waitingWithRank));
-        }
-        return ResponseEntity.ok(reservationDtos);
     }
 }
