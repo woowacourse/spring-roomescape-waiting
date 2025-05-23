@@ -88,7 +88,7 @@ HTTP/1.1 204
 ### Request
 
 ```
-GET /admin/reservations HTTP/1.1
+GET /admin/waitings HTTP/1.1
 cookie: token={member-access-token}
 ```
 
