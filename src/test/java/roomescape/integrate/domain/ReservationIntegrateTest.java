@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
@@ -34,6 +35,7 @@ import roomescape.global.Role;
 import roomescape.jwt.JwtTokenProvider;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ConfirmReservationRepository;
+import roomescape.repository.WaitingReservationRepository;
 import roomescape.service.AuthService;
 import roomescape.service.ConfirmReservationService;
 import roomescape.service.ReservationTimeService;
@@ -53,7 +55,6 @@ class ReservationIntegrateTest {
     @Autowired
     WaitingReservationService waitingReservationService;
 
-
     @Autowired
     ReservationTimeService reservationTimeService;
 
@@ -70,14 +71,21 @@ class ReservationIntegrateTest {
     ConfirmReservationRepository confirmReservationRepository;
 
     @Autowired
+    WaitingReservationRepository waitingReservationRepository;
+
+    @Autowired
     JwtTokenProvider jwtTokenProvider;
 
     private String token;
+    private String otherToken;
 
     @BeforeEach
     void setUp() {
-        Member member = memberRepository.save(new Member("어드민", "test_admin@test.com", "test", Role.ADMIN));
+        Member member = memberRepository.save(new Member("어드민123", "test_admin@test.com", "test", Role.ADMIN));
         token = jwtTokenProvider.createTokenByMember(member);
+        Member otherMember = memberRepository.save(new Member("test123", "test123@test.com", "test", Role.USER));
+        otherToken = jwtTokenProvider.createTokenByMember(otherMember);
+
     }
 
     @Test
@@ -146,7 +154,6 @@ class ReservationIntegrateTest {
         CreateThemeRequest themeRequest_3 = new CreateThemeRequest("테마 3", "설명", "썸네일");
         Theme theme_3 = themeService.addTheme(themeRequest_3);
 
-
         Member member = memberRepository.save(new Member("테스트", "test_user@test.com", "test", Role.USER));
 
         ConfirmedReservation reservation1 = new ConfirmedReservation(member, LocalDate.now().minusDays(1),
@@ -192,7 +199,7 @@ class ReservationIntegrateTest {
     }
 
     @Test
-    void 대상_유저_예약조회_테스트(){
+    void 대상_유저_예약조회_테스트() {
 
         LocalTime afterTime = LocalTime.now().plusHours(1L);
         CreateReservationTimeRequest reservationTimeRequest = new CreateReservationTimeRequest(afterTime);
@@ -204,7 +211,6 @@ class ReservationIntegrateTest {
         Theme theme_2 = themeService.addTheme(themeRequest_2);
         CreateThemeRequest themeRequest_3 = new CreateThemeRequest("테마 3", "설명", "썸네일");
         Theme theme_3 = themeService.addTheme(themeRequest_3);
-
 
         Member member = memberRepository.save(new Member("테스트", "test_user@test.com", "test", Role.USER));
         Member member1 = memberRepository.save(new Member("테스트2", "test2_user@test.com", "test", Role.USER));
@@ -275,5 +281,53 @@ class ReservationIntegrateTest {
                 .when().delete("/waiting/" + waiting.getId())
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    void 확정예약_삭제_시_대기예약_자동_승격_테스트() {
+        // given
+        LocalTime afterTime = LocalTime.now().plusHours(1L);
+        CreateReservationTimeRequest timeRequest = new CreateReservationTimeRequest(afterTime);
+        ReservationTime reservationTime = reservationTimeService.addReservationTime(timeRequest);
+
+        CreateThemeRequest themeRequest = new CreateThemeRequest("시간여행", "미래를 탈출하라", "thumb.png");
+        Theme theme = themeService.addTheme(themeRequest);
+
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+
+        // 사용자 1: 확정 예약
+        LoginMemberRequest member1 = authService.getLoginMemberByToken(token);
+        CreateReservationRequest reservationRequest = new CreateReservationRequest(
+                tomorrow, reservationTime.getId(), theme.getId()
+        );
+        ConfirmedReservation confirmed = confirmReservationService.addReservation(reservationRequest, member1);
+
+        // 사용자 2: 같은 시간, 테마에 대기 예약
+        LoginMemberRequest member2 = authService.getLoginMemberByToken(otherToken);
+        CreateWaitingRequest waitingRequest = new CreateWaitingRequest(
+                tomorrow, reservationTime.getId(), theme.getId()
+        );
+        WaitingReservation waiting = waitingReservationService.addWaiting(waitingRequest, member2);
+
+        // when: 확정 예약 삭제
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().delete("/reservations/" + confirmed.getId())
+                .then().log().all()
+                .statusCode(204);
+
+        // then: 해당 시간에 기존 대기자가 confirm 되었는지 확인
+        boolean replacedConfirm = confirmReservationRepository.existsByTimeIdAndThemeIdAndDate(
+                waiting.getReservationTime().getId(),
+                waiting.getTheme().getId(),
+                waiting.getDate()
+        );
+
+        assertThat(replacedConfirm).isTrue();
+
+        // 그리고 대기열에서는 사라졌는지 확인
+        Optional<WaitingReservation> waitingCheck = waitingReservationRepository.findById(waiting.getId());
+        assertThat(waitingCheck).isEmpty();
     }
 }
