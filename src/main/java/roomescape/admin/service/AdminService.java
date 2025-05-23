@@ -4,27 +4,33 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.repository.ReservationRepositoryInterface;
+import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
+import roomescape.reservation.repository.WaitingRepositoryInterface;
+import roomescape.reservation.service.WaitingService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepositoryInterface;
 
 @RequiredArgsConstructor
 @Service
 public class AdminService {
 
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final WaitingService waitingService;
+    private final ReservationRepositoryInterface reservationRepository;
+    private final ReservationTimeRepositoryInterface reservationTimeRepository;
+    private final ThemeRepositoryInterface themeRepository;
+    private final MemberRepositoryInterface memberRepository;
+    private final WaitingRepositoryInterface waitingRepository;
 
-
+    @Transactional
     public Long saveByAdmin(final LocalDate date, final Long themeId, final Long timeId, final Long memberId) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
@@ -41,11 +47,13 @@ public class AdminService {
         return savedReservation.getId();
     }
 
+    @Transactional(readOnly = true)
     public Reservation getById(final Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + id));
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findByInFromTo(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                             final LocalDate dateTo) {
         Theme theme = themeRepository.findById(themeId)
@@ -62,5 +70,17 @@ public class AdminService {
                 );
 
         return searchedReservations;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Waiting> findAllWaitingReservations() {
+        return waitingRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteWaitingById(final Long id) {
+        waitingRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("해당 대기 데이터가 존재하지 않습니다. id = " + id));
+        waitingRepository.deleteById(id);
     }
 }
