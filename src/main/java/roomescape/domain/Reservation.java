@@ -23,13 +23,13 @@ public class Reservation {
     protected Reservation() {
     }
 
-    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, BookingInfo bookingInfo) {
         this.id = id;
-        this.bookingInfo = new BookingInfo(member, date, time, theme);
+        this.bookingInfo = bookingInfo;
     }
 
-    public static Reservation create(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, member, date, time, theme);
+    public static Reservation create(BookingInfo bookingInfo) {
+        return new Reservation(null, bookingInfo);
     }
 
     public long calculateMinutesUntilStart(Clock clock) {

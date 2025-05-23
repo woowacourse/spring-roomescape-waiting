@@ -30,7 +30,7 @@ public class BookingInfo {
     protected BookingInfo() {
     }
 
-    protected BookingInfo(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public BookingInfo(Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.member = member;
         this.date = date;
         this.time = time;

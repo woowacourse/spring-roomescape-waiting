@@ -31,17 +31,17 @@ public class Waiting {
     protected Waiting() {
     }
 
-    private Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    private Waiting(Long id, BookingInfo bookingInfo) {
         this.id = id;
-        this.bookingInfo = new BookingInfo(member, date, time, theme);
+        this.bookingInfo = bookingInfo;
     }
 
-    public static Waiting create(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Waiting(null, member, date, time, theme);
+    public static Waiting create(BookingInfo bookingInfo) {
+        return new Waiting(null, bookingInfo);
     }
 
-    public Reservation toReservation() {
-        return Reservation.create(getMember(), getDate(), getTime(), getTheme());
+    public Reservation confirm() {
+        return Reservation.create(this.bookingInfo);
     }
 
     public boolean sameWaiterWith(Long memberId) {

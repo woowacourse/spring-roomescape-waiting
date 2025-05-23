@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import roomescape.domain.BookingInfo;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
@@ -75,7 +76,7 @@ public class SampleReservationInitializer implements CommandLineRunner {
         ReservationTime time = timeRepository.findById(timeId).orElseThrow();
         Theme theme = themeRepository.findById(themeId).orElseThrow();
 
-        Reservation reservation = Reservation.create(member, date, time, theme);
+        Reservation reservation = Reservation.create(new BookingInfo(member, date, time, theme));
         reservationRepository.save(reservation);
     }
 
@@ -84,7 +85,7 @@ public class SampleReservationInitializer implements CommandLineRunner {
         ReservationTime time = timeRepository.findById(timeId).orElseThrow();
         Theme theme = themeRepository.findById(themeId).orElseThrow();
 
-        Waiting waiting = Waiting.create(member, date, time, theme);
+        Waiting waiting = Waiting.create(new BookingInfo(member, date, time, theme));
         waitingRepository.save(waiting);
     }
 }

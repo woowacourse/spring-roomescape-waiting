@@ -56,7 +56,7 @@ public class ReservationService {
                 canceled.getDate(), canceled.getTheme().getId(), canceled.getTime().getId());
 
         firstWaiting.ifPresent(waiting -> {
-            Reservation reservation = waiting.toReservation();
+            Reservation reservation = waiting.confirm();
             reservationRepository.save(reservation);
             waitingRepository.delete(waiting);
         });

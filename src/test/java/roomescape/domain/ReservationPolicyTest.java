@@ -1,11 +1,10 @@
 package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.TestFixture.fixedClockAt;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import roomescape.TestFixture;
@@ -24,7 +23,7 @@ class ReservationPolicyTest {
     })
     void 지난_날짜_예약은_불가능하다(LocalDateTime fixedNowStr, LocalDateTime reservationDateTimeStr) {
         // given
-        Clock clock = fixedClock(fixedNowStr);
+        Clock clock = fixedClockAt(fixedNowStr);
         Reservation reservation = reservationAt(reservationDateTimeStr);
         ReservationPolicy policy = new ReservationPolicy(clock);
 
@@ -41,7 +40,7 @@ class ReservationPolicyTest {
     })
     void 임박한_예약은_불가능하다(LocalDateTime fixedNowStr, LocalDateTime reservationDateTimeStr) {
         // given
-        Clock clock = fixedClock(fixedNowStr);
+        Clock clock = fixedClockAt(fixedNowStr);
         Reservation reservation = reservationAt(reservationDateTimeStr);
         ReservationPolicy policy = new ReservationPolicy(clock);
 
@@ -55,7 +54,7 @@ class ReservationPolicyTest {
     @CsvSource({"2025-04-23T12:00, 2025-04-23T13:00"})
     void 중복된_예약은_불가능하다(LocalDateTime fixedNowStr, LocalDateTime dateTime) {
         // given
-        Clock clock = fixedClock(fixedNowStr);
+        Clock clock = fixedClockAt(fixedNowStr);
         Reservation reservation = reservationAt(dateTime);
         ReservationPolicy policy = new ReservationPolicy(clock);
 
@@ -63,10 +62,6 @@ class ReservationPolicyTest {
         assertThatThrownBy(() -> policy.validateReservationAvailable(reservation, true))
                 .isInstanceOf(UnAvailableReservationException.class)
                 .hasMessage(DUPLICATE_RESERVATION_MESSAGE);
-    }
-
-    private Clock fixedClock(LocalDateTime dateTime) {
-        return Clock.fixed(dateTime.toInstant(ZoneOffset.ofHours(9)), ZoneId.of("Asia/Seoul"));
     }
 
     private Reservation reservationAt(LocalDateTime dateTime) {
