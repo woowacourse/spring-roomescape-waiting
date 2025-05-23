@@ -53,6 +53,11 @@ public class Reservation {
         this.member = member;
     }
 
+    public Reservation(LocalDate date, ReservationTime time, ReservationTheme theme,
+        Member member) {
+        this(null, date, time, theme, member);
+    }
+
     public LocalDateTime getReservationDateTime() {
         return LocalDateTime.of(date, time.getStartAt());
     }
