@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.member.entity.Member;
-import roomescape.reservation.controller.dto.request.ReservationRequest;
 import roomescape.reservationTime.entity.ReservationTime;
 import roomescape.reservationTime.repository.JpaReservationTimeRepository;
 import roomescape.theme.entity.Theme;

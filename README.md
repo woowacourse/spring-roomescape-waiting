@@ -31,8 +31,14 @@
 
 ### 2. 내 예약 목록 조회
 
-- [x] `/reservation-mine` 요청 시, 사용자 예약 정보를 응답 받을 수 있다.
+- [x] `/reservation-mine` 요청 시, 사용자 예약 정보,에약 대기 정보를 응답 받을 수 있다.
 - [x] 성공된 예약은 상태를 포함할 수 있다.
+
+### 3. 예약 대기
+
+- [x] 예약이 존재한다면 예약 대기를 등록할 수 있다.
+- [x] 앞선 예약이 취소가 되면 예약 대기 순번이 줄어든다
+- [x] 마지막 예약 대기가 취소된다면 예약 대기는 예약으로 상태가 변경된다.
 
 ---
 
@@ -47,36 +53,38 @@
 
 ### 관리자(Admin)
 
-| URL                    | 메서드    | 기능              |
-|------------------------|--------|-----------------|
-| `/admin`               | GET    | 어드민 페이지 보기      |
-| `/admin/reservation`   | GET    | 예약 관리 페이지 보기    |
-| `/admin/time`          | GET    | 예약 시간 관리 페이지 보기 |
-| `/admin/theme`         | GET    | 테마 관리 페이지 보기    |
-| `/admin/reservations`  | POST   | 예약 추가           |
-| `/reservations/{id}`   | DELETE | 예약 삭제           |
-| `/reservations/filter` | GET    | 예약 필터링 조회       |
-| `/members`             | GET    | 사용자 모두 조회       |
-| `/times`               | GET    | 예약 가능 시간 모두 조회  |
-| `/times`               | POST   | 예약 시간 추가        |
-| `/times/{id}`          | DELETE | 예약 시간 삭제        |
-| `/themes`              | POST   | 테마 추가           |
-| `/themes/{id}`         | DELETE | 테마 삭제           |
+| URL                    | 메서드    | 기능                |
+|------------------------|--------|-------------------|
+| `/admin`               | GET    | 어드민 페이지 보기        |
+| `/admin/reservation`   | GET    | 예약 관리 페이지 보기      |
+| `/admin/time`          | GET    | 예약 시간 관리 페이지 보기   |
+| `/admin/theme`         | GET    | 테마 관리 페이지 보기      |
+| `/admin/reservations`  | POST   | 예약 추가             |
+| `/reservations/{id}`   | DELETE | 예약 삭제,예약 대기 상태 변경 |
+| `/reservations/filter` | GET    | 예약 필터링 조회         |
+| `/members`             | GET    | 사용자 모두 조회         |
+| `/times`               | GET    | 예약 가능 시간 모두 조회    |
+| `/times`               | POST   | 예약 시간 추가          |
+| `/times/{id}`          | DELETE | 예약 시간 삭제          |
+| `/themes`              | POST   | 테마 추가             |
+| `/themes/{id}`         | DELETE | 테마 삭제             |
+| `/waiting`             | GET    | 예약 대기 조회          |
 
 ### 사용자(User)
 
-| URL                       | 메서드  | 기능               |
-|---------------------------|------|------------------|
-| `/reservation`            | GET  | 사용자 예약 페이지 보기    |
-| `/reservations`           | POST | 사용자 페이지에서 예약 추가  |
-| `/reservations/mine`      | GET  | 사용자 예약 목록 조회     |
-| `/times/{date}/{themeId}` | GET  | 예약 가능한 상태의 시간 조회 |
-| `/members`                | POST | 사용자 회원가입 추가      |
-| `/signup`                 | GET  | 사용자 회원가입 페이지 보기  |
-| `/login`                  | GET  | 사용자 로그인 페이지 보기   |
-| `/login`                  | POST | 사용자 로그인 후 토큰 생성  |
-| `/login/check`            | GET  | 사용자 인증 정보 확인     |
-| `/logout`                 | POST | 사용자 로그아웃 후 토큰 만료 |
+| URL                        | 메서드  | 기능               |
+|----------------------------|------|------------------|
+| `/reservation`             | GET  | 사용자 예약 페이지 보기    |
+| `/reservations`            | POST | 사용자 페이지에서 예약 추가  |
+| `/reservations/mine`       | GET  | 사용자 예약 목록 조회     |
+| `/times/{date}/{themeId}`  | GET  | 예약 가능한 상태의 시간 조회 |
+| `/members`                 | POST | 사용자 회원가입 추가      |
+| `/signup`                  | GET  | 사용자 회원가입 페이지 보기  |
+| `/login`                   | GET  | 사용자 로그인 페이지 보기   |
+| `/login`                   | POST | 사용자 로그인 후 토큰 생성  |
+| `/login/check`             | GET  | 사용자 인증 정보 확인     |
+| `/logout`                  | POST | 사용자 로그아웃 후 토큰 만료 |
+| `/waiting"`                | POST | 사용자 예약 대기 등록     |
 
 ### Common
 
