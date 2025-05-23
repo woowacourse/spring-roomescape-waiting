@@ -2,16 +2,20 @@ package roomescape.application;
 
 import static roomescape.infrastructure.ReservationSpecs.byFilter;
 import static roomescape.infrastructure.ReservationSpecs.bySlot;
+import static roomescape.infrastructure.ReservationSpecs.byStatus;
 
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.Queues;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationWithOrder;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
@@ -61,6 +65,12 @@ public class ReservationService {
 
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
         return reservationRepository.findAll(byFilter(filter));
+    }
+
+    public List<ReservationWithOrder> findAllWaitings() {
+        var allWaitings = reservationRepository.findAll(byStatus(ReservationStatus.WAITING));
+        var queues = new Queues(allWaitings);
+        return queues.orderOfAll(allWaitings);
     }
 
     public void removeByIdForce(final long id) {

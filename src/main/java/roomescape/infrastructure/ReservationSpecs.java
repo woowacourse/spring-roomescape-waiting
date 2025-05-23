@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.ReservationStatus;
 
 public class ReservationSpecs {
 
@@ -37,6 +38,11 @@ public class ReservationSpecs {
     public static Specification<Reservation> byUserId(final long userId) {
         return (root, query, criteriaBuilder) ->
             criteriaBuilder.equal(root.get("user").get("id"), userId);
+    }
+
+    public static Specification<Reservation> byStatus(final ReservationStatus status) {
+        return (root, query, criteriaBuilder) ->
+            criteriaBuilder.equal(root.get("status"), status);
     }
 
     public static Specification<Reservation> byFilter(final ReservationSearchFilter filter) {

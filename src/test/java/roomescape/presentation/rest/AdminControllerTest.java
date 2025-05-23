@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.TestFixtures.anyReservationWithNewId;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import roomescape.TestFixtures;
 import roomescape.application.ReservationService;
 import roomescape.application.UserService;
+import roomescape.domain.reservation.ReservationWithOrder;
 import roomescape.domain.user.User;
 
 class AdminControllerTest {
@@ -31,7 +33,7 @@ class AdminControllerTest {
     @Test
     @DisplayName("어드민 페이지에서 예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다.")
     void reserve() throws Exception {
-        var reservation = TestFixtures.anyReservationWithNewId();
+        var reservation = anyReservationWithNewId();
         Mockito.when(reservationService.reserve(anyLong(), any(), anyLong(), anyLong())).thenReturn(reservation);
 
         mockMvc.perform(post("/admin/reservations")
@@ -56,5 +58,20 @@ class AdminControllerTest {
         mockMvc.perform(get("/admin/users"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$..['id', 'name']").exists());
+    }
+
+    @Test
+    @DisplayName("어드민 페이지에서 모든 예약 대기 조회 요청 시, 존재하는 모든 예약 대기와 OK를 응답한다.]")
+    void getAllWaitings() throws Exception {
+        Mockito.when(reservationService.findAllWaitings())
+            .thenReturn(List.of(
+                    new ReservationWithOrder(anyReservationWithNewId(), 1),
+                    new ReservationWithOrder(anyReservationWithNewId(), 2),
+                    new ReservationWithOrder(anyReservationWithNewId(), 3)
+                ));
+
+        mockMvc.perform(get("/admin/waitings"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$..['order', 'id','user','date','time','theme']").exists());
     }
 }

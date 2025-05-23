@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationWithOrder;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.Email;
@@ -154,6 +155,29 @@ class ReservationServiceTest {
                 () -> assertThat(service.findAllReservations(fromYesterday_toToday)).isEmpty(),
                 () -> assertThat(service.findAllReservations(fromToday_toTomorrow)).containsOnly(afterOneDay),
                 () -> assertThat(service.findAllReservations(fromTomorrow_toThreeDays)).containsExactly(afterOneDay, afterTwoDay, afterThreeDay)
+        );
+    }
+
+    @Test
+    @DisplayName("모든 대기 예약을 조회한다.")
+    void findAllWaitings() {
+        // given
+        var user1 = repositoryHelper.saveAnyUser();
+        var user2 = repositoryHelper.saveAnyUser();
+        var user3 = repositoryHelper.saveAnyUser();
+        repositoryHelper.flushAndClear();
+
+        var reserved = service.reserve(user1.id(), tomorrow(), timeSlot.id(), theme.id());
+        var waited1 = service.waitFor(user2.id(), tomorrow(), timeSlot.id(), theme.id());
+        var waited2 = service.waitFor(user3.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        // when
+        var waitings = service.findAllWaitings();
+
+        // then
+        assertThat(waitings).containsOnly(
+            new ReservationWithOrder(waited1, 1),
+            new ReservationWithOrder(waited2, 2)
         );
     }
 
