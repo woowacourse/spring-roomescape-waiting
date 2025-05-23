@@ -34,7 +34,7 @@ import roomescape.reservation.service.dto.ThemeInfo;
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
 @Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
-public class ThemeServiceIntegrationTest {
+public class ThemeServiceSliceTest {
 
     @Autowired
     ThemeRepository themeRepository;

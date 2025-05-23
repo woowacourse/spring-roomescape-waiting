@@ -41,7 +41,7 @@ import roomescape.reservation.service.dto.ReservationSearchCondition;
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
 @Sql(value = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
-public class ReservationServiceIntegrationTest {
+public class ReservationServiceSliceTest {
 
     @Autowired
     ReservationRepository reservationRepository;

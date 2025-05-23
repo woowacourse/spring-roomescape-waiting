@@ -34,7 +34,7 @@ import roomescape.reservation.service.dto.ReservationTimeInfo;
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
 @Sql(value = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
-public class TimeServiceIntegrationTest {
+public class TimeServiceSliceTest {
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
