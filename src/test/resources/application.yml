@@ -16,7 +16,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        detector:
+          enabled: true
+          threshold: 2
+          level: warn
 
 jwt:
   secret-key: secretsecretsecretsecretsecretsecret
   expire-time: 31536000000
+
+
