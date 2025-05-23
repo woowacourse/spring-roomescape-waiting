@@ -136,7 +136,6 @@ public class ReservationService {
         if (!waitingReservations.isEmpty()) {
             final Reservation nextReservation = waitingReservations.getFirst();
             nextReservation.pending();
-            reservationRepositoryFacade.save(nextReservation);
         }
     }
 
