@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 public class Waiting {
 
     @Id
@@ -20,11 +19,12 @@ public class Waiting {
     @Embedded
     private Schedule schedule;
 
-    @ManyToOne
-    private Theme theme;
-
-    @CreatedDate
     private LocalDateTime createdAt;
+
+    @PrePersist
+    private void initializeCreatedAt() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     protected Waiting() {
     }
