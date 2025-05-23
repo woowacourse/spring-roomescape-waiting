@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
@@ -158,5 +159,13 @@ public class ReservationService {
         reservationRepository.deleteById(id);
 
    //todo findById()를 바로 해오면 쿼리가 3번 -> 2번이 됨
+    }
+
+    public void deleteReservationWaiting(Long id) {
+        Optional<ReservationWaitingTicket> reservationWaitingTicket = waitingTicketRepository.findById(id);
+        if (reservationWaitingTicket.isEmpty()) {
+            throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+        }
+        waitingTicketRepository.deleteById(id);
     }
 }

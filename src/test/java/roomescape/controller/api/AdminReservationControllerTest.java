@@ -172,7 +172,7 @@ class AdminReservationControllerTest {
         @Test
         void searchAdminReservationTest() {
             Map<String, Object> params = Map.of(
-                    "themeId", 1L,
+                    "theme", 1L,
                     "memberId", 1L,
                     "dateFrom", "2025-05-01",
                     "dateTo", "2025-05-30");
