@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
@@ -16,6 +17,7 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepositoryInterface reservationTimeRepository;
 
+    @Transactional
     public ReservationTime save(final LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {
             throw new DataExistException("해당 예약 시간이 이미 존재합니다. startAt = " + startAt);
@@ -26,6 +28,7 @@ public class ReservationTimeService {
         return reservationTimeRepository.save(reservationTimeEntity);
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         final Optional<ReservationTime> found = reservationTimeRepository.findById(id);
 
@@ -36,6 +39,7 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTime> findAll() {
         return reservationTimeRepository.findAll();
     }
