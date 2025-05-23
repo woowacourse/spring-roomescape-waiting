@@ -16,9 +16,9 @@ public record MemberBookingResponse(
     public static MemberBookingResponse from(MemberBookingResult result) {
         return new MemberBookingResponse(
                 result.id(),
-                result.theme().name(),
+                result.themeName(),
                 result.date(),
-                result.time().startAt(),
+                result.time(),
                 getDisplayName(result.bookingType(), result.rank())
         );
     }

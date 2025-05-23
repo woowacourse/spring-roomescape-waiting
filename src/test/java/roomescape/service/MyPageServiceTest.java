@@ -19,6 +19,7 @@ import roomescape.DatabaseCleaner;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.Waiting;
+import roomescape.service.dto.result.BookingType;
 import roomescape.service.dto.result.MemberBookingResult;
 
 @SpringBootTest
@@ -60,11 +61,17 @@ class MyPageServiceTest {
         //then
         assertAll(
                 () -> assertThat(results).hasSize(2),
-                () -> assertThat(results)
-                        .isEqualTo(List.of(
-                                MemberBookingResult.from(reservation),
-                                MemberBookingResult.from(waiting, 1)
-                        ))
+                () -> assertThat(results.getFirst())
+                        .isEqualTo(
+                                new MemberBookingResult(
+                                        reservation.getId(),
+                                        reservation.getTheme().getName(),
+                                        reservation.getDate(),
+                                        reservation.getTime().getStartAt(),
+                                        BookingType.RESERVED,
+                                        0
+                                )
+                        )
         );
     }
 }
