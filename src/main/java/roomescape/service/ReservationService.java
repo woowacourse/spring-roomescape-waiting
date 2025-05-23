@@ -13,7 +13,6 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
-import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.repository.jpa.JpaMemberRepository;
@@ -71,7 +70,6 @@ public class ReservationService {
             .orElseThrow(() -> new NotFoundException("theme"));
 
         validateDateTimeAfterNow(date, time);
-        validateDuplicateReservation(request);
 
         return ReservationResponse.from(
             reservationRepository.save(new Reservation(member, request.date(), time, theme)));
@@ -87,17 +85,8 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new NotFoundException("theme"));
 
-        validateDuplicateReservation(request);
-
         return ReservationResponse.from(
             reservationRepository.save(new Reservation(member, request.date(), time, theme)));
-    }
-
-    private void validateDuplicateReservation(ReservationRequest request) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-            request.date(), request.timeId(), request.themeId())) {
-            throw new DuplicatedException("reservation");
-        }
     }
 
     private void validateDateTimeAfterNow(LocalDate date, ReservationTime time) {

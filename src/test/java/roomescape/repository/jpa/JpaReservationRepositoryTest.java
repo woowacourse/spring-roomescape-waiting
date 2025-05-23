@@ -70,7 +70,7 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
 
-        assertThat(jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, 1L, 1L))
+        assertThat(jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, 1L, 1L, member.getId()))
             .isTrue();
     }
 
@@ -92,7 +92,7 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
 
-        assertThat(jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, 1L, 2L))
+        assertThat(jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, 1L, 2L, member.getId()))
             .isFalse();
     }
 }
