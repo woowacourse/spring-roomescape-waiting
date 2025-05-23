@@ -10,7 +10,7 @@ import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.dto.time.ReservationTimeResponseDto;
 
 public record ReservationResponseDto(
-        long id,
+        Long id,
         MemberNameResponseDto member,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         ThemeResponseDto theme,
