@@ -5,9 +5,15 @@ import java.time.LocalTime;
 
 public class ReservationTimeFixtures {
 
-    public static ReservationTime persistReservationTime(EntityManager entityManager) {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.MIDNIGHT);
+    private static final LocalTime DEFAULT_START_AT = LocalTime.of(10, 0);
+
+    public static ReservationTime persistReservationTime(EntityManager entityManager, LocalTime startAt) {
+        ReservationTime reservationTime = new ReservationTime(startAt);
         entityManager.persist(reservationTime);
         return reservationTime;
+    }
+
+    public static ReservationTime persistReservationTime(EntityManager entityManager) {
+        return persistReservationTime(entityManager, DEFAULT_START_AT);
     }
 }
