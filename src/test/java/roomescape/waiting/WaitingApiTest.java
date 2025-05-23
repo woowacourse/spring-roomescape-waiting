@@ -162,7 +162,6 @@ public class WaitingApiTest {
         @Test
         void testDeleteWaiting() {
             RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
                     .cookie(AUTH_COOKIE_NAME, MEMBER_1_TOKEN)
                     .when().delete("/waitings/{id}", MEMBER_1_WAITING_ID)
                     .then().log().all()
@@ -174,7 +173,6 @@ public class WaitingApiTest {
         @Test
         void testUnauthorized() {
             RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
                     .when().delete("/waitings/{id}", MEMBER_1_WAITING_ID)
                     .then().log().all()
                     .statusCode(401);
@@ -184,7 +182,6 @@ public class WaitingApiTest {
         @Test
         void testForbidden() {
             RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
                     .cookie(AUTH_COOKIE_NAME, MEMBER_1_TOKEN)
                     .when().delete("/waitings/{id}", MEMBER_2_WAITING_ID)
                     .then().log().all()

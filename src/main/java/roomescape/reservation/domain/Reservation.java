@@ -65,6 +65,10 @@ public class Reservation {
         return false;
     }
 
+    public void updateMember(final Member member) {
+        this.member = member;
+    }
+
     public boolean hasOwner(final Member other) {
         return this.member.equals(other);
     }

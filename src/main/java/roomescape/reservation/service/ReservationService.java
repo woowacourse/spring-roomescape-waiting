@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
@@ -17,6 +18,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
@@ -85,6 +87,17 @@ public class ReservationService {
     }
 
     public void cancelReservationById(final long id) {
+        // 해당 아이디를 가지는 waiting이 있는지 확인
+        final Optional<Waiting> waiting = waitingRepository.findFirstByReservationIdOrderByCreatedAtAsc(id);
+        if (waiting.isPresent()) {
+            // 업데이트
+            Waiting waiting2 = waiting.get();
+            final Reservation reservation = reservationRepository.findById(id)
+                    .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+            reservation.updateMember(waiting2.getMember());
+            waitingRepository.delete(waiting2);
+            return;
+        }
         reservationRepository.deleteById(id);
     }
 
