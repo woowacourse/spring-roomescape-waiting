@@ -13,13 +13,13 @@ public interface WaitingReservationRepository extends JpaRepository<WaitingReser
     @Query("""
             select new roomescape.reservation.dto.WaitingReservationWithRank(
                 w.id,
-                w.theme.name,
-                w.date,
-                w.time.startAt,
+                w.roomEscapeInformation.theme.name,
+                w.roomEscapeInformation.date,
+                w.roomEscapeInformation.time.startAt,
                 (select COUNT(wr)*1L from WaitingReservation wr
-                    where wr.theme = w.theme
-                      and wr.date = w.date
-                      and wr.time = w.time
+                    where wr.roomEscapeInformation.theme = w.roomEscapeInformation.theme
+                      and wr.roomEscapeInformation.date = w.roomEscapeInformation.date
+                      and wr.roomEscapeInformation.time = w.roomEscapeInformation.time
                       and wr.createdAt <= w.createdAt
                 )
             )

@@ -18,9 +18,9 @@ public record MyReservationResponse(
     public MyReservationResponse(final Reservation reservation, final ReservationStatus status) {
         this(
                 reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
+                reservation.getRoomEscapeInformation().getTheme().getName(),
+                reservation.getRoomEscapeInformation().getDate(),
+                reservation.getRoomEscapeInformation().getTime().getStartAt(),
                 status.getOutput(),
                 null
         );

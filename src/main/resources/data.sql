@@ -13,8 +13,14 @@ VALUES ('운영진', 'admin@naver.com', '1234', 'ADMIN');
 INSERT INTO member(name, email, password, role)
 VALUES ('홍길동', 'member@naver.com', '1234', 'MEMBER');
 
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-11', 1, 1, 1);
+INSERT INTO room_escape_information(date, time_id, theme_id)
+VALUES ('2025-05-11', 1, 1);
 
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 1, 1, 1);
+INSERT INTO room_escape_information(date, time_id, theme_id)
+VALUES ('2099-05-11', 1, 1);
+
+INSERT INTO reservation(room_escape_information_id, member_id)
+VALUES (1, 1);
+
+INSERT INTO reservation(room_escape_information_id, member_id)
+VALUES (2, 1);

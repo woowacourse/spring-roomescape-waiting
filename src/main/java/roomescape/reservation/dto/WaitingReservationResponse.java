@@ -17,9 +17,9 @@ public record WaitingReservationResponse(
     public WaitingReservationResponse(final WaitingReservation waitingReservation) {
         this(
                 waitingReservation.getId(),
-                waitingReservation.getDate(),
-                new ReservationTimeResponse(waitingReservation.getTime()),
-                new ThemeResponse(waitingReservation.getTheme()),
+                waitingReservation.getRoomEscapeInformation().getDate(),
+                new ReservationTimeResponse(waitingReservation.getRoomEscapeInformation().getTime()),
+                new ThemeResponse(waitingReservation.getRoomEscapeInformation().getTheme()),
                 new MemberResponse(waitingReservation.getMember())
         );
     }

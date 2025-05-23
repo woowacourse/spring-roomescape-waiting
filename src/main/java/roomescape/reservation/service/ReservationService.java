@@ -1,18 +1,19 @@
 package roomescape.reservation.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.RoomEscapeInformation;
 import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
@@ -20,6 +21,7 @@ import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.reservation.repository.WaitingReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
@@ -37,6 +39,7 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final WaitingReservationRepository waitingReservationRepository;
     private final WaitingReservationService waitingReservationService;
+    private final RoomEscapeInformationRepository roomEscapeInformationRepository;
 
 
     public List<ReservationResponse> findReservationsByCriteria(final ReservationSearchRequest request) {
@@ -55,8 +58,8 @@ public class ReservationService {
     @Transactional
     public ReservationResponse saveReservation(final ReservationRequest request, final LoginMember loginMember) {
         final ReservationTime reservationTime = findReservationTimeById(request.timeId());
-        final Member member = findMemberById(loginMember.id());
         final Theme theme = findThemeById(request.themeId());
+        final Member member = findMemberById(loginMember.id());
         return saveReservationInternal(request.date(), reservationTime, theme, member);
     }
 
@@ -70,25 +73,29 @@ public class ReservationService {
     private ReservationResponse saveReservationInternal(
             final LocalDate date,
             final ReservationTime reservationTime,
-            final Theme theme, Member member
+            final Theme theme,
+            Member member
     ) {
         if (hasReservation(date, reservationTime, theme)) {
             throw new ReservationException("이미 해당 날짜에 예약이 존재합니다.");
         }
+        final RoomEscapeInformation roomEscapeInformation = RoomEscapeInformation.builder()
+                .date(date)
+                .theme(theme)
+                .time(reservationTime)
+                .build();
+        final RoomEscapeInformation newRoomEscapeInformation = roomEscapeInformationRepository.save(
+                roomEscapeInformation);
         try {
             final Reservation reservation = Reservation.builder()
-                    .date(date)
-                    .time(reservationTime)
-                    .theme(theme)
+                    .roomEscapeInformation(newRoomEscapeInformation)
                     .member(member)
                     .build();
             final Reservation newReservation = reservationRepository.save(reservation);
             return new ReservationResponse(newReservation);
         } catch (final DataIntegrityViolationException e) {
             final WaitingReservation waitingReservation = WaitingReservation.builder()
-                    .date(date)
-                    .time(reservationTime)
-                    .theme(theme)
+                    .roomEscapeInformation(newRoomEscapeInformation)
                     .member(member)
                     .build();
             return waitingReservationService.saveAsWaitingIfReserved(waitingReservation);
@@ -104,6 +111,7 @@ public class ReservationService {
         final List<MyReservationResponse> bookedReservations = reservationRepository.findByMember(member).stream()
                 .map(MyReservationResponse::from)
                 .toList();
+        // FIXME: service 호출
         final List<MyReservationResponse> waitingReservations = waitingReservationRepository.findWaitingReservationByMember(
                         member).stream()
                 .map(MyReservationResponse::from)
@@ -113,17 +121,18 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllWaitingReservation() {
+        // FIXME: service 호출
         final List<WaitingReservation> waitingReservationReservations = waitingReservationRepository.findAll();
         return waitingReservationReservations.stream().map(ReservationResponse::new).toList();
     }
 
+    @Transactional
     public void approveWaitingReservation(final Long id) {
-        final WaitingReservation waitingReservation = this.waitingReservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("예약 대기가 존재하지 않습니다."));
+        final WaitingReservation waitingReservation = waitingReservationService.findWaitingReservationById(id);
+        waitingReservationService.deleteById(waitingReservation.getId());
+
         final Reservation reservation = Reservation.builder()
-                .theme(waitingReservation.getTheme())
-                .date(waitingReservation.getDate())
-                .time(waitingReservation.getTime())
+                .roomEscapeInformation(waitingReservation.getRoomEscapeInformation())
                 .member(waitingReservation.getMember())
                 .build();
         reservationRepository.save(reservation);
@@ -143,6 +152,6 @@ public class ReservationService {
     }
 
     private boolean hasReservation(final LocalDate date, final ReservationTime time, final Theme theme) {
-        return reservationRepository.existsByDateAndTimeAndTheme(date, time, theme);
+        return roomEscapeInformationRepository.existsByDateAndTimeAndTheme(date, time, theme);
     }
 }

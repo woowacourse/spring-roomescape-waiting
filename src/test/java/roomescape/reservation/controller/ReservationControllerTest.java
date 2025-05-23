@@ -180,7 +180,7 @@ class ReservationControllerTest {
                 .count();
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(booked).isEqualTo(3); // 기존 2건 + 예약 1건
+            softly.assertThat(booked).isEqualTo(3); // 기존 2건 + 예약 1건 = 3건
             softly.assertThat(waiting).isEqualTo(4); // 대기 4건
         });
     }

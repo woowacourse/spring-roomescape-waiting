@@ -1,6 +1,5 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,27 +7,21 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 @Getter
 @Entity
 @Table(
         uniqueConstraints = @UniqueConstraint(
                 name = "unique_reservation_per_time",
-                columnNames = {"date", "time_id", "theme_id"}
+                columnNames = {"roomEscapeInformation_id"}
         )
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,16 +31,9 @@ public class Reservation extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
-
     @JoinColumn(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private ReservationTime time;
-
-    @JoinColumn(nullable = false)
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Theme theme;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private RoomEscapeInformation roomEscapeInformation;
 
     @JoinColumn(nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -56,24 +42,11 @@ public class Reservation extends BaseTimeEntity {
     @Builder
     private Reservation(
             final Long id,
-            @NonNull final LocalDate date,
-            @NonNull final ReservationTime time,
-            @NonNull final Theme theme,
+            @NonNull final RoomEscapeInformation roomEscapeInformation,
             @NonNull final Member member
     ) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.roomEscapeInformation = roomEscapeInformation;
         this.member = member;
-    }
-
-    @PrePersist
-    private void validateFutureOrPresent() {
-        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        final LocalDateTime currentDateTime = LocalDateTime.now();
-        if (reservationDateTime.isBefore(currentDateTime)) {
-            throw new ReservationException("예약은 현재 시간 이후로 가능합니다.");
-        }
     }
 }

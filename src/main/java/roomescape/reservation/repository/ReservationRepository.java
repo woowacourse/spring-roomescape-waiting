@@ -7,17 +7,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     @Query("""
-            SELECT r FROM Reservation r
-            WHERE (:themeId IS NULL OR r.theme.id = :themeId)
-              AND (:memberId IS NULL OR r.member.id = :memberId)
-              AND (:localDateFrom IS NULL OR r.date >= :localDateFrom)
-              AND (:localDateTo IS NULL OR r.date <= :localDateTo)
+            select r from Reservation r
+            join RoomEscapeInformation re
+            on r.roomEscapeInformation.id = re.id
+            where (:themeId is null or re.theme.id = :themeId)
+              and (:memberId is null or r.member.id = :memberId)
+              and (:localDateFrom is null or re.date >= :localDateFrom)
+              and (:localDateTo is null or re.date <= :localDateTo)
             """)
     List<Reservation> findByCriteria(
             @Param("themeId") Long themeId,
@@ -25,12 +25,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("localDateFrom") LocalDate localDateFrom,
             @Param("localDateTo") LocalDate localDateTo
     );
-
-    boolean existsByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme);
-
-    boolean existsByThemeId(final Long themeId);
-
-    boolean existsByTimeId(final Long timeId);
 
     List<Reservation> findByMember(final Member member);
 }
