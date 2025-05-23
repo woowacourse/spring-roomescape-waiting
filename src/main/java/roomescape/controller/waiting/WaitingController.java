@@ -57,7 +57,7 @@ public class WaitingController {
 
     @PostMapping("/apply")
     public ResponseEntity<Void> applyWaiting(@RequestBody ApplyWaitingRequestDto applyWaitingRequestDto) {
-        waitingService.apply(applyWaitingRequestDto);
-        return ResponseEntity.ok().build();
+        Long reservationId = waitingService.apply(applyWaitingRequestDto);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationId)).build();
     }
 }

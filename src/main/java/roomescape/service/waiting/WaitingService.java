@@ -79,10 +79,11 @@ public class WaitingService {
     }
 
     @Transactional
-    public void apply(ApplyWaitingRequestDto applyWaitingRequestDto) {
+    public Long apply(ApplyWaitingRequestDto applyWaitingRequestDto) {
         Long waitingId = applyWaitingRequestDto.id();
         Waiting waiting = getWaitingById(waitingId);
-        reserveTicketService.addReservation(new AddReservationDto(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId()), waiting.getMember().getId());
+        Long reservationId = reserveTicketService.addReservation(new AddReservationDto(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId()), waiting.getMember().getId());
         deleteWaiting(waitingId);
+        return reservationId;
     }
 }
