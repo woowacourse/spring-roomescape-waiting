@@ -24,24 +24,24 @@ import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 
 @RestController
-@RequestMapping("/admin/reservations")
+@RequestMapping("/admin")
 @RequiresRole(authRoles = {ADMIN})
 @RequiredArgsConstructor
 public class AdminReservationRestController {
 
     private final AdminReservationService adminReservationService;
 
-    @PostMapping
+    @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid final CreateReservationRequest request
     ) {
-        final ReservationResponse response = adminReservationService.create(request);
+        final ReservationResponse response = adminReservationService.createReservation(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteAsAdmin(
             @PathVariable final Long id,
             final MemberAuthInfo memberAuthInfo
@@ -51,14 +51,14 @@ public class AdminReservationRestController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findAll() {
+    @GetMapping("/reservations")
+    public ResponseEntity<List<ReservationResponse>> findAllReservations() {
         final List<ReservationResponse> reservationResponses = adminReservationService.findAll();
 
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @GetMapping("/filtered")
+    @GetMapping("/reservations/filtered")
     public ResponseEntity<List<ReservationResponse>> findAllByFilter(
             @ModelAttribute @Valid final ReservationsByFilterRequest request
     ) {
@@ -67,10 +67,27 @@ public class AdminReservationRestController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @GetMapping("/statuses")
+    @GetMapping("/reservations/statuses")
     @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<List<ReservationStatusResponse>> findAllReservationStatuses() {
         return ResponseEntity.ok()
                 .body(adminReservationService.findAllReservationStatuses());
+    }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deny(
+            @PathVariable final Long id,
+            final MemberAuthInfo memberAuthInfo
+    ) {
+        adminReservationService.deleteAsAdmin(id, memberAuthInfo.authRole());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<ReservationResponse>> findAllWaitings() {
+        final List<ReservationResponse> reservationResponses = adminReservationService.findAllWaitings();
+
+        return ResponseEntity.ok(reservationResponses);
     }
 }

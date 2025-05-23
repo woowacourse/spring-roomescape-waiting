@@ -1,6 +1,8 @@
 package roomescape.reservation.application;
 
 import static roomescape.auth.domain.AuthRole.ADMIN;
+import static roomescape.reservation.domain.ReservationStatus.CONFIRMED;
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -28,50 +30,74 @@ import roomescape.theme.domain.ThemeRepository;
 @Service
 @RequiredArgsConstructor
 public class AdminReservationService {
-
     private final ReservationRepository reservationRepository;
+
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationResponse create(
-            final CreateReservationRequest request
-    ) {
-        return ReservationResponse.from(
-                createReservation(
-                        request.date(),
-                        request.timeId(),
-                        request.themeId(),
-                        request.memberId(),
-                        request.status()
-                ));
+    public ReservationResponse createReservation(final CreateReservationRequest request) {
+        if (request.status() == CONFIRMED) {
+            return createConfirmedReservation(request.date(), request.timeId(), request.themeId(), request.memberId());
+        }
+        if (request.status() == WAITING) {
+            return createWaitingReservation(request.date(), request.timeId(), request.themeId(), request.memberId());
+        }
+        throw new IllegalArgumentException("처리할 수 없는 예약 상태입니다.");
     }
 
-    private Reservation createReservation(
+    private ReservationResponse createConfirmedReservation(
             final LocalDate date,
             final Long timeId,
             final Long themeId,
-            final Long memberId,
-            final ReservationStatus status
+            final Long memberId
     ) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
-        validateNoDuplicateReservation(date, timeId, themeId);
-
-        final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-        final Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member, status);
-
-        return reservationRepository.save(reservation);
-    }
-
-    private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                date, timeId, themeId, CONFIRMED
+        )) {
             throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
         }
+
+        final ReservationTime reservationTime = getReservationTimeById(timeId);
+        final Theme theme = getThemeById(themeId);
+        final Member member = getMemberById(memberId);
+
+        final Reservation reservation = new Reservation(date, reservationTime, theme, member, CONFIRMED);
+
+        return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    private ReservationResponse createWaitingReservation(
+            final LocalDate date,
+            final Long timeId,
+            final Long themeId,
+            final Long memberId
+    ) {
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                date, timeId, themeId, CONFIRMED
+        )) {
+            throw new ResourceNotFoundException("예약이 없는 상태에서 예약 대기를 추가할 수 없습니다.");
+        }
+
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+                date, timeId, themeId, memberId, CONFIRMED
+        )) {
+            throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 본인 예약이 있습니다.");
+        }
+
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+                date, timeId, themeId, memberId, WAITING
+        )) {
+            throw new AlreadyExistException("신청한 예약 대기가 이미 존재합니다.");
+        }
+
+        final ReservationTime reservationTime = getReservationTimeById(timeId);
+        final Theme theme = getThemeById(themeId);
+        final Member member = getMemberById(memberId);
+
+        final Reservation reservation = new Reservation(date, reservationTime, theme, member, WAITING);
+
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     public void deleteAsAdmin(final Long reservationId, final AuthRole authRole) {
@@ -80,9 +106,9 @@ public class AdminReservationService {
         }
 
         if (!reservationRepository.existsById(reservationId)) {
-            // 이미 취소되어 예약이 존재하지 않음을 구분하는 것이 UX에 좋을 것으로 예상됨
             throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
         }
+
         reservationRepository.deleteById(reservationId);
     }
 
@@ -110,5 +136,27 @@ public class AdminReservationService {
         return Arrays.stream(ReservationStatus.values())
                 .map(ReservationStatusResponse::from)
                 .toList();
+    }
+
+    public List<ReservationResponse> findAllWaitings() {
+        return reservationRepository.findAllByStatus(ReservationStatus.WAITING)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    private ReservationTime getReservationTimeById(final Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
+    }
+
+    private Theme getThemeById(final Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
+    }
+
+    private Member getMemberById(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
     }
 }

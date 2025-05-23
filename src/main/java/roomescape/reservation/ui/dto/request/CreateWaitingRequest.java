@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import roomescape.reservation.domain.ReservationStatus;
 
-public record CreateReservationRequest(
+public record CreateWaitingRequest(
         @NotNull
         Long memberId,
         @NotNull

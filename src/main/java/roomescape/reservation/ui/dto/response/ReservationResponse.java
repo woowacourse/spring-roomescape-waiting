@@ -28,7 +28,7 @@ public record ReservationResponse(
 
     public record ForMember(
             Long id,
-            String theme,
+            String themeName,
             LocalDate date,
             LocalTime time,
             String status

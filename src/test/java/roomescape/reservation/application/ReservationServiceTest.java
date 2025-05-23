@@ -70,7 +70,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatCode(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatCode(() -> reservationService.createConfirmedReservation(request, memberAuthInfo.id()))
                 .doesNotThrowAnyException();
     }
 
@@ -88,7 +88,7 @@ class ReservationServiceTest {
                 new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.createConfirmedReservation(request, memberAuthInfo.id()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -109,7 +109,7 @@ class ReservationServiceTest {
                 new Reservation(date, reservationTime, theme, member, ReservationStatus.CONFIRMED));
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.createConfirmedReservation(request, memberAuthInfo.id()))
                 .isInstanceOf(AlreadyExistException.class);
     }
 

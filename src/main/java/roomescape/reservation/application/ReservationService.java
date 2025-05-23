@@ -1,5 +1,8 @@
 package roomescape.reservation.application;
 
+import static roomescape.reservation.domain.ReservationStatus.CONFIRMED;
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -14,11 +17,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
+import roomescape.reservation.ui.dto.request.CreateWaitingRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.theme.domain.Theme;
@@ -33,38 +36,56 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationResponse create(
+    public ReservationResponse createConfirmedReservation(
             final CreateReservationRequest.ForMember request,
             final Long memberId
     ) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                request.date(), request.timeId(), request.themeId(), CONFIRMED
+        )) {
+            throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
+        }
 
-        return ReservationResponse.from(
-                createReservation(
-                        request.date(),
-                        request.timeId(),
-                        request.themeId(),
-                        memberId,
-                        ReservationStatus.CONFIRMED
-                )
-        );
-    }
-
-    private Reservation createReservation(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId,
-            final ReservationStatus status
-    ) {
-        final ReservationTime reservationTime = getReservationTime(date, timeId);
-        validateNoDuplicateReservation(date, timeId, themeId);
-
-        final Theme theme = getThemeById(themeId);
+        final ReservationTime reservationTime = getReservationTime(request.date(), request.timeId());
+        final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberById(memberId);
 
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member, status);
+        final Reservation reservation =
+                new Reservation(request.date(), reservationTime, theme, member, CONFIRMED);
 
-        return reservationRepository.save(reservation);
+        return ReservationResponse.from(reservationRepository.save(reservation));
+    }
+
+    public ReservationResponse createWaitingReservation(
+            final CreateWaitingRequest.ForMember request,
+            final Long memberId
+    ) {
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(
+                request.date(), request.timeId(), request.themeId(), CONFIRMED
+        )) {
+            throw new ResourceNotFoundException("예약이 없는 상태에서 예약 대기를 추가할 수 없습니다.");
+        }
+
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+                request.date(), request.timeId(), request.themeId(), memberId, CONFIRMED
+        )) {
+            throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 본인 예약이 있습니다.");
+        }
+
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+                request.date(), request.timeId(), request.themeId(), memberId, WAITING
+        )) {
+            throw new AlreadyExistException("신청한 예약 대기가 이미 존재합니다.");
+        }
+
+        final ReservationTime reservationTime = getReservationTime(request.date(), request.timeId());
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberById(memberId);
+
+        final Reservation reservation =
+                new Reservation(request.date(), reservationTime, theme, member, WAITING);
+
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
@@ -74,13 +95,8 @@ public class ReservationService {
         if (reservationDateTime.isBefore(now)) {
             throw new IllegalArgumentException("예약 시간은 현재 시간보다 이후여야 합니다.");
         }
-        return reservationTime;
-    }
 
-    private void validateNoDuplicateReservation(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
-        }
+        return reservationTime;
     }
 
     public void deleteIfOwner(final Long reservationId, final Long memberId) {
@@ -92,17 +108,10 @@ public class ReservationService {
         }
 
         if (!reservationRepository.existsById(reservationId)) {
-            // 이미 취소되어 예약이 존재하지 않음을 구분하는 것이 UX에 좋을 것으로 예상됨
             throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
         }
-        reservationRepository.deleteById(reservationId);
-    }
 
-    public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
+        reservationRepository.deleteById(reservationId);
     }
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(

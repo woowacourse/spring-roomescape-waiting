@@ -47,6 +47,7 @@ public class Reservation {
     private Member member;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ReservationStatus status;
 
     public Reservation(final Long id, final LocalDate date, final ReservationTime time,

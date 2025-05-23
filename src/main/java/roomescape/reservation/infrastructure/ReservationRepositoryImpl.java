@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,12 +32,13 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(
+    public boolean existsByDateAndTimeIdAndThemeIdAndStatus(
             final LocalDate date,
             final Long timeId,
-            final Long themeId
+            final Long themeId,
+            final ReservationStatus status
     ) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, status);
     }
 
     @Override
@@ -75,5 +77,22 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Transactional(readOnly = true)
     public List<Reservation> findAllByMemberId(final Long memberId) {
         return jpaReservationRepository.findAllByMemberId(memberId);
+    }
+
+    @Override
+    public List<Reservation> findAllByStatus(final ReservationStatus status) {
+        return jpaReservationRepository.findAllByStatus(status);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+            final LocalDate date,
+            final Long timeId,
+            final Long themeId,
+            final Long memberId,
+            final ReservationStatus status) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+                date, timeId, themeId, memberId, status
+        );
     }
 }

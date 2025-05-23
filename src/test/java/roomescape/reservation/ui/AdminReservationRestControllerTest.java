@@ -166,7 +166,7 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .body(waitingReservationParams())
+                .body(confirmedReservationParams2())
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -211,21 +211,20 @@ class AdminReservationRestControllerTest {
         return createReservationParams(memberId, date, timeId, themeId, status);
     }
 
-    private Map<String, String> waitingReservationParams() {
+    private Map<String, String> confirmedReservationParams2() {
         final String memberId = createMemberResponses.get(0).extract().body()
                 .as(Map.class)
                 .get("id").toString();
-        final String timeId = createReservationTimeResponses.get(1).extract().body()
+        final String timeId = createReservationTimeResponses.get(0).extract().body()
                 .as(Map.class)
                 .get("id").toString();
-        final String themeId = createThemeResponses.get(0).extract().body()
+        final String themeId = createThemeResponses.get(1).extract().body()
                 .as(Map.class)
                 .get("id").toString();
-        final String status = ReservationStatus.WAITING.name();
+        final String status = ReservationStatus.CONFIRMED.name();
 
         return createReservationParams(memberId, date, timeId, themeId, status);
     }
-
 
     private Map<String, String> createReservationParams(
             final String memberId,
