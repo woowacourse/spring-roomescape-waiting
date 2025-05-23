@@ -19,13 +19,16 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.local.AlreadyReservedTimeException;
+import roomescape.exception.local.AlreadyWaitingTimeException;
 import roomescape.exception.local.DuplicateReservationException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingRepository;
 
 @DataJpaTest
 class ReservationTimeServiceTest {
@@ -36,6 +39,8 @@ class ReservationTimeServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     private ReservationTimeService timeService;
 
@@ -43,7 +48,8 @@ class ReservationTimeServiceTest {
     void setup() {
         timeService = new ReservationTimeService(
                 reservationTimeRepository,
-                reservationRepository);
+                reservationRepository,
+                waitingRepository);
     }
 
     @DisplayName("모든 예약을 조회할 수 있다.")
@@ -159,7 +165,7 @@ class ReservationTimeServiceTest {
 
         @DisplayName("이미 해당 시간에 예약이 존재할 경우 예약을 추가할 수 없다.")
         @Test
-        void cannotDeleteDuplicatedReservationTime() {
+        void cannotDeleteReservedTimeByReservation() {
             // given
             Theme theme = entityManager.persist(
                     Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
@@ -178,6 +184,28 @@ class ReservationTimeServiceTest {
             assertThatThrownBy(() -> timeService.deleteReservationTimeById(time.getId()))
                     .isInstanceOf(AlreadyReservedTimeException.class)
                     .hasMessage("예약에서 사용 중인 시간입니다.");
+        }
+
+        @DisplayName("이미 해당 시간에 예약 대기가 존재할 경우 예약을 추가할 수 없다.")
+        @Test
+        void cannotDeleteReservedTimeByWaiting() {
+            // given
+            Theme theme = entityManager.persist(
+                    Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
+
+            ReservationTime time = entityManager.persist(ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+
+            entityManager.persist(Waiting.createWithoutId(TODAY, theme, time, member));
+
+            entityManager.flush();
+
+            // when & then
+            assertThatThrownBy(() -> timeService.deleteReservationTimeById(time.getId()))
+                    .isInstanceOf(AlreadyWaitingTimeException.class)
+                    .hasMessage("이미 예약대기 중인 예약시간입니다.");
         }
     }
 }

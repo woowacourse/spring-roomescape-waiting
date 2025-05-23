@@ -11,10 +11,12 @@ import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.exception.local.AlreadyReservedTimeException;
+import roomescape.exception.local.AlreadyWaitingTimeException;
 import roomescape.exception.local.DuplicateReservationException;
 import roomescape.exception.local.NotFoundReservationTimeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 @Transactional
@@ -22,13 +24,15 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationTimeService(
             ReservationTimeRepository timeRepository,
-            ReservationRepository reservationRepository
+            ReservationRepository reservationRepository, WaitingRepository waitingRepository
     ) {
         this.timeRepository = timeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationTimeResponse> findAllReservationTimes() {
@@ -51,10 +55,11 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(savedReservationTime);
     }
 
-    public void deleteReservationTimeById(Long id) {
-        ReservationTime reservationTime = getReservationTimeById(id);
+    public void deleteReservationTimeById(Long timeId) {
+        ReservationTime reservationTime = getReservationTimeById(timeId);
         validateReservationInTime(reservationTime);
-        timeRepository.deleteById(id);
+        validateWaitingInTime(reservationTime);
+        timeRepository.deleteById(timeId);
     }
 
     private void validateDuplicateTime(LocalTime startAt) {
@@ -67,6 +72,12 @@ public class ReservationTimeService {
     private void validateReservationInTime(ReservationTime reservationTime) {
         if (reservationRepository.existsByReservationTime(reservationTime)) {
             throw new AlreadyReservedTimeException();
+        }
+    }
+
+    private void validateWaitingInTime(ReservationTime reservationTime) {
+        if (waitingRepository.existsByTime(reservationTime)) {
+            throw new AlreadyWaitingTimeException();
         }
     }
 

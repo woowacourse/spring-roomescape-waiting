@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.business.WaitingWithRank;
@@ -54,4 +55,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     );
 
     boolean existsByTheme(Theme theme);
+
+    boolean existsByTime(ReservationTime reservationTime);
 }
