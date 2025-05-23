@@ -2,7 +2,6 @@ package roomescape.member.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.util.Objects;
 import roomescape.member.exception.NameException;
 
 @Embeddable
@@ -25,22 +24,5 @@ public record Name(@Column(length = MAX_NAME_LENGTH, nullable = false) String na
         if (name.isEmpty() || name.length() > MAX_NAME_LENGTH) {
             throw new NameException("이름은 1-5글자 사이여야 합니다.");
         }
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof Name name1)) {
-            return false;
-        }
-        return Objects.equals(getName(), name1.getName());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getName());
     }
 }

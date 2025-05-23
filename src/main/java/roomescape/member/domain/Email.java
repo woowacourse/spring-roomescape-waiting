@@ -2,7 +2,6 @@ package roomescape.member.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.util.Objects;
 import roomescape.member.exception.EmailException;
 
 @Embeddable
@@ -25,22 +24,5 @@ public record Email(@Column(nullable = false) String email) {
         if (!email.matches(EMAIL_REGEX)) {
             throw new EmailException("이메일 형식이 맞지 않습니다.");
         }
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        if (!(object instanceof Email email1)) {
-            return false;
-        }
-        return Objects.equals(getEmail(), email1.getEmail());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getEmail());
     }
 }

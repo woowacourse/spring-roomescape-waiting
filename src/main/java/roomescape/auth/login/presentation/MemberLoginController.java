@@ -41,6 +41,6 @@ public class MemberLoginController {
     @GetMapping("/login/check")
     public ResponseEntity<LoginCheckResponse> checkLogin(@LoginMember final LoginMemberInfo info) {
         Member member = loginService.findByMemberId(info.id());
-        return ResponseEntity.ok().body(new LoginCheckResponse(member.getName()));
+        return ResponseEntity.ok().body(new LoginCheckResponse(member.getName().name()));
     }
 }

@@ -6,10 +6,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
-import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.common.exception.BusinessException;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@EqualsAndHashCode(of = "id")
 public class ReservationTime {
 
     @Id
@@ -18,9 +24,6 @@ public class ReservationTime {
 
     @Column(nullable = false)
     private LocalTime startAt;
-
-    public ReservationTime() {
-    }
 
     public ReservationTime(final LocalTime startAt) {
         validateIsNonNull(startAt);
@@ -41,30 +44,5 @@ public class ReservationTime {
 
     public boolean isEqual(final LocalTime time) {
         return startAt.equals(time);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
-    }
-
-    @Override
-    public boolean equals(final Object object) {
-        if (!(object instanceof ReservationTime that)) {
-            return false;
-        }
-
-        if (getId() == null && that.getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
     }
 }

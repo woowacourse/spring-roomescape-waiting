@@ -98,7 +98,7 @@ public class ReservationFacadeService {
                 new ReservationTimeResponse(reservation.getTime().getId(), reservation.getTime().getStartAt()),
                 new ThemeResponse(reservation.getTheme().getId(), reservation.getTheme().getName(),
                     reservation.getTheme().getDescription(), reservation.getTheme().getThumbnail()),
-                new MemberResponse(reservation.getMember().getId(), reservation.getMember().getName())
+                new MemberResponse(reservation.getMember().getId(), reservation.getMember().getName().name())
             ))
             .toList();
     }

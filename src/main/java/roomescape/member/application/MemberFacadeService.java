@@ -26,7 +26,7 @@ public class MemberFacadeService {
         validateEmailExists(emailExist);
 
         Member member = memberCommandService.save(request);
-        return new MemberResponse(member.getId(), member.getName());
+        return new MemberResponse(member.getId(), member.getName().name());
     }
 
     private void validateEmailExists(boolean emailExist) {
@@ -37,7 +37,7 @@ public class MemberFacadeService {
 
     public List<MemberResponse> findAll() {
         return memberQueryService.findAll().stream()
-            .map(member -> new MemberResponse(member.getId(), member.getName()))
+            .map(member -> new MemberResponse(member.getId(), member.getName().name()))
             .toList();
     }
 }

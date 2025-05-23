@@ -21,7 +21,7 @@ public record ReservationResponse(Long id, LocalDate date, ReservationTimeRespon
                         reservation.getTheme().getThumbnail()
                 ),
                 new MemberResponse(reservation.getMember().getId(),
-                        reservation.getMember().getName())
+                        reservation.getMember().getName().name())
         );
     }
 }

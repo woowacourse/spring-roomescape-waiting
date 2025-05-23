@@ -11,12 +11,19 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.common.exception.BusinessException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@EqualsAndHashCode(of = "id")
 public class Reservation {
 
     @Id
@@ -38,9 +45,6 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus reservationStatus;
-
-    public Reservation() {
-    }
 
     public Reservation(final LocalDate date,
                        final ReservationTime time,
@@ -78,46 +82,5 @@ public class Reservation {
 
     public boolean isSameTime(final ReservationTime time) {
         return this.time.isEqual(time.getStartAt());
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public ReservationStatus getStatus() {
-        return reservationStatus;
-    }
-
-    @Override
-    public boolean equals(final Object object) {
-        if (!(object instanceof Reservation that)) {
-            return false;
-        }
-
-        if (getId() == null && that.getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
     }
 }
