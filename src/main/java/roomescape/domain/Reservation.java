@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.domain.enums.ReservationStatus;
 import roomescape.exception.reservation.ReservationFieldRequiredException;
 
@@ -92,6 +93,23 @@ public class Reservation {
         if (member == null) {
             throw new ReservationFieldRequiredException("멤버");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Reservation that = (Reservation) o;
+        if (that.getId() == null || this.getId() == null) {
+            return false;
+        }
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public Long getId() {

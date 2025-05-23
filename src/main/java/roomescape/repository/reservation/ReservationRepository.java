@@ -3,12 +3,12 @@ package roomescape.repository.reservation;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.enums.ReservationStatus;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -28,19 +28,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    @Modifying
-    @Query("UPDATE ReservationStatus s " +
-            "SET s.priority = s.priority - 1 " +
-            "WHERE s.id IN (" +
-            "   SELECT r.status.id FROM Reservation r " +
-            "   WHERE r.date = :date " +
-            "   AND r.time = :time " +
-            "   AND r.theme = :theme " +
-            "   AND s.priority > :priority" +
-            ")")
-    void updateAllWaitingReservationsAfterPriority(LocalDate date, ReservationTime time, Theme theme,
-                                                   Long priority);
+    List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
 
-    @Query("SELECT r FROM Reservation r WHERE r.status.priority > 1")
-    List<Reservation> findAllWaiting();
+    List<Reservation> findAllByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
 }

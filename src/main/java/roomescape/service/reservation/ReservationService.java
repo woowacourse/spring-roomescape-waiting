@@ -1,15 +1,17 @@
 package roomescape.service.reservation;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.enums.ReservationStatus;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.admin.AdminWaitingReservationResponse;
 import roomescape.dto.reservation.MemberReservationResponse;
@@ -25,7 +27,6 @@ import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ReservationStatusRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
 
@@ -37,18 +38,15 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationStatusRepository statusRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository timeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository,
-                              ReservationStatusRepository statusRepository) {
+                              MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.statusRepository = statusRepository;
     }
 
     public ReservationResponse create(ReservationRequest request, Member member) {
@@ -66,17 +64,18 @@ public class ReservationService {
             throw new ReservationAlreadyExistsException();
         }
 
-        ReservationStatus status = new ReservationStatus(1L);
-        statusRepository.save(status);
+        ReservationStatus status = getReservationStatus(request.date(), reservationTime, theme);
 
         Reservation newReservation = new Reservation(request.date(),
-                reservationTime, theme, member, status);
+                reservationTime, theme, member, status, LocalDateTime.now());
 
-        return ReservationResponse.from(reservationRepository.save(newReservation));
+        return mapToReservationResponse(reservationRepository.save(newReservation));
     }
 
     public List<ReservationResponse> getAll() {
-        return ReservationResponse.from(reservationRepository.findAll());
+        return reservationRepository.findAll().stream()
+                .map(this::mapToReservationResponse)
+                .toList();
     }
 
     @Transactional
@@ -84,7 +83,6 @@ public class ReservationService {
         Reservation targetReservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
 
-        updateWaitingReservationPriorities(targetReservation);
         reservationRepository.delete(targetReservation);
     }
 
@@ -98,13 +96,12 @@ public class ReservationService {
         Member member = memberRepository.findById(adminReservationRequest.memberId())
                 .orElseThrow(() -> new MemberNotFoundException(adminReservationRequest.memberId()));
 
-        ReservationStatus status = new ReservationStatus(1L);
-        statusRepository.save(status);
+        ReservationStatus status = getReservationStatus(adminReservationRequest.date(), reservationTime, theme);
 
         Reservation newReservation = new Reservation(adminReservationRequest.date(),
-                reservationTime, theme, member, status);
+                reservationTime, theme, member, status, LocalDateTime.now());
 
-        return ReservationResponse.from(reservationRepository.save(newReservation));
+        return mapToReservationResponse(reservationRepository.save(newReservation));
     }
 
     public List<ReservationResponse> getReservationsByConditions(
@@ -117,14 +114,14 @@ public class ReservationService {
                 searchConditionsRequest.dateTo()
         );
         return reservations.stream().
-                map(ReservationResponse::from)
+                map(this::mapToReservationResponse)
                 .toList();
     }
 
     public List<MemberReservationResponse> getReservationByMember(Member member) {
         return reservationRepository.findAllByMember(member)
                 .stream()
-                .map(MemberReservationResponse::from)
+                .map(this::mapToMemberReservationResponse)
                 .toList();
     }
 
@@ -135,14 +132,10 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
 
-        long waitingCount = reservationRepository.countByDateAndTimeAndTheme(request.date(), time, theme);
-
-        ReservationStatus status = new ReservationStatus(waitingCount + 1);
-        statusRepository.save(status);
-
         Reservation reservation = reservationRepository.save(new Reservation(request.date(),
-                time, theme, member, status));
-        return ReservationResponse.from(reservation);
+                time, theme, member, ReservationStatus.WAITING, LocalDateTime.now()));
+
+        return mapToReservationResponse(reservation);
     }
 
     @Transactional
@@ -154,20 +147,47 @@ public class ReservationService {
             throw new IllegalArgumentException("예약의 주인이 아닙니다.");
         }
 
-        updateWaitingReservationPriorities(targetReservation);
         reservationRepository.delete(targetReservation);
     }
 
     public List<AdminWaitingReservationResponse> getWaitingReservations() {
-        return AdminWaitingReservationResponse.from(reservationRepository.findAllWaiting());
+        return AdminWaitingReservationResponse.from(reservationRepository.findAllByStatus(ReservationStatus.WAITING));
     }
 
-    private void updateWaitingReservationPriorities(Reservation targetReservation) {
-        reservationRepository.updateAllWaitingReservationsAfterPriority(
-                targetReservation.getDate(),
-                targetReservation.getTime(),
-                targetReservation.getTheme(),
-                targetReservation.getStatus().getPriority()
-        );
+    private ReservationResponse mapToReservationResponse(
+            Reservation reservation) { // TODO : 아래 MemberReservationResponse랑 너무 겹침 -> 리팩토링 필요
+        if (reservation.getStatus().isWaiting()) {
+            int order = calculateWaitingOrder(reservation);
+            return ReservationResponse.fromWaitingReservation(reservation, order);
+        }
+        return ReservationResponse.fromConfirmedReservation(reservation);
+    }
+
+    private ReservationStatus getReservationStatus(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
+            return ReservationStatus.WAITING;
+        }
+        return ReservationStatus.CONFIRMED;
+    }
+
+    private MemberReservationResponse mapToMemberReservationResponse(Reservation reservation) {
+        if (reservation.getStatus().isWaiting()) {
+            int order = calculateWaitingOrder(reservation);
+            return MemberReservationResponse.fromWaitingReservation(reservation, order);
+        }
+        return MemberReservationResponse.fromConfirmedReservation(reservation);
+    }
+
+    private int calculateWaitingOrder(Reservation reservation) {
+        // TODO : findAllByThemeAndDateAnd..로 가져와서 코드 레벨에서 계산하기 - > query의 order by 추가하기 vs stream의 sorted 사용하기 성능 차이 ?
+        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeAndTime(
+                        reservation.getDate(),
+                        reservation.getTheme(),
+                        reservation.getTime()
+                ).stream()
+                .sorted(Comparator.comparing(Reservation::getCreatedAt))
+                .toList();
+
+        return reservations.indexOf(reservation) + 1;
     }
 }
