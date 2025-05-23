@@ -26,7 +26,7 @@ public class ReservationDbFixture {
         return reservationRepository.save(reservation);
     }
 
-    public Reservation 예약_생성_한스(Member member, ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
+    public Reservation 예약_생성(Member member, ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         LocalDate date = reservationDate.getDate();
         Reservation reservation = Reservation.create(member, date, reservationTime, theme);
 
