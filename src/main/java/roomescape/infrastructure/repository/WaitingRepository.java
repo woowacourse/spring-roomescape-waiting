@@ -15,7 +15,8 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                     + "FROM Waiting w2 "
                     + "WHERE w2.theme=w.theme "
                     + "AND w2.date=w.date "
-                    + "AND w2.time=w.time)) "
+                    + "AND w2.time=w.time "
+                    + "AND w2.createdAt <= w.createdAt)) "
             + "FROM Waiting w "
             + "WHERE w.member.id=:memberId"
     )
