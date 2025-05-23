@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
@@ -20,6 +21,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.service.ReservationTimeService;
 
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -34,13 +36,15 @@ public class ReservationService {
     public ReservationResponse reserve(ReserveCommand reserveCommand) {
         LocalDate date = reserveCommand.date();
         Long timeId = reserveCommand.timeId();
+        Long themeId = reserveCommand.themeId();
 
-        isAlreadyReservedTime(date, timeId);
+        isAlreadyReserved(date, timeId, themeId);
 
         ReservationDateTime reservationDateTime = ReservationDateTime.create(
                 new ReservationDate(date), reservationTimeService.getReservationTime(timeId)
         );
-        Theme theme = themeService.getTheme(reserveCommand.themeId());
+
+        Theme theme = themeService.getTheme(themeId);
         Member reserver = memberQueryService.getMember(reserveCommand.memberId());
 
         Reservation reserved = Reservation.reserve(reserver, reservationDateTime, theme);
@@ -49,9 +53,9 @@ public class ReservationService {
         return ReservationResponse.from(saved);
     }
 
-    private void isAlreadyReservedTime(LocalDate date, Long timeId) {
-        if (reservationRepository.hasReservationWithDateTime(date, timeId)) {
-            throw new InvalidArgumentException("이미 예약이 존재하는 시간입니다.");
+    private void isAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            throw new InvalidArgumentException("이미 예약되어 있습니다.");
         }
     }
 

@@ -26,6 +26,19 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select exists
                 (select r from Reservation r
+                    where r.reservationDatetime.reservationDate.date = :date
+                    and r.reservationDatetime.reservationTime.id = :timeId
+                    and r.theme.id = :themeId)
+            """)
+    boolean existsByDateAndTimeIdAndThemeId(
+            LocalDate date,
+            Long timeId,
+            Long themeId
+    );
+
+    @Query("""
+            select exists
+                (select r from Reservation r
                 where r.reservationDatetime.reservationDate.date = :date and r.reservationDatetime.reservationTime.id = :timeId)
             """)
     boolean existsByDateAndTimeId(@Param(value = "date") LocalDate date, @Param(value = "timeId") Long timeId);

@@ -1,7 +1,9 @@
 package roomescape.time.service;
 
 import java.time.LocalTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +31,9 @@ public class ReservationTimeService {
         isAlreadyOpened(startAt);
 
         ReservationTime reservationTime = ReservationTime.open(request.startAt());
-        ReservationTime created = reservationTimeRepository.save(reservationTime);
+        ReservationTime saved = reservationTimeRepository.save(reservationTime);
 
-        return ReservationTimeResponse.from(created);
+        return ReservationTimeResponse.from(saved);
     }
 
     private void isAlreadyOpened(LocalTime startAt) {
@@ -64,16 +66,14 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
-
-        List<Long> reservedTimeIds = reservationRepository.findReservedTimeIdsByDateAndTheme(
-                request.date(), request.themeId());
-
+        Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findReservedTimeIdsByDateAndTheme(
+                request.date(), request.themeId()));
+        
         return allTimes.stream()
                 .map(time -> new AvailableReservationTimeResponse(
                         time.getId(),
                         time.getStartAt(),
                         reservedTimeIds.contains(time.getId())
-                ))
-                .toList();
+                )).toList();
     }
 }
