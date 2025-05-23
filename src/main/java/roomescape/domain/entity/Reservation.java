@@ -20,35 +20,27 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate date;
-    @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_id", nullable = false)
-    private ReservationTime time;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id", nullable = false)
-    private Theme theme;
+    @JoinColumn(name = "game_schedule_id", nullable = false)
+    private GameSchedule gameSchedule;
+
+    @Enumerated(EnumType.STRING)
+    private ReservationStatus status;
 
     private Reservation(
             Long id,
             Member member,
-            Theme theme,
-            LocalDate date,
-            ReservationTime time,
+            GameSchedule gameSchedule,
             ReservationStatus status
     ) {
         this.id = id;
         this.member = member;
-        this.theme = theme;
-        this.date = date;
-        this.time = time;
+        this.gameSchedule = gameSchedule;
         this.status = status;
-        this.time.addReservation(this);
     }
 
     protected Reservation() {
@@ -57,46 +49,36 @@ public class Reservation {
     public static Reservation of(
             Long id,
             Member member,
-            Theme theme,
-            LocalDate date,
-            ReservationTime time,
+            GameSchedule gameSchedule,
             ReservationStatus status
     ) {
-        return new Reservation(id, member, theme, date, time, status);
+        return new Reservation(id, member, gameSchedule, status);
     }
 
     public static Reservation withoutId(
             Member member,
-            Theme theme,
-            LocalDate reservationDate,
-            ReservationTime reservationTime,
+            GameSchedule gameSchedule,
             ReservationStatus status
     ) {
-        return new Reservation(null, member, theme, reservationDate, reservationTime, status);
-    }
-
-    public void remove() {
-        if (time != null) {
-            time.removeReservation(this);
-        }
+        return new Reservation(null, member, gameSchedule, status);
     }
 
     public boolean isPast() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        LocalDateTime reservationDateTime = LocalDateTime.of(gameSchedule.getDate(), gameSchedule.getTime().getStartAt());
         return reservationDateTime.isBefore(now);
     }
 
     public boolean isDuplicated(Reservation other) {
-        return this.date.equals(other.date)
-               && this.time.equals(other.time)
-               && this.theme.equals(other.theme);
+        return this.gameSchedule.getDate().equals(other.gameSchedule.getDate())
+               && this.gameSchedule.getTime().equals(other.gameSchedule.getTime())
+               && this.gameSchedule.getTheme().equals(other.gameSchedule.getTheme());
     }
 
     public boolean isAlreadyBookedTime(LocalDate date, Long themeId, Long timeId) {
-        return this.date.equals(date)
-               && this.theme.getId().equals(themeId)
-               && this.time.getId().equals(timeId);
+        return this.gameSchedule.getDate().equals(date)
+               && this.gameSchedule.getTheme().getId().equals(themeId)
+               && this.gameSchedule.getTime().getId().equals(timeId);
     }
 
     public Long getId() {
@@ -107,16 +89,8 @@ public class Reservation {
         return member;
     }
 
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
+    public GameSchedule getGameSchedule() {
+        return gameSchedule;
     }
 
     public ReservationStatus getStatus() {

@@ -10,13 +10,12 @@ import roomescape.domain.entity.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
-
     @Query("""
             SELECT DISTINCT r
             FROM Reservation r
-            LEFT JOIN FETCH r.theme
-            LEFT JOIN FETCH r.time
+            LEFT JOIN FETCH r.gameSchedule gs
+            LEFT JOIN FETCH gs.theme
+            LEFT JOIN FETCH gs.time
             WHERE r.member = :member
             """)
     List<Reservation> findByMember(Member member);
@@ -25,14 +24,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             SELECT DISTINCT r
             FROM Reservation r
             LEFT JOIN FETCH r.member
-            LEFT JOIN FETCH r.theme
-            LEFT JOIN FETCH r.time
-            WHERE (:themeId IS NULL OR r.theme.id = :themeId)
+            LEFT JOIN FETCH r.gameSchedule gs
+            LEFT JOIN FETCH gs.theme
+            LEFT JOIN FETCH gs.time
+            WHERE (:themeId IS NULL OR gs.theme.id = :themeId)
                 AND (:memberId IS NULL OR r.member.id = :memberId)
-                AND (:dateFrom IS NULL OR r.date >= :dateFrom)
-                AND (:dateTo IS NULL OR r.date <= :dateTo)
+                AND (:dateFrom IS NULL OR gs.date >= :dateFrom)
+                AND (:dateTo IS NULL OR gs.date <= :dateTo)
             """)
-    List<Reservation> findByMemberAndThemeAndDateRange(
+    List<Reservation> findByMemberAndGameScheduleAndDateRange(
             @Param("memberId") Long member,
             @Param("themeId") Long theme,
             @Param("dateFrom") LocalDate dateFrom,

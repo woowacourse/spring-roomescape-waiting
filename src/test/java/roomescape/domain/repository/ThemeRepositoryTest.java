@@ -13,9 +13,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.entity.Theme;
 
@@ -39,6 +40,7 @@ class ThemeRepositoryTest {
     @BeforeEach
     void setUp() {
         entityManager.createQuery("DELETE FROM Reservation").executeUpdate();
+        entityManager.createQuery("DELETE FROM GameSchedule").executeUpdate();
         entityManager.createQuery("DELETE FROM Member").executeUpdate();
         entityManager.createQuery("DELETE FROM Theme").executeUpdate();
         entityManager.createQuery("DELETE FROM ReservationTime").executeUpdate();
@@ -111,7 +113,9 @@ class ThemeRepositoryTest {
     }
 
     private void createReservation(Theme theme, LocalDate date) {
-        Reservation reservation = Reservation.withoutId(member, theme, date, time, ReservationStatus.RESERVED);
+        GameSchedule gameSchedule = GameSchedule.withoutId(date, time, theme);
+        entityManager.persist(gameSchedule);
+        Reservation reservation = Reservation.withoutId(member, gameSchedule, ReservationStatus.RESERVED);
         entityManager.persist(reservation);
     }
 }

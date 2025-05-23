@@ -9,10 +9,12 @@ import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.application.dto.ReservationStatusServiceResponse;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.entity.Theme;
+import roomescape.domain.repository.GameScheduleRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.NotFoundException;
 
@@ -21,17 +23,20 @@ import roomescape.exception.NotFoundException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final GameScheduleRepository gameScheduleRepository;
     private final TimeService timeService;
     private final ThemeService themeService;
     private final MemberService memberService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
+            GameScheduleRepository gameScheduleRepository,
             TimeService timeService,
             ThemeService themeService,
             MemberService memberService
     ) {
         this.reservationRepository = reservationRepository;
+        this.gameScheduleRepository = gameScheduleRepository;
         this.timeService = timeService;
         this.themeService = themeService;
         this.memberService = memberService;
@@ -43,11 +48,13 @@ public class ReservationService {
         Theme theme = themeService.getThemeEntityById(request.themeId());
         ReservationTime reservationTime = timeService.getTimeEntityById(request.timeId());
         Member member = memberService.getMemberEntityById(request.memberId());
+
+        GameSchedule gameSchedule = GameSchedule.withoutId(request.date(), reservationTime, theme);
+        GameSchedule savedGameSchedule = gameScheduleRepository.save(gameSchedule);
+
         Reservation reservationWithoutId = Reservation.withoutId(
                 member,
-                theme,
-                request.date(),
-                reservationTime,
+                savedGameSchedule,
                 ReservationStatus.RESERVED
         );
         validateNotPast(reservationWithoutId);
@@ -56,7 +63,7 @@ public class ReservationService {
     }
 
     private void validateNotDuplicate(ReservationCreateServiceRequest request) {
-        boolean duplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(
+        boolean duplicated = gameScheduleRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(),
                 request.timeId(),
                 request.themeId()
@@ -88,9 +95,9 @@ public class ReservationService {
         return memberReservations.stream()
                 .map(reservation -> new ReservationStatusServiceResponse(
                                 reservation.getId(),
-                                reservation.getTheme().getName(),
-                                reservation.getDate(),
-                                reservation.getTime().getStartAt(),
+                                reservation.getGameSchedule().getTheme().getName(),
+                                reservation.getGameSchedule().getDate(),
+                                reservation.getGameSchedule().getTime().getStartAt(),
                                 ReservationStatus.name(reservation.getStatus())
                         )
                 )
@@ -104,7 +111,7 @@ public class ReservationService {
             LocalDate dateTo
     ) {
         List<Reservation> reservations = reservationRepository
-                .findByMemberAndThemeAndDateRange(
+                .findByMemberAndGameScheduleAndDateRange(
                         memberId,
                         themeId,
                         dateFrom,
@@ -117,7 +124,6 @@ public class ReservationService {
     public void deleteReservation(Long id) {
         try {
             Reservation reservation = getReservationEntityById(id);
-            reservation.remove();
             reservationRepository.deleteById(id);
             reservationRepository.flush();
         } catch (EmptyResultDataAccessException e) {

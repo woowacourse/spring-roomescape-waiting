@@ -35,7 +35,8 @@ class LoginControllerIntTest {
     @DisplayName("토큰으로 로그인 성공")
     @Test
     void tokenLogin() {
-        jdbcTemplate.update("INSERT INTO member (name, email, password, role) VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN')");
+        jdbcTemplate.update(
+                "INSERT INTO member (name, email, password, role) VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN')");
 
         String cookie = RestAssured
                 .given().log().all()

@@ -19,10 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.application.dto.ReservationStatusServiceResponse;
+import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.entity.Theme;
+import roomescape.domain.repository.GameScheduleRepository;
 import roomescape.domain.repository.ReservationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +34,8 @@ public class ReservationServiceTest {
     private ReservationService reservationService;
     @Mock
     private ReservationRepository reservationRepository;
+    @Mock
+    private GameScheduleRepository gameScheduleRepository;
     @Mock
     private TimeService timeService;
     @Mock
@@ -48,9 +52,10 @@ public class ReservationServiceTest {
 
         Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
+        GameSchedule gameSchedule = GameSchedule.of(1L, LocalDate.now().plusDays(1), time, theme);
 
-        Reservation reservation1 = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, RESERVED);
-        Reservation reservation2 = Reservation.of(2L, member, theme, LocalDate.now().plusDays(1), time, RESERVED);
+        Reservation reservation1 = Reservation.of(1L, member, gameSchedule, RESERVED);
+        Reservation reservation2 = Reservation.of(2L, member, gameSchedule, RESERVED);
 
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
@@ -76,14 +81,18 @@ public class ReservationServiceTest {
         Theme theme = stubTheme(1L);
         ReservationTime time = stubTime(1L);
         Member member = stubMember(1L);
+        LocalDate date = LocalDate.now().plusDays(1);
 
-        Reservation reservation = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, RESERVED);
+        GameSchedule gameSchedule = GameSchedule.of(1L, date, time, theme);
+        Mockito.doReturn(gameSchedule).when(gameScheduleRepository).save(Mockito.any(GameSchedule.class));
+
+        Reservation reservation = Reservation.of(1L, member, gameSchedule, RESERVED);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
         //when
         ReservationServiceResponse reservationServiceResponse = reservationService.registerReservation(
                 new ReservationCreateServiceRequest(
-                        reservation.getDate(),
+                        date,
                         theme.getId(),
                         time.getId(),
                         member.getId()

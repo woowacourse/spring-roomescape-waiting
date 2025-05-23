@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.TimeCreateServiceRequest;
 import roomescape.application.dto.TimeServiceResponse;
 import roomescape.domain.entity.ReservationTime;
+import roomescape.domain.repository.GameScheduleRepository;
 import roomescape.domain.repository.TimeRepository;
 import roomescape.domain.repository.dto.TimeDataWithBookingInfo;
 import roomescape.exception.NotFoundException;
@@ -18,9 +19,11 @@ import roomescape.exception.NotFoundException;
 public class TimeService {
 
     private final TimeRepository repository;
+    private final GameScheduleRepository gameScheduleRepository;
 
-    public TimeService(TimeRepository repository) {
+    public TimeService(TimeRepository repository, GameScheduleRepository gameScheduleRepository) {
         this.repository = repository;
+        this.gameScheduleRepository = gameScheduleRepository;
     }
 
     @Transactional
@@ -52,7 +55,7 @@ public class TimeService {
                         new TimeDataWithBookingInfo(
                                 time.getId(),
                                 time.getStartAt(),
-                                time.hasReservationOn(date, themeId)
+                                gameScheduleRepository.existsByDateAndTimeIdAndThemeId(date, time.getId(), themeId)
                         )
                 )
                 .toList();
