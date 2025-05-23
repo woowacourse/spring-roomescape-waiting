@@ -11,21 +11,26 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.exception.UnauthorizedAccessException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
-import roomescape.exception.UnauthorizedAccessException;
+import roomescape.reservation.dto.WaitingRequest;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 
 @RestController
 @RequestMapping("/reservations")
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -42,6 +47,12 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody final UserReservationRequest request, Member member) {
         ReservationResponse responseDto = reservationService.createUserReservation(request, member);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody final WaitingRequest request, Member member) {
+        WaitingResponse responseDto = waitingService.createWaiting(request, member);
+        return ResponseEntity.created(URI.create("reservations/waiting/" + responseDto.id())).body(responseDto);
     }
 
     @DeleteMapping("/{id}")

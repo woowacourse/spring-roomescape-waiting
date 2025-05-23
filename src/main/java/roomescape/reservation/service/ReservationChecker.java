@@ -8,9 +8,10 @@ import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.UserReservationRequest;
+import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -48,7 +49,20 @@ public class ReservationChecker {
         Member member = memberRepository.findById(dto.memberId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 회원을 찾을 수 없습니다."));
 
-        return dto.createWithoutId(reservationTime, theme, member, ReservationStatus.RESERVED);
+        return dto.createWithoutId(reservationTime, theme, member);
+    }
+
+    @Transactional(readOnly = true)
+    public Waiting createWaitingWithoutId(WaitingRequest dto, Member member) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + dto.timeId()));
+
+        validateRequestDateTime(LocalDateTime.of(dto.date(), reservationTime.getStartAt()));
+
+        Theme theme = themeRepository.findById(dto.themeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + dto.themeId()));
+
+        return dto.createWithoutId(reservationTime, theme, member);
     }
 
     private void validateRequestDateTime(LocalDateTime requestDateTime) {
