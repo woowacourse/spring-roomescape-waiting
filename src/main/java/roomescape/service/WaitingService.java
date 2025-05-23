@@ -21,14 +21,14 @@ import roomescape.repository.jpa.JpaWaitingRepository;
 
 @Service
 @Transactional
-public class WaitingAndReservationService {
+public class WaitingService {
 
     private final JpaWaitingRepository waitingRepository;
     private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
 
-    public WaitingAndReservationService(JpaWaitingRepository waitingRepository,
+    public WaitingService(JpaWaitingRepository waitingRepository,
         JpaReservationRepository reservationRepository,
         JpaReservationTimeRepository reservationTimeRepository,
         JpaThemeRepository themeRepository) {
@@ -48,11 +48,13 @@ public class WaitingAndReservationService {
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new NotFoundException("theme"));
 
+        long rank = waitingRepository.countByDateAndThemeIdAndTimeId(date, theme.getId(), time.getId());
+
         validateDateTimeAfterNow(now, date, time);
         validateDuplicateReservationAboutMemberId(member, request);
 
         return WaitingResponse.from(
-            waitingRepository.save(new Waiting(member, request.date(), time, theme, now)));
+            waitingRepository.save(new Waiting(member, request.date(), time, theme, rank + 1)));
     }
 
     private void validateDuplicateReservationAboutMemberId(Member member, WaitingRequest request) {

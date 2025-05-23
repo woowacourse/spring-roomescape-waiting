@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.config.annotation.AuthMember;
 import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.entity.Member;
 import roomescape.service.ReservationService;
@@ -41,11 +40,6 @@ public class ReservationController {
         @RequestParam(required = false) LocalDate dateFrom,
         @RequestParam(required = false) LocalDate dateTo) {
         return reservationService.findReservationsByFilters(themeId, memberId, dateFrom, dateTo);
-    }
-
-    @GetMapping("/mine")
-    public List<MyReservationResponse> readMyReservations(@AuthMember Member member) {
-        return reservationService.findReservationsByMemberId(member);
     }
 
     @PostMapping

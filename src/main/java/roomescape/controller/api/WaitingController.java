@@ -10,17 +10,17 @@ import roomescape.config.annotation.AuthMember;
 import roomescape.dto.request.WaitingRequest;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.entity.Member;
-import roomescape.service.WaitingAndReservationService;
+import roomescape.service.WaitingService;
 
 @RestController
 @RequestMapping("/waitings")
-public class WaitingAndReservationController {
+public class WaitingController {
 
-    private final WaitingAndReservationService waitingAndReservationService;
+    private final WaitingService waitingService;
 
-    public WaitingAndReservationController(
-        WaitingAndReservationService waitingAndReservationService) {
-        this.waitingAndReservationService = waitingAndReservationService;
+    private WaitingController(
+        WaitingService waitingService) {
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -28,6 +28,6 @@ public class WaitingAndReservationController {
     public WaitingResponse createWaiting(
         @AuthMember Member member,
         @RequestBody WaitingRequest request) {
-        return waitingAndReservationService.addWaitingAfterNow(member, request);
+        return waitingService.addWaitingAfterNow(member, request);
     }
 }

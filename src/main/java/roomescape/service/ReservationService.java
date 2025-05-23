@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
@@ -42,13 +41,6 @@ public class ReservationService {
     public List<ReservationResponse> findAllReservations() {
         return reservationRepository.findAll().stream()
             .map(ReservationResponse::from)
-            .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<MyReservationResponse> findReservationsByMemberId(Member member) {
-        return reservationRepository.findByMemberId(member.getId()).stream()
-            .map(MyReservationResponse::from)
             .toList();
     }
 
