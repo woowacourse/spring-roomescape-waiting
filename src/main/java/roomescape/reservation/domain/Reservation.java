@@ -14,6 +14,7 @@ import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.Waiting;
 
 @Entity
 public class Reservation {

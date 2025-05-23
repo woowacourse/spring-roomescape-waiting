@@ -10,7 +10,7 @@ public record WaitingInfoResponse(
     String memberName,
     String themeName,
 
-    @JsonFormat(pattern = "MM:dd")
+    @JsonFormat(pattern = "MM-dd")
     LocalDate date,
 
     @JsonFormat(pattern = "HH:mm")

@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -41,6 +42,12 @@ public class Waiting {
 
     public Waiting(Member member, ReservationTime reservationTime, Theme theme, LocalDate date) {
         this(null, member, reservationTime, theme, date);
+    }
+
+    public Reservation convertToReservation() {
+        return new Reservation(
+            this.getDate(), this.getReservationTime(), this.getTheme(), this.getMember()
+        );
     }
 
     public Long getId() {
