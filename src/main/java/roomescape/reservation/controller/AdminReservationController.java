@@ -14,7 +14,7 @@ import roomescape.exception.ExceptionCause;
 import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.AdminReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -28,7 +28,7 @@ public class AdminReservationController {
     }
 
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody ReservationRequest request,
+    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody AdminReservationCreateRequest request,
                                                               Member member) {
         if (!Role.isAdmin(member.getRole())) {
             throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);

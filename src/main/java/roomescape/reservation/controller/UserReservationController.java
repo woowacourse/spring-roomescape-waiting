@@ -6,23 +6,28 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.dto.MemberReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.jwt.TokenProvider;
+import roomescape.reservation.dto.UserReservationResponse;
+import roomescape.reservation.service.UserReservationService;
 
 @RestController
 @RequestMapping("/member")
 public class UserReservationController {
 
-    private final ReservationService reservationService;
+    private final UserReservationService userReservationService;
+    private final TokenProvider tokenProvider;
 
-    public UserReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public UserReservationController(UserReservationService userReservationService, TokenProvider tokenProvider) {
+        this.userReservationService = userReservationService;
+        this.tokenProvider = tokenProvider;
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
+    public ResponseEntity<List<UserReservationResponse>> getMemberReservations(
             @CookieValue(name = "token", required = false) String token) {
-        List<MemberReservationResponse> allMemberReservations = reservationService.findAllMemberReservations(token);
+        Long memberId = tokenProvider.getMemberIdFromToken(token);
+        List<UserReservationResponse> allMemberReservations = userReservationService.findAllMemberReservations(
+                memberId);
         return ResponseEntity.ok(allMemberReservations);
     }
 }

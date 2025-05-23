@@ -16,7 +16,7 @@ import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.UserReservationRequest;
+import roomescape.reservation.dto.UserReservationCreateRequest;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -39,7 +39,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody final UserReservationRequest request,
+    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody final UserReservationCreateRequest request,
                                                               Member member) {
         ReservationResponse responseDto = reservationService.createUserReservation(request, member);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
