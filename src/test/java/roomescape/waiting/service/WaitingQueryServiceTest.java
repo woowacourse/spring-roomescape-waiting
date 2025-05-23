@@ -87,7 +87,7 @@ class WaitingQueryServiceTest {
         reservationRepository.save(Reservation.waiting(유저1, 내일_열시, 공포));
 
         // when
-        List<MyReservationResponse> result = waitingQueryService.getWaitingReservations(유저1.getId());
+        List<MyReservationResponse> result = waitingQueryService.getMyWaitingReservations(유저1.getId());
 
         // then
         SoftAssertions.assertSoftly(softly -> {
