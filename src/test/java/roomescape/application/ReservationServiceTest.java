@@ -116,7 +116,7 @@ class ReservationServiceTest {
     void waitForAlreadyReserved() {
         // given
         service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
-        
+
         // when & then
         assertThatThrownBy(() -> service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id()))
             .isInstanceOf(AlreadyExistedException.class);
@@ -152,6 +152,31 @@ class ReservationServiceTest {
         // then
         var reservations = user.reservations();
         assertThat(reservations).doesNotContain(waited);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 취소하면 뒤따라오는 순번의 다른 대기 예약들의 순번이 앞당겨진다.")
+    void cancelWaitingMirrorsQueue() {
+        // given
+        var user1 = repositoryHelper.saveAnyUser();
+        var user2 = repositoryHelper.saveAnyUser();
+        var user3 = repositoryHelper.saveAnyUser();
+        repositoryHelper.flushAndClear();
+
+        var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
+        var first = service.waitFor(user1.id(), tomorrow(), timeSlot.id(), theme.id());
+        var second = service.waitFor(user2.id(), tomorrow(), timeSlot.id(), theme.id());
+        var third = service.waitFor(user3.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        // when
+        service.cancelWaiting(user1.id(), first.id());
+
+        // then
+        var waitings = service.findAllWaitings();
+        assertThat(waitings).containsOnly(
+            new ReservationWithOrder(second, 1),
+            new ReservationWithOrder(third, 2)
+        );
     }
 
     @Test

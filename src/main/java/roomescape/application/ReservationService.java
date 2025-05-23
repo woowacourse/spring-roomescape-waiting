@@ -38,7 +38,7 @@ public class ReservationService {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
 
-        return createReservation(userId, slot, ReservationStatus.RESERVED);
+        return reserve(userId, slot, ReservationStatus.RESERVED);
     }
 
     @Transactional
@@ -48,20 +48,7 @@ public class ReservationService {
             throw new BusinessRuleViolationException("해당 날짜, 시간, 테마에 예약이 없습니다. 바로 예약해 주세요.");
         }
 
-        return createReservation(userId, slot, ReservationStatus.WAITING);
-    }
-
-    private Reservation createReservation(final long userId, final ReservationSlot slot, final ReservationStatus status) {
-        var user = userRepository.getById(userId);
-        var reservation = new Reservation(user, slot, status);
-        user.reserve(reservation);
-        return reservationRepository.save(reservation);
-    }
-
-    private ReservationSlot toReservationSlot(final LocalDate date, final long timeId, final long themeId) {
-        var timeSlot = timeSlotRepository.getById(timeId);
-        var theme = themeRepository.getById(themeId);
-        return ReservationSlot.forReserve(date, timeSlot, theme);
+        return reserve(userId, slot, ReservationStatus.WAITING);
     }
 
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
@@ -83,5 +70,19 @@ public class ReservationService {
         var user = userRepository.getById(userId);
         var reservation = reservationRepository.getById(reservationId);
         user.cancelReservation(reservation);
+        reservationRepository.delete(reservation);
+    }
+
+    private Reservation reserve(final long userId, final ReservationSlot slot, final ReservationStatus status) {
+        var user = userRepository.getById(userId);
+        var reservation = new Reservation(user, slot, status);
+        user.reserve(reservation);
+        return reservationRepository.save(reservation);
+    }
+
+    private ReservationSlot toReservationSlot(final LocalDate date, final long timeId, final long themeId) {
+        var timeSlot = timeSlotRepository.getById(timeId);
+        var theme = themeRepository.getById(themeId);
+        return ReservationSlot.forReserve(date, timeSlot, theme);
     }
 }
