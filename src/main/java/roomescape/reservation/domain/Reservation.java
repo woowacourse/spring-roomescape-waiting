@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -20,8 +21,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class Reservation {
 
     @Id
@@ -31,8 +32,10 @@ public class Reservation {
     @JoinColumn(name = "member_id")
     @ManyToOne
     private Member reserver;
+
     @Embedded
     private ReservationDateTime reservationDatetime;
+
     @JoinColumn(name = "theme_id")
     @ManyToOne
     private Theme theme;
@@ -40,6 +43,9 @@ public class Reservation {
     @Column(name = "status")
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
+
+    @Column(name = "reserved_at")
+    private LocalDateTime reservedAt;
 
     private Reservation(
             Long id,
@@ -53,6 +59,7 @@ public class Reservation {
         this.reservationDatetime = reservationDateTime;
         this.theme = theme;
         this.status = status;
+        this.reservedAt = LocalDateTime.now();
     }
 
     public static Reservation reserve(
@@ -61,6 +68,14 @@ public class Reservation {
             Theme theme
     ) {
         return new Reservation(null, reserver, reservationDateTime, theme, ReservationStatus.RESERVED);
+    }
+
+    public static Reservation wait(
+            Member reserver,
+            ReservationDateTime reservationDateTime,
+            Theme theme
+    ) {
+        return new Reservation(null, reserver, reservationDateTime, theme, ReservationStatus.WAITING);
     }
 
     public String getReserverName() {

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberQueryService;
@@ -38,25 +37,24 @@ public class ReservationService {
         Long timeId = reserveCommand.timeId();
         Long themeId = reserveCommand.themeId();
 
-        isAlreadyReserved(date, timeId, themeId);
-
         ReservationDateTime reservationDateTime = ReservationDateTime.create(
-                new ReservationDate(date), reservationTimeService.getReservationTime(timeId)
-        );
-
+                new ReservationDate(date), reservationTimeService.getReservationTime(timeId));
         Theme theme = themeService.getTheme(themeId);
         Member reserver = memberQueryService.getMember(reserveCommand.memberId());
 
+        if (isAlreadyReserved(date, timeId, themeId)) {
+            Reservation waited = Reservation.wait(reserver, reservationDateTime, theme);
+            Reservation saved = reservationRepository.save(waited);
+            return ReservationResponse.from(saved);
+        }
+
         Reservation reserved = Reservation.reserve(reserver, reservationDateTime, theme);
         Reservation saved = reservationRepository.save(reserved);
-
         return ReservationResponse.from(saved);
     }
 
-    private void isAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new InvalidArgumentException("이미 예약되어 있습니다.");
-        }
+    private boolean isAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Transactional

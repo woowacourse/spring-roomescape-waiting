@@ -17,7 +17,6 @@ import roomescape.fixture.ReservationDateFixture;
 import roomescape.fixture.ReservationDateTimeDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
-import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
@@ -79,7 +78,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약이_존재하면_예약을_생성할_수_없다() {
+    void 예약을_대기한다() {
         Theme theme = themeDbFixture.공포();
         Member reserver = memberDbFixture.유저1_생성();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
@@ -95,9 +94,12 @@ class ReservationServiceTest {
                 reservation.getReserver().getId()
         );
 
-        assertThatThrownBy(() -> reservationService.reserve(command))
-                .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("이미 예약되어 있습니다.");
+        ReservationResponse response = reservationService.reserve(command);
+
+        assertThat(response.id()).isNotNull();
+        assertThat(response.member().name()).isEqualTo(reserver.getName());
+        assertThat(response.date()).isEqualTo(reservationDateTime.reservationDate().date());
+        assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(reservationDateTime.reservationTime()));
     }
 
     @Test
