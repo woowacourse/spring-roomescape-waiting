@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import roomescape.domain.ReservationWithRank;
 import roomescape.exception.custom.InvalidReservationException;
 import roomescape.global.ReservationStatus;
 import roomescape.global.Role;
@@ -58,6 +59,15 @@ public class Member {
 
     public Member(String name, String email, String password, Role role) {
         this(null, name, email, password, role);
+    }
+
+    public List<ReservationWithRank> calculateReservationRanks(List<Reservation> allReservations) {
+        return reservations.stream()
+                .map(reservation -> {
+                    long rank = reservation.calculateWaitRank(allReservations);
+                    return new ReservationWithRank(reservation, rank);
+                })
+                .toList();
     }
 
     public Reservation reserve(LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {

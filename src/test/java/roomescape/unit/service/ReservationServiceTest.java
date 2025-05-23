@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationWithRank;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.CreateWaitReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
@@ -163,9 +162,6 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(any(Long.class)))
                 .thenReturn(Optional.of(theme));
-        when(reservationRepository.findReservationWithRank(any(), any()))
-                .thenReturn(List.of(new ReservationWithRank(
-                        new Reservation(member, date, time, theme, ReservationStatus.RESERVED), 0)));
 
         Reservation reservation2 = new Reservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER),
                 LocalDate.now(), time, theme, ReservationStatus.RESERVED);
@@ -208,8 +204,8 @@ class ReservationServiceTest {
 
         //then
         assertAll(
-                () -> assertThat(actual.time()).isEqualTo(time.getStartAt()),
-                () -> assertThat(actual.themeName()).isEqualTo(theme.getName()),
+                () -> assertThat(actual.startAt()).isEqualTo(time.getStartAt()),
+                () -> assertThat(actual.theme()).isEqualTo(theme.getName()),
                 () -> assertThat(actual.name()).isEqualTo(member.getName())
         );
     }

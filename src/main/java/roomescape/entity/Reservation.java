@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
 import org.hibernate.annotations.CreationTimestamp;
 import roomescape.exception.custom.InvalidReservationException;
@@ -44,7 +45,8 @@ public class Reservation {
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
-    @CreationTimestamp()
+    @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createAt;
 
     protected Reservation() {
@@ -77,6 +79,23 @@ public class Reservation {
                        Theme theme,
                        ReservationStatus status) {
         this(null, member, date, reservationTime, theme, status);
+    }
+
+    public long calculateWaitRank(List<Reservation> allReservations) {
+        return allReservations.stream()
+                .filter(this::isSameReservationCondition)
+                .filter(reservation -> reservation.isCreateAtBeforeOrEqual(this))
+                .count();
+    }
+
+    private boolean isSameReservationCondition(Reservation target) {
+        return this.theme.equals(target.theme)
+                && this.date.equals(target.date)
+                && this.reservationTime.equals(target.reservationTime);
+    }
+
+    private boolean isCreateAtBeforeOrEqual(Reservation reservation) {
+        return !this.createAt.isAfter(reservation.createAt);
     }
 
     public boolean isBefore(LocalDateTime compareDateTime) {

@@ -134,8 +134,10 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllReservationOfMember(Long memberId) {
-        List<ReservationWithRank> reservationWithRanks = reservationRepository.findReservationWithRank(
-                memberId, ReservationStatus.WAIT);
+        Member member = memberRepository.findFetchById(memberId)
+                .orElseThrow(() -> new InvalidMemberException("존재하지 않는 멤버 ID입니다."));
+        List<Reservation> reservations = reservationRepository.findAll();
+        List<ReservationWithRank> reservationWithRanks = member.calculateReservationRanks(reservations);
 
         return reservationWithRanks.stream()
                 .map(MyReservationResponse::from)
