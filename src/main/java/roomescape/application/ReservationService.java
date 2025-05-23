@@ -10,6 +10,7 @@ import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.application.dto.UserReservationCreateDto;
+import roomescape.application.dto.UserWaitingCreateDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -69,8 +70,14 @@ public class ReservationService {
         return ReservationDto.from(reservation);
     }
 
+    private void validateNotPast(Reservation reservation, LocalDateTime now) {
+        if (reservation.isPast(now)) {
+            throw new IllegalArgumentException("과거 일시로 예약할 수 없습니다.");
+        }
+    }
+
     private void validateNotDuplicate(ReservationCreateDto request) {
-        boolean duplicated = reservationRepository.existsByDateAndTimeIdAndThemeId(
+        boolean duplicated = isDuplicated(
                 request.date(),
                 request.timeId(),
                 request.themeId()
@@ -80,10 +87,34 @@ public class ReservationService {
         }
     }
 
-    private void validateNotPast(Reservation reservation, LocalDateTime now) {
-        if (reservation.isPast(now)) {
-            throw new IllegalArgumentException("과거 일시로 예약할 수 없습니다.");
+    private boolean isDuplicated(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.existsByDateAndTimeIdAndThemeId(
+                date,
+                timeId,
+                themeId
+        );
+    }
+
+    @Transactional
+    public ReservationDto registerWaitingByUser(UserWaitingCreateDto request, Long memberId) {
+        if (!isDuplicated(request.date(), request.time(), request.theme())) {
+            throw new IllegalArgumentException("예약 가능한 일시입니다.");
         }
+        Theme theme = themeService.getThemeById(request.theme());
+        ReservationTime reservationTime = timeService.getTimeEntityById(request.time());
+        Member member = memberService.getMemberEntityById(memberId);
+        Waiting waiting = new Waiting(ReservationStatus.WAITING);
+        Reservation reservationWithoutId = Reservation.withoutId(
+                member,
+                theme,
+                request.date(),
+                reservationTime,
+                waiting
+        );
+        LocalDateTime now = clockProvider.now();
+        validateNotPast(reservationWithoutId, now);
+        Reservation reservation = reservationRepository.save(reservationWithoutId);
+        return ReservationDto.from(reservation);
     }
 
     @Transactional(readOnly = true)

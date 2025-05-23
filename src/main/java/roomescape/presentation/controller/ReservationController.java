@@ -17,6 +17,7 @@ import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.application.dto.UserReservationCreateDto;
+import roomescape.application.dto.UserWaitingCreateDto;
 import roomescape.infrastructure.AuthenticatedMemberId;
 import roomescape.presentation.controller.dto.ReservationWaitingResponse;
 
@@ -48,8 +49,16 @@ public class ReservationController {
             @Valid @RequestBody UserReservationCreateDto request,
             @AuthenticatedMemberId MemberIdDto memberIdDto
     ) {
-        LocalDateTime now = LocalDateTime.now();
         ReservationDto reservationDto = service.registerReservationByUser(request, memberIdDto.id());
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationDto> createWaiting(
+            @Valid @RequestBody UserWaitingCreateDto request,
+            @AuthenticatedMemberId MemberIdDto memberIdDto
+    ) {
+        ReservationDto reservationDto = service.registerWaitingByUser(request, memberIdDto.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
     }
 
