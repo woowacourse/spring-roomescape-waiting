@@ -1,4 +1,5 @@
 const THEME_API_ENDPOINT = '/themes';
+const WAITING_API_ENDPOINT = '/waitings';
 
 document.addEventListener('DOMContentLoaded', () => {
     requestRead(THEME_API_ENDPOINT)
@@ -177,7 +178,7 @@ function onReservationButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (response.status != 201) throw new Error('Reservation creation failed');
+                if (response.status !== 201) throw new Error('Reservation creation failed');
                 return response.json();
             })
             .then(data => {
@@ -206,9 +207,9 @@ function onWaitButtonClick() {
         };
 
         /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
+        [3단계] 예약 대기 생성 요청 API 호출
          */
-        fetch('', {
+        fetch(WAITING_API_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -216,7 +217,7 @@ function onWaitButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (!response.ok) throw new Error('Reservation waiting failed');
+                if (response.status !== 201) throw new Error('Reservation waiting failed');
                 return response.json();
             })
             .then(data => {
