@@ -21,7 +21,7 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     @Column(length = 10, nullable = false)
     private Role role;
-    @Column(length = 30, nullable = false, unique = true)
+    @Column(length = 30, nullable = false)
     private String name;
 
     protected Member() {
@@ -34,10 +34,6 @@ public class Member {
         this.password = password;
         this.role = role;
         this.name = name;
-    }
-
-    public Member toEntity(long id) {
-        return new Member(id, username, password, name, role);
     }
 
     public boolean isSameUsername(String username) {
