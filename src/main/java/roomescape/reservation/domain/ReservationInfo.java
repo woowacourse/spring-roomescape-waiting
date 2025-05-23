@@ -6,7 +6,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -17,10 +16,6 @@ public class ReservationInfo {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
 
@@ -28,8 +23,7 @@ public class ReservationInfo {
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    public ReservationInfo(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
-        this.member = member;
+    public ReservationInfo(final LocalDate date, final ReservationTime time, final Theme theme) {
         this.date = date;
         this.time = time;
         this.theme = theme;
@@ -43,9 +37,6 @@ public class ReservationInfo {
         return date;
     }
 
-    public Member getMember() {
-        return member;
-    }
 
     public ReservationTime getTime() {
         return time;

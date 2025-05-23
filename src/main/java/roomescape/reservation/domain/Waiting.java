@@ -1,36 +1,56 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.member.domain.Member;
 import roomescape.reservation.exception.InvalidReservationException;
 
 @Entity
-public class WaitingReservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @Column(name = "turn", nullable = false)
+    private int turn;
+
     @Embedded
     private ReservationInfo info;
 
 
-    protected WaitingReservation() {
+    protected Waiting() {
     }
 
-    public WaitingReservation(final ReservationInfo info) {
+    public Member getMember() {
+        return member;
+    }
+
+    public Waiting(final Member member, final ReservationInfo info, final int turn) {
+        this.member = member;
         this.info = info;
+        this.turn = turn;
     }
 
-    public static WaitingReservation createUpcomingReservationWithUnassignedId(final ReservationInfo reservationInfo,
-                                                                               LocalDateTime now) {
+    public static Waiting createUpcomingReservationWithUnassignedId(final Member member, final int turn,
+                                                                    final ReservationInfo reservationInfo,
+                                                                    LocalDateTime now) {
+
         validateDateTime(reservationInfo, now);
-        return new WaitingReservation(reservationInfo);
+        return new Waiting(member, reservationInfo, turn);
     }
 
     private static void validateDateTime(ReservationInfo reservationInfo, LocalDateTime now) {
@@ -39,13 +59,10 @@ public class WaitingReservation {
         }
     }
 
-    private Reservation promoteToReservation() {
-        return new Reservation(info);
-    }
 
     @Override
     public boolean equals(final Object object) {
-        if (!(object instanceof final WaitingReservation that)) {
+        if (!(object instanceof final Waiting that)) {
             return false;
         }
         return Objects.equals(getId(), that.getId()) && Objects.equals(getInfo(), that.getInfo());
@@ -62,5 +79,9 @@ public class WaitingReservation {
 
     public ReservationInfo getInfo() {
         return info;
+    }
+
+    public int getTurn() {
+        return turn;
     }
 }

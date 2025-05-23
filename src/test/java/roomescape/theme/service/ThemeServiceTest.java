@@ -22,7 +22,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationModuleService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
@@ -59,7 +59,7 @@ class ThemeServiceTest {
 
     private MemberService memberService;
 
-    private ReservationService reservationService;
+    private ReservationModuleService reservationModuleService;
 
     private ReservationTimeService reservationTimeService;
 
@@ -68,7 +68,8 @@ class ThemeServiceTest {
         themeService = new ThemeService(themeRepository, reservationRepository);
         memberService = new MemberService(memberRepository, myPasswordEncoder);
         reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
+        reservationModuleService = new ReservationModuleService(reservationRepository, reservationTimeRepository,
+                themeRepository,
                 memberRepository);
     }
 
