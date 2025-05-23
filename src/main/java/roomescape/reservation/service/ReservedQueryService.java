@@ -56,7 +56,7 @@ public class ReservedQueryService {
         return statusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(memberId, date, timeId, RESERVED);
     }
 
-    public boolean existsReserved(LocalDate date, Long timeId) {
-        return statusRepository.existsByDateAndTimeIdAndStatus(date, timeId, RESERVED);
+    public boolean notExistsReserved(LocalDate date, Long timeId) {
+        return !statusRepository.existsByDateAndTimeIdAndStatus(date, timeId, RESERVED);
     }
 }
