@@ -3,6 +3,7 @@ package roomescape.controller;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,6 +62,7 @@ public class ReservationController {
 
         List<MyReservationResponse> combinedResponses = new ArrayList<>(reservationResponses);
         combinedResponses.addAll(waitingResponses);
+        combinedResponses.sort(Comparator.comparing(MyReservationResponse::date));
 
         return ResponseEntity.ok(combinedResponses);
     }
