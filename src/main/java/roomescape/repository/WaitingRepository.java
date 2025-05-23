@@ -18,7 +18,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                 w, (SELECT COUNT(w2) + 1 FROM Waiting w2 WHERE w2.id < w.id))
             FROM Waiting w
             WHERE w.member.id = :memberId
-            ORDER BY w.date
+            ORDER BY w.createdDate
             """)
     List<WaitingWithRank> findWithRankingByMember(long memberId);
 
@@ -45,7 +45,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             WHERE w.theme.id = :themeId
             AND w.date = :date
             AND w.time.id = :timeId
-            ORDER BY w.id
+            ORDER BY w.createdDate
             LIMIT 1
             """)
     Optional<Waiting> findFirstWaiting(
