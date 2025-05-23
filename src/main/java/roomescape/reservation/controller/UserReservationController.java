@@ -14,7 +14,7 @@ import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.web.resolver.AuthenticationPrincipal;
 import roomescape.reservation.application.UserReservationService;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
-import roomescape.reservation.controller.dto.request.CreateReservationUserRequest;
+import roomescape.reservation.controller.dto.request.UserCreateReservationRequest;
 import roomescape.reservation.controller.dto.response.UserReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 
@@ -28,7 +28,7 @@ public class UserReservationController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ReservationResponse create(
-            @RequestBody @Valid CreateReservationUserRequest request,
+            @RequestBody @Valid UserCreateReservationRequest request,
             @AuthenticationPrincipal AuthenticatedMember authenticatedMember
     ) {
         Long memberId = authenticatedMember.id();

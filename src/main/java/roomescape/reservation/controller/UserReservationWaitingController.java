@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.web.resolver.AuthenticationPrincipal;
 import roomescape.reservation.application.UserReservationWaitingService;
-import roomescape.reservation.controller.dto.request.CreateReservationWaitingUserRequest;
+import roomescape.reservation.controller.dto.request.UserCreateReservationWaitingRequest;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class UserReservationWaitingController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public void create(
-            @RequestBody @Valid CreateReservationWaitingUserRequest request,
+            @RequestBody @Valid UserCreateReservationWaitingRequest request,
             @AuthenticationPrincipal AuthenticatedMember member
     ) {
         userReservationWaitingService.create(request.toServiceRequest(member.id()));

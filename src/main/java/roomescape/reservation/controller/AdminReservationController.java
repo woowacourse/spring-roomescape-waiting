@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.AdminReservationService;
 import roomescape.reservation.application.UserReservationService;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
-import roomescape.reservation.controller.dto.request.CreateReservationAdminRequest;
+import roomescape.reservation.controller.dto.request.AdminCreateReservationRequest;
 import roomescape.reservation.controller.dto.request.ReservationSearchRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
 
@@ -31,7 +31,7 @@ public class AdminReservationController {
     //TODO : 현재 user의 예약 생성 로직 그대로 사용, 요구사항 변경되면 새로 어드민용 생성하기
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public ReservationResponse create(@RequestBody @Valid CreateReservationAdminRequest request) {
+    public ReservationResponse create(@RequestBody @Valid AdminCreateReservationRequest request) {
         ReservationServiceResponse response = userReservationService.create(request.toServiceRequest());
         return ReservationResponse.from(response);
     }
