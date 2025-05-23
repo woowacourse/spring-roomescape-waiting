@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dto.request.CreateReservationTimeRequest;
 import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.InvalidReservationTimeException;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ConfirmReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.ReservationTimeService;
 
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 class ReservationTimeServiceTest {
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private ConfirmReservationRepository confirmReservationRepository;
 
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
@@ -75,7 +75,7 @@ class ReservationTimeServiceTest {
     @Test
     void 특정_시간에_대한_예약이_존재할때_시간을_삭제하려고하면_예외가_발생한다() {
         // given
-        when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
+        when(confirmReservationRepository.existsByTimeId(1L)).thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))

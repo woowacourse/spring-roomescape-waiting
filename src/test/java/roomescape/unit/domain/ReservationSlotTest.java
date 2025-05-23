@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.ReservationSlots;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -29,10 +30,10 @@ public class ReservationSlotTest {
         ReservationTime reservationTime1 = new ReservationTime(1L, firstTime);
         ReservationTime reservationTime2 = new ReservationTime(2L, secondTime);
 
-        Reservation reservation1 = new Reservation(1L, beforeAddMember, today, reservationTime1, theme, ReservationStatus.RESERVED);
+        ConfirmedReservation reservation1 = new ConfirmedReservation(1L, beforeAddMember, today, reservationTime1, theme);
 
         List<ReservationTime> times = List.of(reservationTime1, reservationTime2);
-        List<Reservation > alreadyReservedReservation = List.of(reservation1);
+        List<ConfirmedReservation > alreadyReservedReservation = List.of(reservation1);
 
 
         // when

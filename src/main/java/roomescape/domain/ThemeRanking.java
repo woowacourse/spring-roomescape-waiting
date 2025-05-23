@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import roomescape.entity.Reservation;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.Theme;
 
 public class ThemeRanking {
@@ -13,9 +13,9 @@ public class ThemeRanking {
 
     private final Map<Theme, Integer> reservationCountByTheme;
 
-    public ThemeRanking(List<Reservation> reservations) {
+    public ThemeRanking(List<ConfirmedReservation> reservations) {
         Map<Theme, Integer> reservationCountByTheme = new HashMap<>();
-        for (Reservation reservation : reservations) {
+        for (ConfirmedReservation reservation : reservations) {
             Theme theme = reservation.getTheme();
             reservationCountByTheme.put(theme, reservationCountByTheme.getOrDefault(theme, 0) + 1);
         }

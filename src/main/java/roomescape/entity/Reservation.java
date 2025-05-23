@@ -1,21 +1,22 @@
 package roomescape.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import roomescape.global.ReservationStatus;
 
 @Entity
-public class Reservation {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,28 +37,23 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private ReservationStatus status;
-
     public Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
 
     public Reservation(Member member,
                        LocalDate date,
                        ReservationTime time,
-                       Theme theme,
-                       ReservationStatus status) {
-        this(null, member, date, time, theme, status);
+                       Theme theme
+    ) {
+        this(null, member, date, time, theme);
     }
 
 
@@ -98,7 +94,4 @@ public class Reservation {
         return theme.getName();
     }
 
-    public ReservationStatus getStatus() {
-        return status;
-    }
 }

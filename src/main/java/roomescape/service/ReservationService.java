@@ -1,117 +1,87 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.dto.query.WaitingWithRank;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.request.CreateReservationRequest;
+import roomescape.dto.request.CreateWaitingRequest;
 import roomescape.dto.request.LoginMemberRequest;
-import roomescape.entity.Member;
-import roomescape.entity.Reservation;
-import roomescape.entity.ReservationTime;
-import roomescape.entity.Theme;
-import roomescape.exception.custom.InvalidMemberException;
-import roomescape.exception.custom.InvalidReservationException;
-import roomescape.exception.custom.InvalidReservationTimeException;
-import roomescape.exception.custom.InvalidThemeException;
-import roomescape.global.ReservationStatus;
-import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
+import roomescape.entity.ConfirmedReservation;
+import roomescape.entity.WaitingReservation;
 
 @Service
 public class ReservationService {
+    private final ConfirmReservationService confirmReservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    private final MemberRepository memberRepository;
-    private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-
-    public ReservationService(
-            MemberRepository memberRepository,
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository
-    ) {
-        this.memberRepository = memberRepository;
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
+    public ReservationService(ConfirmReservationService confirmReservationService,
+                              WaitingReservationService waitingReservationService) {
+        this.confirmReservationService = confirmReservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
-    public Reservation addReservation(
-            CreateReservationRequest request,
-            LoginMemberRequest loginMemberRequest
-    ) {
-        return createReservation(loginMemberRequest.id(), request.themeId(), request.date(), request.timeId());
+    public ConfirmedReservation addReservation(CreateReservationRequest request,
+                                               LoginMemberRequest loginMemberRequest) {
+        return confirmReservationService.addReservation(request, loginMemberRequest);
     }
 
-    public Reservation addReservationByAdmin(AdminCreateReservationRequest request) {
-        return createReservation(request.memberId(), request.themeId(), request.date(), request.timeId());
+    public ConfirmedReservation addConfirmReservationByAdmin(AdminCreateReservationRequest request) {
+        return confirmReservationService.addReservationByAdmin(request);
     }
 
-    private Reservation createReservation(
-            long memberId,
-            long themeId,
-            LocalDate date,
-            long timeId
-    ) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new InvalidMemberException("존재하지 않는 멤버 ID입니다."));
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new InvalidReservationTimeException("존재하지 않는 예약 시간입니다."));
-        Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마입니다."));
-
-        Reservation reservation = new Reservation(member, date, reservationTime, theme, ReservationStatus.RESERVED);
-
-        validateDuplicateReservation(reservation);
-        validateAddReservationDateTime(reservation);
-        return reservationRepository.save(reservation);
+    public List<ConfirmedReservation> findAllConfirmReservation() {
+        return confirmReservationService.findAll();
     }
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
-    }
-
-    public List<Reservation> findAllByFilter(
+    public List<ConfirmedReservation> findAllConfirmReservationByFilter(
             Long memberId,
             Long themeId,
             LocalDate dateFrom,
             LocalDate dateTo
     ) {
-        return reservationRepository.findAllByFilter(memberId, themeId, dateFrom, dateTo);
+        return confirmReservationService.findAllByFilter(memberId, themeId, dateFrom, dateTo);
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
-        reservationRepository.deleteById(id);
-    }
-
-    public List<Reservation> findAllReservationByMember(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId);
-    }
-
-    private void validateDuplicateReservation(Reservation reservation) {
-        boolean exists = reservationRepository.existsByTimeIdAndThemeIdAndDate(
-                reservation.getReservationTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getDate()
-        );
-        if (exists) {
-            throw new InvalidReservationException("중복된 예약신청입니다");
+        Optional<ConfirmedReservation> deleteReservation = confirmReservationService.findById(id);
+        if (deleteReservation.isEmpty()) {
+            return;
         }
+        ConfirmedReservation confirmedReservation = deleteReservation.get();
+        Optional<WaitingReservation> waitingReservation = waitingReservationService.findFirstWaitingByDateAndThemeAndTime(
+                confirmedReservation.getDate(),
+                confirmedReservation.getTheme(),
+                confirmedReservation.getReservationTime());
+        confirmReservationService.deleteReservation(id);
+        if (waitingReservation.isEmpty()){
+            return;
+        }
+        confirmReservationService.addReservation(waitingReservation.get());
+        waitingReservationService.deleteById(waitingReservation.get().getId());
     }
 
-    private void validateAddReservationDateTime(Reservation reservation) {
-        ZoneId zoneId = ZoneId.of("Asia/Seoul");
-        LocalDateTime currentDateTime = ZonedDateTime.now(zoneId).toLocalDateTime();
+    public List<ConfirmedReservation> findAllReservationByMember(final Long memberId) {
+        return confirmReservationService.findAllReservationByMember(memberId);
+    }
 
-        if (reservation.isBefore(currentDateTime)) {
-            throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
-        }
+    public WaitingReservation addWaiting(CreateWaitingRequest request, LoginMemberRequest loginMemberRequest) {
+        return waitingReservationService.addWaiting(request, loginMemberRequest);
+    }
+
+    public List<WaitingWithRank> findALlWaitingWithRank(Long memberId) {
+        return waitingReservationService.findALlWaitingWithRank(memberId);
+    }
+
+    public void deleteWaiting(Long id) {
+        waitingReservationService.deleteById(id);
+    }
+
+    public List<WaitingReservation> findAllWaitingReservation() {
+        return waitingReservationService.findAll();
     }
 }
