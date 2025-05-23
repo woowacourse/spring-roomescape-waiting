@@ -24,7 +24,7 @@ import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
 import roomescape.presentation.dto.response.ReservationMineResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
-import roomescape.presentation.dto.response.ReservationWithAheadDto;
+import roomescape.business.dto.ReservationWithAheadDto;
 
 @RestController
 @RequiredArgsConstructor

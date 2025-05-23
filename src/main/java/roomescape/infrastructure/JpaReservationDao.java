@@ -14,7 +14,7 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 import roomescape.business.model.vo.Status;
-import roomescape.presentation.dto.response.ReservationWithAheadDto;
+import roomescape.business.dto.ReservationWithAheadDto;
 
 public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
 
@@ -35,11 +35,10 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
             @Param("userId") Id userId,
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo,
-            @Param("status") Status status
-    );
+            @Param("status") Status status);
 
     @Query("""
-                SELECT new roomescape.presentation.dto.response.ReservationWithAheadDto(
+                SELECT new roomescape.business.dto.ReservationWithAheadDto(
                     r,
                     (
                         SELECT COUNT(r2) + 1L

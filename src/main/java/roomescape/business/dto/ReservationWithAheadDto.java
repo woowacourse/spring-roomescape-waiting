@@ -1,4 +1,4 @@
-package roomescape.presentation.dto.response;
+package roomescape.business.dto;
 
 import roomescape.business.model.entity.Reservation;
 

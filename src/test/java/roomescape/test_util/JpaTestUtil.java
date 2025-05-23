@@ -42,7 +42,7 @@ public class JpaTestUtil {
         User user = userDao.findById(Id.create(userId)).get();
         ReservationTime time = timeDao.findById(Id.create(timeId)).get();
         Theme theme = themeDao.findById(Id.create(themeId)).get();
-        reservationDao.save(Reservation.restore(id, user, date, time, theme, Status.RESERVED, LocalDateTime.now()));
+        reservationDao.save(Reservation.restore(id, user, date, time, theme, reservationStatus, LocalDateTime.now()));
     }
 
     public void insertReservationTime(final String id, final LocalTime time) {

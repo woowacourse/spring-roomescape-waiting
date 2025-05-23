@@ -3,6 +3,7 @@ package roomescape.presentation.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import roomescape.business.dto.ReservationWithAheadDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.vo.Status;
 

@@ -9,7 +9,8 @@ import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.presentation.dto.response.ReservationWithAheadDto;
+import roomescape.business.model.vo.Status;
+import roomescape.business.dto.ReservationWithAheadDto;
 
 public interface ReservationRepository {
 
@@ -17,7 +18,8 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllReservationWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findAllReservationWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo,
+                                                   Status reservationStatus);
 
     List<ReservationWithAheadDto> findReservationsWithAhead(Id userId);
 
@@ -32,8 +34,6 @@ public interface ReservationRepository {
     boolean isDuplicateDateAndTimeAndTheme(LocalDate date, LocalTime time, Id themeId);
 
     void deleteById(Id reservationId);
-
-    List<Reservation> findAllWaitingReservations();
 
     void updateWaitingReservations(ReservationDate date, ReservationTime time, Theme theme);
 }
