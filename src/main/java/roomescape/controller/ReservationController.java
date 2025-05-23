@@ -9,7 +9,9 @@ import roomescape.controller.request.LoginMemberInfo;
 import roomescape.controller.response.MemberReservationResponse;
 import roomescape.controller.response.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.result.ReservationResult;
+import roomescape.service.result.WaitingWithRankResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,9 +22,11 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @GetMapping
@@ -48,13 +52,16 @@ public class ReservationController {
 
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("reservationId") Long reservationId) {
+        ReservationResult reservationResult = reservationService.findById(reservationId);
         reservationService.deleteById(reservationId);
+        waitingService.approveFirst(reservationResult.theme().id(), reservationResult.date(), reservationResult.time().id());
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/mine")
-    public ResponseEntity<List<MemberReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
-        List<ReservationResult> reservationResults = reservationService.findMemberReservationsById(loginMemberInfo.id());
-        return ResponseEntity.ok(MemberReservationResponse.from(reservationResults));
+    @GetMapping("/member")
+    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
+        List<ReservationResult> reservationResults = reservationService.findReservationsByMemberId(loginMemberInfo.id());
+        List<WaitingWithRankResult> waitingsWithRank = waitingService.findWaitingsWithRankByMemberId(loginMemberInfo.id());
+        return ResponseEntity.ok(MemberReservationResponse.from(reservationResults, waitingsWithRank));
     }
 }

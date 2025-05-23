@@ -16,6 +16,7 @@ import roomescape.auth.JwtTokenProvider;
 import roomescape.controller.request.CreateReservationRequest;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.param.CreateReservationParam;
 import roomescape.service.result.MemberResult;
 import roomescape.service.result.ReservationResult;
@@ -46,6 +47,9 @@ class ReservationControllerTest {
     private MemberService memberService;
 
     @MockitoBean
+    private WaitingService waitingService;
+
+    @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
 
     @MockitoBean
@@ -58,7 +62,7 @@ class ReservationControllerTest {
     @BeforeEach
     void setUp() {
         memberResult = TestFixture.createMemberResult();
-        reservationResult = TestFixture.createReservationResult();
+        reservationResult = TestFixture.createDefaultReservationResult();
         authCookie = new Cookie(TestFixture.AUTH_COOKIE_NAME, TestFixture.VALID_TOKEN);
 
         when(cookieProvider.extractTokenFromCookies(any())).thenReturn(TestFixture.VALID_TOKEN);
@@ -107,26 +111,28 @@ class ReservationControllerTest {
     @DisplayName("예약을 삭제할 수 있다.")
     void deleteReservation() throws Exception {
         // given
+        ReservationResult reservationResult = TestFixture.createDefaultReservationResult();
+        when(reservationService.findById(TestFixture.TEST_RESERVATION_ID)).thenReturn(reservationResult);
         doNothing().when(reservationService).deleteById(TestFixture.TEST_RESERVATION_ID);
+        doNothing().when(waitingService).approveFirst(TestFixture.TEST_THEME_ID, TestFixture.TEST_DATE, TestFixture.TEST_TIME_ID);
 
         // when & then
         mockMvc.perform(delete("/reservations/" + TestFixture.TEST_RESERVATION_ID)
                 .cookie(authCookie))
                 .andExpect(status().isNoContent());
-
     }
 
     @Test
     @DisplayName("로그인한 사용자의 예약 목록을 조회할 수 있다.")
     void getMyReservations() throws Exception {
         // given
-        when(reservationService.findMemberReservationsById(TestFixture.TEST_MEMBER_ID))
+        when(reservationService.findReservationsByMemberId(TestFixture.TEST_MEMBER_ID))
                 .thenReturn(List.of(reservationResult));
 
         // when & them
-        mockMvc.perform(get("/reservations/mine")
+        mockMvc.perform(get("/reservations/member")
                 .cookie(authCookie))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].reservationId").value(reservationResult.id()));
+                .andExpect(jsonPath("$[0].id").value(reservationResult.id()));
     }
 }

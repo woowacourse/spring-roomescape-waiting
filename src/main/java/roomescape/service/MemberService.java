@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -33,6 +35,7 @@ public class MemberService {
         return MemberResult.from(member);
     }
 
+    @Transactional
     public MemberResult create(final RegisterMemberParam registerMemberParam) {
         Member member = memberRepository.save(Member.createNew(registerMemberParam.name(), MemberRole.USER, registerMemberParam.email(), registerMemberParam.password()));
 

@@ -19,7 +19,7 @@ public interface ReservationRepository {
 
     boolean existsByTimeId(Long reservationTimeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
+    boolean existsBySchedule(Schedule schedule);
 
     boolean existsByThemeId(Long themeId);
 

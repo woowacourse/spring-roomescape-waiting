@@ -3,6 +3,7 @@ package roomescape.persistence;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationRepository;
+import roomescape.domain.Schedule;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,22 +45,22 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     public boolean existsByTimeId(final Long reservationTimeId) {
-        return jpaReservationRepository.existsByTimeId(reservationTimeId);
+        return jpaReservationRepository.existsBySchedule_TimeId(reservationTimeId);
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(final LocalDate reservationDate, final Long timeId, final Long themeId) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(reservationDate, timeId, themeId);
+    public boolean existsBySchedule(Schedule schedule) {
+        return jpaReservationRepository.existsBySchedule(schedule);
     }
 
     @Override
     public boolean existsByThemeId(final Long themeId) {
-        return jpaReservationRepository.existsByThemeId(themeId);
+        return jpaReservationRepository.existsBySchedule_ThemeId(themeId);
     }
 
     @Override
     public List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate reservationDate) {
-        return jpaReservationRepository.findByThemeIdAndDate(themeId, reservationDate);
+        return jpaReservationRepository.findBySchedule_ThemeIdAndSchedule_Date(themeId, reservationDate);
     }
 
     @Override

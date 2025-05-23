@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.exception.*;
 import roomescape.service.param.CreateReservationParam;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -26,6 +28,7 @@ public class ReservationService {
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    @Transactional
     public ReservationResult create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = reservationTimeRepository.findById(createReservationParam.timeId()).orElseThrow(
                 () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
@@ -34,7 +37,7 @@ public class ReservationService {
         Member member = memberRepository.findById(createReservationParam.memberId()).orElseThrow(
                 () -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
 
-        validateUniqueReservation(createReservationParam, reservationTime, theme);
+        validateDuplicateReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
 
         Reservation reservation = Reservation.createNew(member, createReservationParam.date(), reservationTime, theme);
@@ -42,6 +45,7 @@ public class ReservationService {
         return ReservationResult.from(reservation);
     }
 
+    @Transactional
     public void deleteById(Long reservationId) {
         reservationRepository.deleteById(reservationId);
     }
@@ -66,13 +70,13 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResult> findMemberReservationsById(Long memberId) {
+    public List<ReservationResult> findReservationsByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         return ReservationResult.from(reservations);
     }
 
-    private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
+    private void validateDuplicateReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
+        if (reservationRepository.existsBySchedule(new Schedule(createReservationParam.date(), reservationTime, theme))) {
             throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
     }
