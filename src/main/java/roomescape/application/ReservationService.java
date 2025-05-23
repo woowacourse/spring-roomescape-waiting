@@ -20,6 +20,7 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
+import roomescape.exception.BusinessRuleViolationException;
 
 @Service
 @AllArgsConstructor
@@ -33,20 +34,26 @@ public class ReservationService {
     @Transactional
     public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var slot = toReservationSlot(date, timeId, themeId);
-        throwIfDuplicates(slot);
+        if (reservationRepository.exists(bySlot(slot))) {
+            throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
+        }
 
-        var user = userRepository.getById(userId);
-        var reservation = new Reservation(user, slot);
-        user.reserve(reservation);
-        return reservationRepository.save(reservation);
+        return createReservation(userId, slot, ReservationStatus.RESERVED);
     }
 
     @Transactional
     public Reservation waitFor(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var slot = toReservationSlot(date, timeId, themeId);
-        var user = userRepository.getById(userId);
+        if (!reservationRepository.exists(bySlot(slot))) {
+            throw new BusinessRuleViolationException("해당 날짜, 시간, 테마에 예약이 없습니다. 바로 예약해 주세요.");
+        }
 
-        var reservation = Reservation.ofWaiting(user, slot);
+        return createReservation(userId, slot, ReservationStatus.WAITING);
+    }
+
+    private Reservation createReservation(final long userId, final ReservationSlot slot, final ReservationStatus status) {
+        var user = userRepository.getById(userId);
+        var reservation = new Reservation(user, slot, status);
         user.reserve(reservation);
         return reservationRepository.save(reservation);
     }
@@ -55,12 +62,6 @@ public class ReservationService {
         var timeSlot = timeSlotRepository.getById(timeId);
         var theme = themeRepository.getById(themeId);
         return ReservationSlot.forReserve(date, timeSlot, theme);
-    }
-
-    private void throwIfDuplicates(final ReservationSlot slot) {
-        if (reservationRepository.exists(bySlot(slot))) {
-            throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
-        }
     }
 
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {

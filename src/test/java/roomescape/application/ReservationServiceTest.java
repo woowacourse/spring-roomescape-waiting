@@ -61,10 +61,35 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("지나간 날짜와 시간에 대한 예약 생성은 불가능하다.")
+    void cannotReservePastDateTime() {
+        assertThatThrownBy(() -> service.reserve(user.id(), yesterday(), timeSlot.id(), theme.id()))
+            .isInstanceOf(BusinessRuleViolationException.class);
+    }
+
+    @Test
+    @DisplayName("이미 해당 날짜, 시간, 테마에 대한 예약이 존재하는 경우 중복된 예약은 불가능하다.")
+    void cannotReserveDuplicate() {
+        // given
+        service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        // when & then
+        assertThatThrownBy(
+            () -> service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id())
+        ).isInstanceOf(AlreadyExistedException.class);
+    }
+
+    @Test
     @DisplayName("예약 대기를 건다.")
     void waitFor() {
+        // given
+        var anotherUser = repositoryHelper.saveAnyUser();
+        service.reserve(anotherUser.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        // when
         var waited = service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
+        // then
         var reservations = service.findAllReservations(NONE_FILTERING);
         assertAll(
             () -> assertThat(waited.status()).isEqualTo(ReservationStatus.WAITING),
@@ -75,8 +100,24 @@ class ReservationServiceTest {
     @Test
     @DisplayName("한 유저가 중복으로 예약 대기를 하려고 하면 예외가 발생한다.")
     void waitForDuplicates() {
+        // given
+        var anotherUser = repositoryHelper.saveAnyUser();
+        service.reserve(anotherUser.id(), tomorrow(), timeSlot.id(), theme.id());
+
         service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
+        // when & then
+        assertThatThrownBy(() -> service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id()))
+            .isInstanceOf(AlreadyExistedException.class);
+    }
+
+    @Test
+    @DisplayName("한 유저가 이미 예약했는데 대기하려고 하면 예외가 발생한다.")
+    void waitForAlreadyReserved() {
+        // given
+        service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
+        
+        // when & then
         assertThatThrownBy(() -> service.waitFor(user.id(), tomorrow(), timeSlot.id(), theme.id()))
             .isInstanceOf(AlreadyExistedException.class);
     }
@@ -179,24 +220,5 @@ class ReservationServiceTest {
             new ReservationWithOrder(waited1, 1),
             new ReservationWithOrder(waited2, 2)
         );
-    }
-
-    @Test
-    @DisplayName("지나간 날짜와 시간에 대한 예약 생성은 불가능하다.")
-    void cannotReservePastDateTime() {
-        assertThatThrownBy(() -> service.reserve(user.id(), yesterday(), timeSlot.id(), theme.id()))
-                .isInstanceOf(BusinessRuleViolationException.class);
-    }
-
-    @Test
-    @DisplayName("이미 해당 날짜, 시간, 테마에 대한 예약이 존재하는 경우 중복된 예약은 불가능하다.")
-    void cannotReserveDuplicate() {
-        // given
-        service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
-
-        // when & then
-        assertThatThrownBy(
-                () -> service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id())
-        ).isInstanceOf(AlreadyExistedException.class);
     }
 }

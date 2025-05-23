@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ import roomescape.exception.BusinessRuleViolationException;
 @EqualsAndHashCode(of = {"id"})
 @Getter
 @Accessors(fluent = true)
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Reservation {
@@ -33,19 +35,12 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(final long id, final User user, final ReservationSlot slot, final ReservationStatus status) {
-        this.id = id;
-        this.user = user;
-        this.slot = slot;
-        this.status = status;
-    }
-
     public Reservation(final User user, final ReservationSlot slot) {
         this(0L, user, slot, ReservationStatus.RESERVED);
     }
 
-    public static Reservation ofWaiting(final User user, final ReservationSlot slot) {
-        return new Reservation(0L, user, slot, ReservationStatus.WAITING);
+    public Reservation(final User user, final ReservationSlot slot, final ReservationStatus status) {
+        this(0L, user, slot, status);
     }
 
     public final boolean sameSlotWith(final Reservation reservation) {
