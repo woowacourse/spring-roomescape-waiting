@@ -39,8 +39,12 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
                     request.timeId(),
                     request.themeId());
         }
+        final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());
 
-        Reservation reservation = createReservation(request);
+        final Theme theme = themeQueryService.get(request.themeId());
+
+        final Reservation reservation = request.toDomain(reservationTime, theme);
+        reservation.validatePast(timeProvider.now());
         return reservationRepository.save(reservation);
     }
 
@@ -59,6 +63,13 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
         if (!reservationRepository.existsByParams(
                 request.date(), request.timeId(), request.themeId())) {
             throw new NotFoundException(DomainTerm.RESERVATION, //Todo 개선 및 검증 필요
+                    request.date(),
+                    DomainTerm.THEME_ID,
+                    DomainTerm.RESERVATION_TIME_ID);
+        }
+        if (waitingReservationRepository.existsByParams(
+                request.date(), request.timeId(), request.themeId())) {
+            throw new DuplicateException(DomainTerm.RESERVATION_WAITING,
                     request.date(),
                     DomainTerm.THEME_ID,
                     DomainTerm.RESERVATION_TIME_ID);
@@ -91,16 +102,6 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
                 waitingReservation.getTheme(),
                 waitingReservation.getWaitingOrder());
         waitingReservationRepository.deleteById(id);
-    }
-
-    private Reservation createReservation(final CreateReservationServiceRequest request) {
-        final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());
-
-        final Theme theme = themeQueryService.get(request.themeId());
-
-        final Reservation reservation = request.toDomain(reservationTime, theme);
-        reservation.validatePast(timeProvider.now());
-        return reservation;
     }
 
     private boolean isExistsByParams(final ReservationDate date,

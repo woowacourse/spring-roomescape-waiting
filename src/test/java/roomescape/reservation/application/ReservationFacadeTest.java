@@ -99,6 +99,7 @@ class ReservationFacadeTest {
         //then
         Long userId = 1L;
         List<Reservation> reservations = List.of(createReservation(1L));
+        given(userQueryService.getById(any())).willReturn(createUser(userId));
         given(reservationQueryService.getAllReservationsByUserId(any(Long.class))).willReturn(reservations);
         given(reservationQueryService.getWaitingByUserId(any(Long.class))).willReturn(List.of());
 

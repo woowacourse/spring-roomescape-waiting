@@ -229,6 +229,39 @@ class ReservationCommandServiceImplTest {
     }
 
     @Test
+    @DisplayName("중복된 예약 대기가 존재할 때, 예외가 발생한다")
+    void createWaitingReservationDuplication() {
+        // given
+        final ReservationTime reservationTime = createAndSaveReservationTime(LocalTime.of(10, 0));
+        final Theme theme = createAndSaveTheme();
+        final User user = createAndSaveUser();
+
+        final CreateReservationServiceRequest requestDto = createReservationRequest(
+                user.getId(),
+                LocalDate.of(2025, 8, 5),
+                reservationTime.getId(),
+                theme.getId());
+
+        final Reservation reservation = reservationRepository.save(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        reservationTime,
+                        theme));
+
+        // when
+        final WaitingReservation waitingReservation = reservationCommandService.createWaitingReservation(requestDto);
+        assertThatThrownBy(() -> reservationCommandService.createWaitingReservation(requestDto))
+                .isInstanceOf(DuplicateException.class)
+                .hasMessageContainingAll(
+                        "RESERVATION_WAITING already exists.",
+                        "params={ReservationDate=ReservationDate(value=",
+                        "DomainTerm=THEME_ID, DomainTerm=RESERVATION_TIME_ID}"
+                );
+
+    }
+
+    @Test
     @DisplayName("예약 대기를 삭제할 수 있다")
     void deleteWaitingReservation() {
         // given

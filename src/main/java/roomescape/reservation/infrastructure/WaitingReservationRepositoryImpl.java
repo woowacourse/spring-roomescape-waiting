@@ -18,6 +18,11 @@ public class WaitingReservationRepositoryImpl implements WaitingReservationRepos
     private final JpaWaitingReservationRepository jpaWaitingReservationRepository;
 
     @Override
+    public boolean existsByParams(final ReservationDate date, final Long timeId, final Long themeId) {
+        return jpaWaitingReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
     public List<WaitingReservation> findAllByUserId(final Long userId) {
         return jpaWaitingReservationRepository.findAllByUserId(userId);
     }

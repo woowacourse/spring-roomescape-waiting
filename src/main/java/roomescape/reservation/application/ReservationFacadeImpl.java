@@ -68,6 +68,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
 
     @Override
     public List<MyReservationsResponse> getAllByUserId(final Long userId) {
+        userQueryService.getById(userId);
         final List<MyReservationsResponse> responses = new ArrayList<>();
 
         responses.addAll(reservationQueryService.getAllReservationsByUserId(userId)

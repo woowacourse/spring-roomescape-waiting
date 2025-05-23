@@ -13,6 +13,8 @@ import java.util.List;
 
 public interface JpaWaitingReservationRepository extends JpaRepository<WaitingReservation, Long> {
 
+    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+
     List<WaitingReservation> findAllByUserId(Long userId);
 
     @Query("""
