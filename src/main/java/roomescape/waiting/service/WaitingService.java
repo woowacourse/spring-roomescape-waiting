@@ -8,7 +8,7 @@ import roomescape.auth.web.exception.NotAuthorizationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationStatusRepository;
-import roomescape.reservation.service.ReservationManager;
+import roomescape.reservation.service.manager.ReservationManager;
 
 @Service
 @RequiredArgsConstructor

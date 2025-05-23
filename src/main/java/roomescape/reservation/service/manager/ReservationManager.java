@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.reservation.service.manager;
 
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
