@@ -1,5 +1,6 @@
 package roomescape.reservation.infrastructure.db;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -28,6 +29,12 @@ public class ReservationWaitingDbRepository implements ReservationWaitingReposit
     public ReservationWaiting getById(Long reservationWaitingId) {
         return reservationWaitingJpaRepository.findById(reservationWaitingId)
                 .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 웨이팅이 존재하지 않습니다."));
+    }
+
+    @Override
+    public ReservationWaiting getByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return reservationWaitingJpaRepository.findByDateAndTimeIdAndThemeId(date, themeId, themeId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 테마 및 시간에 존재하는 예약 대기가 존재하지 않습니다."));
     }
 
     @Override

@@ -34,4 +34,13 @@ sealed public class ReservationException extends RuntimeException {
             super(message);
         }
     }
+
+    public static final class AlreadyDoneWaitingException extends ReservationException {
+
+        private static final String message = "해당 테마 및 날짜에 이미 예약 대기를 진행한 상태입니다";
+
+        public AlreadyDoneWaitingException() {
+            super(message);
+        }
+    }
 }

@@ -1,6 +1,8 @@
 package roomescape.reservation.infrastructure.db.dao;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.model.entity.ReservationWaiting;
@@ -22,4 +24,6 @@ public interface ReservationWaitingJpaRepository extends JpaRepository<Reservati
             WHERE rw.member.id = :memberId
             """)
     List<ReservationWaitingWithRank> findAllWithRankByMemberId(Long memberId);
+
+    Optional<ReservationWaiting> findByDateAndTimeIdAndThemeId(LocalDate date, Long themeId, Long themeId1);
 }

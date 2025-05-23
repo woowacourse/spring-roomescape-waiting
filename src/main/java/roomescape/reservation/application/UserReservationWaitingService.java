@@ -16,6 +16,7 @@ import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
 import roomescape.reservation.model.repository.ReservationWaitingRepository;
 import roomescape.reservation.model.service.ReservationValidator;
+import roomescape.reservation.model.service.ReservationWaitingValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +27,14 @@ public class UserReservationWaitingService {
     private final MemberRepository memberRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationValidator reservationValidator;
+    private final ReservationWaitingValidator reservationWaitingValidator;
 
     public void create(CreateReservationWaitingServiceRequest request) {
         ReservationWaitingDetails reservationWaitingDetails = createReservationWaitingDetails(request);
         try {
             reservationValidator.validateExistence(request.date(), request.timeId(), request.themeId());
+            reservationWaitingValidator.validateAlreadyWaiting(request.date(), request.timeId(), request.themeId(),
+                    request.memberId());
             ReservationWaiting reservationWaiting = ReservationWaiting.createFuture(reservationWaitingDetails);
             reservationWaitingRepository.save(reservationWaiting);
         } catch (ReservationException e) {
