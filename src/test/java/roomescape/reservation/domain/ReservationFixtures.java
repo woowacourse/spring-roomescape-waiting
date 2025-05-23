@@ -10,11 +10,21 @@ public class ReservationFixtures {
 
     public static Reservation persistReservedReservation(
             EntityManager entityManager,
-            Theme theme, Member member,
-            ReservationTime time,
-            LocalDate date
+            Member member, Theme theme,
+            LocalDate date,
+            ReservationTime reservationTime
     ) {
-        Reservation reservation = Reservation.createReserved(member, theme, date, time);
+        Reservation reservation = Reservation.createReserved(member, theme, date, reservationTime);
+        entityManager.persist(reservation);
+        return reservation;
+    }
+
+    public static Reservation persistWaitingReservation(
+            EntityManager entityManager,
+            Member member, Theme theme,
+            LocalDate date, ReservationTime reservationTime
+    ) {
+        Reservation reservation = Reservation.createWaiting(member, theme, date, reservationTime);
         entityManager.persist(reservation);
         return reservation;
     }

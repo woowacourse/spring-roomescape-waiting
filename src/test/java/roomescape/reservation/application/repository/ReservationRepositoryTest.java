@@ -14,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
+import roomescape.member.domain.MemberFixtures;
 import roomescape.reservation.application.ReservationRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationFixtures;
 import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.reservation.time.domain.ReservationTimeFixtures;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeFixtures;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -60,15 +63,16 @@ class ReservationRepositoryTest {
     @DisplayName("날짜, 시간, 테마가 같은 최근 WAITING 상태 예약 정보를 반환한다")
     void findFirstWaitingReservationTest() {
         // given
-        Member member = createAndSaveMemberFixture();
+        Member member = MemberFixtures.persistUserMember(entityManager);
         LocalDate date = LocalDate.of(2025, 5, 5);
-        ReservationTime reservationTime = createAndSaveReservationTimeFixture();
-        Theme theme = createAndSaveThemeFixture();
+        ReservationTime reservationTime = ReservationTimeFixtures.persistReservationTime(entityManager);
+        Theme theme = ThemeFixtures.persistTheme(entityManager);
 
-        createAndSaveReservedReservationFixture(member, theme, date, reservationTime);
-        Reservation waitingReservation = createAndSaveWaitingReservationFixture(member, theme, date,
-                reservationTime);
-        createAndSaveWaitingReservationFixture(member, theme, date, reservationTime);
+        ReservationFixtures.persistReservedReservation(entityManager, member, theme, date, reservationTime);
+        Reservation waitingReservation = ReservationFixtures.persistWaitingReservation(entityManager, member, theme,
+                date, reservationTime
+        );
+        ReservationFixtures.persistWaitingReservation(entityManager, member, theme, date, reservationTime);
 
         // when
         Reservation result = reservationRepository.findFirstWaitingReservation(date, reservationTime,
@@ -101,13 +105,13 @@ class ReservationRepositoryTest {
     @DisplayName("회원의 모든 예약 정보와 대기 순위를 조회할 수 있다")
     void findReservationsWithRankByMemberId() {
         // given
-        Member member = createAndSaveMemberFixture();
-        Theme theme = createAndSaveThemeFixture();
-        ReservationTime time = createAndSaveReservationTimeFixture();
+        Member member = MemberFixtures.persistUserMember(entityManager);
+        Theme theme = ThemeFixtures.persistTheme(entityManager);
+        ReservationTime time = ReservationTimeFixtures.persistReservationTime(entityManager);
         LocalDate date = LocalDate.now();
 
-        createAndSaveWaitingReservationFixture(member, theme, date, time);
-        createAndSaveWaitingReservationFixture(member, theme, date, time);
+        ReservationFixtures.persistWaitingReservation(entityManager, member, theme, date, time);
+        ReservationFixtures.persistWaitingReservation(entityManager, member, theme, date, time);
 
         // when
         List<ReservationWithRank> results = reservationRepository
@@ -125,14 +129,14 @@ class ReservationRepositoryTest {
     @DisplayName("대기 상태인 모든 예약 정보와 대기 순위를 조회할 수 있다")
     void findReservationsWithRankOfWaitingStatus() {
         // given
-        Member member = createAndSaveMemberFixture();
-        Theme theme = createAndSaveThemeFixture();
-        ReservationTime time = createAndSaveReservationTimeFixture();
+        Member member = MemberFixtures.persistUserMember(entityManager);
+        Theme theme = ThemeFixtures.persistTheme(entityManager);
+        ReservationTime reservationTime = ReservationTimeFixtures.persistReservationTime(entityManager);
         LocalDate date = LocalDate.now();
 
-        createAndSaveReservedReservationFixture(member, theme, date, time);
-        createAndSaveWaitingReservationFixture(member, theme, date, time);
-        createAndSaveWaitingReservationFixture(member, theme, date, time);
+        ReservationFixtures.persistReservedReservation(entityManager, member, theme, date, reservationTime);
+        ReservationFixtures.persistWaitingReservation(entityManager, member, theme, date, reservationTime);
+        ReservationFixtures.persistWaitingReservation(entityManager, member, theme, date, reservationTime);
 
         // when
         List<ReservationWithRank> results = reservationRepository.findReservationsWithRankOfWaitingStatus();
@@ -149,15 +153,15 @@ class ReservationRepositoryTest {
     @DisplayName("특정 예약 시간 ID에 대한 예약 존재 여부를 확인할 수 있다")
     void existsByReservationTimeId() {
         // given
-        ReservationTime time = createAndSaveReservationTimeFixture();
-        Theme theme = createAndSaveThemeFixture();
-        Member member = createAndSaveMemberFixture();
+        ReservationTime reservationTime = ReservationTimeFixtures.persistReservationTime(entityManager);
+        Theme theme = ThemeFixtures.persistTheme(entityManager);
+        Member member = MemberFixtures.persistUserMember(entityManager);
 
-        createAndSaveReservedReservationFixture(member, theme, LocalDate.now(), time);
+        ReservationFixtures.persistReservedReservation(entityManager, member, theme, LocalDate.now(), reservationTime);
 
         // when & then
         assertAll(
-                () -> assertThat(reservationRepository.existsByReservationTimeId(time.getId())).isTrue(),
+                () -> assertThat(reservationRepository.existsByReservationTimeId(reservationTime.getId())).isTrue(),
                 () -> assertThat(reservationRepository.existsByReservationTimeId(999L)).isFalse()
         );
     }
@@ -168,11 +172,12 @@ class ReservationRepositoryTest {
         // given
         LocalDate date = LocalDate.now();
         LocalTime startAt = LocalTime.of(10, 0);
-        ReservationTime time = createAndSaveReservationTimeFixture();
-        Theme theme = createAndSaveThemeFixture();
-        Member member = createAndSaveMemberFixture();
+        ReservationTime reservationTime = ReservationTimeFixtures.persistReservationTime(entityManager);
+        Theme theme = ThemeFixtures.persistTheme(entityManager);
 
-        createAndSaveReservedReservationFixture(member, theme, date, time);
+        Member member = MemberFixtures.persistUserMember(entityManager);
+
+        ReservationFixtures.persistReservedReservation(entityManager, member, theme, date, reservationTime);
 
         // when & then
         assertAll(
@@ -199,16 +204,23 @@ class ReservationRepositoryTest {
     }
 
     private TestData setUpTestData() {
-        Member member1 = createAndSaveMemberFixture();
-        Member member2 = createAndSaveMemberFixture();
-        Theme theme1 = createAndSaveThemeFixture();
-        Theme theme2 = createAndSaveThemeFixture();
-        ReservationTime reservationTime = createAndSaveReservationTimeFixture();
+        Member member1 = MemberFixtures.persistUserMember(entityManager);
+        Member member2 = MemberFixtures.persistUserMember(entityManager);
+        Theme theme1 = ThemeFixtures.persistTheme(entityManager);
+        Theme theme2 = ThemeFixtures.persistTheme(entityManager);
+        ReservationTime reservationTime = ReservationTimeFixtures.persistReservationTime(entityManager);
 
-        createAndSaveReservedReservationFixture(member1, theme1, LocalDate.now(), reservationTime);
-        createAndSaveReservedReservationFixture(member1, theme2, LocalDate.now().minusDays(1), reservationTime);
-        createAndSaveReservedReservationFixture(member2, theme1, LocalDate.now().minusDays(2), reservationTime);
-        createAndSaveReservedReservationFixture(member2, theme2, LocalDate.now().minusDays(3), reservationTime);
+        ReservationFixtures.persistReservedReservation(entityManager, member1, theme1, LocalDate.now(), reservationTime
+        );
+        ReservationFixtures.persistReservedReservation(entityManager, member1, theme2, LocalDate.now().minusDays(1),
+                reservationTime
+        );
+        ReservationFixtures.persistReservedReservation(entityManager, member2, theme1, LocalDate.now().minusDays(2),
+                reservationTime
+        );
+        ReservationFixtures.persistReservedReservation(entityManager, member2, theme2, LocalDate.now().minusDays(3),
+                reservationTime
+        );
         return new TestData(member1, member2, theme1, theme2);
     }
 
@@ -218,37 +230,5 @@ class ReservationRepositoryTest {
             Theme theme1,
             Theme theme2
     ) {
-    }
-
-    private void createAndSaveReservedReservationFixture(Member member, Theme theme, LocalDate date,
-                                                         ReservationTime reservationTime) {
-        Reservation reservation = Reservation.createReserved(member, theme, date, reservationTime);
-        entityManager.persist(reservation);
-    }
-
-    private Reservation createAndSaveWaitingReservationFixture(Member member, Theme theme, LocalDate date,
-                                                               ReservationTime reservationTime) {
-        Reservation reservation = Reservation.createWaiting(member, theme, date, reservationTime);
-        entityManager.persist(reservation);
-
-        return reservation;
-    }
-
-    private Member createAndSaveMemberFixture() {
-        Member member = new Member("이메일", "패스워드", "이름", Role.USER);
-        entityManager.persist(member);
-        return member;
-    }
-
-    private Theme createAndSaveThemeFixture() {
-        Theme theme = new Theme("테마명", "설명", "thumbnail");
-        entityManager.persist(theme);
-        return theme;
-    }
-
-    private ReservationTime createAndSaveReservationTimeFixture() {
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
-        entityManager.persist(reservationTime);
-        return reservationTime;
     }
 }

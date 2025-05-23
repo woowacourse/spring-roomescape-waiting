@@ -92,7 +92,7 @@ class ThemeRepositoryTest {
             int count
     ) {
         for (int i = 0; i < count; i++) {
-            ReservationFixtures.persistReservedReservation(entityManager, theme, member, time, date);
+            ReservationFixtures.persistReservedReservation(entityManager, member, theme, date, time);
         }
     }
 
