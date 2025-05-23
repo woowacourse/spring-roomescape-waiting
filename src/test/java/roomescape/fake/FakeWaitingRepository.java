@@ -3,8 +3,6 @@ package roomescape.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.repository.WaitingRepository;
 
@@ -22,11 +20,20 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
+    public long countByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return waitings.stream()
                 .filter(waiting -> waiting.getDate().equals(date))
-                .filter(waiting -> waiting.getTime().getId().equals(time.getId()))
-                .filter(waiting -> waiting.getTheme().getId().equals(theme.getId()))
+                .filter(waiting -> waiting.getTime().getId().equals(timeId))
+                .filter(waiting -> waiting.getTheme().getId().equals(themeId))
                 .count();
+    }
+
+    @Override
+    public boolean existsByDateAndThemeIdAndTimeIdAndMemberId(LocalDate date, long themeId, long timeId, long memberId) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTime().getId().equals(timeId))
+                .filter(waiting -> waiting.getTheme().getId().equals(themeId))
+                .anyMatch(waiting -> waiting.getMember().getId().equals(memberId));
     }
 }

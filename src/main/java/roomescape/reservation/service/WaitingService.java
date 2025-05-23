@@ -39,19 +39,44 @@ public class WaitingService {
     /**
      * TODO
      * 락이 필요하다.
-     * 중복 대기.
      */
     public WaitingInfo addWaiting(WaitingAddCommand command) {
         ReservationTime reservationTime = getReservationTime(command.timeId());
-        validatePastTime(command.date(), reservationTime);
-        validateNoReservation(command);
         Theme theme = getTheme(command.themeId());
         Member member = getMember(command.memberId());
         ReservationTime time = getTime(command.timeId());
-        long order = calculateWaitingOrder(command, time, theme);
+        validatePastTime(command.date(), reservationTime);
+        validateNoReservation(command);
+        validateAlreadyWaiting(command);
+        validateAlreadyReserved(command);
+        long order = calculateWaitingOrder(command);
         Waiting waiting = new Waiting(null, command.date(), time, theme, member, order);
         Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingInfo(savedWaiting);
+    }
+
+    private void validateAlreadyWaiting(WaitingAddCommand command) {
+        boolean waitingExists = waitingRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
+                command.date(),
+                command.themeId(),
+                command.timeId(),
+                command.memberId()
+        );
+        if (waitingExists) {
+            throw new IllegalArgumentException("이미 대기 중입니다.");
+        }
+    }
+
+    private void validateAlreadyReserved(WaitingAddCommand command) {
+        boolean reservationExists = reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
+                command.date(),
+                command.themeId(),
+                command.timeId(),
+                command.memberId()
+        );
+        if (reservationExists) {
+            throw new IllegalArgumentException("이미 예약되었습니다.");
+        }
     }
 
     private void validatePastTime(LocalDate date, ReservationTime reservationTime) {
@@ -69,8 +94,8 @@ public class WaitingService {
         }
     }
 
-    private long calculateWaitingOrder(WaitingAddCommand command, ReservationTime time, Theme theme) {
-        return waitingRepository.countByDateAndTimeAndTheme(command.date(), time, theme) + 1;
+    private long calculateWaitingOrder(WaitingAddCommand command) {
+        return waitingRepository.countByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId()) + 1;
     }
 
     private ReservationTime getReservationTime(long timeId) {

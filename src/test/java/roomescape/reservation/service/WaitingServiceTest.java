@@ -39,7 +39,8 @@ public class WaitingServiceTest {
     MemberRepository memberRepository;
     CurrentDateTime currentDateTime;
 
-    Member savedMember;
+    Member savedMember1;
+    Member savedMember2;
     ReservationTime savedReservationTime;
     Theme savedTheme;
 
@@ -55,7 +56,8 @@ public class WaitingServiceTest {
                 themeRepository, memberRepository, currentDateTime);
         savedReservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         savedTheme = themeRepository.save(new Theme(null, "공포", "무서운거임", "abcd"));
-        savedMember = memberRepository.save(new Member(null, "유저1", "이메일", "비밀번호", MemberRole.USER));
+        savedMember1 = memberRepository.save(new Member(null, "유저1", "이메일", "비밀번호", MemberRole.USER));
+        savedMember2 = memberRepository.save(new Member(null, "유저2", "이메일", "비밀번호", MemberRole.USER));
     }
 
     @DisplayName("과거에 대한 예약 대기를 요청하면 예외가 발생한다")
@@ -65,7 +67,7 @@ public class WaitingServiceTest {
         LocalDate date = LocalDate.of(2024, 1, 1);
         long timeId = savedReservationTime.getId();
         long themeId = savedTheme.getId();
-        long memberId = savedMember.getId();
+        long memberId = savedMember1.getId();
         WaitingAddCommand command = new WaitingAddCommand(date, timeId, themeId, memberId);
 
         // when
@@ -82,7 +84,7 @@ public class WaitingServiceTest {
         LocalDate date = LocalDate.of(2025, 5, 1);
         long timeId = savedReservationTime.getId();
         long themeId = savedTheme.getId();
-        long memberId = savedMember.getId();
+        long memberId = savedMember1.getId();
         WaitingAddCommand command = new WaitingAddCommand(date, timeId, themeId, memberId);
 
         // when
@@ -98,7 +100,7 @@ public class WaitingServiceTest {
         // given
         reservationRepository.save(
                 new Reservation(null,
-                        savedMember,
+                        savedMember1,
                         currentDateTime.getDate().plusDays(1),
                         savedReservationTime,
                         savedTheme
@@ -107,7 +109,7 @@ public class WaitingServiceTest {
         LocalDate date = LocalDate.of(2025, 5, 1);
         long timeId = savedReservationTime.getId();
         long themeId = savedTheme.getId();
-        long memberId = savedMember.getId();
+        long memberId = savedMember2.getId();
         WaitingAddCommand command = new WaitingAddCommand(date, timeId, themeId, memberId);
 
         // when
@@ -121,5 +123,56 @@ public class WaitingServiceTest {
                 () -> assertThat(result.memberInfo().id()).isEqualTo(memberId),
                 () -> assertThat(result.order()).isEqualTo(1L)
         );
+    }
+
+    @DisplayName("같은 멤버가 예약 대기 중 중복 대기를 요청하면 예외가 발생한다")
+    @Test
+    void should_ThrowException_WhenAddWaitingWithDuplicateWaiting() {
+        // given
+        reservationRepository.save(
+                new Reservation(null,
+                        savedMember1,
+                        currentDateTime.getDate().plusDays(1),
+                        savedReservationTime,
+                        savedTheme
+                )
+        );
+        LocalDate date = LocalDate.of(2025, 5, 1);
+        long timeId = savedReservationTime.getId();
+        long themeId = savedTheme.getId();
+        long memberId = savedMember2.getId();
+        WaitingAddCommand command = new WaitingAddCommand(date, timeId, themeId, memberId);
+        waitingService.addWaiting(command);
+
+        // when
+        // then
+        assertThatThrownBy(() -> waitingService.addWaiting(command))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 대기 중입니다.");
+    }
+
+    @DisplayName("같은 멤버가 예약 중 중복 대기를 요청하면 예외가 발생한다")
+    @Test
+    void should_ThrowException_WhenAddWaitingWithDuplicateReservation() {
+        // given
+        reservationRepository.save(
+                new Reservation(null,
+                        savedMember1,
+                        currentDateTime.getDate().plusDays(1),
+                        savedReservationTime,
+                        savedTheme
+                )
+        );
+        LocalDate date = LocalDate.of(2025, 5, 1);
+        long timeId = savedReservationTime.getId();
+        long themeId = savedTheme.getId();
+        long memberId = savedMember1.getId();
+        WaitingAddCommand command = new WaitingAddCommand(date, timeId, themeId, memberId);
+
+        // when
+        // then
+        assertThatThrownBy(() -> waitingService.addWaiting(command))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 예약되었습니다.");
     }
 }

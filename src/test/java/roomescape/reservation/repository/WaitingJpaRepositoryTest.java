@@ -28,7 +28,7 @@ public class WaitingJpaRepositoryTest {
     WaitingRepository waitingRepository;
 
     @Test
-    void test() {
+    void countByDateAndTimeIdAndThemeId() {
         // given
         LocalDate now = LocalDate.now();
         ReservationTime reservationTime = new ReservationTime(LocalTime.now());
@@ -43,9 +43,33 @@ public class WaitingJpaRepositoryTest {
         entityManager.persist(new Waiting(null, now, reservationTime, theme, member2, 2));
 
         // when
-        long result = waitingRepository.countByDateAndTimeAndTheme(now, reservationTime, theme);
+        long result = waitingRepository.countByDateAndTimeIdAndThemeId(now, reservationTime.getId(), theme.getId());
 
         // then
         assertThat(result).isEqualTo(2);
+    }
+
+    @Test
+    void existsByDateAndThemeIdAndTimeIdAndMemberId() {
+        // given
+        LocalDate now = LocalDate.now();
+        ReservationTime reservationTime = new ReservationTime(LocalTime.now());
+        Theme theme = new Theme(null, "공포테마", "진짜 무서운거임", "덜덜");
+        Member member = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
+        entityManager.persist(reservationTime);
+        entityManager.persist(theme);
+        entityManager.persist(member);
+        entityManager.persist(new Waiting(null, now, reservationTime, theme, member, 1));
+
+        // when
+        boolean result = waitingRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
+                now,
+                reservationTime.getId(),
+                theme.getId(),
+                member.getId()
+        );
+
+        // then
+        assertThat(result).isTrue();
     }
 }

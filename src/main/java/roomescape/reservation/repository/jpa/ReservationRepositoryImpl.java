@@ -64,4 +64,10 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                 .and(ReservationSpecs.isReservationByPeriod(from, to));
         return reservationJpaRepository.findAll(spec);
     }
+
+    @Override
+    public boolean existsByDateAndThemeIdAndTimeIdAndMemberId(LocalDate date, long themeId, long timeId,
+                                                              long memberId) {
+        return reservationJpaRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(date, themeId, timeId, memberId);
+    }
 }
