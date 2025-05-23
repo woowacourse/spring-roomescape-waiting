@@ -67,6 +67,14 @@ public class Reservation {
         status = ReservationStatus.RESERVED;
     }
 
+    public boolean isReserved() {
+        return status == ReservationStatus.RESERVED;
+    }
+
+    public String getReservationStatus() {
+        return status.getStatus();
+    }
+
     public Long getId() {
         return id;
     }
