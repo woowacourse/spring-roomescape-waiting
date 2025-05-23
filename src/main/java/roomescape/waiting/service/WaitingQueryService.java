@@ -62,7 +62,15 @@ public class WaitingQueryService {
                 .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
     }
 
+    public Reservation getFirstByDateAndTimeId(LocalDate date, Long timeId) {
+        return statusRepository.findByDateAndTimeIdAndStatus(date, timeId, WAITING).getFirst();
+    }
+
     public boolean existWaiting(Long userId, LocalDate date, Long timeId) {
         return statusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(userId, date, timeId, WAITING);
+    }
+
+    public boolean existsByDateAndTimeId(LocalDate date, Long timeId) {
+        return statusRepository.existsByDateAndTimeIdAndStatus(date, timeId, WAITING);
     }
 }
