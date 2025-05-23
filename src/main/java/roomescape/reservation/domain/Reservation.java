@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -8,12 +9,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import roomescape.reservation.exception.InvalidReservationTimeException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.user.domain.User;
+import roomescape.waiting.domain.Waiting;
 
 @Entity
 public class Reservation {
@@ -30,25 +35,35 @@ public class Reservation {
     private Theme theme;
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Waiting> waitings;
 
     protected Reservation() {
     }
 
     public Reservation(Long id, LocalDate date, ReservationStatus status, ReservationTime reservationTime, Theme theme,
-            User user) {
+            User user, List<Waiting> waitings) {
         this.id = id;
         this.date = date;
         this.status = status;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.user = user;
+        this.waitings = waitings;
     }
 
     public static Reservation of(LocalDate date, ReservationStatus status, ReservationTime reservationTime, Theme theme,
             User user) {
         LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         validateTense(dateTime);
-        return new Reservation(null, date, status, reservationTime, theme, user);
+        return new Reservation(null, date, status, reservationTime, theme, user, new ArrayList<>());
+    }
+
+    public static Reservation of(LocalDate date, ReservationStatus status, ReservationTime reservationTime, Theme theme,
+                                 User user, List<Waiting> waitings) {
+        LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
+        validateTense(dateTime);
+        return new Reservation(null, date, status, reservationTime, theme, user, waitings);
     }
 
     private static void validateTense(LocalDateTime dateTime) {
@@ -68,6 +83,10 @@ public class Reservation {
 
     public LocalDateTime getDateTime() {
         return LocalDateTime.of(date, reservationTime.getStartAt());
+    }
+
+    public void addWaiting(Waiting waiting) {
+        waitings.add(waiting);
     }
 
     public Long getId() {
@@ -92,5 +111,9 @@ public class Reservation {
 
     public User getUser() {
         return user;
+    }
+
+    public List<Waiting> getWaitings() {
+        return waitings;
     }
 }
