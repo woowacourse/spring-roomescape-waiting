@@ -71,4 +71,21 @@ public class FakeWaitingRepository implements WaitingRepositoryInterface {
                         waiting.getId() < id)
                 .count();
     }
+
+    @Override
+    public List<Waiting> findAll() {
+        return waitings.values().stream().toList();
+    }
+
+    @Override
+    public Optional<Waiting> findFirstByThemeAndDateAndTimeOrderByIdAsc(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime time) {
+        return waitings.values().stream()
+                .filter(waiting -> waiting.getTheme().equals(theme) &&
+                        waiting.getDate().isEqual(date) &&
+                        waiting.getTime().equals(time))
+                .findFirst();
+    }
 }
