@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
-import roomescape.domain.repository.MemberRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.infrastructure.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -26,7 +26,11 @@ public class MemberApiTest {
     @Test
     void 전체_회원_조회() {
         // given
-        Member member = new Member(null, "name", "email1@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("member1")
+                .password("password1")
+                .email("email1@domain.com")
+                .role(Role.MEMBER).build();
         memberRepository.save(member);
         // when & then
         RestAssured.given()

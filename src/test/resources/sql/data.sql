@@ -5,13 +5,13 @@ values ('아마', 'email1', 'password', 'ADMIN');
 insert into member (name, email, password, role)
 values ('포라', 'email1', 'password', 'ADMIN');
 
-insert into reservation_time (start_at)
+insert into time_slot (start_at)
 values ('10:00');
-insert into reservation_time (start_at)
+insert into time_slot (start_at)
 values ('11:00');
-insert into reservation_time (start_at)
+insert into time_slot (start_at)
 values ('12:00');
-insert into reservation_time (start_at)
+insert into time_slot (start_at)
 values ('13:00');
 
 insert into theme (name, description, thumbnail)

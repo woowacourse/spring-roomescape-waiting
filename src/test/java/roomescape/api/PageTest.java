@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
-import roomescape.domain.repository.MemberRepository;
-import roomescape.presentation.PageController;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.ui.PageController;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -37,7 +37,11 @@ class PageTest {
     @Test
     void 예약_시간_화면_요청을_성공한다() {
         Member admin = memberRepository.save(
-                new Member(null, "admin", "admin@domain.com", "password1", Role.ADMIN)
+                Member.builder()
+                        .name("admin")
+                        .password("admin")
+                        .email("admin@domain.com")
+                        .role(Role.ADMIN).build()
         );
         Map<String, Object> body = Map.of(
                 "email", admin.getEmail(),
@@ -61,7 +65,11 @@ class PageTest {
     @Test
     void 관리자가_아닌_사용자가_예약시간_화면_요청_시_리다이렉트된다() {
         Member member = memberRepository.save(
-                new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
         );
         Map<String, Object> body = Map.of(
                 "email", member.getEmail(),
@@ -109,7 +117,11 @@ class PageTest {
     @Test
     void 어드민_홈_화면_요청을_성공한다() {
         Member admin = memberRepository.save(
-                new Member(null, "admin", "admin@domain.com", "password1", Role.ADMIN)
+                Member.builder()
+                        .name("admin")
+                        .password("admin")
+                        .email("admin@domain.com")
+                        .role(Role.ADMIN).build()
         );
         Map<String, Object> body = Map.of(
                 "email", admin.getEmail(),
@@ -133,7 +145,11 @@ class PageTest {
     @Test
     void 관리자가_아닌_사용자가_어드민_홈_화면_요청_시_리다이렉트된다() {
         Member member = memberRepository.save(
-                new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.MEMBER).build()
         );
         Map<String, Object> body = Map.of(
                 "email", member.getEmail(),

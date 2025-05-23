@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.Theme;
-import roomescape.domain.repository.ThemeRepository;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.infrastructure.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
 
@@ -20,11 +20,11 @@ public class FakeThemeRepository implements ThemeRepository {
 
     @Override
     public Theme save(Theme theme) {
-        Theme themeWithId = new Theme(index.getAndIncrement(),
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnail()
-        );
+        Theme themeWithId = Theme.builder()
+                .id(index.getAndIncrement())
+                .name(theme.getName())
+                .description(theme.getDescription())
+                .thumbnail(theme.getThumbnail()).build();
         fakeThemes.add(themeWithId);
         return themeWithId;
     }

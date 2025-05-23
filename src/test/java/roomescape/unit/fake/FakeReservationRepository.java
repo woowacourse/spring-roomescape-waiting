@@ -6,11 +6,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-import roomescape.domain.repository.ReservationRepository;
-import roomescape.dto.request.ReservationCondition;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
+import roomescape.reservation.dto.request.ReservationCondition;
+import roomescape.reservation.infrastructure.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -28,8 +29,12 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
-        Reservation reservationWithId = Reservation.of(index.getAndIncrement(), reservation.getMember(),
-                reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
+        Reservation reservationWithId = Reservation.builder()
+                .id(index.getAndIncrement())
+                .member(reservation.getMember())
+                .date(reservation.getDate())
+                .timeSlot(reservation.getTimeSlot())
+                .theme(reservation.getTheme()).build();
         reservations.add(reservationWithId);
         return reservationWithId;
     }
@@ -55,18 +60,17 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeId(Long themeId) {
+    public boolean existsByThemeId(Long themeId) {
         return reservations.stream()
-                .filter(reservation -> reservation.getTheme().getId().equals(themeId))
-                .toList();
+                .anyMatch(reservation -> reservation.getTheme().getId().equals(themeId));
     }
 
     @Override
-    public Optional<Reservation> findByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time,
-                                                                      Theme theme) {
+    public Optional<Reservation> findByDateAndTimeSlotAndTheme(LocalDate date, TimeSlot time,
+                                                               Theme theme) {
         return reservations.stream()
                 .filter(reservation -> reservation.getDate().equals(date))
-                .filter(reservation -> reservation.getReservationTime().equals(time))
+                .filter(reservation -> reservation.getTimeSlot().equals(time))
                 .filter(reservation -> reservation.getTheme().equals(theme))
                 .findFirst();
     }
@@ -80,10 +84,9 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByReservationTimeId(Long timeId) {
+    public boolean existsByTimeSlotId(Long timeId) {
         return reservations.stream()
-                .filter(reservation -> reservation.getReservationTime().getId().equals(timeId))
-                .toList();
+                .anyMatch(reservation -> reservation.getTimeSlot().getId().equals(timeId));
     }
 
     @Override
@@ -113,5 +116,28 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.stream()
                 .filter(reservation -> reservation.getMember().getId().equals(memberId))
                 .toList();
+    }
+
+    @Override
+    public boolean existsByDateAndMemberAndThemeAndTimeSlot(LocalDate date, Member member, Theme theme,
+                                                            TimeSlot timeSlot) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getDate().equals(date))
+                .filter(reservation -> reservation.getTimeSlot().equals(timeSlot))
+                .filter(reservation -> reservation.getMember().equals(member))
+                .anyMatch(reservation -> reservation.getTheme().equals(theme));
+    }
+
+    @Override
+    public boolean existsByDateAndThemeAndTimeSlot(LocalDate date, Theme theme, TimeSlot timeSlot) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getDate().equals(date))
+                .filter(reservation -> reservation.getTimeSlot().equals(timeSlot))
+                .anyMatch(reservation -> reservation.getTheme().equals(theme));
+    }
+
+    @Override
+    public void delete(Reservation reservation) {
+        reservations.remove(reservation);
     }
 }

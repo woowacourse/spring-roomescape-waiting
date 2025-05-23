@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.Member;
-import roomescape.domain.Role;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 
 class FakeMemberRepositoryTest {
 
@@ -15,7 +15,11 @@ class FakeMemberRepositoryTest {
     @Test
     void 회원을_저장한다() {
         // given
-        Member member = new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         // when
         memberDao.save(member);
         // then
@@ -28,7 +32,11 @@ class FakeMemberRepositoryTest {
     @Test
     void 이메일로_회원을_찾는다() {
         // given
-        Member member = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
         memberDao.getMembers().add(member);
         // when
         Optional<Member> optionalMember = memberDao.findByEmail("email1@domain.com");
@@ -41,8 +49,12 @@ class FakeMemberRepositoryTest {
     @Test
     void id로_회원을_찾는다() {
         // given
-        Member member = new Member(1L, "name1", "email1@domain.com", "password1", Role.MEMBER);
-        memberDao.getMembers().add(member);
+        Member member = Member.builder()
+                .name("name1")
+                .email("email1@domain.com")
+                .password("password1")
+                .role(Role.MEMBER).build();
+        memberDao.save(member);
         // when
         Optional<Member> optionalMember = memberDao.findById(1L);
         // then
