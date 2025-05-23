@@ -43,4 +43,8 @@ public class PendingReservation {
             throw new IllegalStateException("과거 및 당일 예약은 불가능합니다.");
         }
     }
+
+    public Member getMember() {
+        return member;
+    }
 }

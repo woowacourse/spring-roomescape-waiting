@@ -6,4 +6,7 @@ public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
+    Waiting findById(Long id);
+
+    void delete(Waiting waiting);
 }

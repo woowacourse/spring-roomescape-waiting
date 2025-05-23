@@ -37,4 +37,8 @@ public class Waiting {
         this.registeredAt = registeredAt;
         this.pendingReservation = pendingReservation;
     }
+
+    public boolean ownBy(Member comparedMember) {
+        return pendingReservation.getMember().equals(comparedMember);
+    }
 }

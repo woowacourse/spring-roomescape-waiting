@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRegisterDto;
 import roomescape.dto.response.WaitingResponseDto;
@@ -31,12 +32,28 @@ public class WaitingService {
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRegisterDto.time());
         Theme theme = themeRepository.findById(waitingRegisterDto.theme());
 
-        PendingReservation pendingReservation = new PendingReservation(waitingRegisterDto.date(), reservationTime,
-                theme, member, LocalDate.now());
+        PendingReservation pendingReservation = new PendingReservation(
+                waitingRegisterDto.date(),
+                reservationTime,
+                theme,
+                member,
+                LocalDate.now()
+        );
         Waiting waiting = new Waiting(LocalDateTime.now(), pendingReservation);
 
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         return new WaitingResponseDto(savedWaiting.getId());
+    }
+
+    public void deleteWaiting(LoginMember loginMember, Long id) {
+        Waiting waiting = waitingRepository.findById(id);
+        Member member = memberRepository.findById(loginMember.id());
+
+        if (!waiting.ownBy(member)) {
+            throw new UnauthorizedException("해당 객체를 삭제할 수 있는 권한이 없습니다.");
+        }
+
+        waitingRepository.delete(waiting);
     }
 }
