@@ -43,8 +43,35 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    //TODO : 어드민만 사용하는 메서드임 사실상, 추후에 어드민 서비스로 분리 하는 것이 적절해 보인다.
+    @Transactional
     public void deleteById(final Long id) {
-        findReservationById(id);
+        //TODO : 대기 정보가 있는지 파악하기 O
+        //TODO : 대기 정보가 있으면 첫 번째 대기 정보를 예약으로 바꾸기 O
+        //TODO : 대기 삭제하기
+        final Reservation reservation = findReservationById(id);
+        final Theme theme = reservation.getTheme();
+        final LocalDate date = reservation.getDate();
+        final ReservationTime time = reservation.getTime();
+        if (waitingRepository.existsByDateAndTimeAndTheme(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme()
+        )) {
+            //대기 정보가 있는 것임
+            waitingRepository.findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date, time)
+                    .ifPresent(waiting -> {
+                        //TODO : 대기 정보를 예약으로 바꾸기
+                        reservationRepository.save(new Reservation(
+                                waiting.getMember(),
+                                waiting.getDate(),
+                                waiting.getTime(),
+                                waiting.getTheme()
+                        ));
+                        //TODO : 대기 삭제하기
+                        waitingRepository.deleteById(waiting.getId());
+                    });
+        }
 
         reservationRepository.deleteById(id);
     }
@@ -85,6 +112,7 @@ public class ReservationService {
         return waitingRepository.findByMember(member);
     }
 
+    @Transactional
     public void deleteWaitingById(final Long id) {
         final Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("해당 대기 데이터가 존재하지 않습니다. id = " + id));
