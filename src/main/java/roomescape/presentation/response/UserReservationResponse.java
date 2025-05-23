@@ -2,7 +2,7 @@ package roomescape.presentation.response;
 
 import java.time.LocalDate;
 import java.util.List;
-import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.ReservationWithOrder;
 
 public record UserReservationResponse(
     long id,
@@ -12,7 +12,7 @@ public record UserReservationResponse(
     String status
 ) {
 
-    public static UserReservationResponse from(final Waiting waiting) {
+    public static UserReservationResponse from(final ReservationWithOrder waiting) {
         var reservation = waiting.reservation();
         return new UserReservationResponse(
             reservation.id(),
@@ -23,7 +23,7 @@ public record UserReservationResponse(
         );
     }
 
-    private static String writeDescription(final Waiting waiting) {
+    private static String writeDescription(final ReservationWithOrder waiting) {
         if (waiting.isWaiting()) {
             return waiting.order() + "번째 예약 대기";
         }
@@ -31,7 +31,7 @@ public record UserReservationResponse(
         return reservation.status().description();
     }
 
-    public static List<UserReservationResponse> from(final List<Waiting> waitings) {
+    public static List<UserReservationResponse> from(final List<ReservationWithOrder> waitings) {
         return waitings.stream()
             .map(UserReservationResponse::from)
             .toList();

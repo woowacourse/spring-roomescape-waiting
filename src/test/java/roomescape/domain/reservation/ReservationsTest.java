@@ -75,30 +75,6 @@ class ReservationsTest {
         );
     }
 
-    @Test
-    @DisplayName("가지고 있는 예약들과 비교해 주어진 예약들의 대기 순번을 계산한다.")
-    void checkWaitingOrders() {
-        // given
-        var reservations = new Reservations(List.of(
-            reservationOf(theme, date, time1, ReservationStatus.WAITING),
-            reservationOf(theme, date, time1, ReservationStatus.WAITING),
-            reservationOf(theme, date, time1, ReservationStatus.WAITING)
-        ));
-
-        var reservation1 = reservationOf(theme, date, time1, ReservationStatus.WAITING);
-        var reservation2 = reservationOf(theme, date, time2, ReservationStatus.RESERVED);
-        var reservationsToCheck = List.of(reservation1, reservation2);
-
-        // when
-        var checkedWaitingOrders = reservations.checkWaitingOrders(reservationsToCheck);
-
-        // then
-        assertThat(checkedWaitingOrders).contains(
-            new Waiting(reservation1, 4),
-            new Waiting(reservation2, 1)
-        );
-    }
-
     private Reservation reservationOf(final TimeSlot timeSlot) {
         return new Reservation(
             DUMMY_ID_GENERATOR.incrementAndGet(),
@@ -114,15 +90,6 @@ class ReservationsTest {
             user,
             ReservationSlot.of(date, timeSlot, theme),
             ReservationStatus.RESERVED
-        );
-    }
-
-    private Reservation reservationOf(final Theme theme, final LocalDate date, final TimeSlot timeSlot, final ReservationStatus status) {
-        return new Reservation(
-            DUMMY_ID_GENERATOR.incrementAndGet(),
-            user,
-            ReservationSlot.of(date, timeSlot, theme),
-            status
         );
     }
 }

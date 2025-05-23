@@ -1,13 +1,13 @@
 package roomescape.domain.reservation;
 
-public record Waiting(
+public record ReservationWithOrder(
     Reservation reservation,
     int order
 ) {
 
     private static final int NOT_WAITING = 1;
 
-    public Waiting(final Reservation reservation) {
+    public ReservationWithOrder(final Reservation reservation) {
         this(reservation, NOT_WAITING);
     }
 

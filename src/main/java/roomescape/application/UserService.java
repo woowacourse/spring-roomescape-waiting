@@ -2,20 +2,16 @@ package roomescape.application;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Reservations;
-import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.ReservationWithOrder;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserName;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
-import roomescape.infrastructure.ReservationSpecs;
 
 @Service
 @AllArgsConstructor
@@ -38,18 +34,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<Waiting> getMyReservations(final long id) {
+    public List<ReservationWithOrder> getMyReservations(final long id) {
         var user = repository.getById(id);
-        var reservations = new Reservations(relatedReservationsWith(user));
-        return reservations.checkWaitingOrders(user.reservations());
-    }
-
-    private List<Reservation> relatedReservationsWith(final User user) {
-        var byReservedSlots = user.reservedSlots().stream()
-            .map(ReservationSpecs::bySlot)
-            .toList();
-        var relatedReservations = Specification.anyOf(byReservedSlots);
-        return reservationRepository.findAll(relatedReservations);
+        var queues = reservationRepository.findQueuesBySlots(user.reservedSlots());
+        return queues.orderOfAll(user.reservations());
     }
 
     public List<User> findAllUsers() {

@@ -4,11 +4,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.SequencedCollection;
 
-public class WaitingQueue {
+public class ReservationQueue {
 
     private final List<Reservation> queue;
 
-    public WaitingQueue(final SequencedCollection<Reservation> reservations) {
+    public ReservationQueue(final SequencedCollection<Reservation> reservations) {
         this.queue = sorted(reservations);
     }
 

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.ReservationWithOrder;
 
 @DataJpaTest
 @Import({UserService.class, TestRepositoryHelper.class})
@@ -54,6 +54,6 @@ class UserServiceTest {
         var reservations = service.getMyReservations(user.id());
 
         // then
-        assertThat(reservations).contains(new Waiting(savedReservation));
+        assertThat(reservations).contains(new ReservationWithOrder(savedReservation));
     }
 }

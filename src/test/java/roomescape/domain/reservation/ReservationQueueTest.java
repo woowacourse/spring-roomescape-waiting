@@ -19,7 +19,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.User;
 
-class WaitingQueueTest {
+class ReservationQueueTest {
 
     private static final AtomicLong DUMMY_ID_GENERATOR = new AtomicLong();
 
@@ -41,7 +41,7 @@ class WaitingQueueTest {
         var reservation2 = reservationOf(slot, user2);
         var reservation3 = reservationOf(slot, user3);
 
-        var queue = new WaitingQueue(List.of(reservation1, reservation2, reservation3));
+        var queue = new ReservationQueue(List.of(reservation1, reservation2, reservation3));
 
         // when & then
         assertAll(
@@ -54,7 +54,7 @@ class WaitingQueueTest {
     @Test
     @DisplayName("대기열에 존재하지 않는 예약의 순번을 조회하려하면 예외가 발생한다.")
     void orderOfNotWaiting() {
-        var queue = new WaitingQueue(emptyList());
+        var queue = new ReservationQueue(emptyList());
         var reservation = reservationOf(slot, user1);
 
         assertThatThrownBy(() -> queue.orderOf(reservation))
@@ -64,7 +64,7 @@ class WaitingQueueTest {
     @Test
     @DisplayName("다른 슬롯의 예약 순번을 조회하려하면 예외가 발생한다.")
     void orderOfMismatchSlot() {
-        var queue = new WaitingQueue(emptyList());
+        var queue = new ReservationQueue(emptyList());
         var reservation = reservationOf(otherSlot, user1);
 
         assertThatThrownBy(() -> queue.orderOf(reservation))
