@@ -59,6 +59,15 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/waiting")
+    public ResponseEntity<List<WaitingResponse>> getAllWaitings(Member member) {
+        if (Role.isUser(member.getRole())) {
+            throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
+        }
+
+        return ResponseEntity.ok(waitingService.findAll());
+    }
+
     @PostMapping("/waiting")
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody final WaitingRequest request, Member member) {
         WaitingResponse responseDto = waitingService.createWaiting(request, member);

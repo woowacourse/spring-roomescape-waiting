@@ -28,6 +28,13 @@ public class WaitingService {
         this.tokenProvider = tokenProvider;
     }
 
+    public List<WaitingResponse> findAll() {
+        List<Waiting> allWaitings = waitingRepository.findAll();
+        return allWaitings.stream()
+                .map(waiting -> WaitingResponse.from(waiting, waiting.getTime(), waiting.getTheme()))
+                .toList();
+    }
+
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest dto, Member member) {
         Waiting waiting = reservationChecker.createWaitingWithoutId(dto, member);
