@@ -19,7 +19,7 @@ import roomescape.repository.ReservationSpecifications;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.request.AdminCreateReservationRequest;
-import roomescape.service.request.ReservationCreateRequest;
+import roomescape.service.request.CreateReservationRequest;
 import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
 
@@ -57,7 +57,7 @@ public class ReservationService {
         reservationRepository.deleteById(reservation.getId());
     }
 
-    public ReservationResponse createReservation(final ReservationCreateRequest request, final Long memberId) {
+    public ReservationResponse createReservation(final CreateReservationRequest request, final Long memberId) {
         Reservation created = createReservation(
                 new ReservationDate(request.date()),
                 request.timeId(),
@@ -126,7 +126,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllMyReservation(final Long id) {
-        List<Reservation> reservations = reservationRepository.findByMember_Id(id);
+        List<Reservation> reservations = reservationRepository.findAllByMember_Id(id);
         return MyReservationResponse.from(reservations);
     }
 }

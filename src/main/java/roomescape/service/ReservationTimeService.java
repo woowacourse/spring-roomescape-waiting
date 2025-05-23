@@ -62,7 +62,7 @@ public class ReservationTimeService {
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
             final AvailableReservationTimeRequest request
     ) {
-        List<AvailableReservationTime> allAvailableReservationTimes = reservationTimeRepository.findAllAvailableReservationTimes(
+        List<AvailableReservationTime> allAvailableReservationTimes = reservationScheduleRepository.findAllAvailableReservationSchedules(
                 request.date(),
                 request.themeId()
         );

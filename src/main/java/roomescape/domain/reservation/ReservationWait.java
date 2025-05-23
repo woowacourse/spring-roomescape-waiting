@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.schdule.ReservationSchedule;
@@ -29,6 +31,9 @@ public class ReservationWait {
     @JoinColumn(name = "schedule_id")
     private ReservationSchedule schedule;
 
+    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    private LocalDateTime createdAt;
+
     protected ReservationWait() {
     }
 
@@ -46,4 +51,21 @@ public class ReservationWait {
         return id;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
+    public ReservationSchedule getSchedule() {
+        return schedule;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Long calculateRank() {
+        return schedule.getWaits().stream()
+                .filter(wait -> wait.getCreatedAt().isBefore(this.createdAt))
+                .count() + 1;
+    }
 }

@@ -36,7 +36,7 @@ import roomescape.repository.ReservationScheduleRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.ReservationService;
-import roomescape.service.request.ReservationCreateRequest;
+import roomescape.service.request.CreateReservationRequest;
 import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
 
@@ -119,7 +119,7 @@ class ReservationServiceTest {
                 reservationTime,
                 theme
         );
-        ReservationCreateRequest request = new ReservationCreateRequest(today, reservationTime.getId(), theme.getId());
+        CreateReservationRequest request = new CreateReservationRequest(today, reservationTime.getId(), theme.getId());
         ReservationResponse response = service.createReservation(request, member.getId());
 
         assertThat(response.name()).isEqualTo(member.getName().name());
@@ -135,7 +135,7 @@ class ReservationServiceTest {
                         MemberRole.MEMBER
                 )
         );
-        ReservationCreateRequest request = new ReservationCreateRequest(today, 999L, 1L);
+        CreateReservationRequest request = new CreateReservationRequest(today, 999L, 1L);
 
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
                 .isInstanceOf(NoSuchElementException.class);
@@ -149,7 +149,7 @@ class ReservationServiceTest {
         Member member = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
         reservationRepository.save(new Reservation(null, member, schedule));
 
-        ReservationCreateRequest request = new ReservationCreateRequest(예약날짜_오늘.date(), time.getId(), theme.getId());
+        CreateReservationRequest request = new CreateReservationRequest(예약날짜_오늘.date(), time.getId(), theme.getId());
 
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
                 .isInstanceOf(NoSuchElementException.class);
@@ -168,7 +168,7 @@ class ReservationServiceTest {
                 null,
                 time
         ));
-        ReservationCreateRequest request = new ReservationCreateRequest(today, reservationTime.getId(), 999L);
+        CreateReservationRequest request = new CreateReservationRequest(today, reservationTime.getId(), 999L);
 
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
                 .isInstanceOf(NoSuchElementException.class);

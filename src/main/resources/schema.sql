@@ -58,6 +58,7 @@ CREATE TABLE reservation_wait
     id   BIGINT       NOT NULL AUTO_INCREMENT,
     schedule_id BIGINT,
     member_id BIGINT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (schedule_id) REFERENCES reservation_schedule (id),
     UNIQUE (schedule_id, member_id),
