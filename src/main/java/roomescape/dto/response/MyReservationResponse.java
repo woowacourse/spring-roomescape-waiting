@@ -7,7 +7,7 @@ import roomescape.entity.Reservation;
 import roomescape.entity.Waiting;
 
 public record MyReservationResponse(
-    Long reservationId,
+    Long id,
     String theme,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
     @JsonFormat(pattern = "HH:mm") LocalTime time,

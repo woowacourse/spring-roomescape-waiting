@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.entity.Member;
+import roomescape.entity.Waiting;
+import roomescape.exception.custom.NotFoundException;
 import roomescape.repository.jpa.JpaReservationRepository;
 import roomescape.repository.jpa.JpaWaitingRepository;
 
@@ -43,5 +45,19 @@ public class MyReservationService {
         return waitingRepository.findByMemberId(member.getId()).stream()
             .map(w -> MyReservationResponse.from(w, String.format("%d번째", w.getRank())))
             .toList();
+    }
+
+    public void removeWaiting(Long id) {
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("waiting"));
+
+        waitingRepository.deleteById(id);
+
+        List<Waiting> remainings = waitingRepository.findByDateAndThemeIdAndTimeId(
+            waiting.getDate(), waiting.getTheme().getId(), waiting.getTime().getId());
+
+        for (Waiting remaining : remainings) {
+            remaining.setRank(remaining.getRank() - 1);
+        }
     }
 }
