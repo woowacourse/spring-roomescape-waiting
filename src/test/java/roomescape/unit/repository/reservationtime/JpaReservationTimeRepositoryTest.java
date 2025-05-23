@@ -9,7 +9,6 @@ import roomescape.repository.reservationtime.JpaReservationTimeRepository;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DataJpaTest
 class JpaReservationTimeRepositoryTest {
