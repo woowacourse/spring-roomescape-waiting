@@ -22,9 +22,6 @@
       - 승인
         1. 예약 생성
         2. 대기 삭제
-    
-
-
 ---
 
 ### API 명세
@@ -321,17 +318,3 @@ Date: Fri, 09 May 2025 17:18:41 GMT
 **name**: 사용자 이름
 
 ---
-
-### 고민한 점
-
-- 예약 대기 구현 방법
-  - Waiting 테이블을 만들지, 
-    - Waiting 테이블 컬럼을 고민
-      - 컬럼으로 Reservation을 가진다 (ManyToOne)
-        - Reservation의 메서드에 접근 가능
-        - Waiting과 Reservation의 생명주기가 다른데 
-      - Reservation과 동일한 컬럼 모두 가지기 (id, name, theme, ReservationTime, member) + 예약 순번 컬럼
-        - 예약처럼 예약 대기를 관리
-  - Reservation에서 순서와 상태 컬럼을 만들지
-    - 대기가 아닌 예약 상태일 경우, 순서와 상태 컬럼은 사실상 같은 의미
-  - 승인과 거절의 method
