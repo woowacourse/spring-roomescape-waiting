@@ -49,10 +49,6 @@ public class WaitingService {
     }
 
     public void deleteWaitingById(final long waitingId, final LoginMember loginMember) {
-        // TODO 고민할 것
-        // 이게 효율적인 방법일까?
-        // 멤버를 또 불러오는게 맞을까?? 아니면 아이디만 쓰기??
-        // 트랜잭션이 필요한가?
         final Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new BadRequestException("id를 찾을 수 없습니다."));
         final Member member = memberRepository.findById(loginMember.id())
