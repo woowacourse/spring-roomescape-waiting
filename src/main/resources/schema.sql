@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS reservation_schedule;
-DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_wait;
+DROP TABLE IF EXISTS reservation;
+DROP TABLE IF EXISTS reservation_schedule;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS member;
 DROP TABLE IF EXISTS theme;
@@ -38,8 +38,9 @@ CREATE TABLE reservation_schedule
     theme_id BIGINT,
     date VARCHAR(255) NOT NULL,
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
-)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    PRIMARY KEY (id)
+);
 
 CREATE TABLE reservation
 (
@@ -48,7 +49,8 @@ CREATE TABLE reservation
     member_id BIGINT,
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (schedule_id) REFERENCES reservation_schedule (id),
-    UNIQUE (schedule_id)
+    UNIQUE (schedule_id),
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE reservation_wait
@@ -58,5 +60,7 @@ CREATE TABLE reservation_wait
     member_id BIGINT,
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (schedule_id) REFERENCES reservation_schedule (id),
-    UNIQUE (schedule_id, member_id)
+    UNIQUE (schedule_id, member_id),
+    PRIMARY KEY (id)
 );
+

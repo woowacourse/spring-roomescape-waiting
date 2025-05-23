@@ -17,8 +17,10 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
                 CASE WHEN COUNT(r.id) > 0 THEN true ELSE false END
             )
             FROM ReservationTime rt
-            LEFT JOIN Reservation r
-                ON r.reservationTime = rt AND r.reservationDate.date = :date AND r.theme.id = :themeId
+            LEFT JOIN ReservationSchedule rs 
+                ON rs.reservationTime = rt AND rs.reservationDate.date = :date AND rs.theme.id = :themeId
+            LEFT JOIN Reservation r 
+                ON r.schedule = rs
             GROUP BY rt
             """)
     List<AvailableReservationTime> findAllAvailableReservationTimes(

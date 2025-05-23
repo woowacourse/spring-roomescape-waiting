@@ -8,12 +8,13 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.reservation.ReservationDateTime;
+import roomescape.domain.reservation.schdule.ReservationDate;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationScheduleRepository;
 import roomescape.repository.ReservationSpecifications;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -29,19 +30,21 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final Clock clock;
+    private final ReservationScheduleRepository reservationScheduleRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository,
-            final Clock clock
-    ) {
+            final Clock clock,
+            final ReservationScheduleRepository reservationScheduleRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.clock = clock;
+        this.reservationScheduleRepository = reservationScheduleRepository;
     }
 
     public List<ReservationResponse> findAllReservations() {
@@ -82,21 +85,22 @@ public class ReservationService {
     ) {
         ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NoSuchElementException("예약 시간을 찾을 수 없습니다."));
-        ReservationDateTime dateTime = new ReservationDateTime(date, time, clock);
-        validateReservationAvailability(dateTime);
-
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버가 존재하지 않습니다."));
-
-        return reservationRepository.save(
-                new Reservation(null, member, dateTime.getReservationDate(), dateTime.getReservationTime(), theme));
+        ReservationSchedule schedule = reservationScheduleRepository.findByReservationTime_IdAndTheme_IdAndReservationDate_Date(
+                time.getId(),
+                theme.getId(),
+                date.date()
+        ).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 일정입니다."));
+        validateReservationAvailability(schedule);
+        Reservation reservation = new Reservation(null, member, schedule);
+        return reservationRepository.save(reservation);
     }
 
-    private void validateReservationAvailability(final ReservationDateTime dateTime) {
-        if (reservationRepository.existsByReservationDateAndReservationTime_Id(dateTime.getReservationDate(),
-                dateTime.getTimeId())) {
+    private void validateReservationAvailability(final ReservationSchedule schedule) {
+        if (reservationRepository.findByScheduleId(schedule.getId()).isPresent()) {
             throw new IllegalStateException("이미 예약이 찼습니다.");
         }
     }

@@ -9,17 +9,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.schdule.ReservationSchedule;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.ReservationTime;
 
 @Entity
-@Table(name = "reservation")
-public class Reservation {
+@Table(name = "reservation_wait")
+public class ReservationWait {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,10 +29,10 @@ public class Reservation {
     @JoinColumn(name = "schedule_id")
     private ReservationSchedule schedule;
 
-    protected Reservation() {
+    protected ReservationWait() {
     }
 
-    public Reservation(
+    public ReservationWait(
             final Long id,
             final Member member,
             final ReservationSchedule schedule
@@ -50,23 +46,4 @@ public class Reservation {
         return id;
     }
 
-    public Member getMember() {
-        return member;
-    }
-
-    public LocalDate getDate() {
-        return schedule.getDate();
-    }
-
-    public ReservationTime getReservationTime() {
-        return schedule.getReservationTime();
-    }
-
-    public LocalTime getStartAt() {
-        return schedule.getStartAt();
-    }
-
-    public Theme getTheme() {
-        return schedule.getTheme();
-    }
 }

@@ -11,16 +11,32 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.RestAssuredTestBase;
+import roomescape.domain.reservation.schdule.ReservationDate;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.ReservationTime;
 import roomescape.integration.api.RestLoginMember;
+import roomescape.integration.fixture.ReservationScheduleDbFixture;
+import roomescape.integration.fixture.ReservationTimeDbFixture;
+import roomescape.integration.fixture.ThemeDbFixture;
 
 class ReservationRestTest extends RestAssuredTestBase {
 
     private static final LocalDate RESERVATION_DATE = LocalDate.now(FIXED_CLOCK).plusDays(1);
-    private static final String THEME_NAME = "어드벤처";
+    private static final String THEME_NAME = "공포";
     private Integer timeId;
     private Integer themeId;
     private RestLoginMember restLoginMember;
+
+    @Autowired
+    private ReservationScheduleDbFixture reservationScheduleDbFixture;
+
+    @Autowired
+    private ReservationTimeDbFixture reservationTimeDbFixture;
+
+    @Autowired
+    private ThemeDbFixture themeDbFixture;
 
     @BeforeEach
     void setUp() {
@@ -47,10 +63,15 @@ class ReservationRestTest extends RestAssuredTestBase {
 
     @Test
     void 예약을_생성한다() {
+        Theme theme = themeDbFixture.공포();
+        ReservationTime time = reservationTimeDbFixture.예약시간_10시();
+        ReservationDate date = new ReservationDate(RESERVATION_DATE);
+        reservationScheduleDbFixture.createSchedule(date, time, theme);
+
         Map<String, Object> request = Map.of(
-                "date", LocalDate.now(FIXED_CLOCK).plusDays(1).toString(),
-                "timeId", timeId,
-                "themeId", themeId
+                "date", date.date().toString(),
+                "timeId", time.getId(),
+                "themeId", theme.getId()
         );
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -61,9 +82,9 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .statusCode(201)
                 .body("id", is(1))
                 .body("name", is("홍길동"))
-                .body("date", is(RESERVATION_DATE.toString()))
-                .body("time.startAt", is("10:00"))
-                .body("theme.name", is("어드벤처"));
+                .body("date", is(date.date().toString()))
+                .body("time.startAt", is(time.getStartAt().toString()))
+                .body("theme.name", is(theme.getName().name()));
     }
 
     @Test
@@ -77,7 +98,7 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .statusCode(200)
                 .body("size()", greaterThan(0))
                 .body("[0].name", is("홍길동"))
-                .body("[0].time.id", is(1))
+                .body("[0].time.id", is(2))
                 .body("[0].time.startAt", is("10:00"))
                 .body("[0].theme.id", is(1))
                 .body("[0].theme.name", is("어드벤처"))

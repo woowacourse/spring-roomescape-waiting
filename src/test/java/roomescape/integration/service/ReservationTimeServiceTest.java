@@ -20,13 +20,15 @@ import roomescape.domain.member.MemberEncodedPassword;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationDateTime;
+import roomescape.domain.reservation.schdule.ReservationDate;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThemeThumbnail;
 import roomescape.domain.time.ReservationTime;
+import roomescape.integration.fixture.ReservationScheduleDbFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -56,6 +58,8 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+    @Autowired
+    private ReservationScheduleDbFixture reservationScheduleDbFixture;
 
     @Test
     void 예약시간을_생성할_수_있다() {
@@ -113,9 +117,8 @@ class ReservationTimeServiceTest {
     void 예약이_존재하는_시간은_삭제할_수_없다() {
         // given
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        ReservationDateTime reservationDateTime = new ReservationDateTime(
-                new ReservationDate(LocalDate.of(2025, 5, 5)), time, FIXED_CLOCK
-        );
+        ReservationDate date = new ReservationDate(LocalDate.of(2025, 5, 5));
+        ReservationDateTime reservationDateTime = new ReservationDateTime(date, time, FIXED_CLOCK);
         Member member = memberRepository.save(new Member(
                 null,
                 new MemberName("한스"),
@@ -129,13 +132,8 @@ class ReservationTimeServiceTest {
                 new ThemeDescription("공포입니다."),
                 new ThemeThumbnail("썸네일")
         ));
-        Reservation reservation = reservationRepository.save(new Reservation(
-                null,
-                member,
-                reservationDateTime.getReservationDate(),
-                reservationDateTime.getReservationTime(),
-                theme
-        ));
+        ReservationSchedule schedule = reservationScheduleDbFixture.createSchedule(date, time, theme);
+        reservationRepository.save(new Reservation(null, member, schedule));
 
         // when & then
         assertThatThrownBy(() -> service.deleteReservationTimeById(time.getId()))

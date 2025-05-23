@@ -3,10 +3,13 @@ package roomescape.service;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.time.AvailableReservationTime;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationScheduleRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.request.AvailableReservationTimeRequest;
 import roomescape.service.request.CreateReservationTimeRequest;
@@ -17,13 +20,15 @@ import roomescape.service.response.ReservationTimeResponse;
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationScheduleRepository reservationScheduleRepository;
 
     public ReservationTimeService(
             final ReservationTimeRepository reservationTimeRepository,
-            final ReservationRepository reservationRepository
-    ) {
+            final ReservationRepository reservationRepository,
+            final ReservationScheduleRepository reservationScheduleRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
+        this.reservationScheduleRepository = reservationScheduleRepository;
     }
 
     public ReservationTimeResponse createReservationTime(final CreateReservationTimeRequest request) {
@@ -41,7 +46,8 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTimeById(final Long id) {
-        if (reservationRepository.existsByReservationTime_Id(id)) {
+        Optional<ReservationSchedule> schedule = reservationScheduleRepository.findByReservationTime_Id(id);
+        if (schedule.isPresent() && reservationRepository.existsByScheduleId(schedule.get().getId())) {
             throw new IllegalArgumentException("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
         ReservationTime reservationTime = getReservationTime(id);

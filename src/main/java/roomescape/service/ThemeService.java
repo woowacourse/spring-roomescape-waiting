@@ -3,14 +3,17 @@ package roomescape.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.theme.DateRange;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThemeThumbnail;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationScheduleRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.request.CreateThemeRequest;
 import roomescape.service.response.ThemeResponse;
@@ -21,19 +24,23 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
     private final Clock clock;
+    private final ReservationScheduleRepository reservationScheduleRepository;
 
     public ThemeService(
-            ThemeRepository themeRepository,
-            ReservationRepository reservationRepository,
-            Clock clock
+            final ThemeRepository themeRepository,
+            final ReservationRepository reservationRepository,
+            final Clock clock,
+            final ReservationScheduleRepository reservationScheduleRepository
     ) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
         this.clock = clock;
+        this.reservationScheduleRepository = reservationScheduleRepository;
     }
 
     public void deleteThemeById(final Long id) {
-        if (reservationRepository.existsByTheme_Id(id)) {
+        Optional<ReservationSchedule> schedule = reservationScheduleRepository.findByTheme_Id(id);
+        if (schedule.isPresent() && reservationRepository.existsByScheduleId(schedule.get().getId())) {
             throw new IllegalStateException("이미 예약이 존재해서 테마를 삭제할 수 없습니다.");
         }
         Theme theme = getTheme(id);
