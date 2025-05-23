@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.schedule.domain.Schedule;
 import roomescape.schedule.respository.ScheduleRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -21,5 +22,9 @@ public class ScheduleService {
 
     public Optional<Schedule> findById(Long id) {
         return scheduleRepository.findById(id);
+    }
+
+    public Optional<Schedule> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+        return scheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 }
