@@ -18,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -250,8 +249,7 @@ class ReservationServiceTest {
                     () -> assertThat(reservationResponse.id()).isEqualTo(expectedReservation.getId()),
                     () -> assertThat(reservationResponse.member().id()).isEqualTo(member.getId()),
                     () -> assertThat(reservationResponse.date()).isEqualTo(creationContent.date()),
-                    () -> assertThat(reservationResponse.theme().id()).isEqualTo(creationContent.themeId()),
-                    () -> assertThat(reservationResponse.bookState()).isEqualTo(ReservationStatus.BOOKED.toString())
+                    () -> assertThat(reservationResponse.theme().id()).isEqualTo(creationContent.themeId())
             );
         }
 

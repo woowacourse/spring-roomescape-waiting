@@ -12,6 +12,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationStatusResponse;
 import roomescape.exception.local.DuplicateReservationException;
 import roomescape.exception.local.NotFoundMemberException;
 import roomescape.exception.local.NotFoundReservationException;
@@ -59,6 +60,13 @@ public class ReservationService {
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
+    }
+
+    public List<ReservationStatusResponse> findAllReservationStatusByMember(long memberId) {
+        Member savedMember = getMemberById(memberId);
+        List<Reservation> reservations = reservationRepository.findByMember(savedMember);
+        List<Waiting> waitings = waitingRepository.findByMember(savedMember);
+        return ReservationStatusResponse.createWithReservationAndWaiting(reservations, waitings);
     }
 
     public List<ReservationResponse> findReservationsByFilter(

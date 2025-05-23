@@ -16,6 +16,7 @@ import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.request.ReservationCreationRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationStatusResponse;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -54,10 +55,10 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/mine")
-    public List<ReservationResponse> findAllReservationsByMember(
+    @GetMapping("/state")
+    public List<ReservationStatusResponse> findAllReservationStateByMember(
             @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
-        return reservationService.findAllReservationsByMember(accessTokenContent.id());
+        return reservationService.findAllReservationStatusByMember(accessTokenContent.id());
     }
 }
