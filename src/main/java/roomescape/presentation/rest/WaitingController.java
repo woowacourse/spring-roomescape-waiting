@@ -33,8 +33,6 @@ public class WaitingController {
     public WaitingResponse createWaiting(
             @Authenticated final User user, @RequestBody @Valid final CreateWaitingRequest request
     ) {
-
-        System.out.println(request);
         Waiting waiting = service.saveWaiting(user, request.date(), request.timeId(), request.themeId());
         return WaitingResponse.from(waiting);
     }
