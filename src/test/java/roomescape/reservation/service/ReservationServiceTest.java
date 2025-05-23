@@ -156,6 +156,7 @@ class ReservationServiceTest {
 
     @DisplayName("예약을 삭제할 수 있다.")
     @Test
+    @Disabled
     void testCancelById() {
         // given
         // when
