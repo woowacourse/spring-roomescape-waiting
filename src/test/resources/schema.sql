@@ -1,4 +1,5 @@
 DROP TABLE reservation IF EXISTS;
+DROP TABLE waiting IF EXISTS;
 DROP TABLE member IF EXISTS;
 DROP TABLE theme IF EXISTS;
 DROP TABLE reservation_time IF EXISTS;
