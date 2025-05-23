@@ -43,6 +43,7 @@ public class Waiting {
 
     public Waiting(final Member member, final Theme theme, final ReservationTime time,
                    final LocalDate date) {
+        validateDate(date);
         this.member = member;
         this.theme = theme;
         this.time = time;
@@ -72,5 +73,16 @@ public class Waiting {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    private void validateDate(final LocalDate date) {
+        if(date == null) {
+            throw new IllegalArgumentException("date 필드가 null 입니다.");
+        }
+    }
+
+    public boolean isPast() {
+        LocalDate today = LocalDate.now();
+        return date.isBefore(today) || (date.isEqual(today) && time.isPast());
     }
 }
