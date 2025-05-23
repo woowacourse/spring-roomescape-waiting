@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import java.time.LocalDate;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +18,7 @@ import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.User;
 import roomescape.waiting.domain.dto.WaitingRequestDto;
 import roomescape.waiting.domain.dto.WaitingResponseDto;
+import roomescape.waiting.exception.NotFoundWaitingException;
 import roomescape.waiting.fixture.WaitingFixture;
 
 @DataJpaTest
@@ -68,6 +70,43 @@ class WaitingServiceTest {
                 softly.assertThat(responseDto.time().id()).isEqualTo(requestDto.timeId());
                 softly.assertThat(responseDto.theme().id()).isEqualTo(requestDto.themeId());
             });
+        }
+    }
+
+    @Nested
+    @DisplayName("예약 대기 삭제 기능")
+    class deleteById {
+
+        @DisplayName("존재하는 예약 대기 id 요청했을 때 삭제 가능하다")
+        @Test
+        void deleteById_success_byExistingWaitingId() {
+            // given
+            WaitingRequestDto requestDto = WaitingFixture.createReqDto(
+                    LocalDate.now().plusDays(2),
+                    savedTime.getId(),
+                    savedTheme.getId());
+
+            WaitingResponseDto waitingResponseDto = waitingService.create(requestDto, savedMember);
+
+            // before then
+            Assertions.assertThat(waitingService.findAll()).hasSize(1);
+
+            // when
+            waitingService.delete(waitingResponseDto.id());
+
+            // then
+            Assertions.assertThat(waitingService.findAll()).hasSize(0);
+        }
+
+        @DisplayName("존재하지 않는 예약 대기 id로 삭제 요청했을 때 예외가 발생한다 : NotFoundWaitingException")
+        @Test
+        void deleteById_throwException_byNonExistingWaitingId() {
+            // given
+            // when
+            // then
+            Assertions.assertThatThrownBy(
+                    () -> waitingService.delete(Long.MAX_VALUE)
+            ).isInstanceOf(NotFoundWaitingException.class);
         }
     }
 }

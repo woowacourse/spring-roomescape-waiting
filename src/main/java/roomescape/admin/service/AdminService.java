@@ -58,4 +58,9 @@ public class AdminService {
                 adminReservationRequestDto.timeId(),
                 adminReservationRequestDto.themeId());
     }
+
+    @Transactional
+    public void deleteWaitingById(Long waitingId) {
+        waitingService.delete(waitingId);
+    }
 }

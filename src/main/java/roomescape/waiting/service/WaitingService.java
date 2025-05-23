@@ -9,10 +9,10 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.NotFoundThemeException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.user.domain.User;
-import roomescape.user.repository.UserRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.dto.WaitingRequestDto;
 import roomescape.waiting.domain.dto.WaitingResponseDto;
+import roomescape.waiting.exception.NotFoundWaitingException;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
@@ -21,15 +21,13 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final UserRepository userRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
                           ReservationTimeRepository reservationTimeRepository,
-                          ThemeRepository themeRepository, UserRepository userRepository) {
+                          ThemeRepository themeRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.userRepository = userRepository;
     }
 
     public WaitingResponseDto create(WaitingRequestDto requestDto, User member) {
@@ -54,5 +52,15 @@ public class WaitingService {
 
     private static WaitingResponseDto convertWaitingResponseDto(Waiting savedWaiting) {
         return WaitingResponseDto.of(savedWaiting);
+    }
+
+    public void delete(Long waitingId) {
+        findByIdOrThrow(waitingId);
+        waitingRepository.deleteById(waitingId);
+    }
+
+    private void findByIdOrThrow(Long waitingId) {
+        waitingRepository.findById(waitingId)
+                .orElseThrow(NotFoundWaitingException::new);
     }
 }
