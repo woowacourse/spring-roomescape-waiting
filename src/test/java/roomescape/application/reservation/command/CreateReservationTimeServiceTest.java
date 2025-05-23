@@ -67,6 +67,6 @@ class CreateReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         // then
         assertThatCode(() -> createReservationTimeService.register(createReservationTimeCommand))
                 .isInstanceOf(ReservationTimeException.class)
-                .hasMessage("이미 존재하는 얘약시간입니다.");
+                .hasMessage("이미 존재하는 예약시간입니다.");
     }
 }

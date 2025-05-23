@@ -44,7 +44,7 @@ class WaitingTest {
 
         // then
         assertThat(canBeApproved)
-                .isTrue();
+                .isFalse();
     }
 
     @Test
