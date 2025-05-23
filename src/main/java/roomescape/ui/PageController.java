@@ -50,6 +50,6 @@ public class PageController {
 
     @GetMapping("/admin/waiting")
     public String getAdminWaitingPage() {
-        return "waiting";
+        return "admin/waiting";
     }
 }
