@@ -42,6 +42,12 @@ public class ReservationController {
         return ResponseEntity.ok(myReservations);
     }
 
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationResponseDto>> getReservationWaitings() {
+        List<ReservationResponseDto> reservationWaitings = reservationService.findAllReservationWaitings();
+        return ResponseEntity.ok().body(reservationWaitings);
+    }
+
     @PostMapping
     public ResponseEntity<ReservationResponseDto> addReservation(
             @CurrentMember LoginInfo loginInfo,

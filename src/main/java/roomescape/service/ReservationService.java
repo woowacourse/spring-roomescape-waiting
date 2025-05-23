@@ -9,6 +9,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWaitingRank;
 import roomescape.domain.reservation.ReservationWaitingTicket;
 import roomescape.dto.auth.LoginInfo;
@@ -62,11 +63,7 @@ public class ReservationService {
         Reservation requestReservation = Reservation.createWithoutId(member, dto.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
 
-        return ReservationResponseDto.of(
-                newReservation,
-                newReservation.getTime(),
-                theme
-        );
+        return ReservationResponseDto.of(newReservation);
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId) {
@@ -103,11 +100,7 @@ public class ReservationService {
         Reservation requestReservation = Reservation.createWaitingWithoutId(member, createDto.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
         waitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
-        return ReservationResponseDto.of(
-                newReservation,
-                reservationTime,
-                theme
-        );
+        return ReservationResponseDto.of(newReservation);
     }
 
     @Transactional(readOnly = true)
@@ -115,8 +108,7 @@ public class ReservationService {
         List<Reservation> allReservations = reservationRepository.findAll();
 
         return allReservations.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
-                        reservation.getTheme()))
+                .map(ReservationResponseDto::of)
                 .toList();
     }
 
@@ -126,8 +118,7 @@ public class ReservationService {
         List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(
                 from, to, themeId, memberId);
         return reservationsByPeriodAndMemberAndTheme.stream()
-                .map(reservation -> ReservationResponseDto.of(reservation, reservation.getTime(),
-                        reservation.getTheme()))
+                .map(ReservationResponseDto::of)
                 .toList();
     }
 
@@ -150,6 +141,12 @@ public class ReservationService {
             }
             return new MyReservationResponseDto(reservation);
         }).toList();
+    }
+
+    public List<ReservationResponseDto> findAllReservationWaitings() {
+        return reservationRepository.findReservationsByStatus(ReservationStatus.WAITING).stream()
+                .map(ReservationResponseDto::of)
+                .toList();
     }
 
     public void deleteReservation(Long id) {

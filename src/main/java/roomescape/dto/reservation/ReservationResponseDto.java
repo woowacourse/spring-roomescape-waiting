@@ -18,10 +18,10 @@ public record ReservationResponseDto(
         String status
 ) {
 
-    public static ReservationResponseDto of(Reservation reservation, ReservationTime reservationTime, Theme theme) {
+    public static ReservationResponseDto of(Reservation reservation) {
         MemberNameResponseDto memberResponseDto = new MemberNameResponseDto(reservation.getMember().getName());
-        ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.from(reservationTime);
-        ThemeResponseDto themeResponseDto = ThemeResponseDto.from(theme);
+        ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.from(reservation.getTime());
+        ThemeResponseDto themeResponseDto = ThemeResponseDto.from(reservation.getTheme());
 
         return new ReservationResponseDto(
                 reservation.getId(),
