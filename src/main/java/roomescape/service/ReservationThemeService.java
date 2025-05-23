@@ -1,17 +1,18 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTheme;
+import roomescape.domain.ReservationThemeRepository;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
-import roomescape.domain.ReservationThemeRepository;
 
 @Service
 public class ReservationThemeService {
 
-    public static final int DELETE_FAILED_COUNT = 0;
     private final ReservationThemeRepository reservationThemeRepository;
 
     public ReservationThemeService(
@@ -25,7 +26,11 @@ public class ReservationThemeService {
     }
 
     public List<ReservationThemeResponse> findPopularThemes() {
-        List<ReservationTheme> popularReservationThemes = reservationThemeRepository.findWeeklyThemeOrderByCountDesc();
+        List<ReservationTheme> popularReservationThemes = reservationThemeRepository.findWeeklyThemeOrderByCountDesc(
+                10,
+                LocalDate.now().minusDays(7),
+                LocalDate.now().minusDays(1)
+        );
         return popularReservationThemes.stream().map(ReservationThemeResponse::from).toList();
     }
 
@@ -41,13 +46,17 @@ public class ReservationThemeService {
     }
 
     public void removeReservationTheme(final long id) {
-        reservationThemeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+        final ReservationTheme theme = getThemeById(id);
         try {
-            reservationThemeRepository.deleteById(id);
+            reservationThemeRepository.deleteById(theme.getId());
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("예약이 존재해 테마를 삭제할 수 없습니다.");
+            throw new IllegalArgumentException("[ERROR] 예약이 존재해 테마를 삭제할 수 없습니다.");
         }
+    }
+
+    public ReservationTheme getThemeById(long id) {
+        return reservationThemeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마입니다."));
     }
 
     private void validateUniqueThemes(final ReservationTheme reservationTheme) {

@@ -76,7 +76,7 @@ public class ReservationRepositoryTest {
         theme = reservationThemeRepository.save(
                 new ReservationTheme("Theme", "Description", "Thumbnail")
         );
-        reservation = reservationRepository.saveWithMember(
+        reservation = reservationRepository.save(
                 new Reservation(member, LocalDate.now().plusDays(1), time, theme)
         );
     }

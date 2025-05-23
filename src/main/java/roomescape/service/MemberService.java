@@ -2,13 +2,14 @@ package roomescape.service;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
+import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
-import roomescape.domain.MemberRepository;
 
 @Service
 public class MemberService {
@@ -38,7 +39,13 @@ public class MemberService {
     }
 
     public Member getMemberById(final long id) {
-        return memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("[ERROR] 사용자가 존재하지 않습니다."));
+        return memberRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 사용자가 존재하지 않습니다."));
+    }
+
+    public Member getMemberByEmail(final String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 사용자가 존재하지 않습니다."));
     }
 
     private void validateDuplicateEmail(final String email) {

@@ -1,24 +1,20 @@
 package roomescape.service;
 
 import java.util.Base64;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequest;
-import roomescape.domain.MemberRepository;
 
-
+@RequiredArgsConstructor
 @Service
 public class AuthService {
 
-    private final MemberRepository memberRepository;
-
-    public AuthService(final MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
+    private final MemberService memberService;
 
     public Long authenticate(final LoginRequest loginRequest) {
-        final Member member = memberRepository.findByEmail(loginRequest.email())
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 사용자를 찾을 수 없습니다."));
+        final Member member = memberService.getMemberByEmail(loginRequest.email());
+
         if (!matches(loginRequest.password(), member.getPassword())) {
             throw new IllegalArgumentException("[ERROR] 비밀번호가 일치 하지않습니다.");
         }
@@ -26,8 +22,8 @@ public class AuthService {
     }
 
     public void updateSessionIdByMemberId(final Long memberId, final String sessionId) {
-        final Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("[ERROR] 사용자를 찾을 수 없습니다."));
+        final Member member = memberService.getMemberById(memberId);
+
         member.updateSessionId(sessionId);
     }
 

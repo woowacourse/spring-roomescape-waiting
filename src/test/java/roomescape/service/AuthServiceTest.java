@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.JpaConfig;
 import roomescape.domain.Member;
+import roomescape.domain.MemberRepository;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
-import roomescape.domain.MemberRepository;
 import roomescape.repository.impl.MemberRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
 
@@ -38,8 +39,8 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
-        authService = new AuthService(memberRepository);
         memberService = new MemberService(memberRepository);
+        authService = new AuthService(memberService);
     }
 
     @Test
@@ -67,7 +68,7 @@ class AuthServiceTest {
 
         // when, then
         assertThatThrownBy(() -> authService.authenticate(loginRequest))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

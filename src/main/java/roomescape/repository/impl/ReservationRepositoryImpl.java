@@ -28,7 +28,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Reservation saveWithMember(final Reservation reservation) {
+    public Reservation save(final Reservation reservation) {
         return reservationJpaRepository.save(reservation);
     }
 

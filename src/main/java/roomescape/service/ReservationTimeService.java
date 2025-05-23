@@ -2,12 +2,13 @@ package roomescape.service;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.domain.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
@@ -28,13 +29,17 @@ public class ReservationTimeService {
     }
 
     public void removeReservationTime(final long id) {
-        reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하는 시간이 없습니다."));
+        final ReservationTime reservationTime = getReservationTimeById(id);
         try {
-            reservationTimeRepository.deleteById(id);
+            reservationTimeRepository.deleteById(reservationTime.getId());
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("이미 예약이 존재해 시간을 삭제할 수 없습니다.");
+            throw new IllegalArgumentException("[ERROR] 이미 예약이 존재해 시간을 삭제할 수 없습니다.");
         }
+    }
+
+    public ReservationTime getReservationTimeById(long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하는 시간이 없습니다."));
     }
 
     public List<ReservationTimeResponse> findReservationTimes() {

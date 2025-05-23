@@ -28,12 +28,8 @@ public class ReservationThemeRepositoryImpl implements ReservationThemeRepositor
     }
 
     @Override
-    public List<ReservationTheme> findWeeklyThemeOrderByCountDesc() {
-        return reservationThemeJpaRepository.findPopularThemesByRankAndDuration(
-                10,
-                LocalDate.now().minusDays(7),
-                LocalDate.now().minusDays(1)
-        );
+    public List<ReservationTheme> findWeeklyThemeOrderByCountDesc(int amount, LocalDate dateFrom, LocalDate dateTo) {
+        return reservationThemeJpaRepository.findPopularThemesByRankAndDuration(amount, dateFrom, dateTo);
     }
 
     @Override

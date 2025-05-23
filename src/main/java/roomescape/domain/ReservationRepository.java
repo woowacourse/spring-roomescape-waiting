@@ -10,7 +10,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAllReservations();
 
-    Reservation saveWithMember(final Reservation reservation);
+    Reservation save(final Reservation reservation);
 
     void deleteById(final long id);
 

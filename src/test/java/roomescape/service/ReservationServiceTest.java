@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.MemberRegisterRequest;
-import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationResponse;
@@ -65,17 +65,18 @@ class ReservationServiceTest {
         twoDaysLater = LocalDate.now().plusDays(2);
         threeDaysLater = LocalDate.now().plusDays(3);
 
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(tomorrow, themeId1, timeId), memberId1);
-
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(twoDaysLater, themeId2, timeId), memberId1);
-
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(twoDaysLater, themeId1, timeId), memberId2);
-
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(threeDaysLater, themeId2, timeId), memberId2);
+        reservationService.addReservation(
+                new CreateReservationRequest(memberId1, tomorrow, themeId1, timeId)
+        );
+        reservationService.addReservation(
+                new CreateReservationRequest(memberId1, twoDaysLater, themeId2, timeId)
+        );
+        reservationService.addReservation(
+                new CreateReservationRequest(memberId2, twoDaysLater, themeId1, timeId)
+        );
+        reservationService.addReservation(
+                new CreateReservationRequest(memberId2, threeDaysLater, themeId2, timeId)
+        );
     }
 
     @Test
@@ -86,15 +87,15 @@ class ReservationServiceTest {
         Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
         Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("new Theme", "new Description", "new Thumbnail")).id();
 
-        ReservationRequest reservationRequest = new ReservationRequest(
+        final CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+                memberId,
                 LocalDate.now().plusDays(1),
                 themeId,
                 timeId
         );
 
         // when
-        ReservationResponse reservationResponse = reservationService.addReservationWithMemberId(reservationRequest,
-                memberId);
+        ReservationResponse reservationResponse = reservationService.addReservation(createReservationRequest);
 
         // then
         assertAll(
@@ -111,13 +112,15 @@ class ReservationServiceTest {
         Long nonExistTimeId = 999L;
         Long nonExistThemeId = 999L;
 
-        ReservationRequest reservationRequest1 = new ReservationRequest(
+        final CreateReservationRequest createReservationRequest1 = new CreateReservationRequest(
+                memberId1,
                 LocalDate.now().plusDays(1),
                 nonExistThemeId,
                 timeId
         );
 
-        ReservationRequest reservationRequest2 = new ReservationRequest(
+        final CreateReservationRequest createReservationRequest2 = new CreateReservationRequest(
+                memberId1,
                 LocalDate.now().plusDays(1),
                 themeId1,
                 nonExistTimeId
@@ -126,10 +129,10 @@ class ReservationServiceTest {
         // when, then
         assertAll(
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest1, memberId1)
+                        () -> reservationService.addReservation(createReservationRequest1)
                 ).isInstanceOf(NoSuchElementException.class),
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest2, memberId1)
+                        () -> reservationService.addReservation(createReservationRequest2)
                 ).isInstanceOf(NoSuchElementException.class)
         );
     }
@@ -138,13 +141,15 @@ class ReservationServiceTest {
     @DisplayName("미래가 아닌 날짜로 예약 시도 시 예외 발생")
     void createReservationTest3() {
         // given
-        ReservationRequest reservationRequest1 = new ReservationRequest(
+        final CreateReservationRequest createReservationRequest1 = new CreateReservationRequest(
+                memberId1,
                 LocalDate.now(),
                 themeId1,
                 timeId
         );
 
-        ReservationRequest reservationRequest2 = new ReservationRequest(
+        final CreateReservationRequest createReservationRequest2 = new CreateReservationRequest(
+                memberId1,
                 LocalDate.now().minusDays(1),
                 themeId1,
                 timeId
@@ -153,10 +158,10 @@ class ReservationServiceTest {
         // when, then
         assertAll(
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest1, memberId1)
+                        () -> reservationService.addReservation(createReservationRequest1)
                 ).isInstanceOf(IllegalArgumentException.class),
                 () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest2, memberId1)
+                        () -> reservationService.addReservation(createReservationRequest2)
                 ).isInstanceOf(IllegalArgumentException.class)
         );
     }
@@ -166,14 +171,15 @@ class ReservationServiceTest {
     @Test
     void duplicateTest() {
         // given
-        ReservationRequest reservationRequest = new ReservationRequest(
+        final CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+                memberId1,
                 tomorrow,
                 themeId1,
                 timeId
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationService.addReservationWithMemberId(reservationRequest, memberId1))
+        assertThatThrownBy(() -> reservationService.addReservation(createReservationRequest))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,7 +8,7 @@ public interface ReservationThemeRepository {
 
     Optional<ReservationTheme> findById(final Long id);
 
-    List<ReservationTheme> findWeeklyThemeOrderByCountDesc();
+    List<ReservationTheme> findWeeklyThemeOrderByCountDesc(int amount, LocalDate dateFrom, LocalDate dateTo);
 
     List<ReservationTheme> findAll();
 

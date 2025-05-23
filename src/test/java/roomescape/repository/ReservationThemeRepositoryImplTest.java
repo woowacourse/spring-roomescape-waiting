@@ -4,10 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,18 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.JpaConfig;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationThemeRepository;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeRepository;
+import roomescape.repository.impl.ReservationRepositoryImpl;
 import roomescape.repository.impl.ReservationThemeRepositoryImpl;
+import roomescape.repository.impl.ReservationTimeRepositoryImpl;
+import roomescape.repository.jpa.ReservationJpaRepository;
 import roomescape.repository.jpa.ReservationThemeJpaRepository;
+import roomescape.repository.jpa.ReservationTimeJpaRepository;
 
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",
@@ -32,30 +41,42 @@ class ReservationThemeRepositoryImplTest {
 
     @Autowired
     private ReservationThemeJpaRepository reservationThemeJpaRepository;
+    @Autowired
+    private ReservationJpaRepository reservationJpaRepository;
+    @Autowired
+    private ReservationTimeJpaRepository reservationTimeJpaRepository;
 
-    private ReservationTheme savedTheme;
+    private ReservationTheme savedTheme1;
+    private ReservationTheme savedTheme2;
+    private ReservationTheme savedTheme3;
+
 
     @BeforeEach
     void setUp() {
         repository = new ReservationThemeRepositoryImpl(reservationThemeJpaRepository);
 
-        ReservationTheme theme = new ReservationTheme("Theme 1", "Description", "Thumbnail");
-        savedTheme = repository.save(theme);
+        ReservationTheme theme1 = new ReservationTheme("Theme 1", "Description", "Thumbnail");
+        ReservationTheme theme2 = new ReservationTheme("Theme 2", "Description", "Thumbnail");
+        ReservationTheme theme3 = new ReservationTheme("Theme 3", "Description", "Thumbnail");
+
+        savedTheme1 = repository.save(theme1);
+        savedTheme2 = repository.save(theme2);
+        savedTheme3 = repository.save(theme3);
     }
 
     @DisplayName("id로 테마 데이터를 성공적으로 가져온다.")
     @Test
     void findById() {
         //when
-        final Optional<ReservationTheme> theme = repository.findById(savedTheme.getId());
+        final Optional<ReservationTheme> theme = repository.findById(savedTheme1.getId());
 
         //then
         assertAll(
                 () -> assertThat(theme).isPresent(),
-                () -> assertThat(theme.get().getId()).isEqualTo(savedTheme.getId()),
-                () -> assertThat(theme.get().getName()).isEqualTo(savedTheme.getName()),
-                () -> assertThat(theme.get().getDescription()).isEqualTo(savedTheme.getDescription()),
-                () -> assertThat(theme.get().getThumbnail()).isEqualTo(savedTheme.getThumbnail())
+                () -> assertThat(theme.get().getId()).isEqualTo(savedTheme1.getId()),
+                () -> assertThat(theme.get().getName()).isEqualTo(savedTheme1.getName()),
+                () -> assertThat(theme.get().getDescription()).isEqualTo(savedTheme1.getDescription()),
+                () -> assertThat(theme.get().getThumbnail()).isEqualTo(savedTheme1.getThumbnail())
         );
     }
 
@@ -68,21 +89,34 @@ class ReservationThemeRepositoryImplTest {
         //then
         assertAll(
                 () -> assertThat(themes).isNotEmpty(),
-                () -> assertThat(themes).hasSize(1),
-                () -> assertThat(themes.get(0).getId()).isEqualTo(savedTheme.getId()),
-                () -> assertThat(themes.get(0).getName()).isEqualTo(savedTheme.getName())
+                () -> assertThat(themes).hasSize(3),
+                () -> assertThat(themes.get(0).getId()).isEqualTo(savedTheme1.getId()),
+                () -> assertThat(themes.get(0).getName()).isEqualTo(savedTheme1.getName())
         );
     }
 
-    @Disabled // TODO: findWeeklyThemeOrderByCountDesc를 파라미터를 넣을 수 있게 만든 뒤 테스트
     @DisplayName("주간 인기테마를 성공적으로 가져온다.")
     @Test
     void findWeeklyThemeOrderByCountDesc() {
-        //when
-        final List<ReservationTheme> weeklyThemeOrderByCountDesc = repository.findWeeklyThemeOrderByCountDesc();
+        // given
+        saveDummyReservation();
 
-        //then
-        assertThat(weeklyThemeOrderByCountDesc).hasSizeLessThanOrEqualTo(10);
+        // when
+        final List<ReservationTheme> weeklyThemeOrderByCountDesc = repository.findWeeklyThemeOrderByCountDesc(
+                2,
+                LocalDate.now(),
+                LocalDate.now().plusDays(1)
+        );
+
+        // then
+        assertAll(
+                () -> assertThat(weeklyThemeOrderByCountDesc).hasSize(2),
+                () -> assertThat(
+                        weeklyThemeOrderByCountDesc.stream()
+                                .map(ReservationTheme::getName)
+                                .toList()
+                ).containsExactly(savedTheme1.getName(), savedTheme2.getName())
+        );
     }
 
     @DisplayName("테마를 성공적으로 저장한다.")
@@ -107,7 +141,7 @@ class ReservationThemeRepositoryImplTest {
     @Test
     void deleteById() {
         //given
-        Long themeId = savedTheme.getId();
+        Long themeId = savedTheme1.getId();
 
         //when & then
         assertAll(
@@ -120,12 +154,32 @@ class ReservationThemeRepositoryImplTest {
     @Test
     void existsByName() {
         //given
-        String themeName = savedTheme.getName();
+        String themeName = savedTheme1.getName();
 
         //when
         final boolean expected = repository.existsByName(themeName);
 
         //then
         assertThat(expected).isTrue();
+    }
+
+    private void saveDummyReservation() {
+        ReservationTimeRepository reservationTimeRepository = new ReservationTimeRepositoryImpl(reservationTimeJpaRepository);
+        ReservationRepository reservationRepository = new ReservationRepositoryImpl(reservationJpaRepository);
+
+        final ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(1)));
+        final ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(2)));
+        final ReservationTime reservationTime3 = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(3)));
+
+        reservationRepository.save(new Reservation(null, LocalDate.now(), reservationTime1, savedTheme1));
+        reservationRepository.save(new Reservation(null, LocalDate.now(), reservationTime2, savedTheme1));
+        reservationRepository.save(new Reservation(null, LocalDate.now(), reservationTime3, savedTheme1));
+
+        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), reservationTime1, savedTheme2));
+        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), reservationTime2, savedTheme2));
+
+        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(2), reservationTime1, savedTheme3));
+        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(2), reservationTime2, savedTheme3));
+        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(2), reservationTime3, savedTheme3));
     }
 }

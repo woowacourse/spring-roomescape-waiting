@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.request.ReservationTimeRequest;
@@ -92,7 +93,7 @@ class ReservationThemeServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationThemeService.removeReservationTheme(id))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
 
     }
 
@@ -118,8 +119,8 @@ class ReservationThemeServiceTest {
                 new ReservationThemeRequest("test", "test", "test"));
         final ReservationTimeResponse time = reservationTimeService.addReservationTime(
                 new ReservationTimeRequest(LocalTime.now()));
-        final ReservationResponse reservation = reservationService.addReservationForAdmin(
-                new AdminReservationRequest(member.id(), LocalDate.now().plusDays(1), theme.id(), time.id())
+        final ReservationResponse reservation = reservationService.addReservation(
+                new CreateReservationRequest(member.id(), LocalDate.now().plusDays(1), theme.id(), time.id())
         );
 
         // when, then
