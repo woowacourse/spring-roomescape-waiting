@@ -25,6 +25,7 @@ import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
+import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
 
@@ -38,6 +39,8 @@ class ReservationServiceTest {
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private ThemeRepository themeRepository;
@@ -46,7 +49,8 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReservationService(reservationRepository, timeSlotRepository, themeRepository, userRepository);
+        service = new ReservationService(reservationRepository, waitingRepository, timeSlotRepository, themeRepository,
+                userRepository);
         userRepository.save(JUNK_USER);
         themeRepository.save(JUNK_THEME);
         timeSlotRepository.save(JUNK_TIME_SLOT);
