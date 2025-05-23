@@ -7,70 +7,53 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.NoSuchElementException;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.AccountRepository;
-import roomescape.member.repository.FakeAccountRepository;
-import roomescape.member.repository.FakeMemberRepository;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.usecase.MemberQueryUseCase;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.repository.FakeReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.theme.repository.FakeThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.usecase.ThemeQueryUseCase;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.FakeReservationTimeRepository;
 import roomescape.time.repository.ReservationTimeRepository;
-import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
 
+@SpringBootTest
+@Transactional
 class ReservationCommandUseCaseTest {
 
+    @Autowired
     private ReservationCommandUseCase reservationCommandUseCase;
+    
+    @Autowired
     private ReservationRepository reservationRepository;
+    
+    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
+    
+    @Autowired
     private ThemeRepository themeRepository;
+    
+    @Autowired
     private MemberRepository memberRepository;
-    private AccountRepository accountRepository;
-
-    @BeforeEach
-    void setUp() {
-        reservationRepository = new FakeReservationRepository();
-        reservationTimeRepository = new FakeReservationTimeRepository();
-        themeRepository = new FakeThemeRepository();
-        memberRepository = new FakeMemberRepository();
-        accountRepository = new FakeAccountRepository();
-
-        reservationCommandUseCase = new ReservationCommandUseCase(
-                reservationRepository,
-                new ReservationQueryUseCase(reservationRepository,
-                        new ReservationTimeQueryUseCase(reservationTimeRepository)),
-                new ReservationTimeQueryUseCase(reservationTimeRepository),
-                new ThemeQueryUseCase(themeRepository, new ReservationQueryUseCase(reservationRepository,
-                        new ReservationTimeQueryUseCase(reservationTimeRepository))),
-                new MemberQueryUseCase(memberRepository, accountRepository)
-        );
-    }
 
     @Test
     @DisplayName("예약을 생성할 수 있다")
     void createAndFindReservation() {
         // given
-
         final ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.of(12, 27)));
 
@@ -138,7 +121,7 @@ class ReservationCommandUseCaseTest {
                         theme.getId()
                 ));
 
-        // When & Then
+        // when & then
         assertThatThrownBy(() -> reservationCommandUseCase.create(
                 new CreateReservationServiceRequest(
                         member.getId(),
@@ -153,21 +136,20 @@ class ReservationCommandUseCaseTest {
     @DisplayName("예약을 삭제할 수 있다")
     void deleteReservation() {
         // given
-        final Theme theme = Theme.withId(
-                1L,
+        final Theme theme = themeRepository.save(Theme.withoutId(
                 ThemeName.from("공포"),
                 ThemeDescription.from("지구별 방탈출 최고"),
-                ThemeThumbnail.from("www.making.com"));
+                ThemeThumbnail.from("www.making.com")));
 
-        final Member member = Member.withId(
-                1L,
-                MemberName.from("강산"),
-                MemberEmail.from("123@gmail.com"),
-                Role.MEMBER);
+        final Member member = memberRepository.save(
+                Member.withoutId(
+                        MemberName.from("강산"),
+                        MemberEmail.from("123@gmail.com"),
+                        Role.MEMBER
+                ));
 
-        final ReservationTime reservationTime = ReservationTime.withId(
-                1L,
-                LocalTime.of(12, 27));
+        final ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(LocalTime.of(12, 27)));
 
         final Reservation reservation = reservationRepository.save(
                 Reservation.withoutId(
@@ -187,10 +169,10 @@ class ReservationCommandUseCaseTest {
     @Test
     @DisplayName("존재하지 않는 예약을 삭제하려 하면 예외가 발생한다")
     void deleteNonExistentReservation() {
-        // Given
+        // given
         final Long id = 1000L;
 
-        // When & Then
+        // when & then
         assertThatThrownBy(() -> reservationCommandUseCase.delete(id))
                 .isInstanceOf(NotFoundException.class);
     }
