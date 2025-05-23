@@ -15,7 +15,6 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
@@ -53,23 +52,23 @@ class JpaReservationRepositoryTest {
         reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme());
         reservationRepository.save(
-                new Reservation(member, futureDate, reservationTime, theme, ReservationStatus.RESERVED));
+                new Reservation(member, futureDate, reservationTime, theme));
     }
 
     @Test
-    void findByThemeIdAndMemberIdAndDateBetween() {
+    void findByThemeIdAndDateBetweenAndWaitingsMemberId() {
         Theme theme2 = themeRepository.save(Theme.of("논리", "셜록 논리 게임 with Vector", "image.png"));
 
         ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
         reservationTime2 = reservationTimeRepository.save(reservationTime2);
 
-        Reservation reservation2 = new Reservation(member, futureDate, reservationTime2, theme2,
-                ReservationStatus.RESERVED);
+        Reservation reservation2 = new Reservation(member, futureDate, reservationTime2, theme2);
         reservationRepository.save(reservation2);
 
-        List<Reservation> filteredReservations = reservationRepository.findByThemeIdAndMemberIdAndDateBetween(theme.getId(),
-                member.getId(), futureDate,
-                futureDate.plusDays(1));
+        List<Reservation> filteredReservations = reservationRepository.findByThemeIdAndDateBetweenAndWaitingMemberId(
+                theme.getId(),
+                futureDate, futureDate.plusDays(1), member.getId()
+        );
 
         assertThat(filteredReservations.size()).isEqualTo(1);
     }
@@ -105,9 +104,9 @@ class JpaReservationRepositoryTest {
                 ReservationTime.withUnassignedId(LocalTime.of(12, 0)));
 
         reservationRepository.save(
-                new Reservation(member, futureDate, reservationTime2, theme, ReservationStatus.RESERVED));
+                new Reservation(member, futureDate, reservationTime2, theme));
         reservationRepository.save(
-                new Reservation(member, futureDate, reservationTime3, theme, ReservationStatus.RESERVED));
+                new Reservation(member, futureDate, reservationTime3, theme));
 
         List<AvailableReservationTimeResponse> bookedTimesByDateAndThemeId = reservationRepository.findBookedTimesByDateAndThemeId(
                 futureDate, theme.getId());
@@ -116,12 +115,12 @@ class JpaReservationRepositoryTest {
     }
 
     @Test
-    void findMemberById() {
+    void findByWaitingsMemberId() {
         // Given
         Long memberId = member.getId();
 
         // When
-        List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
+        List<Reservation> reservations = reservationRepository.findByWaitingMemberId(memberId);
 
         // Then
         assertThat(reservations.size()).isEqualTo(1);

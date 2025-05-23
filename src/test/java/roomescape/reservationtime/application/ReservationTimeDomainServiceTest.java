@@ -17,19 +17,21 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.application.ReservationApplicationService;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
+import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
+import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
-import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
-import roomescape.reservationtime.exception.ReservationTimeInUseException;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.domain.service.ThemeDomainService;
+import roomescape.waiting.application.WaitingDomainService;
+import roomescape.waiting.domain.repository.WaitingRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -56,6 +58,9 @@ class ReservationTimeDomainServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @BeforeEach
     void setUp() {
         ReservationDomainService reservationDomainService = new ReservationDomainService(reservationRepository);
@@ -67,9 +72,9 @@ class ReservationTimeDomainServiceTest {
         MemberDomainService memberDomainService = new MemberDomainService(memberRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
+        WaitingDomainService waitingDomainService = new WaitingDomainService(waitingRepository);
         reservationApplicationService = new ReservationApplicationService(reservationDomainService,
-                reservationTimeDomainService, themeDomainService,
-                memberDomainService);
+                reservationTimeDomainService, themeDomainService, memberDomainService, waitingDomainService);
     }
 
     @Test

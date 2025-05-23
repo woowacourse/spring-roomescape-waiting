@@ -2,15 +2,15 @@ package roomescape.reservation.domain.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 
 public interface ReservationRepository {
 
-    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId,
-                                                             Long memberId,
-                                                             LocalDate startDate,
-                                                             LocalDate endDate);
+    List<Reservation> findByThemeIdAndDateBetweenAndWaitingMemberId(Long themeId, LocalDate startDate,
+                                                                    LocalDate endDate,
+                                                                    Long memberId);
 
     boolean existsByTimeId(Long id);
 
@@ -18,10 +18,12 @@ public interface ReservationRepository {
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(LocalDate date,
                                                                            Long themeId);
 
-    List<Reservation> findByMemberId(Long id);
+    List<Reservation> findByWaitingMemberId(Long id);
 
     List<Reservation> findAll();
 

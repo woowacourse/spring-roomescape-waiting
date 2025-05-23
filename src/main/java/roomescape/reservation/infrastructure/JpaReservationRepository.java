@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,20 +12,19 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
     @Query("""
-            SELECT r 
-            FROM Reservation r                
-            JOIN FETCH r.time t 
-            JOIN FETCH r.theme th                   
-            JOIN FETCH r.member m                   
-            WHERE th.id = :themeId     
-              AND m.id = :memberId    
-              AND r.date BETWEEN :startDate AND :endDate 
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.time t
+            JOIN FETCH r.theme th
+            JOIN FETCH r.waitings w
+            JOIN FETCH w.member m
+            WHERE th.id = :themeId
+              AND m.id = :memberId
+              AND r.date BETWEEN :startDate AND :endDate
             """)
-
-    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(Long themeId,
-                                                             Long memberId,
-                                                             LocalDate startDate,
-                                                             LocalDate endDate);
+    List<Reservation> findByThemeIdAndDateBetweenAndWaitingsMemberId(Long themeId,
+                                                                     LocalDate startDate, LocalDate endDate,
+                                                                     Long memberId);
 
     @Query("SELECT EXISTS (SELECT 1 FROM Reservation r WHERE r.time.id = :timeId) ")
     boolean existsByTimeId(Long timeId);
@@ -45,5 +45,16 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(LocalDate date, Long themeId);
 
     @EntityGraph(attributePaths = {"theme", "time"})
-    List<Reservation> findByMemberId(Long memberId);
+    List<Reservation> findByWaitingsMemberId(Long memberId);
+
+    @Query("""
+            SELECT r 
+            FROM Reservation r                
+            JOIN r.time t 
+            JOIN r.theme th                   
+            WHERE th.id = :themeId     
+              AND t.id = :timeId
+              AND r.date = :date
+            """)
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

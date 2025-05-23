@@ -104,7 +104,7 @@ public class GuestTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        assertThat(memberResponses.size()).isEqualTo(1);
+        assertThat(memberResponses.size()).isEqualTo(2);
     }
 
     @Test

@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.presentation.dto.response.MyReservationResponse;
-import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservation.presentation.dto.response.MyReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.theme.domain.Theme;
@@ -28,10 +28,16 @@ public class ReservationDomainService {
         reservationRepository.deleteById(id);
     }
 
-    public void checkIfReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
+    public void checkIfReservationDoesNotExists(final LocalDate date, final Long timeId, final Long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new ReservationAlreadyExistsException("해당 시간에 이미 예약이 존재합니다.");
         }
+    }
+
+    public Reservation getReservationByDateAndTimeAndTheme(final LocalDate date, final Long timeId,
+                                                           final Long themeId) {
+        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseThrow(() -> new ReservationNotFoundException("해당 시간에 예약이 존재하지 않습니다."));
     }
 
     public List<Reservation> findFilteredReservations(final Long themeId, final Long memberId,
@@ -39,18 +45,18 @@ public class ReservationDomainService {
         if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
             return reservationRepository.findAll();
         }
-        return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, startDate, endDate);
+        return reservationRepository.findByThemeIdAndDateBetweenAndWaitingMemberId(themeId, startDate, endDate,
+                memberId);
     }
 
     public Reservation save(final Member member, final LocalDate date, final ReservationTime time, final Theme theme,
                             final LocalDateTime now) {
         return reservationRepository.save(
-                Reservation.createUpcomingReservationWithUnassignedId(member, date, time, theme, now,
-                        ReservationStatus.RESERVED));
+                Reservation.createUpcomingReservation(member, date, time, theme, now));
     }
 
     public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
-        return reservationRepository.findByMemberId(memberInfo.id())
+        return reservationRepository.findByWaitingMemberId(memberInfo.id())
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();

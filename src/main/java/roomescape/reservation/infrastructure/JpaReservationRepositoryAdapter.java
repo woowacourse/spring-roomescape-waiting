@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -17,10 +18,10 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeIdAndMemberIdAndDateBetween(final Long themeId, final Long memberId,
-                                                                    final LocalDate startDate,
-                                                                    final LocalDate endDate) {
-        return jpaReservationRepository.findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, startDate, endDate);
+    public List<Reservation> findByThemeIdAndDateBetweenAndWaitingMemberId(final Long themeId, final LocalDate startDate,
+                                                                           final LocalDate endDate, final Long memberId) {
+        return jpaReservationRepository.findByThemeIdAndDateBetweenAndWaitingsMemberId(themeId, startDate, endDate,
+                memberId);
     }
 
     @Override
@@ -39,14 +40,20 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId,
+                                                               final Long themeId) {
+        return jpaReservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
     public List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(final LocalDate date,
                                                                                   final Long themeId) {
         return jpaReservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
     }
 
     @Override
-    public List<Reservation> findByMemberId(final Long id) {
-        return jpaReservationRepository.findByMemberId(id);
+    public List<Reservation> findByWaitingMemberId(final Long id) {
+        return jpaReservationRepository.findByWaitingsMemberId(id);
     }
 
     @Override

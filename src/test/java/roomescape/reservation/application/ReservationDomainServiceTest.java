@@ -17,16 +17,18 @@ import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.service.MemberDomainService;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.service.ReservationDomainService;
-import roomescape.reservation.presentation.dto.response.ReservationResponse;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.presentation.dto.response.ReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.domain.service.ThemeDomainService;
+import roomescape.waiting.application.WaitingDomainService;
+import roomescape.waiting.domain.repository.WaitingRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -53,6 +55,9 @@ class ReservationDomainServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @BeforeEach
     void setUp() {
         ReservationDomainService reservationDomainService = new ReservationDomainService(reservationRepository);
@@ -60,7 +65,9 @@ class ReservationDomainServiceTest {
                 reservationDomainService,
                 new ReservationTimeDomainService(reservationTimeRepository, reservationDomainService),
                 new ThemeDomainService(themeRepository, reservationRepository),
-                new MemberDomainService(memberRepository));
+                new MemberDomainService(memberRepository),
+                new WaitingDomainService(waitingRepository)
+        );
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
         timeId = reservationTimeRepository.save(time2).getId();

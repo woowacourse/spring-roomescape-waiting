@@ -13,6 +13,7 @@ import roomescape.reservation.domain.ReservationStatus;
 public class IntegrationFixture {
 
     public static final String REGULAR_EMAIL = "regular@gmail.com";
+    public static final String REGULAR2_EMAIL = "alice@gmail.com";
     public static final String ADMIN_EMAIL = "admin@gmail.com";
     public static final String PASSWORD = "password";
     public static final String FUTURE_DATE = TestFixture.makeFutureDate().toString();
@@ -36,7 +37,6 @@ public class IntegrationFixture {
         reservation.put("date", FUTURE_DATE);
         reservation.put("timeId", 1);
         reservation.put("themeId", themeId);
-        reservation.put("status", ReservationStatus.RESERVED);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

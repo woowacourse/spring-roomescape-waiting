@@ -1,13 +1,19 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import roomescape.member.exception.InvalidMemberException;
+import roomescape.waiting.domain.Waiting;
 
 @Entity
 public class Member {
@@ -30,6 +36,11 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole memberRole;
+
+    // TODO: 꼭 필요할까?
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "waiting_id")
+    private List<Waiting> waitingList = new ArrayList<>();
 
     public Member(final String name, final String email, final String password,
                   final MemberRole memberRole) {

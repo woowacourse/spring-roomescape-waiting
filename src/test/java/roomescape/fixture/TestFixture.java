@@ -24,7 +24,7 @@ public class TestFixture {
 
     public static Reservation makeReservation(final LocalDate date, final ReservationTime reservationTime,
                                               final Member member, final Theme theme) {
-        return new Reservation(member, date, reservationTime, theme, ReservationStatus.RESERVED);
+        return new Reservation(member, date, reservationTime, theme);
     }
 
     public static ReservationTime makeReservationTime() {

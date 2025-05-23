@@ -2,27 +2,34 @@ package roomescape.e2e;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static roomescape.fixture.IntegrationFixture.FUTURE_DATE;
 import static roomescape.fixture.IntegrationFixture.PASSWORD;
-import static roomescape.fixture.IntegrationFixture.TOKEN;
+import static roomescape.fixture.IntegrationFixture.REGULAR2_EMAIL;
 import static roomescape.fixture.IntegrationFixture.REGULAR_EMAIL;
+import static roomescape.fixture.IntegrationFixture.TOKEN;
+import static roomescape.fixture.IntegrationFixture.createRegularReservation;
 import static roomescape.fixture.IntegrationFixture.createReservationTime;
 import static roomescape.fixture.IntegrationFixture.createTheme;
-import static roomescape.fixture.IntegrationFixture.createRegularReservation;
 import static roomescape.fixture.IntegrationFixture.loginAndGetAuthToken;
 
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
+import io.restassured.http.ContentType;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.fixture.IntegrationFixture;
-import roomescape.common.security.dto.response.CheckLoginResponse;
 import roomescape.common.security.dto.request.LoginRequest;
+import roomescape.common.security.dto.response.CheckLoginResponse;
+import roomescape.fixture.IntegrationFixture;
 import roomescape.reservation.presentation.dto.response.MyReservationResponse;
+import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
+import roomescape.waiting.domain.WaitingStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -133,5 +140,30 @@ public class RegularTest {
                 });
 
         assertThat(responses.size()).isEqualTo(1);
+    }
+
+    @Test
+    void createWaitingReservations() {
+        createReservationTime();
+        createTheme("추리");
+        createRegularReservation(1L);
+
+        String user2Token = loginAndGetAuthToken(REGULAR2_EMAIL, PASSWORD);
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", FUTURE_DATE);
+        reservation.put("timeId", 1L);
+        reservation.put("themeId", 1L);
+
+        WaitingReservationResponse waitingReservationResponse = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TOKEN, user2Token)
+                .body(reservation)
+                .when().post("/waiting-reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .as(WaitingReservationResponse.class);
+
+        assertThat(waitingReservationResponse.waitingStatus()).isEqualTo(WaitingStatus.WAITING);
     }
 }
