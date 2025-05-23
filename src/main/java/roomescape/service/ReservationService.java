@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,7 +101,7 @@ public class ReservationService {
     }
 
     private void validateDateTimeAfterNow(LocalDate date, ReservationTime time) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
         if (date.isBefore(now.toLocalDate()) ||
             (date.isEqual(now.toLocalDate()) && time.isBefore(now.toLocalTime()))) {
