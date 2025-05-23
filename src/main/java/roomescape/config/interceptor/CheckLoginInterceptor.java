@@ -4,10 +4,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.entity.Member;
-import roomescape.entity.Role;
+import roomescape.member.entity.Member;
+import roomescape.reservation.entity.Role;
 import roomescape.exception.custom.AuthenticatedException;
-import roomescape.service.AuthService;
+import roomescape.auth.service.AuthService;
 
 public class CheckLoginInterceptor implements HandlerInterceptor {
 
