@@ -24,9 +24,9 @@ public interface JpaReservationWaitingTicketRepository extends JpaRepository<Res
                     "and r.time.id = :timeId"
     )
     ReservationWaitingRank countReservationWaitingsByThemeIdAndDateAndTimeIdAndCreatedAt(
-            @Param("theme") Long themeId,
+            @Param("themeId") Long themeId,
             @Param("date") LocalDate date,
-            @Param("time") Long timeId,
+            @Param("timeId") Long timeId,
             @Param("createdAt") LocalDateTime createdAt
     );
 }
