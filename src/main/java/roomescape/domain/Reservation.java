@@ -2,15 +2,18 @@ package roomescape.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import roomescape.domain.enums.ReservationStatus;
 import roomescape.exception.reservation.ReservationFieldRequiredException;
 
 @Entity
@@ -36,15 +39,15 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
-    @JoinColumn(name = "status_id", nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
+    private LocalDateTime createdAt;
 
     protected Reservation() {
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member,
-                       ReservationStatus status) {
+                       ReservationStatus status, LocalDateTime createdAt) {
         validate(date, time, theme, member);
         this.id = id;
         this.date = date;
@@ -52,10 +55,12 @@ public class Reservation {
         this.theme = theme;
         this.member = member;
         this.status = status;
+        this.createdAt = createdAt;
     }
 
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, ReservationStatus status) {
-        this(null, date, time, theme, member, status);
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, ReservationStatus status,
+                       LocalDateTime createdAt) {
+        this(null, date, time, theme, member, status, createdAt);
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -111,5 +116,9 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
