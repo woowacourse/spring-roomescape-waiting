@@ -26,7 +26,7 @@ public class CreateReservationTimeService {
 
     private void validateAlreadyExistsReservationTime(CreateReservationTimeCommand createReservationTimeCommand) {
         if (reservationTimeRepository.existsByStartAt(createReservationTimeCommand.startAt())) {
-            throw new ReservationTimeException("이미 존재하는 얘약시간입니다.");
+            throw new ReservationTimeException("이미 존재하는 예약시간입니다.");
         }
     }
 }
