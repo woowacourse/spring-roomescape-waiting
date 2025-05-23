@@ -106,3 +106,6 @@ INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2025-05-15', 9, 5, 2, 'BOOKED');
 INSERT INTO reservation(date, time_id, theme_id, member_id, status)
 VALUES ('2025-05-15', 10, 5, 2, 'BOOKED');
+
+INSERT INTO reservation(date, time_id, theme_id, member_id, status)
+VALUES ('2025-05-25', 11, 5, 1, 'BOOKED');

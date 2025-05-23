@@ -16,6 +16,7 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.dto.admin.AdminReservationRequest;
 import roomescape.reservation.dto.admin.AdminReservationSearchRequest;
 import roomescape.reservation.dto.user.UserReservationRequest;
@@ -68,6 +69,34 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
+    }
+
+    public List<WaitingResponse> findAllWaiting() {
+        return reservationRepository.findAllWaiting()
+                .stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
+    public ReservationResponse addFromWaiting(final Long id) {
+        Reservation waitingReservation = reservationRepository.findByWaitingId(id)
+                .orElseThrow(() -> new InvalidIdException(
+                        IdExceptionMessage.INVALID_RESERVATION_WAITING_ID.getMessage())
+                );
+
+        Reservation bookedReservation = new Reservation(
+                waitingReservation.getMember(),
+                waitingReservation.getDate(),
+                waitingReservation.getTime(),
+                waitingReservation.getTheme(),
+                Status.BOOKED
+        );
+        reservationRepository.deleteById(id);
+
+        validateDuplicateReservation(bookedReservation.getDate(), bookedReservation.getTime());
+        Reservation savedReservation = reservationRepository.save(bookedReservation);
+
+        return ReservationResponse.from(savedReservation);
     }
 
     public ReservationResponse addWaiting(final Long memberId, final UserReservationRequest request) {
