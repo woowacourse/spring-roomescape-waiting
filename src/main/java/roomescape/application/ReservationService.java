@@ -99,7 +99,6 @@ public class ReservationService {
 
     private void processWaitingToReservation(ReservationInfo reservationInfo) {
         Waiting firstRankWaiting = waitingService.findFirstRankWaitingByReservationInfo(reservationInfo);
-        waitingService.deleteWaitingById(firstRankWaiting.getId());
 
         LocalDate date = reservationInfo.getDate();
         Long timeId = reservationInfo.getTime().getId();
@@ -108,6 +107,7 @@ public class ReservationService {
         Reservation newReservation = createReservation(date, timeId, themeId, member);
         ReservationInfo newReservationInfo = ReservationInfo.create(newReservation);
 
+        waitingService.deleteWaitingById(firstRankWaiting.getId());
         waitingService.updateWaitings(reservationInfo, newReservationInfo);
     }
 
