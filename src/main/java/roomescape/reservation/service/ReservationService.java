@@ -1,7 +1,9 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
@@ -16,6 +18,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -24,17 +28,17 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(
-            final ReservationRepository reservationRepository,
-            final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
-    ) {
+    public ReservationService(final ReservationRepository reservationRepository,
+                              final ReservationTimeRepository reservationTimeRepository,
+                              final ThemeRepository themeRepository,
+                              final MemberRepository memberRepository, final WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse createReservation(final CreateReservationWithMemberRequest request) {
@@ -69,13 +73,29 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(final LoginMember loginMember) {
-        final List<Reservation> reservations = reservationRepository.findAllByMemberIdOrderByDateDesc(loginMember.id());
-        return reservations.stream()
+        final List<MyReservationResponse> reservations = reservationRepository.findAllByMemberIdOrderByDateDesc(
+                        loginMember.id()).stream()
                 .map(MyReservationResponse::new)
                 .toList();
+        final List<MyReservationResponse> waitings = waitingRepository.findWaitingWithRankByMemberId(
+                        loginMember.id()).stream()
+                .map(MyReservationResponse::new)
+                .toList();
+        final ArrayList<MyReservationResponse> responses = new ArrayList<>(reservations);
+        responses.addAll(waitings);
+        return responses;
     }
 
     public void cancelReservationById(final long id) {
+        final Optional<Waiting> waiting = waitingRepository.findFirstByReservationIdOrderByCreatedAtAsc(id);
+        if (waiting.isPresent()) {
+            Waiting waiting2 = waiting.get();
+            final Reservation reservation = reservationRepository.findById(id)
+                    .orElseThrow(() -> new BadRequestException("예약을 찾을 수 없습니다."));
+            reservation.updateMember(waiting2.getMember());
+            waitingRepository.delete(waiting2);
+            return;
+        }
         reservationRepository.deleteById(id);
     }
 

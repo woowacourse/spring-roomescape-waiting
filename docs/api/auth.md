@@ -7,7 +7,6 @@
 ```
 POST /login HTTP/1.1
 content-type: application/json
-host: localhost:8080
 
 {
     "password": "password",
@@ -20,7 +19,7 @@ host: localhost:8080
 ```
 HTTP/1.1 200 OK
 Content-Type: application/json
-Set-Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFETUlOIn0.cwnHsltFeEtOzMHs2Q5-ItawgvBZ140OyWecppNlLoI; Path=/; HttpOnly
+Set-Cookie: token={access-token}; Path=/; HttpOnly
 ```
 
 ## 인증 정보 조회 API
@@ -29,8 +28,7 @@ Set-Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6ImFkbWluIiwicm9sZ
 
 ```
 GET /login/check HTTP/1.1
-cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
-host: localhost:8080
+cookie: token={access-token}
 ```
 
 ### Response
@@ -50,7 +48,7 @@ Content-Type: application/json
 
 ```
 POST /logout HTTP/1.1
-cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+cookie: token={access-token}
 ```
 
 ### Response

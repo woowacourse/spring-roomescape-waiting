@@ -30,7 +30,7 @@ Content-Type: application/json
 }
 ```
 
-## 테마 조회 API
+## 테마 목록 조회 API
 
 ### Request
 
@@ -59,7 +59,7 @@ Content-Type: application/json
 ### Request
 
 ```
-DELETE /themes/1 HTTP/1.1
+DELETE /themes/{id} HTTP/1.1
 ```
 
 ### Response
@@ -68,7 +68,7 @@ DELETE /themes/1 HTTP/1.1
 HTTP/1.1 204
 ```
 
-## 인기 테마 조회 API
+## 인기 테마 목록 조회 API
 
 ### Request
 

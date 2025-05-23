@@ -52,6 +52,12 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findFirstByDateAndThemeIdAndTimeId(final LocalDate date, final Long themeId,
+                                                                    final Long timeId) {
+        return Optional.empty();
+    }
+
+    @Override
     public void deleteById(final Long id) {
         Reservation reservation = findById(id).orElseThrow();
         reservations.remove(reservation);

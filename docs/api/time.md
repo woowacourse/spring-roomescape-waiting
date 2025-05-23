@@ -26,7 +26,7 @@ Content-Type: application/json
 }
 ```
 
-## 시간 조회 API
+## 시간 목록 조회 API
 
 ### Request
 
@@ -53,7 +53,7 @@ Content-Type: application/json
 ### Request
 
 ```
-DELETE /times/1 HTTP/1.1
+DELETE /times/{id} HTTP/1.1
 ```
 
 ### Response
