@@ -12,10 +12,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
 @Entity
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"date", "time_id", "theme_id"})
+})
 public class Reservation {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
