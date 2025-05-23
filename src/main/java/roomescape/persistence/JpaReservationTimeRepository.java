@@ -15,7 +15,7 @@ public interface JpaReservationTimeRepository extends JpaRepository<ReservationT
                 rt.id, rt.startAt,
                 EXISTS (
                     SELECT 1 FROM Reservation r
-                    WHERE r.time = rt AND r.theme.id = :themeId AND r.date = :date
+                    WHERE r.bookingInfo.time = rt AND r.bookingInfo.theme.id = :themeId AND r.bookingInfo.date = :date
                 )
             )
             FROM ReservationTime rt

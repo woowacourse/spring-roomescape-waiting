@@ -10,13 +10,22 @@ import roomescape.persistence.dto.WaitingWithRankData;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
+    @Query("""
+    SELECT EXISTS (
+        SELECT 1 FROM Waiting w
+        WHERE w.bookingInfo.member.id = :memberId
+          AND w.bookingInfo.theme.id = :themeId
+          AND w.bookingInfo.time.id = :timeId
+          AND w.bookingInfo.date = :date
+        )
+    """)
     boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(Long memberId, Long themeId, Long timeId, LocalDate date);
 
     @Query("""
         SELECT w FROM Waiting w
-        WHERE w.theme.id = :themeId
-          AND w.time.id = :timeId
-          AND w.date = :date
+        WHERE w.bookingInfo.theme.id = :themeId
+          AND w.bookingInfo.time.id = :timeId
+          AND w.bookingInfo.date = :date
         ORDER BY w.id ASC
         LIMIT 1
     """)
@@ -24,10 +33,10 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
         SELECT w FROM Waiting w
-        JOIN FETCH w.member
-        JOIN FETCH w.time
-        JOIN FETCH w.theme
-        WHERE w.member.id = :memberId
+        JOIN FETCH w.bookingInfo.member
+        JOIN FETCH w.bookingInfo.time
+        JOIN FETCH w.bookingInfo.theme
+        WHERE w.bookingInfo.member.id = :memberId
         ORDER BY w.id
     """)
     List<Waiting> findByMemberId(Long memberId);
@@ -38,23 +47,23 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             (
                 SELECT COUNT(w2)
                 FROM Waiting w2
-                WHERE w2.date = w.date
-                  AND w2.time = w.time
-                  AND w2.theme = w.theme
+                WHERE w2.bookingInfo.date = w.bookingInfo.date
+                  AND w2.bookingInfo.time = w.bookingInfo.time
+                  AND w2.bookingInfo.theme = w.bookingInfo.theme
                   AND w2.waitingStartedAt < w.waitingStartedAt
             )
         )
         FROM Waiting w
-        WHERE w.member.id = :memberId
+        WHERE w.bookingInfo.member.id = :memberId
         ORDER BY w.waitingStartedAt, w.id
     """)
     List<WaitingWithRankData> findWaitingsWithRankByMemberId(Long memberId);
 
     @Query("""
         SELECT w FROM Waiting w
-        JOIN FETCH w.member
-        JOIN FETCH w.time
-        JOIN FETCH w.theme
+        JOIN FETCH w.bookingInfo.member
+        JOIN FETCH w.bookingInfo.time
+        JOIN FETCH w.bookingInfo.theme
         ORDER BY w.id ASC
     """)
     List<Waiting> findAllWaitings();
