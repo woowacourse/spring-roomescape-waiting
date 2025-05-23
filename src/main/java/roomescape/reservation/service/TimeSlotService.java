@@ -45,10 +45,8 @@ public class TimeSlotService {
     }
 
     public void deleteTimeById(Long id) {
-        if (timeSlotRepository.findById(id).isEmpty()) {
-            throw new TimeSlotNotFoundException();
-        }
-        if (reservationRepository.findByTimeSlotId(id).size() > 0) {
+        timeSlotRepository.findById(id).orElseThrow(TimeSlotNotFoundException::new);
+        if (reservationRepository.existsByTimeSlotId(id)) {
             throw new ExistedReservationException();
         }
         timeSlotRepository.deleteById(id);

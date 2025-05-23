@@ -84,10 +84,9 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByTimeSlotId(Long timeId) {
+    public boolean existsByTimeSlotId(Long timeId) {
         return reservations.stream()
-                .filter(reservation -> reservation.getTimeSlot().getId().equals(timeId))
-                .toList();
+                .anyMatch(reservation -> reservation.getTimeSlot().getId().equals(timeId));
     }
 
     @Override

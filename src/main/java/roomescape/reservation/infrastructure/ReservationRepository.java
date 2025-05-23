@@ -21,13 +21,6 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
 
     boolean existsByThemeId(Long themeId);
 
-    @Query("""
-                SELECT r
-                FROM Reservation r
-                WHERE r.timeSlot.id = :timeSlotId
-            """)
-    List<Reservation> findByTimeSlotId(Long timeSlotId);
-
     Optional<Reservation> findByDateAndTimeSlotAndTheme(LocalDate date, TimeSlot time, Theme theme);
 
     List<Reservation> findByDateBetween(LocalDate dateFrom, LocalDate dateTo);
@@ -49,5 +42,7 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
     boolean existsByDateAndThemeAndTimeSlot(LocalDate date, Theme theme, TimeSlot timeSlot);
 
     void delete(Reservation reservation);
+
+    boolean existsByTimeSlotId(Long timeSlotId);
 }
 

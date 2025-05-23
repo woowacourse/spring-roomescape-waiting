@@ -237,10 +237,9 @@ class ReservationRepositoryTest {
                         .theme(theme).build()
         );
         // when
-        List<Reservation> reservations = reservationRepository.findByTimeSlotId(time1.getId());
+        boolean exist = reservationRepository.existsByTimeSlotId(time1.getId());
         // then
-        assertThat(reservations).hasSize(1);
-        assertThat(reservations.get(0).getTheme().getId()).isEqualTo(theme.getId());
+        assertThat(exist).isTrue();
     }
 
     @Test
