@@ -8,13 +8,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationRegisterDto;
@@ -25,14 +23,15 @@ import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
+import roomescape.model.Waiting;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Slf4j
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
     @Autowired
@@ -47,13 +46,19 @@ class ReservationServiceTest {
     @Autowired
     MemberRepository memberRepository;
 
-    private LoginMember loginMember;
+    @Autowired
+    WaitingRepository waitingRepository;
+
     @Autowired
     private ThemeRepository themeRepository;
 
-    @BeforeEach
-    void setUp() {
-        this.loginMember = new LoginMember(1L, "히로", "example@gmail.com", Role.ADMIN);
+    @AfterEach
+    void tearDown() {
+        reservationRepository.deleteAllInBatch();
+        waitingRepository.deleteAllInBatch();
+        reservationTimeRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+        themeRepository.deleteAllInBatch();
     }
 
     @DisplayName("예약을 정상적으로 저장한다.")
@@ -67,12 +72,14 @@ class ReservationServiceTest {
                 1L
         );
 
+        LoginMember loginMember = getLoginMember();
+
         // when
-        ReservationResponseDto response = this.reservationService.saveReservation(request, this.loginMember);
+        ReservationResponseDto response = reservationService.saveReservation(request, loginMember);
 
         // then
         assertAll(
-                () -> assertThat(response.member().name()).isEqualTo("히로"),
+                () -> assertThat(response.member().name()).isEqualTo("도기"),
                 () -> assertThat(response.date()).isEqualTo(tomorrow)
         );
     }
@@ -81,15 +88,13 @@ class ReservationServiceTest {
     @Test
     void test3() {
         // given
-        ReservationRegisterDto request = new ReservationRegisterDto(
-                LocalDate.now().plusDays(1).toString(), 1L, 1L);
-        ReservationResponseDto saved = this.reservationService.saveReservation(request, this.loginMember);
+        Reservation savedReservation = createSaveReservation();
 
         // when
-        this.reservationService.cancelReservation(saved.id());
+        reservationService.cancelReservation(savedReservation.getId());
 
         // then
-        List<ReservationResponseDto> reservations = this.reservationService.getAllReservations();
+        List<ReservationResponseDto> reservations = reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
     }
 
@@ -97,15 +102,17 @@ class ReservationServiceTest {
     @Test
     void test4() {
         // given
-        ReservationRegisterDto request = new ReservationRegisterDto(
-                LocalDate.now().plusDays(1).toString(), 1L, 1L);
-        this.reservationService.saveReservation(request, this.loginMember);
+        Reservation savedReservation = createSaveReservation();
+        LoginMember loginMember = getLoginMember();
+
         ReservationRegisterDto savedRequest = new ReservationRegisterDto(
-                LocalDate.now().plusDays(1).toString(), 1L, 1L);
+                savedReservation.getDate().toString(),
+                savedReservation.getReservationTime().getId(),
+                savedReservation.getTheme().getId()
+        );
 
         // when && then
-        assertThatThrownBy(
-                () -> this.reservationService.saveReservation(savedRequest, this.loginMember))
+        assertThatThrownBy(() -> reservationService.saveReservation(savedRequest, loginMember))
                 .isInstanceOf(DuplicatedException.class);
     }
 
@@ -113,44 +120,78 @@ class ReservationServiceTest {
     @Test
     void test5() {
         // given
+        Reservation savedReservation = createSaveReservation();
+
         ReservationRegisterDto request = new ReservationRegisterDto(
-                LocalDate.now().toString(), 1L, 1L);
+                LocalDate.now().toString(),
+                savedReservation.getReservationTime().getId(),
+                savedReservation.getTheme().getId()
+        );
+
+        LoginMember loginMember = getLoginMember();
+
         // when && then
         assertThatThrownBy(
-                () -> this.reservationService.saveReservation(request, this.loginMember))
+                () -> reservationService.saveReservation(request, loginMember))
                 .isInstanceOf(IllegalStateException.class);
-
     }
 
-    @DisplayName("사용자가 예약한 예약 내역을 모두 가져온다")
+    @DisplayName("사용자가 예약한 예약과 신청한 대기 내역을 모두 가져온다")
     @Test
     void test6() {
         //given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        Reservation savedReservation = createSaveReservation();
+        LoginMember loginMember = new LoginMember(savedReservation.getMember());
 
-        Theme theme = new Theme("테마", "공포", "image");
-        Theme savedTheme = themeRepository.save(theme);
-
-        Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
-        Member savedMember = memberRepository.save(member);
-
-        Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
-                savedMember, LocalDate.now());
-        Reservation savedReservation = reservationRepository.save(reservation);
-
-        LoginMember loginMember = new LoginMember(savedMember);
+        Waiting savedWaiting = createSaveWaiting(savedReservation);
 
         //when
         List<MemberReservationResponseDto> response = reservationService.getReservationsOfMember(loginMember);
 
-        List<MemberReservationResponseDto> comparedResponse = List.of(
-                new MemberReservationResponseDto(savedReservation));
+        MemberReservationResponseDto reservationResponse = MemberReservationResponseDto.from(savedReservation);
+        MemberReservationResponseDto waitingResponse = MemberReservationResponseDto.from(savedWaiting);
 
         //then
-        assertAll(
-                () -> assertThat(response).hasSize(1),
-                () -> assertThat(response).isEqualTo(comparedResponse)
-        );
+        assertThat(response).hasSize(2);
+        assertThat(response).contains(reservationResponse, waitingResponse);
     }
+
+    private Waiting createSaveWaiting(final Reservation savedReservation) {
+        Waiting waiting = Waiting.of(
+                savedReservation.getDate(),
+                savedReservation.getTheme(),
+                savedReservation.getReservationTime(),
+                savedReservation.getMember()
+        );
+        return waitingRepository.save(waiting);
+    }
+
+    private Reservation createSaveReservation() {
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
+        reservationTimeRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마", "공포", "image");
+        themeRepository.save(theme);
+
+        Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
+        memberRepository.save(member);
+
+        Reservation reservation = new Reservation(
+                LocalDate.now().plusDays(1),
+                reservationTime,
+                theme,
+                member,
+                LocalDate.now()
+        );
+
+        return reservationRepository.save(reservation);
+    }
+
+    private LoginMember getLoginMember() {
+        Member member = new Member("도기", "test", "test", Role.ADMIN);
+        memberRepository.save(member);
+        return new LoginMember(member);
+    }
+
+
 }

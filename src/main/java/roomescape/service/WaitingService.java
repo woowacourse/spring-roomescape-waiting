@@ -76,14 +76,18 @@ public class WaitingService {
     }
 
     private void validateExists(final Waiting waiting, final Member member) {
-        if (waitingRepository.existsByDateAndThemeAndReservationTimeAndMember(
-                waiting.getDate(),
-                waiting.getTheme(),
-                waiting.getReservationTime(),
-                member
-        )) {
+        if (isExists(waiting, member)) {
             throw new DuplicatedException("이미 대기 중인 예약입니다.");
         }
+    }
+
+    private boolean isExists(final Waiting waiting, final Member member) {
+        return waitingRepository.existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
+                waiting.getDate(),
+                waiting.getTheme().getId(),
+                waiting.getReservationTime().getId(),
+                member.getId()
+        );
     }
 
     private void validateAfter(final Waiting waiting) {

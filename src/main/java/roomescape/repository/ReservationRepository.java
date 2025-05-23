@@ -18,7 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             Long themeId,
             Long reservationTimeId);
 
-    List<Reservation> findByMemberId(Long id);
+    List<Reservation> findAllByMemberId(Long id);
 
     List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate date);
 

@@ -75,7 +75,7 @@ class MemberReservationAcceptanceTest {
 
         //then
         List<MemberReservationResponseDto> comparedResponse = List.of(
-                new MemberReservationResponseDto(savedReservation));
+                MemberReservationResponseDto.from(savedReservation));
 
         assertAll(
                 () -> assertThat(responses).hasSize(1),

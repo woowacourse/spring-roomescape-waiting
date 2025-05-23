@@ -13,25 +13,22 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Waiting {
 
-    @Getter
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
 
-    @Getter
     @Column(nullable = false)
     private LocalDate date;
 
-    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private ReservationTime reservationTime;
@@ -54,9 +51,13 @@ public class Waiting {
     }
 
     public void isAfterBy(final LocalDate now) {
-        if (!this.date.isAfter(now)) {
+        if (isBefore(now)) {
             throw new IllegalStateException("과거 및 당일 예약은 대기 신청이 불가능합니다.");
         }
+    }
+
+    private boolean isBefore(final LocalDate now) {
+        return !this.date.isAfter(now);
     }
 
 }

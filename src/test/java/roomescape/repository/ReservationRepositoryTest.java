@@ -96,7 +96,7 @@ class ReservationRepositoryTest {
 
     @DisplayName("memberId에 해당하는 예약이 있다면 반환한다.")
     @Test
-    void findByMemberId() {
+    void findAllByMemberId() {
         //given
         LocalDate date = LocalDate.now().plusDays(1);
 
@@ -128,7 +128,7 @@ class ReservationRepositoryTest {
         reservationRepository.save(reservation2);
 
         //when
-        List<Reservation> actual = reservationRepository.findByMemberId(member.getId());
+        List<Reservation> actual = reservationRepository.findAllByMemberId(member.getId());
 
         //then
         assertThat(actual).hasSize(2);

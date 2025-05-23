@@ -2,6 +2,8 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
@@ -15,11 +17,14 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.model.Waiting;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class ReservationService {
@@ -28,16 +33,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository,
-                              MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
-    }
+    private final WaitingRepository waitingRepository;
 
     @Transactional
     public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
@@ -76,10 +72,23 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findByMemberId(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.id());
+        List<Waiting> waitingList = waitingRepository.findAllByMemberId(loginMember.id());
 
-        return reservations.stream()
-                .map(MemberReservationResponseDto::new)
+        return getMemberReservationResponseDtos(reservations, waitingList);
+    }
+
+    private List<MemberReservationResponseDto> getMemberReservationResponseDtos(final List<Reservation> reservations,
+                                                                                final List<Waiting> waitingList) {
+        List<MemberReservationResponseDto> reservationResponse = reservations.stream()
+                .map(MemberReservationResponseDto::from)
+                .toList();
+
+        List<MemberReservationResponseDto> waitingResponse = waitingList.stream()
+                .map(MemberReservationResponseDto::from)
+                .toList();
+
+        return Stream.concat(reservationResponse.stream(), waitingResponse.stream())
                 .toList();
     }
 
