@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -16,9 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.enums.ReservationStatus;
 import roomescape.domain.enums.Role;
 import roomescape.dto.reservationtime.AvailableTimeResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
@@ -37,8 +38,6 @@ class ReservationTimeServiceTest {
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
-
-    private final ReservationStatus status = new ReservationStatus(1L);
 
     @DisplayName("중복되는 시간은 생성할 수 없다")
     @Test
@@ -86,7 +85,7 @@ class ReservationTimeServiceTest {
         Member member = new Member(10L, "name", "email@email.com", "pw", Role.USER);
         Theme theme = new Theme(themeId, "theme", "description", "thumbnail");
         Reservation reservation = new Reservation(1L, date, new ReservationTime(1L, LocalTime.now()), theme, member,
-                status);
+                ReservationStatus.CONFIRMED, LocalDateTime.now());
         when(reservationRepository.findAllByDateAndThemeId(date, themeId)).thenReturn(List.of(reservation));
         when(timeRepository.findAll()).thenReturn(List.of(new ReservationTime(1L, LocalTime.now()),
                 new ReservationTime(2L, LocalTime.now())));

@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.enums.ReservationStatus;
 import roomescape.domain.enums.Role;
 import roomescape.dto.admin.AdminReservationRequest;
 import roomescape.dto.admin.AdminWaitingReservationResponse;
@@ -35,7 +35,6 @@ import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.repository.reservation.ReservationStatusRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
 
@@ -54,13 +53,8 @@ class ReservationServiceTest {
     @Mock
     private MemberRepository memberRepository;
 
-    @Mock
-    private ReservationStatusRepository reservationStatusRepository;
-
     @InjectMocks
     private ReservationService reservationService;
-
-    private final ReservationStatus status = new ReservationStatus(1L);
 
     @DisplayName("예약 시간이 존재하지 않으면 예약을 생성할 수 없다")
     @Test
@@ -140,14 +134,13 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "admin@a.com", "pw", roomescape.domain.enums.Role.ADMIN);
-        Reservation reservation = new Reservation(99L, date, time, theme, member, status);
-        ReservationStatus reservationStatus = new ReservationStatus(1L);
+        Reservation reservation = new Reservation(99L, date, time, theme, member, ReservationStatus.CONFIRMED,
+                LocalDateTime.now());
 
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
         when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
         when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
-        when(reservationStatusRepository.save(any(ReservationStatus.class))).thenReturn(reservationStatus);
 
         // when
         ReservationResponse response = reservationService.createByAdmin(request);
@@ -173,13 +166,18 @@ class ReservationServiceTest {
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", roomescape.domain.enums.Role.ADMIN);
-        Reservation reservation = new Reservation(99L, date, time, theme, member, status);
-        ReservationStatus reservationStatus = new ReservationStatus(1L);
+        Reservation reservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
+                LocalDateTime.now());
+
+        List<Reservation> waitings = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            waitings.add(new Reservation((long) i, date, time, theme, member, ReservationStatus.WAITING,
+                    LocalDateTime.now()));
+        }
 
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
-        when(reservationRepository.countByDateAndTimeAndTheme(date, time, theme)).thenReturn(3L);
-        when(reservationStatusRepository.save(any(ReservationStatus.class))).thenReturn(reservationStatus);
+        when(reservationRepository.findAllByDateAndThemeAndTime(date, theme, time)).thenReturn(waitings);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
 
         // when
@@ -197,26 +195,21 @@ class ReservationServiceTest {
         long timeId = 2L;
         long themeId = 2L;
         long memberId = 2L;
-        long priority = 3L;
 
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
 
         // 취소할 예약
-        ReservationStatus targetStatus = new ReservationStatus(3L);
-        Reservation targetReservation = new Reservation(99L, date, time, theme, member, targetStatus);
-
+        Reservation targetReservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
+                LocalDateTime.now().minusDays(3));
         when(reservationRepository.findById(99L)).thenReturn(Optional.of(targetReservation));
-        doNothing().when(reservationRepository).updateAllWaitingReservationsAfterPriority(date, time, theme, priority);
 
         // when
         reservationService.deleteWaitingReservation(99L, member);
 
         // then
-        // TODO: 순위 변동 사항은 repository의 메서드 책임이니까 그 부분은 mocking 하고 결과는 verify로만 검증을 할까?
         verify(reservationRepository).delete(targetReservation);
-        verify(reservationRepository).updateAllWaitingReservationsAfterPriority(date, time, theme, priority);
     }
 
     @Test
@@ -233,11 +226,11 @@ class ReservationServiceTest {
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
         List<Reservation> reservations = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            reservations.add(new Reservation(99L + i, LocalDate.now(), time, theme, member,
-                    new ReservationStatus(priority)));
+            reservations.add(new Reservation(99L + i, LocalDate.now(), time, theme, member, ReservationStatus.WAITING,
+                    LocalDateTime.now().minusDays(i + 1)));
         }
 
-        when(reservationRepository.findAllWaiting()).thenReturn(reservations);
+        when(reservationRepository.findAllByStatus(ReservationStatus.WAITING)).thenReturn(reservations);
 
         // when
         List<AdminWaitingReservationResponse> waitingReservations = reservationService.getWaitingReservations();

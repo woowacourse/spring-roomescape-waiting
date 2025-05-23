@@ -3,15 +3,15 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.enums.ReservationStatus;
 import roomescape.domain.enums.Role;
 import roomescape.exception.reservation.ReservationFieldRequiredException;
 
 class ReservationTest {
-
-    private final ReservationStatus status = new ReservationStatus(1L);
 
     @DisplayName("예약은 빈 날짜로 생성할 수 없다")
     @Test
@@ -23,7 +23,8 @@ class ReservationTest {
         Member member = new Member(1L, "슬링키", "이메일", "비밀번호", Role.ADMIN);
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(date, time, theme, member, status)).isInstanceOf(
+        assertThatThrownBy(() -> new Reservation(date, time, theme, member, ReservationStatus.CONFIRMED,
+                LocalDateTime.now())).isInstanceOf(
                 ReservationFieldRequiredException.class);
     }
 
@@ -35,7 +36,8 @@ class ReservationTest {
         ReservationTime time = null;
         Theme theme = new Theme("무서운 방", "무섭습니다", "/image/scary");
         Member member = new Member(1L, "슬링키", "이메일", "비밀번호", Role.ADMIN);        // when & then
-        assertThatThrownBy(() -> new Reservation(date, time, theme, member, status)).isInstanceOf(
+        assertThatThrownBy(() -> new Reservation(date, time, theme, member, ReservationStatus.CONFIRMED,
+                LocalDateTime.now())).isInstanceOf(
                 ReservationFieldRequiredException.class);
     }
 
@@ -47,7 +49,8 @@ class ReservationTest {
         ReservationTime time = new ReservationTime(LocalTime.now().plusHours(1));
         Theme theme = null;
         Member member = new Member(1L, "슬링키", "이메일", "비밀번호", Role.ADMIN);        // when & then
-        assertThatThrownBy(() -> new Reservation(date, time, theme, member, status)).isInstanceOf(
+        assertThatThrownBy(() -> new Reservation(date, time, theme, member, ReservationStatus.CONFIRMED,
+                LocalDateTime.now())).isInstanceOf(
                 ReservationFieldRequiredException.class);
     }
 
@@ -60,7 +63,8 @@ class ReservationTest {
         Theme theme = new Theme("무서운 방", "무섭습니다", "/image/scary");
         Member member = null;
         // when & then
-        assertThatThrownBy(() -> new Reservation(date, time, theme, member, status)).isInstanceOf(
+        assertThatThrownBy(() -> new Reservation(date, time, theme, member, ReservationStatus.CONFIRMED,
+                LocalDateTime.now())).isInstanceOf(
                 ReservationFieldRequiredException.class);
     }
 }
