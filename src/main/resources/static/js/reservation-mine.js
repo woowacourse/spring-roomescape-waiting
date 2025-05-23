@@ -24,7 +24,7 @@ function render(data) {
               response 명세에 맞춰 값 설정
          */
 
-        const theme = item.themeId;
+        const theme = item.theme;
         const date = item.date
         const time = item.time
         const status = item.status
