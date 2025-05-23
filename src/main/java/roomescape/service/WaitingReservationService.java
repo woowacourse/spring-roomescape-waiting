@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.dto.query.WaitingWithRank;
 import roomescape.dto.request.CreateWaitingRequest;
@@ -45,13 +46,26 @@ public class WaitingReservationService {
         return createWaiting(loginMemberRequest.id(), request.theme(), request.date(), request.time());
     }
 
-    public List<WaitingWithRank> findALlWaitingWithRank(Long memberId){
+    public List<WaitingWithRank> findALlWaitingWithRank(Long memberId) {
         return waitingReservationRepository.findWaitingsWithRankByMemberId(memberId);
     }
 
     public void deleteById(Long id) {
         waitingReservationRepository.deleteById(id);
     }
+
+    public Optional<WaitingReservation> findFirstWaitingByDateAndThemeAndTime(
+            LocalDate date,
+            Theme theme,
+            ReservationTime time
+    ) {
+        return waitingReservationRepository.findFirstWaitingByDateAndThemeIdAndTimeId(
+                date,
+                theme.getId(),
+                time.getId()
+        );
+    }
+
 
     private WaitingReservation createWaiting(
             long memberId,
@@ -73,7 +87,12 @@ public class WaitingReservationService {
     }
 
     private void validateNoDuplicateWaiting(Long memberId, Long timeId, Long themeId, LocalDate date) {
-        boolean exists = waitingReservationRepository.existsByMemberIdAndTimeIdAndThemeIdAndDate(memberId, timeId, themeId, date);
+        boolean exists = waitingReservationRepository.existsByMemberIdAndTimeIdAndThemeIdAndDate(
+                memberId,
+                timeId,
+                themeId,
+                date
+        );
         if (exists) {
             throw new InvalidWaitingException("이미 예약대기가 존재합니다.");
         }

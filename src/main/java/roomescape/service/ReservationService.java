@@ -2,7 +2,9 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.query.WaitingWithRank;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.request.CreateReservationRequest;
@@ -16,12 +18,14 @@ public class ReservationService {
     private final ConfirmReservationService confirmReservationService;
     private final WaitingReservationService waitingReservationService;
 
-    public ReservationService(ConfirmReservationService confirmReservationService, WaitingReservationService waitingReservationService) {
+    public ReservationService(ConfirmReservationService confirmReservationService,
+                              WaitingReservationService waitingReservationService) {
         this.confirmReservationService = confirmReservationService;
         this.waitingReservationService = waitingReservationService;
     }
 
-    public ConfirmedReservation addReservation(CreateReservationRequest request, LoginMemberRequest loginMemberRequest) {
+    public ConfirmedReservation addReservation(CreateReservationRequest request,
+                                               LoginMemberRequest loginMemberRequest) {
         return confirmReservationService.addReservation(request, loginMemberRequest);
     }
 
@@ -42,8 +46,23 @@ public class ReservationService {
         return confirmReservationService.findAllByFilter(memberId, themeId, dateFrom, dateTo);
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
+        Optional<ConfirmedReservation> deleteReservation = confirmReservationService.findById(id);
+        if (deleteReservation.isEmpty()) {
+            return;
+        }
+        ConfirmedReservation confirmedReservation = deleteReservation.get();
+        Optional<WaitingReservation> waitingReservation = waitingReservationService.findFirstWaitingByDateAndThemeAndTime(
+                confirmedReservation.getDate(),
+                confirmedReservation.getTheme(),
+                confirmedReservation.getReservationTime());
         confirmReservationService.deleteReservation(id);
+        if (waitingReservation.isEmpty()){
+            return;
+        }
+        confirmReservationService.addReservation(waitingReservation.get());
+        waitingReservationService.deleteById(waitingReservation.get().getId());
     }
 
     public List<ConfirmedReservation> findAllReservationByMember(final Long memberId) {
@@ -54,7 +73,7 @@ public class ReservationService {
         return waitingReservationService.addWaiting(request, loginMemberRequest);
     }
 
-    public List<WaitingWithRank> findALlWaitingWithRank(Long memberId){
+    public List<WaitingWithRank> findALlWaitingWithRank(Long memberId) {
         return waitingReservationService.findALlWaitingWithRank(memberId);
     }
 
