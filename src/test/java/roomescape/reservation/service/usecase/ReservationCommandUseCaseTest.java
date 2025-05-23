@@ -2,6 +2,7 @@ package roomescape.reservation.service.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,7 +22,9 @@ import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationWait;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationWaitRepository;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
@@ -40,6 +43,9 @@ class ReservationCommandUseCaseTest {
     
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationWaitRepository reservationWaitRepository;
     
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -175,5 +181,58 @@ class ReservationCommandUseCaseTest {
         // when & then
         assertThatThrownBy(() -> reservationCommandUseCase.delete(id))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @DisplayName("예약 삭제 후 예약 대기가 있다면, 가장 첫 번째 예약 대기가 삭제되고 예약으로 승격된다.")
+    @Test
+    void deleteAndPromotionReservationWait() {
+        // given
+        final Theme theme = themeRepository.save(Theme.withoutId(
+                ThemeName.from("공포"),
+                ThemeDescription.from("지구별 방탈출 최고"),
+                ThemeThumbnail.from("www.making.com")));
+
+        final Member reservationMember = memberRepository.save(
+                Member.withoutId(
+                        MemberName.from("강산"),
+                        MemberEmail.from("123@gmail.com"),
+                        Role.MEMBER
+                ));
+
+        final ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(LocalTime.of(12, 27)));
+
+        final Reservation reservation = reservationRepository.save(
+                Reservation.withoutId(
+                        reservationMember,
+                        ReservationDate.from(LocalDate.of(2025, 8, 10)),
+                        reservationTime,
+                        theme));
+
+        final Member reservationWaitMember = memberRepository.save(
+                Member.withoutId(
+                        MemberName.from("호떡"),
+                        MemberEmail.from("456@gmail.com"),
+                        Role.MEMBER
+                ));
+
+        final ReservationWait reservationWait = reservationWaitRepository.save(
+                ReservationWait.withoutId(
+                        reservationWaitMember,
+                        ReservationDate.from(LocalDate.of(2025, 8, 10)),
+                        reservationTime,
+                        theme
+                ));
+
+        // when
+        reservationCommandUseCase.delete(reservation.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(reservationWaitRepository.findAll()).isEmpty(),
+                () -> assertThat(reservationRepository.findAll().get(0))
+                        .extracting(Reservation::getInfo)
+                        .isEqualTo(reservationWait.getInfo())
+        );
     }
 }
