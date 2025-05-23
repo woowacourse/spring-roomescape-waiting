@@ -32,15 +32,23 @@ public class FakeReservationRepository implements ReservationRepository {
                                          && Objects.equals(reservation.getTheme().getId(), themeId));
     }
 
+
     @Override
-    public Optional<Reservation> findByInfoDateAndInfoTimeIdAndInfoThemeId(final ReservationDate date, final Long timeId,
-                                                                           final Long themeId) {
-        // TODO: 수정 필요
-        return Optional.empty();
+    public Optional<Reservation> findByInfoDateAndInfoTimeIdAndInfoThemeId(
+            final ReservationDate date,
+            final Long timeId,
+            final Long themeId
+    ) {
+        return reservations.stream()
+                .filter(reservation -> Objects.equals(reservation.getDate(), date)
+                                       && Objects.equals(reservation.getTime().getId(), timeId)
+                                       && Objects.equals(reservation.getTheme().getId(), themeId))
+                .findFirst();
     }
 
     @Override
-    public List<Reservation> findByInfoMemberIdAndInfoThemeIdAndInfoDateBetween(Long memberId, Long themeId, ReservationDate from,
+    public List<Reservation> findByInfoMemberIdAndInfoThemeIdAndInfoDateBetween(Long memberId, Long themeId,
+                                                                                ReservationDate from,
                                                                                 ReservationDate to) {
         return reservations.stream()
                 .filter(reservation -> Objects.equals(reservation.getMember().getId(), memberId)
