@@ -26,5 +26,5 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByMemberIdAndSchedule(Long memberId, Schedule schedule);
 
-    List<Waiting> findBySchedule(Schedule schedule);
+    List<Waiting> findByScheduleOrderByCreatedAt(Schedule schedule);
 }

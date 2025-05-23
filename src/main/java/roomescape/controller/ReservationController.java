@@ -22,7 +22,7 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final WaitingService waitingService; //TODO: 내 예약, 대기 조회 고민
+    private final WaitingService waitingService;
 
     public ReservationController(ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;

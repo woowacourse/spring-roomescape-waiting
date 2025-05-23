@@ -19,5 +19,5 @@ public interface WaitingRepository {
 
     boolean existsById(Long waitingId);
 
-    List<Waiting> findBySchedule(Schedule schedule);
+    List<Waiting> findByScheduleOrderByCreatedAt(Schedule schedule);
 }

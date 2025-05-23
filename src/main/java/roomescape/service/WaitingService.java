@@ -92,8 +92,9 @@ public class WaitingService {
         ReservationTime reservationTime = getReservationTimeFromRepository(timeId);
         Theme theme = getThemeFromRepository(themeId);
 
-        List<Waiting> waitings = waitingRepository.findBySchedule(new Schedule(date, reservationTime, theme));
-        approve(waitings.getFirst().getId()); //TODO: 1순위 대기 가져오는 로직 수정 필요
+        List<Waiting> waitings = waitingRepository.findByScheduleOrderByCreatedAt(new Schedule(date, reservationTime, theme));
+        Waiting firstWaiting = waitings.getFirst();
+        approve(firstWaiting.getId());
     }
 
     @Transactional
