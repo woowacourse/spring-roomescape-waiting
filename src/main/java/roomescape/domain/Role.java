@@ -6,8 +6,7 @@ import roomescape.exception.local.InvalidRoleException;
 public enum Role {
 
     GENERAL,
-    ADMIN,
-    ;
+    ADMIN;
 
     public static Role findByName(String name) {
         return Arrays.stream(Role.values())

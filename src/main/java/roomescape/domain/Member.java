@@ -11,7 +11,7 @@ import java.util.Objects;
 import roomescape.domain.regex.MemberFormat;
 
 @Entity
-public class Member {
+public class Member extends AuditedEntity {
 
     private static final int MAX_NAME_LENGTH = 50;
     private static final int MAX_EMAIL_LENGTH = 150;
