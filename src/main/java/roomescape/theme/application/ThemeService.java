@@ -38,7 +38,7 @@ public class ThemeService {
 
     @Transactional
     public void deleteTheme(final Long themeId) {
-        validateIsDuplicated(themeId);
+        validateThemeHasNoReservations(themeId);
 
         Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
@@ -46,9 +46,9 @@ public class ThemeService {
         themeRepository.delete(theme);
     }
 
-    private void validateIsDuplicated(final Long themeId) {
+    private void validateThemeHasNoReservations(final Long themeId) {
         if (reservationRepository.existsByThemeId(themeId)) {
-            throw new IllegalStateException("예약이 이미 존재하는 테마입니다.");
+            throw new IllegalStateException("해당 테마로 예약된 정보가 있어 삭제할 수 없습니다.");
         }
     }
 }
