@@ -56,14 +56,14 @@ class ThemeRepositoryTest {
 
     private TestEntities createTestEntities() {
         Member member = MemberFixtures.createAndPersistMember(entityManager);
-        ReservationTime time = ReservationTimeFixtures.createAndPersistReservationTime(entityManager);
+        ReservationTime time = ReservationTimeFixtures.persistReservationTime(entityManager);
         List<Theme> themes = createTestThemes();
         return new TestEntities(themes, member, time);
     }
 
     private List<Theme> createTestThemes() {
         return IntStream.range(0, 11)
-                .mapToObj(i -> ThemeFixtures.createAndPersistTheme(entityManager))
+                .mapToObj(i -> ThemeFixtures.persistTheme(entityManager))
                 .toList();
     }
 
