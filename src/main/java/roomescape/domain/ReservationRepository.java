@@ -8,7 +8,7 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findAllReservationsV2();
+    List<Reservation> findAllReservations();
 
     Reservation saveWithMember(final Reservation reservation);
 

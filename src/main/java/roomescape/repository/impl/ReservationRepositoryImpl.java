@@ -23,7 +23,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllReservationsV2() {
+    public List<Reservation> findAllReservations() {
         return reservationJpaRepository.findAll();
     }
 

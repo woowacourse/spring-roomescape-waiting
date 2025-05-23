@@ -167,7 +167,7 @@ class MissionStepTest {
                 .statusCode(201)
                 .body("id", greaterThan(0));
 
-        jdbcTemplate.update("INSERT INTO reservation_v2 (member_id, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO reservation (member_id, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
                 "1", "2023-08-05", 1, 1);
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
@@ -177,7 +177,7 @@ class MissionStepTest {
                 .statusCode(200).extract()
                 .jsonPath().getList(".", ReservationResponse.class);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_v2", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
         assertThat(reservations).hasSize(count);
     }
@@ -213,7 +213,7 @@ class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_v2", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(count).isPositive();
 
         RestAssured.given().log().all()
@@ -222,7 +222,7 @@ class MissionStepTest {
                 .then().log().all()
                 .statusCode(204);
 
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation_v2", Integer.class);
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(countAfterDelete).isLessThan(count);
     }
 
