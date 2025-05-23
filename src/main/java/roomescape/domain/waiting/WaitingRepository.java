@@ -27,4 +27,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                 WHERE w.user.id = :userId
             """)
     List<WaitingWithRank> findWaitingWithRankByUserId(Long userId);
+
+    boolean existsByDateAndTimeSlotIdAndThemeIdAndUserId(LocalDate date, long timeId, long themeId, long userId);
 }

@@ -2,9 +2,7 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
@@ -49,8 +47,8 @@ public class WaitingService {
         TimeSlot timeSlot = getTimeSlotById(timeId);
         Theme theme = getThemeById(themeId);
 
-        validateDuplicateWaiting(date, timeSlot, theme, user);
-        validateNotAlreadyReserved(date, timeSlot, theme, user);
+        validateDuplicateWaiting(date, timeSlot.id(), theme.id(), user.id());
+        validateNotAlreadyReserved(date, timeSlot.id(), theme.id(), user.id());
 
         Waiting waiting = Waiting.reserveNewly(user, date, timeSlot, theme);
         return waitingRepository.save(waiting);
@@ -66,26 +64,27 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 
-    private void validateNotAlreadyReserved(final LocalDate date, final TimeSlot timeSlot,
-                                            final Theme theme, final User user) {
-        Reservation reservation = reservationRepository.findByDateAndTimeSlotIdAndThemeId(
-                        date, timeSlot.id(), theme.id())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+    private void validateDuplicateWaiting(final LocalDate date,
+                                          final long timeSlotId,
+                                          final long themeId,
+                                          final long userId) {
+        boolean isWaitingExisted =
+                waitingRepository.existsByDateAndTimeSlotIdAndThemeIdAndUserId(date, timeSlotId, themeId, userId);
 
-        if (reservation.user().id().equals(user.id())) {
-            throw new BusinessRuleViolationException("해당 테마의 시간대에 이미 예약되어 있습니다.");
+        if (isWaitingExisted) {
+            throw new AlreadyExistedException("이미 예약 대기한 내역이 있습니다.");
         }
     }
 
-    private void validateDuplicateWaiting(final LocalDate date,
-                                          final TimeSlot timeSlot,
-                                          final Theme theme,
-                                          final User user) {
-        Optional<Waiting> waiting = waitingRepository.findByDateAndTimeSlotIdAndThemeIdAndUserId
-                (date, timeSlot.id(), theme.id(), user.id());
+    private void validateNotAlreadyReserved(final LocalDate date,
+                                            final long timeSlotId,
+                                            final long themeId,
+                                            final long userId) {
+        boolean isAlreadyReserved =
+                reservationRepository.existsByDateAndTimeSlotIdAndThemeIdAndUserId(date, timeSlotId, themeId, userId);
 
-        if (waiting.isPresent()) {
-            throw new AlreadyExistedException("이미 예약 대기한 내역이 있습니다.");
+        if (isAlreadyReserved) {
+            throw new BusinessRuleViolationException("해당 테마의 시간대에 이미 예약되어 있습니다.");
         }
     }
 
