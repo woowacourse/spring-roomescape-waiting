@@ -3,7 +3,7 @@ spring:
     init:
       mode: always
   datasource:
-    url: jdbc:h2:mem:database-test
+    url: jdbc:h2:mem:database
   h2:
     console:
       enabled: true
