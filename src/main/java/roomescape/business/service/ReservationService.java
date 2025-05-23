@@ -18,10 +18,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.infrastructure.repository.ReservationRepository;
-import roomescape.infrastructure.repository.ReservationTimeRepository;
-import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
@@ -30,22 +27,16 @@ import roomescape.presentation.dto.ReservationResponse;
 @Transactional(readOnly = true)
 public class ReservationService {
 
+    private final QueryService queryService;
     private final ReservationRepository reservationRepository;
-    private final MemberRepository memberRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
-                              final MemberRepository memberRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository,
+    public ReservationService(final QueryService queryService,
+                              final ReservationRepository reservationRepository,
                               final WaitingRepository waitingRepository
     ) {
+        this.queryService = queryService;
         this.reservationRepository = reservationRepository;
-        this.memberRepository = memberRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
         this.waitingRepository = waitingRepository;
     }
 
@@ -54,36 +45,15 @@ public class ReservationService {
                                       final Long themeId
     ) {
         validateIsDuplicate(date, timeId, themeId);
-        final ReservationTime reservationTime = getReservationTimeById(timeId);
+        final ReservationTime reservationTime = queryService.getReservationTimeById(timeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
 
-        final Theme theme = getThemeById(themeId);
-        final Member member = getMemberById(memberId);
+        final Theme theme = queryService.getThemeById(themeId);
+        final Member member = queryService.getMemberById(memberId);
+
         final Reservation reservation = new Reservation(date, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
-    }
-
-    public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    private Theme getThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(themeId)));
-    }
-
-    private ReservationTime getReservationTimeById(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("해당하는 방탈출 예약 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(timeId)));
-    }
-
-    private Member getMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId)));
     }
 
     private void validateIsDuplicate(final LocalDate date, final Long playTimeId, final Long themeId) {
@@ -99,6 +69,13 @@ public class ReservationService {
         if (reservationDateTime.isBefore(now)) {
             throw new InvalidDateAndTimeException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
         }
+    }
+
+    public List<ReservationResponse> findAll() {
+        return reservationRepository.findAll()
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public List<ReservationResponse> findAllFilter(final Long memberId, final Long themeId, final LocalDate startDate,

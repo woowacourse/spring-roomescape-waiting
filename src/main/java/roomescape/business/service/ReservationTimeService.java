@@ -23,7 +23,9 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
+                                  final ReservationRepository reservationRepository) {
+
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -68,13 +70,13 @@ public class ReservationTimeService {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(reservationTime -> {
-                    boolean isAlreadyBooked = containPlayTime(reservations, reservationTime);
+                    boolean isAlreadyBooked = containReservationTime(reservations, reservationTime);
                     return AvailableReservationTimeResponse.from(reservationTime, isAlreadyBooked);
                 })
                 .collect(Collectors.toList());
     }
 
-    private boolean containPlayTime(final List<Reservation> reservations, final ReservationTime reservationTime) {
+    private boolean containReservationTime(final List<Reservation> reservations, final ReservationTime reservationTime) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.isSameReservationTime(reservationTime));
     }
