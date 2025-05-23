@@ -20,7 +20,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public Member findMemberById(long id) {
+    public Member findMemberById(Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new UnauthorizedException("[ERROR] 유저를 찾을 수 없습니다. ID : " + id));
     }
@@ -32,10 +32,10 @@ public class MemberService {
                 .toList();
     }
 
-    public MemberSignupResponse registerMember(SignUpRequest requestDto) {
-        Member member = Member.createWithoutId(requestDto.name(), requestDto.email(), Role.USER, requestDto.password());
+    public MemberSignupResponse registerMember(SignUpRequest request) {
+        Member member = Member.createWithoutId(request.name(), request.email(), Role.USER, request.password());
 
-        if (memberRepository.existsByEmail(requestDto.email())) {
+        if (memberRepository.existsByEmail(request.email())) {
             throw new DuplicateContentException("이메일은 중복될 수 없습니다.");
         }
 

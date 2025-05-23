@@ -31,9 +31,9 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> postTheme(@RequestBody final ThemeCreateRequest requestDto) {
-        ThemeResponse responseDto = themeService.createTheme(requestDto);
-        return ResponseEntity.created(URI.create("themes/" + responseDto.id())).body(responseDto);
+    public ResponseEntity<ThemeResponse> postTheme(@RequestBody final ThemeCreateRequest request) {
+        ThemeResponse response = themeService.createTheme(request);
+        return ResponseEntity.created(URI.create("themes/" + response.id())).body(response);
     }
 
     @GetMapping("/popular")

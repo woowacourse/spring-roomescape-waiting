@@ -36,7 +36,20 @@ public class Waiting {
     @JoinColumn(name = "time_id")
     private ReservationTime time;
 
+    public Waiting(final Long id, final LocalDate date, final Member member, final Theme theme,
+                   final ReservationTime time) {
+        this.id = id;
+        this.date = date;
+        this.member = member;
+        this.theme = theme;
+        this.time = time;
+    }
+
     public Waiting() {
+    }
+
+    public static Waiting createWithoutId(LocalDate date, Member member, Theme theme, ReservationTime time) {
+        return new Waiting(null, date, member, theme, time);
     }
 
     public Long getId() {

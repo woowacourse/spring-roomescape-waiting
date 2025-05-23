@@ -1,0 +1,80 @@
+package roomescape.service;
+
+import static roomescape.domain.Reservation.validateReservableTime;
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.member.Member;
+import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithRank;
+import roomescape.dto.reservation.MyReservationAndWaitingsResponse;
+import roomescape.dto.waiting.WaitingCreateRequest;
+import roomescape.dto.waiting.WaitingResponse;
+import roomescape.exception.NotFoundException;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingQueryRepository;
+import roomescape.repository.WaitingRepository;
+
+@Service
+public class WaitingService {
+
+    private final WaitingRepository waitingRepository;
+    private final ReservationTimeRepository ReservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
+    private final WaitingQueryRepository waitingQueryRepository;
+
+    public WaitingService(final WaitingRepository WaitingRepository,
+                          final ReservationTimeRepository ReservationTimeRepository,
+                          final ThemeRepository themeRepository,
+                          final MemberRepository memberRepository, final WaitingRepository waitingRepository,
+                          final WaitingQueryRepository waitingQueryRepository) {
+        this.waitingRepository = WaitingRepository;
+        this.ReservationTimeRepository = ReservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
+        this.waitingQueryRepository = waitingQueryRepository;
+    }
+
+    public WaitingResponse createWaiting(WaitingCreateRequest request) {
+        ReservationTime ReservationTime = ReservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
+
+        validateReservableTime(request.date(), ReservationTime.getStartAt());
+
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + request.themeId()));
+
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + request.memberId()));
+
+        Waiting requestWaiting = Waiting.createWithoutId(request.date(), member, theme, ReservationTime);
+        Waiting newWaiting = waitingRepository.save(requestWaiting);
+
+        return WaitingResponse.from(newWaiting);
+    }
+
+    public List<WaitingResponse> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        return waitings.stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
+    public void deleteWaiting(Long id) {
+        if (!waitingRepository.existsById(id)) {
+            throw new NotFoundException("[ERROR] 등록된 예약 대기 번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+        }
+        waitingRepository.deleteById(id);
+    }
+
+    public List<MyReservationAndWaitingsResponse> findMyWaitings(Long id) {
+        List<WaitingWithRank> waitingsWithRank = waitingQueryRepository.findWaitingsWithRankByMemberId(id);
+        return waitingsWithRank.stream().map(MyReservationAndWaitingsResponse::from).toList();
+    }
+}

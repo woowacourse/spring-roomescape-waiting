@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.reservation.AdminReservationCreateRequest;
+import roomescape.dto.reservation.ReservationCreateRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.service.ReservationService;
-import roomescape.dto.reservation.ReservationCreateRequest;
 
 @RestController
 @RequestMapping("/admin/reservations")
@@ -27,18 +27,18 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(
-            @RequestBody AdminReservationCreateRequest requestDto) {
-        ReservationCreateRequest createDto = new ReservationCreateRequest(requestDto.date(), requestDto.themeId(),
-                requestDto.timeId(),
-                requestDto.memberId());
-        ReservationResponse responseDto = reservationService.createReservation(createDto);
-        return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
+            @RequestBody AdminReservationCreateRequest request) {
+        ReservationCreateRequest createdRequest = new ReservationCreateRequest(request.date(), request.themeId(),
+                request.timeId(),
+                request.memberId());
+        ReservationResponse response = reservationService.createReservation(createdRequest);
+        return ResponseEntity.created(URI.create("reservations/" + response.id())).body(response);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ReservationResponse>> searchReservationsByPeriod(
-            @RequestParam("themeId") long themeId,
-            @RequestParam("memberId") long memberId,
+            @RequestParam("themeId") Long themeId,
+            @RequestParam("memberId") Long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
             @RequestParam("dateTo") LocalDate dateTo) {
         List<ReservationResponse> reservationBetween = reservationService.findReservationBetween(themeId, memberId,

@@ -46,10 +46,10 @@ class AdminReservationControllerTest {
                     .then().log().all()
                     .statusCode(201);
 
-            ThemeCreateRequest themeCreateRequestDto = new ThemeCreateRequest("테마1", "설명1", "url");
+            ThemeCreateRequest themeCreaterequest = new ThemeCreateRequest("테마1", "설명1", "url");
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(themeCreateRequestDto)
+                    .body(themeCreaterequest)
                     .when().post("/themes")
                     .then().log().all()
                     .statusCode(201);

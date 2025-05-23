@@ -6,7 +6,7 @@ import roomescape.dto.theme.ThemeResponse;
 import roomescape.dto.time.ReservationTimeResponse;
 
 public record WaitingResponse(
-        long id,
+        Long id,
         LocalDate date,
         ThemeResponse theme,
         ReservationTimeResponse time) {

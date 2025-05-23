@@ -25,8 +25,8 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ReservationTimeResponse createReservationTime(final ReservationTimeCreateRequest requestDto) {
-        ReservationTime requestTime = requestDto.createWithoutId();
+    public ReservationTimeResponse createReservationTime(final ReservationTimeCreateRequest request) {
+        ReservationTime requestTime = request.toDomain();
         try {
             ReservationTime savedTime = reservationTimeRepository.save(requestTime);
             return ReservationTimeResponse.from(savedTime);

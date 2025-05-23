@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.waiting.WaitingWithRankResponse;
 
 @Repository
@@ -19,9 +20,9 @@ public interface WaitingQueryRepository extends JpaRepository<Waiting, Long> {
                  WHERE w2.theme = w.theme
                   AND w2.date = w.date
                    AND w2.time = w.time
-                   AND w2.id < w.id))
+                   AND w2.id <= w.id))
             FROM Waiting w
             WHERE w.member.id = :memberId
             """)
-    List<WaitingWithRankResponse> findWaitingsWithRankByMemberId(@Param("memberId") Long memberId);
+    List<WaitingWithRank> findWaitingsWithRankByMemberId(@Param("memberId") Long memberId);
 }

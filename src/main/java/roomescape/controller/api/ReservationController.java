@@ -35,12 +35,12 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@CurrentMember LoginInfo loginInfo,
-                                                              @RequestBody final MemberReservationCreateRequest requestDto) {
-        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(requestDto.date(), requestDto.themeId(),
-                requestDto.timeId(),
+                                                              @RequestBody final MemberReservationCreateRequest request) {
+        ReservationCreateRequest reservationCreateRequest = new ReservationCreateRequest(request.date(), request.themeId(),
+                request.timeId(),
                 loginInfo.id());
-        ReservationResponse responseDto = reservationService.createReservation(reservationCreateRequest);
-        return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
+        ReservationResponse response = reservationService.createReservation(reservationCreateRequest);
+        return ResponseEntity.created(URI.create("reservations/" + response.id())).body(response);
     }
 
     @DeleteMapping("/{id}")

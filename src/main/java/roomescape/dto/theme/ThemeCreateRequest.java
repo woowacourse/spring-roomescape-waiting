@@ -4,7 +4,7 @@ import roomescape.domain.Theme;
 
 public record ThemeCreateRequest(String name, String description, String thumbnail) {
 
-    public Theme createWithoutId() {
+    public Theme toDomain() {
         return Theme.createWithoutId(name, description, thumbnail);
     }
 }
