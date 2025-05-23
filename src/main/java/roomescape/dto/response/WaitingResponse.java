@@ -6,9 +6,9 @@ import roomescape.domain.Waiting;
 public record WaitingResponse(
         Long id,
         LocalDate date,
-        ThemeProfileResponse themeResponse,
-        ReservationTimeResponse timeResponse,
-        MemberProfileResponse memberProfileResponse
+        ThemeProfileResponse theme,
+        ReservationTimeResponse time,
+        MemberProfileResponse member
 ) {
 
     public WaitingResponse(Waiting waiting) {

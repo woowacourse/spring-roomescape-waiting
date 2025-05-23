@@ -89,9 +89,9 @@ class WaitingServiceTest {
             assertAll(
                     () -> assertThat(waitingResponse.id()).isEqualTo(expectedWaiting.getId()),
                     () -> assertThat(waitingResponse.date()).isEqualTo(creationContent.date()),
-                    () -> assertThat(waitingResponse.themeResponse().id()).isEqualTo(creationContent.themeId()),
-                    () -> assertThat(waitingResponse.timeResponse().id()).isEqualTo(creationContent.timeId()),
-                    () -> assertThat(waitingResponse.memberProfileResponse().id()).isEqualTo(creationContent.memberId())
+                    () -> assertThat(waitingResponse.theme().id()).isEqualTo(creationContent.themeId()),
+                    () -> assertThat(waitingResponse.time().id()).isEqualTo(creationContent.timeId()),
+                    () -> assertThat(waitingResponse.member().id()).isEqualTo(creationContent.memberId())
             );
         }
 

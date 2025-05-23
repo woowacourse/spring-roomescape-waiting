@@ -1,5 +1,8 @@
 INSERT INTO member(role, name, email, password)
-VALUES ('GENERAL', 'member', 'member@email.com', 'qwer1234!'),
+VALUES ('GENERAL', 'member1', 'member1@email.com', 'qwer1234!'),
+       ('GENERAL', 'member2', 'member2@email.com', 'qwer1234!'),
+       ('GENERAL', 'member3', 'member3@email.com', 'qwer1234!'),
+       ('GENERAL', 'member4', 'member4@email.com', 'qwer1234!'),
        ('ADMIN', 'admin', 'admin@email.com', 'qwer1234!');
 
 INSERT INTO reservation_time(start_at)
@@ -20,20 +23,22 @@ VALUES ('Theme 1', '설명1',
 
 INSERT INTO reservation(date, reservation_time_id, theme_id, member_id)
 VALUES
--- theme_id 1에 1개 예약
 ('2025-05-10', 1, 1, 1),
 
--- theme_id 2에 2개 예약
 ('2025-05-10', 1, 2, 1),
 ('2025-05-10', 2, 2, 1),
 
--- theme_id 3에 3개 예약
 ('2025-05-10', 1, 3, 1),
 ('2025-05-10', 2, 3, 1),
 ('2025-05-10', 3, 3, 1),
 
--- theme_id 4에 4개 예약
 ('2025-05-10', 1, 4, 1),
 ('2025-05-10', 2, 4, 1),
 ('2025-05-10', 3, 4, 1),
 ('2025-05-10', 4, 4, 1);
+
+INSERT INTO waiting(date, theme_id, time_id, member_id)
+VALUES
+('2025-05-10', 1, 1, 2),
+('2025-05-10', 1, 1, 3),
+('2025-05-10', 1, 1, 4);

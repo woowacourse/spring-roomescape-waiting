@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
@@ -42,6 +43,12 @@ public class WaitingService {
         this.reservationTimeRepository = reservationTimeRepository;
         this.memberRepository = memberRepository;
         this.reservationRepository = reservationRepository;
+    }
+
+    public List<WaitingResponse> findAllWaiting() {
+        List<Waiting> allWaiting = waitingRepository.findAll();
+        return allWaiting.stream().map(WaitingResponse::new)
+                .toList();
     }
 
     public WaitingResponse addWaiting(WaitingCreationContent content) {
