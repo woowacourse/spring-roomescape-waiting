@@ -50,7 +50,10 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
                 WHERE w2.bookingInfo.date = w.bookingInfo.date
                   AND w2.bookingInfo.time = w.bookingInfo.time
                   AND w2.bookingInfo.theme = w.bookingInfo.theme
-                  AND w2.waitingStartedAt < w.waitingStartedAt
+                  AND (
+                       w2.waitingStartedAt < w.waitingStartedAt OR
+                       (w2.waitingStartedAt = w.waitingStartedAt AND w2.id < w.id)
+                  )
             )
         )
         FROM Waiting w
