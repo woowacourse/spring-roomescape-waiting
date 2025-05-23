@@ -22,3 +22,6 @@ spring:
 jwt:
   secret-key: secretsecretsecretsecretsecretsecret
   expire-time: 31536000000
+
+logging:
+  config: classpath:logback/logback.xml
