@@ -18,6 +18,7 @@ import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,16 +45,6 @@ public class RegularTest {
     void setUp() {
         REGULAR_TOKEN = loginAndGetAuthToken(REGULAR_EMAIL, PASSWORD);
     }
-
-    void login() {
-        RestAssured.given().log().all()
-                .body(new LoginRequest(REGULAR_EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200);
-    }
-
 
     @Test
     void logout() {
@@ -125,24 +116,6 @@ public class RegularTest {
     }
 
     @Test
-    void findMyReservations() {
-        createReservationTime();
-        createTheme("추리");
-        createRegularReservation(1L);
-
-        List<MyReservationResponse> responses = RestAssured.given().log().all()
-                .cookie(TOKEN, REGULAR_TOKEN)
-                .when().get("/reservations-mine")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .as(new TypeRef<>() {
-                });
-
-        assertThat(responses.size()).isEqualTo(1);
-    }
-
-    @Test
     void createWaitingReservations() {
         createReservationTime();
         createTheme("추리");
@@ -165,5 +138,25 @@ public class RegularTest {
                 .as(WaitingReservationResponse.class);
 
         assertThat(waitingReservationResponse.waitingStatus()).isEqualTo(WaitingStatus.WAITING);
+    }
+
+    @Test
+    void findMyReservations() {
+        createWaitingReservations();
+        String user2Token = loginAndGetAuthToken(REGULAR2_EMAIL, PASSWORD);
+
+        List<MyReservationResponse> responses = RestAssured.given().log().all()
+                .cookie(TOKEN, user2Token)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(new TypeRef<>() {
+                });
+
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(responses.size()).isEqualTo(1);
+            softAssertions.assertThat(responses.getFirst().status()).isEqualTo("1번째 예약대기");
+        });
     }
 }

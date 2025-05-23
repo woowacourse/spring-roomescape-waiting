@@ -18,8 +18,10 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByThemeIdAndDateBetweenAndWaitingMemberId(final Long themeId, final LocalDate startDate,
-                                                                           final LocalDate endDate, final Long memberId) {
+    public List<Reservation> findByThemeIdAndDateBetweenAndWaitingMemberId(final Long themeId,
+                                                                           final LocalDate startDate,
+                                                                           final LocalDate endDate,
+                                                                           final Long memberId) {
         return jpaReservationRepository.findByThemeIdAndDateBetweenAndWaitingsMemberId(themeId, startDate, endDate,
                 memberId);
     }
@@ -49,11 +51,6 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     public List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(final LocalDate date,
                                                                                   final Long themeId) {
         return jpaReservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
-    }
-
-    @Override
-    public List<Reservation> findByWaitingMemberId(final Long id) {
-        return jpaReservationRepository.findByWaitingsMemberId(id);
     }
 
     @Override

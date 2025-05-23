@@ -25,6 +25,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingStatus;
+import roomescape.waiting.exception.WaitingNotFoundException;
 
 @Entity
 public class Reservation {
@@ -53,6 +54,7 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+        // TODO : 연관관계 저장 안됨 문제
         waitings.add(new Waiting(WaitingStatus.CURRENT, member, this));
     }
 
@@ -90,6 +92,17 @@ public class Reservation {
                 .map(Waiting::getMember)
                 .findFirst()
                 .orElseThrow(() -> new ReservationNotFoundException("현재 예약한 멤버가 없습니다."));
+    }
+
+    public long findRank(final Waiting givenWaiting) {
+        if (!waitings.contains(givenWaiting)) {
+            throw new WaitingNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
+        }
+        List<Waiting> sortedWaitings = new ArrayList<>(waitings)
+                .stream()
+                .sorted(Comparator.comparing(Waiting::getCreatedAt))
+                .toList();
+        return sortedWaitings.indexOf(givenWaiting);
     }
 
     public void cancelWaiting(final Member member) {

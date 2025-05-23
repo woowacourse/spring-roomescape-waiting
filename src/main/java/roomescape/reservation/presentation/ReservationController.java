@@ -90,5 +90,4 @@ public class ReservationController {
         List<MyReservationResponse> myReservations = reservationApplicationService.findMyReservations(memberInfo);
         return ResponseEntity.ok().body(myReservations);
     }
-
 }

@@ -4,13 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.presentation.dto.response.MyReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.theme.domain.Theme;
@@ -53,13 +51,6 @@ public class ReservationDomainService {
                             final LocalDateTime now) {
         return reservationRepository.save(
                 Reservation.createUpcomingReservation(member, date, time, theme, now));
-    }
-
-    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
-        return reservationRepository.findByWaitingMemberId(memberInfo.id())
-                .stream()
-                .map(MyReservationResponse::from)
-                .toList();
     }
 
     public boolean existsByTimeId(final Long timeId) {

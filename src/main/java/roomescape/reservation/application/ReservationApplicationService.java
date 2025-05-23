@@ -80,6 +80,6 @@ public class ReservationApplicationService {
     }
 
     public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
-        return reservationDomainService.findMyReservations(memberInfo);
+        return waitingDomainService.findMyReservations(memberInfo);
     }
 }

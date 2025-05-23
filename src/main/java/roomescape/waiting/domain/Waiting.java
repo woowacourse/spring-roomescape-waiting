@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 
@@ -50,12 +51,29 @@ public class Waiting {
     public Waiting() {
     }
 
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof final Waiting waiting)) {
+            return false;
+        }
+        return Objects.equals(getId(), waiting.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
     public Long getId() {
         return id;
     }
 
     public WaitingStatus getWaitingStatus() {
         return waitingStatus;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
     }
 
     public Member getMember() {

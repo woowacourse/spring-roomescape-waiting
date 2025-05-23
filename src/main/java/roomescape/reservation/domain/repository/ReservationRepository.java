@@ -23,8 +23,6 @@ public interface ReservationRepository {
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(LocalDate date,
                                                                            Long themeId);
 
-    List<Reservation> findByWaitingMemberId(Long id);
-
     List<Reservation> findAll();
 
     void deleteById(Long id);

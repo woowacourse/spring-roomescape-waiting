@@ -6,12 +6,13 @@ import java.time.LocalTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 public class TestFixture {
 
+    public static final LocalDate FUTURE_DATE = TestFixture.makeFutureDate();
+    public static final LocalDateTime NOW_DATETIME = TestFixture.makeNowDateTime();
     private static final LocalTime TIME = LocalTime.of(10, 0);
 
     public static Theme makeTheme() {
@@ -33,6 +34,10 @@ public class TestFixture {
 
     public static ReservationTime makeReservationTime(final LocalTime localTime) {
         return ReservationTime.withUnassignedId(localTime);
+    }
+
+    public static LocalDateTime makeNowDateTime() {
+        return LocalDateTime.now();
     }
 
     public static LocalDate makeFutureDate() {

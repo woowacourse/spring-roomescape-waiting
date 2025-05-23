@@ -3,7 +3,6 @@ package roomescape.reservation.infrastructure;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
@@ -43,9 +42,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             ORDER BY rt.startAt
             """)
     List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(LocalDate date, Long themeId);
-
-    @EntityGraph(attributePaths = {"theme", "time"})
-    List<Reservation> findByWaitingsMemberId(Long memberId);
 
     @Query("""
             SELECT r 
