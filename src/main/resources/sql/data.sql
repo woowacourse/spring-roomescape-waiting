@@ -19,4 +19,7 @@ INSERT INTO reservation (date, time_id, theme_id, member_id, status)
 VALUES ('2025-05-25', 2, 4, 1, 'RESERVED'),
        ('2025-05-25', 2, 3, 1, 'RESERVED'),
        ('2025-05-26', 2, 3, 1, 'RESERVED'),
-       ('2025-05-27', 1, 3, 1, 'RESERVED');
+       ('2025-05-27', 1, 3, 1, 'RESERVED'),
+       ('2025-05-25', 2, 4, 1, 'WAITING'),
+       ('2025-05-25', 2, 4, 1, 'WAITING'),
+       ('2025-05-27', 1, 3, 1, 'WAITING');
