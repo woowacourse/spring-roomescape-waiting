@@ -5,12 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.common.exception.DuplicatedException;
+import roomescape.common.exception.NotFoundException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRequest;
 import roomescape.model.Member;
@@ -135,6 +137,42 @@ class WaitingServiceTest {
 
         //then
         assertThat(actual).isNotNull();
+    }
+
+    @DisplayName("대기 신청을 취소할 수 있다.")
+    @Test
+    void cancel() {
+        //given
+        Reservation reservation = createReservation();
+
+        WaitingRequest request = new WaitingRequest(
+                reservation.getDate(),
+                reservation.getTheme().getId(),
+                reservation.getReservationTime().getId()
+        );
+
+        LoginMember loginMember = new LoginMember(reservation.getMember());
+
+        Long savedId = waitingService.register(request, loginMember);
+
+        //when
+        waitingService.cancel(savedId);
+
+        //then
+        List<Waiting> actual = waitingRepository.findAll();
+        assertThat(actual).hasSize(0);
+    }
+
+    @DisplayName("취소하려는 대기가 존재하지 않는 경우 예외가 발생한다.")
+    @Test
+    void nonCancel() {
+        //given
+        Long savedId = 1L;
+
+        //when //then
+        assertThatThrownBy(() -> waitingService.cancel(savedId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("대기 신청이 존재하지 않습니다.");
     }
 
     private Reservation createReservation() {

@@ -41,6 +41,17 @@ public class WaitingService {
         return savedWaiting.getId();
     }
 
+    @Transactional
+    public void cancel(final Long waitingId) {
+        final Waiting waiting = findWaiting(waitingId);
+        waitingRepository.delete(waiting);
+    }
+
+    private Waiting findWaiting(final Long waitingId) {
+        return waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new NotFoundException("대기 신청이 존재하지 않습니다."));
+    }
+
     private Reservation findReservationBy(final LocalDate date, final Long themeId, final Long timeId) {
         return reservationRepository.findByDateAndThemeIdAndReservationTimeId(
                 date,
