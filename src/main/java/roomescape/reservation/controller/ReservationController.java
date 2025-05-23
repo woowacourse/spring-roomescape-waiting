@@ -23,6 +23,7 @@ import roomescape.reservation.dto.response.MyReservationsResponse;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.service.CreateReservationService;
 import roomescape.reservation.service.ReservationService;
 
 @RequestMapping("/reservations")
@@ -30,9 +31,14 @@ import roomescape.reservation.service.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final CreateReservationService createReservationService;
 
-    public ReservationController(final ReservationService reservationService) {
+    public ReservationController(
+            final ReservationService reservationService,
+            final CreateReservationService createReservationService
+    ) {
         this.reservationService = reservationService;
+        this.createReservationService = createReservationService;
     }
 
     @GetMapping
@@ -58,7 +64,7 @@ public class ReservationController {
             final LoginMember loginMember
     ) {
         ReservationCreateRequest createRequest = ReservationCreateRequest.from(request, loginMember);
-        ReservationResponse response = reservationService.create(createRequest);
+        ReservationResponse response = createReservationService.create(createRequest);
 
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
                 .body(response);

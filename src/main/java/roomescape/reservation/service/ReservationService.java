@@ -1,33 +1,26 @@
 package roomescape.reservation.service;
 
+import org.springframework.stereotype.Service;
+import roomescape.auth.dto.LoginMember;
+import roomescape.common.exception.EntityNotFoundException;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.dto.request.FilteringReservationRequest;
+import roomescape.reservation.dto.response.BookedReservationTimeResponse;
+import roomescape.reservation.dto.response.MyReservationsResponse;
+import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import roomescape.auth.dto.LoginMember;
-import roomescape.common.exception.AlreadyInUseException;
-import roomescape.common.exception.EntityNotFoundException;
-import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
-import roomescape.reservation.dto.response.BookedReservationTimeResponse;
-import roomescape.reservation.dto.request.FilteringReservationRequest;
-import roomescape.reservation.dto.response.MyReservationsResponse;
-import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
@@ -64,20 +57,6 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse create(final ReservationCreateRequest request) {
-        if (isAlreadyBooked(request)) {
-            throw new AlreadyInUseException("reservation is already in use");
-        }
-
-        Reservation reservation = createReservation(request);
-        LocalDateTime now = LocalDateTime.now();
-        validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
-
-        Reservation savedReservation = reservationRepository.save(reservation);
-
-        return ReservationResponse.from(savedReservation);
-    }
-
     public List<ReservationResponse> findReservationByFiltering(final FilteringReservationRequest request) {
         Long themeId = request.themeId();
         Long memberId = request.memberId();
@@ -88,41 +67,6 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
-    }
-
-    private boolean isAlreadyBooked(final ReservationCreateRequest request) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId()
-        );
-    }
-
-    private Reservation createReservation(final ReservationCreateRequest request) {
-        ReservationTime reservationTime = getReservationTime(request);
-        Theme theme = getTheme(request);
-        LoginMember loginMember = request.loginMember();
-        Member member = memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
-        return new Reservation(member, request.date(), reservationTime, theme);
-    }
-
-    private Theme getTheme(final ReservationCreateRequest request) {
-        Long themeId = request.themeId();
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new EntityNotFoundException("theme not found id =" + themeId));
-    }
-
-    private ReservationTime getReservationTime(final ReservationCreateRequest request) {
-        Long timeId = request.timeId();
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new EntityNotFoundException("reservationsTime not found id =" + timeId));
-    }
-
-    private void validateDateTime(final LocalDateTime now, final LocalDate date, final LocalTime time) {
-        LocalDateTime dateTime = LocalDateTime.of(date, time);
-
-        if (now.isAfter(dateTime)) {
-            throw new IllegalArgumentException("이미 지난 예약 시간입니다.");
-        }
     }
 
     public void delete(final Long id) {
