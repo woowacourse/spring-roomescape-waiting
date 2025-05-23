@@ -1,4 +1,4 @@
-package roomescape.admin;
+package roomescape.view;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -83,6 +83,15 @@ class AdminViewControllerTest {
     void checkAdminDisplay_Theme() {
         requestSpecification.log().all()
                 .when().get("/admin/theme")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("어드민 예약 대기 관리 페이지를 출력한다")
+    @Test
+    void checkAdminDisplay_Waiting() {
+        requestSpecification.log().all()
+                .when().get("/admin/waiting")
                 .then().log().all()
                 .statusCode(200);
     }

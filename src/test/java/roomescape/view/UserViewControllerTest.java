@@ -1,4 +1,4 @@
-package roomescape.user;
+package roomescape.view;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +18,7 @@ class UserViewControllerTest {
                 .statusCode(200);
     }
 
-    @DisplayName("사용자 예약 내역 페이지를 출력한다")
+    @DisplayName("사용자 예약 생성 페이지를 출력한다")
     @Test
     void checkUserDisplay_Reservation() {
         RestAssured.given().log().all()
@@ -41,6 +41,15 @@ class UserViewControllerTest {
     void checkUserDisplay_Signup() {
         RestAssured.given().log().all()
                 .when().get("/signup")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @DisplayName("사용자 예약 내역 페이지를 출력한다")
+    @Test
+    void checkUserDisplay_ReservationMine() {
+        RestAssured.given().log().all()
+                .when().get("/reservation-mine")
                 .then().log().all()
                 .statusCode(200);
     }
