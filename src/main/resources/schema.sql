@@ -30,9 +30,21 @@ CREATE TABLE IF NOT EXISTS reservation (
     date DATE NOT NULL,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
-    type VARCHAR(31) NOT NULL, -- @DiscriminatorColumn(name = "type")
+    type VARCHAR(31) NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member(id),
     FOREIGN KEY (time_id) REFERENCES reservation_time(id),
     FOREIGN KEY (theme_id) REFERENCES theme(id)
+);
+
+CREATE TABLE IF NOT EXISTS confirmed_reservation (
+    id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES reservation(id)
+);
+
+CREATE TABLE IF NOT EXISTS waiting_reservation (
+    id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (id) REFERENCES reservation(id)
 );
