@@ -46,7 +46,7 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> getReservationTimes(final LocalDate date, final Long themeId) {
-        List<Long> bookedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId).stream()
+        List<Long> bookedTimeIds = reservationRepository.findAllByDateAndThemeId(date, themeId).stream()
                 .map(reservation -> reservation.getReservationTime().getId())
                 .toList();
 

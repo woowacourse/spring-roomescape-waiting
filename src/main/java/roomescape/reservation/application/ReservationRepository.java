@@ -13,7 +13,7 @@ import roomescape.theme.domain.Theme;
 
 @Repository
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
-    List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query("""
                 SELECT r FROM Reservation r
