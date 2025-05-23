@@ -8,9 +8,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.config.annotation.AuthMember;
-import roomescape.entity.Member;
 import roomescape.exception.custom.AuthenticatedException;
-import roomescape.service.AuthService;
+import roomescape.auth.service.AuthService;
+import roomescape.member.entity.Member;
 
 public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -23,7 +23,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(AuthMember.class)
-            && parameter.getParameterType().equals(Member.class);
+                && parameter.getParameterType().equals(Member.class);
     }
 
     @Override
@@ -33,7 +33,6 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
             NativeWebRequest webRequest,
             WebDataBinderFactory binderFactory
     ) {
-
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = extractTokenFromCookie(request.getCookies());
 

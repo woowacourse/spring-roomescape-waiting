@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.config.interceptor.CheckLoginInterceptor;
 import roomescape.config.resolver.AuthArgumentResolver;
-import roomescape.service.AuthService;
+import roomescape.auth.service.AuthService;
 
 @Configuration
 public class AuthConfiguration implements WebMvcConfigurer {
@@ -26,6 +26,7 @@ public class AuthConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CheckLoginInterceptor(authService))
-            .addPathPatterns("/admin/**");
+                .addPathPatterns("/admin/**");
+
     }
 }

@@ -9,7 +9,7 @@ public class NotFoundException extends CustomException {
         super(ErrorCode.NOT_FOUND);
     }
 
-    public NotFoundException(String detail) {
+    public NotFoundException(final String detail) {
         super(ErrorCode.NOT_FOUND, detail);
     }
 }
