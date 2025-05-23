@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.request.CreateReservationRequest;
@@ -14,6 +15,7 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.entity.WaitingReservation;
 import roomescape.exception.custom.InvalidMemberException;
 import roomescape.exception.custom.InvalidReservationException;
 import roomescape.exception.custom.InvalidReservationTimeException;
@@ -50,12 +52,26 @@ public class ConfirmReservationService {
         return createReservation(loginMemberRequest.id(), request.themeId(), request.date(), request.timeId());
     }
 
+    public ConfirmedReservation addReservation(
+            WaitingReservation waitingReservation
+    ) {
+        return createReservation(
+                waitingReservation.getMember().getId(),
+                waitingReservation.getTheme().getId(),
+                waitingReservation.getDate(),
+                waitingReservation.getReservationTime().getId());
+    }
+
     public ConfirmedReservation addReservationByAdmin(AdminCreateReservationRequest request) {
         return createReservation(request.memberId(), request.themeId(), request.date(), request.timeId());
     }
 
     public List<ConfirmedReservation> findAll() {
         return confirmRepository.findAll();
+    }
+
+    public Optional<ConfirmedReservation> findById(Long id){
+        return confirmRepository.findById(id);
     }
 
     public List<ConfirmedReservation> findAllByFilter(
