@@ -22,23 +22,11 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    private LocalDate date;
-//
-//    @ManyToOne
-//    private Theme theme;
-//
-//    @ManyToOne
-//    private ReservationTime time;
-
     @ManyToOne
     private ReservationSlot reservationSlot;
 
     @ManyToOne
     private Member member;
-
-//    public Waiting(LocalDate date, Theme theme, ReservationTime time, Member member) {
-//        this(null, date, theme, time, member);
-//    }
 
     public Waiting(ReservationSlot reservationSlot, Member member) {
         this(null, reservationSlot, member);

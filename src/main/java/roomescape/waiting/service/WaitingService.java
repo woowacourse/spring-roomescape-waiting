@@ -13,12 +13,8 @@ import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationSlot;
-import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationSlotRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.theme.entity.Theme;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.dto.request.WaitingCreateRequest;
 import roomescape.waiting.dto.response.WaitingCreateResponse;
 import roomescape.waiting.dto.response.WaitingReadResponse;
@@ -31,33 +27,27 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
     private final MemberRepository memberRepository;
     private final ReservationSlotRepository reservationSlotRepository;
 
     public WaitingCreateResponse createWaiting(LoginMember loginMember, WaitingCreateRequest request) {
-        validateAvailableWaiting(loginMember, request);
-
-        Theme theme = getThemeById(request.themeId());
-        ReservationTime time = getReservationTimeById(request.timeId());
-        Member member = getMemberById(loginMember.id());
-
         ReservationSlot reservationSlot = reservationSlotRepository.findByDateAndTimeIdAndThemeId(
-                request.date(), time.getId(), theme.getId())
+                        request.date(), request.timeId(), request.themeId())
                 .orElseThrow(() -> new NotFoundException("예약 슬롯을 찾을 수 없습니다."));
+
+        Member member = getMemberById(loginMember.id());
+        validateAvailableWaiting(reservationSlot, loginMember);
+
         Waiting waiting = new Waiting(reservationSlot, member);
-
         Waiting saved = waitingRepository.save(waiting);
-        Long rank = waitingRepository.countByReservationSlot_DateAndReservationSlot_ThemeAndMember(
-                request.date(), theme, member);
 
+        Long rank = waitingRepository.countByReservationSlotAndMemberId(reservationSlot, loginMember.id());
         return WaitingCreateResponse.from(saved, rank);
     }
 
     public List<WaitingReadResponse> getWaitings() {
-        List<Waiting> waitings = waitingRepository.findAll();
-        return waitings.stream()
+        return waitingRepository.findAll()
+                .stream()
                 .map(WaitingReadResponse::from)
                 .toList();
     }
@@ -99,36 +89,23 @@ public class WaitingService {
         }
     }
 
-    private void validateAvailableWaiting(LoginMember loginMember, WaitingCreateRequest request) {
-        boolean hasReservation = reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
-                request.date(), request.timeId(), request.themeId());
+    private void validateAvailableWaiting(ReservationSlot reservationSlot, LoginMember loginMember) {
+        boolean hasReservation = reservationRepository.existsByReservationSlot(reservationSlot);
         if (!hasReservation) {
             throw new BadRequestException("예약이 존재하지 않아 대기를 생성할 수 없습니다.");
         }
 
-//        boolean alreadyReservedByMember = reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-        boolean alreadyReservedByMember = reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(
-                request.date(), request.timeId(), request.themeId(), loginMember.id());
+        boolean alreadyReservedByMember = reservationRepository.existsByReservationSlotAndMemberId(
+                reservationSlot, loginMember.id());
         if (alreadyReservedByMember) {
             throw new BadRequestException("중복된 예약이 존재합니다.");
         }
 
-//        boolean alreadyWaitingByMember = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-        boolean alreadyWaitingByMember = waitingRepository.existsByReservationSlot_DateAndReservationSlot_ThemeIdAndReservationSlot_TimeIdAndMemberId(
-                request.date(), request.timeId(), request.themeId(), loginMember.id());
+        boolean alreadyWaitingByMember = waitingRepository.existsByReservationSlotAndMemberId(
+                reservationSlot, loginMember.id());
         if (alreadyWaitingByMember) {
             throw new BadRequestException("중복된 예약 대기가 존재합니다.");
         }
-    }
-
-    private Theme getThemeById(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마 입니다."));
-    }
-
-    private ReservationTime getReservationTimeById(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간 입니다."));
     }
 
     private Member getMemberById(Long memberId) {

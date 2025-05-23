@@ -28,9 +28,7 @@ import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationSlotRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.dto.request.WaitingCreateRequest;
 import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
@@ -49,12 +47,6 @@ public class WaitingServiceTest {
     private WaitingRepository waitingRepository;
 
     @Mock
-    private ThemeRepository themeRepository;
-
-    @Mock
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Mock
     private MemberRepository memberRepository;
 
     @Mock
@@ -69,14 +61,11 @@ public class WaitingServiceTest {
         var date = LocalDate.now().plusDays(1);
         var reservationSlot = new ReservationSlot(date, time, theme);
 
-        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
-                any(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlot(reservationSlot))
                 .thenReturn(true);
-        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(
-                any(), anyLong(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(false);
-        when(waitingRepository.existsByReservationSlot_DateAndReservationSlot_ThemeIdAndReservationSlot_TimeIdAndMemberId(
-                any(), anyLong(), anyLong(), anyLong()))
+        when(waitingRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(false);
 
         var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
@@ -86,13 +75,9 @@ public class WaitingServiceTest {
         var waiting = new Waiting(1L, reservationSlot, member);
         when(waitingRepository.save(any()))
                 .thenReturn(waiting);
-        when(waitingRepository.countByReservationSlot_DateAndReservationSlot_ThemeAndMember(any(), any(), any()))
+        when(waitingRepository.countByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(1L);
 
-        when(themeRepository.findById(anyLong()))
-                .thenReturn(Optional.of(theme));
-        when(reservationTimeRepository.findById(anyLong()))
-                .thenReturn(Optional.of(time));
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
         when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
@@ -113,13 +98,17 @@ public class WaitingServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
         var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(date, time, theme);
 
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
-                any(), anyLong(), anyLong()))
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
+                .thenReturn(Optional.of(reservationSlot));
+        when(reservationRepository.existsByReservationSlot(reservationSlot))
                 .thenReturn(false);
+        when(memberRepository.findById(anyLong()))
+                .thenReturn(Optional.of(member));
 
         //when & then
         assertThatThrownBy(() -> waitingService.createWaiting(loginMember, request))
@@ -134,16 +123,19 @@ public class WaitingServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
         var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(date, time, theme);
 
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
-                any(), anyLong(), anyLong()))
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
+                .thenReturn(Optional.of(reservationSlot));
+        when(reservationRepository.existsByReservationSlot(any()))
                 .thenReturn(true);
-        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(
-                any(), anyLong(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(true);
+        when(memberRepository.findById(anyLong()))
+                .thenReturn(Optional.of(member));
 
         //when & then
         assertThatThrownBy(() -> waitingService.createWaiting(loginMember, request))
@@ -158,18 +150,20 @@ public class WaitingServiceTest {
         var time = new ReservationTime(1L, LocalTime.of(10, 0));
         var date = LocalDate.now().plusDays(1);
         var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
+        var reservationSlot = new ReservationSlot(date, time, theme);
 
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeId(
-                any(), anyLong(), anyLong()))
+        when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), anyLong()))
+                .thenReturn(Optional.of(reservationSlot));
+        when(memberRepository.findById(anyLong()))
+                .thenReturn(Optional.of(member));
+        when(reservationRepository.existsByReservationSlot(any()))
                 .thenReturn(true);
-        when(reservationRepository.existsByReservationSlot_DateAndReservationSlot_TimeIdAndReservationSlot_ThemeIdAndMemberId(
-                any(), anyLong(), anyLong(), anyLong()))
+        when(reservationRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(false);
-        when(waitingRepository.existsByReservationSlot_DateAndReservationSlot_ThemeIdAndReservationSlot_TimeIdAndMemberId(
-                any(), anyLong(), anyLong(), anyLong()))
+        when(waitingRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(true);
 
         //when & then

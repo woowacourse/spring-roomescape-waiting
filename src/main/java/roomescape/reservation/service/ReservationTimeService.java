@@ -49,7 +49,6 @@ public class ReservationTimeService {
     }
 
     public void deleteTime(Long id) {
-//        if (reservationRepository.existsByTimeId(id)) {
         if (reservationRepository.existsByReservationSlot_TimeId(id)) {
             throw new BadRequestException("해당 시간에 예약된 내역이 존재하므로 삭제할 수 없습니다.");
         }

@@ -75,7 +75,7 @@ public class ReservationService {
     }
 
     public List<ReservationReadFilteredResponse> getFilteredReservations(ReservationReadFilteredRequest request) {
-        List<Reservation> reservations = reservationRepository.findAllByReservationSlot_ThemeIdAndMemberIdAndReservationSlot_DateBetween(
+        List<Reservation> reservations = reservationRepository.findReservationsInPeriod(
                 request.themeId(), request.memberId(), request.dateFrom(), request.dateTo());
 
         return reservations.stream()

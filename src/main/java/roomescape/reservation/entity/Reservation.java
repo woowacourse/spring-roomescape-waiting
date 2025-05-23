@@ -24,27 +24,12 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @Column(nullable = false)
-//    private LocalDate date;
-//
-//    @ManyToOne
-//    @JoinColumn(nullable = false)
-//    private ReservationTime time;
-//
-//    @ManyToOne
-//    @JoinColumn(nullable = false)
-//    private Theme theme;
-
     @OneToOne
     private ReservationSlot reservationSlot;
 
     @ManyToOne
     @JoinColumn(nullable = false)
     private Member member;
-
-//    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-//        this(null, date, time, theme, member);
-//    }
 
     public Reservation(ReservationSlot reservationSlot, Member member) {
         this(null, reservationSlot, member);

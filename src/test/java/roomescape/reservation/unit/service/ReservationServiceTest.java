@@ -248,7 +248,7 @@ class ReservationServiceTest {
         var inDbReservations = List.of(
                 new Reservation(1L, reservationSlot, member)
         );
-        when(reservationRepository.findAllByReservationSlot_ThemeIdAndMemberIdAndReservationSlot_DateBetween(anyLong(), anyLong(), any(LocalDate.class), any(LocalDate.class)))
+        when(reservationRepository.findReservationsInPeriod(anyLong(), anyLong(), any(LocalDate.class), any(LocalDate.class)))
                 .thenReturn(inDbReservations);
 
         var filterRequest = new ReservationReadFilteredRequest(

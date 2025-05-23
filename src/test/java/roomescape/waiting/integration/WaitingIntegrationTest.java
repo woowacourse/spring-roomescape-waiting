@@ -88,6 +88,7 @@ public class WaitingIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.now().plusDays(1);
+        reservationSlotRepository.save(new ReservationSlot(date, time, theme));
 
         var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
