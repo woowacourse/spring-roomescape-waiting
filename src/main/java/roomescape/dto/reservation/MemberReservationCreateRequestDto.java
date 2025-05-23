@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 public record MemberReservationCreateRequestDto
         (@JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-         Long theme,
-         Long time
+         Long themeId,
+         Long timeId
 ) {
 }
