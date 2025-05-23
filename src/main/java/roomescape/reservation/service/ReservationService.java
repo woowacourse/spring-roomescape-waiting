@@ -69,7 +69,7 @@ public class ReservationService {
         List<MyReservationResponse> responses = new ArrayList<>();
 
         responses.addAll(reservedQueryService.getReservations(memberId));
-        responses.addAll(waitingQueryService.getWaitingReservations(memberId));
+        responses.addAll(waitingQueryService.getMyWaitingReservations(memberId));
 
         return responses;
     }

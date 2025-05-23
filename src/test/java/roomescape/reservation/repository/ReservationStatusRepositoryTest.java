@@ -35,33 +35,6 @@ class ReservationStatusRepositoryTest {
     private ThemeDbFixture themeDbFixture;
 
     @Test
-    void 나의_예약_순위를_알_수_있다() {
-        // given
-        Member 유저2 = memberDbFixture.유저2_생성();
-        Member 유저1 = memberDbFixture.유저1_생성();
-        Theme 공포 = themeDbFixture.공포();
-        ReservationDateTime 내일_열시 = reservationDateTimeDbFixture.내일_열시();
-
-        // 유저2가 먼저 예약 대기
-        reservationRepository.save(Reservation.waiting(유저2, 내일_열시, 공포));
-
-        // 유저1 예약 대기
-        Reservation savedWaitingByUser1 = reservationRepository.save(Reservation.waiting(유저1, 내일_열시, 공포));
-
-        // when
-        List<ReservationWithRank> result = reservationStatusRepository.findWithRankByMemberIdAndStatus(
-                유저1.getId(),
-                ReservationStatus.WAITING);
-
-        // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result).hasSize(1);
-            softly.assertThat(result.getFirst().waiting().getId()).isEqualTo(savedWaitingByUser1.getId());
-            softly.assertThat(result.getFirst().rank()).isEqualTo(2);
-        });
-    }
-
-    @Test
     void 대기_정보를_모두_반환한다() {
         // given
         Member 유저1 = memberDbFixture.유저1_생성();

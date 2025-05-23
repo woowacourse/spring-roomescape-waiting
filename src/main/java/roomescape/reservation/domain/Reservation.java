@@ -41,7 +41,7 @@ public class Reservation {
 
     @Builder
     private Reservation(Member reserver, ReservationDateTime reservationDateTime, Theme theme,
-                       ReservationStatus status) {
+                        ReservationStatus status) {
         this.reserver = reserver;
         this.reservationDateTime = reservationDateTime;
         this.theme = theme;

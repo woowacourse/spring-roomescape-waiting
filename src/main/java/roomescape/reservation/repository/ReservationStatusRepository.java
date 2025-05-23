@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.dto.ReservationWithRank;
 
 public interface ReservationStatusRepository extends JpaRepository<Reservation, Long> {
 
@@ -31,13 +30,9 @@ public interface ReservationStatusRepository extends JpaRepository<Reservation, 
               and (:toDate is null or r.reservationDateTime.reservationDate.date <= :toDate)
               and (r.status = :status)
             """)
-    Page<Reservation> findFilteredReservations(
-            @Param("themeId") Long themeId,
-            @Param("memberId") Long memberId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate,
-            @Param("status") ReservationStatus status,
-            Pageable pageable
+    Page<Reservation> findFilteredReservations(@Param("themeId") Long themeId, @Param("memberId") Long memberId,
+                                               @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate,
+                                               @Param("status") ReservationStatus status, Pageable pageable
     );
 
     @Query("""
@@ -92,21 +87,4 @@ public interface ReservationStatusRepository extends JpaRepository<Reservation, 
                                                    @Param("timeId") Long timeId,
                                                    @Param("status") ReservationStatus status
     );
-
-    @Query("""
-            select new roomescape.reservation.dto.ReservationWithRank(
-            r,
-                count(r2)
-            )
-                 from Reservation r
-            join ReservationTime rt on rt = r.reservationDateTime.reservationTime
-            join Reservation r2 on
-                r2.reservationDateTime.reservationTime = rt
-                and r2.reservationDateTime.reservationDate.date = r.reservationDateTime.reservationDate.date
-                and r2.id <= r.id
-            where r.reserver.id = :memberId and r.status = :status
-            group by r
-            """)
-    List<ReservationWithRank> findWithRankByMemberIdAndStatus(@Param("memberId") Long memberId,
-                                                              @Param("status") ReservationStatus status);
 }
