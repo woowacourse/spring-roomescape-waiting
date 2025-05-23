@@ -1,15 +1,14 @@
 package roomescape.reservation.repository.jpa;
 
-import java.time.LocalDate;
-import java.util.List;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Repository
-@ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
 public class JpaReservationRepositoryComposite implements ReservationRepository {
     private final JpaReservationRepository jpaReservationRepository;
 
@@ -39,16 +38,16 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
 
     @Override
     public List<Reservation> findByMemberAndThemeAndVisitDateBetween(
-        Long themeId,
-        Long memberId,
-        LocalDate dateFrom,
-        LocalDate dateTo
+            Long themeId,
+            Long memberId,
+            LocalDate dateFrom,
+            LocalDate dateTo
     ) {
         return jpaReservationRepository.findByMemberAndThemeAndVisitDateBetween(
-            themeId,
-            memberId,
-            dateFrom,
-            dateTo
+                themeId,
+                memberId,
+                dateFrom,
+                dateTo
         );
     }
 

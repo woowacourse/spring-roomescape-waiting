@@ -15,20 +15,20 @@ public class MyReservationJsonResponse implements MyReservationResponse {
     private final LocalTime time;
     private final String status;
 
-    private MyReservationJsonResponse(Long id, String themeName, LocalDate date, LocalTime time, String status) {
+    private MyReservationJsonResponse(Long id, LocalDate date, LocalTime time, String themeName, String status) {
         this.id = id;
-        this.themeName = themeName;
         this.date = date;
         this.time = time;
+        this.themeName = themeName;
         this.status = status;
     }
 
     public static MyReservationJsonResponse fromReservationAndStatus(Reservation reservation, ReservationStatus status) {
         return new MyReservationJsonResponse(
                 reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
+                reservation.getSchedule().getDate(),
+                reservation.getSchedule().getTime().getStartAt(),
+                reservation.getSchedule().getTheme().getName(),
                 status.getDescription()
         );
     }

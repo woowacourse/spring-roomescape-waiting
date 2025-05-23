@@ -14,7 +14,7 @@ import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
+import roomescape.schedule.domain.Schedule;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,19 +32,15 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservation(
-            ReservationTime reservationTime,
-            Theme theme,
             Member member,
             List<ReservationTime> availableTimes,
+            Schedule schedule,
             ReservationCreateRequest reservationCreateRequest
     ) {
-        validateNotPast(LocalDateTime.of(reservationCreateRequest.date(), reservationTime.getStartAt()));
-
-        validateReservationTimeConflict(availableTimes, reservationTime);
-
+        validateNotPast(schedule.getDateTime());
+        validateReservationTimeConflict(availableTimes, schedule.getTime());
         Reservation reservation = reservationRepository.save(
-                reservationCreateRequest.toReservation(reservationTime, theme, member));
-
+                reservationCreateRequest.toReservation(schedule, member));
         return ReservationResponse.from(reservation);
     }
 
@@ -89,7 +85,7 @@ public class ReservationService {
     }
 
     public void validateReservationNonExistenceByTimeId(Long reservationTimeId) {
-        if (reservationRepository.existsByTimeId(reservationTimeId)) {
+        if (existsByTimeId(reservationTimeId)) {
             throw new ConflictException("해당 예약 시간을 사용하는 예약이 존재합니다.");
         }
     }
@@ -107,10 +103,6 @@ public class ReservationService {
     }
 
     private ReservationStatus getReservationStatus(Reservation reservation) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getTime().getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            return ReservationStatus.COMPLETED;
-        }
-        return ReservationStatus.RESERVED;
+        return reservation.getReservationStatus();
     }
 }

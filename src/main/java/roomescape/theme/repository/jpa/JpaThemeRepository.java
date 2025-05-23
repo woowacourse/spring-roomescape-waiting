@@ -13,10 +13,10 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
                 SELECT t
                 FROM Theme t
                 WHERE t.id IN (
-                    SELECT r.theme.id
+                    SELECT r.schedule.theme.id
                     FROM Reservation r
-                    WHERE r.date BETWEEN :fromDate AND :toDate
-                    GROUP BY r.theme.id
+                    WHERE r.schedule.date BETWEEN :fromDate AND :toDate
+                    GROUP BY r.schedule.theme.id
                     ORDER BY COUNT(r) DESC
                     LIMIT :listNum
                 )

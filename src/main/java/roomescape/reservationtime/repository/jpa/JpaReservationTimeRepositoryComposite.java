@@ -1,15 +1,14 @@
 package roomescape.reservationtime.repository.jpa;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 @Repository
-@ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
 public class JpaReservationTimeRepositoryComposite implements ReservationTimeRepository {
     private final JpaReservationTimeRepository jpaReservationTimeRepository;
 

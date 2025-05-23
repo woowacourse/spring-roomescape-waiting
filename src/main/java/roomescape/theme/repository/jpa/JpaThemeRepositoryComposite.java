@@ -1,6 +1,5 @@
 package roomescape.theme.repository.jpa;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
 public class JpaThemeRepositoryComposite implements ThemeRepository {
     private final JpaThemeRepository jpaThemeRepository;
 
