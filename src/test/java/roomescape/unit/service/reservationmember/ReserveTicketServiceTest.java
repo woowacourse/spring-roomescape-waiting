@@ -62,7 +62,7 @@ class ReserveTicketServiceTest {
         long timeId = reservationTimeService.addReservationTime(
                 new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)));
         long themeId = themeService.addTheme(new AddThemeDto("tuda", "asdf", "asdf"));
-        AddReservationDto addReservationDto = new AddReservationDto("asdf", LocalDate.now(), Long.valueOf(timeId),
+        AddReservationDto addReservationDto = new AddReservationDto(LocalDate.now(), Long.valueOf(timeId),
                 Long.valueOf(themeId));
 
         long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
@@ -75,7 +75,7 @@ class ReserveTicketServiceTest {
         long timeId = reservationTimeService.addReservationTime(
                 new AddReservationTimeDto(LocalTime.now().plusHours(1L)));
         long themeId = themeService.addTheme(new AddThemeDto("tuda", "asdf", "asdf"));
-        AddReservationDto addReservationDto = new AddReservationDto("asdf", LocalDate.now(), Long.valueOf(timeId),
+        AddReservationDto addReservationDto = new AddReservationDto(LocalDate.now(), Long.valueOf(timeId),
                 Long.valueOf(themeId));
 
         long memberId = -1;
@@ -90,7 +90,7 @@ class ReserveTicketServiceTest {
                 new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)));
         long themeId = themeService.addTheme(new AddThemeDto("tuda", "asdf", "asdf"));
 
-        AddReservationDto addReservationDto = new AddReservationDto("asdf", LocalDate.now(), Long.valueOf(timeId),
+        AddReservationDto addReservationDto = new AddReservationDto(LocalDate.now(), Long.valueOf(timeId),
                 Long.valueOf(themeId));
 
         long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
@@ -116,8 +116,8 @@ class ReserveTicketServiceTest {
 
         LocalDate today = LocalDate.now();
 
-        AddReservationDto addReservationDto = new AddReservationDto("asdf", today.plusDays(1L), timeId, themeId);
-        AddReservationDto addReservationDto2 = new AddReservationDto("asdf2", today.plusDays(2L), timeId2, themeId);
+        AddReservationDto addReservationDto = new AddReservationDto(today.plusDays(1L), timeId, themeId);
+        AddReservationDto addReservationDto2 = new AddReservationDto(today.plusDays(2L), timeId2, themeId);
 
         reserveTicketService.addReservation(addReservationDto, memberId);
         reserveTicketService.addReservation(addReservationDto2, memberId);
@@ -134,9 +134,9 @@ class ReserveTicketServiceTest {
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
         long firstId = reserveTicketService.addReservation(
-                new AddReservationDto("name", LocalDate.now().plusDays(1), timeId, themeId), memberId);
+                new AddReservationDto(LocalDate.now().plusDays(1), timeId, themeId), memberId);
         long secondId = reserveTicketService.addReservation(
-                new AddReservationDto("name", LocalDate.now().plusDays(2), timeId, themeId), memberId);
+                new AddReservationDto(LocalDate.now().plusDays(2), timeId, themeId), memberId);
 
         List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(memberId);
         List<Long> reservationMemberIds = reserveTickets.stream()
