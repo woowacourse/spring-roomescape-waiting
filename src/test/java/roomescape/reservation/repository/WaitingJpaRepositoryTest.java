@@ -1,0 +1,51 @@
+package roomescape.reservation.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.Waiting;
+
+@ActiveProfiles("test")
+@DataJpaTest
+@Sql(value = {"/schema.sql"})
+public class WaitingJpaRepositoryTest {
+
+    @Autowired
+    TestEntityManager entityManager;
+
+    @Autowired
+    WaitingRepository waitingRepository;
+
+    @Test
+    void test() {
+        // given
+        LocalDate now = LocalDate.now();
+        ReservationTime reservationTime = new ReservationTime(LocalTime.now());
+        Theme theme = new Theme(null, "공포테마", "진짜 무서운거임", "덜덜");
+        Member member1 = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
+        Member member2 = new Member(null, "유저2", "유저2이메일", "비밀번호2", MemberRole.USER);
+        entityManager.persist(reservationTime);
+        entityManager.persist(theme);
+        entityManager.persist(member1);
+        entityManager.persist(member2);
+        entityManager.persist(new Waiting(null, now, reservationTime, theme, member1, 1));
+        entityManager.persist(new Waiting(null, now, reservationTime, theme, member2, 2));
+
+        // when
+        long result = waitingRepository.countByDateAndTimeAndTheme(now, reservationTime, theme);
+
+        // then
+        assertThat(result).isEqualTo(2);
+    }
+}

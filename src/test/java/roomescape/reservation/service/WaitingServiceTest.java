@@ -94,7 +94,7 @@ public class WaitingServiceTest {
 
     @DisplayName("예약 대기를 요청할 수 있다")
     @Test
-    void test() {
+    void addWaiting() {
         // given
         reservationRepository.save(
                 new Reservation(null,
@@ -115,9 +115,11 @@ public class WaitingServiceTest {
 
         // then
         assertAll(
+                () -> assertThat(result.date()).isEqualTo(date),
                 () -> assertThat(result.themeInfo().id()).isEqualTo(themeId),
                 () -> assertThat(result.timeInfo().id()).isEqualTo(timeId),
-                () -> assertThat(result.memberInfo().id()).isEqualTo(memberId)
+                () -> assertThat(result.memberInfo().id()).isEqualTo(memberId),
+                () -> assertThat(result.order()).isEqualTo(1L)
         );
     }
 }

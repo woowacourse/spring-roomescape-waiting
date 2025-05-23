@@ -36,6 +36,11 @@ public class WaitingService {
         this.currentDateTime = currentDateTime;
     }
 
+    /**
+     * TODO
+     * 락이 필요하다.
+     * 중복 대기.
+     */
     public WaitingInfo addWaiting(WaitingAddCommand command) {
         ReservationTime reservationTime = getReservationTime(command.timeId());
         validatePastTime(command.date(), reservationTime);
@@ -43,7 +48,8 @@ public class WaitingService {
         Theme theme = getTheme(command.themeId());
         Member member = getMember(command.memberId());
         ReservationTime time = getTime(command.timeId());
-        Waiting waiting = new Waiting(null, command.date(), time, theme, member);
+        long order = calculateWaitingOrder(command, time, theme);
+        Waiting waiting = new Waiting(null, command.date(), time, theme, member, order);
         Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingInfo(savedWaiting);
     }
@@ -61,6 +67,10 @@ public class WaitingService {
         if (!isReservationExists) {
             throw new IllegalArgumentException("해당 시간에 예약이 존재하지 않아 대기할 수 없습니다.");
         }
+    }
+
+    private long calculateWaitingOrder(WaitingAddCommand command, ReservationTime time, Theme theme) {
+        return waitingRepository.countByDateAndTimeAndTheme(command.date(), time, theme) + 1;
     }
 
     private ReservationTime getReservationTime(long timeId) {

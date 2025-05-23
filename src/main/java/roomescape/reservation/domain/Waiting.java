@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import roomescape.member.domain.Member;
 
@@ -21,8 +22,9 @@ public class Waiting {
     private Theme theme;
     @OneToOne
     private Member member;
+    private long priority;
 
-    public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member, long priority) {
         if (date == null || time == null || theme == null || member == null) {
             throw new IllegalArgumentException();
         }
@@ -31,6 +33,7 @@ public class Waiting {
         this.time = time;
         this.theme = theme;
         this.member = member;
+        this.priority = priority;
     }
 
     public Waiting() {
@@ -54,5 +57,9 @@ public class Waiting {
 
     public Member getMember() {
         return member;
+    }
+
+    public long getPriority() {
+        return priority;
     }
 }
