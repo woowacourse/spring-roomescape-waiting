@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.exception.UnauthorizedAccessException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
+import roomescape.reservation.service.AutoBookService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingService;
 
@@ -27,10 +29,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final WaitingService waitingService;
+    private final AutoBookService autoBookService;
 
-    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService, AutoBookService autoBookService) {
         this.reservationService = reservationService;
         this.waitingService = waitingService;
+        this.autoBookService = autoBookService;
     }
 
     @GetMapping
@@ -55,7 +59,8 @@ public class ReservationController {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
         }
 
-        reservationService.deleteReservation(id);
+        Reservation deletedReservation = reservationService.deleteReservation(id);
+        autoBookService.addReservationFromWaiting(deletedReservation);
         return ResponseEntity.noContent().build();
     }
 

@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.DuplicateContentException;
@@ -67,12 +68,14 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
-        if (reservationRepository.findById(id).isEmpty()) {
+    public Reservation deleteReservation(Long id) {
+        Optional<Reservation> reservation = reservationRepository.findById(id);
+        if (reservation.isEmpty()) {
             throw new NotFoundException("[ERROR] 등록된 예약만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
 
         reservationRepository.deleteById(id);
+        return reservation.get();
     }
 
     public List<MemberReservationResponse> findAllMemberReservations(String token) {

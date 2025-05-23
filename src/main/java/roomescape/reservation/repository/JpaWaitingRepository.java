@@ -37,6 +37,11 @@ public class JpaWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return waitingListCrudRepository.findFirstWaitingByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
     public List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId) {
         return waitingListCrudRepository.findWaitingWithRankByMemberId(memberId);
     }

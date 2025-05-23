@@ -13,6 +13,16 @@ public interface WaitingListCrudRepository extends ListCrudRepository<Waiting, L
     Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
     @Query("""
+            SELECT w FROM Waiting w
+            WHERE w.date = :date
+            AND w.time.id = :timeId
+            AND w.theme.id = :themeId
+            ORDER BY w.id ASC
+            LIMIT 1
+            """)
+    Optional<Waiting> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    @Query("""
             SELECT new roomescape.reservation.domain.WaitingWithRank(
                 w,
                 (SELECT COUNT(w2)

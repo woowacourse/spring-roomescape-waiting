@@ -16,6 +16,8 @@ public interface WaitingRepository {
 
     Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
+    Optional<Waiting> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
