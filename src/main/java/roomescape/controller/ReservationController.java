@@ -56,7 +56,7 @@ public class ReservationController {
     }
 
     @GetMapping("/state")
-    public List<ReservationStatusResponse> findAllReservationStateByMember(
+    public ReservationStatusResponse findAllReservationStateByMember(
             @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
         return reservationService.findAllReservationStatusByMember(accessTokenContent.id());

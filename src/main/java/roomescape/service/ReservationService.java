@@ -11,6 +11,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationCreationContent;
+import roomescape.dto.business.WaitingWithRank;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationStatusResponse;
 import roomescape.exception.local.DuplicateReservationException;
@@ -62,11 +63,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationStatusResponse> findAllReservationStatusByMember(long memberId) {
+    public ReservationStatusResponse findAllReservationStatusByMember(long memberId) {
         Member savedMember = getMemberById(memberId);
         List<Reservation> reservations = reservationRepository.findByMember(savedMember);
-        List<Waiting> waitings = waitingRepository.findByMember(savedMember);
-        return ReservationStatusResponse.createWithReservationAndWaiting(reservations, waitings);
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWithRankingByMember(savedMember.getId());
+        return ReservationStatusResponse.createReservationStatusResponses(reservations, waitingWithRanks);
     }
 
     public List<ReservationResponse> findReservationsByFilter(

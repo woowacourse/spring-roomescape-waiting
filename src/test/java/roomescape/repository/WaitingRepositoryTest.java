@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.test.fixture.DateFixture.NEXT_DAY;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,6 +18,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.dto.business.WaitingWithRank;
 
 @DataJpaTest
 class WaitingRepositoryTest {
@@ -25,6 +27,36 @@ class WaitingRepositoryTest {
     private TestEntityManager entityManager;
     @Autowired
     private WaitingRepository waitingRepository;
+
+    @DisplayName("회원의 에약 대기 목록을 순번과 함께 구할 수 있다.")
+    @Test
+    void findWithRankingByMember() {
+        // given
+        ReservationTime time = entityManager.persist(
+                ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        Theme theme = entityManager.persist(
+                Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+
+        Member targetMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원1", "member1@test.com", "qwer1234!"));
+        Member otherMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원2", "member2@test.com", "qwer1234!"));
+
+        Waiting waitingWithOtherMember = entityManager.persist(
+                Waiting.createWithoutId(NEXT_DAY, theme, time, otherMember));
+        Waiting waitingWithTargetMember = entityManager.persist(
+                Waiting.createWithoutId(NEXT_DAY, theme, time, targetMember));
+
+        // when
+        List<WaitingWithRank> waitingWithRankings = waitingRepository.findWithRankingByMember(targetMember.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(waitingWithRankings).hasSize(1),
+                () -> assertThat(waitingWithRankings.getFirst().id()).isEqualTo(waitingWithTargetMember.getId()),
+                () -> assertThat(waitingWithRankings.getFirst().rank()).isEqualTo(2)
+        );
+    }
 
     @Nested
     @DisplayName("중복된 대기 데이터 존재여부를 확인할 수 있다.")

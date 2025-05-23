@@ -6,12 +6,19 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import roomescape.domain.Member;
 import roomescape.domain.Waiting;
+import roomescape.dto.business.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    List<Waiting> findByMember(Member member);
+    @Query("""
+            SELECT new roomescape.dto.business.WaitingWithRank(
+                w, (SELECT COUNT(w2) + 1 FROM Waiting w2 WHERE w2.id < w.id))
+            FROM Waiting w
+            WHERE w.member.id = :memberId
+            ORDER BY w.date
+            """)
+    List<WaitingWithRank> findWithRankingByMember(long memberId);
 
     @Query("""
             SELECT EXISTS(

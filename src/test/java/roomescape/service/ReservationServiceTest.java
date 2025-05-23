@@ -25,7 +25,9 @@ import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.MemberProfileResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationStatusResponse;
 import roomescape.dto.response.ThemeResponse;
+import roomescape.dto.response.WaitingWithRankResponse;
 import roomescape.exception.local.DuplicateReservationException;
 import roomescape.exception.local.NotFoundMemberException;
 import roomescape.exception.local.NotFoundReservationException;
@@ -103,7 +105,7 @@ class ReservationServiceTest {
         );
     }
 
-    @DisplayName("모든 예약을 조회할 수 있다.")
+    @DisplayName("회원의 모든 예약을 조회할 수 있다.")
     @Test
     void testMethodNameHere() {
         // given
@@ -132,6 +134,36 @@ class ReservationServiceTest {
                         .extracting(ReservationResponse::member)
                         .extracting(MemberProfileResponse::id)
                         .containsExactly(member.getId(), member.getId(), member.getId())
+        );
+    }
+
+    @DisplayName("회원의 모든 예약 상태를 조회할 수 있다.")
+    @Test
+    void canFindAllReservationStatusByMember() {
+        // given
+        List<Reservation> reservations = List.of(
+                entityManager.persist(Reservation.createWithoutId(TODAY, reservationTime, theme, member)),
+                entityManager.persist(Reservation.createWithoutId(TODAY, reservationTime, theme, member)),
+                entityManager.persist(Reservation.createWithoutId(TODAY, reservationTime, theme, member)));
+        List<Waiting> waitings = List.of(
+                entityManager.persist(Waiting.createWithoutId(TODAY, theme, reservationTime, member)),
+                entityManager.persist(Waiting.createWithoutId(TODAY, theme, reservationTime, member)),
+                entityManager.persist(Waiting.createWithoutId(TODAY, theme, reservationTime, member)));
+
+        // when
+        ReservationStatusResponse allReservationState =
+                reservationService.findAllReservationStatusByMember(member.getId());
+
+        // then
+        List<Long> reservationIds = reservations.stream().map(Reservation::getId).toList();
+        List<Long> waitingIds = waitings.stream().map(Waiting::getId).toList();
+        assertAll(
+                () -> assertThat(allReservationState.reservationResponses())
+                        .extracting(ReservationResponse::id)
+                        .containsExactlyElementsOf(reservationIds),
+                () -> assertThat(allReservationState.waitingWithRankResponses())
+                        .extracting(WaitingWithRankResponse::id)
+                        .containsExactlyElementsOf(waitingIds)
         );
     }
 
