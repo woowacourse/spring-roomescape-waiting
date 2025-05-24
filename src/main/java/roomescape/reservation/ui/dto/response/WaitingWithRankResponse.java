@@ -1,6 +1,7 @@
 package roomescape.reservation.ui.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
 import roomescape.reservation.domain.WaitingWithRank;
@@ -24,5 +25,24 @@ public record WaitingWithRankResponse(
                 ThemeResponse.from(waitingWithRank.getWaiting().getTheme()),
                 waitingWithRank.getRank() + "번째 예약 대기"
         );
+    }
+
+    public record ForMember(
+            Long id,
+            LocalDate date,
+            LocalTime time,
+            String themeName,
+            String status
+    ) {
+
+        public static WaitingWithRankResponse.ForMember from(final WaitingWithRank waitingWithRank) {
+            return new WaitingWithRankResponse.ForMember(
+                    waitingWithRank.getWaiting().getId(),
+                    waitingWithRank.getWaiting().getDate(),
+                    waitingWithRank.getWaiting().getTime().getStartAt(),
+                    waitingWithRank.getWaiting().getTheme().getName(),
+                    waitingWithRank.getRank() + "번째 예약 대기"
+            );
+        }
     }
 }

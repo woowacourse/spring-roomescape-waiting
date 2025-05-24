@@ -112,11 +112,11 @@ public class WaitingService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
     }
 
-    public List<WaitingWithRankResponse> findAllWaitingWithRank(final Long memberId) {
+    public List<WaitingWithRankResponse.ForMember> findAllWaitingWithRankByMemberId(final Long memberId) {
         final List<WaitingWithRank> waitingWithRanks = waitingRepository.findAllWaitingWithRankByMemberId(memberId);
 
         return waitingWithRanks.stream()
-                .map(WaitingWithRankResponse::from)
+                .map(WaitingWithRankResponse.ForMember::from)
                 .toList();
     }
 }

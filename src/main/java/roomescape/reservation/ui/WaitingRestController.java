@@ -54,9 +54,9 @@ public class WaitingRestController {
 
     @GetMapping("/mine")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<WaitingWithRankResponse>> findAllWaitingWithRank(
+    public ResponseEntity<List<WaitingWithRankResponse.ForMember>> findAllWaitingWithRankByMemberId(
             final MemberAuthInfo memberAuthInfo
     ) {
-        return ResponseEntity.ok(waitingService.findAllWaitingWithRank(memberAuthInfo.id()));
+        return ResponseEntity.ok(waitingService.findAllWaitingWithRankByMemberId(memberAuthInfo.id()));
     }
 }
