@@ -27,16 +27,18 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
 
-    public ReservationController(final ReservationService reservationService,
-                                 final ReservationTimeService reservationTimeService) {
+    public ReservationController(
+            final ReservationService reservationService,
+            final ReservationTimeService reservationTimeService
+    ) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createByLoginMember(
-            @RequestBody final ReservationRequest reservationRequest,
-            final @AuthenticationPrincipal LoginMember loginMember
+            @AuthenticationPrincipal final LoginMember loginMember,
+            @RequestBody final ReservationRequest reservationRequest
     ) {
         final ReservationResponse reservationResponse = reservationService.insert(
                 reservationRequest.date(),
@@ -50,9 +52,9 @@ public class ReservationController {
 
     @PostMapping("/reservations/wait")
     public ResponseEntity<WaitInfoResponse> createReservationWaitByLoginMember(
-            @RequestBody final ReservationRequest reservationRequest,
-            final @AuthenticationPrincipal LoginMember loginMember
-    ){
+            @AuthenticationPrincipal final LoginMember loginMember,
+            @RequestBody final ReservationRequest reservationRequest
+    ) {
         final WaitInfoResponse waitInfoResponse = reservationService.insertWait(
                 reservationRequest.date(),
                 loginMember.id(),

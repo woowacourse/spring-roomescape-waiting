@@ -25,8 +25,10 @@ public class LoginController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> login(@RequestBody final LoginRequest loginRequest,
-                                      final HttpServletResponse response) {
+    public ResponseEntity<Void> login(
+            @RequestBody final LoginRequest loginRequest,
+            final HttpServletResponse response
+    ) {
         final String accessToken = authService.login(loginRequest.email(), loginRequest.password());
         final Cookie cookie = new Cookie("token", accessToken);
         cookie.setHttpOnly(true);
