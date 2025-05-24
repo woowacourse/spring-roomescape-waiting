@@ -54,7 +54,6 @@ public class AdminController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    // TODO: 통합 테스트 추가.
     @GetMapping("/waits")
     public ResponseEntity<List<WaitResponse>> readWaits() {
         final List<WaitResponse> waitResponses = reservationService.findWaitInfoByStatusNotApprove();

@@ -2,6 +2,7 @@ package roomescape.integration;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
@@ -16,11 +17,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.business.domain.Member;
+import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
+import roomescape.business.domain.WaitInfo;
 import roomescape.persistence.repository.MemberRepository;
+import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.LoginRequest;
 import roomescape.presentation.dto.ReservationRequest;
 
@@ -36,6 +41,10 @@ class AdminControllerIntegrationTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private WaitInfoRepository waitInfoRepository;
 
     @BeforeEach
     void setUp() {
@@ -260,5 +269,50 @@ class AdminControllerIntegrationTest {
                 .post("/admin/reservations")
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("어드민 권한 로그인 후 예약 대기목록 조회시 성공적으로 예약 대기 목록을 반환한다")
+    void readWaits_WithValidRequest_ReturnsWaitListSuccessfully() {
+        // given
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(reservationTime);
+
+        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        final Member member = new Member("어드민", "ADMIN", "admin@test.com", "pass");
+        memberRepository.save(member);
+        final Member member2 = new Member("사용자", "USER", "member@test.com", "pass");
+        memberRepository.save(member2);
+
+        final LocalDate futureDate = LocalDate.now().plusDays(1);
+        final Reservation reservation = new Reservation(futureDate, reservationTime, theme);
+        reservationRepository.save(reservation);
+
+        final WaitInfo waitInfo1 = new WaitInfo(member, reservation, 1L);
+        waitInfoRepository.save(waitInfo1);
+        final WaitInfo waitInfo2 = new WaitInfo(member2, reservation, 2L);
+        waitInfoRepository.save(waitInfo2);
+
+        final LoginRequest loginRequest = new LoginRequest("admin@test.com", "pass");
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
+        // when & then
+        given()
+                .cookie("token", token)
+                .when()
+                .get("/admin/waits")
+                .then()
+                .statusCode(200)
+                .body("size()", is(1))
+                .body("[0].memberName", equalTo("사용자"))
+                .body("[0].themeName", equalTo("테마1"))
+                .body("[0].date", equalTo(futureDate.toString()))
+                .body("[0].startAt", equalTo("14:00:00"));
     }
 }
