@@ -15,8 +15,8 @@ import roomescape.exception.custom.reason.reservation.ReservationNotFoundExcepti
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -31,11 +31,10 @@ public class BookingService {
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         List<Waiting> waitings = waitingRepository.findAllByMember(member);
 
-        List<BookingResponse> responses = new ArrayList<>();
-        reservations.forEach(reservation -> responses.add(BookingResponse.of(reservation)));
-        waitings.forEach(waiting -> responses.add(BookingResponse.of(waiting)));
-
-        return responses;
+        return Stream.concat(
+                reservations.stream().map(BookingResponse::of),
+                waitings.stream().map(BookingResponse::of)
+        ).toList();
     }
 
     @Transactional
