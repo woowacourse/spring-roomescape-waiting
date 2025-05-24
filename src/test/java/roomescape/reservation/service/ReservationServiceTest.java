@@ -30,6 +30,7 @@ import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationWaitingRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.WaitingReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.dto.response.ReservationTimeResponse;
@@ -65,14 +66,14 @@ class ReservationServiceTest {
     void beforeEach() {
         Theme theme1 = Theme.createWithId(1L, "테스트1", "설명", "localhost:8080");
         Theme theme2 = Theme.createWithId(2L, "테스트2", "설명", "localhost:8080");
-        Theme theme3 = Theme.createWithId(3L, "테스트2", "설명", "localhost:8080");
+        Theme theme3 = Theme.createWithId(3L, "테스트3", "설명", "localhost:8080");
         theme1 = themeRepository.save(theme1);
         theme2 = themeRepository.save(theme2);
         themeRepository.save(theme3);
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(9, 0));
         Member member1 = Member.createWithId(1L, "홍길동", "a@com", "a", Role.USER);
-        Member member2 = Member.createWithId(1L, "홍길동", "a@com", "a", Role.USER);
+        Member member2 = Member.createWithId(1L, "홍길동2", "a@com", "a", Role.USER);
         member1 = memberRepository.save(member1);
         member2 = memberRepository.save(member2);
         reservationTime1 = reservationTimeRepository.save(reservationTime1);
@@ -199,7 +200,7 @@ class ReservationServiceTest {
     void createWaitingReservation_test() {
         // given
         ReservationResponse expected = new ReservationResponse(
-                6L, "대기", new ReservationMemberResponse("홍길동"),
+                6L, "대기", new ReservationMemberResponse("홍길동2"),
                 LocalDate.of(2024, 10, 8),
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(2L, "테스트2", "설명", "localhost:8080")
@@ -228,6 +229,19 @@ class ReservationServiceTest {
         assertThat(responses.get(1)).isEqualTo(expected2);
         assertThat(responses.get(2)).isEqualTo(expected3);
         assertThat(responses.get(3)).isEqualTo(expected4);
+    }
+
+    @Test
+    @DisplayName("정상적으로 예약 대기를 dto로 변환한다.")
+    void getWaitingReservations_test() {
+        // given
+        WaitingReservationResponse expected = new WaitingReservationResponse(5L, "홍길동", "테스트2",
+                LocalDate.of(2025, 5, 22), LocalTime.of(10, 0));
+        // when
+        List<WaitingReservationResponse> waitingReservations = reservationService.getWaitingReservations();
+        // then
+        assertThat(waitingReservations).hasSize(1);
+        assertThat(waitingReservations.get(0)).isEqualTo(expected);
     }
 
 }

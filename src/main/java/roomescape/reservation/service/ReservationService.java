@@ -16,6 +16,7 @@ import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationWaitingRequest;
 import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.WaitingReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -94,6 +95,13 @@ public class ReservationService {
                         request.dateFrom(), request.dateTo())
                 .stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<WaitingReservationResponse> getWaitingReservations() {
+        List<Reservation> waitingReservations = reservationRepository.findAllWaitingReservations(dateTime.now());
+        return waitingReservations.stream()
+                .map(WaitingReservationResponse::from)
                 .toList();
     }
 
