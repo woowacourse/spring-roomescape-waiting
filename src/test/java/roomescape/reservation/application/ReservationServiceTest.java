@@ -71,7 +71,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatCode(() -> reservationService.createReservedReservation(request, memberAuthInfo.id()))
+        Assertions.assertThatCode(() -> reservationService.create(request, memberAuthInfo.id()))
                 .doesNotThrowAnyException();
     }
 
@@ -89,7 +89,7 @@ class ReservationServiceTest {
                 new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.createReservedReservation(request, memberAuthInfo.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -110,7 +110,7 @@ class ReservationServiceTest {
                 new Reservation(date, reservationTime, theme, member, ReservationStatus.RESERVED));
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.createReservedReservation(request, memberAuthInfo.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
                 .isInstanceOf(AlreadyExistException.class);
     }
 
@@ -171,7 +171,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 특정_날짜에_특정_테마에_대해_이용_가능한_예약_시간_목록을_조회한다() {
+    void 특정_날짜에_특정_테마에_대해_예약_가능한_예약_시간_목록을_조회한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final Theme theme = themeRepository.save(notSavedTheme1());

@@ -38,7 +38,7 @@ public class ReservationRestController {
             final MemberAuthInfo memberAuthInfo
     ) {
         final ReservationResponse response =
-                reservationService.createReservedReservation(request, memberAuthInfo.id());
+                reservationService.create(request, memberAuthInfo.id());
 
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }

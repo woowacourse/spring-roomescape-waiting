@@ -33,36 +33,41 @@ public class WaitingService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public WaitingResponse createWaiting(
+    public WaitingResponse create(
             final CreateWaitingRequest.ForMember request,
             final Long memberId
     ) {
-        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId()
-        )) {
+        return WaitingResponse.from(
+                createWaiting(request.date(), request.timeId(), request.themeId(), memberId)
+        );
+    }
+
+    private Waiting createWaiting(
+            final LocalDate date,
+            final Long timeId,
+            final Long themeId,
+            final Long memberId
+    ) {
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new ResourceNotFoundException("예약이 없는 상태에서 예약 대기를 추가할 수 없습니다.");
         }
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                request.date(), request.timeId(), request.themeId(), memberId
-        )) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
             throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 본인 예약이 있습니다.");
         }
 
-        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                request.date(), request.timeId(), request.themeId(), memberId
-        )) {
+        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
             throw new AlreadyExistException("신청한 예약 대기가 이미 존재합니다.");
         }
 
-        final ReservationTime reservationTime = getReservationTime(request.date(), request.timeId());
-        final Theme theme = getThemeById(request.themeId());
+        final ReservationTime reservationTime = getReservationTime(date, timeId);
+        final Theme theme = getThemeById(themeId);
         final Member member = getMemberById(memberId);
 
         final Waiting waiting =
-                new Waiting(request.date(), reservationTime, theme, member, LocalDateTime.now());
+                new Waiting(date, reservationTime, theme, member, LocalDateTime.now());
 
-        return WaitingResponse.from(waitingRepository.save(waiting));
+        return waitingRepository.save(waiting);
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {

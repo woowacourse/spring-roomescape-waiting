@@ -42,9 +42,7 @@ public class AdminReservationService {
             final Long themeId,
             final Long memberId
     ) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                date, timeId, themeId
-        )) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
         }
 

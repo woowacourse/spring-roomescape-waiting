@@ -35,7 +35,7 @@ public class WaitingRestController {
             @RequestBody @Valid final CreateWaitingRequest.ForMember request,
             final MemberAuthInfo memberAuthInfo
     ) {
-        final WaitingResponse response = waitingService.createWaiting(request, memberAuthInfo.id());
+        final WaitingResponse response = waitingService.create(request, memberAuthInfo.id());
 
         return ResponseEntity.created(URI.create("/waitings/" + response.id()))
                 .body(response);
