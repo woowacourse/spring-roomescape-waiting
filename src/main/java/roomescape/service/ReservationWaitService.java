@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -32,7 +31,7 @@ public class ReservationWaitService {
             final MemberRepository memberRepository,
             final ReservationScheduleRepository reservationScheduleRepository,
             final ReservationWaitRepository reservationWaitRepository,
-            final ReservationRepository reservationRepository, final EntityManager entityManager) {
+            final ReservationRepository reservationRepository) {
         this.memberRepository = memberRepository;
         this.reservationScheduleRepository = reservationScheduleRepository;
         this.reservationWaitRepository = reservationWaitRepository;
