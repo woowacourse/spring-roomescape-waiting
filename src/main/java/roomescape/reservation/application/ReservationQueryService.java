@@ -84,14 +84,14 @@ public class ReservationQueryService {
                 .toList();
     }
 
-    public List<MyHistoryResponse> findMyHistory(final Long memberId) {
+    public List<MyHistoryResponse> findMyReservation(final Long memberId) {
         final List<MyHistoryResponse> responses = new ArrayList<>();
 
         final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
         reservations.forEach(r -> responses.add(MyHistoryResponse.ofReservation(r)));
 
-        final List<WaitingWithRank> waitingsWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
-        waitingsWithRanks.forEach(w -> responses.add(MyHistoryResponse.ofWaiting(w.waiting(), w.rank())));
+        final List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
+        waitingWithRanks.forEach(w -> responses.add(MyHistoryResponse.ofWaiting(w.waiting(), w.rank())));
 
         return responses;
     }

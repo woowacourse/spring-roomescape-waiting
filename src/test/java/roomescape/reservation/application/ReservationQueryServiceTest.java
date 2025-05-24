@@ -58,7 +58,7 @@ class ReservationQueryServiceTest {
     @Test
     void 멤버id로_예약기록을_조회한다() {
         final long memberId = 1L;
-        final List<MyHistoryResponse> responses = reservationQueryService.findMyHistory(memberId);
+        final List<MyHistoryResponse> responses = reservationQueryService.findMyReservation(memberId);
 
         assertThat(responses).hasSize(4);
     }
@@ -93,6 +93,6 @@ class ReservationQueryServiceTest {
     void 존재하지_않는_멤버의_예약기록은_빈_목록을_반환한다() {
         final long nonExistingMemberId = 999L;
 
-        assertThat(reservationQueryService.findMyHistory(nonExistingMemberId)).isEmpty();
+        assertThat(reservationQueryService.findMyReservation(nonExistingMemberId)).isEmpty();
     }
 }

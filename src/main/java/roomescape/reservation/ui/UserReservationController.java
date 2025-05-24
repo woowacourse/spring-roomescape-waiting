@@ -37,8 +37,8 @@ public class UserReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyHistoryResponse>> findMyHistory(final LoginCheckRequest request) {
-        List<MyHistoryResponse> response = reservationQueryService.findMyHistory(request.id());
+    public ResponseEntity<List<MyHistoryResponse>> findMyReservation(final LoginCheckRequest request) {
+        List<MyHistoryResponse> response = reservationQueryService.findMyReservation(request.id());
         return ResponseEntity.ok(response);
     }
 
