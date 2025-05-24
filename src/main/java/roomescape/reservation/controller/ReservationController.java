@@ -23,6 +23,7 @@ import roomescape.reservation.controller.dto.AvailableReservationTimeWebResponse
 import roomescape.reservation.controller.dto.CreateReservationByAdminWebRequest;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
 import roomescape.reservation.controller.dto.ReservationSearchWebRequest;
+import roomescape.reservation.controller.dto.ReservationWaitWebResponse;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.service.ReservationService;
@@ -42,48 +43,83 @@ public class ReservationController {
         return reservationService.getAll();
     }
 
+    @RoleRequired(value = Role.ADMIN)
+    @GetMapping(BASE_PATH + "/wait")
+    public List<ReservationWaitWebResponse> getAllReservationWait() {
+        return reservationService.getAllReservationWait();
+    }
+
     @GetMapping(BASE_PATH + "/mine")
-    public List<ReservationWithStatusResponse> getAll(@LoginMember MemberInfo memberInfo) {
-        return reservationService.getByMemberId(memberInfo.id());
+    public List<ReservationWithStatusResponse> getAllWithReservationWait(@LoginMember MemberInfo memberInfo) {
+        return reservationService.getWithReservationWaitByMemberId(memberInfo.id());
     }
 
     @GetMapping(BASE_PATH + "/times")
     public List<AvailableReservationTimeWebResponse> getAvailable(
             @RequestParam final LocalDate date,
-            @RequestParam final Long themeId) {
+            @RequestParam final Long themeId
+    ) {
         return reservationService.getAvailable(date, themeId);
+    }
+
+    @GetMapping("/admin" + BASE_PATH)
+    public ResponseEntity<List<ReservationWebResponse>> getReservationsByAdmin(
+            @ModelAttribute final ReservationSearchWebRequest reservationSearchWebRequest
+    ) {
+        return ResponseEntity.ok(reservationService.search(reservationSearchWebRequest));
     }
 
     @PostMapping(BASE_PATH)
     public ResponseEntity<ReservationWebResponse> create(
             @RequestBody final CreateReservationWebRequest createReservationWebRequest,
-            @LoginMember MemberInfo memberInfo) {
-        final ReservationWebResponse reservationWebResponse = reservationService.create(createReservationWebRequest,
-                memberInfo);
+            @LoginMember MemberInfo memberInfo
+    ) {
+        final ReservationWebResponse reservationWebResponse = reservationService.create(
+                createReservationWebRequest,
+                memberInfo
+        );
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationWebResponse.id()));
+        return ResponseEntity.created(location)
+                .body(reservationWebResponse);
+    }
+
+    @PostMapping(BASE_PATH + "/wait")
+    public ResponseEntity<ReservationWaitWebResponse> createReservationWait(
+            @RequestBody final CreateReservationWebRequest createReservationWebRequest,
+            @LoginMember MemberInfo memberInfo
+    ) {
+        final ReservationWaitWebResponse reservationWebResponse = reservationService.createReservationWait(
+                createReservationWebRequest,
+                memberInfo
+        );
+        final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationWebResponse.id()));
+
         return ResponseEntity.created(location)
                 .body(reservationWebResponse);
     }
 
     @PostMapping("/admin" + BASE_PATH)
     public ResponseEntity<ReservationWebResponse> createReservationByAdmin(
-            @RequestBody final CreateReservationByAdminWebRequest createReservationByAdminWebRequest) {
+            @RequestBody final CreateReservationByAdminWebRequest createReservationByAdminWebRequest
+    ) {
         final ReservationWebResponse reservationWebResponse = reservationService.create(
-                createReservationByAdminWebRequest);
+                createReservationByAdminWebRequest
+        );
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationWebResponse.id()));
+
         return ResponseEntity.created(location)
                 .body(reservationWebResponse);
-    }
-
-    @GetMapping("/admin" + BASE_PATH)
-    public ResponseEntity<List<ReservationWebResponse>> getReservationsByAdmin(
-            @ModelAttribute final ReservationSearchWebRequest reservationSearchWebRequest) {
-        return ResponseEntity.ok(reservationService.search(reservationSearchWebRequest));
     }
 
     @DeleteMapping(BASE_PATH + "/{id}")
     public ResponseEntity<Void> delete(@PathVariable final Long id) {
         reservationService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(BASE_PATH + "/wait" + "/{id}")
+    public ResponseEntity<Void> deleteReservationWait(@PathVariable final Long id) {
+        reservationService.deleteReservationWait(id);
         return ResponseEntity.noContent().build();
     }
 }
