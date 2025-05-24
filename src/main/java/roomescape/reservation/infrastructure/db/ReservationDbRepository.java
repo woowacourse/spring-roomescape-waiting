@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.reservation.infrastructure.db.dao.ReservationJpaRepository;
 import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
 import roomescape.reservation.model.repository.ReservationRepository;
 
 @Repository
@@ -18,8 +19,8 @@ public class ReservationDbRepository implements ReservationRepository {
     private final ReservationJpaRepository reservationJpaRepository;
 
     @Override
-    public List<Reservation> getAll() {
-        return reservationJpaRepository.findAll();
+    public List<Reservation> getAllByStatuses(List<ReservationStatus> reservationStatuses) {
+        return reservationJpaRepository.findAllByStatusIn(reservationStatuses);
     }
 
     @Override

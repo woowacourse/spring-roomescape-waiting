@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>,
         JpaSpecificationExecutor<Reservation> {
@@ -16,4 +17,6 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     boolean existsByTimeId(Long reservationTimeId);
 
     List<Reservation> findAllByMemberId(Long memberId);
+
+    List<Reservation> findAllByStatusIn(List<ReservationStatus> statuses);
 }

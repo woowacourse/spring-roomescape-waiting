@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.AdminReservationService;
@@ -18,6 +19,7 @@ import roomescape.reservation.application.dto.response.ReservationServiceRespons
 import roomescape.reservation.controller.dto.request.AdminCreateReservationRequest;
 import roomescape.reservation.controller.dto.request.ReservationSearchRequest;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,8 +39,10 @@ public class AdminReservationController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public List<ReservationResponse> getAll() {
-        List<ReservationServiceResponse> responses = adminReservationService.getAll();
+    public List<ReservationResponse> getAllByStatus(
+            @RequestParam(required = false, defaultValue = "CONFIRMED") List<ReservationStatus> statuses
+    ) {
+        List<ReservationServiceResponse> responses = adminReservationService.getAllByStatuses(statuses);
         return responses.stream()
                 .map(ReservationResponse::from)
                 .toList();
