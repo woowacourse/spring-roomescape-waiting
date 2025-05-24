@@ -2,6 +2,8 @@ package roomescape.repository.waiting;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -23,7 +25,9 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             "       AND w2.id < w.id)) " +
             "FROM Waiting w " +
             "WHERE w.member.id = :memberId")
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 }
