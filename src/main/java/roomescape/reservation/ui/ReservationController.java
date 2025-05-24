@@ -42,8 +42,7 @@ public class ReservationController {
             @SignInUser final UserSession userSession) {
         final ReservationResponse response =
                 reservationFacade.create(
-                        request.toRequestWithUserId(userSession.id()),
-                        userSession);
+                        request.toRequestWithUserId(userSession.id()));
 
         final URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

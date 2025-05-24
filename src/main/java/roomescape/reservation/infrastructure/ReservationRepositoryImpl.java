@@ -6,13 +6,12 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.infrastructure.projection.TimeValueProjection;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.timeslot.domain.TimeSlotId;
-import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,25 +29,8 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByParams(final ReservationDate date, final ReservationTime time, final ThemeId themeId) {
-        return jpaReservationRepository.existsByDateAndTimeAndThemeId(date, time, themeId.getValue());
-    }
-
-    @Override
     public Optional<Reservation> findById(final ReservationId id) {
         return jpaReservationRepository.findById(id.getValue());
-    }
-
-    @Override
-    public List<ReservationTime> findTimeValuesByParams(final ReservationDate date, final ThemeId themeId) {
-        return jpaReservationRepository.findTimeByDateAndThemeId(date, themeId.getValue()).stream()
-                .map(TimeValueProjection::getTime)
-                .toList();
-    }
-
-    @Override
-    public List<TimeSlotId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
-        return List.of();
     }
 
     @Override
@@ -69,6 +51,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public List<Reservation> findAllByParams(final UserId userId, final ThemeId themeId, final ReservationDate from, final ReservationDate to) {
         return jdbcTemplateReservationRepository.findAllByParams(userId, themeId, from, to);
+    }
+
+    @Override
+    public List<Reservation> findAllBySlotAndCreatedAt(final ReservationSlot slot, final LocalDateTime createdAt) {
+        return jpaReservationRepository.findAllBySlotAndCreatedAtJpql(slot, createdAt);
     }
 
     @Override

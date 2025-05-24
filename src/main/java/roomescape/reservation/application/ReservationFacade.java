@@ -17,7 +17,7 @@ public interface ReservationFacade {
 
     List<ReservationResponse> getAllByUserId(UserId id);
 
-    ReservationResponse create(CreateReservationRequest request, UserSession userSession);
+    ReservationResponse create(CreateReservationRequest request);
 
     void delete(ReservationId id, UserSession userSession);
 }

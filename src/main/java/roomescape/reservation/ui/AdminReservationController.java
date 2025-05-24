@@ -47,9 +47,8 @@ public class AdminReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
-            @RequestBody final CreateReservationWithUserIdWebRequest request,
-            @SignInUser final UserSession userSession) {
-        final ReservationResponse response = reservationFacade.create(request.toServiceRequest(), userSession);
+            @RequestBody final CreateReservationWithUserIdWebRequest request) {
+        final ReservationResponse response = reservationFacade.create(request.toServiceRequest());
 
         final URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

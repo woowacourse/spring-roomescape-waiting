@@ -8,8 +8,9 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.timeslot.domain.TimeSlotId;
 import roomescape.timeslot.domain.ReservationTime;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotId;
 import roomescape.user.domain.UserId;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
@@ -22,11 +23,11 @@ public record CreateReservationRequest(UserId userId,
         validate(userId, date, timeId, themeId);
     }
 
-    public Reservation toDomain(final Theme theme, final ReservationTime time) {
+    public Reservation toDomain(final TimeSlot time, final Theme theme) {
         return Reservation.withoutId(
                 userId,
                 date,
-                time,
+                time.getStartAt(),
                 theme);
     }
 
@@ -37,7 +38,7 @@ public record CreateReservationRequest(UserId userId,
         Validator.of(CreateReservationRequest.class)
                 .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label())
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
-                .validateNotNull(Fields.timeId, timeId, DomainTerm.TIME_SLOT.label())
+                .validateNotNull(Fields.timeId, timeId, DomainTerm.TIME_SLOT_ID.label())
                 .validateNotNull(Fields.themeId, themeId, DomainTerm.THEME_ID.label());
     }
 }

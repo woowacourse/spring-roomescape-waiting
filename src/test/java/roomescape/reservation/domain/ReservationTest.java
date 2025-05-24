@@ -91,7 +91,7 @@ class ReservationTest {
             assertThat(reservation.getDate()).isEqualTo(date);
             assertThat(reservation.getTime()).isEqualTo(time.getStartAt());
             assertThat(reservation.getTheme()).isEqualTo(theme);
-            assertThat(reservation.getStatus().isBooked()).isTrue();
+            assertThat(reservation.getStatus() == BookedStatus.WAITING).isTrue();
         });
     }
 

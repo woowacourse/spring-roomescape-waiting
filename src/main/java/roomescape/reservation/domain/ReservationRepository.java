@@ -6,6 +6,7 @@ import roomescape.timeslot.domain.TimeSlotId;
 import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,13 +15,7 @@ public interface ReservationRepository {
 
     boolean existsByParams(ReservationId id);
 
-    boolean existsByParams(ReservationDate date, ReservationTime time, ThemeId themeId);
-
     Optional<Reservation> findById(ReservationId id);
-
-    List<ReservationTime> findTimeValuesByParams(ReservationDate date, ThemeId themeId);
-
-    List<TimeSlotId> findTimeIdByParams(ReservationDate date, ThemeId themeId);
 
     List<Reservation> findAll();
 
@@ -29,6 +24,8 @@ public interface ReservationRepository {
     Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(ReservationDate startDate, ReservationDate endDate, int count);
 
     List<Reservation> findAllByParams(UserId userId, ThemeId themeId, ReservationDate reservationDate, ReservationDate reservationDate1);
+
+    List<Reservation> findAllBySlotAndCreatedAt(ReservationSlot slot, LocalDateTime createdAt);
 
     Reservation save(Reservation reservation);
 

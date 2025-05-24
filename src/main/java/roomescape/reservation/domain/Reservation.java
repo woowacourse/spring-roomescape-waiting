@@ -4,6 +4,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -44,18 +46,15 @@ public class Reservation extends BaseEntity {
 
     @Embedded
     @AttributeOverride(
-            name = BookedStatus.Fields.sequence,
-            column = @Column(name = Fields.status))
-    private BookedStatus status;
-
-    @Embedded
-    @AttributeOverride(
             name = ReservationTime.Fields.value,
             column = @Column(name = Fields.time))
     private ReservationTime time;
 
     @ManyToOne
     private Theme theme;
+
+    @Enumerated(EnumType.STRING)
+    private BookedStatus status;
 
     public Reservation(final UserId userId,
                        final ReservationDate date,
@@ -92,14 +91,14 @@ public class Reservation extends BaseEntity {
                                      final ReservationDate date,
                                      final ReservationTime time,
                                      final Theme theme) {
-        return new Reservation(id.getValue(), userId, date, time, theme, BookedStatus.from(0));
+        return new Reservation(id.getValue(), userId, date, time, theme, BookedStatus.WAITING);
     }
 
     public static Reservation withoutId(final UserId userId,
                                         final ReservationDate date,
                                         final ReservationTime time,
                                         final Theme theme) {
-        return new Reservation(userId, date, time, theme, BookedStatus.from(0));
+        return new Reservation(userId, date, time, theme, BookedStatus.WAITING);
     }
 
     private static void validate(
@@ -126,6 +125,10 @@ public class Reservation extends BaseEntity {
         if (time.isBefore(now.toLocalTime())) {
             throw new PastTimeReservationException(time, now);
         }
+    }
+
+    public void approved() {
+        this.status = BookedStatus.APPROVED;
     }
 
     public ReservationId getId() {

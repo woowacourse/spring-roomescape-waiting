@@ -12,10 +12,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.theme.domain.ThemeId;
-import roomescape.timeslot.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.user.domain.UserId;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -53,13 +53,11 @@ public class ReservationQueryService {
         );
     }
 
-    public List<Reservation> getAllByUserId(final UserId userId) {
-        return reservationRepository.findAllByUserId(userId);
+    public List<Reservation> getByReservationSlotAndCreatedAt(final ReservationSlot slot, final LocalDateTime createdAt) {
+        return reservationRepository.findAllBySlotAndCreatedAt(slot, createdAt);
     }
 
-    public boolean existsByParams(final ReservationDate date,
-                                  final ReservationTime time,
-                                  final ThemeId themeId) {
-        return reservationRepository.existsByParams(date, time, themeId);
+    public List<Reservation> getAllByUserId(final UserId userId) {
+        return reservationRepository.findAllByUserId(userId);
     }
 }

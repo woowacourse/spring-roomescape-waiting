@@ -4,17 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.domain.DomainTerm;
-import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
-import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.theme.application.service.ThemeQueryService;
-import roomescape.theme.domain.Theme;
-import roomescape.timeslot.application.service.ReservationTimeQueryService;
-import roomescape.timeslot.domain.TimeSlot;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.SortedReservationsOfSlot;
 
 @Service
 @RequiredArgsConstructor
@@ -23,33 +19,25 @@ public class ReservationCommandService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationQueryService reservationQueryService;
-    private final ReservationTimeQueryService reservationTimeQueryService;
-    private final ThemeQueryService themeQueryService;
     private final TimeProvider timeProvider;
 
-    public Reservation create(final CreateReservationRequest request) {
-        final TimeSlot timeSlot = reservationTimeQueryService.get(
-                request.timeId());
-
-        final Theme theme = themeQueryService.get(
-                request.themeId());
-
-        if (reservationQueryService.existsByParams(
-                request.date(),
-                timeSlot.getStartAt(),
-                request.themeId())
-        ) {
-            throw new DuplicateException(
-                    DomainTerm.RESERVATION,
-                    request.date(),
-                    timeSlot.getStartAt(),
-                    request.themeId());
-        }
-
-        final Reservation reservation = request.toDomain(theme, timeSlot.getStartAt());
+    public Reservation create(Reservation reservation) {
         reservation.validatePast(timeProvider.now());
 
-        return reservationRepository.save(reservation);
+        reservation = reservationRepository.save(reservation);
+
+        final ReservationSlot slot = ReservationSlot.from(reservation);
+        final SortedReservationsOfSlot reservations = SortedReservationsOfSlot.of(
+                slot,
+                reservationQueryService.getByReservationSlotAndCreatedAt(
+                        slot,
+                        reservation.getCreatedAt()));
+
+        if (reservations.isEmpty()) {
+            reservation.approved();
+        }
+
+        return reservation;
     }
 
     public void delete(final ReservationId id) {
