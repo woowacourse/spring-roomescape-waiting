@@ -58,5 +58,10 @@ public class WaitingService {
     public void cancelWaitingById(long id) {
         waitingRepository.deleteById(id);
     }
-}
 
+    public List<WaitingResponse> getAllWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::new)
+                .toList();
+    }
+}

@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface WaitingRepository extends CrudRepository<Waiting, Long> {
 
+    List<Waiting> findAll();
+
     List<Waiting> findByMemberId(Long memberId);
 
 }

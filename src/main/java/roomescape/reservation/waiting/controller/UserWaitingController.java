@@ -14,11 +14,11 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/reservations/waitings")
-public class WaitingController {
+public class UserWaitingController {
 
     private final WaitingService waitingService;
 
-    public WaitingController(final WaitingService waitingService) {
+    public UserWaitingController(final WaitingService waitingService) {
         this.waitingService = waitingService;
     }
 

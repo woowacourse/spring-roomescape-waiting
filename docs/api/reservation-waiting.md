@@ -57,3 +57,37 @@ DELETE /reservations/waitings/1 HTTP/1.1
 ```
 HTTP/1.1 204
 ```
+
+## 예약 대기 조회 API
+
+### Request
+
+```
+GET /admin/reservations/waitings HTTP/1.1
+```
+
+### Response
+
+```
+[
+    {
+        "id": 1,
+        "member": {
+            "id": 1,
+            "email": "aaa@gmail.com",
+            "name": "사용자1"
+        },
+        "date": "2025-05-25",
+        "time": {
+            "id": 1,
+            "startAt": "10:00"
+        },
+        "theme": {
+            "id": 1,
+            "name": "테마1",
+            "description": "테마1입니다.",
+            "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+        }
+    }
+]
+```
