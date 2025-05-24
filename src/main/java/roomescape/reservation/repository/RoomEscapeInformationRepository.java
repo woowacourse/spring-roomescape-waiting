@@ -15,8 +15,5 @@ public interface RoomEscapeInformationRepository extends JpaRepository<RoomEscap
 
     boolean existsByTimeId(final Long timeId);
 
-    Optional<RoomEscapeInformation> findByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time,
-                                                              final Theme theme);
-
     Optional<RoomEscapeInformation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }
