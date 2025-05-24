@@ -53,14 +53,16 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
     @Override
     public List<ReservationWithRank> findReservationWithRankById(Long memberId) {
         return em.createQuery("""
-                        select new roomescape.reservation.domain.ReservationWithRank(r,
-                                (select COUNT(r2) from Reservation r2
-                         where r2.theme.id = r.theme.id
-                            and r2.date = r.date 
-                            and r2.time = r.time 
-                            and r2.createdAt < r.createdAt)) 
-                         from Reservation r 
-                         where r.member.id = :memberId
+                        SELECT new roomescape.reservation.domain.ReservationWithRank(r,
+                                (SELECT COUNT(r2) FROM Reservation r2
+                         WHERE r2.theme.id = r.theme.id
+                            AND r2.date = r.date 
+                            AND r2.time = r.time 
+                            AND r2.createdAt < r.createdAt)) 
+                         FROM Reservation r 
+                         JOIN FETCH r.theme
+                         JOIN FETCH r.time
+                         WHERE r.member.id = :memberId
                         """)
                 .setParameter("memberId", memberId)
                 .getResultList();
@@ -80,7 +82,8 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
     }
 
     private StringBuilder createQuery(Long memberId, Long themeId, LocalDate from, LocalDate to) {
-        StringBuilder query = new StringBuilder("SELECT r FROM Reservation r WHERE 1=1");
+        StringBuilder query = new StringBuilder(
+                "SELECT r FROM Reservation r JOIN FETCH r.theme JOIN FETCH r.member JOIN FETCH r.time WHERE 1=1");
 
         if (memberId != null) {
             query.append(" AND r.member.id = :memberId");
