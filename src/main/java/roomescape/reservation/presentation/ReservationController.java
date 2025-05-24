@@ -38,7 +38,7 @@ public class ReservationController {
     @GetMapping(RESERVATION_BASE_URL)
     public ResponseEntity<List<ReservationResponse>> getReservations(
             @ModelAttribute ReservationConditionRequest request) {
-        List<ReservationResponse> response = reservationService.getReservations(request);
+        List<ReservationResponse> response = reservationService.getAllReservations(request);
         return ResponseEntity.ok(response);
     }
 

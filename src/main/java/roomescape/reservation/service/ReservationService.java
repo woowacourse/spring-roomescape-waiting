@@ -72,20 +72,7 @@ public class ReservationService {
         return ReservationResponse.from(save);
     }
 
-    private Reservation makeReservation(Long timeId, Long themeId, Long memberId, LocalDate date,
-                                        ReservationStatus status) {
-        ReservationTime time = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
-        Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
-        return Reservation.createWithoutId(dateTime.now(), member, date, time,
-                theme, status);
-    }
-
-    public List<ReservationResponse> getReservations(ReservationConditionRequest request) {
+    public List<ReservationResponse> getAllReservations(ReservationConditionRequest request) {
         if (request.isEmpty()) {
             return reservationRepository.findAll().stream()
                     .map(ReservationResponse::from)
@@ -115,5 +102,18 @@ public class ReservationService {
         return reservations.stream()
                 .map(MyReservationResponse::from)
                 .toList();
+    }
+
+    private Reservation makeReservation(Long timeId, Long themeId, Long memberId, LocalDate date,
+                                        ReservationStatus status) {
+        ReservationTime time = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        return Reservation.createWithoutId(dateTime.now(), member, date, time,
+                theme, status);
     }
 }

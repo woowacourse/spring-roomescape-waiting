@@ -129,7 +129,7 @@ class ReservationServiceTest {
         // when
         reservationService.deleteReservationById(1L);
         // then
-        List<ReservationResponse> reservations = reservationService.getReservations(
+        List<ReservationResponse> reservations = reservationService.getAllReservations(
                 new ReservationConditionRequest(null, null, null, null));
         assertThat(reservations).hasSize(4);
     }
@@ -140,7 +140,7 @@ class ReservationServiceTest {
         // given
         ReservationConditionRequest request = new ReservationConditionRequest(null, null, null, null);
         // when
-        List<ReservationResponse> reservations = reservationService.getReservations(request);
+        List<ReservationResponse> reservations = reservationService.getAllReservations(request);
         // then
         assertThat(reservations).hasSize(5);
     }
@@ -153,7 +153,7 @@ class ReservationServiceTest {
         // given
         ReservationConditionRequest request = new ReservationConditionRequest(memberId, themeId, dateForm, dateTo);
         // when
-        List<ReservationResponse> reservations = reservationService.getReservations(request);
+        List<ReservationResponse> reservations = reservationService.getAllReservations(request);
         // then
         assertThat(reservations).hasSize(expectedCount);
     }
