@@ -14,6 +14,7 @@ import roomescape.reservation.exception.InvalidReservationTimeException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.user.domain.User;
+import roomescape.waiting.domain.Waiting;
 
 @Entity
 public class Reservation {
@@ -24,7 +25,6 @@ public class Reservation {
     private LocalDate date;
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
-
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime reservationTime;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,6 +50,10 @@ public class Reservation {
         LocalDateTime dateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         validateTense(dateTime);
         return new Reservation(null, date, status, reservationTime, theme, user);
+    }
+
+    public static Reservation ofWaiting(Waiting waiting) {
+        return new Reservation(null, waiting.getDate(), ReservationStatus.BOOKED, waiting.getTime(), waiting.getTheme(), waiting.getMember());
     }
 
     private static void validateTense(LocalDateTime dateTime) {

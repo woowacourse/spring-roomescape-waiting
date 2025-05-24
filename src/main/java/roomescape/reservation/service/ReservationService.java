@@ -1,11 +1,13 @@
 package roomescape.reservation.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.domain.dto.SearchReservationRequestDto;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.dto.ReservationInfo;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.domain.dto.ReservationResponseDto;
 import roomescape.reservation.exception.DuplicateReservationException;
@@ -13,14 +15,13 @@ import roomescape.reservation.exception.InvalidReservationTimeException;
 import roomescape.reservation.exception.NotFoundReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.dto.ReservationTimeResponseDto;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.dto.ThemeResponseDto;
 import roomescape.theme.exception.InvalidThemeException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.user.domain.User;
-import roomescape.user.domain.dto.UserResponseDto;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,12 +30,15 @@ public class ReservationService {
     private final ReservationRepository repository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository repository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                              WaitingRepository waitingRepository) {
         this.repository = repository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponseDto> findAll() {
@@ -53,9 +57,25 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        findByIdOrThrow(id);
+    public ReservationInfo cancelReservationAndReturnInfo(Long id) {
+        Reservation oldReservation = findByIdOrThrow(id);
         repository.deleteById(id);
+        return new ReservationInfo(oldReservation.getDate(), oldReservation.getReservationTime(), oldReservation.getTheme());
+    }
+
+    @Transactional
+    public void approveWaiting(ReservationInfo reservationInfo) {
+        Optional<Waiting> waitingOptional = waitingRepository.findOneByReservationInfoDesc(reservationInfo.date(),
+                reservationInfo.time().getId(), reservationInfo.theme().getId());
+        if (waitingOptional.isEmpty()) {
+            return ;
+        }
+
+        Waiting waiting = waitingOptional.get();
+        waitingRepository.deleteById(waiting.getId());
+
+        Reservation newReservation = Reservation.ofWaiting(waiting);
+        repository.save(newReservation);
     }
 
     private Reservation findByIdOrThrow(Long id) {
@@ -97,10 +117,6 @@ public class ReservationService {
     }
 
     private ReservationResponseDto convertReservationResponseDto(Reservation reservation) {
-        ReservationTimeResponseDto reservationTimeResponseDto = ReservationTimeResponseDto.of(
-                reservation.getReservationTime());
-        ThemeResponseDto themeResponseDto = ThemeResponseDto.of(reservation.getTheme());
-        UserResponseDto userResponseDto = UserResponseDto.of(reservation.getUser());
-        return ReservationResponseDto.from(reservation, reservationTimeResponseDto, themeResponseDto, userResponseDto);
+        return ReservationResponseDto.of(reservation);
     }
 }

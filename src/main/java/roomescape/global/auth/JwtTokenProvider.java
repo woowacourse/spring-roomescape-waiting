@@ -49,8 +49,6 @@ public class JwtTokenProvider {
         } catch (JwtException e) {
             throw new AuthorizationException("토큰 생성 실패");
         }
-
-
     }
 
     private Map<String, ?> getMyClaimMap(TokenInfoDto tokenInfoDto) {

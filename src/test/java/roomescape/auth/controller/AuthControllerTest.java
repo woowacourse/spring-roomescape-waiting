@@ -57,9 +57,9 @@ class AuthControllerTest {
     @DisplayName("로그인 기능")
     class login {
 
-        @DisplayName("유효한 이메일과 비밀번호로 로그인을 성공한다.")
+        @DisplayName("유효한 이메일과 비밀번호로 로그인을 성공한다. : member")
         @Test
-        void login_success() {
+        void login_success_byValidMember() {
             // given
 
             // when
@@ -70,15 +70,15 @@ class AuthControllerTest {
                     .given().log().all()
                     .contentType(ContentType.JSON)
                     .body(requestDto)
-                    .when().post("/login")
+                    .when().post("/signin")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value())
                     .extract().response();
         }
 
-        @DisplayName("유효한 이메일과 비밀번호로 로그인을 성공한다.")
+        @DisplayName("유효한 이메일과 비밀번호로 로그인을 성공한다. : admin")
         @Test
-        void login_success2() {
+        void login_success_byValidAdmin() {
             // given
 
             // when
@@ -89,7 +89,7 @@ class AuthControllerTest {
                     .given().log().all()
                     .contentType(ContentType.JSON)
                     .body(requestDto)
-                    .when().post("/login")
+                    .when().post("/signin")
                     .then().log().all()
                     .statusCode(HttpStatus.OK.value())
                     .extract().response();
@@ -107,7 +107,7 @@ class AuthControllerTest {
                     .given().log().all()
                     .contentType(ContentType.JSON)
                     .body(requestDto)
-                    .when().post("/login")
+                    .when().post("/signin")
                     .then().log().all()
                     .statusCode(HttpStatus.NOT_FOUND.value())
                     .extract().response();
@@ -167,5 +167,4 @@ class AuthControllerTest {
             Assertions.assertThat(actualRoleName).isEqualTo(Role.ROLE_ADMIN.name());
         }
     }
-
 }
