@@ -9,8 +9,8 @@ import roomescape.reservation.domain.Reservation;
 
 public record MyReservationResponse(Long reservationId, String theme, LocalDate date, LocalTime time, String status) {
 
-    public static final String RESERVED = "예약";
-    public static final String WAITING = "%d번째 예약대기";
+    private static final String RESERVED = "예약";
+    private static final String WAITING = "%d번째 예약대기";
 
     public static MyReservationResponse from(final Reservation reservation) {
         return new MyReservationResponse(
