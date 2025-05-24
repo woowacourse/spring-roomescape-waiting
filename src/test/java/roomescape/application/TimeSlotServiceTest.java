@@ -9,21 +9,16 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.exception.InUseException;
 
-@DataJpaTest
-@Import({TimeSlotService.class, TestRepositoryHelper.class})
-class TimeSlotServiceTest {
+@Import(TimeSlotService.class)
+class TimeSlotServiceTest extends ServiceTest {
 
     @Autowired
     private TimeSlotService service;
-    @Autowired
-    private TestRepositoryHelper repositoryHelper;
 
     @Test
     @DisplayName("예약 시간을 추가한다.")

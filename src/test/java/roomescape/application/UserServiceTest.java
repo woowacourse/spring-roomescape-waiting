@@ -6,21 +6,16 @@ import static roomescape.DateUtils.tomorrow;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationWithOrder;
 
-@DataJpaTest
-@Import({UserService.class, TestRepositoryHelper.class})
-class UserServiceTest {
+@Import(UserService.class)
+class UserServiceTest extends ServiceTest {
 
     @Autowired
     private UserService service;
-    @Autowired
-    private TestRepositoryHelper repositoryHelper;
 
     @Test
     @DisplayName("사용자를 추가한다.")

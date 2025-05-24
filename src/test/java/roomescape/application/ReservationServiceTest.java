@@ -12,9 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWithOrder;
@@ -28,16 +26,13 @@ import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
 
-@DataJpaTest
-@Import({ReservationService.class, TestRepositoryHelper.class})
-class ReservationServiceTest {
+@Import(ReservationService.class)
+class ReservationServiceTest extends ServiceTest {
 
     private static final ReservationSearchFilter NONE_FILTERING = new ReservationSearchFilter(null, null, null, null);
 
     @Autowired
     private ReservationService service;
-    @Autowired
-    private TestRepositoryHelper repositoryHelper;
 
     private User user;
     private TimeSlot timeSlot;
