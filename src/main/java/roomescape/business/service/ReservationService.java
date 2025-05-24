@@ -32,11 +32,12 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final WaitInfoRepository waitInfoRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
-                              final MemberRepository memberRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository,
-                              final WaitInfoRepository waitInfoRepository
+    public ReservationService(
+            final ReservationRepository reservationRepository,
+            final MemberRepository memberRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
+            final WaitInfoRepository waitInfoRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
@@ -45,8 +46,11 @@ public class ReservationService {
         this.waitInfoRepository = waitInfoRepository;
     }
 
-    public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId,
-                                      final Long themeId
+    public ReservationResponse insert(
+            final LocalDate date,
+            final Long memberId,
+            final Long timeId,
+            final Long themeId
     ) {
         validateMemberIdExists(memberId);
         final Member member = memberRepository.findById(memberId).get();
@@ -59,17 +63,28 @@ public class ReservationService {
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
         // TODO: 검증 변경하기, "예약이 존재합니다. 예약대기를 사용해주세요."
 
-        final Reservation reservation = new Reservation(date, member, reservationTime, theme);
+        final Reservation reservation = new Reservation(date, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
 
         final WaitInfo waitInfo = new WaitInfo(member, reservation);
         waitInfoRepository.save(waitInfo);
-        return ReservationResponse.from(savedReservation);
+
+        return new ReservationResponse(
+                savedReservation.getId(),
+                member.getName(),
+                theme.getName(),
+                date,
+                reservationTime.getStartAt()
+        );
     }
 
     // TODO: 테스트 추가
-    public WaitInfoResponse insertWait(final LocalDate date, final Long memberId, final Long timeId,
-                                       final Long themeId) {
+    public WaitInfoResponse insertWait(
+            final LocalDate date,
+            final Long memberId,
+            final Long timeId,
+            final Long themeId
+    ) {
         validateMemberIdExists(memberId);
         final Member member = memberRepository.findById(memberId).get();
         validateTimeIdExists(timeId);
@@ -145,17 +160,40 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResponse::from)
+        final List<WaitInfo> waitInfos = waitInfoRepository.findByRank(1L);
+        return waitInfos.stream()
+                .map(waitInfo -> new ReservationResponse(
+                        waitInfo.getReservation().getId(),
+                        waitInfo.getMember().getName(),
+                        waitInfo.getReservation().getTheme().getName(),
+                        waitInfo.getReservation().getDate(),
+                        waitInfo.getReservation().getReservationTime().getStartAt()
+                ))
                 .toList();
     }
 
-    public List<ReservationResponse> findAllFilter(final Long memberId, final Long themeId, final LocalDate startDate,
-                                                   final LocalDate endDate) {
-        return reservationRepository.findAllByFilter(memberId, themeId, startDate, endDate)
-                .stream()
-                .map(ReservationResponse::from)
+    public List<ReservationResponse> findAllFilter(
+            final Long memberId,
+            final Long themeId,
+            final LocalDate startDate,
+            final LocalDate endDate
+    ) {
+        final List<WaitInfo> waitInfos = waitInfoRepository.filterByMemberIdAndThemeIdAndStartDateAndEndDateAndRank(
+                memberId,
+                themeId,
+                startDate,
+                endDate,
+                1L
+        );
+
+        return waitInfos.stream()
+                .map(waitInfo -> new ReservationResponse(
+                        waitInfo.getId(),
+                        waitInfo.getMember().getName(),
+                        waitInfo.getReservation().getTheme().getName(),
+                        waitInfo.getReservation().getDate(),
+                        waitInfo.getReservation().getReservationTime().getStartAt()
+                ))
                 .toList();
     }
 
@@ -169,7 +207,8 @@ public class ReservationService {
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
         final List<WaitInfo> memberWaitInfos = waitInfoRepository.findByMemberId(memberId);
         return memberWaitInfos.stream()
-                .map(waitInfo -> new ReservationMineResponse(waitInfo.getReservation().getId(),
+                .map(waitInfo -> new ReservationMineResponse(
+                        waitInfo.getReservation().getId(),
                         waitInfo.getReservation().getTheme().getName(),
                         waitInfo.getReservation().getDate(),
                         waitInfo.getReservation().getReservationTime().getStartAt(),
@@ -184,7 +223,7 @@ public class ReservationService {
                 waitInfo.getId(),
                 waitInfo.getReservation().getId());
 
-        if(rank == 1) {
+        if (rank == 1) {
             return "예약";
         }
         return "%d번째 예약대기".formatted(rank);
@@ -193,7 +232,8 @@ public class ReservationService {
     // TODO: 테스트 추가, 예약 대기 삭제가 잘 되는지 확인
     public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
         if (!waitInfoRepository.existsByIdAndMemberId(waitInfoId, memberId)) {
-            throw new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d, 멤버 id: %d".formatted(waitInfoId, memberId));
+            throw new NotFoundException(
+                    "해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d, 멤버 id: %d".formatted(waitInfoId, memberId));
         }
 
         waitInfoRepository.deleteById(waitInfoId);

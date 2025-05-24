@@ -19,29 +19,22 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne
-    private Member member;
-
-    @ManyToOne
     private ReservationTime reservationTime;
 
     @ManyToOne
     private Theme theme;
 
-    public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime reservationTime,
-                       final Theme theme
-    ) {
+    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         validateDate(date);
 
         this.id = id;
         this.date = date;
-        this.member = member;
         this.reservationTime = reservationTime;
         this.theme = theme;
     }
 
-    public Reservation(final LocalDate date, final Member member, final ReservationTime reservationTime,
-                       final Theme theme) {
-        this(null, date, member, reservationTime, theme);
+    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
+        this(null, date, reservationTime, theme);
     }
 
     protected Reservation() {
@@ -63,10 +56,6 @@ public class Reservation {
 
     public LocalDate getDate() {
         return date;
-    }
-
-    public Member getMember() {
-        return member;
     }
 
     public ReservationTime getReservationTime() {

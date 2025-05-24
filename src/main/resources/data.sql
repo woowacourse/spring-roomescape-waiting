@@ -23,11 +23,11 @@ INSERT INTO member (name, role, email, password) VALUES ('솔라', 'USER', 'sola
 
 
 -- 방탈출 예약 삽입
-INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-10', 1, 1, 5);
-INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-09', 1, 1, 5);
-INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-08', 1, 1, 4);
+INSERT INTO reservation (date, reservation_time_id, theme_id) VALUES ('2025-05-10', 1, 5);
+INSERT INTO reservation (date, reservation_time_id, theme_id) VALUES ('2025-05-09', 1, 5);
+INSERT INTO reservation (date, reservation_time_id, theme_id) VALUES ('2025-05-08', 1, 4);
 
-INSERT INTO reservation (date, member_id, reservation_time_id, theme_id) VALUES ('2025-05-31', 2, 1, 1);
+INSERT INTO reservation (date, reservation_time_id, theme_id) VALUES ('2025-05-31', 1, 1);
 
 
 -- 방탈출 예약 대기 삽입

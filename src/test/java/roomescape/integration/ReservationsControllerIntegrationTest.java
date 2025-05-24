@@ -116,11 +116,11 @@ class ReservationsControllerIntegrationTest {
         final Member member = new Member("이름", "USER", "이메일", "비밀번호");
         memberRepository.save(member);
 
-        final Reservation reservation1 = new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme);
+        final Reservation reservation1 = new Reservation(LocalDate.now().plusDays(1),reservationTime, theme);
         reservationRepository.save(reservation1);
-        final Reservation reservation2 = new Reservation(LocalDate.now().plusDays(2), member, reservationTime, theme);
+        final Reservation reservation2 = new Reservation(LocalDate.now().plusDays(2),reservationTime, theme);
         reservationRepository.save(reservation2);
-        final Reservation reservation3 = new Reservation(LocalDate.now().plusDays(3), member, reservationTime, theme);
+        final Reservation reservation3 = new Reservation(LocalDate.now().plusDays(3),reservationTime, theme);
         reservationRepository.save(reservation3);
 
         final Long memberId = 1L;
@@ -201,7 +201,7 @@ class ReservationsControllerIntegrationTest {
         memberRepository.save(member);
 
         final LocalDate futureDate = LocalDate.now().plusDays(1);
-        final Reservation reservation14_00 = new Reservation(futureDate, member, reservationTime14_00, theme);
+        final Reservation reservation14_00 = new Reservation(futureDate, reservationTime14_00, theme);
         reservationRepository.save(reservation14_00);
 
         final String formattedFutureDate = LocalDate.now().plusDays(1).toString();
@@ -239,9 +239,9 @@ class ReservationsControllerIntegrationTest {
         memberRepository.save(member2);
 
         final LocalDate futureDate = LocalDate.now().plusDays(1);
-        final Reservation reservation14_00 = new Reservation(futureDate, member1, reservationTime14_00, theme);
+        final Reservation reservation14_00 = new Reservation(futureDate, reservationTime14_00, theme);
         reservationRepository.save(reservation14_00);
-        final Reservation reservation16_00 = new Reservation(futureDate, member2, reservationTime16_00, theme);
+        final Reservation reservation16_00 = new Reservation(futureDate, reservationTime16_00, theme);
         reservationRepository.save(reservation16_00);
 
         final WaitInfo waitInfo1 = new WaitInfo(member1, reservation14_00);

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -62,26 +63,12 @@ public class ReservationServiceTest {
 
         // then
         assertAll(
-                () -> assertThat(reservationResponse.date()).isEqualTo(MAX_DATE_FIXTURE),
-                // member
-                () -> assertThat(reservationResponse.member()
-                        .id()).isEqualTo(memberId),
-                () -> assertThat(reservationResponse.member()
-                        .name()).isEqualTo("kim"),
-                () -> assertThat(reservationResponse.member()
-                        .email()).isEqualTo("email@test.com"),
                 // reservation_time
-                () -> assertThat(reservationResponse.time()
-                        .id()).isEqualTo(timeId),
-                () -> assertThat(reservationResponse.time()
-                        .startAt()).isEqualTo("14:00"),
+                () -> assertThat(reservationResponse.startAt()).isEqualTo("14:00"),
                 // theme
-                () -> assertThat(reservationResponse.theme()
-                        .id()).isEqualTo(themeId),
-                () -> assertThat(reservationResponse.theme()
-                        .name()).isEqualTo("평범"),
-                () -> assertThat(reservationResponse.theme()
-                        .description()).isEqualTo("평범한 테마입니다.")
+                () -> assertThat(reservationResponse.themeName()).isEqualTo("평범"),
+                () -> assertThat(reservationResponse.date()).isEqualTo(MAX_DATE_FIXTURE),
+                () -> assertThat(reservationResponse.startAt()).isEqualTo(LocalTime.of(14,0))
         );
     }
 
