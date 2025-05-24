@@ -13,7 +13,7 @@ public class ReservationTimeOperation {
     private final ReservationTimeValidator reservationTimeValidator;
 
     public void removeTime(ReservationTime reservationTime) {
-        reservationTimeValidator.validateNotInUse(reservationTime.getId());
+        reservationTimeValidator.validateNotUsedInActive(reservationTime.getId());
         reservationTimeRepository.remove(reservationTime);
     }
 }

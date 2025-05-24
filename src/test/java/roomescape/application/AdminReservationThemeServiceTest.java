@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.ReservationTestFixture;
-import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.reservation.application.AdminReservationThemeService;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
@@ -66,6 +66,6 @@ class AdminReservationThemeServiceTest extends IntegrationTestSupport {
         System.out.println(reservationRepository.findById(reservation.getId()));
         // when & then
         assertThatThrownBy(() -> adminReservationThemeService.delete(savedTheme.getId()))
-                .isInstanceOf(BusinessRuleViolationException.class);
+                .isInstanceOf(ReservationException.class);
     }
 }

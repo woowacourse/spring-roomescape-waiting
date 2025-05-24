@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.application;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.reservation.model.entity.vo.ReservationStatus.CONFIRMED;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ReservationTestFixture;
-import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
 import roomescape.member.model.Role;
@@ -22,6 +21,7 @@ import roomescape.reservation.application.dto.response.ReservationServiceRespons
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
@@ -102,7 +102,7 @@ class UserReservationServiceTest extends IntegrationTestSupport {
 
         // when & then
         Assertions.assertThatThrownBy(() -> userReservationService.create(request))
-                .isInstanceOf(BusinessRuleViolationException.class);
+                .isInstanceOf(ReservationException.class);
     }
 
     @DisplayName("예약 요청한 테마, 예약 시간에 이미 예약이 있다면 예외를 발생시킨다")
@@ -123,6 +123,6 @@ class UserReservationServiceTest extends IntegrationTestSupport {
 
         // when & then
         Assertions.assertThatThrownBy(() -> userReservationService.create(request))
-                .isInstanceOf(BusinessRuleViolationException.class);
+                .isInstanceOf(ReservationException.class);
     }
 }

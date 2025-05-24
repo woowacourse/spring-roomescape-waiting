@@ -55,6 +55,16 @@ public class ReservationTestFixture {
                 .build();
     }
 
+    public static Reservation createCanceledReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme, Member member) {
+        return Reservation.builder()
+                .date(date)
+                .time(reservationTime)
+                .theme(reservationTheme)
+                .status(ReservationStatus.CANCELED)
+                .member(member)
+                .build();
+    }
+
     public static ReservationTime createTime(LocalTime time) {
         return ReservationTime.builder()
             .startAt(time)

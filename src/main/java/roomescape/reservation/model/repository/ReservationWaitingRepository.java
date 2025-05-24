@@ -18,5 +18,5 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> getAll();
 
-    boolean existsByScheduleAndMemberId(Schedule schedule, Long memberId);
+    boolean existsPendingByScheduleAndMemberId(Schedule schedule, Long memberId);
 }

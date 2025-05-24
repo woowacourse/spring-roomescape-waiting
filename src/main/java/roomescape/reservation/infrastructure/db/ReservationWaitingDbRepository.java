@@ -50,12 +50,13 @@ public class ReservationWaitingDbRepository implements ReservationWaitingReposit
     }
 
     @Override
-    public boolean existsByScheduleAndMemberId(Schedule schedule, Long memberId) {
-        return reservationWaitingJpaRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+    public boolean existsPendingByScheduleAndMemberId(Schedule schedule, Long memberId) {
+        return reservationWaitingJpaRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
                 schedule.date(),
                 schedule.timeId(),
                 schedule.themeId(),
-                memberId
+                memberId,
+                PENDING
         );
     }
 }

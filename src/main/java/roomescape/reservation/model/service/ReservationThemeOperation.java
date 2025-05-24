@@ -13,7 +13,7 @@ public class ReservationThemeOperation {
     private final ReservationThemeValidator reservationThemeValidator;
 
     public void removeTheme(ReservationTheme reservationTheme) {
-        reservationThemeValidator.validateNotInUse(reservationTheme.getId());
+        reservationThemeValidator.validateNotUsedInActive(reservationTheme.getId());
         reservationThemeRepository.remove(reservationTheme);
     }
 }

@@ -36,11 +36,10 @@ public class Member {
     private Role role;
 
     @Builder
-    public Member(String password, Role role, String email, String name, Long id) {
+    public Member(String password, Role role, String email, String name) {
         this.password = password;
         this.role = role;
         this.email = email;
         this.name = name;
-        this.id = id;
     }
 }

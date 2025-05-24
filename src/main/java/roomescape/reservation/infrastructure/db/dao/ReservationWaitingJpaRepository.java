@@ -29,5 +29,5 @@ public interface ReservationWaitingJpaRepository extends JpaRepository<Reservati
 
     Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeIdAndStatusOrderByCreatedAtAsc(LocalDate date, Long timeId, Long themeId, ReservationWaitingStatus status);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(LocalDate date, Long timeId, Long themeId, Long memberId, ReservationWaitingStatus status);
 }

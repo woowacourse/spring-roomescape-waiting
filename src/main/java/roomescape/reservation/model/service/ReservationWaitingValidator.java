@@ -13,7 +13,7 @@ public class ReservationWaitingValidator {
     private final ReservationWaitingRepository reservationWaitingRepository;
 
     public void validateAlreadyWaiting(Schedule schedule, Long memberId) {
-        boolean existsWaiting = reservationWaitingRepository.existsByScheduleAndMemberId(schedule, memberId);
+        boolean existsWaiting = reservationWaitingRepository.existsPendingByScheduleAndMemberId(schedule, memberId);
         if (existsWaiting) {
             throw new AlreadyDoneWaitingException();
         }

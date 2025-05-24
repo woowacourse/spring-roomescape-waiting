@@ -19,9 +19,9 @@ public interface ReservationRepository {
 
     boolean existDuplicatedSchedule(Schedule schedule);
 
-    boolean existsByThemeId(Long reservationThemeId);
+    boolean existsActiveByThemeId(Long reservationThemeId);
 
-    boolean existsByTimeId(Long reservationTimeId);
+    boolean existsActiveByTimeId(Long reservationTimeId);
 
     List<Reservation> getSearchReservations(Long themeId, Long memberId, LocalDate from, LocalDate to);
 

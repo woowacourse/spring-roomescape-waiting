@@ -12,6 +12,7 @@ import roomescape.reservation.application.AdminReservationTimeService;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
@@ -45,6 +46,6 @@ class AdminReservationTimeServiceTest extends IntegrationTestSupport {
 
         // when & then
         assertThatThrownBy(() -> adminReservationTimeService.delete(reservationTime.getId()))
-                .isInstanceOf(BusinessRuleViolationException.class);
+                .isInstanceOf(ReservationException.class);
     }
 }

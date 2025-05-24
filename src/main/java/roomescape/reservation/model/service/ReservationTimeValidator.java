@@ -11,7 +11,7 @@ public class ReservationTimeValidator {
 
     private final ReservationRepository reservationRepository;
 
-    public void validateNotActive(Long reservationTimeId) {
+    public void validateNotUsedInActive(Long reservationTimeId) {
         if (reservationRepository.existsActiveByTimeId(reservationTimeId)) {
             throw new ReservationTimeInUseException("해당 예약 시간을 사용중인 예약이 존재합니다.");
         }

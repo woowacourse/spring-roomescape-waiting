@@ -1,5 +1,7 @@
 package roomescape.reservation.infrastructure.db;
 
+import static roomescape.reservation.model.entity.vo.ReservationStatus.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -42,17 +44,17 @@ public class ReservationDbRepository implements ReservationRepository {
 
     @Override
     public boolean existDuplicatedSchedule(Schedule schedule) {
-        return reservationJpaRepository.existsByDateAndTimeIdAndThemeId(schedule.date(), schedule.timeId(), schedule.themeId());
+        return reservationJpaRepository.existsByDateAndTimeIdAndThemeIdAndStatus(schedule.date(), schedule.timeId(), schedule.themeId(), CONFIRMED);
     }
 
     @Override
-    public boolean existsByThemeId(Long reservationThemeId) {
-        return reservationJpaRepository.existsByThemeId(reservationThemeId);
+    public boolean existsActiveByThemeId(Long reservationThemeId) {
+        return reservationJpaRepository.existsByThemeIdAndDateGreaterThanEqual(reservationThemeId, LocalDate.now());
     }
 
     @Override
-    public boolean existsByTimeId(Long reservationTimeId) {
-        return reservationJpaRepository.existsByTimeId(reservationTimeId);
+    public boolean existsActiveByTimeId(Long reservationTimeId) {
+        return reservationJpaRepository.existsByTimeIdAndDateGreaterThanEqual(reservationTimeId, LocalDate.now());
     }
 
     @Override
