@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.ResourceNotFoundException;
-import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
+import roomescape.reservation.application.dto.response.MyBookingServiceResponse;
 import roomescape.reservation.application.dto.response.MyWaitingServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.Waiting;
@@ -15,23 +15,23 @@ import roomescape.reservation.model.vo.WaitingWithRank;
 
 @Service
 @RequiredArgsConstructor
-public class MyReservationService {
+public class MyBookingService {
 
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public List<MyReservationServiceResponse> getAllByMemberId(Long memberId) {
+    public List<MyBookingServiceResponse> getAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(
             memberId);
-        List<MyReservationServiceResponse> response = new ArrayList<>();
+        List<MyBookingServiceResponse> response = new ArrayList<>();
 
         for (Reservation reservation : reservations) {
-            response.add(MyReservationServiceResponse.from(reservation));
+            response.add(MyBookingServiceResponse.from(reservation));
         }
 
         for (WaitingWithRank waitingWithRank : waitingWithRanks) {
-            response.add(MyReservationServiceResponse.from(waitingWithRank));
+            response.add(MyBookingServiceResponse.from(waitingWithRank));
         }
 
         return response;

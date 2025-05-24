@@ -9,20 +9,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.web.resolver.AuthenticationPrincipal;
-import roomescape.reservation.application.MyReservationService;
+import roomescape.reservation.application.MyBookingService;
 import roomescape.reservation.controller.dto.response.MyReservationResponse;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reservations-mine")
-public class MyReservationController {
+public class MyBookingController {
 
-    private final MyReservationService myReservationService;
+    private final MyBookingService myBookingService;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<MyReservationResponse> getAll(@AuthenticationPrincipal AuthenticatedMember member) {
-        return myReservationService.getAllByMemberId(member.id())
+        return myBookingService.getAllByMemberId(member.id())
             .stream()
             .map(MyReservationResponse::from)
             .toList();

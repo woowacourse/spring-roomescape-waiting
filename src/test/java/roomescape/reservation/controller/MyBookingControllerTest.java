@@ -1,17 +1,8 @@
 package roomescape.reservation.controller;
 
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,12 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import jakarta.servlet.http.Cookie;
-import roomescape.reservation.application.MyReservationService;
-import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
-import roomescape.reservation.model.vo.ReservationStatus;
+import roomescape.reservation.application.MyBookingService;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -33,13 +19,13 @@ import roomescape.reservation.model.vo.ReservationStatus;
 @Sql(statements = {
         "INSERT INTO member (name, email, password, role) VALUES ('테스트', 'test_email@naver.com', '1234', 'USER')",
 })
-class MyReservationControllerTest {
+class MyBookingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private MyReservationService myReservationService;
+    private MyBookingService myBookingService;
 
     @Test
     @DisplayName("GET /reservations-mine 요청에 대해 올바르게 응답한다")

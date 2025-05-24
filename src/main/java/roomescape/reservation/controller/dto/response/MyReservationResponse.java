@@ -3,7 +3,7 @@ package roomescape.reservation.controller.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
+import roomescape.reservation.application.dto.response.MyBookingServiceResponse;
 
 public record MyReservationResponse(
     Long reservationId,
@@ -13,7 +13,7 @@ public record MyReservationResponse(
     String status
 ) {
 
-    public static MyReservationResponse from(MyReservationServiceResponse response) {
+    public static MyReservationResponse from(MyBookingServiceResponse response) {
         return new MyReservationResponse(
             response.reservationId(),
             response.themeName(),
