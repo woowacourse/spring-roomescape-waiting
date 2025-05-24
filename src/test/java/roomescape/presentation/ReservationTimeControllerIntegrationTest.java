@@ -43,7 +43,7 @@ class ReservationTimeControllerIntegrationTest {
                 .post("/times")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("startAt", equalTo("14:00:00"));
+                .body("startAt", equalTo("14:00"));
     }
 
     @Test
@@ -109,7 +109,7 @@ class ReservationTimeControllerIntegrationTest {
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2))
-                .body("startAt", hasItems("14:00:00", "16:00:00"));
+                .body("startAt", hasItems("14:00", "16:00"));
     }
 
     @Test

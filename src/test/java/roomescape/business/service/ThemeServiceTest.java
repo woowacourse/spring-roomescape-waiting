@@ -7,39 +7,42 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
 import roomescape.util.CurrentUtil;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 @Sql("classpath:data-themeService.sql")
 class ThemeServiceTest {
 
-    private ThemeService themeService;
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
-
     @Autowired
-    public ThemeServiceTest(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-    }
+    private ThemeService themeService;
+    @Autowired
+    private QueryService queryService;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private CurrentUtil currentUtil;
 
-    @BeforeEach
-    void setUp() {
-        final CurrentUtil currentUtil = () -> LocalDate.of(2025, 5, 10);
-        themeService = new ThemeService(themeRepository, reservationRepository, currentUtil);
+    @TestConfiguration
+    static class CurrentUtilTestConfig {
+        @Bean
+        public CurrentUtil currentUtil() {
+            return () -> LocalDate.of(2025, 5, 10);
+        }
     }
 
     @Test

@@ -10,45 +10,38 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.infrastructure.repository.ReservationRepository;
-import roomescape.infrastructure.repository.ReservationTimeRepository;
-import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 @Sql("classpath:data-reservationService.sql")
 public class ReservationServiceTest {
 
     private static final LocalDate MAX_DATE_FIXTURE = LocalDate.of(9999, 12, 31);
 
-    private final ReservationService reservationService;
-    private final ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationService reservationService;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
+    private QueryService queryService;
 
     // data-reservationService.sql
     private final Long memberId = 100L;
     private final Long timeId = 100L;
     private final Long themeId = 100L;
-
-    @Autowired
-    public ReservationServiceTest(final MemberRepository memberRepository,
-                                  final ThemeRepository themeRepository,
-                                  final ReservationTimeRepository reservationTimeRepository,
-                                  final ReservationRepository reservationRepository,
-                                  final WaitingRepository waitingRepository) {
-
-        this.reservationService = new ReservationService(reservationRepository,
-                memberRepository, reservationTimeRepository, themeRepository, waitingRepository);
-        this.reservationRepository = reservationRepository;
-    }
 
     @Test
     @DisplayName("방탈출 예약 요청 객체로 방탈출 예약을 저장한다")
@@ -81,7 +74,6 @@ public class ReservationServiceTest {
                         .description()).isEqualTo("평범한 테마입니다.")
         );
     }
-
 
     @Test
     @DisplayName("존재하지 않는 사용자로 예약하면 예외가 발생한다")

@@ -6,21 +6,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.UnauthorizedException;
 import roomescape.infrastructure.repository.MemberRepository;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 @Sql("classpath:data-authService.sql")
 class AuthServiceTest {
 
-    private final AuthService authService;
+    @Autowired
+    private AuthService authService;
 
     @Autowired
-    public AuthServiceTest(final MemberRepository memberRepository) {
-        this.authService = new AuthService(memberRepository);
-    }
+    MemberRepository memberRepository;
 
     @Test
     @DisplayName("email, password 통해 인증에 성공하면 AccessToken 반환한다")

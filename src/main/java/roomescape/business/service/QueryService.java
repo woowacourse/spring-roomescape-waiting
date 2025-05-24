@@ -55,4 +55,8 @@ public class QueryService {
     public List<Reservation> findByDateBetween(LocalDate startDate, LocalDate endDate) {
         return reservationRepository.findByDateBetween(startDate, endDate);
     }
+
+    public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
+        return reservationRepository.findByDateAndThemeId(date, themeId);
+    }
 }

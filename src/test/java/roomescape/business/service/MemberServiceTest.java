@@ -6,21 +6,22 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.presentation.dto.MemberResponse;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 @Sql("classpath:data-memberService.sql")
 class MemberServiceTest {
 
-    private final MemberService memberService;
+    @Autowired
+    private MemberService memberService;
 
     @Autowired
-    public MemberServiceTest(final MemberRepository memberRepository) {
-        this.memberService = new MemberService(memberRepository);
-    }
+    private MemberRepository memberRepository;
 
     @Test
     @DisplayName("모든 사용자를 조회한다")

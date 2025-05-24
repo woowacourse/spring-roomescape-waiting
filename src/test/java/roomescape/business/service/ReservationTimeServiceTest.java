@@ -11,29 +11,28 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.ReservationTime;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
 import roomescape.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 @Sql("classpath:data-playTimeService.sql")
 class ReservationTimeServiceTest {
 
-    private final ReservationTimeService reservationTimeService;
-    private final ReservationTimeRepository reservationTimeRepository;
-
     @Autowired
-    public ReservationTimeServiceTest(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
-        this.reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
-        this.reservationTimeRepository = reservationTimeRepository;
-    }
+    private ReservationTimeService reservationTimeService;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private QueryService queryService;
 
     @Test
     @DisplayName("방탈출 예약 시간 요청 객체로 방탈출 예약 시간을 저장한다")
