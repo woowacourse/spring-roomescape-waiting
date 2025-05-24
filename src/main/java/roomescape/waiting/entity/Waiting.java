@@ -1,4 +1,4 @@
-package roomescape.reservation.entity;
+package roomescape.waiting.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -7,37 +7,36 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.entity.Member;
+import roomescape.reservation.entity.ReservationSlot;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private ReservationSlot reservationSlot;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Member member;
 
-    public Reservation(ReservationSlot reservationSlot, Member member) {
+    public Waiting(ReservationSlot reservationSlot, Member member) {
         this(null, reservationSlot, member);
     }
 
-    public LocalDateTime getDateTime() {
-        return LocalDateTime.of(reservationSlot.getDate(), reservationSlot.getTime().getStartAt());
+    public boolean matchesMemberById(Long id) {
+        return member.matchesId(id);
     }
 }

@@ -87,7 +87,7 @@ class ReservationAcceptanceTest {
         TestHelper.postWithToken("/reservations", reservationRequest, token)
                 .then()
                 .statusCode(HttpStatus.CONFLICT.value())
-                .body(equalTo("해당 날짜와 시간에 이미 예약이 존재합니다."));
+                .body(equalTo("이미 예약이 존재합니다."));
     }
 
     @Test
@@ -130,7 +130,7 @@ class ReservationAcceptanceTest {
         // when & then
         TestHelper.deleteWithToken("/reservations/1", token)
                 .then()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
         TestHelper.get("/reservations")
                 .then()

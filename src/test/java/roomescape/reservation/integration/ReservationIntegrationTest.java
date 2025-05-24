@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.member.entity.Member;
@@ -20,11 +21,17 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.entity.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -34,6 +41,9 @@ class ReservationIntegrationTest {
     private ReservationService reservationService;
 
     @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
+
+    @Autowired
     private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
@@ -41,6 +51,12 @@ class ReservationIntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Test
     @DisplayName("예약을 생성한다.")
@@ -114,7 +130,7 @@ class ReservationIntegrationTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(member.getId(), request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("해당 날짜와 시간에 이미 예약이 존재합니다.");
+                .hasMessage("이미 예약이 존재합니다.");
     }
 
     @Test
@@ -195,6 +211,31 @@ class ReservationIntegrationTest {
         assertThat(reservations).isEmpty();
     }
 
+    @DisplayName("예약을 삭제하고, 예약 대기를 예약으로 변환한다.")
+    @Test
+    void deleteAndChangeWaitingToReservation() {
+        //given
+        var otherMember = memberRepository.save(new Member("미소", "miso@email.com", "password", RoleType.USER));
+        var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        var date = LocalDate.now().plusDays(1);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, otherMember);
+        var savedReservation = reservationRepository.save(reservation);
+
+        var member = memberRepository.save(new Member("훌라", "hula@email.com", "password", RoleType.USER));
+        var waiting = new Waiting(reservationSlot, member);
+        waitingRepository.save(waiting);
+
+        //when
+        reservationService.deleteReservation(savedReservation.getId());
+
+        //then
+        var found = reservationRepository.findByReservationSlot(reservationSlot)
+                .orElse(null);
+        assertThat(found.getMember().getId()).isEqualTo(member.getId());
+    }
+
     @Test
     @DisplayName("유저 예약 기록을 확인한다.")
     void getReservationsByMember() {
@@ -206,8 +247,10 @@ class ReservationIntegrationTest {
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
 
+        var loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
+
         // when
-        var response = reservationService.getReservationsByMember(member.getId());
+        var response = reservationService.getReservationsByMember(loginMember);
 
         // then
         assertThat(response).hasSize(1);
