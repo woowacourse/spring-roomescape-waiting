@@ -6,11 +6,9 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchConditionRequest;
-import roomescape.reservation.dto.response.MyReservationJsonResponse;
-import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.response.MyReservationAndWaitingResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -18,7 +16,6 @@ import roomescape.schedule.domain.Schedule;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -90,19 +87,9 @@ public class ReservationService {
         }
     }
 
-    public List<MyReservationResponse> findAllByMember(Member member) {
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return reservations.stream()
-                .map(reservation ->
-                        MyReservationJsonResponse.fromReservationAndStatus(
-                                reservation,
-                                getReservationStatus(reservation)
-                        )
-                )
-                .collect(Collectors.toList());
-    }
-
-    private ReservationStatus getReservationStatus(Reservation reservation) {
-        return reservation.getReservationStatus();
+    public List<MyReservationAndWaitingResponse> findAllByMember(Member member) {
+        return reservationRepository.findAllByMember(member).stream()
+                .map(MyReservationAndWaitingResponse::fromReservationAndStatus)
+                .toList();
     }
 }

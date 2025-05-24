@@ -3,11 +3,13 @@ package roomescape.reservation.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingWithRank;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class MyReservationJsonResponse implements MyReservationResponse {
+public class MyReservationAndWaitingResponse {
 
     private final Long id;
     private final String themeName;
@@ -15,7 +17,7 @@ public class MyReservationJsonResponse implements MyReservationResponse {
     private final LocalTime time;
     private final String status;
 
-    private MyReservationJsonResponse(Long id, LocalDate date, LocalTime time, String themeName, String status) {
+    private MyReservationAndWaitingResponse(Long id, LocalDate date, LocalTime time, String themeName, String status) {
         this.id = id;
         this.date = date;
         this.time = time;
@@ -23,8 +25,9 @@ public class MyReservationJsonResponse implements MyReservationResponse {
         this.status = status;
     }
 
-    public static MyReservationJsonResponse fromReservationAndStatus(Reservation reservation, ReservationStatus status) {
-        return new MyReservationJsonResponse(
+    public static MyReservationAndWaitingResponse fromReservationAndStatus(Reservation reservation) {
+        ReservationStatus status = reservation.getStatus();
+        return new MyReservationAndWaitingResponse(
                 reservation.getId(),
                 reservation.getSchedule().getDate(),
                 reservation.getSchedule().getTime().getStartAt(),
@@ -33,28 +36,36 @@ public class MyReservationJsonResponse implements MyReservationResponse {
         );
     }
 
-    @Override
+    public static MyReservationAndWaitingResponse fromWaitingAndStatus(WaitingWithRank waitingWithRank) {
+        Waiting waiting = waitingWithRank.getWaiting();
+        ReservationStatus status = waitingWithRank.getStatus();
+        String statusWithRank = String.format("%s번째 %s", waitingWithRank.getRank() + 1, status.getDescription());
+        return new MyReservationAndWaitingResponse(
+                waiting.getId(),
+                waiting.getSchedule().getDate(),
+                waiting.getSchedule().getTime().getStartAt(),
+                waiting.getSchedule().getTheme().getName(),
+                statusWithRank
+        );
+    }
+
     public Long getId() {
         return id;
     }
 
-    @Override
     @JsonProperty("theme")
     public String getThemeName() {
         return themeName;
     }
 
-    @Override
     public LocalDate getDate() {
         return date;
     }
 
-    @Override
     public LocalTime getTime() {
         return time;
     }
 
-    @Override
     public String getStatus() {
         return status;
     }

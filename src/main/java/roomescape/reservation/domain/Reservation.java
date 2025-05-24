@@ -47,7 +47,7 @@ public class Reservation {
         return schedule.getDateTime();
     }
 
-    public ReservationStatus getReservationStatus() {
+    public ReservationStatus getStatus() {
         // todo: 스케쥴한테 상태를 물어도 괜찮을까?
         LocalDateTime reservationDateTime = getReservationDateTime();
         if (reservationDateTime.isBefore(LocalDateTime.now())) {

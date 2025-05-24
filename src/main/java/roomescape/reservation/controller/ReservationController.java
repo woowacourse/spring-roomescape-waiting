@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.auth.infrastructure.methodargument.AuthorizedMember;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.response.MyReservationAndWaitingResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationServiceFacade;
 
@@ -41,10 +41,10 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationResponse>> readMyReservations(
+    public ResponseEntity<List<MyReservationAndWaitingResponse>> readMyReservations(
             @AuthorizedMember MemberPrincipal memberPrincipal
     ) {
-        List<MyReservationResponse> responses = reservationService.findMyReservations(memberPrincipal);
+        List<MyReservationAndWaitingResponse> responses = reservationService.findAllMyReservationAndWaiting(memberPrincipal);
         return ResponseEntity.ok(responses);
     }
 

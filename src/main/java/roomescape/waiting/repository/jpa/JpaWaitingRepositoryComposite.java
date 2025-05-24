@@ -2,7 +2,10 @@ package roomescape.waiting.repository.jpa;
 
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
+
+import java.util.List;
 
 @Repository
 public class JpaWaitingRepositoryComposite implements WaitingRepository {
@@ -15,5 +18,10 @@ public class JpaWaitingRepositoryComposite implements WaitingRepository {
     @Override
     public Waiting save(Waiting waiting) {
         return jpaWaitingRepository.save(waiting);
+    }
+
+    @Override
+    public List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId) {
+        return jpaWaitingRepository.findWaitingWithRankByMemberId(memberId);
     }
 }
