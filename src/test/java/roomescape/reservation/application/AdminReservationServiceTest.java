@@ -31,7 +31,7 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
+import roomescape.reservation.ui.dto.request.CreateBookedReservationRequest;
 import roomescape.reservation.ui.dto.request.FilteredReservationsRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
@@ -66,8 +66,8 @@ class AdminReservationServiceTest {
         final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
-        final CreateReservationRequest request =
-                new CreateReservationRequest(member.getId(), date, timeId, themeId);
+        final CreateBookedReservationRequest request =
+                new CreateBookedReservationRequest(member.getId(), date, timeId, themeId);
 
         // when
         final ReservationResponse response = adminReservationService.create(request);
@@ -91,8 +91,8 @@ class AdminReservationServiceTest {
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
 
-        final CreateReservationRequest request =
-                new CreateReservationRequest(member.getId(), date, timeId, themeId);
+        final CreateBookedReservationRequest request =
+                new CreateBookedReservationRequest(member.getId(), date, timeId, themeId);
 
         // when & then
         Assertions.assertThatCode(() -> adminReservationService.create(request))
@@ -110,8 +110,8 @@ class AdminReservationServiceTest {
         reservationRepository.save(
                 Reservation.of(ReservationSlot.of(date, reservationTime, theme), member, BOOKED));
 
-        final CreateReservationRequest request =
-                new CreateReservationRequest(member.getId(), date, reservationTime.getId(), theme.getId());
+        final CreateBookedReservationRequest request =
+                new CreateBookedReservationRequest(member.getId(), date, reservationTime.getId(), theme.getId());
 
         // when & then
         Assertions.assertThatThrownBy(() -> adminReservationService.create(request))

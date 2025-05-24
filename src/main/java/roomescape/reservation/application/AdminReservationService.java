@@ -21,7 +21,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingRepository;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
+import roomescape.reservation.ui.dto.request.CreateBookedReservationRequest;
 import roomescape.reservation.ui.dto.request.FilteredReservationsRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
@@ -38,7 +38,7 @@ public class AdminReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationResponse create(final CreateReservationRequest request) {
+    public ReservationResponse create(final CreateBookedReservationRequest request) {
         final ReservationTime time = getReservationTimeById(request.timeId());
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberById(request.memberId());

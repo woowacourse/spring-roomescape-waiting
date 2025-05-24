@@ -32,7 +32,7 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
+import roomescape.reservation.ui.dto.request.CreateBookedReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse.ForMember;
 import roomescape.theme.domain.Theme;
@@ -67,8 +67,8 @@ class ReservationServiceTest {
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
 
-        final CreateReservationRequest.ForMember request =
-                new CreateReservationRequest.ForMember(date, timeId, themeId);
+        final CreateBookedReservationRequest.ForMember request =
+                new CreateBookedReservationRequest.ForMember(date, timeId, themeId);
 
         // when & then
         Assertions.assertThatCode(() -> reservationService.create(request, member.getId()))
@@ -83,8 +83,8 @@ class ReservationServiceTest {
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
 
-        final CreateReservationRequest.ForMember request =
-                new CreateReservationRequest.ForMember(date, timeId, themeId);
+        final CreateBookedReservationRequest.ForMember request =
+                new CreateBookedReservationRequest.ForMember(date, timeId, themeId);
 
         // when & then
         Assertions.assertThatThrownBy(() -> reservationService.create(request, member.getId()))
@@ -99,8 +99,8 @@ class ReservationServiceTest {
         final Theme theme = themeRepository.save(notSavedTheme1());
         final Member member = memberRepository.save(notSavedMember1());
 
-        final CreateReservationRequest.ForMember request =
-                new CreateReservationRequest.ForMember(date, time.getId(), theme.getId());
+        final CreateBookedReservationRequest.ForMember request =
+                new CreateBookedReservationRequest.ForMember(date, time.getId(), theme.getId());
         final MemberAuthInfo memberAuthInfo =
                 new MemberAuthInfo(member.getId(), member.getRole());
 

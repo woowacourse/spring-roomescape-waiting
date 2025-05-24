@@ -27,7 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.ui.dto.LoginRequest;
 import roomescape.member.ui.dto.SignUpRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest.ForMember;
+import roomescape.reservation.ui.dto.request.CreateBookedReservationRequest.ForMember;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationTimeResponse;
 import roomescape.theme.ui.dto.ThemeResponse;
