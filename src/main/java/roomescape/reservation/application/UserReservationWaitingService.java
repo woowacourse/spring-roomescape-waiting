@@ -3,10 +3,8 @@ package roomescape.reservation.application;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.AuthorizationException;
-import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.reservation.application.dto.request.CreateReservationWaitingServiceRequest;
 import roomescape.reservation.model.entity.ReservationWaiting;
-import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationWaitingRepository;
 import roomescape.reservation.model.service.ReservationWaitingOperation;
 
@@ -18,11 +16,7 @@ public class UserReservationWaitingService {
     private final ReservationWaitingOperation reservationWaitingOperation;
 
     public void create(CreateReservationWaitingServiceRequest request) {
-        try {
-            reservationWaitingOperation.waiting(request.date(), request.themeId(), request.themeId(), request.memberId());
-        } catch (ReservationException e) {
-            throw new BusinessRuleViolationException(e.getMessage(), e);
-        }
+        reservationWaitingOperation.waiting(request.date(), request.themeId(), request.themeId(), request.memberId());
     }
 
     public void cancel(Long reservationWaitingId, Long memberId) {

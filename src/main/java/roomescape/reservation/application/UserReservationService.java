@@ -7,13 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.AuthorizationException;
-import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.application.dto.response.UserReservationServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationWaiting;
-import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.ReservationWaitingRepository;
 import roomescape.reservation.model.repository.dto.ReservationWaitingWithRank;
@@ -29,13 +27,9 @@ public class UserReservationService {
 
     @Transactional
     public ReservationServiceResponse create(CreateReservationServiceRequest request) {
-        try {
-            Reservation savedReservation = reservationOperation.reserve(request.date(), request.timeId(),
-                    request.themeId(), request.memberId());
-            return ReservationServiceResponse.from(savedReservation);
-        } catch (ReservationException e) {
-            throw new BusinessRuleViolationException(e.getMessage(), e);
-        }
+        Reservation savedReservation = reservationOperation.reserve(request.date(), request.timeId(),
+                request.themeId(), request.memberId());
+        return ReservationServiceResponse.from(savedReservation);
     }
 
     public List<UserReservationServiceResponse> getAllByMemberId(Long memberId) {

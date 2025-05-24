@@ -2,11 +2,9 @@ package roomescape.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.reservation.application.dto.request.CreateReservationThemeServiceRequest;
 import roomescape.reservation.application.dto.response.ReservationThemeServiceResponse;
 import roomescape.reservation.model.entity.ReservationTheme;
-import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.service.ReservationThemeOperation;
 
@@ -23,11 +21,7 @@ public class AdminReservationThemeService {
     }
 
     public void delete(Long id) {
-        try {
-            ReservationTheme reservationTheme = reservationThemeRepository.getById(id);
-            reservationThemeOperation.removeTheme(reservationTheme);
-        } catch (ReservationException e) {
-            throw new BusinessRuleViolationException(e.getMessage(), e);
-        }
+        ReservationTheme reservationTheme = reservationThemeRepository.getById(id);
+        reservationThemeOperation.removeTheme(reservationTheme);
     }
 }
