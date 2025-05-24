@@ -15,7 +15,7 @@ public interface BaseRepository<T, ID> {
 
     List<T> findAll(Specification<T> specification);
 
-    boolean exists(Specification<T> spec);
+    boolean exists(Specification<T> specification);
 
     void delete(T entity);
 

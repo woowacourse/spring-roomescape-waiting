@@ -32,18 +32,6 @@ class ThemeRepositoryTest {
     }
 
     @Test
-    @DisplayName("아이디에 해당하는 테마를 삭제하고 삭제된 테마 수를 반환한다.")
-    void deleteByIdAndCount() {
-        var id = savedTheme.id();
-        var deletedCount = themeRepository.deleteByIdAndCount(id);
-
-        assertAll(
-            () -> assertThat(themeRepository.findById(id)).isEmpty(),
-            () -> assertThat(deletedCount).isEqualTo(1)
-        );
-    }
-
-    @Test
     @DisplayName("아이디에 해당하는 테마를 삭제한다.")
     void deleteByIdWhenFound() {
         var id = savedTheme.id();

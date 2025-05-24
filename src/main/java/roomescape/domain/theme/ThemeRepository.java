@@ -1,28 +1,33 @@
 package roomescape.domain.theme;
 
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.domain.Specification;
+import roomescape.domain.BaseRepository;
 import roomescape.exception.NotFoundException;
 
-public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
+public interface ThemeRepository extends BaseRepository<Theme, Long> {
 
-    @Modifying
-    @Query("DELETE FROM Theme t WHERE t.id = :id")
-    @Transactional
-    int deleteByIdAndCount(@Param("id") long id);
+    @Override
+    Theme save(Theme entity);
 
-    @Transactional
-    default void deleteByIdOrElseThrow(final long id) {
-        var deletedCount = deleteByIdAndCount(id);
-        if (deletedCount == 0) {
-            throw new NotFoundException("존재하지 않는 예약입니다. id : " + id);
-        }
-    }
+    @Override
+    Optional<Theme> findById(Long id);
 
-    default Theme getById(final long id) {
-        return findById(id).orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다. id : " + id));
-    }
+    @Override
+    Theme getById(Long id) throws NotFoundException;
+
+    List<Theme> findAll();
+
+    @Override
+    List<Theme> findAll(Specification<Theme> specification);
+
+    @Override
+    boolean exists(Specification<Theme> spec);
+
+    @Override
+    void delete(Theme entity);
+
+    @Override
+    void deleteByIdOrElseThrow(Long id) throws NotFoundException;
 }

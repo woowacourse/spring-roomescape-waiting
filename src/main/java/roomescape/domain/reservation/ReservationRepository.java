@@ -8,18 +8,18 @@ import roomescape.exception.NotFoundException;
 
 public interface ReservationRepository extends BaseRepository<Reservation, Long> {
 
-    ReservationQueues findQueuesBySlots(List<ReservationSlot> slots);
-
-    Reservations findAllWithWrapping(Specification<Reservation> spec);
-
     @Override
     Reservation save(Reservation entity);
 
     @Override
-    Optional<Reservation> findById(Long aLong);
+    Optional<Reservation> findById(Long id);
 
     @Override
-    Reservation getById(Long aLong) throws NotFoundException;
+    Reservation getById(Long id) throws NotFoundException;
+
+    ReservationQueues findQueuesBySlots(List<ReservationSlot> slots);
+
+    Reservations findAllWithWrapping(Specification<Reservation> spec);
 
     @Override
     List<Reservation> findAll(Specification<Reservation> specification);
@@ -31,5 +31,5 @@ public interface ReservationRepository extends BaseRepository<Reservation, Long>
     void delete(Reservation entity);
 
     @Override
-    void deleteByIdOrElseThrow(Long aLong) throws NotFoundException;
+    void deleteByIdOrElseThrow(Long id) throws NotFoundException;
 }
