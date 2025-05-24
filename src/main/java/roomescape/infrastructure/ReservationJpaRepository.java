@@ -20,7 +20,7 @@ public interface ReservationJpaRepository extends ReservationRepository, Reposit
     Reservation save(Reservation reservation);
 
     @Override
-    default Reservation getById(final long id) {
+    default Reservation getById(final Long id) {
         return findById(id).orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다. id : " + id));
     }
 
@@ -37,7 +37,7 @@ public interface ReservationJpaRepository extends ReservationRepository, Reposit
     }
 
     @Override
-    Optional<Reservation> findById(long id);
+    Optional<Reservation> findById(Long id);
 
     @Override
     void delete(final Reservation entity);
@@ -51,10 +51,10 @@ public interface ReservationJpaRepository extends ReservationRepository, Reposit
     @Modifying
     @Query("DELETE FROM Reservation r WHERE r.id = :id")
     @Transactional
-    int deleteByIdAndCount(final long id);
+    int deleteByIdAndCount(final Long id);
 
     @Transactional
-    default void deleteByIdOrElseThrow(final long id) {
+    default void deleteByIdOrElseThrow(final Long id) {
         var deletedCount = deleteByIdAndCount(id);
         if (deletedCount == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다. id : " + id);

@@ -3,24 +3,33 @@ package roomescape.domain.reservation;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
+import roomescape.domain.BaseRepository;
+import roomescape.exception.NotFoundException;
 
-public interface ReservationRepository {
-
-    Reservation save(Reservation reservation);
-
-    Reservation getById(long id);
-
-    Optional<Reservation> findById(long id);
+public interface ReservationRepository extends BaseRepository<Reservation, Long> {
 
     ReservationQueues findQueuesBySlots(List<ReservationSlot> slots);
 
-    List<Reservation> findAll(Specification<Reservation> spec);
-
     Reservations findAllWithWrapping(Specification<Reservation> spec);
 
+    @Override
+    Reservation save(Reservation entity);
+
+    @Override
+    Optional<Reservation> findById(Long aLong);
+
+    @Override
+    Reservation getById(Long aLong) throws NotFoundException;
+
+    @Override
+    List<Reservation> findAll(Specification<Reservation> specification);
+
+    @Override
     boolean exists(Specification<Reservation> spec);
 
-    void delete(Reservation Reservation);
+    @Override
+    void delete(Reservation entity);
 
-    void deleteByIdOrElseThrow(long id);
+    @Override
+    void deleteByIdOrElseThrow(Long aLong) throws NotFoundException;
 }
