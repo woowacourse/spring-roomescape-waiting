@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import roomescape.domain.reservation.Reservation;
 import roomescape.service.reserveticket.ReservationWithWaitingRank;
 
@@ -13,23 +14,27 @@ public class ReservationWithWaitingRanks {
     private final List<ReservationWithWaitingRank> reservationWithRanks;
 
     public ReservationWithWaitingRanks(List<Reservation> reserveTickets) {
-        Map<Reservation, List<Reservation>> reservationsMap = new HashMap<>();
+        List<ReservationWithWaitingRank> reservationWithWaitingRankList = reserveTickets.stream()
+                .map(ReservationWithWaitingRank::new)
+                .toList();
 
-        for (Reservation reservation : reserveTickets) {
-            reservationsMap.putIfAbsent(reservation, new ArrayList<>());
+        Map<ReservationWithWaitingRank, List<ReservationWithWaitingRank>> reservationsMap = new HashMap<>();
 
-            List<Reservation> reservations = reservationsMap.getOrDefault(reservation, new ArrayList<>());
-            reservations.add(reservation);
-            reservationsMap.put(reservation, reservations);
+        for (ReservationWithWaitingRank reservationWithRank : reservationWithWaitingRankList) {
+            reservationsMap.putIfAbsent(reservationWithRank, new ArrayList<>());
+
+            List<ReservationWithWaitingRank> reservations = reservationsMap.getOrDefault(reservationWithRank, new ArrayList<>());
+            reservations.add(reservationWithRank);
+            reservationsMap.put(reservationWithRank, reservations);
         }
         this.reservationWithRanks = calculateReservationWaitingRank(reservationsMap);
     }
 
     private List<ReservationWithWaitingRank> calculateReservationWaitingRank(
-            Map<Reservation, List<Reservation>> reservationsMap) {
+            Map<ReservationWithWaitingRank, List<ReservationWithWaitingRank>> reservationsMap) {
         List<ReservationWithWaitingRank> reservationWithWaitingRanks = new ArrayList<>();
-        for (Reservation compareObjectReservation : reservationsMap.keySet()) {
-            List<Reservation> reservations = reservationsMap.get(compareObjectReservation);
+        for (ReservationWithWaitingRank compareObjectReservation : reservationsMap.keySet()) {
+            List<ReservationWithWaitingRank> reservations = reservationsMap.get(compareObjectReservation);
             List<ReservationWithWaitingRank> createdReservationWaitings = createReservationWaitingListFromReservation(
                     reservations);
             reservationWithWaitingRanks.addAll(createdReservationWaitings);
@@ -38,12 +43,12 @@ public class ReservationWithWaitingRanks {
     }
 
     private List<ReservationWithWaitingRank> createReservationWaitingListFromReservation(
-            List<Reservation> reservations) {
+            List<ReservationWithWaitingRank> reservations) {
 
         List<ReservationWithWaitingRank> reservationWithWaitingRank = new ArrayList<>();
 
         for (int waitRank = 1; waitRank <= reservations.size(); waitRank++) {
-            Reservation reservation = reservations.get(waitRank - 1);
+            ReservationWithWaitingRank reservation = reservations.get(waitRank - 1);
             reservationWithWaitingRank.add(
                     new ReservationWithWaitingRank(reservation.getId(), reservation.getDate(), reservation.getStartAt(),
                             reservation.getReservationStatus(), waitRank, reservation.getThemeName()));

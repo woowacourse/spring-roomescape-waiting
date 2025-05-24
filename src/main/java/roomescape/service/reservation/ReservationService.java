@@ -11,6 +11,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reserveticket.ReservationWithWaitingRanks;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRanking;
 import roomescape.dto.reservation.AddReservationDto;
@@ -105,5 +106,9 @@ public class ReservationService {
             return reservation;
         }
         return Optional.empty();
+    }
+
+    public ReservationWithWaitingRanks createReservationWithWaitingRanks(List<Reservation> reservations) {
+        return new ReservationWithWaitingRanks(reservations);
     }
 }

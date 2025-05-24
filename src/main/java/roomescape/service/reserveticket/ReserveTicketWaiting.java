@@ -2,6 +2,7 @@ package roomescape.service.reserveticket;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.ReservationStatus;
 
 public class ReserveTicketWaiting {
@@ -25,6 +26,12 @@ public class ReserveTicketWaiting {
         this.waitNumber = waitNumber;
         this.themeName = themeName;
         this.memberId = memberId;
+    }
+
+    public ReserveTicketWaiting(ReservationWithWaitingRank reservationWithWaitingRank, Reserver reserver) {
+        this(reservationWithWaitingRank.getId(), reserver.getName(), reservationWithWaitingRank.getDate(),
+                reservationWithWaitingRank.getStartAt(), reservationWithWaitingRank.getReservationStatus(),
+                reservationWithWaitingRank.getWaitRank(), reservationWithWaitingRank.getThemeName(), reserver.getId());
     }
 
     public Long getId() {
@@ -56,6 +63,6 @@ public class ReserveTicketWaiting {
     }
 
     public boolean isSameMember(Long memberId) {
-        return this.memberId == memberId;
+        return this.memberId.equals(memberId);
     }
 }

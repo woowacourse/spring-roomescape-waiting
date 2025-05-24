@@ -8,8 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reserveticket.ReservationTicketWaitings;
+import roomescape.domain.reserveticket.ReservationWithWaitingRanks;
 import roomescape.domain.reserveticket.ReserveTicket;
+import roomescape.domain.reserveticket.ReserveTicketFinder;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
@@ -47,18 +48,31 @@ public class ReserveTicketService {
     }
 
     public List<ReserveTicketWaiting> allReservationTickets() {
-        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAll();
-        ReservationTicketWaitings reservationTicketWaitings = new ReservationTicketWaitings(reserveTickets);
-        return reservationTicketWaitings.reserveTicketWaitings();
+        ReserveTicketWaitings reserveTicketWaitings = createReserveTicketWaiting();
+        return reserveTicketWaitings.reserveTicketWaitings();
     }
 
     public List<ReserveTicketWaiting> memberReservationWaitingTickets(Long memberId) {
-        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAll();
-        ReservationTicketWaitings reservationTicketWaitings = new ReservationTicketWaitings(reserveTickets);
-        return reservationTicketWaitings.reserveTicketWaitings()
+        ReserveTicketWaitings reserveTicketWaitings = createReserveTicketWaiting();
+        return reserveTicketWaitings.reserveTicketWaitings()
                 .stream()
                 .filter(reserveTicketWaiting -> reserveTicketWaiting.isSameMember(memberId))
                 .toList();
+    }
+
+    private ReserveTicketWaitings createReserveTicketWaiting() {
+        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAll();
+        List<Reservation> reservations = reserveTickets.stream()
+                .map(ReserveTicket::getReservation)
+                .toList();
+
+        ReservationWithWaitingRanks reservationWithWaitingRanks = reservationService.createReservationWithWaitingRanks(
+                reservations);
+
+        ReserveTicketFinder memberReservations = new ReserveTicketFinder(reserveTickets);
+
+        return new ReserveTicketWaitings(memberReservations,
+                reservationWithWaitingRanks);
     }
 
     @Transactional

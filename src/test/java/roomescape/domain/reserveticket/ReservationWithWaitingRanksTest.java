@@ -8,37 +8,28 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.member.Reserver;
-import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.service.reserveticket.ReserveTicketWaiting;
+import roomescape.service.reserveticket.ReservationWithWaitingRank;
 
-class ReservationTicketWaitingsTest {
+class ReservationWithWaitingRanksTest {
 
     @Test
     @DisplayName("예약 티켓 대기 목록을 생성한다.")
     void createReservationTicketWaitings() {
-        Reserver member1 = new Reserver(1L, "member1", "password1", "member1@email.com", Role.USER);
-        Reserver member2 = new Reserver(2L, "member2", "password2", "member2@email.com", Role.USER);
-        Reserver member3 = new Reserver(3L, "member3", "password3", "member3@email.com", Role.USER);
-
         Theme theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2024, 3, 20);
 
         Reservation reservation = new Reservation(null, date, time, theme, ReservationStatus.RESERVATION);
+        Reservation reservation2 = new Reservation(null, date, time, theme, ReservationStatus.PREPARE);
+        Reservation reservation3 = new Reservation(null, date, time, theme, ReservationStatus.PREPARE);
 
-        ReserveTicket reserveTicket1 = new ReserveTicket(1L, reservation, member1);
-        ReserveTicket reserveTicket2 = new ReserveTicket(2L, reservation, member2);
-        ReserveTicket reserveTicket3 = new ReserveTicket(3L, reservation, member3);
-
-        List<ReserveTicket> reserveTickets = List.of(reserveTicket1, reserveTicket2, reserveTicket3);
-
-        ReservationTicketWaitings reservationTicketWaitings = new ReservationTicketWaitings(reserveTickets);
-        List<ReserveTicketWaiting> result = reservationTicketWaitings.reserveTicketWaitings();
+        ReservationWithWaitingRanks reservationWithWaitingRanks = new ReservationWithWaitingRanks(
+                List.of(reservation, reservation2, reservation3));
+        List<ReservationWithWaitingRank> result = reservationWithWaitingRanks.getReservationWithRanks();
 
         assertThat(result).hasSize(3);
         assertAll(
@@ -51,10 +42,10 @@ class ReservationTicketWaitingsTest {
     @Test
     @DisplayName("빈 예약 티켓 목록으로 대기 목록을 생성한다.")
     void createReservationTicketWaitingsWithEmptyList() {
-        List<ReserveTicket> reserveTickets = List.of();
+        List<Reservation> reservations = List.of();
 
-        ReservationTicketWaitings reservationTicketWaitings = new ReservationTicketWaitings(reserveTickets);
-        List<ReserveTicketWaiting> result = reservationTicketWaitings.reserveTicketWaitings();
+        ReservationWithWaitingRanks reservationWithWaitingRanks = new ReservationWithWaitingRanks(reservations);
+        List<ReservationWithWaitingRank> result = reservationWithWaitingRanks.getReservationWithRanks();
 
         assertThat(result).isEmpty();
     }

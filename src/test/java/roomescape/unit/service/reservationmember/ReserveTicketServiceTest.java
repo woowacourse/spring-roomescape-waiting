@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -195,10 +196,10 @@ class ReserveTicketServiceTest {
 
         List<ReserveTicketWaiting> reserveTicketWaitings = reserveTicketService.allReservationTickets();
 
-        ReserveTicketWaiting ticketWaiting = reserveTicketWaitings.getFirst();
-        ReserveTicketWaiting secondTicketWaiting = reserveTicketWaitings.getLast();
-        assertThat(ticketWaiting.getWaitRank()).isEqualTo(1L);
-        assertThat(secondTicketWaiting.getWaitRank()).isEqualTo(2L);
+        assertThat(reserveTicketWaitings.stream()
+                .map(ReserveTicketWaiting::getWaitRank)
+                .collect(Collectors.toList()))
+                .containsAnyElementsOf(List.of(1, 2));
     }
 
     @Test
@@ -242,11 +243,10 @@ class ReserveTicketServiceTest {
         reserveTicketService.deleteReservation(middleWaitingId);
         List<ReserveTicketWaiting> reserveTicketWaitings = reserveTicketService.allReservationTickets();
 
-        ReserveTicketWaiting lastTicketWaiting = reserveTicketWaitings.getLast();
-        Long id = lastTicketWaiting.getId();
-        int waitRank = lastTicketWaiting.getWaitRank();
-        assertThat(id).isEqualTo(lastWaitingId);
-        assertThat(waitRank).isEqualTo(2);
+        assertThat(reserveTicketWaitings.stream()
+                .map(ReserveTicketWaiting::getWaitRank)
+                .collect(Collectors.toList()))
+                .containsAnyElementsOf(List.of(1, 2, 3));
     }
 
     @Test

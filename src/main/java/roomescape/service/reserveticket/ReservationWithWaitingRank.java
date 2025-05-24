@@ -2,9 +2,13 @@ package roomescape.service.reserveticket;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 
 public class ReservationWithWaitingRank {
+
+    private static final int NOT_INITIALIZED_RANK = 1;
 
     private final Long id;
     private final LocalDate date;
@@ -21,6 +25,16 @@ public class ReservationWithWaitingRank {
         this.reservationStatus = reservationStatus;
         this.waitNumber = waitNumber;
         this.themeName = themeName;
+    }
+
+    public ReservationWithWaitingRank(Long id, LocalDate date, LocalTime startAt,
+                                      ReservationStatus reservationStatus, String themeName) {
+        this(id, date, startAt, reservationStatus, NOT_INITIALIZED_RANK, themeName);
+    }
+
+    public ReservationWithWaitingRank(Reservation reservation) {
+        this(reservation.getId(), reservation.getDate(), reservation.getStartAt(), reservation.getReservationStatus(),
+                reservation.getThemeName());
     }
 
     public Long getId() {
@@ -45,5 +59,20 @@ public class ReservationWithWaitingRank {
 
     public String getThemeName() {
         return themeName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ReservationWithWaitingRank that = (ReservationWithWaitingRank) o;
+        return Objects.equals(date, that.date) && Objects.equals(startAt, that.startAt)
+                && Objects.equals(themeName, that.themeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, startAt, themeName);
     }
 }
