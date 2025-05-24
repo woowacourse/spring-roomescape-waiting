@@ -19,7 +19,7 @@ public record MemberReservationResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                reservation.getState().getDescription(),
+                reservation.getStatus().getDescription(),
                 rank
         );
     }

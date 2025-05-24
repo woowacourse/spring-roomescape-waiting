@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.domain.BookingState;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.ui.dto.response.BookingStateResponse;
+import roomescape.reservation.ui.dto.response.BookingStatusResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 
 @RestController
@@ -69,12 +69,12 @@ public class ReservationRestController {
         return ResponseEntity.ok(availableReservationTimes);
     }
 
-    @GetMapping("/reservations/states")
+    @GetMapping("/reservations/statuses")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<BookingStateResponse>> getBookingStateOptions() {
+    public ResponseEntity<List<BookingStatusResponse>> getBookingStateOptions() {
         return ResponseEntity.ok()
-                .body(Arrays.stream(BookingState.values())
-                        .map(BookingStateResponse::from)
+                .body(Arrays.stream(BookingStatus.values())
+                        .map(BookingStatusResponse::from)
                         .toList());
     }
 }

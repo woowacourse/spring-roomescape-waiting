@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_ADMIN_1;
 import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_1;
 import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_2;
 import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVATION_TIME_1;
@@ -27,7 +28,7 @@ import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservation.domain.BookingState;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -80,7 +81,7 @@ class ReservationServiceTest {
                 () -> assertThat(response.theme()).isEqualTo(theme.getName()),
                 () -> assertThat(response.date()).isEqualTo(date),
                 () -> assertThat(response.time()).isEqualTo(time.getStartAt()),
-                () -> assertThat(response.status()).isEqualTo(BookingState.CONFIRMED.getDescription()),
+                () -> assertThat(response.status()).isEqualTo(BookingStatus.CONFIRMED.getDescription()),
                 () -> assertThat(response.rank()).isEqualTo(1L)
         );
     }
@@ -107,7 +108,7 @@ class ReservationServiceTest {
                 () -> assertThat(response.theme()).isEqualTo(theme.getName()),
                 () -> assertThat(response.date()).isEqualTo(date),
                 () -> assertThat(response.time()).isEqualTo(time.getStartAt()),
-                () -> assertThat(response.status()).isEqualTo(BookingState.WAITING.getDescription()),
+                () -> assertThat(response.status()).isEqualTo(BookingStatus.WAITING.getDescription()),
                 () -> assertThat(response.rank()).isEqualTo(2L)
         );
     }
@@ -119,7 +120,7 @@ class ReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final BookingState status = BookingState.WAITING;
+        final BookingStatus status = BookingStatus.WAITING;
 
         final AdminCreateReservationRequest request = new AdminCreateReservationRequest(member.getId(), date,
                 time.getId(), theme.getId(), status);
@@ -145,7 +146,7 @@ class ReservationServiceTest {
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         final Reservation reservation = Reservation.createForRegister(date, time, theme, member,
-                BookingState.CONFIRMED);
+                BookingStatus.CONFIRMED);
         final Reservation saved = reservationRepository.save(reservation);
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
@@ -167,7 +168,7 @@ class ReservationServiceTest {
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
         final Reservation reservation = Reservation.createForRegister(date, time, theme, member1,
-                BookingState.CONFIRMED);
+                BookingStatus.CONFIRMED);
         final Reservation savedReservation = reservationRepository.save(reservation);
 
         final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
@@ -194,10 +195,10 @@ class ReservationServiceTest {
         final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
 
         final Reservation saved1 = reservationRepository.save(
-                Reservation.createForRegister(date1, time1, theme1, member, BookingState.CONFIRMED)
+                Reservation.createForRegister(date1, time1, theme1, member, BookingStatus.CONFIRMED)
         );
         final Reservation saved2 = reservationRepository.save(
-                Reservation.createForRegister(date2, time2, theme2, member, BookingState.CONFIRMED)
+                Reservation.createForRegister(date2, time2, theme2, member, BookingStatus.CONFIRMED)
         );
 
         // when
@@ -246,9 +247,9 @@ class ReservationServiceTest {
                 .toList();
 
         reservationRepository.save(
-                Reservation.createForRegister(date, time1, theme, member, BookingState.CONFIRMED));
+                Reservation.createForRegister(date, time1, theme, member, BookingStatus.CONFIRMED));
         reservationRepository.save(
-                Reservation.createForRegister(date, time2, theme, member, BookingState.CONFIRMED));
+                Reservation.createForRegister(date, time2, theme, member, BookingStatus.CONFIRMED));
 
         // when
         final List<AvailableReservationTimeResponse> after = reservationService.findAvailableReservationTimes(request)
@@ -274,7 +275,7 @@ class ReservationServiceTest {
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         reservationRepository.save(
-                Reservation.createForRegister(date, time, theme, member, BookingState.CONFIRMED));
+                Reservation.createForRegister(date, time, theme, member, BookingStatus.CONFIRMED));
 
         final MemberCreateReservationRequest request = new MemberCreateReservationRequest(date, time.getId(),
                 theme.getId());
@@ -299,7 +300,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         reservationRepository.save(
-                Reservation.createForRegister(date, time, theme, member, BookingState.CONFIRMED));
+                Reservation.createForRegister(date, time, theme, member, BookingStatus.CONFIRMED));
 
         // when & then
         assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id()))
@@ -321,11 +322,11 @@ class ReservationServiceTest {
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         final Reservation saved1 = reservationRepository.save(
-                Reservation.createForRegister(date1, time1, theme1, member, BookingState.WAITING)
+                Reservation.createForRegister(date1, time1, theme1, member, BookingStatus.WAITING)
         );
 
         final Reservation saved2 = reservationRepository.save(
-                Reservation.createForRegister(date2, time2, theme2, member, BookingState.WAITING)
+                Reservation.createForRegister(date2, time2, theme2, member, BookingStatus.WAITING)
         );
 
         // when

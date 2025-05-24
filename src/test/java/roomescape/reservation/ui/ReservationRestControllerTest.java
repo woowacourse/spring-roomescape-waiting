@@ -25,9 +25,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.fixture.ui.LoginApiFixture;
-import roomescape.reservation.domain.BookingState;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.ui.dto.response.BookingStateResponse;
+import roomescape.reservation.ui.dto.response.BookingStatusResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -115,7 +115,7 @@ class ReservationRestControllerTest {
         // then
         assertAll(
                 () -> assertThat(response.date()).isEqualTo(reservationParams2.get("date")),
-                () -> assertThat(response.status()).isEqualTo(BookingState.WAITING.getDescription()),
+                () -> assertThat(response.status()).isEqualTo(BookingStatus.WAITING.getDescription()),
                 () -> assertThat(response.rank()).isEqualTo(2L)
         );
 
@@ -224,8 +224,8 @@ class ReservationRestControllerTest {
                 () -> assertThat(responses).extracting(response -> response.date().toString())
                         .containsExactlyInAnyOrder(reservationParams1.get("date"), reservationParams2().get("date")),
                 () -> assertThat(responses).extracting(MemberReservationResponse::status)
-                        .containsExactlyInAnyOrder(BookingState.CONFIRMED.getDescription(),
-                                BookingState.CONFIRMED.getDescription())
+                        .containsExactlyInAnyOrder(BookingStatus.CONFIRMED.getDescription(),
+                                BookingStatus.CONFIRMED.getDescription())
         );
     }
 
@@ -233,16 +233,16 @@ class ReservationRestControllerTest {
     void 예약_상태_목록을_조회한다() {
         final Map<String, String> adminCookies = LoginApiFixture.adminLoginAndGetCookies();
 
-        final List<BookingStateResponse> responses =
+        final List<BookingStatusResponse> responses =
                 RestAssured.given().log().all()
                         .contentType(ContentType.JSON)
                         .cookies(adminCookies)
-                        .when().get("/reservations/states")
+                        .when().get("/reservations/statuses")
                         .then().log().all()
                         .extract().jsonPath()
-                        .getList(".", BookingStateResponse.class);
+                        .getList(".", BookingStatusResponse.class);
 
-        assertThat(responses).hasSize(BookingState.values().length);
+        assertThat(responses).hasSize(BookingStatus.values().length);
     }
 
     private Map<String, String> reservationParams1() {

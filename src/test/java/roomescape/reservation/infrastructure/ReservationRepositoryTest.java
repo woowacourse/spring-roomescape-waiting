@@ -27,7 +27,7 @@ import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservation.domain.BookingState;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -59,7 +59,7 @@ class ReservationRepositoryTest {
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
         final Reservation saved = reservationRepository.save(
                 Reservation.createForRegister(date, time, theme, member,
-                        BookingState.WAITING));
+                        BookingStatus.WAITING));
 
         final Long savedId = saved.getId();
 
@@ -73,7 +73,7 @@ class ReservationRepositoryTest {
                 () -> assertThat(found.getMember().getName()).isEqualTo("헤일러"),
                 () -> assertThat(found.getTheme().getDescription()).isEqualTo("테마1 설명"),
                 () -> assertThat(found.getTime().getStartAt()).isEqualTo(LocalTime.of(10, 0)),
-                () -> assertThat(found.getState()).isEqualTo(BookingState.WAITING)
+                () -> assertThat(found.getStatus()).isEqualTo(BookingStatus.WAITING)
         );
     }
 
@@ -103,10 +103,10 @@ class ReservationRepositoryTest {
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         reservationRepository.save(
-                Reservation.createForRegister(date1, time1, theme, member, BookingState.WAITING));
+                Reservation.createForRegister(date1, time1, theme, member, BookingStatus.WAITING));
 
         reservationRepository.save(
-                Reservation.createForRegister(date2, time2, theme, member, BookingState.WAITING));
+                Reservation.createForRegister(date2, time2, theme, member, BookingStatus.WAITING));
 
         // when
         final List<Reservation> found = reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(
@@ -133,10 +133,10 @@ class ReservationRepositoryTest {
         final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
         final Member member3 = memberRepository.save(NOT_SAVED_MEMBER_3());
 
-        reservationRepository.save(Reservation.createForRegister(date, time, theme, member1, BookingState.CONFIRMED));
-        reservationRepository.save(Reservation.createForRegister(date, time, theme, member2, BookingState.WAITING));
+        reservationRepository.save(Reservation.createForRegister(date, time, theme, member1, BookingStatus.CONFIRMED));
         final Reservation target = reservationRepository.save(
-                Reservation.createForRegister(date, time, theme, member3, BookingState.WAITING));
+                Reservation.createForRegister(date, time, theme, member2, BookingStatus.WAITING));
+        reservationRepository.save(Reservation.createForRegister(date, time, theme, member3, BookingStatus.WAITING));
 
         // when
         final Long rank = reservationRepository.getReservationRankByReservationId(target.getId());

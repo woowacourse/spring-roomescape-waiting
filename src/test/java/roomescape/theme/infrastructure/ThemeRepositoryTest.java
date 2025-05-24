@@ -24,7 +24,7 @@ import roomescape.fixture.config.TestConfig;
 import roomescape.fixture.domain.ReservationTimeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservation.domain.BookingState;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -94,19 +94,19 @@ class ThemeRepositoryTest {
         final LocalDate date2 = LocalDate.now().plusDays(5);
 
         reservationRepository.save(
-                Reservation.createForRegister(date1, time1, theme1, member, BookingState.WAITING));
+                Reservation.createForRegister(date1, time1, theme1, member, BookingStatus.WAITING));
         reservationRepository.save(
-                Reservation.createForRegister(date1, time2, theme2, member, BookingState.WAITING));
+                Reservation.createForRegister(date1, time2, theme2, member, BookingStatus.WAITING));
         reservationRepository.save(
-                Reservation.createForRegister(date1, time3, theme1, member, BookingState.WAITING));
+                Reservation.createForRegister(date1, time3, theme1, member, BookingStatus.WAITING));
         reservationRepository.save(
-                Reservation.createForRegister(date2, time1, theme2, member, BookingState.WAITING));
+                Reservation.createForRegister(date2, time1, theme2, member, BookingStatus.WAITING));
         reservationRepository.save(
-                Reservation.createForRegister(date2, time2, theme1, member, BookingState.WAITING));
+                Reservation.createForRegister(date2, time2, theme1, member, BookingStatus.WAITING));
         reservationRepository.save(
-                Reservation.createForRegister(date2, time2, theme2, member, BookingState.WAITING));
+                Reservation.createForRegister(date2, time2, theme2, member, BookingStatus.WAITING));
         reservationRepository.save(
-                Reservation.createForRegister(date2, time3, theme2, member, BookingState.WAITING));
+                Reservation.createForRegister(date2, time3, theme2, member, BookingStatus.WAITING));
 
         // when
         final List<Theme> actual = themeRepository.getTopNThemesInPeriod(from, to, topN);

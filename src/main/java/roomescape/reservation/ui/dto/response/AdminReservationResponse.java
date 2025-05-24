@@ -22,7 +22,7 @@ public record AdminReservationResponse(
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                reservation.getState().getDescription(),
+                reservation.getStatus().getDescription(),
                 rank
         );
     }

@@ -12,7 +12,7 @@ import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservation.domain.BookingState;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -42,11 +42,11 @@ public class ReservationService {
             final Long memberId
     ) {
         validateMemberDuplicateReservation(request.date(), request.timeId(), request.themeId(), memberId);
-        final BookingState bookingState = getBookingState(request.date(), request.timeId(), request.themeId());
+        final BookingStatus bookingStatus = getBookingStatus(request.date(), request.timeId(), request.themeId());
 
         final Reservation reservation = registerReservation(request.date(), request.timeId(), request.themeId(),
                 memberId,
-                bookingState);
+                bookingStatus);
 
         return MemberReservationResponse.from(reservation,
                 reservationRepository.getReservationRankByReservationId(reservation.getId()));
@@ -137,17 +137,17 @@ public class ReservationService {
 
     private BookingState getBookingState(final LocalDate date, final Long timeId, final Long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            return BookingState.WAITING;
+            return BookingStatus.WAITING;
         }
-        return BookingState.CONFIRMED;
+        return BookingStatus.CONFIRMED;
     }
 
     private Reservation registerReservation(final LocalDate date, final Long timeId, final Long themeId,
-                                            final Long memberId, final BookingState state) {
+                                            final Long memberId, final BookingStatus status) {
         final ReservationTime time = reservationTimeRepository.getByIdOrThrow(timeId);
         final Theme theme = themeRepository.getByIdOrThrow(themeId);
         final Member member = memberRepository.getByIdOrThrow(memberId);
-        final Reservation reservation = Reservation.createForRegister(date, time, theme, member, state);
+        final Reservation reservation = Reservation.createForRegister(date, time, theme, member, status);
         return reservationRepository.save(reservation);
     }
 
