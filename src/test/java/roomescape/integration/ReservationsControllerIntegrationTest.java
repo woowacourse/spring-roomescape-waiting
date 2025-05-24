@@ -209,8 +209,7 @@ class ReservationsControllerIntegrationTest {
         memberRepository.save(member);
 
         final LocalDate futureDate = LocalDate.now().plusDays(1);
-        final Reservation reservation14_00 = new Reservation(futureDate, reservationTime14_00, theme);
-        reservationRepository.save(reservation14_00);
+        reservationService.insert(member.getId(), theme.getId(), futureDate, reservationTime14_00.getId());
 
         final String formattedFutureDate = LocalDate.now().plusDays(1).toString();
         final Long themeId = 1L;

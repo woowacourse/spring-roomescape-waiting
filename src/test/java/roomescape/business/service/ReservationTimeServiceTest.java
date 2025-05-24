@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.business.domain.Member;
-import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
@@ -22,6 +21,7 @@ import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
 import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
@@ -30,7 +30,7 @@ import roomescape.presentation.dto.ReservationTimeResponse;
 class ReservationTimeServiceTest {
 
     private final ReservationTimeService reservationTimeService;
-    private final ReservationRepository reservationRepository;
+    private final ReservationService reservationService;
     private final ReservationTimeRepository reservationTimeRepository;
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
@@ -40,13 +40,20 @@ class ReservationTimeServiceTest {
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final MemberRepository memberRepository,
-            final ThemeRepository themeRepository
+            final ThemeRepository themeRepository,
+            final WaitInfoRepository waitInfoRepository
     ) {
-        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
-        this.reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+        this.reservationTimeService = new ReservationTimeService(reservationTimeRepository, waitInfoRepository);
+        this.reservationService = new ReservationService(
+                reservationRepository,
+                memberRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitInfoRepository
+        );
     }
 
     @Test
@@ -166,19 +173,11 @@ class ReservationTimeServiceTest {
         final ReservationTime time2 = new ReservationTime(LocalTime.of(12, 0));
         reservationTimeRepository.save(time2);
 
-        final LocalDate date = LocalDate.parse("2025-05-10");
-        final Reservation reservation = new Reservation(
-                date,
-                time1,
-                theme
-        );
-        reservationRepository.save(reservation);
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.MAX, time1.getId());
 
         // when
-        final List<ReservationAvailableTimeResponse> availableTimeResponses = reservationTimeService.findAvailableTimes(
-                date,
-                theme.getId()
-        );
+        final List<ReservationAvailableTimeResponse> availableTimeResponses
+                = reservationTimeService.findAvailableTimes(LocalDate.MAX, theme.getId());
 
         // then
         final ReservationAvailableTimeResponse alreadyBookedResponse = availableTimeResponses.stream()
