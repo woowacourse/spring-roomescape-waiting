@@ -67,6 +67,13 @@ public class WaitingService {
             waitingRepository.save(new Waiting(member, request.date(), time, theme, rank + 1)));
     }
 
+    private void validateDateTimeAfterNow(LocalDateTime now, LocalDate date, ReservationTime time) {
+        if (date.isBefore(now.toLocalDate()) ||
+            (date.isEqual(now.toLocalDate()) && time.isBefore(now.toLocalTime()))) {
+            throw new InvalidInputException("과거 예약은 불가능");
+        }
+    }
+
     private void validateDuplicateReservationAboutMemberId(Member member, WaitingRequest request) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
             request.date(), request.timeId(), request.themeId(), member.getId())) {
@@ -75,13 +82,6 @@ public class WaitingService {
         if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
             request.date(), request.timeId(), request.themeId(), member.getId())) {
             throw new DuplicatedException("waiting");
-        }
-    }
-
-    private void validateDateTimeAfterNow(LocalDateTime now, LocalDate date, ReservationTime time) {
-        if (date.isBefore(now.toLocalDate()) ||
-            (date.isEqual(now.toLocalDate()) && time.isBefore(now.toLocalTime()))) {
-            throw new InvalidInputException("과거 예약은 불가능");
         }
     }
 
