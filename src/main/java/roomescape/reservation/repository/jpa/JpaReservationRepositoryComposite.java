@@ -2,11 +2,14 @@ package roomescape.reservation.repository.jpa;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Repository
 @ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
@@ -55,5 +58,15 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     @Override
     public List<Reservation> findAllByMember(Member member) {
         return jpaReservationRepository.findAllByMember(member);
+    }
+
+    @Override
+    public Optional<Reservation> findByLastPriorityByDateAndTimeAndThemeAndMember(
+        LocalDate date,
+        ReservationTime time,
+        Theme theme,
+        Member member
+    ) {
+        return jpaReservationRepository.findByLastPriorityByDateAndTimeAndThemeAndMember(date, time, theme, member);
     }
 }

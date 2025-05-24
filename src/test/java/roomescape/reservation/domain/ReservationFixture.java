@@ -17,7 +17,8 @@ public class ReservationFixture {
             LocalDate.now(),
             ReservationTimeFixture.create(),
             ThemeFixture.create(),
-            MemberFixture.create(MemberRole.USER)
+            MemberFixture.create(MemberRole.USER),
+            (int) id
         );
     }
 
@@ -27,7 +28,8 @@ public class ReservationFixture {
             LocalDate.now(),
             ReservationTimeFixture.create(),
             ThemeFixture.create(),
-            MemberFixture.createWithoutId(MemberRole.USER)
+            MemberFixture.createWithoutId(MemberRole.USER),
+            (int) id
         );
     }
 }

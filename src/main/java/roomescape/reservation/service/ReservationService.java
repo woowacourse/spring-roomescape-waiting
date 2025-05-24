@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,10 +41,27 @@ public class ReservationService {
 
         validateReservationTimeConflict(availableTimes, reservationTime);
 
-        Reservation reservation = reservationRepository.save(
-            reservationCreateRequest.toReservation(reservationTime, theme, member));
+        Reservation reservation = makeReservation(
+            reservationCreateRequest.date(),
+            reservationTime,
+            theme,
+            member
+        );
+
+        reservationRepository.save(reservation);
 
         return ReservationResponse.from(reservation);
+    }
+
+    private Reservation makeReservation(
+        LocalDate date,
+        ReservationTime reservationTime,
+        Theme theme,
+        Member member
+    ) {
+        return reservationRepository
+            .findByLastPriorityByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member)
+            .orElse(Reservation.first(date, reservationTime, theme, member));
     }
 
     private void validateNotPast(LocalDateTime dateTime) {

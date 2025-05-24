@@ -3,6 +3,7 @@ package roomescape.reservation.repository.jdbc;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -50,6 +51,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT
                 r.id as reservation_id,
                 r.date as reservation_date,
+                r.priority as reservation_priority,
                 t.id as time_id,
                 t.start_at as time_start_at,
                 m.id as member_id,
@@ -91,7 +93,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("member_email"),
                     MemberRole.valueOf(resultSet.getString("role")),
                     resultSet.getString("member_password")
-                )
+                ),
+                resultSet.getInt("reservation_priority")
             )
         );
     }
@@ -103,6 +106,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT
                 r.id as reservation_id,
                 r.date as reservation_date,
+                r.priority as reservation_priority,
                 t.id as time_id,
                 t.start_at as time_start_at,
                 m.id as member_id,
@@ -147,7 +151,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("member_email"),
                     MemberRole.valueOf(resultSet.getString("role")),
                     resultSet.getString("member_password")
-                )
+                ),
+                resultSet.getInt("reservation_priority")
             ),
             themeId, memberId, dateFrom, dateTo
         );
@@ -159,6 +164,16 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAllByMember(Member member) {
         return List.of();
+    }
+
+    @Override
+    public Optional<Reservation> findByLastPriorityByDateAndTimeAndThemeAndMember(
+        LocalDate date,
+        ReservationTime time,
+        Theme theme,
+        Member member
+    ) {
+        return Optional.empty();
     }
 
     @Override

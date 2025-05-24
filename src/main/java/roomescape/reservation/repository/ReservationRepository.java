@@ -2,8 +2,11 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
@@ -22,4 +25,11 @@ public interface ReservationRepository {
     );
 
     List<Reservation> findAllByMember(Member member);
+
+    Optional<Reservation> findByLastPriorityByDateAndTimeAndThemeAndMember(
+        LocalDate date,
+        ReservationTime time,
+        Theme theme,
+        Member member
+    );
 }

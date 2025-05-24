@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -8,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.exception.DomainValidationException;
@@ -16,13 +18,22 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Entity
-@Table(name = "reservation")
+@Table(
+    name = "reservation",
+    uniqueConstraints = @UniqueConstraint(
+        columnNames = {"date", "time_id", "theme_id", "priority"}
+    )
+)
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne
@@ -33,33 +44,62 @@ public class Reservation {
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @Embedded
+    private Priority priority;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, Priority priority) {
+        validate(date, time, theme, member);
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.priority = priority;
+    }
+
+    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validate(date, time, theme, member);
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.priority = Priority.first();
+    }
+
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member, Integer priority) {
         validate(date, time, theme, member);
         this.id = id;
+        this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.member = member;
+        this.priority = new Priority(priority);
     }
 
-    Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
+    Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, Integer priority) {
         validate(date, time, theme, member);
+        this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.member = member;
+        this.priority = new Priority(priority);
+    }
+
+    public static Reservation first(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        return new Reservation(date, time, theme, member, Priority.first());
     }
 
     public static Reservation generateWithPrimaryKey(Reservation reservation, Long newPrimaryKey) {
-        return new Reservation(newPrimaryKey, reservation.date, reservation.time, reservation.theme,
-            reservation.member);
+        return new Reservation(
+            newPrimaryKey,
+            reservation.date,
+            reservation.time,
+            reservation.theme,
+            reservation.member,
+            reservation.priority.getValue()
+        );
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -84,6 +124,10 @@ public class Reservation {
         return theme;
     }
 
+    public Integer getPriority() {
+        return priority.getValue();
+    }
+
     public Member getMember() {
         return member;
     }
@@ -93,13 +137,13 @@ public class Reservation {
         if (!(o instanceof Reservation that)) {
             return false;
         }
-        return Objects.equals(id, that.id) && Objects.equals(date, that.date)
-            && Objects.equals(time, that.time) && Objects.equals(theme, that.theme)
-            && Objects.equals(member, that.member);
+        return Objects.equals(id, that.id) && Objects.equals(member, that.member)
+            && Objects.equals(date, that.date) && Objects.equals(time, that.time)
+            && Objects.equals(theme, that.theme) && Objects.equals(priority, that.priority);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hash(id, member, date, time, theme, priority);
     }
 }
