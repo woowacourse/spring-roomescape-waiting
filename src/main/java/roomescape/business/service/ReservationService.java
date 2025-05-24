@@ -172,7 +172,8 @@ public class ReservationService {
                         waitInfo.getReservation().getTheme().getName(),
                         waitInfo.getReservation().getDate(),
                         waitInfo.getReservation().getReservationTime().getStartAt(),
-                        calculateStatus(waitInfo)))
+                        calculateStatus(waitInfo),
+                        waitInfo.getId()))
                 .toList();
     }
 
@@ -186,5 +187,14 @@ public class ReservationService {
             return "예약";
         }
         return "%d번째 예약대기".formatted(rank);
+    }
+
+    // TODO: 테스트 추가, 예약 대기 삭제가 잘 되는지 확인
+    public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
+        if (!waitInfoRepository.existsByIdAndMemberId(waitInfoId, memberId)) {
+            throw new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d, 멤버 id: %d".formatted(waitInfoId, memberId));
+        }
+
+        waitInfoRepository.deleteById(waitInfoId);
     }
 }

@@ -1,5 +1,6 @@
 package roomescape.business.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -23,6 +24,12 @@ public class WaitInfo {
     @ManyToOne
     @JoinColumn(name = "reservation_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Reservation reservation;
+
+    @Column(name = "wait_date_time")
+    private String waitDateTime;
+
+    @Column(name = "wait_status")
+    private String waitStatus;
 
     public WaitInfo(final Member member, final Reservation reservation) {
         this.member = member;
