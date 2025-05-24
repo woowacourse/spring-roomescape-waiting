@@ -61,7 +61,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeDbFixture.열시();
         Theme theme = themeDbFixture.공포();
         Member reserver = memberDbFixture.유저1_생성();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
 
         ReserveCommand command = new ReserveCommand(date, theme.getId(), reservationTime.getId(), reserver.getId());
 
@@ -113,7 +113,7 @@ class ReservationServiceTest {
     void 존재하지_않는_회원으로_예약할_수_없다() {
         ReservationTime reservationTime = reservationTimeDbFixture.열시();
         Theme theme = themeDbFixture.공포();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
 
         ReserveCommand command = new ReserveCommand(date, theme.getId(), reservationTime.getId(), 999L);
 
@@ -125,7 +125,7 @@ class ReservationServiceTest {
     void 존재하지_않는_테마로_예약할_수_없다() {
         ReservationTime reservationTime = reservationTimeDbFixture.열시();
         Member reserver = memberDbFixture.유저1_생성();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
 
         ReserveCommand command = new ReserveCommand(date, 999L, reservationTime.getId(), reserver.getId());
 
@@ -137,7 +137,7 @@ class ReservationServiceTest {
     void 존재하지_않는_시간으로_예약할_수_없다() {
         Theme theme = themeDbFixture.공포();
         Member reserver = memberDbFixture.유저1_생성();
-        LocalDate date = ReservationDateFixture.예약날짜_내일.getDate();
+        LocalDate date = ReservationDateFixture.예약날짜_내일.date();
 
         ReserveCommand command = new ReserveCommand(date, theme.getId(), 999L, reserver.getId());
 

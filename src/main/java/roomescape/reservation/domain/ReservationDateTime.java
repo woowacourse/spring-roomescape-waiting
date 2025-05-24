@@ -39,7 +39,7 @@ public class ReservationDateTime {
     }
 
     private static void validatePast(ReservationDate reservationDate, ReservationTime reservationTime) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate.getDate(), reservationTime.getStartAt());
+        LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate.date(), reservationTime.getStartAt());
         LocalDateTime now = LocalDateTime.now();
 
         if (reservationDateTime.isBefore(now)) {
@@ -48,7 +48,7 @@ public class ReservationDateTime {
     }
 
     public LocalDate getDate() {
-        return reservationDate.getDate();
+        return reservationDate.date();
     }
 
     public LocalTime getStartAt() {

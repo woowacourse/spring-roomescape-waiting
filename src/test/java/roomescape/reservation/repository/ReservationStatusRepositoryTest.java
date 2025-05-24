@@ -13,7 +13,6 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.dto.ReservationWithRank;
 import roomescape.theme.domain.Theme;
 
 @CustomJpaTest
