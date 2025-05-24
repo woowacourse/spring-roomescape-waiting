@@ -42,10 +42,11 @@ public class ReservationsController {
             @RequestBody final ReservationRequest reservationRequest
     ) {
         final ReservationResponse reservationResponse = reservationService.insert(
-                reservationRequest.date(),
                 loginMember.id(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId());
+                reservationRequest.themeId(),
+                reservationRequest.date(),
+                reservationRequest.timeId()
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservationResponse);

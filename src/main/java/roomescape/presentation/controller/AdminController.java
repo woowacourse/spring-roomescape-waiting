@@ -27,10 +27,12 @@ public class AdminController {
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody final ReservationRequest reservationRequest
     ) {
-        final ReservationResponse reservationResponse = reservationService.insert(reservationRequest.date(),
+        final ReservationResponse reservationResponse = reservationService.insert(
                 reservationRequest.memberId(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId());
+                reservationRequest.themeId(),
+                reservationRequest.date(),
+                reservationRequest.timeId()
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservationResponse);

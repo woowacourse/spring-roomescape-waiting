@@ -29,11 +29,18 @@ public class WaitInfo {
     @JoinColumn(name = "reservation_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Reservation reservation;
 
+    @Column(name = "rank")
+    private Long rank;
+
     @Column(name = "created_at")
     private String createdAt;
 
-    @Column(name = "rank")
-    private Long rank;
+    public WaitInfo(final Member member, final Reservation reservation, final Long rank) {
+        this.member = member;
+        this.reservation = reservation;
+        this.rank = rank;
+        this.createdAt = LocalDateTime.now().format(DATE_TIME_FORMATTER);
+    }
 
     public WaitInfo(final Member member, final Reservation reservation) {
         this.member = member;
@@ -56,11 +63,11 @@ public class WaitInfo {
         return reservation;
     }
 
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
     public Long getRank() {
         return rank;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
     }
 }

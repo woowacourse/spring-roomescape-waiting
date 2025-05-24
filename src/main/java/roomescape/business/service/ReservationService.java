@@ -47,10 +47,10 @@ public class ReservationService {
     }
 
     public ReservationResponse insert(
-            final LocalDate date,
             final Long memberId,
-            final Long timeId,
-            final Long themeId
+            final Long themeId,
+            final LocalDate date,
+            final Long timeId
     ) {
         validateMemberIdExists(memberId);
         final Member member = memberRepository.findById(memberId).get();
@@ -59,18 +59,24 @@ public class ReservationService {
         validateThemeIdExists(themeId);
         final Theme theme = themeRepository.findById(themeId).get();
 
-        validateIsDuplicate(date, timeId, themeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
-        // TODO: 검증 변경하기, "예약이 존재합니다. 예약대기를 사용해주세요."
 
-        final Reservation reservation = new Reservation(date, reservationTime, theme);
-        final Reservation savedReservation = reservationRepository.save(reservation);
+        if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
+            final Reservation reservation = new Reservation(date, reservationTime, theme);
+            reservationRepository.save(reservation);
+        }
+        final Reservation reservation = reservationRepository.findByDateAndReservationTimeIdAndThemeId(
+                date,
+                timeId,
+                themeId
+        ).get();
 
-        final WaitInfo waitInfo = new WaitInfo(member, reservation);
+        validateWaitInfoEmpty(reservation.getId());
+        final WaitInfo waitInfo = new WaitInfo(member, reservation, 1L);
         waitInfoRepository.save(waitInfo);
 
         return new ReservationResponse(
-                savedReservation.getId(),
+                reservation.getId(),
                 member.getName(),
                 theme.getName(),
                 date,
@@ -141,6 +147,12 @@ public class ReservationService {
     private void validateReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
         if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
             throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(themeId));
+        }
+    }
+
+    private void validateWaitInfoEmpty(Long reservationId) {
+        if (waitInfoRepository.existsByReservationId(reservationId)) {
+            throw new DuplicateException("예약이 이미 존재합니다. 예약대기를 사용해주세요.");
         }
     }
 
