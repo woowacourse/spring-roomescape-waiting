@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +36,7 @@ import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.service.WaitingService;
 
 @ExtendWith(MockitoExtension.class)
-public class WaitingServiceTest {
+class WaitingServiceTest {
 
     @InjectMocks
     private WaitingService waitingService;
@@ -52,15 +53,38 @@ public class WaitingServiceTest {
     @Mock
     private ReservationSlotRepository reservationSlotRepository;
 
+    private LocalDate date;
+    private Theme theme;
+    private ReservationTime time;
+    private ReservationSlot reservationSlot;
+    private Waiting waiting;
+
+    private Member member;
+    private Member otherMember;
+    private Member admin;
+    private LoginMember loginMember;
+    private Reservation reservation;
+
+    @BeforeEach
+    void setUp() {
+        date = LocalDate.now().plusDays(1);
+        time = new ReservationTime(1L, LocalTime.of(10, 0));
+        theme = new Theme(1L, "테마", "설명", "썸네일");
+        reservationSlot = new ReservationSlot(1L, date, time, theme);
+
+        member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
+        otherMember = new Member(2L, "미소", "miso@email.com", "password", RoleType.USER);
+        admin = new Member(3L, "admin", "admin@email.com", "password", RoleType.ADMIN);
+        loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
+
+        waiting = new Waiting(1L, reservationSlot, member);
+        reservation = new Reservation(1L, reservationSlot, otherMember);
+    }
+
     @Test
     @DisplayName("예약 대기를 생성할 수 있다.")
     void createWaiting() {
         //given
-        var theme = new Theme(1L, "테마", "설명", "썸네일");
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var reservationSlot = new ReservationSlot(date, time, theme);
-
         when(reservationRepository.existsByReservationSlot(reservationSlot))
                 .thenReturn(true);
         when(reservationRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
@@ -68,11 +92,7 @@ public class WaitingServiceTest {
         when(waitingRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(false);
 
-        var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
-        var loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
-        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
-        var waiting = new Waiting(1L, reservationSlot, member);
         when(waitingRepository.save(any()))
                 .thenReturn(waiting);
         when(waitingRepository.countByReservationSlotAndIdLessThan(any(), any()))
@@ -82,6 +102,8 @@ public class WaitingServiceTest {
                 .thenReturn(Optional.of(member));
         when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(reservationSlot));
+
+        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
         //when
         var response = waitingService.createWaiting(loginMember, request);
@@ -94,21 +116,14 @@ public class WaitingServiceTest {
     @DisplayName("예약이 존재하지 않는다면 예외를 던진다.")
     void cantCreateWaitingWhenNotReserved() {
         //given
-        var theme = new Theme(1L, "테마", "설명", "썸네일");
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(date, time, theme);
-
-        var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
-        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
-
         when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(reservationSlot));
         when(reservationRepository.existsByReservationSlot(reservationSlot))
                 .thenReturn(false);
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
+
+        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
         //when & then
         assertThatThrownBy(() -> waitingService.createWaiting(loginMember, request))
@@ -119,15 +134,6 @@ public class WaitingServiceTest {
     @DisplayName("중복된 본인의 예약이 존재한다면 예외를 던진다.")
     void cantCreateWaitingWhenAlreadyReserved() {
         //given
-        var theme = new Theme(1L, "테마", "설명", "썸네일");
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(date, time, theme);
-
-        var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
-        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
-
         when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(reservationSlot));
         when(reservationRepository.existsByReservationSlot(any()))
@@ -136,6 +142,8 @@ public class WaitingServiceTest {
                 .thenReturn(true);
         when(memberRepository.findById(anyLong()))
                 .thenReturn(Optional.of(member));
+
+        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
         //when & then
         assertThatThrownBy(() -> waitingService.createWaiting(loginMember, request))
@@ -146,15 +154,6 @@ public class WaitingServiceTest {
     @DisplayName("중복된 본인의 예약 대기가 존재한다면 예외를 던진다.")
     void cantCreateWaitingWhenAlreadyWaiting() {
         //given
-        var theme = new Theme(1L, "테마", "설명", "썸네일");
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(date, time, theme);
-
-        var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
-        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
-
         when(reservationSlotRepository.findByDateAndTimeIdAndThemeId(any(), any(), anyLong()))
                 .thenReturn(Optional.of(reservationSlot));
         when(memberRepository.findById(anyLong()))
@@ -166,6 +165,8 @@ public class WaitingServiceTest {
         when(waitingRepository.existsByReservationSlotAndMemberId(any(), anyLong()))
                 .thenReturn(true);
 
+        var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
+
         //when & then
         assertThatThrownBy(() -> waitingService.createWaiting(loginMember, request))
                 .isInstanceOf(BadRequestException.class);
@@ -175,15 +176,7 @@ public class WaitingServiceTest {
     @Test
     void cantDeleteWaitingWhenNotMine() {
         //given
-        var otherMember = new Member(1L, "미소", "miso@email.com", "password", RoleType.USER);
-        var theme = new Theme(1L, "테마", "설명", "썸네일");
-        var time = new ReservationTime(LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var reservationSlot = new ReservationSlot(1L, date, time, theme);
         var otherMemberWaiting = new Waiting(1L, reservationSlot, otherMember);
-
-        var member = new Member(2L, "훌라", "hula@email.com", "password", RoleType.USER);
-        var loginMember = new LoginMember(member.getId(), member.getPassword(), member.getRole());
 
         when(waitingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(otherMemberWaiting));
@@ -197,21 +190,14 @@ public class WaitingServiceTest {
     @Test
     void deleteWaitingWhenAdmin() {
         //given
-        var otherMember = new Member(1L, "미소", "miso@email.com", "password", RoleType.USER);
-        var theme = new Theme(1L, "테마", "설명", "썸네일");
-        var time = new ReservationTime(LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var reservationSlot = new ReservationSlot(1L, date, time, theme);
         var otherMemberWaiting = new Waiting(1L, reservationSlot, otherMember);
-
-        var admin = new Member(2L, "admin", "admin@email.com", "password", RoleType.ADMIN);
-        var loginMember = new LoginMember(admin.getId(), admin.getPassword(), admin.getRole());
+        var adminLoginMember = new LoginMember(admin.getId(), admin.getPassword(), admin.getRole());
 
         when(waitingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(otherMemberWaiting));
 
         // when & then
-        assertThatCode(() -> waitingService.deleteWaiting(otherMemberWaiting.getId(), loginMember))
+        assertThatCode(() -> waitingService.deleteWaiting(otherMemberWaiting.getId(), adminLoginMember))
                 .doesNotThrowAnyException();
 
         verify(waitingRepository).deleteById(anyLong());
@@ -221,17 +207,6 @@ public class WaitingServiceTest {
     @Test
     void acceptWaitingWhenAlreadyReserved() {
         //given
-        // 타인의 예약 생성
-        var otherMember = new Member(1L, "미소", "miso@email.com", "password", RoleType.USER);
-        var theme = new Theme(1L, "테마", "설명", "썸네일");
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var reservationSlot = new ReservationSlot(1L, date, time, theme);
-        var reservation = new Reservation(1L, reservationSlot, otherMember);
-
-        var member = new Member("훌라", "hula@email.com", "password", RoleType.USER);
-        var waiting = new Waiting(1L, reservationSlot, member);
-
         when(waitingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(waiting));
         when(reservationRepository.findByReservationSlot(any()))

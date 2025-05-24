@@ -57,8 +57,18 @@ public class WaitingAcceptanceTest {
     @Autowired
     private ReservationSlotRepository reservationSlotRepository;
 
+    private LocalDate date;
+    private ReservationTime time;
+    private Theme theme;
+    private ReservationSlot reservationSlot;
+
     @BeforeEach
     void init() {
+        date = createTomorrow();
+        theme = createDefaultTheme();
+        time = createDefaultReservationTime();
+        reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+
         Member member = new Member(DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD, RoleType.USER);
         memberRepository.save(member);
         Member admin = new Member(DEFAULT_ADMIN_NAME, DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD, RoleType.ADMIN);
@@ -69,10 +79,6 @@ public class WaitingAcceptanceTest {
     @Test
     void cantWaitingWhenNotLogin() {
         // given
-        var date = createTomorrow();
-        var theme = createDefaultTheme();
-        var time = createDefaultReservationTime();
-
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
         // when & then
@@ -88,10 +94,6 @@ public class WaitingAcceptanceTest {
         // given
         var token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
 
-        var date = createTomorrow();
-        var theme = createDefaultTheme();
-        var time = createDefaultReservationTime();
-        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
         createOtherMemberReservation(reservationSlot);
         var request = new WaitingCreateRequest(date, time.getId(), theme.getId());
 
@@ -110,10 +112,6 @@ public class WaitingAcceptanceTest {
         // given
         var token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
 
-        var date = createTomorrow();
-        var theme = createDefaultTheme();
-        var time = createDefaultReservationTime();
-        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
         createOtherMemberReservation(reservationSlot);
 
         // when & then
@@ -128,10 +126,6 @@ public class WaitingAcceptanceTest {
         // given
         var token = TestHelper.login(DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD);
 
-        var date = createTomorrow();
-        var theme = createDefaultTheme();
-        var time = createDefaultReservationTime();
-        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
         createOtherMemberReservation(reservationSlot);
         createWaiting(reservationSlot);
 
@@ -152,10 +146,6 @@ public class WaitingAcceptanceTest {
         // given
         var token = TestHelper.login(DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD);
 
-        var date = createTomorrow();
-        var theme = createDefaultTheme();
-        var time = createDefaultReservationTime();
-        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
         createOtherMemberReservation(reservationSlot);
         var waiting = createWaiting(reservationSlot);
 
@@ -170,10 +160,7 @@ public class WaitingAcceptanceTest {
     void deleteMyWaiting() {
         // given
         var token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
-        var date = createTomorrow();
-        var theme = createDefaultTheme();
-        var time = createDefaultReservationTime();
-        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+
         createOtherMemberReservation(reservationSlot);
         var waiting = createWaiting(reservationSlot);
 

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,16 +65,29 @@ class ReservationServiceTest {
     @Mock
     private ReservationSlotRepository reservationSlotRepository;
 
+    private LocalDate date;
+    private Theme theme;
+    private ReservationTime time;
+    private ReservationSlot reservationSlot;
+
+    private Member member;
+    private LoginMember loginMember;
+
+    @BeforeEach
+    void setUp() {
+        date = LocalDate.now().plusDays(1);
+        time = new ReservationTime(1L, LocalTime.of(10, 0));
+        theme = new Theme(1L, "테마", "설명", "썸네일");
+        reservationSlot = new ReservationSlot(1L, date, time, theme);
+
+        member = new Member(1L, "훌라", "hula@email.com", "password", RoleType.USER);
+        loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
+    }
+
     @Test
     @DisplayName("예약을 생성한다.")
     void createReservation() {
         // given
-        var tomorrow = LocalDate.now().plusDays(1);
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
-        var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(tomorrow, time, theme);
-
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong()))
@@ -86,7 +100,7 @@ class ReservationServiceTest {
                 .thenReturn(new Reservation(anyLong(), reservationSlot, member));
 
         var request = new ReservationCreateRequest(
-                tomorrow,
+                date,
                 time.getId(),
                 theme.getId()
         );
@@ -108,12 +122,6 @@ class ReservationServiceTest {
     @DisplayName("관리자가 예약을 생성한다.")
     void createReservationByAdmin() {
         // given
-        var tomorrow = LocalDate.now().plusDays(1);
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
-        var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(tomorrow, time, theme);
-
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong()))
@@ -149,11 +157,8 @@ class ReservationServiceTest {
     @DisplayName("과거 날짜로 예약을 생성하면 예외가 발생한다.")
     void createReservationWithPastDate() {
         // given
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
-        var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(LocalDate.now(), time, theme);
-
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        var reservationSlot = new ReservationSlot(yesterday, time, theme);
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong()))
@@ -164,7 +169,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(reservationSlot));
 
         var request = new ReservationCreateRequest(
-                LocalDate.now().minusDays(1),
+                yesterday,
                 time.getId(),
                 theme.getId()
         );
@@ -181,12 +186,6 @@ class ReservationServiceTest {
     @DisplayName("이미 예약된 시간에 예약을 생성하면 예외가 발생한다.")
     void createReservationWithDuplicateTime() {
         // given
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
-        var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
-        var date = LocalDate.now().plusDays(1);
-        var reservationSlot = new ReservationSlot(date, time, theme);
-
         when(reservationTimeRepository.findById(anyLong()))
                 .thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong()))
@@ -212,10 +211,6 @@ class ReservationServiceTest {
     @DisplayName("모든 예약을 조회한다.")
     void getAllReservations() {
         // given
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
-        var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(LocalDate.now(), time, theme);
         var inDbReservations = List.of(
                 new Reservation(1L, reservationSlot, member)
         );
@@ -229,7 +224,7 @@ class ReservationServiceTest {
         // then
         assertAll(
                 () -> assertThat(responses).hasSize(1),
-                () -> assertThat(responses.getFirst().date()).isEqualTo(LocalDate.now()),
+                () -> assertThat(responses.getFirst().date()).isEqualTo(date),
                 () -> assertThat(responses.getFirst().startAt()).isEqualTo(time.getStartAt()),
                 () -> assertThat(responses.getFirst().themeName()).isEqualTo(theme.getName()),
                 () -> assertThat(responses.getFirst().memberName()).isEqualTo(member.getName())
@@ -240,11 +235,6 @@ class ReservationServiceTest {
     @DisplayName("필터링된 예약을 조회한다.")
     void getFilteredReservations() {
         // given
-        var date = LocalDate.now().plusDays(1);
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
-        var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(LocalDate.now().plusDays(1), time, theme);
         var inDbReservations = List.of(
                 new Reservation(1L, reservationSlot, member)
         );
@@ -276,13 +266,8 @@ class ReservationServiceTest {
     void deleteAndChangeWaitingToReservation() {
         //given
         var otherMember = new Member("미소", "miso@email.com", "password", RoleType.USER);
-        var theme = new Theme("테마", "설명", "썸네일");
-        var time = new ReservationTime(LocalTime.of(10, 0));
-        var date = LocalDate.now().plusDays(1);
-        var reservationSlot = new ReservationSlot(date, time, theme);
         var reservation = new Reservation(1L, reservationSlot, otherMember);
 
-        var member = new Member("훌라", "hula@email.com", "password", RoleType.USER);
         var waiting = new Waiting(reservationSlot, member);
 
         when(reservationRepository.findById(anyLong()))
@@ -303,11 +288,6 @@ class ReservationServiceTest {
     @DisplayName("유저 예약 기록을 확인한다.")
     void getReservationsByMember() {
         // given
-        var date = LocalDate.now().plusDays(1);
-        var time = new ReservationTime(1L, LocalTime.of(10, 0));
-        var theme = new Theme(1L, "테마1", "테마1 설명", "테마1 썸네일");
-        var member = new Member(1L, "테스트", "test@test.com", "password", RoleType.USER);
-        var reservationSlot = new ReservationSlot(date, time, theme);
         var inDbReservations = List.of(
                 new Reservation(1L, reservationSlot, member)
         );
@@ -317,8 +297,6 @@ class ReservationServiceTest {
                 .thenReturn(inDbReservations);
         when(waitingRepository.findWaitingsWithRankByMemberId(anyLong()))
                 .thenReturn(List.of());
-
-        var loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
 
         // when
         var response = reservationService.getReservationsByMember(loginMember);
