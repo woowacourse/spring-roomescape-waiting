@@ -25,7 +25,5 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByMemberId(Long memberId);
 
-    List<Reservation> findAllByStatus(ReservationStatus status);
-
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 }

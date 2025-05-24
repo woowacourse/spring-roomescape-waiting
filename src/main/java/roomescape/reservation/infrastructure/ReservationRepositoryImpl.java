@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationStatus;
 
 @Repository
 @RequiredArgsConstructor
@@ -76,11 +75,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Transactional(readOnly = true)
     public List<Reservation> findAllByMemberId(final Long memberId) {
         return jpaReservationRepository.findAllByMemberId(memberId);
-    }
-
-    @Override
-    public List<Reservation> findAllByStatus(final ReservationStatus status) {
-        return jpaReservationRepository.findAllByStatus(status);
     }
 
     @Override
