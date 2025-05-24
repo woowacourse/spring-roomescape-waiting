@@ -23,14 +23,14 @@ import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/reservations")
 @RequiresRole(authRoles = {ADMIN})
 @RequiredArgsConstructor
 public class AdminReservationRestController {
 
     private final AdminReservationService adminReservationService;
 
-    @PostMapping("/reservations")
+    @PostMapping
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid final CreateReservationRequest request
     ) {
@@ -40,7 +40,7 @@ public class AdminReservationRestController {
                 .body(response);
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAsAdmin(
             @PathVariable final Long id
     ) {
@@ -49,14 +49,14 @@ public class AdminReservationRestController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/reservations")
+    @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAllReservations() {
         final List<ReservationResponse> reservationResponses = adminReservationService.findAll();
 
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @GetMapping("/reservations/filtered")
+    @GetMapping("/filtered")
     public ResponseEntity<List<ReservationResponse>> findAllByFilter(
             @ModelAttribute @Valid final FilteredReservationsRequest request
     ) {
@@ -65,7 +65,7 @@ public class AdminReservationRestController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    @GetMapping("/reservations/statuses")
+    @GetMapping("/statuses")
     @RequiresRole(authRoles = {ADMIN})
     public ResponseEntity<List<ReservationStatusResponse>> findAllReservationStatuses() {
         return ResponseEntity.ok()

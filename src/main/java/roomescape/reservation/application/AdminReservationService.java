@@ -33,10 +33,12 @@ public class AdminReservationService {
     private final ReservationRepository reservationRepository;
 
     public ReservationResponse createReservation(final CreateReservationRequest request) {
-        return createReservedReservation(request.date(), request.timeId(), request.themeId(), request.memberId());
+        return ReservationResponse.from(
+                createReservedReservation(request.date(), request.timeId(), request.themeId(), request.memberId())
+        );
     }
 
-    private ReservationResponse createReservedReservation(
+    private Reservation createReservedReservation(
             final LocalDate date,
             final Long timeId,
             final Long themeId,
@@ -46,13 +48,15 @@ public class AdminReservationService {
             throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
         }
 
-        final ReservationTime reservationTime = getReservationTimeById(timeId);
-        final Theme theme = getThemeById(themeId);
-        final Member member = getMemberById(memberId);
+        final Reservation reservation = new Reservation(
+                date,
+                getReservationTimeById(timeId),
+                getThemeById(themeId),
+                getMemberById(memberId),
+                BOOKED
+        );
 
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member, BOOKED);
-
-        return ReservationResponse.from(reservationRepository.save(reservation));
+        return reservationRepository.save(reservation);
     }
 
 

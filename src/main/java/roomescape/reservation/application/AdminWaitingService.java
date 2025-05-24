@@ -31,10 +31,12 @@ public class AdminWaitingService {
     private final WaitingRepository waitingRepository;
 
     public WaitingResponse create(final CreateWaitingRequest request) {
-        return createWaiting(request.date(), request.timeId(), request.themeId(), request.memberId());
+        return WaitingResponse.from(
+                createWaiting(request.date(), request.timeId(), request.themeId(), request.memberId())
+        );
     }
 
-    private WaitingResponse createWaiting(
+    private Waiting createWaiting(
             final LocalDate date,
             final Long timeId,
             final Long themeId,
@@ -52,12 +54,15 @@ public class AdminWaitingService {
             throw new AlreadyExistException("신청한 예약 대기가 이미 존재합니다.");
         }
 
-        final ReservationTime reservationTime = getReservationTimeById(timeId);
-        final Theme theme = getThemeById(themeId);
-        final Member member = getMemberById(memberId);
-        final Waiting waiting = new Waiting(date, reservationTime, theme, member, LocalDateTime.now());
+        final Waiting waiting = new Waiting(
+                date,
+                getReservationTimeById(timeId),
+                getThemeById(themeId),
+                getMemberById(memberId),
+                LocalDateTime.now()
+        );
 
-        return WaitingResponse.from(waitingRepository.save(waiting));
+        return waitingRepository.save(waiting);
     }
 
     public void deleteAsAdmin(final Long waitingId) {

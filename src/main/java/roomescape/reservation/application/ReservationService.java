@@ -29,10 +29,10 @@ import roomescape.theme.domain.ThemeRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public ReservationResponse create(
             final CreateReservationRequest.ForMember request,

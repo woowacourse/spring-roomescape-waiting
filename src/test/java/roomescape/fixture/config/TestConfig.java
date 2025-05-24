@@ -92,16 +92,16 @@ public class TestConfig {
 
     @Bean
     public ReservationService reservationService(
-            final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository
     ) {
         return new ReservationService(
-                reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
-                memberRepository
+                memberRepository,
+                reservationRepository
         );
     }
 
