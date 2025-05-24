@@ -7,14 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-
-    default boolean hasReservationWithDateTime(LocalDate date, Long timeId) {
-        return existsByDateAndTimeId(date, timeId);
-    }
 
     default boolean hasReservationWithTime(Long timeId) {
         return existsByTimeId(timeId);
@@ -115,4 +112,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
               and th = :theme
             """)
     List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Theme theme);
+
+    List<Reservation> findByStatus(ReservationStatus reservationStatus);
 }

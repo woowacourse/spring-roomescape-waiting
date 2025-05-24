@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.response.ApiResponse;
 import roomescape.reservation.controller.request.ReserveByAdminRequest;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.controller.response.WaitingReservationResponse;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.command.ReserveCommand;
 
@@ -63,5 +64,12 @@ public class ReservationAdminApiController {
         return ResponseEntity
                 .status(NO_CONTENT)
                 .body(ApiResponse.success(CANCEL_RESERVATION));
+    }
+
+    @GetMapping("/waiting")
+    public ResponseEntity<List<WaitingReservationResponse>> getWaitingReservations() {
+        List<WaitingReservationResponse> responses = reservationService.getWaitingReservations();
+
+        return ResponseEntity.ok(responses);
     }
 }

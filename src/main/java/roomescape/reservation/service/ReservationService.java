@@ -13,9 +13,11 @@ import roomescape.member.domain.Member;
 import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.controller.response.WaitingReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
@@ -118,5 +120,11 @@ public class ReservationService {
         }
 
         return responses;
+    }
+
+    public List<WaitingReservationResponse> getWaitingReservations() {
+        List<Reservation> waitingReservations = reservationRepository.findByStatus(ReservationStatus.WAITING);
+
+        return WaitingReservationResponse.from(waitingReservations);
     }
 }
