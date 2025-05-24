@@ -6,25 +6,23 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.entity.Member;
 import roomescape.exception.custom.NotFoundException;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class JpaMemberRepositoryTest {
 
     @Autowired
-    private JpaMemberRepository jpaMemberRepository;
+    private JpaMemberRepository memberRepository;
 
     @Test
     @DisplayName("이메일이 존재한다면 조회할 수 있다.")
     void findMemberByExistedEmail() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
-        jpaMemberRepository.save(member);
+        memberRepository.save(member);
 
         String email = member.getEmail();
-        Member expected = jpaMemberRepository.findByEmail(email)
+        Member expected = memberRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException("member"));
 
         assertThat(expected.getEmail()).isEqualTo(email);
@@ -34,9 +32,9 @@ class JpaMemberRepositoryTest {
     @DisplayName("해당 이메일이 없다면 true를 반환한다.")
     void existsByEmail() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
-        jpaMemberRepository.save(member);
+        memberRepository.save(member);
 
-        assertThat(jpaMemberRepository.existsByEmail(member.getEmail())).isTrue();
+        assertThat(memberRepository.existsByEmail(member.getEmail())).isTrue();
     }
 
     @Test
@@ -44,6 +42,6 @@ class JpaMemberRepositoryTest {
     void notExistsByEmail() {
         Member member = Member.createUser("이름", "이메일", "비밀번호");
 
-        assertThat(jpaMemberRepository.existsByEmail(member.getEmail())).isFalse();
+        assertThat(memberRepository.existsByEmail(member.getEmail())).isFalse();
     }
 }
