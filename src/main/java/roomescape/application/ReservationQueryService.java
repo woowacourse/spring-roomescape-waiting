@@ -27,7 +27,7 @@ public class ReservationQueryService {
     }
 
     public List<ReservationDto> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
+        List<Reservation> reservations = reservationRepository.findByWaitingStatus(ReservationStatus.RESERVED);
         return ReservationDto.from(reservations);
     }
 
