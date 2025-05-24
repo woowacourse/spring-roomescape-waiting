@@ -6,12 +6,12 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.dto.MemberResponse;
 import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MemberReservationRequest;
@@ -19,6 +19,8 @@ import roomescape.reservation.application.dto.MyReservation;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.application.dto.ReservationTimeResponse;
 import roomescape.theme.application.dto.ThemeResponse;
+import roomescape.waiting.application.WaitingService;
+import roomescape.waiting.application.dto.WaitingIdResponse;
 
 @ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -27,6 +29,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private WaitingService waitingService;
 
     @Test
     void 모든_예약기록을_조회한다() {
@@ -111,5 +116,43 @@ class ReservationServiceTest {
 
         // then
         assertThat(responses).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("예약을 삭제하면, 대기 1번이 예약으로 추가되고, 대기1번은 웨이팅에서 없어져야 한다.")
+    void when_remove_reservation_then_waiting_num1_change_reservation_and_delete() {
+        //given
+        MemberReservationRequest memberReservationRequest = new MemberReservationRequest(
+            LocalDate.of(2030, 3, 3),
+            1L, 1L
+        );
+        ReservationResponse reservationResponse = reservationService.addMemberReservation(
+            memberReservationRequest, 1L);
+
+        // 기존 member2의 예약 내역
+        List<MyReservation> beforeMemberReservations = reservationService.findByMemberId(2L);
+        assertThat(beforeMemberReservations).hasSize(2);
+
+        WaitingIdResponse waitingIdResponse = waitingService.addWaiting(memberReservationRequest,
+            2L);
+
+        //when
+        reservationService.deleteReservationAndGetFirstWaiting(reservationResponse.id());
+
+        //then
+        List<MyReservation> reservations = reservationService.findByMemberId(1L);
+        boolean hasReservation = reservations.stream()
+            .anyMatch(reservation -> reservation.id().equals(reservationResponse.id()));
+
+        List<MyReservation> waitingsFromMember = waitingService.getWaitingsFromMember(2L);
+        boolean hasWaiting = waitingsFromMember.stream()
+            .anyMatch(waiting -> waiting.id().equals(waitingIdResponse.waitingId()));
+
+        List<MyReservation> findReservations = reservationService.findByMemberId(2L);
+
+        //then
+        assertThat(hasReservation).isFalse();
+        assertThat(hasWaiting).isFalse();
+        assertThat(findReservations).hasSize(3);
     }
 }

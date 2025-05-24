@@ -76,8 +76,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservationAndGetFirstWaiting(Long id) {
-        Reservation reservation = getReservation(id);
+    public void deleteReservationAndGetFirstWaiting(Long reservationId) {
+        Reservation reservation = getReservation(reservationId);
         deleteById(reservation.getId());
         Optional<Waiting> findWaiting = waitingRepository.findFirstByThemeIdAndDateAndReservationTimeId(
             reservation.getTheme().getId(),
