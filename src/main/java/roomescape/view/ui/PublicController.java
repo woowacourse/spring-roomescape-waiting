@@ -30,4 +30,9 @@ public class PublicController {
     public String reservationMine() {
         return "reservation-mine";
     }
+
+    @GetMapping("/waiting-mine")
+    public String waitingMine() {
+        return "waiting-mine";
+    }
 }
