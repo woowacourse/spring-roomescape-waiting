@@ -119,4 +119,8 @@ public class ReservationModuleService {
         return reservationRepository.save(reservation);
     }
 
+    public Reservation findById(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 예약 정보가 없습니다."));
+    }
 }

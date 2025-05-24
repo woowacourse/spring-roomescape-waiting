@@ -72,7 +72,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservations(
             @PathVariable("id") Long id
     ) {
-        reservationModuleService.delete(id);
+        reservationCompositeService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 

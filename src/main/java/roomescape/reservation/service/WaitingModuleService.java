@@ -14,6 +14,7 @@ import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingWithRank;
 import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservation.exception.WaitingNotFoundException;
 import roomescape.reservation.repository.WaitingReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -114,6 +115,12 @@ public class WaitingModuleService {
 
     public Waiting save(final Waiting waiting) {
         return waitingReservationRepository.save(waiting);
+    }
+
+    public Waiting findFirstWaitingOfInfo(ReservationInfo reservationInfo) {
+        return waitingReservationRepository.findFirstByInfoDateAndInfoTimeAndInfoThemeOrderByTurnAsc(reservationInfo.getDate(),
+                        reservationInfo.getTime(), reservationInfo.getTheme())
+                .orElseThrow(() -> new WaitingNotFoundException("요청한 id와 일치하는 대기 정보가 없습니다."));
     }
 
 //

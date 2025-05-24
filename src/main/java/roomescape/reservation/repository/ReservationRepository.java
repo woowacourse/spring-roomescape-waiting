@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 
@@ -28,4 +29,6 @@ public interface ReservationRepository {
     void deleteById(Long id);
 
     Reservation save(Reservation upcomingReservationWithUnassignedId);
+
+    Optional<Reservation> findById(Long id);
 }

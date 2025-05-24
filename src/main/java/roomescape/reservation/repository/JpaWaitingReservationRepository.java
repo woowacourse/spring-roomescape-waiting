@@ -3,13 +3,16 @@ package roomescape.reservation.repository;
 import jakarta.persistence.LockModeType;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.response.WaitingWithRank;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
+import roomescape.theme.domain.Theme;
 
 
 public interface JpaWaitingReservationRepository extends WaitingReservationRepository,
@@ -119,4 +122,10 @@ public interface JpaWaitingReservationRepository extends WaitingReservationRepos
               WHERE w.member.id = :memberId
             """)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(@Param("memberId") Long memberId);
+
+    Optional<Waiting> findFirstByInfoDateAndInfoTimeAndInfoThemeOrderByTurnAsc(
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    );
 }

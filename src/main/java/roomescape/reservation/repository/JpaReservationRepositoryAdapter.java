@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
@@ -61,5 +62,10 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     @Override
     public Reservation save(final Reservation reservation) {
         return jpaReservationRepository.save(reservation);
+    }
+
+    @Override
+    public Optional<Reservation> findById(final Long id) {
+        return jpaReservationRepository.findById(id);
     }
 }
