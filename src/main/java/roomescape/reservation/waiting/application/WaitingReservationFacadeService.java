@@ -15,7 +15,7 @@ import roomescape.reservation.waiting.application.service.WaitingReservationComm
 import roomescape.reservation.waiting.application.service.WaitingReservationQueryService;
 import roomescape.reservation.waiting.domain.WaitingReservation;
 import roomescape.reservation.presentation.dto.ReservationRequest;
-import roomescape.reservation.presentation.dto.WaitingReservationResponse;
+import roomescape.reservation.waiting.presentation.dto.WaitingReservationResponse;
 import roomescape.reservation.time.application.service.ReservationTimeQueryService;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.theme.application.service.ThemeQueryService;

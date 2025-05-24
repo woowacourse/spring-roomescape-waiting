@@ -23,37 +23,9 @@ import roomescape.reservation.waiting.application.WaitingReservationFacadeServic
 public class AdminReservationController {
 
     private final ReservationFacadeService reservationFacadeService;
-    private final WaitingReservationFacadeService waitingReservationFacadeService;
 
-    public AdminReservationController(ReservationFacadeService reservationFacadeService,
-                                      WaitingReservationFacadeService waitingReservationFacadeService) {
+    public AdminReservationController(ReservationFacadeService reservationFacadeService) {
         this.reservationFacadeService = reservationFacadeService;
-        this.waitingReservationFacadeService = waitingReservationFacadeService;
-    }
-
-    @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<ReservationResponse> response = reservationFacadeService.getReservations();
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/waiting-reservations")
-    public ResponseEntity<List<ReservationResponse>> getWaitingReservations() {
-        List<ReservationResponse> responses = waitingReservationFacadeService.getWaitingReservations();
-
-        return ResponseEntity.ok().body(responses);
-    }
-
-    @PostMapping("/waiting-reservations/{id}")
-    public ResponseEntity<Void> acceptWaitingReservation(@PathVariable("id") Long waitingId) {
-        waitingReservationFacadeService.acceptWaiting(waitingId);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/waiting-reservations/{id}")
-    public ResponseEntity<Void> denyWaitingReservation(@PathVariable("id") Long waitingId) {
-        waitingReservationFacadeService.denyWaiting(waitingId);
-        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reservations")
@@ -68,8 +40,14 @@ public class AdminReservationController {
         return ResponseEntity.created(URI.create("/admin/reservation")).body(response);
     }
 
+    @GetMapping("/reservations")
+    public ResponseEntity<List<ReservationResponse>> getReservations() {
+        List<ReservationResponse> response = reservationFacadeService.getReservations();
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/user-reservation")
-    public ResponseEntity<List<ReservationResponse>> reservationFilter(@ModelAttribute SearchCondition condition) {
+    public ResponseEntity<List<ReservationResponse>> searchReservationWithCondition(@ModelAttribute SearchCondition condition) {
         List<ReservationResponse> responses = reservationFacadeService.searchReservationWithCondition(condition);
 
         return ResponseEntity.ok().body(responses);
