@@ -33,9 +33,9 @@ public record MyReservation(
         Waiting waiting = waitingWithRank.getWaiting();
         return new MyReservation(
             waiting.getId(),
-            waiting.getTheme().getName(),
+            waiting.getThemeName(),
             waiting.getDate(),
-            waiting.getReservationTime().getStartAt(),
+            waiting.getReservationStartAt(),
             WAITING_STATUS.formatted(waitingWithRank.getRank())
         );
     }

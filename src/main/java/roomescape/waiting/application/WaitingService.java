@@ -50,30 +50,37 @@ public class WaitingService {
         Member member = getMember(memberId);
         Theme theme = getTheme(request.themeId());
         Waiting waiting = new Waiting(member, reservationTime, theme, request.date());
+        validateAlreadyReserved(request, member, theme, reservationTime);
+        validateAlreadyWaiting(request, member, theme, reservationTime);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+        return WaitingIdResponse.from(savedWaiting);
+    }
 
+    private void validateAlreadyReserved(
+        MemberReservationRequest request, Member member, Theme theme, ReservationTime reservationTime) {
         boolean isAlreadyReserved = reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
             member.getId(), theme.getId(), reservationTime.getId(), request.date());
-
         if (isAlreadyReserved) {
             throw new IllegalArgumentException("이미 예약이 되어있는 상태에서는, 대기할 수 없습니다.");
         }
+    }
 
+    private void validateAlreadyWaiting(
+        MemberReservationRequest request,
+        Member member,
+        Theme theme,
+        ReservationTime reservationTime
+    ) {
         boolean isAlreadyWaiting = waitingRepository.existsByMemberIdAndThemeIdAndReservationTimeIdAndDate(
-            member.getId(), theme.getId(), reservationTime.getId(), request.date()
-        );
-
+            member.getId(), theme.getId(), reservationTime.getId(), request.date());
         if (isAlreadyWaiting) {
             throw new IllegalArgumentException("이미 대기중인 상태에서는, 추가로 대기할 수 없습니다.");
         }
-
-        Waiting savedWaiting = waitingRepository.save(waiting);
-        return WaitingIdResponse.from(savedWaiting);
     }
 
     public List<MyReservation> getWaitingsFromMember(Long memberId) {
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(
             memberId);
-
         return waitingWithRanks.stream()
             .map(MyReservation::from)
             .toList();
@@ -94,7 +101,6 @@ public class WaitingService {
             .map(WaitingInfoResponse::from)
             .toList();
     }
-
 
     private ReservationTime getReservationTime(final Long timeId) {
         return reservationTimeRepository.findById(timeId)

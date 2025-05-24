@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -68,5 +69,17 @@ public class Waiting {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public String getMemberName() {
+        return member.getNameValue();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
+    }
+
+    public LocalTime getReservationStartAt() {
+        return reservationTime.getStartAt();
     }
 }

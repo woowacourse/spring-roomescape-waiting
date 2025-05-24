@@ -19,10 +19,10 @@ public record WaitingInfoResponse(
     public static WaitingInfoResponse from(Waiting waiting) {
         return new WaitingInfoResponse(
             waiting.getId(),
-            waiting.getMember().getNameValue(),
-            waiting.getTheme().getName(),
+            waiting.getMemberName(),
+            waiting.getThemeName(),
             waiting.getDate(),
-            waiting.getReservationTime().getStartAt()
+            waiting.getReservationStartAt()
         );
     }
 }
