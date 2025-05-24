@@ -60,24 +60,23 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @Test
-    void 회원_권한으로_예약을_추가한다() {
+    void 예약을_추가한다() {
         // given
         final LocalDate date = LocalDate.now().plusDays(1);
         final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
-        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date,
-                timeId,
-                themeId);
-        final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
+
+        final CreateReservationRequest.ForMember request =
+                new CreateReservationRequest.ForMember(date, timeId, themeId);
 
         // when & then
-        Assertions.assertThatCode(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatCode(() -> reservationService.create(request, member.getId()))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void 회원_권한으로_과거_시간에_예약을_추가하려_하면_예외가_발생한다() {
+    void 과거_시간에_예약을_추가하려_하면_예외가_발생한다() {
         // given
         final LocalDate date = LocalDate.now().minusDays(5);
         final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
@@ -86,11 +85,9 @@ class ReservationServiceTest {
 
         final CreateReservationRequest.ForMember request =
                 new CreateReservationRequest.ForMember(date, timeId, themeId);
-        final MemberAuthInfo memberAuthInfo =
-                new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
+        Assertions.assertThatThrownBy(() -> reservationService.create(request, member.getId()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
