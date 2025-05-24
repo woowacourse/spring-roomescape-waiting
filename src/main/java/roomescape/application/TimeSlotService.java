@@ -1,5 +1,6 @@
 package roomescape.application;
 
+import static roomescape.infrastructure.ReservationSpecs.allOf;
 import static roomescape.infrastructure.ReservationSpecs.byDate;
 import static roomescape.infrastructure.ReservationSpecs.byThemeId;
 import static roomescape.infrastructure.ReservationSpecs.byTimeSlotId;
@@ -8,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.timeslot.TimeSlot;
@@ -40,8 +40,7 @@ public class TimeSlotService {
     }
 
     public List<TimeSlotBookStatus> findAvailableTimeSlots(final LocalDate date, final long themeId) {
-        var byDateAndTheme = Specification.allOf(byDate(date), byThemeId(themeId));
-        var reservations = reservationRepository.findAllWithWrapping(byDateAndTheme);
+        var reservations = reservationRepository.findAllWithWrapping(allOf(byDate(date), byThemeId(themeId)));
         var timeSlots = timeSlotRepository.findAll();
         return reservations.checkBookStatuses(timeSlots);
     }
