@@ -6,7 +6,6 @@ import static org.mockito.BDDMockito.given;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,11 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.member.model.Member;
 import roomescape.member.model.Role;
 import roomescape.reservation.application.dto.response.MyBookingServiceResponse;
-import roomescape.reservation.application.dto.response.MyWaitingServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
-import roomescape.reservation.model.entity.Waiting;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.WaitingRepository;
 
@@ -70,7 +67,7 @@ class MyBookingServiceMockTest {
 
     @Test
     @DisplayName("memberId로 올바른 응답을 반환한다")
-    void getAllByMemberIdReturnMyReservationServiceResponse() {
+    void getAllByMemberId() {
         Member member1 = new Member("1234", Role.USER, "a@naver.com", "유저2", 1L);
 
         Reservation beforeTodayReservation = Reservation.builder()
@@ -95,28 +92,5 @@ class MyBookingServiceMockTest {
             MyBookingServiceResponse.from(afterTodayReservation)
         );
         assertThat(myBookingService.getAllByMemberId(1L)).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("예약 대기 전체 조회")
-    void getAllWaitings_basic() {
-        Member member = new Member("1234", Role.USER, "b@email.com", "두리", 1L);
-
-        Waiting waiting = Waiting.builder()
-            .id(1L)
-            .theme(theme1)
-            .date(LocalDate.of(2024, 6, 1))
-            .time(time2Pm)
-            .member(member)
-            .build();
-        given(waitingRepository.findAll()).willReturn(List.of(waiting));
-
-        List<MyWaitingServiceResponse> expected = myBookingService.getAllWaitings();
-        SoftAssertions.assertSoftly(softly -> {
-                softly.assertThat(expected).hasSize(1);
-                softly.assertThat(expected.get(0).waitingId()).isEqualTo(1L);
-                softly.assertThat(expected.get(0).memberName()).isEqualTo("두리");
-            }
-        );
     }
 }

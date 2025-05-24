@@ -27,10 +27,10 @@ import roomescape.reservation.model.repository.WaitingRepository;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-class ReservationWaitingServiceTest {
+class UserWaitingServiceTest {
 
     @Autowired
-    ReservationWaitingService reservationWaitingService;
+    UserWaitingService userWaitingService;
 
     @Autowired
     WaitingRepository waitingRepository;
@@ -67,7 +67,7 @@ class ReservationWaitingServiceTest {
         CreateReservationServiceRequest request = new CreateReservationServiceRequest(
             member1.getId(), tomorrow, time.getId(), theme.getId()
         );
-        WaitingServiceResponse response = reservationWaitingService.create(request);
+        WaitingServiceResponse response = userWaitingService.create(request);
         assertThat(response.name()).isEqualTo(member1.getName());
         assertThat(response.date()).isEqualTo(tomorrow);
         assertThat(response.startAt()).isEqualTo(time.getStartAt());
@@ -81,8 +81,8 @@ class ReservationWaitingServiceTest {
         CreateReservationServiceRequest request = new CreateReservationServiceRequest(
             member1.getId(), tomorrow, time.getId(), theme.getId()
         );
-        reservationWaitingService.create(request);
-        assertThatThrownBy(() -> reservationWaitingService.create(request))
+        userWaitingService.create(request);
+        assertThatThrownBy(() -> userWaitingService.create(request))
             .isInstanceOf(InvalidReservationTimeException.class);
     }
 
@@ -93,14 +93,14 @@ class ReservationWaitingServiceTest {
         waitingRepository.save(waiting);
 
         assertThat(waitingRepository.findAll()).hasSize(1);
-        reservationWaitingService.deleteById(waiting.getId());
+        userWaitingService.deleteMyWaitingById(waiting.getId(), member2.getId());
         assertThat(waitingRepository.findAll()).isEmpty();
     }
 
     @DisplayName("존재하지 않는 예약 대기 삭제시 예외 발생")
     @Test
     void deleteWaitingNotExists() {
-        assertThatThrownBy(() -> reservationWaitingService.deleteById(999L))
+        assertThatThrownBy(() -> userWaitingService.deleteMyWaitingById(100L, 100L))
             .isInstanceOf(ResourceNotFoundException.class);
     }
 }

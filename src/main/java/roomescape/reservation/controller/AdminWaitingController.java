@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.MyBookingService;
+import roomescape.reservation.application.AdminWaitingService;
 import roomescape.reservation.controller.dto.response.MyWaitingResponse;
 
 @RestController
@@ -17,12 +17,12 @@ import roomescape.reservation.controller.dto.response.MyWaitingResponse;
 @RequiredArgsConstructor
 public class AdminWaitingController {
 
-    private final MyBookingService myBookingService;
+    private final AdminWaitingService adminWaitingService;
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<MyWaitingResponse> getAll() {
-        return myBookingService.getAllWaitings()
+        return adminWaitingService.getAllWaitings()
             .stream()
             .map(MyWaitingResponse::from)
             .toList();
@@ -31,6 +31,6 @@ public class AdminWaitingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void remove(@PathVariable Long id) {
-        myBookingService.deleteById(id);
+        adminWaitingService.deleteById(id);
     }
 }

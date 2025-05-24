@@ -17,7 +17,7 @@ import roomescape.reservation.model.service.WaitingValidator;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationWaitingService {
+public class UserWaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationThemeRepository reservationThemeRepository;
@@ -43,8 +43,8 @@ public class ReservationWaitingService {
         return WaitingServiceResponse.from(savedWaiting);
     }
 
-    public void deleteById(Long id) {
-        Waiting waiting = waitingRepository.findById(id)
+    public void deleteMyWaitingById(Long id, Long memberId) {
+        Waiting waiting = waitingRepository.findByIdAndMemberId(id, memberId)
             .orElseThrow(() -> new ResourceNotFoundException("id에 해당하는 예약 대기가 존재하지 않습니다."));
         waitingRepository.delete(waiting);
     }

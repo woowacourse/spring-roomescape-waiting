@@ -25,4 +25,6 @@ public interface WaitingRepository {
 
     List<Waiting> findAllByThemeAndDateAndTime(ReservationTheme theme, LocalDate date,
         ReservationTime time);
+
+    Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 }

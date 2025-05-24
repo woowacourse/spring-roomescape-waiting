@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.AuthenticatedMember;
 import roomescape.auth.web.resolver.AuthenticationPrincipal;
-import roomescape.reservation.application.ReservationWaitingService;
+import roomescape.reservation.application.UserWaitingService;
 import roomescape.reservation.application.dto.response.WaitingServiceResponse;
 import roomescape.reservation.controller.dto.request.CreateWaitingRequest;
 import roomescape.reservation.controller.dto.response.WaitingResponse;
@@ -20,9 +20,9 @@ import roomescape.reservation.controller.dto.response.WaitingResponse;
 @RestController
 @RequestMapping("/reservations-wait")
 @RequiredArgsConstructor
-public class ReservationWaitingController {
+public class UserWaitingController {
 
-    private final ReservationWaitingService reservationWaitingService;
+    private final UserWaitingService userWaitingService;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
@@ -31,14 +31,14 @@ public class ReservationWaitingController {
         @AuthenticationPrincipal AuthenticatedMember authenticatedMember
     ) {
         Long memberId = authenticatedMember.id();
-        WaitingServiceResponse response = reservationWaitingService.create(
+        WaitingServiceResponse response = userWaitingService.create(
             request.toServiceRequest(memberId));
         return WaitingResponse.from(response);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-         reservationWaitingService.deleteById(id);
+    public void delete(@PathVariable Long id, @AuthenticationPrincipal AuthenticatedMember authenticatedMember) {
+         userWaitingService.deleteMyWaitingById(id, authenticatedMember.id());
     }
 }
