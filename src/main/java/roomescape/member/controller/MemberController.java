@@ -10,37 +10,31 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.member.dto.LoginRequest;
-import roomescape.member.dto.RegistrationRequest;
-import roomescape.member.dto.TokenResponse;
-import roomescape.member.service.LoginService;
-import roomescape.member.service.SignupService;
 import roomescape.exception.ExceptionCause;
 import roomescape.exception.UnauthorizedException;
+import roomescape.jwt.TokenProvider;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.member.dto.LoginRequest;
 import roomescape.member.dto.MemberResponse;
+import roomescape.member.dto.RegistrationRequest;
+import roomescape.member.dto.TokenResponse;
 import roomescape.member.service.MemberService;
-import roomescape.jwt.TokenProvider;
 
 @RestController
-public class AuthController {
+public class MemberController {
 
     private final TokenProvider tokenProvider;
-    private final SignupService signupService;
-    private final LoginService loginService;
     private final MemberService memberService;
 
-    public AuthController(TokenProvider tokenProvider, SignupService signupService, LoginService loginService, MemberService memberService) {
+    public MemberController(TokenProvider tokenProvider, MemberService memberService) {
         this.tokenProvider = tokenProvider;
-        this.signupService = signupService;
-        this.loginService = loginService;
         this.memberService = memberService;
     }
 
     @PostMapping("/members")
     public ResponseEntity<Void> registerMember(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        signupService.signup(registrationRequest);
+        memberService.signup(registrationRequest);
         return ResponseEntity.ok().build();
     }
 
@@ -60,7 +54,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Void> processLogin(@Valid @RequestBody LoginRequest loginRequest,
                                              HttpServletResponse response) {
-        TokenResponse tokenResponse = loginService.createToken(loginRequest);
+        TokenResponse tokenResponse = memberService.createToken(loginRequest);
 
         Cookie cookie = new Cookie("token", tokenResponse.accessToken());
         cookie.setHttpOnly(true);
@@ -73,7 +67,7 @@ public class AuthController {
     @GetMapping("/login/check")
     public ResponseEntity<MemberResponse> checkLogin(@CookieValue(name = "token", required = false) String token) {
         Long memberId = tokenProvider.getMemberIdFromToken(token);
-        MemberResponse response = loginService.findMemberById(memberId);
+        MemberResponse response = memberService.findMemberById(memberId);
         return ResponseEntity.ok().body(response);
     }
 
