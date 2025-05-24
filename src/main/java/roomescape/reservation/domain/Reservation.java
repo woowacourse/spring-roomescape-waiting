@@ -48,7 +48,7 @@ public class Reservation {
     private Member member;
 
     @JoinColumn(nullable = false)
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Waiting waiting;
 
     @Builder
