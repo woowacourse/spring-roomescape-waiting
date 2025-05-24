@@ -16,7 +16,6 @@ import java.util.Objects;
 
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.reservation.InvalidReservationException;
 
 @Entity
 public class Reservation {
@@ -54,10 +53,10 @@ public class Reservation {
 
     private void validate(String name, LocalDate date, ReservationTime time) {
         if (name == null || name.isBlank()) {
-            throw new InvalidReservationException("이름은 공백일 수 없습니다");
+            throw new IllegalArgumentException("이름은 공백일 수 없습니다");
         }
         if (date == null || time == null) {
-            throw new InvalidReservationException("시간은 공백일 수 없습니다.");
+            throw new IllegalArgumentException("시간은 공백일 수 없습니다.");
         }
     }
 

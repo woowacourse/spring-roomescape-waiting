@@ -9,7 +9,6 @@ import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.waiting.ApplyWaitingRequestDto;
-import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.waiting.WaitingRepository;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -50,14 +49,14 @@ public class WaitingService {
 
     private void validateDuplicateWaiting(Waiting waiting) {
         if (waitingRepository.existsByDateAndTimeAndThemeAndMember(waiting)) {
-            throw new InvalidReservationException("중복된 예약대기 신청입니다");
+            throw new IllegalArgumentException("중복된 예약대기 신청입니다");
         }
     }
 
     private void validateAddReservationDateTime(Waiting waiting) {
         LocalDateTime currentDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.now());
         if (waiting.isBeforeDateTime(currentDateTime)) {
-            throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
+            throw new IllegalArgumentException("과거 시간에 예약할 수 없습니다.");
         }
     }
 
@@ -67,7 +66,7 @@ public class WaitingService {
 
     public Waiting getWaitingById(Long id) {
         return waitingRepository.findById(id)
-                .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약대기입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약대기입니다."));
     }
 
     public List<WaitingWithRank> getWaitingsWithRankByMemberId(Long memberId) {

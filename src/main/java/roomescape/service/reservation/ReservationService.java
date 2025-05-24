@@ -6,7 +6,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -52,13 +51,13 @@ public class ReservationService {
 
     private void validateDuplicateReservation(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeAndTheme(reservation)) {
-            throw new InvalidReservationException("중복된 예약신청입니다");
+            throw new IllegalArgumentException("중복된 예약신청입니다");
         }
     }
 
     private void validateAddReservationDateTime(Reservation newReservation, LocalDateTime currentDateTime) {
         if (newReservation.isBeforeDateTime(currentDateTime)) {
-            throw new InvalidReservationException("과거 시간에 예약할 수 없습니다.");
+            throw new IllegalArgumentException("과거 시간에 예약할 수 없습니다.");
         }
     }
 
