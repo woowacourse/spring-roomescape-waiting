@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,9 +67,6 @@ class WaitingManagementTest {
         waitingRepository.save(waitingSecond);
 
         Optional<Reservation> result = waitingManagement.promoteWaiting(theme, tomorrow, time);
-        em.flush();
-        List<Waiting> all = waitingRepository.findAll();
-        System.out.println(all + " " + result.get());
         assertThat(result).isPresent();
         assertThat(result.get().getMember()).isEqualTo(member1);
         assertThat(waitingRepository.findAll()).hasSize(1);
@@ -80,7 +76,7 @@ class WaitingManagementTest {
 
     @DisplayName("대기자가 없으면 optional을 반환한다")
     @Test
-    void 대기자가_없으면_빈_Optional을_반환한다() {
+    void NoWaitingReturnsOptional() {
         assertThat(waitingManagement.promoteWaiting(theme, tomorrow, time)).isEmpty();
     }
 }

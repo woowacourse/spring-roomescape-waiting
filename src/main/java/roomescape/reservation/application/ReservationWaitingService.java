@@ -23,7 +23,6 @@ public class ReservationWaitingService {
     private final ReservationThemeRepository reservationThemeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final MemberRepository memberRepository;
-
     private final WaitingValidator waitingValidator;
 
     public WaitingServiceResponse create(CreateReservationServiceRequest request) {
