@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.application.dto.LoginMemberInfo;
 import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
+import roomescape.reservation.application.reservation.dto.ReservationMineInfo;
 import roomescape.reservation.application.reservation.dto.ReservationSearchCondition;
 import roomescape.reservation.application.reservation.service.ReservationService;
 import roomescape.reservation.ui.reservation.dto.MemberReservationResponse;
@@ -48,7 +49,7 @@ public class ReservationApiController {
     public ResponseEntity<List<ReservationResponse>> findAll(
             @ModelAttribute final ReservationSearchConditionRequest request) {
         final ReservationSearchCondition condition = request.toCondition();
-        final List<ReservationInfo> reservationInfos = reservationService.getReservations(condition);
+        final List<ReservationInfo> reservationInfos = reservationService.findReservationsBySearchCondition(condition);
         final List<ReservationResponse> responses = reservationInfos.stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -57,7 +58,7 @@ public class ReservationApiController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<MemberReservationResponse>> findAllMine(final LoginMemberInfo loginMemberInfo) {
-        final List<ReservationInfo> reservationInfos = reservationService.findReservationsByMemberId(
+        final List<ReservationMineInfo> reservationInfos = reservationService.findReservationsByMemberId(
                 loginMemberInfo.id());
         final List<MemberReservationResponse> responses = reservationInfos.stream()
                 .map(MemberReservationResponse::new)

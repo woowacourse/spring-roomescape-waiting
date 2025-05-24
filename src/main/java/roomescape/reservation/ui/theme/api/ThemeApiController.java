@@ -29,7 +29,7 @@ public class ThemeApiController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@RequestBody @Valid final ThemeCreateRequest request) {
-        final ThemeCreateCommand command = request.toCommand();
+        final ThemeCreateCommand command = request.convertToCreateCommand();
         final ThemeInfo themeInfo = themeService.createTheme(command);
         final URI uri = URI.create("/themes/" + themeInfo.id());
         return ResponseEntity.created(uri).body(new ThemeResponse(themeInfo));

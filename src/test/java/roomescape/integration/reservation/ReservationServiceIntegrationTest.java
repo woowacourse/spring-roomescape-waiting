@@ -26,6 +26,7 @@ import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
 import roomescape.reservation.domain.theme.ThemeRepository;
 import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.domain.waiting.ReservationWaitingRepository;
 import roomescape.support.util.TestCurrentDateTime;
 
 @SpringBootTest
@@ -36,6 +37,9 @@ public class ReservationServiceIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -53,7 +57,8 @@ public class ReservationServiceIntegrationTest {
     void init() {
         final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
         currentDateTime = new TestCurrentDateTime(now);
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
+        reservationService = new ReservationService(reservationRepository, reservationWaitingRepository,
+                reservationTimeRepository,
                 themeRepository,
                 memberRepository,
                 currentDateTime);
@@ -116,9 +121,9 @@ public class ReservationServiceIntegrationTest {
 
     @DisplayName("모든 예약을 조회할 수 있다")
     @Test
-    void getReservations() {
+    void findReservationsBySearchCondition() {
         // when
-        final List<ReservationInfo> result = reservationService.getReservations();
+        final List<ReservationInfo> result = reservationService.findReservationsBySearchCondition();
         // then
         assertThat(result).hasSize(13);
     }

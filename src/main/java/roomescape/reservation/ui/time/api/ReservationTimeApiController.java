@@ -33,7 +33,7 @@ public class ReservationTimeApiController {
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> create(
             @RequestBody @Valid final ReservationTimeCreateRequest request) {
-        final ReservationTimeCreateCommand command = request.toCreateCommand();
+        final ReservationTimeCreateCommand command = request.convertToCreateCommand();
         final ReservationTimeInfo timeInfo = reservationTimeService.createReservationTime(command);
         final URI uri = URI.create("/times/" + timeInfo.id());
         final ReservationTimeResponse response = new ReservationTimeResponse(timeInfo);

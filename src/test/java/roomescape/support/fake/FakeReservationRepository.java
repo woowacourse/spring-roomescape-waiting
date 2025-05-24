@@ -3,6 +3,7 @@ package roomescape.support.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
 
@@ -58,9 +59,9 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByMemberId(final long id) {
+    public List<Reservation> findAllByMemberId(final long memberId) {
         return reservations.stream()
-                .filter(reservation -> reservation.member().id() == id)
+                .filter(reservation -> reservation.member().id() == memberId)
                 .toList();
     }
 
@@ -74,10 +75,17 @@ public class FakeReservationRepository implements ReservationRepository {
                 .toList();
     }
 
-    public Reservation findById(final long id) {
+    @Override
+    public Optional<Reservation> findByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.date() == date && reservation.time().id() == timeId && reservation.theme().id() == themeId)
+                .findFirst();
+    }
+
+    private Reservation findById(final long id) {
         return reservations.stream()
                 .filter(reservation -> reservation.id() == id)
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
     }
 }

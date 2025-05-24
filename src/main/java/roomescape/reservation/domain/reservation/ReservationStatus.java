@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum ReservationStatus {
 
     BOOKED("예약"),
-    WAITING("대기");
+    WAITING("%d번째 예약대기");
 
     private final String displayName;
 

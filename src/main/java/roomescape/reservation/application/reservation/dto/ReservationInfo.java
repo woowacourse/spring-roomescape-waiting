@@ -13,7 +13,7 @@ public record ReservationInfo(
         LocalDate date,
         ReservationTimeInfo time,
         ThemeInfo theme,
-        ReservationStatus status
+        String status
 ) {
 
     public ReservationInfo(final Reservation reservation) {
@@ -23,7 +23,7 @@ public record ReservationInfo(
                 reservation.date(),
                 new ReservationTimeInfo(reservation.time()),
                 new ThemeInfo(reservation.theme()),
-                ReservationStatus.BOOKED
+                ReservationStatus.BOOKED.getDisplayName()
         );
     }
 }

@@ -1,6 +1,8 @@
 INSERT INTO MEMBER (NAME, EMAIL, PASSWORD, ROLE)
 VALUES
-    ('리버', 'river@email.com', 'qwer!', 'ADMIN');
+    ('리버', 'river@email.com', 'qwer!', 'ADMIN'),
+    ('유저1', 'user1@email.com', 'qwer!', 'USER'),
+    ('유저2', 'user2@email.com', 'qwer!', 'USER');
 
 INSERT INTO RESERVATION_TIME (START_AT)
 VALUES
@@ -37,3 +39,12 @@ VALUES
     (1, '2025-04-25', 1,  5),
     (1, '2025-04-25', 2,  6),
     (1, '2025-04-24', 1,  7);
+
+
+INSERT INTO RESERVATION_WAITING (RESERVATION_ID, MEMBER_ID)
+VALUES
+    (2, 2),
+    (2, 1),
+    (3, 2),
+    (3, 3),
+    (3, 1)

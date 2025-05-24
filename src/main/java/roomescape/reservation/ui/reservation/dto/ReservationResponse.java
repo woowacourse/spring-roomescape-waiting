@@ -7,7 +7,7 @@ import roomescape.reservation.ui.theme.dto.ThemeResponse;
 import roomescape.reservation.ui.time.dto.ReservationTimeResponse;
 
 public record ReservationResponse(
-        Long id,
+        long id,
         MemberResponse member,
         LocalDate date,
         ReservationTimeResponse time,

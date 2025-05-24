@@ -3,10 +3,10 @@ package roomescape.reservation.ui.reservation.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.reservation.application.reservation.dto.ReservationInfo;
+import roomescape.reservation.application.reservation.dto.ReservationMineInfo;
 
 public record MemberReservationResponse(
-        long reservationId,
+        long id,
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm")
@@ -14,12 +14,12 @@ public record MemberReservationResponse(
         String status
 ) {
 
-    public MemberReservationResponse(final ReservationInfo reservationInfo) {
-        this(reservationInfo.id(),
-                reservationInfo.theme().name(),
-                reservationInfo.date(),
-                reservationInfo.time().startAt(),
-                reservationInfo.status().getDisplayName()
+    public MemberReservationResponse(final ReservationMineInfo reservationMineInfo) {
+        this(reservationMineInfo.id(),
+                reservationMineInfo.themeInfo().name(),
+                reservationMineInfo.date(),
+                reservationMineInfo.timeInfo().startAt(),
+                reservationMineInfo.status()
         );
     }
 }

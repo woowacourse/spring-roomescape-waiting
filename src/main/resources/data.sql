@@ -24,11 +24,23 @@ VALUES
 
 INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID)
 VALUES
-    (1, CURRENT_DATE, 1, 2),
-    (2, CURRENT_DATE, 2, 2),
-    (3, CURRENT_DATE, 3, 2),
-    (1, CURRENT_DATE, 4, 1),
-    (2, CURRENT_DATE, 5, 1),
-    (3, CURRENT_DATE - 1, 3, 3),
-    (1, CURRENT_DATE - 1, 4, 4),
-    (2, CURRENT_DATE - 1, 5, 5);
+    (1, CURRENT_DATE + 1, 1, 1),
+    (2, CURRENT_DATE + 1, 2, 1),
+    (3, CURRENT_DATE + 1, 3, 1),
+    (4, CURRENT_DATE + 1, 4, 1),
+    (1, CURRENT_DATE + 2, 1, 2),
+    (1, CURRENT_DATE - 2, 1, 2),
+    (3, CURRENT_DATE - 1, 1, 2),
+    (3, CURRENT_DATE - 1, 2, 2),
+    (3, CURRENT_DATE - 1, 3, 2),
+    (3, CURRENT_DATE - 1, 4, 2),
+    (3, CURRENT_DATE - 1, 1, 1),
+    (3, CURRENT_DATE - 1, 1, 3),
+    (3, CURRENT_DATE - 1, 2, 3);
+
+INSERT INTO RESERVATION_WAITING (RESERVATION_ID, MEMBER_ID)
+VALUES
+    (2, 1),
+    (3, 2),
+    (3, 4),
+    (3, 1)

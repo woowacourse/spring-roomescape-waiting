@@ -9,7 +9,7 @@ public record ThemeCreateRequest(
         @NotNull(message = "썸네일을 입력해주세요.") String thumbnail
 ) {
 
-    public ThemeCreateCommand toCommand() {
+    public ThemeCreateCommand convertToCreateCommand() {
         return new ThemeCreateCommand(name, description, thumbnail);
     }
 }

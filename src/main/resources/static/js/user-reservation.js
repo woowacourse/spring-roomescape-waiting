@@ -80,7 +80,7 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-    fetch('/times/availability?date=' + date + '&themeId=' + themeId, { // 예약 가능 시간 조회 API endpoint
+    fetch(`/times/availability?date=${date}&themeId=${themeId}`, { // 예약 가능 시간 조회 API endpoint
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -187,8 +187,8 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
         fetch('/reservations/waitings', {
@@ -204,7 +204,7 @@ function onWaitButtonClick() {
             })
             .then(data => {
                 alert('Reservation waiting successful!');
-                window.location.href = "/";
+                window.location.href = "/reservation";
             })
             .catch(error => {
                 alert("An error occurred while making the reservation waiting.");

@@ -23,6 +23,7 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
+import roomescape.reservation.application.reservation.dto.ReservationMineInfo;
 import roomescape.reservation.application.reservation.dto.ReservationSearchCondition;
 import roomescape.reservation.application.reservation.service.ReservationService;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
@@ -35,6 +36,7 @@ import roomescape.reservation.domain.time.ReservationTimeRepository;
 import roomescape.support.fake.FakeMemberRepository;
 import roomescape.support.fake.FakeReservationRepository;
 import roomescape.support.fake.FakeReservationTimeRepository;
+import roomescape.support.fake.FakeReservationWaitingRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.util.TestCurrentDateTime;
 
@@ -47,10 +49,11 @@ class ReservationServiceTest {
     private final LocalDate tomorrow = today.plusDays(1);
 
     private final FakeReservationRepository reservationRepository = new FakeReservationRepository();
+    private final FakeReservationWaitingRepository reservationWaitingRepository = new FakeReservationWaitingRepository();
     private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
     private final ThemeRepository themeRepository = new FakeThemeRepository();
     private final MemberRepository memberRepository = new FakeMemberRepository();
-    private final ReservationService reservationService = new ReservationService(reservationRepository,
+    private final ReservationService reservationService = new ReservationService(reservationRepository, reservationWaitingRepository,
             reservationTimeRepository, themeRepository, memberRepository, currentDateTime);
 
     private Member member1, member2;
@@ -139,7 +142,8 @@ class ReservationServiceTest {
         // when
         final ReservationInfo response = reservationService.createReservation(request);
         // then
-        final Reservation result = reservationRepository.findById(response.id());
+        final Reservation result = reservationRepository.findByDateAndTimeIdAndThemeId(response.date(), response.time().id(), response.theme().id())
+                .orElseThrow(() -> new AssertionError("예약이 저장되지 않았습니다."));;
         assertAll(
                 () -> assertThat(result.date()).isEqualTo(response.date()),
                 () -> assertThat(new MemberInfo(result.member())).isEqualTo(response.member()),
@@ -159,7 +163,7 @@ class ReservationServiceTest {
         reservationService.createReservation(request1);
         reservationService.createReservation(request2);
         // when
-        final List<ReservationInfo> result = reservationService.getReservations();
+        final List<ReservationInfo> result = reservationService.findReservationsBySearchCondition();
         // then
         assertThat(result).hasSize(2);
     }
@@ -174,12 +178,12 @@ class ReservationServiceTest {
         // when
         reservationService.cancelReservationById(response.id());
         // then
-        assertThat(reservationService.getReservations()).isEmpty();
+        assertThat(reservationService.findReservationsBySearchCondition()).isEmpty();
     }
 
     @DisplayName("멤버 예약 목록을 조회할 수 있다")
     @Test
-    void findReservationsByMember() {
+    void findReservationsBySearchConditionByMember() {
         // given
         final ReservationCreateCommand request1 = new ReservationCreateCommand(tomorrow, member1.id(), time1.id(),
                 theme1.id());
@@ -188,15 +192,19 @@ class ReservationServiceTest {
         final ReservationInfo response1 = reservationService.createReservation(request1);
         reservationService.createReservation(request2);
         // when
-        final List<ReservationInfo> result = reservationService.findReservationsByMemberId(response1.id());
+        final ReservationMineInfo result = reservationService.findReservationsByMemberId(response1.id()).getFirst();
         // then
-        assertThat(result).containsExactlyElementsOf(List.of(response1));
+        assertAll(
+                () -> assertThat(result.date() == response1.date()).isTrue(),
+                () -> assertThat(result.timeInfo().startAt() == response1.time().startAt()).isTrue(),
+                () -> assertThat(result.themeInfo().name() == response1.theme().name()).isTrue()
+        );
     }
 
     @DisplayName("기간을 지정하지 않은 예약 목록을 조회하다")
     @MethodSource(value = "searchConditions")
     @ParameterizedTest()
-    void getReservationsOfNullDate(ReservationSearchCondition condition, int expectedSize) {
+    void findReservationsBySearchConditionOfNullDate(ReservationSearchCondition condition, int expectedSize) {
         // given
         final ReservationCreateCommand request1 = new ReservationCreateCommand(tomorrow, member1.id(), time1.id(),
                 theme1.id());
@@ -217,7 +225,7 @@ class ReservationServiceTest {
         reservationService.createReservation(request5);
 
         // then
-        assertThat(reservationService.getReservations(condition)).hasSize(expectedSize);
+        assertThat(reservationService.findReservationsBySearchCondition(condition)).hasSize(expectedSize);
     }
 
     private static Stream<Arguments> searchConditions() {

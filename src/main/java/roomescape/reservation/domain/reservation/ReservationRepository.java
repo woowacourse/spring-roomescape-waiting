@@ -2,6 +2,7 @@ package roomescape.reservation.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationRepository {
 
@@ -19,7 +20,9 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
-    List<Reservation> findAllByMemberId(long id);
+    List<Reservation> findAllByMemberId(long memberId);
 
     List<Reservation> findAllByCondition(Long memberId, Long themeId, LocalDate from, LocalDate to);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 }
