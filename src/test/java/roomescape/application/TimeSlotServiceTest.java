@@ -3,26 +3,22 @@ package roomescape.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.DateUtils.tomorrow;
 
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.DateUtils;
-import roomescape.TestRepositoryHelper;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.exception.InUseException;
 
-@DataJpaTest
-@Import({TimeSlotService.class, TestRepositoryHelper.class})
-class TimeSlotServiceTest {
+@Import(TimeSlotService.class)
+class TimeSlotServiceTest extends ServiceTest {
 
     @Autowired
     private TimeSlotService service;
-    @Autowired
-    private TestRepositoryHelper repositoryHelper;
 
     @Test
     @DisplayName("예약 시간을 추가한다.")
@@ -61,7 +57,7 @@ class TimeSlotServiceTest {
         var theme = repositoryHelper.saveAnyTheme();
         var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
 
-        var reservationWithTheTimeSlot = new Reservation(user, DateUtils.tomorrow(), timeSlotToBeRemoved, theme);
+        var reservationWithTheTimeSlot = new Reservation(user, ReservationSlot.forReserve(tomorrow(), timeSlotToBeRemoved, theme));
         repositoryHelper.saveReservation(reservationWithTheTimeSlot);
 
         // when & then

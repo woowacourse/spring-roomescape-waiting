@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,25 +22,26 @@ import roomescape.presentation.response.AvailableTimeSlotResponse;
 import roomescape.presentation.response.TimeSlotResponse;
 
 @RestController
+@RequestMapping("/times")
 @AllArgsConstructor
 public class TimeSlotController {
 
     private final TimeSlotService service;
 
-    @PostMapping("/times")
+    @PostMapping
     @ResponseStatus(CREATED)
     public TimeSlotResponse register(@RequestBody @Valid final CreateTimeSlotRequest request) {
         var timeSlot = service.register(request.startAt());
         return TimeSlotResponse.from(timeSlot);
     }
 
-    @GetMapping("/times")
+    @GetMapping
     public List<TimeSlotResponse> getAllTimeSlots() {
         var timeSlots = service.findAllTimeSlots();
         return TimeSlotResponse.from(timeSlots);
     }
 
-    @GetMapping(value = "/availableTimes", params = {"date", "themeId"})
+    @GetMapping(value = "/available", params = {"date", "themeId"})
     public List<AvailableTimeSlotResponse> getAvailableTimes(
             @RequestParam("date") final LocalDate date,
             @RequestParam("themeId") final Long themeId
@@ -48,7 +50,7 @@ public class TimeSlotController {
         return AvailableTimeSlotResponse.from(availableTimeSlots);
     }
 
-    @DeleteMapping("/times/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
     public void delete(@PathVariable("id") final long id) {
         service.removeById(id);

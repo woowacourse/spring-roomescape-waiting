@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDateTime;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.theme.Description;
 import roomescape.domain.theme.Theme;
@@ -26,15 +26,15 @@ public class TestFixtures {
     }
 
     public static User anyUser() {
-        return new User(new UserName("name"), new Email("email@email.com"), new Password("password"));
+        return new User(new UserName("name"), new Email("email" + ID_GENERATOR.incrementAndGet() + "@email.com"), new Password("password"));
     }
 
-    public static User anyUserWithId() {
+    public static User anyUserWithNewId() {
         var user = anyUser();
         return new User(ID_GENERATOR.incrementAndGet(), user.name(), user.role(), user.email(), user.password());
     }
 
-    public static User anyAdminWithId() {
+    public static User anyAdminWithNewId() {
         return new User(ID_GENERATOR.incrementAndGet(), new UserName("어드민"), UserRole.ADMIN, new Email("admin@email.com"), new Password("pw"));
     }
 
@@ -46,7 +46,7 @@ public class TestFixtures {
         return new TimeSlot(LocalTime.of(10, 0));
     }
 
-    public static TimeSlot anyTimeSlotWithId() {
+    public static TimeSlot anyTimeSlotWithNewId() {
         return new TimeSlot(ID_GENERATOR.incrementAndGet(), anyTimeSlot().startAt());
     }
 
@@ -58,17 +58,20 @@ public class TestFixtures {
         return new Theme(new ThemeName("name"), new Description("description"), new Thumbnail("thumbnail.jpg"));
     }
 
-    public static Theme anyThemeWithId() {
+    public static Theme anyThemeWithNewId() {
         var theme = anyTheme();
         return new Theme(ID_GENERATOR.incrementAndGet(), theme.name(), theme.description(), theme.thumbnail());
     }
 
-    public static Reservation anyReservationWithId() {
+    public static Reservation anyReservationWithNewId() {
         return new Reservation(
             ID_GENERATOR.incrementAndGet(),
-            anyUserWithId(),
-            ReservationDateTime.forReserve(LocalDate.of(3000, 10, 1), anyTimeSlotWithId()),
-            anyThemeWithId(),
+            anyUserWithNewId(),
+            ReservationSlot.forReserve(
+                LocalDate.of(3000, 10, 1),
+                anyTimeSlotWithNewId(),
+                anyThemeWithNewId()
+            ),
             ReservationStatus.RESERVED
         );
     }

@@ -4,7 +4,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationWithOrder;
 import roomescape.domain.user.Email;
 import roomescape.domain.user.Password;
 import roomescape.domain.user.User;
@@ -17,6 +18,7 @@ import roomescape.exception.AlreadyExistedException;
 public class UserService {
 
     private final UserRepository repository;
+    private final ReservationRepository reservationRepository;
 
     public User register(final String email, final String password, final String name) {
         if (existsAlready(email)) {
@@ -32,9 +34,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> getReservations(final long id) {
+    public List<ReservationWithOrder> getMyReservations(final long id) {
         var user = repository.getById(id);
-        return user.reservations();
+        var queues = reservationRepository.findQueuesBySlots(user.reservedSlots());
+        return queues.orderOfAll(user.reservations());
     }
 
     public List<User> findAllUsers() {

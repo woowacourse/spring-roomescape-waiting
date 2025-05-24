@@ -1,5 +1,6 @@
 package roomescape.application;
 
+import static roomescape.infrastructure.ReservationSpecs.byDateBetween;
 import static roomescape.infrastructure.ReservationSpecs.byThemeId;
 
 import java.time.LocalDate;
@@ -17,8 +18,6 @@ import roomescape.exception.InUseException;
 @Service
 @AllArgsConstructor
 public class ThemeService {
-
-    private static final int MAX_POPULAR_THEME_COUNT = 10;
 
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
@@ -40,8 +39,8 @@ public class ThemeService {
         themeRepository.deleteByIdOrElseThrow(id);
     }
 
-    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {
-        var finalCount = Math.min(count, MAX_POPULAR_THEME_COUNT);
-        return themeRepository.findRankingByPeriod(startDate, endDate, finalCount);
+    public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int maxCount) {
+        var reservations = reservationRepository.findAllWithWrapping(byDateBetween(startDate, endDate));
+        return reservations.findPopularThemes(maxCount);
     }
 }

@@ -2,31 +2,38 @@ package roomescape.presentation.response;
 
 import java.time.LocalDate;
 import java.util.List;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.ReservationWithOrder;
 
 public record UserReservationResponse(
-        long reservationId,
-        ThemeResponse theme,
-        LocalDate date,
-        TimeSlotResponse time,
-        ReservationStatus status
-
+    long id,
+    LocalDate date,
+    TimeSlotResponse time,
+    ThemeResponse theme,
+    String status
 ) {
 
-    public static UserReservationResponse from(final Reservation reservation) {
+    public static UserReservationResponse from(final ReservationWithOrder waiting) {
+        var reservation = waiting.reservation();
         return new UserReservationResponse(
-                reservation.id(),
-                ThemeResponse.from(reservation.theme()),
-                reservation.dateTime().date(),
-                TimeSlotResponse.from(reservation.dateTime().timeSlot()),
-                reservation.status()
+            reservation.id(),
+            reservation.slot().date(),
+            TimeSlotResponse.from(reservation.slot().timeSlot()),
+            ThemeResponse.from(reservation.slot().theme()),
+            writeDescription(waiting)
         );
     }
 
-    public static List<UserReservationResponse> from(final List<Reservation> reservations) {
-        return reservations.stream()
-                .map(UserReservationResponse::from)
-                .toList();
+    private static String writeDescription(final ReservationWithOrder waiting) {
+        if (waiting.isWaiting()) {
+            return waiting.order() + "번째 예약 대기";
+        }
+        var reservation = waiting.reservation();
+        return reservation.status().description();
+    }
+
+    public static List<UserReservationResponse> from(final List<ReservationWithOrder> waitings) {
+        return waitings.stream()
+            .map(UserReservationResponse::from)
+            .toList();
     }
 }
