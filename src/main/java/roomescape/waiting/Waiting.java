@@ -1,0 +1,100 @@
+package roomescape.waiting;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Objects;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
+
+@Entity
+public class Waiting {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    private Member member;
+
+    @ManyToOne(optional = false)
+    private ReservationTime reservationTime;
+
+    @ManyToOne(optional = false)
+    private Theme theme;
+
+    private LocalDate date;
+
+    protected Waiting() {}
+
+    public Waiting(Long id, Member member, ReservationTime reservationTime, Theme theme,
+        LocalDate date) {
+        this.id = id;
+        this.member = member;
+        this.reservationTime = reservationTime;
+        this.theme = theme;
+        this.date = date;
+    }
+
+    public Waiting(Member member, ReservationTime reservationTime, Theme theme, LocalDate date) {
+        this(null, member, reservationTime, theme, date);
+    }
+
+    public Reservation convertToReservation() {
+        return new Reservation(
+            this.getDate(), this.getReservationTime(), this.getTheme(), this.getMember()
+        );
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public ReservationTime getReservationTime() {
+        return reservationTime;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public String getMemberName() {
+        return member.getNameValue();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
+    }
+
+    public LocalTime getReservationStartAt() {
+        return reservationTime.getStartAt();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Waiting waiting = (Waiting) o;
+        return Objects.equals(id, waiting.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+}

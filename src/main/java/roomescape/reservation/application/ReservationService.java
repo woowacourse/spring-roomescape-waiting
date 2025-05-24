@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.BadRequestException;
@@ -19,11 +20,12 @@ import roomescape.reservation.application.dto.MyReservation;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,15 +35,19 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
-                              final ThemeRepository themeRepository,
-                              final MemberRepository memberRepository) {
+    public ReservationService(
+        final ReservationRepository reservationRepository,
+        final ReservationTimeRepository reservationTimeRepository,
+        final ThemeRepository themeRepository,
+        final MemberRepository memberRepository,
+        final WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findAll() {
@@ -67,6 +73,23 @@ public class ReservationService {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
         reservationRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteReservationAndGetFirstWaiting(Long reservationId) {
+        Reservation reservation = getReservation(reservationId);
+        deleteById(reservation.getId());
+        Optional<Waiting> findWaiting = waitingRepository.findFirstByThemeIdAndDateAndReservationTimeId(
+            reservation.getTheme().getId(),
+            reservation.getDate(),
+            reservation.getTime().getId()
+        );
+        if (findWaiting.isEmpty()) {
+            return;
+        }
+        Waiting waiting = findWaiting.get();
+        waitingRepository.delete(waiting);
+        reservationRepository.save(waiting.convertToReservation());
     }
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId, final String date) {
@@ -110,8 +133,7 @@ public class ReservationService {
         validateIsBooked(sameTimeReservations, reservationTime, theme);
         validatePastDateTime(date, reservationTime.getStartAt());
 
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member,
-            Status.CONFIRMATION);
+        final Reservation reservation = new Reservation(date, reservationTime, theme, member);
         final Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.of(saved);
     }
@@ -147,6 +169,11 @@ public class ReservationService {
             responses.add(response);
         }
         return responses;
+    }
+
+    private Reservation getReservation(final Long reservationId) {
+        return reservationRepository.findById(reservationId)
+            .orElseThrow(() -> new NotFoundException("선택한 예약이 존재하지 않습니다."));
     }
 
     private ReservationTime getReservationTime(final Long timeId) {
