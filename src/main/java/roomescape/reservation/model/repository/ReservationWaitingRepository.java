@@ -16,7 +16,7 @@ public interface ReservationWaitingRepository {
 
     void remove(ReservationWaiting reservationWaiting);
 
-    Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<ReservationWaiting> findFirstPendingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     List<ReservationWaiting> getAll();
 

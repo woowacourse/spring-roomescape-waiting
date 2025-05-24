@@ -1,5 +1,7 @@
 package roomescape.reservation.infrastructure.db;
 
+import static roomescape.reservation.model.entity.vo.ReservationWaitingStatus.PENDING;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +35,8 @@ public class ReservationWaitingDbRepository implements ReservationWaitingReposit
     }
 
     @Override
-    public Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return reservationWaitingJpaRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(date, timeId, themeId);
+    public Optional<ReservationWaiting> findFirstPendingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return reservationWaitingJpaRepository.findFirstByDateAndTimeIdAndThemeIdAndStatusOrderByCreatedAtAsc(date, timeId, themeId, PENDING);
     }
 
     @Override

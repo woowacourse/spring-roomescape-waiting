@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.model.entity.ReservationWaiting;
+import roomescape.reservation.model.entity.vo.ReservationWaitingStatus;
 import roomescape.reservation.model.repository.dto.ReservationWaitingWithRank;
 
 public interface ReservationWaitingJpaRepository extends JpaRepository<ReservationWaiting, Long> {
@@ -25,7 +26,7 @@ public interface ReservationWaitingJpaRepository extends JpaRepository<Reservati
             """)
     List<ReservationWaitingWithRank> findAllWithRankByMemberId(Long memberId);
 
-    Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(LocalDate date, Long timeId, Long themeId);
+    Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeIdAndStatusOrderByCreatedAtAsc(LocalDate date, Long timeId, Long themeId, ReservationWaitingStatus status);
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 }

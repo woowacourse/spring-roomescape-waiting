@@ -38,7 +38,7 @@ public class ReservationOperation {
     @Transactional
     public void cancel(Reservation reservation) {
         reservation.changeToCancel();
-        reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
+        reservationWaitingRepository.findFirstPendingByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()
