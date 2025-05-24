@@ -49,6 +49,11 @@ public class Waiting {
         this.member = member;
     }
 
+    public Waiting(ReservationTheme theme, LocalDate date, ReservationTime time,
+        Member member) {
+        this(null, theme, date, time, member);
+    }
+
     public Long getId() {
         return id;
     }

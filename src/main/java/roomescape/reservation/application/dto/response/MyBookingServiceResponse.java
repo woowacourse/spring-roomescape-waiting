@@ -5,8 +5,8 @@ import java.time.LocalTime;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.Waiting;
 import roomescape.reservation.model.vo.WaitingWithRank;
-//TODO: MyReservationServiceResponse 이름 변경하기
-public record MyReservationServiceResponse(
+
+public record MyBookingServiceResponse(
     Long reservationId,
     String themeName,
     LocalDate date,
@@ -14,8 +14,8 @@ public record MyReservationServiceResponse(
     String status
 ) {
 
-    public static MyReservationServiceResponse from(Reservation reservation) {
-        return new MyReservationServiceResponse(
+    public static MyBookingServiceResponse from(Reservation reservation) {
+        return new MyBookingServiceResponse(
             reservation.getId(),
             reservation.getTheme().getName(),
             reservation.getDate(),
@@ -24,10 +24,10 @@ public record MyReservationServiceResponse(
         );
     }
 
-    public static MyReservationServiceResponse from(WaitingWithRank waitingWithRank) {
+    public static MyBookingServiceResponse from(WaitingWithRank waitingWithRank) {
         Waiting waiting = waitingWithRank.getWaiting();
         Long rank = waitingWithRank.getRank();
-        return new MyReservationServiceResponse(
+        return new MyBookingServiceResponse(
             waiting.getId(),
             waiting.getTheme().getName(),
             waiting.getDate(),
