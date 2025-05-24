@@ -55,7 +55,7 @@ public class ReservationScheduleService {
                 .collect(Collectors.toSet());
     }
 
-    private List<ReservationSchedule> generateNewSchedules(Set<LocalDate> scheduledDates) {
+    private List<ReservationSchedule> generateNewSchedules(final Set<LocalDate> scheduledDates) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
         List<Theme> themes = themeRepository.findAll();
         LocalDate now = LocalDate.now(clock);
@@ -67,8 +67,11 @@ public class ReservationScheduleService {
                 .toList();
     }
 
-    private List<ReservationSchedule> themeTimeCombinations(LocalDate date, List<ReservationTime> times,
-                                                            List<Theme> themes) {
+    private List<ReservationSchedule> themeTimeCombinations(
+            final LocalDate date,
+            final List<ReservationTime> times,
+            final List<Theme> themes
+    ) {
         return themes.stream()
                 .flatMap(theme -> times.stream()
                         .map(time -> new ReservationSchedule(null, new ReservationDate(date), time, theme)))

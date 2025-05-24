@@ -22,6 +22,7 @@ public class LoginService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public Member login(final LoginRequest request) {
         Member member = memberRepository.findByEmail(new MemberEmail(request.email()))
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 멤버입니다."));

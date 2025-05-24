@@ -52,12 +52,11 @@ public class ThemeService {
 
     public ThemeResponse createTheme(final CreateThemeRequest request) {
         Theme theme = themeRepository.save(new Theme(
-                        null,
-                        new ThemeName(request.name()),
-                        new ThemeDescription(request.description()),
-                        new ThemeThumbnail(request.thumbnail())
-                )
-        );
+                null,
+                new ThemeName(request.name()),
+                new ThemeDescription(request.description()),
+                new ThemeThumbnail(request.thumbnail())
+        ));
         return ThemeResponse.from(theme);
     }
 

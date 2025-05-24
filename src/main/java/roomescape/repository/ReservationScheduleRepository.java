@@ -18,8 +18,6 @@ public interface ReservationScheduleRepository extends JpaRepository<Reservation
 
     Optional<ReservationSchedule> findByTheme_Id(Long themeId);
 
-    List<ReservationSchedule> findAllByTheme_IdAndReservationDate_Date(Long themeId, LocalDate date);
-
     @Query("""
             SELECT new roomescape.domain.time.AvailableReservationTime(
                 rs,

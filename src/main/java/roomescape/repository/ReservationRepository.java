@@ -9,8 +9,6 @@ import roomescape.domain.reservation.Reservation;
 public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         JpaSpecificationExecutor<Reservation> {
 
-    boolean existsReservationByScheduleId(final Long scheduleId);
-
     List<Reservation> findAllByMember_Id(final Long memberId);
 
     boolean existsByScheduleId(Long scheduleId);

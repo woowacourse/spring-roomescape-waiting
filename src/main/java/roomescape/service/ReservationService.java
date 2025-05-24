@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,7 +30,6 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final Clock clock;
     private final ReservationScheduleRepository reservationScheduleRepository;
 
     public ReservationService(
@@ -39,13 +37,11 @@ public class ReservationService {
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository,
-            final Clock clock,
             final ReservationScheduleRepository reservationScheduleRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.clock = clock;
         this.reservationScheduleRepository = reservationScheduleRepository;
     }
 
@@ -54,6 +50,7 @@ public class ReservationService {
         return ReservationResponse.from(reservations);
     }
 
+    @Transactional
     public void deleteReservationById(final Long id) {
         Reservation reservation = getReservation(id);
         reservationRepository.deleteById(reservation.getId());
@@ -70,6 +67,7 @@ public class ReservationService {
         return ReservationResponse.from(created);
     }
 
+    @Transactional
     public ReservationResponse createReservationByAdmin(final AdminCreateReservationRequest request) {
         Reservation created = createReservation(
                 new ReservationDate(request.date()),
