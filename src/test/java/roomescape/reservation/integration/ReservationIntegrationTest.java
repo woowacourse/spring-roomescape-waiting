@@ -233,7 +233,7 @@ class ReservationIntegrationTest {
         //then
         var found = reservationRepository.findByReservationSlot(reservationSlot)
                 .orElse(null);
-        assertThat(found.getMember().getName()).isEqualTo(member.getName());
+        assertThat(found.getMember().getId()).isEqualTo(member.getId());
     }
 
     @Test

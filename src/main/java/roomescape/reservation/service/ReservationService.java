@@ -32,6 +32,7 @@ import roomescape.waiting.entity.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReservationService {
 
@@ -68,12 +69,14 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationReadResponse> getAllReservations() {
         return reservationRepository.findAll().stream()
                 .map(ReservationReadResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationReadFilteredResponse> getFilteredReservations(ReservationReadFilteredRequest request) {
         List<Reservation> reservations = reservationRepository.findReservationsInPeriod(
                 request.themeId(), request.memberId(), request.dateFrom(), request.dateTo());
@@ -83,6 +86,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationByMemberResponse> getReservationsByMember(LoginMember loginMember) {
         Member member = getMemberById(loginMember.id());
 
@@ -92,7 +96,6 @@ public class ReservationService {
         return ReservationByMemberResponse.of(reservations, waitingWithRanks);
     }
 
-    @Transactional
     public void deleteReservation(Long id) {
         reservationRepository.findById(id)
                 .ifPresent(reservation -> {

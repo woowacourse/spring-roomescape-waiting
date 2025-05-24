@@ -21,6 +21,7 @@ import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class WaitingService {
 
@@ -44,6 +45,7 @@ public class WaitingService {
         return WaitingCreateResponse.from(saved, rank);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingReadResponse> getWaitings() {
         return waitingRepository.findAll()
                 .stream()
@@ -56,7 +58,6 @@ public class WaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
-    @Transactional
     public void acceptWaiting(Long id) {
         Waiting waiting = getWaitingById(id);
 

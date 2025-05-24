@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
@@ -15,6 +16,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReservationTimeService {
 
@@ -29,12 +31,14 @@ public class ReservationTimeService {
         return ReservationTimeCreateResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeReadResponse> getAllTimes() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeReadResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<ReservationTime> reservedTimes = reservationTimeRepository.findAllReservedTimeByDateAndThemeId(date,
