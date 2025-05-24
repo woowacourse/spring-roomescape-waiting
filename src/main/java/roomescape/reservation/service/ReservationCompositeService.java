@@ -54,20 +54,6 @@ public class ReservationCompositeService {
                 .collect(Collectors.toList());
     }
 
-    public List<ReservationResponse> findReservations(final Long themeId, final Long memberId,
-                                                      final LocalDate startDate,
-                                                      final LocalDate endDate) {
-        return reservationModuleService.getReservations(themeId, memberId, startDate, endDate)
-                .stream()
-                .map(reservation -> {
-                    ReservationTime time = reservation.getInfo().getTime();
-                    Theme theme = reservation.getInfo().getTheme();
-                    Member member = reservation.getMember();
-                    return ReservationResponse.of(reservation, time, theme, member);
-                })
-                .toList();
-    }
-
     @Transactional
     public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
                                       final LocalDateTime now) {

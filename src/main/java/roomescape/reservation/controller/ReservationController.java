@@ -41,7 +41,7 @@ public class ReservationController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        return ResponseEntity.ok(reservationCompositeService.findReservations(themeId, memberId, dateFrom, dateTo));
+        return ResponseEntity.ok(reservationModuleService.findReservations(themeId, memberId, dateFrom, dateTo));
     }
 
     @RequireRole(MemberRole.USER)
@@ -72,7 +72,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservations(
             @PathVariable("id") Long id
     ) {
-        reservationCompositeService.delete(id);
+        reservationModuleService.delete(id);
         return ResponseEntity.noContent().build();
     }
 

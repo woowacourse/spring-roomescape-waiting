@@ -37,6 +37,19 @@ public class ReservationModuleService {
         this.memberRepository = memberRepository;
     }
 
+    public List<ReservationResponse> findReservations(final Long themeId, final Long memberId,
+                                                      final LocalDate startDate,
+                                                      final LocalDate endDate) {
+        return getReservations(themeId, memberId, startDate, endDate)
+                .stream()
+                .map(reservation -> {
+                    ReservationTime time = reservation.getInfo().getTime();
+                    Theme theme = reservation.getInfo().getTheme();
+                    Member member = reservation.getMember();
+                    return ReservationResponse.of(reservation, time, theme, member);
+                })
+                .toList();
+    }
     public List<Reservation> getReservations(final Long themeId, final Long memberId,
                                              final LocalDate startDate, final LocalDate endDate) {
         if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
