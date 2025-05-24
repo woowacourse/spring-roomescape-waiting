@@ -19,23 +19,29 @@ values ('theme5', 'desc5', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea
 insert into reservation_time (start_at)
 values ('09:00');
 insert into reservation_time (start_at)
+values ('10:00');
+insert into reservation_time (start_at)
 values ('11:00');
 insert into reservation_time (start_at)
-values ('16:00');
+values ('12:00');
+insert into reservation_time (start_at)
+values ('13:00');
+insert into reservation_time (start_at)
+values ('14:00');
 
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (1, 1, '2025-05-13', 1);
+values (1, 1, '2025-05-23', 1);
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (1, 1, '2025-05-12', 1);
+values (1, 1, '2025-05-22', 1);
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (1, 1, '2025-05-11', 1);
+values (1, 1, '2025-05-20', 1);
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (2, 1, '2025-05-13', 1);
+values (2, 1, '2025-05-19', 1);
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (2, 2, '2025-05-12', 2);
+values (2, 2, '2025-05-18', 2);
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (3, 2, '2025-05-11', 2);
+values (3, 2, '2025-05-17', 2);
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (4, 2, '2025-05-13', 2);
+values (4, 2, '2025-05-23', 2);
 insert into reservation (theme_id, member_id, date, reservation_time_id)
-values (5, 2, '2025-05-12', 2);
+values (5, 2, '2025-05-22', 2);

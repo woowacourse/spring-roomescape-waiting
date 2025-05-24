@@ -2,6 +2,8 @@ package roomescape.dto.response;
 
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
+import roomescape.domain.Status;
+import roomescape.domain.Waiting;
 
 public record ReservationWithStatusResponse(
         Long id,
@@ -9,7 +11,7 @@ public record ReservationWithStatusResponse(
         LocalDate date,
         ReservationTimeResponse time,
         String themeName,
-        String status
+        Status status
 ) {
     public static ReservationWithStatusResponse from(Reservation reservation) {
         ReservationTimeResponse dto = ReservationTimeResponse.from(reservation.getReservationTime());
@@ -19,7 +21,19 @@ public record ReservationWithStatusResponse(
                 reservation.getDate(),
                 dto,
                 reservation.getTheme().getName(),
-                "예약"
+                Status.CONFIRMED
+        );
+    }
+
+    public static ReservationWithStatusResponse from(Waiting waiting) {
+        ReservationTimeResponse dto = ReservationTimeResponse.from(waiting.getReservationTime());
+        return new ReservationWithStatusResponse(
+                waiting.getId(),
+                waiting.getMember().getName(),
+                waiting.getDate(),
+                dto,
+                waiting.getTheme().getName(),
+                Status.PENDING
         );
     }
 }
