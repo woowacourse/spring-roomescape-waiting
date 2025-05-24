@@ -18,4 +18,6 @@ public record ReservationDate(
     public ReservationDate(final String date) {
         this(LocalDate.parse(Objects.requireNonNull(date, "date는 null일 수 없습니다.")));
     }
+
+
 }

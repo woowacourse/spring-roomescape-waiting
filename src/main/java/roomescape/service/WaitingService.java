@@ -1,0 +1,55 @@
+package roomescape.service;
+
+import java.util.NoSuchElementException;
+import org.springframework.stereotype.Service;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationSchedule;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.ReservationTime;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
+import roomescape.service.request.WaitingCreateRequest;
+import roomescape.service.response.WaitingResponse;
+
+@Service
+public class WaitingService {
+
+    private final WaitingRepository waitingRepository;
+    private final MemberRepository memberRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+
+    public WaitingService(
+            final WaitingRepository waitingRepository,
+            final MemberRepository memberRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository
+    ) {
+        this.waitingRepository = waitingRepository;
+        this.memberRepository = memberRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+    }
+
+    public WaitingResponse createWaiting(final WaitingCreateRequest request, final Long memberId) {
+        final Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("해당 멤버가 존재하지 않습니다."));
+        final ReservationTime time = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new NoSuchElementException("해당 예약 시간이 존재하지 않습니다."));
+        final Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
+
+        final Waiting waiting = new Waiting(
+                null,
+                member,
+                new ReservationSchedule(new ReservationDate(request.date()), time, theme)
+        );
+
+        return WaitingResponse.from(waitingRepository.save(waiting));
+    }
+
+}
