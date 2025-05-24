@@ -37,7 +37,7 @@ function render(data) {
         row.insertCell(2).textContent = item.theme.name;      // 테마 name
         row.insertCell(3).textContent = item.date;            // date
         row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
-        if (item.rank === 0) {
+        if (item.rank === 1) {
             row.insertCell(5).textContent = '예약';
         } else {
             row.insertCell(5).textContent = `${item.rank}번째 예약 대기`;
