@@ -83,11 +83,8 @@ public class ReservationRestController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
-        final List<Reservation> reservations = reservationService.findReservationsByMember(member);
-        final List<ReservationMineResponse> reservationMineResponses = reservations.stream()
-                .map(ReservationMineResponse::from)
-                .toList();
+        final List<ReservationMineResponse> reservations = reservationService.findReservationsByMember(member);
 
-        return ResponseEntity.ok(reservationMineResponses);
+        return ResponseEntity.ok(reservations);
     }
 }

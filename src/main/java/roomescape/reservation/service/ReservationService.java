@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,8 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.AvailableReservationTime;
+import roomescape.reservation.dto.ReservationMineResponse;
+import roomescape.reservation.dto.ReservationWithRank;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -98,7 +101,14 @@ public class ReservationService {
         return reservationSlotService.findAvailableSlots(date, themeId);
     }
 
-    public List<Reservation> findReservationsByMember(final Member member) {
-        return reservationRepository.findByMember(member);
+    public List<ReservationMineResponse> findReservationsByMember(final Member member) {
+        List<ReservationWithRank> confirmedReservations = reservationRepository
+                .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.CONFIRMED);
+        List<ReservationWithRank> waitingReservations = reservationRepository
+                .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.WAITING);
+
+        return Stream.concat(
+                confirmedReservations.stream().map(ReservationMineResponse::from),
+                waitingReservations.stream().map(ReservationMineResponse::from)).toList();
     }
 }

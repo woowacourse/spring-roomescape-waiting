@@ -9,13 +9,16 @@ public record ReservationMineResponse(
         String theme,
         LocalDate date,
         LocalTime time,
-        String status) {
-    public static ReservationMineResponse from(final Reservation reservation) {
+        String status,
+        long rank) {
+    public static ReservationMineResponse from(ReservationWithRank reservationWithRank) {
+        Reservation reservation = reservationWithRank.reservation();
         return new ReservationMineResponse(
                 reservation.getId(),
                 reservation.getSlot().getTheme().getName(),
                 reservation.getSlot().getDate(),
                 reservation.getSlot().getTime().getStartAt(),
-                reservation.getStatusValue());
+                reservation.getStatusValue(),
+                reservationWithRank.rank());
     }
 }
