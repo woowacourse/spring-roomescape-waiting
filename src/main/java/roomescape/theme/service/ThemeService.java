@@ -38,16 +38,19 @@ public class ThemeService {
         themeRepository.deleteById(theme.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getAll() {
         List<Theme> themes = themeRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
+    @Transactional(readOnly = true)
     public Theme getTheme(Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes() {
         LocalDate endDate = LocalDate.now().minusDays(1L);
         LocalDate startDate = LocalDate.now().minusDays(7L);

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.time.controller.response.AvailableReservationTimeResponse;
@@ -16,7 +15,7 @@ public interface ReservationTimeJpaTimeRepository extends JpaRepository<Reservat
 
     boolean existsByStartAt(LocalTime startAt);
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     @Query("""
             SELECT new roomescape.time.controller.response.AvailableReservationTimeResponse(
                 rt.id,

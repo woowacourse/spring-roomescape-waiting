@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
@@ -13,7 +12,7 @@ import roomescape.waiting.domain.WaitingWithRank;
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
         WaitingRepository {
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     @Query("""
                 SELECT new roomescape.waiting.domain.WaitingWithRank(
                     w,
@@ -31,7 +30,7 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
             @Param("memberId") Long memberId
     );
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     @Query("""
                 SELECT new roomescape.waiting.domain.WaitingWithRank(
                     w,
@@ -47,7 +46,7 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
     List<WaitingWithRank> findAllWithRank(
     );
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     @Query("""
                 select w
                 from Waiting w
@@ -58,7 +57,7 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
     List<Waiting> findAll(
     );
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     @Query("""
                 select w
                 from Waiting w

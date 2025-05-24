@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.controller.request.TokenLoginCreateRequest;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.controller.response.TokenLoginResponse;
@@ -25,6 +26,7 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public TokenLoginResponse tokenLogin(TokenLoginCreateRequest tokenLoginCreateRequest) {
         Email email = new Email(tokenLoginCreateRequest.email());
         Password password = new Password(tokenLoginCreateRequest.password());
@@ -36,6 +38,7 @@ public class AuthService {
         throw new IllegalArgumentException("[ERROR] 아이디 또는 비밀번호를 올바르게 입력해주세요.");
     }
 
+    @Transactional(readOnly = true)
     public MemberResponse findUserByToken(String token) {
         String payload = jwtTokenProvider.getPayload(token);
         return MemberResponse.from(

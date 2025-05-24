@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
@@ -40,6 +41,7 @@ public class ReservationService {
         this.waitingService = waitingService;
     }
 
+    @Transactional
     public ReservationResponse create(Long memberId, ReservationRequest request) {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
@@ -54,11 +56,13 @@ public class ReservationService {
         return createReservation(request, reservationDate, member);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         Reservation reservation = getReservation(id);
         reservationRepository.deleteById(reservation.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAll() {
         List<Reservation> reservations = reservationRepository.findAll();
 
@@ -74,6 +78,7 @@ public class ReservationService {
         return reservationResponses;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate start, LocalDate end) {
         List<ReservationResponse> responses = new ArrayList<>(
                 ReservationResponse.fromReservation(
@@ -90,12 +95,14 @@ public class ReservationService {
         return responses;
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllByMemberId(Long id) {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::fromReservation)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllReservationsAndWaitings(Long id) {
         List<MemberReservationResponse> allReservation = findAllByMemberId(id);
         List<MemberReservationResponse> allWaitings = waitingService.findAllByMemberId(id);

@@ -15,7 +15,7 @@ public record MemberReservationResponse(
         String reservationStatus
 ) {
 
-    private static final String STATUS = "%d 번째 예약";
+    private static final String WAITING_RANK_FORMAT = "%d 번째 예약";
 
     public static MemberReservationResponse fromReservation(Reservation reservation) {
         return new MemberReservationResponse(
@@ -35,7 +35,7 @@ public record MemberReservationResponse(
                 waitingWithRank.getWaiting().getMember().getName(),
                 ReservationTimeResponse.from(waitingWithRank.getWaiting().getReservationTime()),
                 ThemeResponse.from(waitingWithRank.getWaiting().getTheme()),
-                String.format(STATUS, waitingWithRank.getRank() + 1)
+                String.format(WAITING_RANK_FORMAT, waitingWithRank.getRank() + 1)
         );
     }
 }

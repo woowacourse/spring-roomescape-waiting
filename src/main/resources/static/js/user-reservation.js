@@ -82,10 +82,6 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-    /*
-    TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
-          요청 포맷에 맞게 설정
-    */
     const url = `/times/available?date=${encodeURIComponent(date)}&themeId=${encodeURIComponent(themeId)}`;
 
     fetch(url, { // 예약 가능 시간 조회 API endpoint
@@ -152,12 +148,6 @@ function onReservationButtonClick() {
     const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
 
     if (selectedDate && selectedThemeId && selectedTimeId) {
-
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 요청 API 호출
-              [5단계] 예약 생성 기능 변경 - 사용자
-              request 명세에 맞게 설정
-        */
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
@@ -200,10 +190,6 @@ function onWaitButtonClick() {
             themeId: selectedThemeId,
             timeId: selectedTimeId
         };
-
-        /*
-        TODO: [3단계] 예약 대기 생성 요청 API 호출
-         */
         fetch(`/reservations/waiting/`, {
             method: 'POST',
             headers: {

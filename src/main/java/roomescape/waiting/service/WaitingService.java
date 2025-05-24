@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
@@ -39,6 +40,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationResponse createById(Long memberId, ReservationRequest request) {
         Member member = memberService.findById(memberId);
         ReservationDate reservationDate = new ReservationDate(request.date());
@@ -55,12 +57,31 @@ public class WaitingService {
         return ReservationResponse.fromWaiting(created);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllByMemberId(Long id) {
         return waitingRepository.findAllWaitingWithRankByMemberId(id).stream()
                 .map(MemberReservationResponse::fromWaitingWithRank)
                 .toList();
     }
 
+    @Transactional
+    public void deleteById(Long id) {
+        waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 대기를 찾을 수 없습니다."));
+        waitingRepository.deleteById(id);
+    }
+
+    @Transactional
+    public ReservationResponse approveWaitingById(Long id) {
+        Waiting waiting = getWaiting(id);
+        validateDuplicateReservation(waiting);
+        waitingRepository.deleteById(id);
+        Reservation reservation = waiting.toReservation();
+        Reservation save = reservationRepository.save(reservation);
+        return ReservationResponse.fromReservation(save);
+    }
+
+    @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllWithRank() {
         List<MemberReservationResponse> responses = new ArrayList<>(
                 waitingRepository.findAllWithRank().stream()
@@ -78,26 +99,12 @@ public class WaitingService {
         return responses;
     }
 
-    public void deleteById(Long id) {
-        waitingRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 대기를 찾을 수 없습니다."));
-        waitingRepository.deleteById(id);
-    }
-
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         List<Waiting> waitings = waitingRepository.findAll();
         return waitings.stream()
                 .map(ReservationResponse::fromWaiting)
                 .toList();
-    }
-
-    public ReservationResponse approveWaitingById(Long id) {
-        Waiting waiting = getWaiting(id);
-        validateDuplicateReservation(waiting);
-        waitingRepository.deleteById(id);
-        Reservation reservation = waiting.toReservation();
-        Reservation save = reservationRepository.save(reservation);
-        return ReservationResponse.fromReservation(save);
     }
 
     private void validateDuplicateReservation(Waiting waiting) {
