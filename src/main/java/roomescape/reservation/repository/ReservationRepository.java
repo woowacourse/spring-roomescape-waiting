@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.theme.domain.Theme;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -103,4 +104,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             order by r.reservationDatetime.reservationDate.date asc, r.reservationDatetime.reservationTime.startAt asc
             """)
     List<Reservation> findByMemberId(@Param("memberId") Long memberId);
+
+    @Query("""
+            select r
+            from Reservation r
+            join fetch r.reservationDatetime.reservationTime t
+            join fetch r.theme th
+            where r.reservationDatetime.reservationDate.date = :date
+              and t.id = :timeId
+              and th = :theme
+            """)
+    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Theme theme);
 }

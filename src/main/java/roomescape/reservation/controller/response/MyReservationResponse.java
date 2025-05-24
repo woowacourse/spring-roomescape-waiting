@@ -6,11 +6,13 @@ import java.time.LocalTime;
 import java.util.List;
 import roomescape.reservation.domain.Reservation;
 
-public record MyReservationResponse(Long reservationId,
-                                    String theme,
-                                    @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                    @JsonFormat(pattern = "HH:mm") LocalTime time,
-                                    String status) {
+public record MyReservationResponse(
+        Long reservationId,
+        String theme,
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
+        @JsonFormat(pattern = "HH:mm") LocalTime time,
+        String status
+) {
 
     public static MyReservationResponse from(Reservation reservation) {
         return new MyReservationResponse(

@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -85,7 +87,6 @@ public class ReservationService {
         return ReservationResponse.from(reservations);
     }
 
-
     private List<ReservationResponse> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
 
@@ -94,6 +95,28 @@ public class ReservationService {
 
     public List<MyReservationResponse> getMyReservations(Long memberId) {
         List<Reservation> myReservations = reservationRepository.findByMemberId(memberId);
-        return MyReservationResponse.from(myReservations);
+
+        List<MyReservationResponse> responses = new ArrayList<>();
+
+        for (Reservation myReservation : myReservations) {
+            List<Reservation> sameSlotReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
+                    myReservation.getDate(),
+                    myReservation.getTimeId(),
+                    myReservation.getTheme()
+            ).stream().sorted(Comparator.comparing(Reservation::getReservedAt)).toList();
+
+            int myReservationNumber = sameSlotReservations.indexOf(myReservation);
+
+            MyReservationResponse response = new MyReservationResponse(
+                    myReservation.getId(),
+                    myReservation.getThemeName(),
+                    myReservation.getDate(),
+                    myReservation.getStartAt(),
+                    myReservationNumber == 0 ? "예약" : myReservationNumber + "번째 예약 대기"
+            );
+            responses.add(response);
+        }
+
+        return responses;
     }
 }

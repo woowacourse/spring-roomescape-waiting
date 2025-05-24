@@ -97,4 +97,12 @@ public class Reservation {
     public Long getTimeId() {
         return reservationDatetime.reservationTime().getId();
     }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
+    }
 }
