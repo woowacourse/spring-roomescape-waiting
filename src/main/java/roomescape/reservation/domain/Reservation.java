@@ -72,7 +72,7 @@ public class Reservation {
 
     private static void validatePastTime(final ReservationDate date, final ReservationTime reservationTime,
                                   final LocalDateTime currentDateTime) {
-        if(date.isToday(currentDateTime.toLocalDate())
+        if(date.isEqualToDate(currentDateTime.toLocalDate())
                 && reservationTime.isBefore(currentDateTime.toLocalTime())){
             throw new ReservationPastTimeException();
         }

@@ -25,8 +25,8 @@ public class ReservationDate {
         this(null);
     }
 
-    public boolean isToday(final LocalDate today) {
-        return date.isEqual(today);
+    public boolean isEqualToDate(final LocalDate date) {
+        return this.date.isEqual(date);
     }
 
     public static ReservationDate of(final LocalDate date, final LocalDate today) {
