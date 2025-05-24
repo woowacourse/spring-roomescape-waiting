@@ -669,6 +669,46 @@ Content-Type: application/json
     }
 ]
 ```
+## 예약 대기 생성 기능
+### 요청
+```json
+POST /waiting-reservations HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+
+{
+    "date": "2024-03-01",
+    "themeId": 1,
+    "timeId": 1,
+}
+```
+
+### 응답
+```json
+HTTP/1.1 201
+Content-Type: application/json
+[
+    {
+      "reservationId": 1,
+      "waitingId": "2024-03-01",
+      "waitingStatus": "WAITING"
+    }
+]
+```
+
+## 예약 대기 삭제 기능
+### 요청
+```json
+DELETE /waiting-reservations/{reservationId} HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+```
+
+### 응답
+```json
+HTTP/1.1 204
+Content-Type: application/json
+```
 
 ## 예외
 
