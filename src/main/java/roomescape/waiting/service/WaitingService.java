@@ -36,6 +36,12 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
+    public void delete(final Long id, LoginMember loginMember) {
+        Waiting waiting = waitingRepository.findByIdAndMemberId(id, loginMember.id())
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 대기 예약 건입니다."));
+        waitingRepository.delete(waiting);
+    }
+
     public CreateWaitingResponse createWaiting(CreateWaitingRequest request, LoginMember loginMember) {
         Member member = getMember(loginMember.id());
         ReservationTime time = getReservationTime(request.timeId());
