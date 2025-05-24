@@ -1,4 +1,4 @@
-package roomescape.reservationtime;
+package roomescape.reservationtime.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +23,7 @@ public class ReservationTime {
     @Column(nullable = false)
     private final LocalTime startAt;
 
-    public ReservationTime() {
+    protected ReservationTime() {
         this(null, null);
     }
 

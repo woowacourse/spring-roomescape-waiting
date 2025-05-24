@@ -1,7 +1,9 @@
-package roomescape.theme;
+package roomescape.member.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,29 +13,32 @@ import lombok.Getter;
 
 @Entity
 @AllArgsConstructor
-@Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Theme {
+@Getter
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private final Long id;
 
+    @Column(unique = true, nullable = false)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String description;
+    @Enumerated(EnumType.STRING)
+    private MemberRole role;
 
-    @Column(nullable = false)
-    private String thumbnail;
-
-    public Theme() {
+    protected Member() {
         id = null;
     }
 
-    public Theme(final String name, final String description, final String thumbnail) {
-        this(null, name, description, thumbnail);
+    public Member(final String email, final String password, final String name, final MemberRole role) {
+        this(null, email, password, name, role);
     }
 }

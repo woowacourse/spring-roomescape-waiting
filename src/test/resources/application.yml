@@ -13,3 +13,7 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create
+
+secret:
+  jwt-key: regjeoigjroigji3j2io3io4h2bjasbdjaksbdkjqu3hu23hru3rhashudhausdhas
+  jwt-expiration: 3600

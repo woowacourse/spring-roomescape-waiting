@@ -2,6 +2,7 @@ package roomescape.auth;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.web.server.Cookie.SameSite;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,12 @@ public class AuthController {
             @RequestBody @Valid final LoginRequest request
     ) {
         final String jwt = authService.generateToken(request);
-        final ResponseCookie cookie = ResponseCookie.from(TOKEN_NAME, jwt).build();
+        final ResponseCookie cookie = ResponseCookie
+                .from(TOKEN_NAME, jwt)
+                .secure(true)
+                .httpOnly(true)
+                .sameSite(SameSite.LAX.attributeValue())
+                .build();
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())

@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.config.AuthenticationPrincipal;
-import roomescape.auth.dto.LoginMember;
 import roomescape.member.dto.MemberRequest;
-import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
 
 @RestController
@@ -30,14 +27,6 @@ public class MemberController {
     ) {
         memberService.createMember(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @GetMapping("/reservations")
-    public ResponseEntity<List<MemberReservationResponse>> readAllMemberWithReservations(
-            @AuthenticationPrincipal final LoginMember loginMember
-    ) {
-        final List<MemberReservationResponse> response = memberService.readAllReservationsByMember(loginMember);
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping

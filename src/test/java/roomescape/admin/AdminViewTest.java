@@ -104,6 +104,20 @@ class AdminViewTest {
                 .statusCode(200);
     }
 
+    @DisplayName("/admin/waiting 요청이 들어오면 테마 설정 페이지를 응답한다.")
+    @Test
+    void adminWaiting() {
+        // given
+        final Cookie cookie = givenAuthCookie();
+
+        // when & then
+        RestAssured.given().port(port).log().all()
+                .cookie(cookie)
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
+
     private Cookie givenAuthCookie() {
         return RestAssured.given().port(port)
                 .contentType(ContentType.JSON)

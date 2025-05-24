@@ -5,17 +5,27 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.member.MemberRole;
+import roomescape.member.domain.MemberRole;
 
 @Component
 public class JwtProvider {
 
-    private final String secretKey = "regjeoigjroigji3j2io3io4h2bjasbdjaksbdkjqu3hu23hru3rhashudhausdhas";
-    private final Key key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-    private final Long validityInMilliseconds = 3600_000L;
+    @Value("${secret.jwt-key}")
+    private String secretKey;
+    @Value("${secret.jwt-expiration}")
+    private Long validityInMilliseconds;
+
+    private Key key;
+
+    @PostConstruct
+    public void init() {
+        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+    }
 
     public String provideToken(final String email, final MemberRole role, final String name) {
         final Date now = new Date();
@@ -29,7 +39,7 @@ public class JwtProvider {
                 .setIssuedAt(now)
                 .setExpiration(validity)
 
-                .signWith(SignatureAlgorithm.HS256, key)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -43,7 +53,7 @@ public class JwtProvider {
 
     public boolean isValidToken(final String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parse(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             return true;
         } catch (final JwtException e) {
             return false;

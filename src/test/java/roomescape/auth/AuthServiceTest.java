@@ -2,23 +2,30 @@ package roomescape.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.exception.custom.reason.auth.AuthNotExistsEmailException;
 import roomescape.exception.custom.reason.auth.AuthNotValidPasswordException;
-import roomescape.member.Member;
-import roomescape.member.MemberRepository;
-import roomescape.member.MemberRole;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryImpl;
+import roomescape.member.domain.MemberRole;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import({
+        AuthService.class,
+        MemberRepositoryImpl.class,
+        PasswordEncoder.class,
+        JwtProvider.class
+})
 public class AuthServiceTest {
 
     private final AuthService authService;
@@ -26,11 +33,17 @@ public class AuthServiceTest {
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceTest() {
-        memberRepository = mock(MemberRepository.class);
-        jwtProvider = new JwtProvider();
-        passwordEncoder = new PasswordEncoder();
-        authService = new AuthService(memberRepository, jwtProvider, passwordEncoder);
+    @Autowired
+    public AuthServiceTest(
+            final MemberRepository memberRepository,
+            final JwtProvider jwtProvider,
+            final PasswordEncoder passwordEncoder,
+            final AuthService authService
+    ) {
+        this.memberRepository = memberRepository;
+        this.jwtProvider = jwtProvider;
+        this.passwordEncoder = passwordEncoder;
+        this.authService = authService;
     }
 
     @Nested
@@ -41,8 +54,7 @@ public class AuthServiceTest {
         void generateToken() {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "pw1234");
-            given(memberRepository.findByEmail(request.email()))
-                    .willReturn(Optional.of(new Member(1L, request.email(), passwordEncoder.encode(request.password()), "부기", MemberRole.MEMBER)));
+            memberRepository.save(new Member(request.email(), passwordEncoder.encode(request.password()), "부기", MemberRole.MEMBER));
 
             // when
             final String actual = authService.generateToken(request);
@@ -68,8 +80,7 @@ public class AuthServiceTest {
         void generateToken2() {
             // given
             final LoginRequest request = new LoginRequest("admin@email.com", "not matches password");
-            given(memberRepository.findByEmail(request.email()))
-                    .willReturn(Optional.of(new Member(1L, request.email(), "pw1234", "부기", MemberRole.MEMBER)));
+            memberRepository.save(new Member(request.email(), passwordEncoder.encode("pw1234"), "부기", MemberRole.MEMBER));
 
             // when & then
             assertThatThrownBy(() -> {

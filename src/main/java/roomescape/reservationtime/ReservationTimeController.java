@@ -45,7 +45,7 @@ public class ReservationTimeController {
             @RequestParam("date") final LocalDate date
     ) {
         final List<AvailableReservationTimeResponse> response = reservationTimeService
-                .findAllAvailableTimes(themeId, date);
+                .findAllAvailable(themeId, date);
         return ResponseEntity.ok(response);
     }
 
