@@ -93,8 +93,9 @@ class ReservationRepositoryTest {
     @Test
     void existsByDateAndTimeIdAndThemeId() {
         boolean existsByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate,
-                theme.getId(),
-                reservationTime.getId());
+                reservationTime.getId(),
+                theme.getId())
+                ;
 
         assertThat(existsByDateAndTimeIdAndThemeId).isTrue();
     }

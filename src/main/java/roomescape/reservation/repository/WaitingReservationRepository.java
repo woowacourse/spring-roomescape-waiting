@@ -32,4 +32,6 @@ public interface WaitingReservationRepository {
             ReservationTime time,
             Theme theme
     );
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

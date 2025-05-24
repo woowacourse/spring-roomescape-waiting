@@ -8,7 +8,9 @@ import roomescape.member.repository.JpaMemberRepositoryAdapter;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.JpaReservationRepositoryAdapter;
+import roomescape.reservation.repository.JpaWaitingReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.WaitingReservationRepository;
 import roomescape.reservationtime.repository.JpaReservationTimeRepository;
 import roomescape.reservationtime.repository.JpaReservationTimeRepositoryAdapter;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -44,4 +46,5 @@ public class TestConfig {
     public MemberRepository memberRepository(final JpaMemberRepository jpaMemberRepository) {
         return new JpaMemberRepositoryAdapter(jpaMemberRepository);
     }
+
 }
