@@ -9,7 +9,6 @@ public record MemberReservationResponse(
         String theme,
         LocalDate date,
         LocalTime time,
-        String status,
         Long rank
 ) {
 

@@ -43,8 +43,6 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
-    @Enumerated(EnumType.STRING)
-    private BookingStatus status;
 
     public Reservation(final Long id, final LocalDate date, final ReservationTime time,
                        final Theme theme, final Member member, final BookingStatus status) {

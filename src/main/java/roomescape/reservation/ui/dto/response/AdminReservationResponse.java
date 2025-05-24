@@ -11,7 +11,6 @@ public record AdminReservationResponse(
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        String status,
         Long rank
 ) {
 
