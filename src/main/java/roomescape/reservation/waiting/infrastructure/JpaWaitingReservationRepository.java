@@ -1,11 +1,11 @@
-package roomescape.reservation.infrastructure;
+package roomescape.reservation.waiting.infrastructure;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.WaitingReservation;
-import roomescape.reservation.domain.dto.WaitingReservationWithRank;
+import roomescape.reservation.waiting.domain.WaitingReservation;
+import roomescape.reservation.waiting.domain.dto.WaitingReservationWithRank;
 
 public interface JpaWaitingReservationRepository extends CrudRepository<WaitingReservation, Long> {
 

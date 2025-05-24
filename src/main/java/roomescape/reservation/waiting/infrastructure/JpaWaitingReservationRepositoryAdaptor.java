@@ -1,10 +1,10 @@
-package roomescape.reservation.infrastructure;
+package roomescape.reservation.waiting.infrastructure;
 
 import java.util.List;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.domain.WaitingReservation;
-import roomescape.reservation.domain.WaitingReservationRepository;
-import roomescape.reservation.domain.dto.WaitingReservationWithRank;
+import roomescape.reservation.waiting.domain.WaitingReservation;
+import roomescape.reservation.waiting.domain.WaitingReservationRepository;
+import roomescape.reservation.waiting.domain.dto.WaitingReservationWithRank;
 
 @Repository
 public class JpaWaitingReservationRepositoryAdaptor implements WaitingReservationRepository {

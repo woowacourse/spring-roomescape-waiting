@@ -1,9 +1,9 @@
-package roomescape.reservation.application.service;
+package roomescape.reservation.waiting.application.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.BusinessException;
-import roomescape.reservation.domain.WaitingReservation;
-import roomescape.reservation.domain.WaitingReservationRepository;
+import roomescape.reservation.waiting.domain.WaitingReservation;
+import roomescape.reservation.waiting.domain.WaitingReservationRepository;
 
 @Service
 public class WaitingReservationCommandService {

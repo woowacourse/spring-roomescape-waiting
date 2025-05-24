@@ -1,4 +1,4 @@
-package roomescape.reservation.application;
+package roomescape.reservation.waiting.application;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -7,8 +7,8 @@ import roomescape.common.exception.BusinessException;
 import roomescape.member.application.service.MemberQueryService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.service.ReservationQueryService;
-import roomescape.reservation.application.service.WaitingReservationCommandService;
-import roomescape.reservation.domain.WaitingReservation;
+import roomescape.reservation.waiting.application.service.WaitingReservationCommandService;
+import roomescape.reservation.waiting.domain.WaitingReservation;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.WaitingReservationResponse;
 import roomescape.reservation.time.application.service.ReservationTimeQueryService;
