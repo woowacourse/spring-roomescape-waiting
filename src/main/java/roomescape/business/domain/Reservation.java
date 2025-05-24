@@ -45,6 +45,12 @@ public class Reservation {
         this.theme = theme;
     }
 
+    private void validateDate(final LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("date 필드가 null 입니다.");
+        }
+    }
+
     public Reservation(final LocalDate date, final Member member, final ReservationTime time, final Theme theme) {
         this(null, date, member, time, theme);
     }
@@ -79,11 +85,5 @@ public class Reservation {
 
     public boolean isSameMember(Long id) {
         return member.isSameMember(id);
-    }
-
-    private void validateDate(final LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("date 필드가 null 입니다.");
-        }
     }
 }

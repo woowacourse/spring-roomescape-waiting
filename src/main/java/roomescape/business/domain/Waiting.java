@@ -51,6 +51,12 @@ public class Waiting {
         this.createdAt = LocalDateTime.now();
     }
 
+    private void validateDate(final LocalDate date) {
+        if(date == null) {
+            throw new IllegalArgumentException("date 필드가 null 입니다.");
+        }
+    }
+
     public Long getId() {
         return id;
     }
@@ -73,12 +79,6 @@ public class Waiting {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    private void validateDate(final LocalDate date) {
-        if(date == null) {
-            throw new IllegalArgumentException("date 필드가 null 입니다.");
-        }
     }
 
     public boolean isPast() {
