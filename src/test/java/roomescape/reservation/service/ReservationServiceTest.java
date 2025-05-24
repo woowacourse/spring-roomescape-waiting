@@ -145,7 +145,7 @@ class ReservationServiceTest {
         ReservationInfo result = reservationService.createReservation(command);
 
         // then
-        Reservation savedReservation = reservationRepository.findById(1L);
+        Reservation savedReservation = reservationRepository.findById(1L).get();
         assertAll(
                 () -> assertThat(result.member().name()).isEqualTo(savedMember.getName()),
                 () -> assertThat(result.date()).isEqualTo(tomorrow),
@@ -166,10 +166,11 @@ class ReservationServiceTest {
     @Test
     void cancelById() {
         // given
-        reservationService.createReservation(createCommand);
+        ReservationInfo reservationInfo = reservationService.createReservation(createCommand);
+        Reservation reservation = reservationRepository.findById(reservationInfo.id()).get();
 
         // when
-        reservationService.cancelReservationById(1L);
+        reservationService.cancel(reservation);
 
         // then
         assertThat(reservationRepository.findAll()).isEmpty();

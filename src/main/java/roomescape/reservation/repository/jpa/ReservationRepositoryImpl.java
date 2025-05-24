@@ -2,6 +2,7 @@ package roomescape.reservation.repository.jpa;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
@@ -24,11 +25,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         return reservationJpaRepository.save(reservation);
-    }
-
-    @Override
-    public void deleteById(long id) {
-        reservationJpaRepository.deleteById(id);
     }
 
     @Override
@@ -69,5 +65,15 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     public boolean existsByDateAndThemeIdAndTimeIdAndMemberId(LocalDate date, long themeId, long timeId,
                                                               long memberId) {
         return reservationJpaRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(date, themeId, timeId, memberId);
+    }
+
+    @Override
+    public void delete(Reservation reservation) {
+        reservationJpaRepository.delete(reservation);
+    }
+
+    @Override
+    public Optional<Reservation> findById(long reservationId) {
+        return reservationJpaRepository.findById(reservationId);
     }
 }

@@ -61,10 +61,4 @@ public class ReservationController {
                 .toList();
         return ResponseEntity.ok().body(responses);
     }
-
-    @DeleteMapping("/reservations/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
-        reservationService.cancelReservationById(id);
-        return ResponseEntity.noContent().build();
-    }
 }

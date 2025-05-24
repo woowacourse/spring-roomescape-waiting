@@ -2,8 +2,12 @@ package roomescape.fake;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.test.util.ReflectionTestUtils;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -30,7 +34,8 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByDateAndThemeIdAndTimeIdAndMemberId(LocalDate date, long themeId, long timeId, long memberId) {
+    public boolean existsByDateAndThemeIdAndTimeIdAndMemberId(LocalDate date, long themeId, long timeId,
+                                                              long memberId) {
         return waitings.stream()
                 .filter(waiting -> waiting.getDate().equals(date))
                 .filter(waiting -> waiting.getTime().getId().equals(timeId))
@@ -58,8 +63,16 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void pullPriority(long id, int amount) {
-        // TODO
+    public void pullPriority(Theme theme, LocalDate date, ReservationTime reservationTime, long fromPriority,
+                             int amount) {
+        waitings.stream()
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTime().getId() == reservationTime.getId())
+                .filter(waiting -> waiting.getTheme().getId() == theme.getId())
+                .filter(waiting -> waiting.getPriority() >= fromPriority)
+                .forEach(waiting ->
+                        ReflectionTestUtils.setField(waiting, "priority", waiting.getPriority() - amount)
+                );
     }
 
     @Override
@@ -72,5 +85,15 @@ public class FakeWaitingRepository implements WaitingRepository {
     @Override
     public List<Waiting> findAll() {
         return new ArrayList<>(waitings);
+    }
+
+    @Override
+    public Optional<Waiting> popFirstWaiting(Theme theme, LocalDate date, ReservationTime time) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTime().getId() == time.getId())
+                .filter(waiting -> waiting.getTheme().getId() == theme.getId())
+                .filter(waiting -> waiting.getPriority() == 0)
+                .findAny();
     }
 }

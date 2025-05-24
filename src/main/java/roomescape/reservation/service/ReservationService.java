@@ -9,6 +9,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.service.dto.ReservationCreateFromWaitingCommand;
 import roomescape.reservation.service.dto.ReservationSearchCondition;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
@@ -42,6 +43,13 @@ public class ReservationService {
 
     public ReservationInfo createReservation(final ReservationCreateCommand command) {
         final Reservation reservation = makeReservation(command);
+        final Reservation savedReservation = reservationRepository.save(reservation);
+        return new ReservationInfo(savedReservation);
+    }
+
+    public ReservationInfo createReservationFromWaiting(final ReservationCreateFromWaitingCommand command) {
+        Reservation reservation = new Reservation(null, command.member(), command.date(), command.time(),
+                command.theme());
         final Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationInfo(savedReservation);
     }
@@ -102,7 +110,12 @@ public class ReservationService {
                 .toList();
     }
 
-    public void cancelReservationById(final long id) {
-        reservationRepository.deleteById(id);
+    public void cancel(final Reservation reservation) {
+        reservationRepository.delete(reservation);
+    }
+
+    public Reservation getReservation(final long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
     }
 }

@@ -1,9 +1,10 @@
 package roomescape.waiting.repository;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 
 public interface WaitingRepository {
@@ -13,7 +14,8 @@ public interface WaitingRepository {
     List<Waiting> findAllByMemberId(long memberId);
     void delete(Waiting waiting);
     boolean existsByIdAndMemberId(long id, long memberId);
-    void pullPriority(long from, int amount);
+    void pullPriority(Theme theme, LocalDate date, ReservationTime reservationTime, long fromPriority, int amount);
     Optional<Waiting> findById(long id);
     List<Waiting> findAll();
+    Optional<Waiting> popFirstWaiting(Theme theme, LocalDate date, ReservationTime time);
 }

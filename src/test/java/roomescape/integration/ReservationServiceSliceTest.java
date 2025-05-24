@@ -138,11 +138,14 @@ public class ReservationServiceSliceTest {
         assertThat(result).hasSize(13);
     }
 
-    @DisplayName("id를 기반으로 예약을 취소할 수 있다")
+    @DisplayName("예약을 취소할 수 있다")
     @Test
-    void cancelReservationById() {
+    void cancelById() {
+        // given
+        Reservation reservation = reservationRepository.findById(1L).get();
+
         // when
-        reservationService.cancelReservationById(1L);
+        reservationService.cancel(reservation);
 
         // then
         List<Reservation> reservations = reservationRepository.findAll();

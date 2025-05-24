@@ -146,7 +146,7 @@ public class MissionStepTest {
                 .statusCode(OK.value())
                 .body("size()", is(1));
 
-        RestAssured.given().log().all()
+        RestAssured.given().log().all().header("Cookie", "token=" + token)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(NO_CONTENT.value());

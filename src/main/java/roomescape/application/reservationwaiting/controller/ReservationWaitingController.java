@@ -3,7 +3,9 @@ package roomescape.application.reservationwaiting.controller;
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservationwaiting.controller.dto.MyReservationAndWaitingResponse;
 import roomescape.application.reservationwaiting.service.ReservationWaitingService;
@@ -21,7 +23,7 @@ public class ReservationWaitingController {
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationAndWaitingResponse>> findAllMyReservationAndWaiting(
-            LoginMemberInfo loginMemberInfo
+            final LoginMemberInfo loginMemberInfo
     ) {
         ReservationInfoAndWaitingInfo myReservationAndWaiting = reservationWaitingService.findMyReservationAndWaiting(
                 loginMemberInfo.id());
@@ -34,5 +36,14 @@ public class ReservationWaitingController {
                         .map(MyReservationAndWaitingResponse::new)
         ).toList();
         return ResponseEntity.ok().body(responses);
+    }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> cancel(
+            @PathVariable("id") final long reservationId,
+            final LoginMemberInfo loginMemberInfo
+    ) {
+        reservationWaitingService.cancelReservation(reservationId, loginMemberInfo);
+        return ResponseEntity.noContent().build();
     }
 }

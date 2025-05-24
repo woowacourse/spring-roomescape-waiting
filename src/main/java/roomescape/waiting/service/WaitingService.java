@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
@@ -58,15 +59,25 @@ public class WaitingService {
                 .toList();
     }
 
-    public void cancelById(long id, LoginMemberInfo loginMemberInfo) {
+    public void cancelById(final long id, final LoginMemberInfo loginMemberInfo) {
         Waiting waiting = getWaiting(id);
         boolean isSameMember = waiting.hasSameMemberId(loginMemberInfo.id());
         if (isSameMember || loginMemberInfo.isAdmin()) {
             waitingRepository.delete(waiting);
-            waitingRepository.pullPriority(waiting.getId() + 1, 1);
+            pullPriority(waiting.getTheme(), waiting.getDate(), waiting.getTime(), waiting.getPriority() + 1, 1);
             return;
         }
         throw new IllegalArgumentException("해당 대기에 대한 취소 권한이 없습니다.");
+    }
+
+    public void pullPriority(
+            final Theme theme,
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final long fromPriority,
+            final int amount
+    ) {
+        waitingRepository.pullPriority(theme, date, reservationTime, fromPriority, amount);
     }
 
     /**
@@ -128,7 +139,8 @@ public class WaitingService {
     }
 
     private long calculateWaitingOrder(WaitingAddCommand command) {
-        return waitingRepository.countByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId()) + 1;
+        return waitingRepository.countByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId())
+                + 1;
     }
 
     private ReservationTime getReservationTime(long timeId) {
@@ -154,5 +166,9 @@ public class WaitingService {
     private Waiting getWaiting(long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기입니다."));
+    }
+
+    public Optional<Waiting> popFirstWaiting(Theme theme, LocalDate date, ReservationTime time) {
+        return waitingRepository.popFirstWaiting(theme, date, time);
     }
 }
