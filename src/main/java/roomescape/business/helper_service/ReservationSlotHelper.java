@@ -12,7 +12,6 @@ import roomescape.business.model.vo.Id;
 import roomescape.exception.business.NotFoundException;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static roomescape.exception.ErrorCode.RESERVATION_TIME_NOT_EXIST;
 import static roomescape.exception.ErrorCode.THEME_NOT_EXIST;
@@ -24,10 +23,6 @@ public class ReservationSlotHelper {
     private final ReservationSlots slots;
     private final Themes themes;
     private final ReservationTimes reservationTimes;
-
-    public List<ReservationSlot> getAllBy(final String userIdValue) {
-        return slots.findAllSlotsContainsReserverOf(Id.create(userIdValue));
-    }
 
     public ReservationSlot getOrCreateBy(final LocalDate date, final String timeIdValue, final String themeIdValue) {
         return slots.findByDateAndTimeIdAndThemeId(date, Id.create(timeIdValue), Id.create(themeIdValue))

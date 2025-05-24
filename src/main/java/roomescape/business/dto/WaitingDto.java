@@ -1,7 +1,6 @@
 package roomescape.business.dto;
 
 import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
 import roomescape.business.model.vo.StartTime;
@@ -18,21 +17,19 @@ public record WaitingDto(
         StartTime time
 ) {
 
-    public static WaitingDto fromEntity(final ReservationSlot slot, final Reservation reservation) {
+    public static WaitingDto fromEntity(final Reservation reservation) {
         return new WaitingDto(
                 reservation.getId(),
                 reservation.getUser().getName(),
-                slot.getTheme().getName(),
-                slot.getDate(),
-                slot.getTime().getStartTime()
+                reservation.getSlot().getTheme().getName(),
+                reservation.getSlot().getDate(),
+                reservation.getSlot().getTime().getStartTime()
         );
     }
 
-    public static List<WaitingDto> fromEntities(final List<ReservationSlot> slots) {
-        return slots.stream()
-                .flatMap(slot -> slot.getReservations().stream()
-                        .map(reservation -> WaitingDto.fromEntity(slot, reservation))
-                )
+    public static List<WaitingDto> fromEntities(final List<Reservation> reservations) {
+        return reservations.stream()
+                .map(WaitingDto::fromEntity)
                 .toList();
     }
 }

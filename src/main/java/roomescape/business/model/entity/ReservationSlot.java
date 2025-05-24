@@ -18,6 +18,8 @@ import roomescape.exception.business.NotFoundException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
 
@@ -49,7 +51,22 @@ public class ReservationSlot {
         reservations.add(reservation);
     }
 
-    public int waitingNumberOf(final Id userId) {
+    public static Map<Reservation, Integer> toWaitingNumberAndReservation(List<ReservationSlot> slots, Id userId) {
+        return slots.stream()
+                .collect(Collectors.toMap(
+                        slot -> slot.reservationOf(userId),
+                        slot -> slot.waitingNumberOf(userId)
+                ));
+    }
+
+    public static Map<Reservation, Integer> toWaitingNumberAndReservation(List<ReservationSlot> slots) {
+        return slots.stream()
+                .flatMap(slot -> slot.reservations.stream()
+                        .map(reservation -> Map.entry(reservation, slot.reservations.indexOf(reservation))))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private int waitingNumberOf(final Id userId) {
         for (int i = 0; i < reservations.size(); i++) {
             if (reservations.get(i).isSameReserver(userId.value())) {
                 return i;
@@ -58,7 +75,7 @@ public class ReservationSlot {
         throw new NotFoundException(RESERVATION_NOT_EXIST);
     }
 
-    public Reservation reservationOf(final Id userId) {
+    private Reservation reservationOf(final Id userId) {
         return reservations.stream()
                 .filter(reservation -> reservation.isSameReserver(userId.value()))
                 .findFirst()

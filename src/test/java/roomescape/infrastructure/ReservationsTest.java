@@ -89,7 +89,7 @@ class ReservationsTest {
             String reservationId2 = testUtil.insertReservation(slotId2, userId);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), null, null, null);
+            final List<Reservation> result = sut.findAllReservedWithFilter(Id.create(themeId1), null, null, null);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -109,7 +109,7 @@ class ReservationsTest {
             String reservationId2 = testUtil.insertReservation(slotId2, userId2);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(null, Id.create(userId1), null, null);
+            final List<Reservation> result = sut.findAllReservedWithFilter(null, Id.create(userId1), null, null);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -130,7 +130,7 @@ class ReservationsTest {
             String reservationId3 = testUtil.insertReservation(slotId3, userId);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(null, null, DATE1, DATE2);
+            final List<Reservation> result = sut.findAllReservedWithFilter(null, null, DATE1, DATE2);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -151,7 +151,7 @@ class ReservationsTest {
             String reservationId3 = testUtil.insertReservation(slotId3, userId);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(null, null, DATE2, null);
+            final List<Reservation> result = sut.findAllReservedWithFilter(null, null, DATE2, null);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -172,7 +172,7 @@ class ReservationsTest {
             String reservationId3 = testUtil.insertReservation(slotId3, userId);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(null, null, null, DATE2);
+            final List<Reservation> result = sut.findAllReservedWithFilter(null, null, null, DATE2);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -197,7 +197,7 @@ class ReservationsTest {
             String reservationId4 = testUtil.insertReservation(slotId4, userId2);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId1), DATE1, DATE2);
+            final List<Reservation> result = sut.findAllReservedWithFilter(Id.create(themeId1), Id.create(userId1), DATE1, DATE2);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -217,7 +217,7 @@ class ReservationsTest {
             String reservationId2 = testUtil.insertReservation(slotId2, userId2);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(null, null, null, null);
+            final List<Reservation> result = sut.findAllReservedWithFilter(null, null, null, null);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -240,7 +240,7 @@ class ReservationsTest {
             String reservationId3 = testUtil.insertReservation(slotId3, userId2);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId2), null, null);
+            final List<Reservation> result = sut.findAllReservedWithFilter(Id.create(themeId1), Id.create(userId2), null, null);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())
@@ -265,7 +265,7 @@ class ReservationsTest {
             String reservationId4 = testUtil.insertReservation(slotId4, userId2);
 
             // when
-            final List<Reservation> result = sut.findAllWithFilter(Id.create(themeId1), Id.create(userId2), DATE2, DATE2);
+            final List<Reservation> result = sut.findAllReservedWithFilter(Id.create(themeId1), Id.create(userId2), DATE2, DATE2);
 
             // then
             assertThat(result).extracting(r -> r.getId().value())

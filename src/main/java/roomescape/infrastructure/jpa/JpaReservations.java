@@ -1,5 +1,6 @@
 package roomescape.infrastructure.jpa;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.Reservation;
@@ -8,20 +9,20 @@ import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
 import roomescape.infrastructure.jpa.dao.JpaReservationDao;
+import roomescape.infrastructure.jpa.dao.JpaReservationSlotDao;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Primary
 @Repository
+@RequiredArgsConstructor
 public class JpaReservations implements Reservations {
 
     private final JpaReservationDao dao;
-
-    public JpaReservations(JpaReservationDao dao) {
-        this.dao = dao;
-    }
+    private final JpaReservationSlotDao slotDao;
 
     @Override
     public void save(Reservation reservation) {
@@ -29,8 +30,36 @@ public class JpaReservations implements Reservations {
     }
 
     @Override
-    public List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo) {
-        return dao.findAllWithFilter(themeId, memberId, dateFrom, dateTo);
+    public List<Reservation> findAllReservedWithFilter(Id themeId, Id userId, LocalDate dateFrom, LocalDate dateTo) {
+        List<ReservationSlot> slots = slotDao.findAllBy(themeId, userId, dateFrom, dateTo);
+        Map<Reservation, Integer> reservations = toWaitingNumberAndReservation(slots, userId);
+        return reservations.entrySet().stream()
+                .filter(entry -> entry.getValue() == 0)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    @Override
+    public List<Reservation> findAllNotReserved() {
+        List<ReservationSlot> slots = slotDao.findAll();
+        Map<Reservation, Integer> reservations = toWaitingNumberAndReservation(slots, null);
+        return reservations.entrySet().stream()
+                .filter(entry -> entry.getValue() != 0)
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    private Map<Reservation, Integer> toWaitingNumberAndReservation(List<ReservationSlot> slots, Id userId) {
+        if (userId == null) {
+            return ReservationSlot.toWaitingNumberAndReservation(slots);
+        }
+        return ReservationSlot.toWaitingNumberAndReservation(slots, userId);
+    }
+
+    @Override
+    public Map<Reservation, Integer> findAllWithWaitingNumberByUserId(Id userId) {
+        List<ReservationSlot> slots = slotDao.findAllBy(null, userId, null, null);
+        return ReservationSlot.toWaitingNumberAndReservation(slots, userId);
     }
 
     @Override
