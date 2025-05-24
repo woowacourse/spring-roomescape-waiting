@@ -20,7 +20,6 @@ import roomescape.reservation.presentation.dto.request.AdminReservationCreateReq
 import roomescape.reservation.presentation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.presentation.dto.response.MyReservationResponse;
 import roomescape.reservation.presentation.dto.response.ReservationResponse;
-import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
 
 @RestController
 public class ReservationController {
@@ -51,17 +50,6 @@ public class ReservationController {
                 request.themeId(),
                 memberInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-    }
-
-    @RequireRole(MemberRole.REGULAR)
-    @PostMapping("/waiting-reservations")
-    public ResponseEntity<WaitingReservationResponse> addWaitingReservations(
-            @RequestBody ReservationCreateRequest request,
-            MemberInfo memberInfo
-    ) {
-        WaitingReservationResponse waitingReservationResponse = reservationApplicationService.addWaiting(
-                request.date(), request.timeId(), request.themeId(), memberInfo.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(waitingReservationResponse);
     }
 
     @RequireRole(MemberRole.ADMIN)

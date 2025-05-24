@@ -27,7 +27,7 @@ import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.domain.service.ThemeDomainService;
-import roomescape.waiting.application.WaitingDomainService;
+import roomescape.waiting.domain.service.WaitingDomainService;
 import roomescape.waiting.domain.repository.WaitingRepository;
 
 @DataJpaTest

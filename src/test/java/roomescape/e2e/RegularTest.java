@@ -159,4 +159,47 @@ public class RegularTest {
             softAssertions.assertThat(responses.getFirst().status()).isEqualTo("1번째 예약대기");
         });
     }
+
+    @Test
+    void removeWaitingReservations() {
+        createReservationTime();
+        createTheme("추리");
+        createRegularReservation(1L);
+
+        String user2Token = loginAndGetAuthToken(REGULAR2_EMAIL, PASSWORD);
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", FUTURE_DATE);
+        reservation.put("timeId", 1L);
+        reservation.put("themeId", 1L);
+
+        WaitingReservationResponse waitingReservationResponse = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TOKEN, user2Token)
+                .body(reservation)
+                .when().post("/waiting-reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .as(WaitingReservationResponse.class);
+
+        Long reservationId = waitingReservationResponse.reservationId();
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TOKEN, user2Token)
+                .pathParam("reservationId", reservationId)
+                .when().delete("/waiting-reservations/{reservationId}")
+                .then().log().all()
+                .statusCode(204);
+
+        List<MyReservationResponse> responses = RestAssured.given().log().all()
+                .cookie(TOKEN, user2Token)
+                .when().get("/reservations-mine")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(new TypeRef<>() {
+                });
+        assertThat(responses).isEmpty();
+    }
 }

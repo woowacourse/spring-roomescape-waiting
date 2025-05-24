@@ -1,6 +1,7 @@
 package roomescape.waiting.infrastructure;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.waiting.domain.Waiting;
@@ -16,4 +17,14 @@ public interface JpaWaitingRepository extends ListCrudRepository<Waiting, Long> 
             WHERE w.member.id = :memberId
             """)
     List<Waiting> findByWaitingsMemberId(Long memberId);
+
+    @Modifying
+    @Query("""
+            DELETE FROM Waiting w 
+            WHERE w.reservation.id = :reservationId
+            AND w.member.id = :memberId
+            """)
+    void deleteByReservationIdAndMemberId(Long reservationId, Long memberId);
+
+    boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
 }

@@ -31,9 +31,6 @@ public class Waiting {
     @Column(name = "waiting_status", nullable = false)
     private WaitingStatus waitingStatus;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -41,6 +38,9 @@ public class Waiting {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     public Waiting(final WaitingStatus waitingStatus, final Member member, final Reservation reservation) {
         this.waitingStatus = waitingStatus;
