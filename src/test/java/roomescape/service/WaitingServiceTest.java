@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dto.LoginMember;
@@ -21,12 +23,14 @@ import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
 import roomescape.model.Waiting;
+import roomescape.model.time.TimeProvider;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 
+@Import(TestTimeProviderConfig.class)
 @SpringBootTest
 class WaitingServiceTest {
 
@@ -47,6 +51,9 @@ class WaitingServiceTest {
 
     @Autowired
     private MemberRepository memberRepository;
+
+    @Autowired
+    private TimeProvider timeProvider;
 
     @AfterEach
     void tearDown() {
@@ -91,12 +98,14 @@ class WaitingServiceTest {
                 reservation.getTheme().getId(),
                 reservation.getReservationTime().getId()
         );
+        LocalDateTime currentDateTime = timeProvider.getCurrentDateTime();
 
         Waiting waiting = Waiting.of(
                 reservation.getDate(),
                 reservation.getTheme(),
                 reservation.getReservationTime(),
-                reservation.getMember()
+                reservation.getMember(),
+                currentDateTime
         );
 
         waitingRepository.save(waiting);
@@ -119,12 +128,16 @@ class WaitingServiceTest {
                 reservation.getReservationTime().getId()
         );
 
+        LocalDateTime currentDateTime = timeProvider.getCurrentDateTime();
+
         Waiting waiting = Waiting.of(
                 reservation.getDate(),
                 reservation.getTheme(),
                 reservation.getReservationTime(),
-                reservation.getMember()
+                reservation.getMember(),
+                currentDateTime
         );
+
         waitingRepository.save(waiting);
 
         Member savedOtherMember = memberRepository.save(

@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import roomescape.dto.request.WaitingRequest;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.Waiting;
+import roomescape.model.time.TimeProvider;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
@@ -24,6 +26,7 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
+    private final TimeProvider timeProvider;
 
     @Transactional
     public Long register(final WaitingRequest waitingRequest, final LoginMember loginMember) {
@@ -33,9 +36,11 @@ public class WaitingService {
                 waitingRequest.time()
         );
         final Member member = findMember(loginMember.id());
-        final Waiting waiting = createWaiting(reservation, member);
+        final LocalDateTime currentDateTime = timeProvider.getCurrentDateTime();
+        final Waiting waiting = createWaiting(reservation, member, currentDateTime);
+
         validateExists(waiting, member);
-        validateAfter(waiting);
+        waiting.isAfterBy(NOW);
 
         final Waiting savedWaiting = waitingRepository.save(waiting);
         return savedWaiting.getId();
@@ -66,12 +71,14 @@ public class WaitingService {
                 .orElseThrow(() -> new NotFoundException("회원이 존재하지 않습니다."));
     }
 
-    private Waiting createWaiting(final Reservation reservation, final Member member) {
+    private Waiting createWaiting(final Reservation reservation, final Member member,
+                                  final LocalDateTime currentDateTime) {
         return Waiting.of(
                 reservation.getDate(),
                 reservation.getTheme(),
                 reservation.getReservationTime(),
-                member
+                member,
+                currentDateTime
         );
     }
 
@@ -90,7 +97,4 @@ public class WaitingService {
         );
     }
 
-    private void validateAfter(final Waiting waiting) {
-        waiting.isAfterBy(NOW);
-    }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -161,8 +162,10 @@ class ReservationServiceTest {
                 savedReservation.getDate(),
                 savedReservation.getTheme(),
                 savedReservation.getReservationTime(),
-                savedReservation.getMember()
+                savedReservation.getMember(),
+                LocalDateTime.of(2023, 1, 1, 1, 1, 1)
         );
+
         return waitingRepository.save(waiting);
     }
 
