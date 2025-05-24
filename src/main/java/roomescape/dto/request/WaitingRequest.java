@@ -7,8 +7,7 @@ import roomescape.exception.custom.InvalidInputException;
 public record WaitingRequest(
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
     Long timeId,
-    Long themeId,
-    Long memberId) {
+    Long themeId) {
 
     public WaitingRequest {
         validateNull(date, timeId, themeId);
