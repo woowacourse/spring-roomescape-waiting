@@ -66,13 +66,13 @@ class ReservationCommandServiceTest {
     void 대기_예약을_확정_예약으로_변경한다() {
         reservationCommandService.deleteReservationById(8L);
 
-        assertThatCode(() -> reservationCommandService.confirmReservation(2L))
+        assertThatCode(() -> reservationCommandService.acceptReservation(2L))
                 .doesNotThrowAnyException();
     }
 
     @Test
     void 존재하지_않는_예약은_상태를_변경할_수_없다() {
-        assertThatThrownBy(() -> reservationCommandService.confirmReservation(999L))
+        assertThatThrownBy(() -> reservationCommandService.acceptReservation(999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
     }
@@ -109,14 +109,14 @@ class ReservationCommandServiceTest {
 
     @Test
     void 본인의_대기가_아니면_삭제할_수_없다() {
-        assertThatThrownBy(() -> reservationCommandService.deleteOwnWaitingById(2L, 999L))
+        assertThatThrownBy(() -> reservationCommandService.cancelOwnWaitingById(2L, 999L))
                 .isInstanceOf(roomescape.common.exception.impl.BadRequestException.class)
                 .hasMessage("사용자 본인의 예약이 아닙니다.");
     }
 
     @Test
     void 이미_예약된_시간은_확정할_수_없다() {
-        assertThatThrownBy(() -> reservationCommandService.confirmReservation(1L))
+        assertThatThrownBy(() -> reservationCommandService.acceptReservation(1L))
                 .isInstanceOf(roomescape.common.exception.impl.ConflictException.class)
                 .hasMessage("이미 예약 확정된 건이 있습니다.");
     }

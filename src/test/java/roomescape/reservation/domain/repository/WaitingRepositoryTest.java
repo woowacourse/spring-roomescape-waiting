@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingStatus;
 import roomescape.theme.domain.Theme;
 
 @DataJpaTest
@@ -21,7 +22,7 @@ class WaitingRepositoryTest {
 
     @Test
     void 전체_대기예약을_time_theme_member와_함께_조회한다() {
-        List<Waiting> result = waitingRepository.findAllWithAssociations();
+        List<Waiting> result = waitingRepository.findByWaitingWithAssociations(WaitingStatus.PENDING);
 
         assertThat(result).hasSize(3);
         assertThat(result.get(0).getTime()).isNotNull();
@@ -42,7 +43,8 @@ class WaitingRepositoryTest {
     void 특정_멤버의_대기예약을_theme_time과_함께_조회한다() {
         Long memberId = 1L; // 엠제이
 
-        List<Waiting> result = waitingRepository.findByMemberIdWithAssociations(memberId);
+        List<Waiting> result = waitingRepository.findByMemberIdAndWaitingStatusWithAssociations(memberId,
+                WaitingStatus.PENDING);
 
         assertThat(result).hasSize(2); // 엠제이: 대기 2건
         assertThat(result).allSatisfy(w -> {

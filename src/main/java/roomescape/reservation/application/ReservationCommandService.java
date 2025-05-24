@@ -84,21 +84,17 @@ public class ReservationCommandService {
         return WaitingResponse.from(waitingRepository.save(waiting));
     }
 
-    public void deleteOwnWaitingById(final Long reservationId, final Long memberId) {
-        if (!waitingRepository.existsByIdAndMemberId(reservationId, memberId)) {
+    public void cancelOwnWaitingById(final Long id, final Long memberId) {
+        final Waiting waiting = getWaiting(id);
+        if (!waiting.isOwner(memberId)) {
             throw new BadRequestException("사용자 본인의 예약이 아닙니다.");
         }
-        if (!waitingRepository.existsById(memberId)) {
-            throw new NotFoundException("존재하지 않는 예약입니다.");
-        }
-        waitingRepository.deleteById(memberId);
+        waiting.cancel();
     }
 
-    public void deleteWaitingById(final Long id) {
-        if (!waitingRepository.existsById(id)) {
-            throw new NotFoundException("존재하지 않는 예약입니다.");
-        }
-        waitingRepository.deleteById(id);
+    public void rejectWaitingById(final Long id) {
+        final Waiting waiting = getWaiting(id);
+        waiting.reject();
     }
 
     public void deleteReservationById(final Long id) {
@@ -108,22 +104,13 @@ public class ReservationCommandService {
         reservationRepository.deleteById(id);
     }
 
-    public void confirmReservation(final Long id) {
-        final Waiting waiting = waitingRepository.findByIdWithAssociations(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
-
-        boolean isBooked = reservationRepository.existsByDateAndTimeAndTheme(
-                waiting.getDate(), waiting.getTime(), waiting.getTheme());
-
-        if (isBooked) {
-            throw new ConflictException("이미 예약 확정된 건이 있습니다.");
-        }
-
-        waitingRepository.delete(waiting);
-        reservationRepository.save(new Reservation(
-                waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember()));
+    public void acceptReservation(final Long id) {
+        final Waiting waiting = getWaitingWithAssociations(id);
+        validateIsBooked(waiting);
+        waiting.accept();
+        reservationRepository.save(
+                new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember()));
     }
-
 
     private void validatePastDateTime(final LocalDate date, final LocalTime time) {
         if (LocalDateTime.of(date, time).isBefore(LocalDateTime.now())) {
@@ -158,6 +145,15 @@ public class ReservationCommandService {
         }
     }
 
+    private void validateIsBooked(final Waiting waiting) {
+        boolean isBooked = reservationRepository.existsByDateAndTimeAndTheme(
+                waiting.getDate(), waiting.getTime(), waiting.getTheme());
+
+        if (isBooked) {
+            throw new ConflictException("이미 예약 확정된 건이 있습니다.");
+        }
+    }
+
     private ReservationTime getReservationTime(final Long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundException("선택한 예약 시간이 존재하지 않습니다."));
@@ -171,6 +167,16 @@ public class ReservationCommandService {
     private Member getMember(final Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("선택한 멤버가 존재하지 않습니다."));
+    }
+
+    private Waiting getWaiting(final Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+    }
+
+    private Waiting getWaitingWithAssociations(final Long id) {
+        return waitingRepository.findByIdWithAssociations(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
     }
 }
 

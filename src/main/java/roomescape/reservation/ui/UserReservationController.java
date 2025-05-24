@@ -71,11 +71,11 @@ public class UserReservationController {
     }
 
     @DeleteMapping("waitings/{id}")
-    public ResponseEntity<Void> deleteWaiting(
+    public ResponseEntity<Void> cancelWaiting(
             @PathVariable("id") final Long id,
             final LoginCheckRequest request
     ) {
-        reservationCommandService.deleteOwnWaitingById(id, request.id());
+        reservationCommandService.cancelOwnWaitingById(id, request.id());
         return ResponseEntity.noContent().build();
     }
 }

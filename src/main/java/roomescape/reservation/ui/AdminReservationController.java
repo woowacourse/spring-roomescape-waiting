@@ -72,16 +72,15 @@ public class AdminReservationController {
         return ResponseEntity.noContent().build();
     }
 
-
-    @DeleteMapping("/waitings/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") final Long id) {
-        reservationCommandService.deleteWaitingById(id);
-        return ResponseEntity.noContent().build();
+    @PutMapping("/waitings/reject/{id}")
+    public ResponseEntity<Void> rejectWaiting(@PathVariable("id") final Long id) {
+        reservationCommandService.rejectWaitingById(id);
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/waitings/{id}")
-    public ResponseEntity<Void> confirmReservation(@PathVariable("id") final Long id) {
-        reservationCommandService.confirmReservation(id);
+    @PutMapping("/waitings/accept/{id}")
+    public ResponseEntity<Void> acceptReservation(@PathVariable("id") final Long id) {
+        reservationCommandService.acceptReservation(id);
         return ResponseEntity.ok().build();
     }
 }

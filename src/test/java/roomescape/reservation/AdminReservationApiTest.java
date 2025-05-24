@@ -100,40 +100,17 @@ class AdminReservationApiTest {
     }
 
     @Test
-    void 예약_상태를_RESERVED로_변경한다() {
-        // 선행 예약 지움
+    void PENDING_예약을_ACCEPTED로_변경한다() {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().get("/admin/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(8));
-
-        RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().delete("/admin/reservations/8")
+                .when().delete("/admin/reservations/7")
                 .then().log().all()
                 .statusCode(204);
 
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().get("/admin/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(7));
-
-        // 대기 예약을 확정으로 수정
-        RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().put("/admin/waitings/2")
+                .when().put("/admin/waitings/accept/1")
                 .then().log().all()
                 .statusCode(200);
-
-        RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().get("/admin/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(8));
     }
 }

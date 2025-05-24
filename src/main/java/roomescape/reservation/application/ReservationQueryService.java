@@ -13,6 +13,7 @@ import roomescape.reservation.application.dto.WaitingResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
@@ -47,7 +48,7 @@ public class ReservationQueryService {
     }
 
     public List<WaitingResponse> findWaitingReservations() {
-        return waitingRepository.findAllWithAssociations()
+        return waitingRepository.findByWaitingWithAssociations(WaitingStatus.PENDING)
                 .stream()
                 .map(WaitingResponse::from)
                 .toList();
@@ -85,7 +86,8 @@ public class ReservationQueryService {
 
     public List<MyHistoryResponse> findMyHistory(final Long memberId) {
         final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
-        final List<Waiting> waitings = waitingRepository.findByMemberIdWithAssociations(memberId);
+        final List<Waiting> waitings = waitingRepository.findByMemberIdAndWaitingStatusWithAssociations(memberId,
+                WaitingStatus.PENDING);
         final List<MyHistoryResponse> responses = new ArrayList<>();
 
         reservations.forEach(r -> responses.add(MyHistoryResponse.ofReservation(r)));

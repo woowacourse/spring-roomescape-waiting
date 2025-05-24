@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingStatus;
 import roomescape.theme.domain.Theme;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
@@ -18,8 +19,9 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             JOIN FETCH w.time
             JOIN FETCH w.theme
             JOIN FETCH w.member
+            WHERE w.waitingStatus = :waitingStatus
             """)
-    List<Waiting> findAllWithAssociations();
+    List<Waiting> findByWaitingWithAssociations(@Param("waitingStatus") WaitingStatus waitingStatus);
 
     @Query("""
             SELECT w FROM Waiting w
@@ -34,8 +36,10 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             JOIN FETCH w.theme
             JOIN FETCH w.time
             WHERE w.member.id = :memberId
+              AND w.waitingStatus = :waitingStaus
             """)
-    List<Waiting> findByMemberIdWithAssociations(@Param("memberId") Long memberId);
+    List<Waiting> findByMemberIdAndWaitingStatusWithAssociations(@Param("memberId") Long memberId,
+                                                                 @Param("waitingStaus") WaitingStatus waitingStatus);
 
     @Query("""
               SELECT COUNT(w)
@@ -51,6 +55,8 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             @Param("time") ReservationTime time,
             @Param("id") Long id
     );
+
+    Optional<Waiting> findByMemberId(Long memberId);
 
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 
