@@ -37,13 +37,13 @@ public class AdminReservationService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationResponse createReservation(final CreateReservationRequest request) {
+    public ReservationResponse create(final CreateReservationRequest request) {
         return ReservationResponse.from(
-                createReservedReservation(request.date(), request.timeId(), request.themeId(), request.memberId())
+                createBookedReservation(request.date(), request.timeId(), request.themeId(), request.memberId())
         );
     }
 
-    private Reservation createReservedReservation(
+    private Reservation createBookedReservation(
             final LocalDate date,
             final Long timeId,
             final Long themeId,

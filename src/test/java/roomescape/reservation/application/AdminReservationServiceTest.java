@@ -68,7 +68,24 @@ class AdminReservationServiceTest {
                 new CreateReservationRequest(member.getId(), date, timeId, themeId, BOOKED);
 
         // when & then
-        Assertions.assertThatCode(() -> adminReservationService.createReservation(request))
+        Assertions.assertThatCode(() -> adminReservationService.create(request))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 관리자는_과거_시간에_예약을_추가할_수_있다() {
+        // given
+        final LocalDate date = LocalDate.now().minusDays(5);
+        final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
+        final Long themeId = themeRepository.save(notSavedTheme1()).getId();
+        final Member member = memberRepository.save(notSavedMember1());
+
+        final CreateReservationRequest request =
+                new CreateReservationRequest(member.getId(), date, timeId, themeId,
+                        BOOKED);
+
+        // when & then
+        Assertions.assertThatCode(() -> adminReservationService.create(request))
                 .doesNotThrowAnyException();
     }
 
@@ -88,25 +105,8 @@ class AdminReservationServiceTest {
                         , BOOKED);
 
         // when & then
-        Assertions.assertThatThrownBy(() -> adminReservationService.createReservation(request))
+        Assertions.assertThatThrownBy(() -> adminReservationService.create(request))
                 .isInstanceOf(AlreadyExistException.class);
-    }
-
-    @Test
-    void 관리자는_과거_시간에_예약을_추가할_수_있다() {
-        // given
-        final LocalDate date = LocalDate.now().minusDays(5);
-        final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
-        final Long themeId = themeRepository.save(notSavedTheme1()).getId();
-        final Member member = memberRepository.save(notSavedMember1());
-
-        final CreateReservationRequest request =
-                new CreateReservationRequest(member.getId(), date, timeId, themeId,
-                        BOOKED);
-
-        // when & then
-        Assertions.assertThatCode(() -> adminReservationService.createReservation(request))
-                .doesNotThrowAnyException();
     }
 
     @Test

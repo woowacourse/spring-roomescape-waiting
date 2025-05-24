@@ -8,6 +8,7 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.MemberRepositoryImpl;
 import roomescape.reservation.application.AdminReservationService;
+import roomescape.reservation.application.AdminWaitingService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.domain.ReservationRepository;
@@ -114,6 +115,23 @@ public class TestConfig {
             final WaitingRepository waitingRepository
     ) {
         return new AdminReservationService(
+                reservationTimeRepository,
+                themeRepository,
+                memberRepository,
+                reservationRepository,
+                waitingRepository
+        );
+    }
+
+    @Bean
+    public AdminWaitingService adminWaitingService(
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository,
+            final WaitingRepository waitingRepository
+    ) {
+        return new AdminWaitingService(
                 reservationTimeRepository,
                 themeRepository,
                 memberRepository,
