@@ -24,13 +24,13 @@ class ReservationThemeValidatorTest {
 
     @DisplayName("해당 테마를 사용중인 예약이 있다면 예외를 발생시킨다")
     @Test
-    void validateNotInUse() {
+    void validateNotActive() {
         // given
         Long themeId = 1L;
-        given(reservationRepository.existsByThemeId(themeId)).willReturn(true);
+        given(reservationRepository.existsActiveByThemeId(themeId)).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> reservationThemeValidator.validateNotInUse(themeId))
+        assertThatThrownBy(() -> reservationThemeValidator.validateNotActive(themeId))
                 .isInstanceOf(ReservationThemeInUseException.class);
     }
 }

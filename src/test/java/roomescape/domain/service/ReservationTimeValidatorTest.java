@@ -24,13 +24,13 @@ class ReservationTimeValidatorTest {
 
     @DisplayName("해당 예약시간을 사용중인 예약이 있다면 예외를 발생시킨다")
     @Test
-    void validateNotInUse() {
+    void validateNotActive() {
         // given
         Long timeId = 1L;
-        given(reservationRepository.existsByTimeId(timeId)).willReturn(true);
+        given(reservationRepository.existsActiveByTimeId(timeId)).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeValidator.validateNotInUse(timeId))
+        assertThatThrownBy(() -> reservationTimeValidator.validateNotActive(timeId))
                 .isInstanceOf(ReservationTimeInUseException.class);
     }
 }
