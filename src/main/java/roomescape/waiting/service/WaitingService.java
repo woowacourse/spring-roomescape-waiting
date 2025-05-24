@@ -13,8 +13,10 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.service.dto.request.CreateWaitingRequest;
 import roomescape.waiting.service.dto.response.CreateWaitingResponse;
+import roomescape.waiting.service.dto.response.WaitingInfoResponse;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class WaitingService {
@@ -34,6 +36,13 @@ public class WaitingService {
         this.themeRepository = themeRepository;
         this.timeRepository = timeRepository;
         this.memberRepository = memberRepository;
+    }
+
+    public List<WaitingInfoResponse> findAll() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(WaitingInfoResponse::from)
+                .toList();
     }
 
     public void delete(final Long id, LoginMember loginMember) {

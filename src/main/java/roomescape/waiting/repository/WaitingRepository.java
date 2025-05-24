@@ -12,8 +12,8 @@ import java.util.Optional;
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
-    @Query("SELECT w FROM Waiting w JOIN FETCH w.time JOIN FETCH w.theme JOIN FETCH w.member m WHERE m.id = :memberId")
-    List<Waiting> findAllByMemberId(@Param("memberId") Long memberId);
+    @Query("SELECT w FROM Waiting w JOIN FETCH w.time JOIN FETCH w.theme JOIN FETCH w.member")
+    List<Waiting> findAll();
 
     @Query("""
     SELECT

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     TODO: [4단계] 예약 대기 관리 기능
           예약 대기 목록 조회 endpoint 설정
      */
-    fetch('') // 내 예약 목록 조회 API 호출
+    fetch('/waiting') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -23,17 +23,19 @@ function render(data) {
         TODO: [4단계] 예약 대기 관리 기능
               예약 대기 목록 조회 response 명세에 맞춰 값 설정
          */
-        const id = '';
-        const name = '';
-        const theme = '';
-        const date = '';
-        const startAt = '';
+        const id = item.id;
+        const name = item.member;
+        const theme = item.theme;
+        const date = item.date;
+        const startAt = item.time;
+        const createdAt = item.createdAt;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명
         row.insertCell(2).textContent = theme;         // 테마명
         row.insertCell(3).textContent = date;          // 예약 날짜
         row.insertCell(4).textContent = startAt;       // 시작 시간
+        row.insertCell(5).textContent = createdAt;          // 대기 번호
 
         const actionCell = row.insertCell(row.cells.length);
 
