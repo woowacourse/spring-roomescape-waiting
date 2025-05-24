@@ -19,12 +19,12 @@ public record WaitingWithRankResponse(
 
     public static WaitingWithRankResponse from(final WaitingWithRank waitingWithRank) {
         return new WaitingWithRankResponse(
-                waitingWithRank.getWaiting().getId(),
-                MemberResponse.IdName.from(waitingWithRank.getWaiting().getMember()),
-                waitingWithRank.getWaiting().getReservationSlot().getDate(),
-                ReservationTimeResponse.from(waitingWithRank.getWaiting().getReservationSlot().getTime()),
-                ThemeResponse.from(waitingWithRank.getWaiting().getReservationSlot().getTheme()),
-                waitingWithRank.getRank() + "번째 예약 대기"
+                waitingWithRank.waiting().getId(),
+                MemberResponse.IdName.from(waitingWithRank.waiting().getMember()),
+                waitingWithRank.waiting().getReservationSlot().getDate(),
+                ReservationTimeResponse.from(waitingWithRank.waiting().getReservationSlot().getTime()),
+                ThemeResponse.from(waitingWithRank.waiting().getReservationSlot().getTheme()),
+                waitingWithRank.rank() + "번째 예약 대기"
         );
     }
 
@@ -39,11 +39,11 @@ public record WaitingWithRankResponse(
 
         public static WaitingWithRankResponse.ForMember from(final WaitingWithRank waitingWithRank) {
             return new WaitingWithRankResponse.ForMember(
-                    waitingWithRank.getWaiting().getId(),
-                    waitingWithRank.getWaiting().getReservationSlot().getDate(),
-                    waitingWithRank.getWaiting().getReservationSlot().getTime().getStartAt(),
-                    waitingWithRank.getWaiting().getReservationSlot().getTheme().getName(),
-                    waitingWithRank.getRank() + "번째 예약 대기"
+                    waitingWithRank.waiting().getId(),
+                    waitingWithRank.waiting().getReservationSlot().getDate(),
+                    waitingWithRank.waiting().getReservationSlot().getTime().getStartAt(),
+                    waitingWithRank.waiting().getReservationSlot().getTheme().getName(),
+                    waitingWithRank.rank() + "번째 예약 대기"
             );
         }
     }
