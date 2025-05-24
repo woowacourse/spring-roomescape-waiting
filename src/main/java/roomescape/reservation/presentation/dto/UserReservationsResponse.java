@@ -22,7 +22,7 @@ public class UserReservationsResponse {
         this.theme = reservation.getTheme().getName();
         this.date = reservation.getDate();
         this.time = reservation.getReservationTime().getStartAt();
-        this.status = reservation.getStatus().getStatus();
+        this.status = "예약";
     }
 
     public UserReservationsResponse(final WaitingWithRank reservation) {
