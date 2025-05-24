@@ -26,6 +26,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 import roomescape.waiting.service.dto.WaitingAddCommand;
 import roomescape.waiting.service.dto.WaitingInfo;
@@ -174,5 +175,36 @@ public class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.addWaiting(command))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 예약되었습니다.");
+    }
+
+    @DisplayName("예약한 멤버와 다른 멤버가 대기를 취소하면 예외가 발생한다")
+    @Test
+    void should_ThrowException_WhenCancelWaitingWithDifferentMember() {
+        // given
+        LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
+        Waiting waiting = new Waiting(null, tomorrow, savedReservationTime, savedTheme, savedMember1, 1L);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when
+        // then
+        assertThatThrownBy(() -> waitingService.cancelById(savedWaiting.getId(), savedMember2.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("해당 대기에 대한 취소 권한이 없습니다.");
+    }
+
+    @DisplayName("자신의 예약 대기를 취소할 수 있다.")
+    @Test
+    void cancelWaiting() {
+        // given
+        LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
+        Waiting waiting = new Waiting(null, tomorrow, savedReservationTime, savedTheme, savedMember1, 1L);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when
+        waitingService.cancelById(savedWaiting.getId(), savedMember1.getId());
+
+        // then
+        boolean exists = waitingRepository.existsByIdAndMemberId(savedWaiting.getId(), savedMember1.getId());
+        assertThat(exists).isFalse();
     }
 }

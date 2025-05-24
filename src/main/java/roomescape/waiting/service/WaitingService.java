@@ -3,6 +3,7 @@ package roomescape.waiting.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -17,6 +18,7 @@ import roomescape.waiting.service.dto.WaitingAddCommand;
 import roomescape.waiting.service.dto.WaitingInfo;
 
 @Service
+@Transactional
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -35,6 +37,23 @@ public class WaitingService {
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.currentDateTime = currentDateTime;
+    }
+
+    public List<WaitingInfo> findAllByMemberId(long memberId) {
+        return waitingRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(WaitingInfo::new)
+                .toList();
+    }
+
+    public void cancelById(long id, long loginMemberId) {
+        Waiting waiting = getWaiting(id);
+        // 리팩터링 TODO
+        if (waiting.getMember().getId() != loginMemberId) {
+            throw new IllegalArgumentException("해당 대기에 대한 취소 권한이 없습니다.");
+        }
+        waitingRepository.delete(waiting);
+        waitingRepository.pullPriority(waiting.getId() + 1, 1);
     }
 
     /**
@@ -119,7 +138,8 @@ public class WaitingService {
                 .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
     }
 
-    public List<WaitingInfo> findAllByMemberId(long memberId) {
-        return null;
+    private Waiting getWaiting(long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기입니다."));
     }
 }

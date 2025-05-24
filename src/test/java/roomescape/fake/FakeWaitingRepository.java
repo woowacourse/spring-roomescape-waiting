@@ -3,6 +3,7 @@ package roomescape.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -35,5 +36,36 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .filter(waiting -> waiting.getTime().getId().equals(timeId))
                 .filter(waiting -> waiting.getTheme().getId().equals(themeId))
                 .anyMatch(waiting -> waiting.getMember().getId().equals(memberId));
+    }
+
+    @Override
+    public List<Waiting> findAllByMemberId(long memberId) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getMember().getId() == memberId)
+                .toList();
+    }
+
+    @Override
+    public void delete(Waiting other) {
+        waitings.removeIf(waiting -> waiting.getId() == other.getId());
+    }
+
+    @Override
+    public boolean existsByIdAndMemberId(long id, long memberId) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getMember().getId() == memberId)
+                .anyMatch(waiting -> waiting.getId() == id);
+    }
+
+    @Override
+    public void pullPriority(long id, int amount) {
+        // TODO
+    }
+
+    @Override
+    public Optional<Waiting> findById(long id) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getId() == id)
+                .findAny();
     }
 }
