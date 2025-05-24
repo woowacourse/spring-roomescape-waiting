@@ -33,19 +33,6 @@ public class ReservationController {
         this.commandService = commandService;
     }
 
-    @GetMapping
-    public List<ReservationDto> getAllReservations() {
-        return queryService.getAllReservations();
-    }
-
-    @GetMapping("/member")
-    public List<ReservationWaitingResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
-        List<ReservationWaitingDto> reservationWaitingDtos = queryService.getReservationsByMember(memberIdDto.id());
-        return reservationWaitingDtos.stream()
-                .map(ReservationWaitingResponse::from)
-                .toList();
-    }
-
     @PostMapping
     public ResponseEntity<ReservationDto> createReservation(
             @Valid @RequestBody UserReservationCreateDto request,
@@ -62,6 +49,19 @@ public class ReservationController {
     ) {
         ReservationDto reservationDto = commandService.registerWaitingByUser(request, memberIdDto.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
+    }
+
+    @GetMapping
+    public List<ReservationDto> getAllReservations() {
+        return queryService.getAllReservations();
+    }
+
+    @GetMapping("/member")
+    public List<ReservationWaitingResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
+        List<ReservationWaitingDto> reservationWaitingDtos = queryService.getReservationsByMember(memberIdDto.id());
+        return reservationWaitingDtos.stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
     }
 
     @DeleteMapping("/{id}")

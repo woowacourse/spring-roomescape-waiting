@@ -51,23 +51,8 @@ public class ReservationCommandService {
         ReservationTime reservationTime = timeService.getTimeEntityById(request.timeId());
         Member member = memberService.getMemberEntityById(request.memberId());
         Waiting waiting = new Waiting(ReservationStatus.RESERVED);
-        Reservation reservationWithoutId = Reservation.withoutId(
-                member,
-                theme,
-                request.date(),
-                reservationTime,
-                waiting
-        );
-        LocalDateTime now = clockProvider.now();
-        validateNotPast(reservationWithoutId, now);
-        Reservation reservation = reservationRepository.save(reservationWithoutId);
+        Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, waiting);
         return ReservationDto.from(reservation);
-    }
-
-    private void validateNotPast(Reservation reservation, LocalDateTime now) {
-        if (reservation.isPast(now)) {
-            throw new IllegalArgumentException("과거 일시로 예약할 수 없습니다.");
-        }
     }
 
     private void validateNotDuplicate(ReservationCreateDto request) {
@@ -89,6 +74,26 @@ public class ReservationCommandService {
         );
     }
 
+    private Reservation saveReservation(Member member, Theme theme, LocalDate request, ReservationTime reservationTime,
+                                        Waiting waiting) {
+        Reservation reservationWithoutId = Reservation.withoutId(
+                member,
+                theme,
+                request,
+                reservationTime,
+                waiting
+        );
+        LocalDateTime now = clockProvider.now();
+        validateNotPast(reservationWithoutId, now);
+        return reservationRepository.save(reservationWithoutId);
+    }
+
+    private void validateNotPast(Reservation reservation, LocalDateTime now) {
+        if (reservation.isPast(now)) {
+            throw new IllegalArgumentException("과거 일시로 예약할 수 없습니다.");
+        }
+    }
+
     public ReservationDto registerWaitingByUser(UserWaitingCreateDto request, Long memberId) {
         if (!isDuplicated(request.date(), request.time(), request.theme())) {
             throw new IllegalArgumentException("예약 가능한 일시입니다.");
@@ -97,16 +102,7 @@ public class ReservationCommandService {
         ReservationTime reservationTime = timeService.getTimeEntityById(request.time());
         Member member = memberService.getMemberEntityById(memberId);
         Waiting waiting = new Waiting(ReservationStatus.WAITING);
-        Reservation reservationWithoutId = Reservation.withoutId(
-                member,
-                theme,
-                request.date(),
-                reservationTime,
-                waiting
-        );
-        LocalDateTime now = clockProvider.now();
-        validateNotPast(reservationWithoutId, now);
-        Reservation reservation = reservationRepository.save(reservationWithoutId);
+        Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, waiting);
         return ReservationDto.from(reservation);
     }
 

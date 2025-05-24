@@ -30,11 +30,6 @@ public class TimeController {
         this.service = service;
     }
 
-    @GetMapping
-    public List<TimeResponse> getAllTimes() {
-        return TimeResponse.from(service.getAllTimes());
-    }
-
     @PostMapping
     public ResponseEntity<TimeResponse> addTime(@Valid @RequestBody TimeCreateDto request) {
         TimeDto timeDto = service.registerNewTime(request);
@@ -42,10 +37,9 @@ public class TimeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(timeResponse);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTime(@PathVariable(name = "id") Long id) {
-        service.deleteTime(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping
+    public List<TimeResponse> getAllTimes() {
+        return TimeResponse.from(service.getAllTimes());
     }
 
     @GetMapping("/booking-status")
@@ -57,5 +51,11 @@ public class TimeController {
         List<TimeDataWithBookingInfoResponse> timesWithBookingResponses = TimeDataWithBookingInfoResponse.from(
                 timesWithBookingInfo);
         return ResponseEntity.ok().body(timesWithBookingResponses);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTime(@PathVariable(name = "id") Long id) {
+        service.deleteTime(id);
+        return ResponseEntity.noContent().build();
     }
 }
