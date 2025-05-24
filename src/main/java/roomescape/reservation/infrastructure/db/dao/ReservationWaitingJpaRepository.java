@@ -19,6 +19,7 @@ public interface ReservationWaitingJpaRepository extends JpaRepository<Reservati
             WHERE subrw.theme = rw.theme
             AND subrw.date = rw.date
             AND subrw.time = rw.time
+            AND subrw.status = 'PENDING'
             AND subrw.createdAt < rw.createdAt)
             )
             FROM ReservationWaiting rw

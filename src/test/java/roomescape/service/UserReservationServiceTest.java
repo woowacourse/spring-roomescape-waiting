@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
+import static roomescape.reservation.model.entity.vo.ReservationStatus.CONFIRMED;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -80,7 +81,7 @@ class UserReservationServiceTest extends IntegrationTestSupport {
         ReservationServiceResponse response = userReservationService.create(request);
 
         // then
-        List<Reservation> reservations = reservationRepository.getConfirmedAll();
+        List<Reservation> reservations = reservationRepository.getAllByStatuses(List.of(CONFIRMED));
         assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(1);
             softly.assertThat(reservations.getFirst().getMember().getId()).isEqualTo(response.id());
