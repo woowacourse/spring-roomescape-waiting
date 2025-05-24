@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,17 +41,10 @@ public class ReservationService {
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
     }
-    // TODO: 중복되는 코드 제거
-    public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
-        ReservationTime time = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
-        Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        Reservation reservation = Reservation.createWithoutId(dateTime.now(), member, request.date(), time, theme,
-                ReservationStatus.RESERVED);
+    public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
+        Reservation reservation = makeReservation(request.timeId(), request.themeId(),
+                memberId, request.date(), ReservationStatus.RESERVED);
 
         if (reservationRepository.hasReservedReservation(reservation)) {
             throw new IllegalArgumentException("이미 예약이 존재합니다.");
@@ -62,15 +56,8 @@ public class ReservationService {
 
     public ReservationResponse createWaitingReservation(final ReservationWaitingRequest waitingRequest,
                                                         final Long memberId) {
-        ReservationTime time = reservationTimeRepository.findById(waitingRequest.time())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
-        Theme theme = themeRepository.findById(waitingRequest.theme())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
-        Reservation reservation = Reservation.createWithoutId(dateTime.now(), member, waitingRequest.date(), time,
-                theme, ReservationStatus.WAITED);
+        Reservation reservation = makeReservation(waitingRequest.time(), waitingRequest.theme(),
+                memberId, waitingRequest.date(), ReservationStatus.WAITED);
 
         if (!reservationRepository.hasReservedReservation(reservation)) {
             throw new IllegalArgumentException("예약 가능한 상태에서는 대기할 수 없습니다.");
@@ -82,6 +69,19 @@ public class ReservationService {
 
         Reservation save = reservationRepository.save(reservation);
         return ReservationResponse.from(save);
+    }
+
+    private Reservation makeReservation(Long timeId, Long themeId, Long memberId, LocalDate date,
+                                        ReservationStatus status) {
+        ReservationTime time = reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
+        Theme theme = themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        return Reservation.createWithoutId(dateTime.now(), member, date, time,
+                theme, status);
     }
 
     public List<ReservationResponse> getReservations(ReservationConditionRequest request) {
