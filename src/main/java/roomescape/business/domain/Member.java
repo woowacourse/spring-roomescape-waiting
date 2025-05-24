@@ -25,16 +25,12 @@ public class Member {
     @Column(name = "password", nullable = false)
     private String password;
 
-    public Member(final Long id, final String name, final String role, final String email, final String password) {
-        this.id = id;
+    public Member(final String name, final String role, final String email, final String password) {
+        this.id = null;
         this.name = name;
         this.role = role;
         this.email = email;
         this.password = password;
-    }
-
-    public Member(final String name, final String role, final String email, final String password) {
-        this(null, name, role, email, password);
     }
 
     protected Member() {
