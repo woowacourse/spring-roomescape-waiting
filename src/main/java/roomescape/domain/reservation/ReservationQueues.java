@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -32,6 +33,7 @@ public class ReservationQueues {
     public List<ReservationWithOrder> orderOfAll(List<Reservation> reservations) {
         return reservations.stream()
             .map(r -> new ReservationWithOrder(r, orderOf(r)))
+            .sorted(comparing(ReservationWithOrder::order))
             .toList();
     }
 

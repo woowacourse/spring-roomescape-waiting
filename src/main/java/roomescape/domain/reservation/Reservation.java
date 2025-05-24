@@ -8,8 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.sql.Timestamp;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +20,6 @@ import roomescape.exception.BusinessRuleViolationException;
 @EqualsAndHashCode(of = {"id"})
 @Getter
 @Accessors(fluent = true)
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity(name = "RESERVATION")
 public class Reservation {
@@ -34,6 +33,14 @@ public class Reservation {
     private ReservationSlot slot;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
+    private final Timestamp createdAt = new Timestamp(System.currentTimeMillis());
+
+    public Reservation(final long id, final User user, final ReservationSlot slot, final ReservationStatus status) {
+        this.id = id;
+        this.user = user;
+        this.slot = slot;
+        this.status = status;
+    }
 
     public Reservation(final User user, final ReservationSlot slot) {
         this(0L, user, slot, ReservationStatus.RESERVED);
