@@ -66,6 +66,9 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
                 r2.date=r.date
         ))
     FROM Reservation r
+        JOIN FETCH r.theme
+        JOIN FETCH r.member
+        JOIN FETCH r.reservationTime
     WHERE r.member = :member
     ORDER BY r.id ASC
     """)
