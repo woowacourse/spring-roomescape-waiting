@@ -31,7 +31,7 @@ public class AdminWaitingRestController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> create(
-            @RequestBody @Valid CreateWaitingRequest request
+            @RequestBody @Valid final CreateWaitingRequest request
     ) {
         final WaitingResponse response = adminWaitingService.create(request);
 
