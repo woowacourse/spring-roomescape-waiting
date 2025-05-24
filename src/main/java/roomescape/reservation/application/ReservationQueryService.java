@@ -10,9 +10,9 @@ import roomescape.reservation.application.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.application.dto.MyHistoryResponse;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.application.dto.WaitingResponse;
+import roomescape.reservation.application.dto.WaitingWithRank;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
@@ -85,24 +85,15 @@ public class ReservationQueryService {
     }
 
     public List<MyHistoryResponse> findMyHistory(final Long memberId) {
-        final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
-        final List<Waiting> waitings = waitingRepository.findByMemberIdAndWaitingStatusWithAssociations(memberId,
-                WaitingStatus.PENDING);
         final List<MyHistoryResponse> responses = new ArrayList<>();
 
+        final List<Reservation> reservations = reservationRepository.findByMemberIdWithAssociations(memberId);
         reservations.forEach(r -> responses.add(MyHistoryResponse.ofReservation(r)));
-        waitings.forEach(w -> responses.add(MyHistoryResponse.ofWaiting(w, countsWaiting(w))));
+
+        final List<WaitingWithRank> waitingsWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
+        waitingsWithRanks.forEach(w -> responses.add(MyHistoryResponse.ofWaiting(w.waiting(), w.rank())));
 
         return responses;
-    }
-
-    private Long countsWaiting(final Waiting waiting) {
-        return waitingRepository.countByThemeAndDateAndTimeAndIdLessThan(
-                waiting.getTheme(),
-                waiting.getDate(),
-                waiting.getTime(),
-                waiting.getId()
-        );
     }
 }
 
