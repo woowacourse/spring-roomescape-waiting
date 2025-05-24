@@ -12,6 +12,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationScheduleRepository;
 import roomescape.repository.ReservationWaitRepository;
 import roomescape.service.request.CreateReservationWaitRequest;
+import roomescape.service.response.MyReservationWaitResponse;
 import roomescape.service.response.ReservationResponse;
 import roomescape.service.response.ReservationWaitResponse;
 
@@ -38,8 +39,8 @@ public class ReservationWaitService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 멤버입니다."));
         ReservationSchedule schedule = reservationScheduleRepository.findByReservationTime_IdAndTheme_IdAndReservationDate_Date(
-                request.timeId(),
-                request.themeId(),
+                request.time(),
+                request.theme(),
                 request.date()
         ).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 일정입니다."));
         ReservationWait saved = reservationWaitRepository.save(new ReservationWait(null, member, schedule));
@@ -65,9 +66,9 @@ public class ReservationWaitService {
         reservationWaitRepository.deleteById(waitId);
     }
 
-    public List<ReservationWaitResponse> findAllMyWaitReservation(final Long memberId) {
+    public List<MyReservationWaitResponse> findAllMyWaitReservation(final Long memberId) {
         List<ReservationWait> reservationWaits = reservationWaitRepository.findAllByMember_id(memberId);
-        return ReservationWaitResponse.from(reservationWaits);
+        return MyReservationWaitResponse.from(reservationWaits);
     }
 
     public List<ReservationWaitResponse> getAllWaitReservation() {

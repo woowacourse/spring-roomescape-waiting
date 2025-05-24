@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 public record CreateReservationWaitRequest(
         @NotNull LocalDate date,
-        @NotNull Long timeId,
-        @NotNull Long themeId
+        @NotNull Long time,
+        @NotNull Long theme
 ) {
 }

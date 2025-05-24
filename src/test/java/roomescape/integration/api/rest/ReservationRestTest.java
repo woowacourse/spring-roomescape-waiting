@@ -70,8 +70,8 @@ class ReservationRestTest extends RestAssuredTestBase {
 
         Map<String, Object> request = Map.of(
                 "date", date.date().toString(),
-                "timeId", time.getId(),
-                "themeId", theme.getId()
+                "time", time.getId(),
+                "theme", theme.getId()
         );
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -110,7 +110,7 @@ class ReservationRestTest extends RestAssuredTestBase {
     void 필터를_이용해서_예약_목록을_조회한다() {
         예약을_생성한다();
         RestAssured.given().log().all()
-                .param("themeId", themeId)
+                .param("theme", themeId)
                 .cookie("JSESSIONID", restLoginMember.sessionId())
                 .when().get("/reservations")
                 .then().log().all()
@@ -155,8 +155,8 @@ class ReservationRestTest extends RestAssuredTestBase {
     void 예약_대기를_한다() {
         Map<String, Object> request = Map.of(
                 "date", LocalDate.now(FIXED_CLOCK).plusDays(1).toString(),
-                "timeId", timeId,
-                "themeId", themeId
+                "time", timeId,
+                "theme", themeId
         );
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

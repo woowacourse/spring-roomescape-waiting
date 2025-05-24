@@ -10,13 +10,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.common.RestAssuredTestBase;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberEncodedPassword;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberRole;
 import roomescape.integration.api.RestLoginMember;
 
 class TimeRestTest extends RestAssuredTestBase {
@@ -74,7 +68,7 @@ class TimeRestTest extends RestAssuredTestBase {
                 .cookie("JSESSIONID", restLoginMember.sessionId())
                 .contentType(ContentType.JSON)
                 .queryParam("date", LocalDate.now(FIXED_CLOCK).toString())
-                .queryParam("themeId", 1L)
+                .queryParam("theme", 1L)
                 .when().get("/times/available")
                 .then().log().all()
                 .statusCode(200)

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.dto.SessionMember;
 import roomescape.service.ReservationWaitService;
 import roomescape.service.request.CreateReservationWaitRequest;
+import roomescape.service.response.MyReservationWaitResponse;
 import roomescape.service.response.ReservationResponse;
 import roomescape.service.response.ReservationWaitResponse;
 
@@ -53,8 +54,8 @@ public class ReservationWaitController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationWaitResponse>> getMyReservation(final SessionMember sessionMember) {
-        final List<ReservationWaitResponse> response = reservationWaitService.findAllMyWaitReservation(
+    public ResponseEntity<List<MyReservationWaitResponse>> getMyReservation(final SessionMember sessionMember) {
+        final List<MyReservationWaitResponse> response = reservationWaitService.findAllMyWaitReservation(
                 sessionMember.id());
         return ResponseEntity.ok(response);
     }
