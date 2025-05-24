@@ -2,12 +2,12 @@ package roomescape.fixture.ui;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
+import roomescape.reservation.ui.dto.response.ReservationTimeResponse;
 
 public class ReservationTimeApiFixture {
 
@@ -44,7 +44,7 @@ public class ReservationTimeApiFixture {
         return RESERVATIONS_TIME_REQUESTS.get(1);
     }
 
-    public static List<ValidatableResponse> createReservationTimes(
+    public static List<ReservationTimeResponse> createReservationTimes(
             final Map<String, String> cookies,
             final int count
     ) {
@@ -54,15 +54,14 @@ public class ReservationTimeApiFixture {
 
         return RESERVATIONS_TIME_REQUESTS.stream()
                 .limit(count)
-                .map(reservationTimeParams -> {
-                    return RestAssured.given().log().all()
-                            .cookies(cookies)
-                            .contentType(ContentType.JSON)
-                            .body(reservationTimeParams)
-                            .when().post("/times")
-                            .then().log().all()
-                            .statusCode(HttpStatus.CREATED.value());
-                })
+                .map(reservationTimeParams -> RestAssured.given().log().all()
+                        .cookies(cookies)
+                        .contentType(ContentType.JSON)
+                        .body(reservationTimeParams)
+                        .when().post("/times")
+                        .then().log().all()
+                        .statusCode(HttpStatus.CREATED.value())
+                        .extract().as(ReservationTimeResponse.class))
                 .toList();
     }
 }

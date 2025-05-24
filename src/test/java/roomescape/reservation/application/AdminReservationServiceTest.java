@@ -32,6 +32,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.FilteredReservationsRequest;
+import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
@@ -67,9 +68,18 @@ class AdminReservationServiceTest {
         final CreateReservationRequest request =
                 new CreateReservationRequest(member.getId(), date, timeId, themeId, BOOKED);
 
-        // when & then
-        Assertions.assertThatCode(() -> adminReservationService.create(request))
-                .doesNotThrowAnyException();
+        // when
+        final ReservationResponse response = adminReservationService.create(request);
+
+        // then
+        SoftAssertions.assertSoftly(softly -> {
+                    softly.assertThat(response.date()).isEqualTo(date);
+                    softly.assertThat(response.time().id()).isEqualTo(timeId);
+                    softly.assertThat(response.theme().id()).isEqualTo(themeId);
+                    softly.assertThat(response.member().id()).isEqualTo(member.getId());
+                    softly.assertThat(response.status()).isEqualTo(BOOKED.getDescription());
+                }
+        );
     }
 
     @Test

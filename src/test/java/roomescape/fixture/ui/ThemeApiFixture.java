@@ -2,11 +2,11 @@ package roomescape.fixture.ui;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import roomescape.theme.ui.dto.CreateThemeRequest;
+import roomescape.theme.ui.dto.ThemeResponse;
 
 public class ThemeApiFixture {
 
@@ -35,7 +35,7 @@ public class ThemeApiFixture {
         return THEME_REQUESTS.get(1);
     }
 
-    public static List<ValidatableResponse> createThemes(
+    public static List<ThemeResponse> createThemes(
             final Map<String, String> cookies,
             final int count
     ) {
@@ -51,7 +51,9 @@ public class ThemeApiFixture {
                         .body(themeParams)
                         .when().post("/themes")
                         .then().log().all()
-                        .statusCode(HttpStatus.CREATED.value()))
+                        .statusCode(HttpStatus.CREATED.value())
+                        .extract().as(ThemeResponse.class)
+                )
                 .toList();
     }
 }
