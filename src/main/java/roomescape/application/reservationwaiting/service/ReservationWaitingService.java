@@ -61,6 +61,7 @@ public class ReservationWaitingService {
         Member member = getMember(waiting.getMember().getId());
         ReservationCreateFromWaitingCommand command = new ReservationCreateFromWaitingCommand(waiting, member);
         reservationService.createReservationFromWaiting(command);
+        waitingService.cancel(waiting);
     }
 
     private Member getMember(final long memberId) {

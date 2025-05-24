@@ -80,6 +80,14 @@ public class WaitingService {
         waitingRepository.pullPriority(theme, date, reservationTime, fromPriority, amount);
     }
 
+    public Optional<Waiting> popFirstWaiting(Theme theme, LocalDate date, ReservationTime time) {
+        return waitingRepository.popFirstWaiting(theme, date, time);
+    }
+
+    public void cancel(Waiting waiting) {
+        waitingRepository.delete(waiting);
+    }
+
     /**
      * TODO
      * 락이 필요하다.
@@ -166,9 +174,5 @@ public class WaitingService {
     private Waiting getWaiting(long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 대기입니다."));
-    }
-
-    public Optional<Waiting> popFirstWaiting(Theme theme, LocalDate date, ReservationTime time) {
-        return waitingRepository.popFirstWaiting(theme, date, time);
     }
 }
