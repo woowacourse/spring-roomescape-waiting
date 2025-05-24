@@ -14,7 +14,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
@@ -92,21 +92,21 @@ public class ReservationService {
 
     public void deleteReservation(final Long id) {
         Reservation reservation = reservationRepository.getById(id);
-        Long deleteRank = reservation.getWaiting().getRank();
-        if (reservation.getWaiting().getStatus() == ReservationStatus.BOOKED) {
+        Long deleteRank = reservation.getReservationStatus().getRank();
+        if (reservation.getReservationStatus().getStatus() == Status.BOOKED) {
             deleteRank = 0L;
         }
-        List<Waiting> waitings = reservationRepository.findAllWaiting(reservation.getDate(), reservation.getTime(),
+        List<ReservationStatus> reservationStatuses = reservationRepository.findAllWaiting(reservation.getDate(), reservation.getTime(),
                 reservation.getTheme());
-        reduceWaitingRanks(deleteRank, waitings);
+        reduceWaitingRanks(deleteRank, reservationStatuses);
         reservationRepository.deleteById(id);
     }
 
-    private void reduceWaitingRanks(final Long deleteRank, final List<Waiting> waitings) {
-        waitings.stream()
+    private void reduceWaitingRanks(final Long deleteRank, final List<ReservationStatus> reservationStatuses) {
+        reservationStatuses.stream()
                 .filter(waiting -> waiting.getRank() != null)
                 .filter(waiting -> waiting.getRank() > deleteRank)
-                .forEach(Waiting::reduceRank);
+                .forEach(ReservationStatus::reduceRank);
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {

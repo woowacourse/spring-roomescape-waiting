@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Status;
 
 public record MyReservationResponse(
         Long reservationId,
@@ -28,10 +28,10 @@ public record MyReservationResponse(
 
     private static String convertToReservationStatusMessage(final Reservation reservation) {
         StringBuilder status = new StringBuilder();
-        if (reservation.getWaiting().getStatus() == ReservationStatus.WAITING) {
-            status.append(reservation.getWaiting().getRank());
+        if (reservation.getReservationStatus().getStatus() == Status.WAITING) {
+            status.append(reservation.getReservationStatus().getRank());
         }
-        status.append(reservation.getWaiting().getStatus().getOutput());
+        status.append(reservation.getReservationStatus().getStatus().getOutput());
         return status.toString();
     }
 }

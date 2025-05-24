@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -39,7 +39,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
             select w.rank from Reservation r
-            join r.waiting w
+            join r.reservationStatus w
             where r.theme = :theme
             and r.date = :date
             and r.time = :reservationTime
@@ -61,13 +61,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByMember(Member member);
 
     @Query("""
-            select r.waiting
+            select r.reservationStatus
             from Reservation r
             where r.date = :date
               and r.time = :time
               and r.theme = :theme
             """)
-    List<Waiting> findAllWaiting(
+    List<ReservationStatus> findAllWaiting(
             @Param("date") LocalDate date,
             @Param("time") ReservationTime time,
             @Param("theme") Theme theme

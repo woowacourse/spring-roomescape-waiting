@@ -119,7 +119,7 @@ class ReservationTest {
         assertThat(savedReservation.getTime()).isEqualTo(time);
         assertThat(savedReservation.getTheme()).isEqualTo(theme);
         assertThat(savedReservation.getMember()).isEqualTo(member);
-        assertThat(savedReservation.getWaiting().getStatus()).isEqualTo(ReservationStatus.BOOKED);
+        assertThat(savedReservation.getReservationStatus().getStatus()).isEqualTo(Status.BOOKED);
     }
 
     @Test
@@ -148,7 +148,7 @@ class ReservationTest {
         Reservation savedReservation = reservationRepository.save(waitingReservation);
 
         // then
-        assertThat(savedReservation.getWaiting().getStatus()).isEqualTo(ReservationStatus.WAITING);
-        assertThat(savedReservation.getWaiting().getRank()).isEqualTo(rank);
+        assertThat(savedReservation.getReservationStatus().getStatus()).isEqualTo(Status.WAITING);
+        assertThat(savedReservation.getReservationStatus().getRank()).isEqualTo(rank);
     }
 }

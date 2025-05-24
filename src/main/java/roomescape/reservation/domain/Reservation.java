@@ -47,9 +47,9 @@ public class Reservation {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Member member;
 
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "status_id", nullable = false)
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Waiting waiting;
+    private ReservationStatus reservationStatus;
 
     @Builder
     private Reservation(
@@ -58,7 +58,7 @@ public class Reservation {
             @NonNull final ReservationTime time,
             @NonNull final Theme theme,
             @NonNull final Member member,
-            @NonNull final Waiting waiting,
+            @NonNull final ReservationStatus reservationStatus,
             @NonNull final LocalDateTime currentDateTime
     ) {
         this.id = id;
@@ -66,7 +66,7 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.member = member;
-        this.waiting = waiting;
+        this.reservationStatus = reservationStatus;
         validateFutureOrPresent(currentDateTime);
     }
 
@@ -84,7 +84,7 @@ public class Reservation {
                 .theme(theme)
                 .member(member)
                 .currentDateTime(currentDateTime)
-                .waiting(Waiting.booked())
+                .reservationStatus(ReservationStatus.booked())
                 .build();
     }
 
@@ -103,7 +103,7 @@ public class Reservation {
                     .theme(theme)
                     .member(member)
                     .currentDateTime(currentDateTime)
-                    .waiting(Waiting.waiting(rank))
+                    .reservationStatus(ReservationStatus.waiting(rank))
                     .build();
     }
 

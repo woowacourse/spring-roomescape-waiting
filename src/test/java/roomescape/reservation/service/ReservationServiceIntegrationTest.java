@@ -18,7 +18,7 @@ import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -78,7 +78,7 @@ class ReservationServiceIntegrationTest {
         assertThat(reservation.getTime()).isEqualTo(time);
         assertThat(reservation.getTheme()).isEqualTo(theme);
         assertThat(reservation.getMember().getId()).isEqualTo(member.getId());
-        assertThat(reservation.getWaiting().getStatus()).isEqualTo(ReservationStatus.BOOKED);
+        assertThat(reservation.getReservationStatus().getStatus()).isEqualTo(Status.BOOKED);
     }
 
     @Test
@@ -116,8 +116,8 @@ class ReservationServiceIntegrationTest {
         Reservation updatedReservation2 = reservationRepository.findById(waitingReservation2.getId()).orElseThrow();
 
         // then
-        assertThat(updatedReservation2.getWaiting().getStatus()).isEqualTo(ReservationStatus.BOOKED);
-        assertThat(updatedReservation2.getWaiting().getRank()).isEqualTo(0L);
+        assertThat(updatedReservation2.getReservationStatus().getStatus()).isEqualTo(Status.BOOKED);
+        assertThat(updatedReservation2.getReservationStatus().getRank()).isEqualTo(0L);
     }
 
     @Test
