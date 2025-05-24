@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.AdminWaitingService;
+import roomescape.reservation.application.dto.response.MyWaitingServiceResponse;
 import roomescape.reservation.controller.dto.response.MyWaitingResponse;
 
 @RestController
@@ -22,7 +23,9 @@ public class AdminWaitingController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<MyWaitingResponse> getAll() {
-        return adminWaitingService.getAllWaitings()
+
+        List<MyWaitingServiceResponse> allWaitings = adminWaitingService.getAllWaitings();
+        return allWaitings
             .stream()
             .map(MyWaitingResponse::from)
             .toList();

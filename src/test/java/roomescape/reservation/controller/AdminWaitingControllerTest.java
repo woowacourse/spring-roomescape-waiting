@@ -1,6 +1,8 @@
 package roomescape.reservation.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,52 +22,58 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import roomescape.reservation.application.MyBookingService;
-import roomescape.reservation.application.dto.response.MyBookingServiceResponse;
+import roomescape.reservation.application.AdminWaitingService;
+import roomescape.reservation.application.dto.response.MyWaitingServiceResponse;
 
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Sql(statements = {
-    "INSERT INTO member (name, email, password, role) VALUES ('테스트', 'test_email@naver.com', '1234', 'USER')",
+    "INSERT INTO member (name, email, password, role) VALUES ('어드민', 'test_admin@naver.com', '1234', 'ADMIN')",
 })
-class MyBookingControllerTest {
+class AdminWaitingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private MyBookingService myBookingService;
+    private AdminWaitingService adminWaitingService;
 
     @Test
-    @DisplayName("GET /reservations-mine 요청에 대해 올바르게 응답한다")
-    void reservationMineTest() throws Exception {
-        MyBookingServiceResponse response1 = new MyBookingServiceResponse(
-            1L, "테마1", LocalDate.of(2025, 5, 5),
-            LocalTime.of(13, 5), "예약");
-        MyBookingServiceResponse response2 = new MyBookingServiceResponse(
-            2L, "테마2", LocalDate.of(2025, 5, 5),
-            LocalTime.of(13, 5), "예약");
-        List<MyBookingServiceResponse> responses = List.of(response1, response2);
-        given(myBookingService.getAllByMemberId(1L)).willReturn(
-            responses);
+    @DisplayName("GET /admin/waitings 요청에 올바르게 응답한다")
+    void getAllWaitingsTest() throws Exception {
+        given(adminWaitingService.getAllWaitings()).willReturn(List.of(
+            new MyWaitingServiceResponse(1L, "두리", "테마", LocalDate.of(2025, 5, 24),
+                LocalTime.of(10, 0))
+        ));
 
-        String token = login();
+        String token = adminLogin();
         Cookie cookie = new Cookie("token", token);
-        MockHttpServletRequestBuilder request = get("/reservations-mine")
-            .cookie(cookie);
-        mockMvc.perform(request)
+        mockMvc.perform(get("/admin/waitings")
+                .cookie(cookie))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2));
+            .andExpect(jsonPath("$.length()").value(1));
     }
 
-    private String login() throws Exception {
+    @Test
+    @DisplayName("DELETE /admin/waitings/{id} 삭제시 204를 반환한다")
+    void removeWaitingTest() throws Exception {
+        Long id = 1L;
+        doNothing().when(adminWaitingService).deleteById(id);
+
+        String token = adminLogin();
+        Cookie cookie = new Cookie("token", token);
+        mockMvc.perform(delete("/admin/waitings/{id}", id)
+                .cookie(cookie))
+            .andExpect(status().isNoContent());
+    }
+
+    private String adminLogin() throws Exception {
         RequestBuilder request = post("/login")
             .contentType("application/json")
             .content("""
                 {
-                    "email": "test_email@naver.com",
+                    "email": "test_admin@naver.com",
                     "password": "1234"
                 }
                 """);
