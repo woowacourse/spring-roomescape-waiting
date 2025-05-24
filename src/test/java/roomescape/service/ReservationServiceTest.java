@@ -25,6 +25,7 @@ import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
 import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -137,7 +138,7 @@ class ReservationServiceTest {
                 .isInstanceOf(IllegalStateException.class);
     }
 
-    @DisplayName("사용자가 예약한 예약과 신청한 대기 내역을 모두 가져온다")
+    @DisplayName("사용자가 예약한 예약과 신청한 대기 내역을 모두 가져온다. 대기 내역은 순위와 함께 반환한다.")
     @Test
     void test6() {
         //given
@@ -145,16 +146,18 @@ class ReservationServiceTest {
         LoginMember loginMember = new LoginMember(savedReservation.getMember());
 
         Waiting savedWaiting = createSaveWaiting(savedReservation);
+        WaitingWithRank waitingWithRank = new WaitingWithRank(savedWaiting, 0L);
 
         //when
         List<MemberReservationResponseDto> response = reservationService.getReservationsOfMember(loginMember);
 
+        /**/
         MemberReservationResponseDto reservationResponse = MemberReservationResponseDto.from(savedReservation);
-        MemberReservationResponseDto waitingResponse = MemberReservationResponseDto.from(savedWaiting);
+        MemberReservationResponseDto waitingRanksResponse = MemberReservationResponseDto.from(waitingWithRank);
 
         //then
         assertThat(response).hasSize(2);
-        assertThat(response).contains(reservationResponse, waitingResponse);
+        assertThat(response).contains(reservationResponse, waitingRanksResponse);
     }
 
     private Waiting createSaveWaiting(final Reservation savedReservation) {

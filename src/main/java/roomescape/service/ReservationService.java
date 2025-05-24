@@ -17,7 +17,7 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
-import roomescape.model.Waiting;
+import roomescape.model.WaitingWithRank;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -73,13 +73,13 @@ public class ReservationService {
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.id());
-        List<Waiting> waitingList = waitingRepository.findAllByMemberId(loginMember.id());
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
 
-        return getMemberReservationResponseDtos(reservations, waitingList);
+        return getMemberReservationResponseDtos(reservations, waitingWithRanks);
     }
 
     private List<MemberReservationResponseDto> getMemberReservationResponseDtos(final List<Reservation> reservations,
-                                                                                final List<Waiting> waitingList) {
+                                                                                final List<WaitingWithRank> waitingList) {
         List<MemberReservationResponseDto> reservationResponse = reservations.stream()
                 .map(MemberReservationResponseDto::from)
                 .toList();
