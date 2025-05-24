@@ -15,7 +15,6 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
@@ -24,7 +23,6 @@ import roomescape.theme.domain.Theme;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = {"id"})
-@ToString
 public class Reservation {
 
     @Id
@@ -50,8 +48,14 @@ public class Reservation {
     @Column(nullable = false)
     private ReservationStatus status;
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime time,
-                       final Theme theme, final Member member, final ReservationStatus status) {
+    public Reservation(
+            final Long id,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final Member member,
+            final ReservationStatus status
+    ) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
@@ -66,15 +70,14 @@ public class Reservation {
         this.status = status;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
-                       final ReservationStatus status) {
+    public Reservation(
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final Member member,
+            final ReservationStatus status
+    ) {
         this(null, date, time, theme, member, status);
-    }
-
-    private void validateMember(final Member member) {
-        if (member == null) {
-            throw new IllegalArgumentException("멤버는 null이면 안됩니다.");
-        }
     }
 
     private void validateDate(final LocalDate date) {
@@ -92,6 +95,12 @@ public class Reservation {
     private void validateTheme(final Theme theme) {
         if (theme == null) {
             throw new IllegalArgumentException("테마는 null이면 안됩니다.");
+        }
+    }
+
+    private void validateMember(final Member member) {
+        if (member == null) {
+            throw new IllegalArgumentException("멤버는 null이면 안됩니다.");
         }
     }
 
