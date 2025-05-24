@@ -99,7 +99,7 @@ public class WaitingApiTest {
             .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
             .contentType(ContentType.JSON)
             .body(request)
-            .when().delete("/waitings/"+waitingId)
+            .when().delete("/waitings/" + waitingId)
             .then().log().all()
             .statusCode(204);
 
@@ -127,5 +127,66 @@ public class WaitingApiTest {
             .when().get("/admin/waitings")
             .then().log().all()
             .statusCode(403);
+    }
+
+    @Test
+    @DisplayName("admin이 아니라면, admin 고유의 waiting 삭제 API를 호출할 수 없다.")
+    void not_admin_then_cannot_use_admin_waiting_delete() {
+        RestAssured.given().log().all()
+            .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+            .contentType(ContentType.JSON)
+            .when().delete("/admin/waitings/1")
+            .then().log().all()
+            .statusCode(403);
+    }
+
+    @Test
+    @DisplayName("admin은 모든 회원의 waiting 삭제 API를 호출할 수 있다.")
+    void admin_can_use_delete_waiting_api() {
+        //given
+        final MemberReservationRequest request = new MemberReservationRequest(
+            LocalDate.now().plusDays(1),
+            1L,
+            1L
+        );
+
+        Long waitingId = RestAssured.given().log().all()
+            .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when().post("/waitings")
+            .then().log().all()
+            .statusCode(201)
+            .extract()
+            .jsonPath()
+            .getLong("waitingId");
+
+        //when, then
+        String adminToken = getAdminToken();
+        RestAssured.given().log().all()
+            .cookie(TokenCookieService.COOKIE_TOKEN_KEY, adminToken)
+            .contentType(ContentType.JSON)
+            .when().delete("/admin/waitings/" + waitingId)
+            .then().log().all()
+            .statusCode(204);
+    }
+
+    private String getAdminToken() {
+        final String email = "admin@admin.com";
+        final String password = "1234";
+
+        final LoginRequest request = new LoginRequest(email, password);
+
+        token = RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .when().post("/login")
+            .then().log().all()
+            .statusCode(200)
+            .extract()
+            .header(HttpHeaders.SET_COOKIE)
+            .split(";")[0]
+            .split(TokenCookieService.COOKIE_TOKEN_KEY + "=")[1];
+        return token;
     }
 }
