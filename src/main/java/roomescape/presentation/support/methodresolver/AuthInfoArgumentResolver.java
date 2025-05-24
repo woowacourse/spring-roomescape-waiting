@@ -9,7 +9,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.repository.MemberRepository;
 import roomescape.infrastructure.error.exception.JwtExtractException;
 import roomescape.infrastructure.error.exception.UnauthorizedException;
 import roomescape.infrastructure.security.AccessToken;

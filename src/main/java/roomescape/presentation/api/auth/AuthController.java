@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.auth.AuthService;
+import roomescape.application.auth.LoginService;
 import roomescape.application.auth.dto.LoginResult;
 import roomescape.presentation.support.methodresolver.AuthInfo;
 import roomescape.presentation.support.methodresolver.AuthPrincipal;
@@ -20,18 +20,18 @@ public class AuthController {
 
     private static final String TOKEN_COOKIE_KEY = "token";
 
-    private final AuthService authService;
+    private final LoginService loginService;
     private final Duration tokenCookieDuration;
 
-    public AuthController(AuthService authService,
+    public AuthController(LoginService loginService,
                           @Value("${security.jwt.token.expire-duration}") Duration tokenCookieDuration) {
-        this.authService = authService;
+        this.loginService = loginService;
         this.tokenCookieDuration = tokenCookieDuration;
     }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest loginRequest) {
-        LoginResult loginResult = authService.login(loginRequest.toLoginParameter());
+        LoginResult loginResult = loginService.login(loginRequest.toLoginParameter());
         ResponseCookie jwtCookie = createCookie(TOKEN_COOKIE_KEY, loginResult.token(), tokenCookieDuration);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())

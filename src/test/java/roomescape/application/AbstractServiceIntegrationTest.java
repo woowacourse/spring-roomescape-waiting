@@ -25,5 +25,6 @@ public abstract class AbstractServiceIntegrationTest {
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
+        jdbcTemplate.update("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1;");
     }
 }
