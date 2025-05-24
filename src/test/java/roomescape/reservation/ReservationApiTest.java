@@ -206,7 +206,7 @@ public class ReservationApiTest {
         void testInvalidCookie() {
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .when().get("/me/reservations")
+                    .when().get("/mine/reservations")
                     .then().log().all()
                     .statusCode(401);
         }
@@ -225,7 +225,7 @@ public class ReservationApiTest {
             // then
             RestAssured.given().log().all()
                     .cookie(TOKEN_COOKIE_NAME, TOKEN)
-                    .when().get("/me/reservations")
+                    .when().get("/mine/reservations")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", Matchers.is(3));

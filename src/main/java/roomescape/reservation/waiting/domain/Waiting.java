@@ -35,6 +35,15 @@ public class Waiting {
     public Waiting() {
     }
 
+    public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        this.id = id;
+        this.createdAt = LocalDateTime.now();
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+    }
+
     public static Waiting register(LocalDate date, ReservationTime time, Member member, Theme theme) {
         return new Waiting(null, LocalDateTime.now(), date, time, member, theme);
     }

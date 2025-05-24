@@ -4,10 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.fake.FakeMemberDao;
-import roomescape.fake.FakeReservationDao;
-import roomescape.fake.FakeReservationTimeDao;
-import roomescape.fake.FakeThemeDao;
+import roomescape.fake.*;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.reservation.domain.Reservation;
@@ -28,17 +25,19 @@ import static roomescape.fixture.TimeFixture.TIME;
 class ReservationServiceTest {
 
     private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
-    private final FakeReservationTimeDao reservationTimeDao = new FakeReservationTimeDao();
-    private final FakeReservationDao reservationDao = new FakeReservationDao();
-    private final FakeThemeDao themeDao = new FakeThemeDao();
+
+    private final FakeReservationTimeDao fakeReservationTimeDao = new FakeReservationTimeDao();
+    private final FakeReservationDao fakeReservationDao = new FakeReservationDao();
+    private final FakeThemeDao fakeThemeDao = new FakeThemeDao();
     private final FakeMemberDao fakeMemberDao = new FakeMemberDao();
-    private final ReservationService reservationService = new ReservationService(reservationDao, reservationTimeDao,
-            themeDao, fakeMemberDao, null);
+    private final FakeWaitingDao fakeWaitingDao = new FakeWaitingDao();
+    private final ReservationService reservationService = new ReservationService(fakeReservationDao, fakeReservationTimeDao,
+            fakeThemeDao, fakeMemberDao, fakeWaitingDao);
 
     @BeforeEach
     void setUp() {
-        reservationTimeDao.save(TIME);
-        themeDao.save(THEME);
+        fakeReservationTimeDao.save(TIME);
+        fakeThemeDao.save(THEME);
         fakeMemberDao.save(MEMBER);
         CreateReservationRequest request1 = new CreateReservationRequest(
                 TOMORROW, TIME.getId(), THEME.getId(), MEMBER.getId());
@@ -98,7 +97,7 @@ class ReservationServiceTest {
             // when
             ReservationResponse result = reservationService.createReservation(REQUEST);
             // then
-            Reservation savedReservation = reservationDao.findById(3L).orElseThrow();
+            Reservation savedReservation = fakeReservationDao.findById(3L).orElseThrow();
             assertAll(
                     () -> assertThat(result.id()).isEqualTo(3L),
                     () -> assertThat(result.member().name()).isEqualTo(MEMBER.getName().getValue()),
