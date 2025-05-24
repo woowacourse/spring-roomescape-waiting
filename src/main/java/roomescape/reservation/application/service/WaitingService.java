@@ -59,6 +59,7 @@ public class WaitingService {
         return new WaitingResponse(waitingRepository.save(waiting));
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> getWaitings(final Long memberId) {
         findMemberById(memberId);
 
@@ -67,6 +68,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> getWaitings() {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::new)
@@ -80,6 +82,7 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    @Transactional
     public void acceptWaiting(final Long id) {
         final Waiting waiting = findWaitingById(id);
 
@@ -107,6 +110,11 @@ public class WaitingService {
                 .orElseThrow(() -> new NoSuchElementException("테마 정보를 찾을 수 없습니다."));
     }
 
+    private Member findMemberById(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
+    }
+
     private void validateReservationDateTime(LocalDate reservationDate, ReservationTime reservationTime) {
         final LocalDateTime reservationDateTime = LocalDateTime.of(reservationDate, reservationTime.getStartAt());
 
@@ -115,12 +123,7 @@ public class WaitingService {
 
     private static void validateIsPast(LocalDateTime reservationDateTime) {
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            throw new DateTimeException("지난 일시에 대한 예약 생성은 불가능합니다.");
+            throw new DateTimeException("지난 일시에 대한 예약 대기 생성은 불가능합니다.");
         }
-    }
-
-    private Member findMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("유저 정보를 찾을 수 없습니다."));
     }
 }

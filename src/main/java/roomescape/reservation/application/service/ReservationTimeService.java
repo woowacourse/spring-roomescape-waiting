@@ -30,6 +30,7 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(reservationTimeRepository.save(reservationTime));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getReservationTimes() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::new)
@@ -46,6 +47,7 @@ public class ReservationTimeService {
         reservationTimeRepository.delete(reservationTime);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getReservationTimes(final LocalDate date, final Long themeId) {
         List<Long> bookedTimeIds = reservationRepository.findByReservationInfoDateAndReservationInfoThemeId(date,
                         themeId).stream()

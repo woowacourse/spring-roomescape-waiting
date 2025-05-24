@@ -29,9 +29,17 @@ public class ThemeService {
         return new ThemeResponse(themeRepository.save(theme));
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getThemes() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
+                .map(ThemeResponse::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ThemeResponse> getPopularThemes() {
+        return themeRepository.findPopularThemes().stream()
                 .map(ThemeResponse::new)
                 .toList();
     }
@@ -44,12 +52,6 @@ public class ThemeService {
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
         themeRepository.delete(theme);
-    }
-
-    public List<ThemeResponse> getPopularThemes() {
-        return themeRepository.findPopularThemes().stream()
-                .map(ThemeResponse::new)
-                .toList();
     }
 
     private void validateIsReservationExist(final Long id) {

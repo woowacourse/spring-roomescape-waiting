@@ -70,21 +70,7 @@ public class ReservationService {
         );
     }
 
-    private ReservationResponse createReservation(Long timeId, Long themeId, LocalDate date, Member member) {
-        ReservationTime reservationTime = getReservationTime(timeId);
-        Theme theme = getTheme(themeId);
-        validateReservationDateTime(date, reservationTime);
-
-        final Reservation reservation = new Reservation(
-                member,
-                theme,
-                date,
-                reservationTime
-        );
-
-        return new ReservationResponse(reservationRepository.save(reservation));
-    }
-
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getReservations(Long memberId, Long themeId, LocalDate dateFrom,
                                                      LocalDate dateTo) {
 
@@ -98,6 +84,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UserReservationsResponse> getUserReservations(final Long memberId) {
         findMemberById(memberId);
 
@@ -136,6 +123,21 @@ public class ReservationService {
 
             waitingRepository.delete(waiting.get());
         });
+    }
+
+    private ReservationResponse createReservation(Long timeId, Long themeId, LocalDate date, Member member) {
+        ReservationTime reservationTime = getReservationTime(timeId);
+        Theme theme = getTheme(themeId);
+        validateReservationDateTime(date, reservationTime);
+
+        final Reservation reservation = new Reservation(
+                member,
+                theme,
+                date,
+                reservationTime
+        );
+
+        return new ReservationResponse(reservationRepository.save(reservation));
     }
 
     private ReservationTime getReservationTime(Long timeId) {
