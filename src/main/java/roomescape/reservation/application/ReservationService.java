@@ -173,7 +173,7 @@ public class ReservationService {
 
     private Reservation getReservation(final Long reservationId) {
         return reservationRepository.findById(reservationId)
-            .orElseThrow(() -> new NotFoundException("선택한 멤버가 존재하지 않습니다."));
+            .orElseThrow(() -> new NotFoundException("선택한 예약이 존재하지 않습니다."));
     }
 
     private ReservationTime getReservationTime(final Long timeId) {

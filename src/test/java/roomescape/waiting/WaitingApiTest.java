@@ -177,7 +177,7 @@ public class WaitingApiTest {
 
         final LoginRequest request = new LoginRequest(email, password);
 
-        token = RestAssured.given().log().all()
+        return RestAssured.given().log().all()
             .contentType(ContentType.JSON)
             .body(request)
             .when().post("/login")
@@ -187,6 +187,5 @@ public class WaitingApiTest {
             .header(HttpHeaders.SET_COOKIE)
             .split(";")[0]
             .split(TokenCookieService.COOKIE_TOKEN_KEY + "=")[1];
-        return token;
     }
 }
