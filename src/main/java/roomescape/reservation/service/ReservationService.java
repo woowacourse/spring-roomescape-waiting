@@ -4,14 +4,12 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.request.FilteringReservationRequest;
 import roomescape.reservation.service.dto.response.BookedReservationTimeResponse;
 import roomescape.reservation.service.dto.response.MyReservationsResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
-import roomescape.reservation.service.dto.response.ReservationTimeResponse;
-import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -19,10 +17,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -95,36 +89,9 @@ public class ReservationService {
     }
 
     public List<BookedReservationTimeResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
-        // TODO: repository에서 처리
-        // return reservationTimeRepository.findAllWithBooked(date, themeId);
-
-        Map<ReservationTime, Boolean> allTimes = processAlreadyBookedTimesMap(date, themeId);
-
-        return allTimes.entrySet()
-                .stream()
-                .map(entry -> bookedReservationTimeResponseOf(entry.getKey(), entry.getValue()))
-                .toList();
-    }
-
-    private Map<ReservationTime, Boolean> processAlreadyBookedTimesMap(final LocalDate date, final Long themeId) {
-        Set<ReservationTime> alreadyBookedTimes = getAlreadyBookedTimes(date, themeId);
-
-        return reservationTimeRepository.findAll()
-                .stream()
-                .collect(Collectors.toMap(Function.identity(), alreadyBookedTimes::contains));
-    }
-
-    private BookedReservationTimeResponse bookedReservationTimeResponseOf(
-            final ReservationTime reservationTime,
-            final boolean isAlreadyBooked
-    ) {
-        return new BookedReservationTimeResponse(ReservationTimeResponse.from(reservationTime), isAlreadyBooked);
-    }
-
-    private Set<ReservationTime> getAlreadyBookedTimes(final LocalDate date, final Long themeId) {
-        return reservationRepository.findByDateAndThemeId(date, themeId)
-                .stream()
-                .map(Reservation::getTime)
-                .collect(Collectors.toSet());
+         return reservationTimeRepository.findAllWithBooked(date, themeId)
+                 .stream()
+                 .map(BookedReservationTimeResponse::from)
+                 .toList();
     }
 }
