@@ -26,14 +26,16 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.dto.response.BookedReservationTimeResponse;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
+import roomescape.reservation.dto.response.BookedReservationTimeResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -50,6 +52,8 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
     @Autowired
     private ReservationService reservationService;
 
@@ -218,6 +222,32 @@ class ReservationServiceTest {
         // then
         assertThatCode(() -> reservationService.delete(id))
                 .doesNotThrowAnyException();
+    }
+
+    @DisplayName("예약을 삭제했을 때 예약대기가 존재하면 자동 승인한다.")
+    @Test
+    void deleteReservationWhenExistsWaiting() {
+        // given
+        Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
+
+        LocalTime time = LocalTime.of(8, 0);
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+        Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
+        Member member2 = new Member("로키", "test1@test.com", "12341234", Role.MEMBER);
+        Member savedMember = memberRepository.save(member);
+        Member savedMember2 = memberRepository.save(member2);
+
+        LocalDate date = nextDay();
+        Reservation savedReservation = reservationRepository.save(
+                new Reservation(savedMember, date, savedTime, savedTheme));
+        Long id = savedReservation.getId();
+        waitingRepository.save(new Waiting(date, savedMember2, savedTime, savedTheme));
+
+        // when
+        reservationService.delete(id);
+
+        // then
+        assertThat(reservationRepository.findAll()).hasSize(1);
     }
 
     @DisplayName("예약이 존재하지 않으면 예외를 반환한다.")

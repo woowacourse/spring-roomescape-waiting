@@ -8,6 +8,8 @@ import roomescape.auth.annotation.RequiredAdmin;
 @Controller
 public class ViewController {
 
+    private static final String A = "a";
+
     @GetMapping()
     public String index() {
         return "index";
@@ -35,6 +37,12 @@ public class ViewController {
     @GetMapping("/admin/theme")
     public String adminReservationThemeDashboard() {
         return "admin/theme";
+    }
+
+    @RequiredAdmin
+    @GetMapping("/admin/waiting")
+    public String adminWaitingDashboard() {
+        return "admin/waiting";
     }
 
     @GetMapping("/reservation")

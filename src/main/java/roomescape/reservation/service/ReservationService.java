@@ -3,14 +3,17 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.AlreadyInUseException;
@@ -20,6 +23,8 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.request.FilteringReservationRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.response.BookedReservationTimeResponse;
@@ -29,6 +34,7 @@ import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -37,17 +43,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> getAll() {
@@ -59,12 +68,30 @@ public class ReservationService {
     }
 
     public List<MyReservationsResponse> getAllMemberReservations(final LoginMember loginMember) {
-        return reservationRepository.findAllByMemberId(loginMember.id())
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.id())
                 .stream()
-                .map(MyReservationsResponse::from)
                 .toList();
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findAllWaitingWithRankByMemberId(loginMember.id())
+                .stream()
+                .toList();
+        return toMyReservationResponses(reservations, waitingWithRanks);
     }
 
+    private List<MyReservationsResponse> toMyReservationResponses(
+            final List<Reservation> reservations,
+            final List<WaitingWithRank> waitingWithRanks
+    ) {
+        List<MyReservationsResponse> responses = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            responses.add(MyReservationsResponse.from(reservation));
+        }
+        for (WaitingWithRank waitingWithRank : waitingWithRanks) {
+            responses.add(MyReservationsResponse.from(waitingWithRank));
+        }
+        return responses;
+    }
+
+    @Transactional
     public ReservationResponse create(final ReservationCreateRequest request) {
         if (isAlreadyBooked(request)) {
             throw new AlreadyInUseException("reservation is already in use");
@@ -125,11 +152,27 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
-        }
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
         reservationRepository.deleteById(id);
+
+        approveFirstWaiting(reservation);
+    }
+
+    private void approveFirstWaiting(final Reservation reservation) {
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderByIdAsc(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+        waiting.ifPresent(value -> {
+            reservationRepository.save(new Reservation(
+                    value.getMember(), value.getDate(), value.getTime(), value.getTheme()
+            ));
+            waitingRepository.delete(waiting.get());
+        });
     }
 
     public List<BookedReservationTimeResponse> getSortedAvailableTimes(final LocalDate date, final Long themeId) {
