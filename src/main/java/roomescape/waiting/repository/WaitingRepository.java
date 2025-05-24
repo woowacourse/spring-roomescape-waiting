@@ -1,6 +1,7 @@
 package roomescape.waiting.repository;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import roomescape.waiting.domain.Waiting;
@@ -14,4 +15,5 @@ public interface WaitingRepository {
     boolean existsByIdAndMemberId(long id, long memberId);
     void pullPriority(long from, int amount);
     Optional<Waiting> findById(long id);
+    List<Waiting> findAll();
 }

@@ -68,4 +68,9 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .filter(waiting -> waiting.getId() == id)
                 .findAny();
     }
+
+    @Override
+    public List<Waiting> findAll() {
+        return new ArrayList<>(waitings);
+    }
 }

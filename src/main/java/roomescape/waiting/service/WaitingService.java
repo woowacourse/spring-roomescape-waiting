@@ -47,6 +47,17 @@ public class WaitingService {
                 .toList();
     }
 
+    /**
+     * TODO
+     * 지난 날짜 대기까지 조회??
+     */
+    public List<WaitingInfo> findAll() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(WaitingInfo::new)
+                .toList();
+    }
+
     public void cancelById(long id, LoginMemberInfo loginMemberInfo) {
         Waiting waiting = getWaiting(id);
         boolean isSameMember = waiting.hasSameMemberId(loginMemberInfo.id());
