@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.global.auth.Auth;
 import roomescape.member.domain.Role;
-import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.UserReservationsResponse;
@@ -29,18 +29,6 @@ public class ReservationController {
 
     public ReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
-    }
-
-    @Auth(Role.USER)
-    @PostMapping
-    public ResponseEntity<ReservationResponse> createReservation(
-            final @RequestBody @Valid ReservationRequest reservationRequest,
-            final Long memberId
-    ) {
-        ReservationResponse reservation = reservationService.createReservation(reservationRequest, memberId);
-
-        return ResponseEntity.created(createUri(reservation.getId()))
-                .body(reservation);
     }
 
     @Auth(Role.USER)
@@ -57,7 +45,19 @@ public class ReservationController {
     }
 
     @Auth(Role.USER)
-    @GetMapping("mine")
+    @PostMapping
+    public ResponseEntity<ReservationResponse> createReservation(
+            final @RequestBody @Valid ReservationRequest reservationRequest,
+            final Long memberId
+    ) {
+        ReservationResponse reservation = reservationService.createReservation(reservationRequest, memberId);
+
+        return ResponseEntity.created(createUri(reservation.getId()))
+                .body(reservation);
+    }
+
+    @Auth(Role.USER)
+    @GetMapping("/mine")
     public ResponseEntity<List<UserReservationsResponse>> getUserReservations(
             final Long memberId
     ) {
@@ -69,9 +69,10 @@ public class ReservationController {
     @Auth(Role.USER)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(
-            final @PathVariable Long id
+            final @PathVariable("id") Long reservationId,
+            final Long memberId
     ) {
-        reservationService.deleteReservation(id);
+        reservationService.deleteReservationByUser(reservationId, memberId);
         return ResponseEntity.noContent().build();
     }
 

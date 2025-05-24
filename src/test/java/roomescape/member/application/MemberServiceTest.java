@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.member.application.service.MemberService;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.SignUpRequest;
 import roomescape.member.presentation.dto.SignUpResponse;
@@ -52,8 +51,8 @@ public class MemberServiceTest {
 
     @Test
     @DisplayName("id로 유저 조회 테스트")
-    void findByIdTest() {
-        assertThat(memberService.findById(2L).getName()).isEqualTo("어드민");
+    void getMemberByIdTest() {
+        assertThat(memberService.getMemberById(2L).getName()).isEqualTo("어드민");
     }
 
     @Test
@@ -71,7 +70,7 @@ public class MemberServiceTest {
 
     @Test
     @DisplayName("유저 조회 테스트")
-    void getMembersTest() {
+    void getMembersTestById() {
         assertThat(memberService.getMembers().size()).isEqualTo(2);
     }
 }

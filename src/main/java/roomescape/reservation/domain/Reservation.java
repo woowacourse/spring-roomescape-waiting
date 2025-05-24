@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import roomescape.member.domain.Member;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Entity
 public class Reservation {
@@ -36,24 +38,41 @@ public class Reservation {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    private Status status;
+    private ReservationStatus status;
 
     public Reservation() {
     }
 
-    public Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime reservationTime) {
+    private Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
+                        final ReservationTime reservationTime, final ReservationStatus status) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.reservationTime = reservationTime;
-        this.status = Status.RESERVED;
+        this.status = status;
     }
 
-    public Reservation(final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime reservationTime) {
-        this(null, member, theme, date, reservationTime);
+    public static Reservation createReserved(final Member member, final Theme theme, final LocalDate date,
+                                             final ReservationTime reservationTime) {
+        return new Reservation(null, member, theme, date, reservationTime, ReservationStatus.RESERVED);
+    }
+
+    public static Reservation createWaiting(final Member member, final Theme theme, final LocalDate date,
+                                            final ReservationTime reservationTime) {
+        return new Reservation(null, member, theme, date, reservationTime, ReservationStatus.WAITING);
+    }
+
+    public void acceptStatus() {
+        status = ReservationStatus.RESERVED;
+    }
+
+    public boolean isReserved() {
+        return status == ReservationStatus.RESERVED;
+    }
+
+    public String getReservationStatus() {
+        return status.getStatus();
     }
 
     public Long getId() {
@@ -76,7 +95,7 @@ public class Reservation {
         return theme;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 }

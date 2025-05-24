@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.Auth;
 import roomescape.global.jwt.AuthorizationExtractor;
-import roomescape.member.application.service.MemberService;
+import roomescape.member.application.MemberService;
 import roomescape.member.domain.Role;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.TokenRequest;

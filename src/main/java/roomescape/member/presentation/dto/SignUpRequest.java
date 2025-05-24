@@ -2,6 +2,8 @@ package roomescape.member.presentation.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 
 public class SignUpRequest {
     @Email
@@ -15,6 +17,15 @@ public class SignUpRequest {
         this.email = email;
         this.password = password;
         this.name = name;
+    }
+
+    public Member toUserMember() {
+        return new Member(
+                email,
+                password,
+                name,
+                Role.USER
+        );
     }
 
     public String getEmail() {

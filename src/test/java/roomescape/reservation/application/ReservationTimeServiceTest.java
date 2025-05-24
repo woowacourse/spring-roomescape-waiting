@@ -12,15 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.reservation.application.service.ReservationService;
-import roomescape.reservation.application.service.ReservationTimeService;
-import roomescape.reservation.application.service.ThemeService;
-import roomescape.reservation.presentation.dto.AdminReservationRequest;
-import roomescape.reservation.presentation.dto.AvailableReservationTimeResponse;
-import roomescape.reservation.presentation.dto.ReservationTimeRequest;
-import roomescape.reservation.presentation.dto.ReservationTimeResponse;
-import roomescape.reservation.presentation.dto.ThemeRequest;
-import roomescape.reservation.presentation.dto.ThemeResponse;
+import roomescape.admin.reservation.presentation.dto.AdminReservationRequest;
+import roomescape.reservation.time.application.ReservationTimeService;
+import roomescape.reservation.time.presentation.dto.AvailableReservationTimeResponse;
+import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
+import roomescape.reservation.time.presentation.dto.ReservationTimeResponse;
+import roomescape.theme.application.ThemeService;
+import roomescape.theme.presentation.ThemeRequest;
+import roomescape.theme.presentation.ThemeResponse;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -63,7 +62,7 @@ public class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("예약 시간 전체 조회 테스트")
-    void getReservationTimesTest() {
+    void getReservationTimesTestById() {
         // given
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(15, 40));
         reservationTimeService.createReservationTime(reservationTimeRequest);

@@ -12,7 +12,7 @@ import jakarta.persistence.Id;
 public class Member {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -41,6 +41,10 @@ public class Member {
 
     public Member(final String email, final String password, final String name, final Role role) {
         this(null, email, password, name, role);
+    }
+
+    public boolean isNotMatchingPassword(String password) {
+        return !this.password.equals(password);
     }
 
     public Long getId() {

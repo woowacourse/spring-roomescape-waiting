@@ -13,20 +13,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.global.interceptor.AuthorizationInterceptor;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
+
     private static final String JWT_EXCEPTION_MESSAGE = "잘못된 로그인 시도입니다. 다시 시도해 주세요.";
+    private static final String PREFIX = "token=";
 
     @Value("${security.jwt.token.secret-key}")
     private String secretKey;
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
-
-    private final static String PREFIX = "token=";
 
     @Override
     public String createToken(Member member) {

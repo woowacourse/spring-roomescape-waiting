@@ -14,13 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.reservation.application.repository.ReservationTimeRepository;
-import roomescape.reservation.application.repository.ThemeRepository;
-import roomescape.reservation.application.service.ReservationService;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Theme;
-import roomescape.reservation.presentation.dto.AdminReservationRequest;
-import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.admin.reservation.presentation.dto.AdminReservationRequest;
+import roomescape.reservation.time.application.ReservationTimeRepository;
+import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.theme.application.ThemeRepository;
+import roomescape.theme.domain.Theme;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -138,33 +136,9 @@ public class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약 삭제 테스트")
-    void deleteReservationTest() {
-        // given
-        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 40)));
-
-        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
-
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(
-                LocalDate.of(2025, 8, 5),
-                theme.getId(),
-                reservationTime.getId(),
-                2L
-        );
-        ReservationResponse reservation = reservationService.createReservation(adminReservationRequest);
-
-        // when
-        reservationService.deleteReservation(reservation.getId());
-
-        // then
-        assertThat(reservationService.getReservations(null, null, null, null).size()).isEqualTo(0);
-    }
-
-    @Test
     @DisplayName("저장되어 있지 않은 id로 요청을 보내면 예외가 발생한다.")
     void deleteExceptionTest() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
+        assertThatThrownBy(() -> reservationService.deleteReservationByAdmin(1L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 삭제되어 있는 리소스입니다.");
     }

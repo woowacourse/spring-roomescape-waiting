@@ -1,77 +1,108 @@
 package roomescape.member.presentation;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.util.Map;
+import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import roomescape.global.config.WebMvcConfig;
+import roomescape.global.interceptor.AuthorizationInterceptor;
+import roomescape.global.jwt.AuthorizationExtractor;
+import roomescape.member.application.MemberService;
+import roomescape.member.presentation.controller.LoginController;
 import roomescape.member.presentation.dto.TokenRequest;
-import roomescape.member.presentation.fixture.MemberFixture;
+import roomescape.member.presentation.resolver.MemberArgumentResolver;
 
-@ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@WebMvcTest(value = LoginController.class,
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = {
+                        WebMvcConfig.class,
+                        AuthorizationInterceptor.class,
+                        MemberArgumentResolver.class
+                }
+        ))
 public class LoginControllerTest {
-    private final MemberFixture memberFixture = new MemberFixture();
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private MemberService memberService;
+
+    @MockitoBean
+    private AuthorizationExtractor authorizationExtractor;
 
     @Test
-    @DisplayName("로그인 테스트")
-    void loginTest() {
+    @DisplayName("로그인 성공 후 쿠키를 담아 반환한다")
+    void loginSuccess() throws Exception {
         // given
-        final TokenRequest tokenRequest = memberFixture.createLoginRequest("user@user.com", "user");
+        TokenRequest request = new TokenRequest("email@email.com", "password");
+        String token = "token";
 
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(tokenRequest)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(200);
-    }
+        doReturn(token).when(memberService)
+                .createToken(request);
 
-    @ParameterizedTest
-    @CsvSource(value = {"user@user.com:admin", ":admin", "admin:"}, delimiter = ':')
-    @DisplayName("로그인 실패 테스트")
-    void when_login_fail_then_throw_bad_request(String email, String password) {
-        // given
-        final TokenRequest tokenRequest = memberFixture.createLoginRequest(email, password);
-
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(tokenRequest)
-                .when().post("/login")
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @Test
-    @DisplayName("로그인 체크 테스트")
-    void loginCheckTest() {
-        // given
-        final Map<String, String> cookies = memberFixture.loginUser();
-
-        // when - then
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookies(cookies)
-                .when().get("/login/check")
-                .then().log().all()
-                .statusCode(200);
+        // when && then
+        mockMvc.perform(MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("로그인 체크 실패 테스트")
-    void loginCheckFailTest() {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .when().get("/login/check")
-                .then().log().all()
-                .statusCode(401);
+    @DisplayName("잘못된 형식의 이메일로 로그인 시도시 400 응답을 반환한다")
+    void loginFailInvalidEmail() throws Exception {
+        // given
+        TokenRequest request = new TokenRequest("invalid-email", "password");
+
+        // when & then
+        mockMvc.perform(MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("비밀번호가 비어있는 경우 400 응답을 반환한다")
+    void loginFailEmptyPassword() throws Exception {
+        // given
+        TokenRequest request = new TokenRequest("email@email.com", "");
+
+        // when & then
+        mockMvc.perform(MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("이메일이 null인 경우 400 응답을 반환한다")
+    void loginFailNullEmail() throws Exception {
+        // given
+        TokenRequest request = new TokenRequest(" ", "password");
+
+        // when & then
+        mockMvc.perform(MockMvcRequestBuilders.post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
     }
 }
