@@ -1,6 +1,8 @@
 package roomescape.reservation.ui;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.ui.LoginApiFixture.adminLoginAndGetCookies;
 import static roomescape.fixture.ui.LoginApiFixture.memberLoginAndGetCookies;
 import static roomescape.fixture.ui.MemberApiFixture.signUpMembers;
@@ -14,7 +16,6 @@ import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.reservation.ui.dto.response.AdminReservationWaitingResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -73,7 +75,7 @@ class AdminReservationRestControllerTest {
                 .extract()
                 .path("size()");
 
-        Assertions.assertThat(sizeAfterCreate).isEqualTo(sizeBeforeCreate + 1);
+        assertThat(sizeAfterCreate).isEqualTo(sizeBeforeCreate + 1);
     }
 
     @Test
@@ -92,6 +94,7 @@ class AdminReservationRestControllerTest {
                 .extract().path("id");
 
         RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
                 .cookies(adminCookies)
                 .when().get("/admin/reservations")
                 .then().log().all()
@@ -99,12 +102,14 @@ class AdminReservationRestControllerTest {
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
                 .cookies(adminCookies)
                 .when().delete("/reservations/{id}", reservationId)
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 
         RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
                 .cookies(adminCookies)
                 .when().get("/admin/reservations")
                 .then().log().all()
@@ -112,8 +117,82 @@ class AdminReservationRestControllerTest {
                 .body("size()", is(0));
     }
 
+    @Test
+    void 예약_대기_목록을_조회한다() {
+        // given
+        final Map<String, String> adminCookies = adminLoginAndGetCookies();
+        final Map<String, String> memberCookies = memberLoginAndGetCookies(signUpParams1());
+        Map<String, String> reservationParams1 = reservationParams1();
+        Map<String, String> reservationParams2 = reservationParams2();
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(adminCookies)
+                .body(reservationParams1)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(adminCookies)
+                .body(reservationParams2)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(memberCookies)
+                .body(reservationParams1)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(memberCookies)
+                .body(reservationParams2)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        // when
+        List<AdminReservationWaitingResponse> responses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(adminCookies)
+                .when().get("/admin/reservations/waiting")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract().jsonPath()
+                .getList(".", AdminReservationWaitingResponse.class);
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses).extracting(AdminReservationWaitingResponse::reservationId)
+                        .containsExactlyInAnyOrder(3L, 4L),
+                () -> assertThat(responses).extracting(response -> response.reservationDate().toString())
+                        .containsExactlyInAnyOrder(
+                                reservationParams1.get("date"),
+                                reservationParams2.get("date")
+                        )
+        );
+
+    }
+
     private Map<String, String> reservationParams1() {
         final String timeId = createReservationTimeResponses.get(0).extract().body()
+                .as(Map.class)
+                .get("id").toString();
+        final String themeId = createThemeResponses.get(0).extract().body()
+                .as(Map.class)
+                .get("id").toString();
+
+        return createReservationParams(date, timeId, themeId);
+    }
+
+    private Map<String, String> reservationParams2() {
+        final String timeId = createReservationTimeResponses.get(1).extract().body()
                 .as(Map.class)
                 .get("id").toString();
         final String themeId = createThemeResponses.get(0).extract().body()

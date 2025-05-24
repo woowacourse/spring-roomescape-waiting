@@ -2,29 +2,32 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    default Reservation getByIdOrThrow(Long id) {
+    default Reservation getByIdOrThrow(final Long id) {
         return this.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
     }
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Boolean existsByReservationSlotAndMemberId(ReservationSlot reservationSlot, Long memberId);
 
     @Query("""
-                SELECT r
+                SELECT r, rs
                 FROM Reservation r
-                JOIN FETCH r.time t
-                JOIN FETCH r.theme th
-                JOIN FETCH r.member m
-                WHERE th.id = :themeId
-                  AND m.id = :memberId
-                  AND r.date BETWEEN :dateFrom AND :dateTo
+                JOIN FETCH r.reservationSlot rs
+                JOIN FETCH rs.theme
+                JOIN FETCH rs.time
+                JOIN FETCH r.member
+                WHERE rs.theme.id = :themeId
+                  AND r.member.id = :memberId
+                  AND rs.date BETWEEN :dateFrom AND :dateTo
             """)
     List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(
             final Long themeId,
@@ -33,7 +36,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             final LocalDate dateTo
     );
 
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
-
+    @EntityGraph(attributePaths = {
+            "reservationSlot",
+            "reservationSlot.time",
+            "reservationSlot.theme"
+    })
     List<Reservation> findAllByMemberId(Long memberId);
+
+    @Query("""
+            SELECT
+            (
+                SELECT COUNT(r2)
+                FROM Reservation r2
+                WHERE r2.reservationSlot = r1.reservationSlot
+                AND   r2.id <= r1.id
+            )
+            FROM Reservation r1
+            WHERE r1.id = :reservationId
+            """)
+    Long getReservationRankById(Long reservationId);
 }

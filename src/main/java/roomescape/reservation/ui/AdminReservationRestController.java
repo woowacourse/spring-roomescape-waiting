@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.ui.dto.request.AdminCreateReservationRequest;
 import roomescape.reservation.ui.dto.request.ReservationsByfilterRequest;
 import roomescape.reservation.ui.dto.response.AdminReservationResponse;
+import roomescape.reservation.ui.dto.response.AdminReservationWaitingResponse;
 
+@RequestMapping("/admin")
 @RequiresRole(authRoles = {ADMIN})
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +28,7 @@ public class AdminReservationRestController {
 
     private final ReservationService reservationService;
 
-    @PostMapping("/admin/reservations")
+    @PostMapping("/reservations")
     public ResponseEntity<AdminReservationResponse> create(
             @RequestBody @Valid final AdminCreateReservationRequest request
     ) {
@@ -33,19 +36,25 @@ public class AdminReservationRestController {
                 .body(reservationService.createForAdmin(request));
     }
 
-    @GetMapping("/admin/reservations")
+    @GetMapping("/reservations")
     public ResponseEntity<List<AdminReservationResponse>> findAll() {
-        final List<AdminReservationResponse> adminReservationRespons = reservationService.findAll();
+        final List<AdminReservationResponse> adminReservationResponse = reservationService.findAll();
 
-        return ResponseEntity.ok(adminReservationRespons);
+        return ResponseEntity.ok(adminReservationResponse);
     }
 
-    @GetMapping("/admin/reservations/filtered")
+    @GetMapping("/reservations/filtered")
     public ResponseEntity<List<AdminReservationResponse>> findAllByFilter(
             @ModelAttribute @Valid final ReservationsByfilterRequest request
     ) {
-        final List<AdminReservationResponse> adminReservationRespons = reservationService.findAllByFilter(request);
+        final List<AdminReservationResponse> adminReservationResponse = reservationService.findAllByFilter(request);
 
-        return ResponseEntity.ok(adminReservationRespons);
+        return ResponseEntity.ok(adminReservationResponse);
     }
+
+    @GetMapping("/reservations/waiting")
+    public ResponseEntity<List<AdminReservationWaitingResponse>> findAllWaitings() {
+        return ResponseEntity.ok(reservationService.findReservationWaitings());
+    }
+
 }

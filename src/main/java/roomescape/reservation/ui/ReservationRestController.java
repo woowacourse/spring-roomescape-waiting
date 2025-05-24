@@ -4,7 +4,6 @@ import static roomescape.auth.domain.AuthRole.ADMIN;
 import static roomescape.auth.domain.AuthRole.MEMBER;
 
 import jakarta.validation.Valid;
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,12 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.ReservationService;
-import roomescape.reservation.domain.BookingState;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
-import roomescape.reservation.ui.dto.response.AdminReservationResponse;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.ui.dto.response.BookingStateResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 
 @RestController
@@ -35,7 +31,7 @@ public class ReservationRestController {
 
     @PostMapping("/reservations")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<AdminReservationResponse> create(
+    public ResponseEntity<MemberReservationResponse> create(
             @RequestBody @Valid final MemberCreateReservationRequest request,
             final MemberAuthInfo memberAuthInfo
     ) {
@@ -49,7 +45,7 @@ public class ReservationRestController {
             @PathVariable final Long id,
             final MemberAuthInfo memberAuthInfo
     ) {
-        reservationService.deleteIfOwner(id, memberAuthInfo);
+        reservationService.deleteReservation(id, memberAuthInfo);
 
         return ResponseEntity.noContent().build();
     }
@@ -69,14 +65,4 @@ public class ReservationRestController {
 
         return ResponseEntity.ok(availableReservationTimes);
     }
-
-    @GetMapping("/reservations/states")
-    @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<List<BookingStateResponse>> getBookingStateOptions() {
-        return ResponseEntity.ok()
-                .body(Arrays.stream(BookingState.values())
-                        .map(BookingStateResponse::from)
-                        .toList());
-    }
-
 }

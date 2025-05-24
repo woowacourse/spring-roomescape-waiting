@@ -37,4 +37,10 @@ public class AdminController {
     public String theme() {
         return "admin/theme";
     }
+
+    @GetMapping("/waiting")
+    @RequiresRole(authRoles = AuthRole.ADMIN)
+    public String waiting() {
+        return "admin/waiting";
+    }
 }
