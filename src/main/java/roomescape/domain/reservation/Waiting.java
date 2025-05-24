@@ -57,6 +57,10 @@ public class Waiting {
         return member;
     }
 
+    public ReservationSchedule getSchedule() {
+        return schedule;
+    }
+
     public ReservationTime getReservationTime() {
         return schedule.getReservationTime();
     }

@@ -92,19 +92,17 @@ public class ReservationService {
         final ReservationDateTime dateTime = new ReservationDateTime(date, time, clock);
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
-        validateReservationAvailability(dateTime, theme);
+        final ReservationSchedule schedule = new ReservationSchedule(
+                dateTime.getReservationDate(), dateTime.getReservationTime(), theme);
+        validateReservationAvailability(schedule);
 
         final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버가 존재하지 않습니다."));
-        return reservationRepository.save(
-                new Reservation(
-                        null, member,
-                        new ReservationSchedule(dateTime.getReservationDate(), dateTime.getReservationTime(), theme)));
+        return reservationRepository.save(new Reservation(null, member, schedule));
     }
 
-    private void validateReservationAvailability(final ReservationDateTime dateTime, final Theme theme) {
-        if (reservationRepository.existsByScheduleReservationDateAndScheduleReservationTimeAndScheduleTheme(
-                dateTime.getReservationDate(), dateTime.getReservationTime(), theme)) {
+    private void validateReservationAvailability(final ReservationSchedule schedule) {
+        if (reservationRepository.existsBySchedule(schedule)) {
             throw new IllegalStateException("이미 예약이 찼습니다.");
         }
     }

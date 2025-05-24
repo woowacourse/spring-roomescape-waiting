@@ -32,7 +32,7 @@ public record MyReservationResponse(
                 waiting.getTheme().getName().name(),
                 waiting.getDate(),
                 waiting.getStartAt(),
-                waitingWithRank.rank() + 1 + "번째 " + ReservationStatus.대기.getDisplay()
+                (waitingWithRank.rank() + 1) + "번째 " + ReservationStatus.대기.getDisplay()
         );
     }
 }

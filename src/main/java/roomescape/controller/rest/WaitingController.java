@@ -37,8 +37,7 @@ public class WaitingController {
     public ResponseEntity<Void> deleteWaiting(
             @PathVariable final Long id,
             final SessionMember sessionMember) {
-        waitingService.deleteWaitingById(id, sessionMember.id());
+        waitingService.deleteWaitingById(id, sessionMember);
         return ResponseEntity.noContent().build();
     }
-
 }

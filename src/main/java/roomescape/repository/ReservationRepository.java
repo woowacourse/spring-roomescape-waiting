@@ -8,17 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.ReservationTime;
+import roomescape.domain.reservation.ReservationSchedule;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
-    boolean existsByScheduleReservationDateAndScheduleReservationTimeAndScheduleTheme(
-            final ReservationDate reservationDate,
-            final ReservationTime reservationTime,
-            final Theme theme
-    );
+    boolean existsBySchedule(final ReservationSchedule reservationSchedule);
 
     @Query("SELECT r.id FROM Reservation r WHERE r.schedule.reservationTime.id = :timeId")
     List<Long> findIdsByReservationTimeId(@Param("timeId") final Long timeId, final Pageable pageable);
@@ -41,20 +35,12 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
                   AND r.schedule.theme.id = :themeId
                   AND r.member.id = :memberId
             """)
-    List<Long> findIdsByScheduleAndMember(
-            @Param("date") final LocalDate date,
-            @Param("timeId") final Long timeId,
-            @Param("themeId") final Long themeId,
-            @Param("memberId") final Long memberId,
-            Pageable pageable
-    );
+    List<Long> findIdsByScheduleAndMember(@Param("date") final LocalDate date, @Param("timeId") final Long timeId,
+                                          @Param("themeId") final Long themeId, @Param("memberId") final Long memberId,
+                                          Pageable pageable);
 
-    default boolean existsByScheduleAndMemberId(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId
-    ) {
+    default boolean existsByScheduleAndMemberId(final LocalDate date, final Long timeId,
+                                                final Long themeId, final Long memberId) {
         return !findIdsByScheduleAndMember(date, timeId, themeId, memberId, Pageable.ofSize(1)).isEmpty();
     }
 

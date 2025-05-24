@@ -22,7 +22,7 @@ public class AdminOnlyInterceptor implements HandlerInterceptor {
             throw new AuthenticationException("로그인이 필요합니다.");
         }
 
-        SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
+        final SessionMember sessionMember = (SessionMember) session.getAttribute("LOGIN_MEMBER");
         if (sessionMember == null) {
             throw new AuthenticationException("로그인이 필요합니다.");
         }
