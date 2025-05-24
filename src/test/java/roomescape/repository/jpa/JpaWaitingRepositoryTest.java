@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.entity.Member;
-import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.entity.Waiting;
 
 @DataJpaTest
-class JpaReservationRepositoryTest {
+class JpaWaitingRepositoryTest {
 
     @PersistenceContext
     private EntityManager em;
@@ -25,12 +25,12 @@ class JpaReservationRepositoryTest {
     @Autowired
     private JpaReservationTimeRepository reservationTimeRepository;
     @Autowired
-    private JpaReservationRepository reservationRepository;
-    @Autowired
     private JpaMemberRepository memberRepository;
+    @Autowired
+    private JpaWaitingRepository waitingRepository;
 
     @Test
-    @DisplayName("사용자로 예약을 찾을 수 있다.")
+    @DisplayName("사용자 정보로 예약 대기를 조회할 수 있다.")
     void findByMemberId() {
         Member member = saveMember(1L);
         Theme theme = saveTheme(1L);
@@ -40,15 +40,15 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
 
-        Reservation reservation = new Reservation(member, date, time, theme);
-        reservationRepository.save(reservation);
+        Waiting waiting = new Waiting(member, date, time, theme, 1L);
+        waitingRepository.save(waiting);
 
-        assertThat(reservationRepository.findByMemberId(member.getId())).hasSize(1);
+        assertThat(waitingRepository.findByMemberId(member.getId())).hasSize(1);
     }
 
     @Test
-    @DisplayName("해당 날짜와 테마에 해당하는 예약을 찾을 수 있다.")
-    void findByDateAndThemeId() {
+    @DisplayName("날짜, 테마, 시간으로 예약 대기를 조회할 수 있다.")
+    void findByDateAndThemeIdAndTimeId() {
         Member member = saveMember(1L);
         Theme theme = saveTheme(1L);
         ReservationTime time = saveTime(LocalTime.of(10, 0));
@@ -57,58 +57,37 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
 
-        Reservation reservation = new Reservation(member, date, time, theme);
-        reservationRepository.save(reservation);
+        Waiting waiting = new Waiting(member, date, time, theme, 1L);
+        waitingRepository.save(waiting);
 
-        assertThat(reservationRepository.findByDateAndThemeId(date, theme.getId())).hasSize(1);
+        assertThat(waitingRepository.findByDateAndThemeIdAndTimeId(
+            date, theme.getId(), time.getId())).hasSize(1);
     }
 
     @Test
-    @DisplayName("테마를 필터링하여 예약을 조회할 수 있다.")
-    void findByFiltersForTheme() {
-        Member member = saveMember(1L);
-        Theme theme1 = saveTheme(1L);
-        Theme theme2 = saveTheme(2L);
-        ReservationTime time = saveTime(LocalTime.of(10, 0));
-        LocalDate date = LocalDate.of(2025, 4, 28);
-
-        em.flush();
-        em.clear();
-
-        Reservation reservation1 = new Reservation(member, date, time, theme1);
-        Reservation reservation2 = new Reservation(member, date, time, theme2);
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
-
-        assertThat(reservationRepository.findByFilters(
-            theme1.getId(), null, null, null)).hasSize(1);
-    }
-
-    @Test
-    @DisplayName("테마와 사용자를 필터링하여 예약을 조회할 수 있다.")
-    void findByFiltersForThemeAndMember() {
+    @DisplayName("날짜, 테마, 시간으로 기존 예약 대기 수를 조회할 수 있다.")
+    void countByDateAndThemeIdAndTimeId() {
         Member member1 = saveMember(1L);
         Member member2 = saveMember(2L);
-        Theme theme1 = saveTheme(1L);
-        Theme theme2 = saveTheme(2L);
+        Theme theme = saveTheme(1L);
         ReservationTime time = saveTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2025, 4, 28);
 
         em.flush();
         em.clear();
 
-        Reservation reservation1 = new Reservation(member1, date, time, theme1);
-        Reservation reservation2 = new Reservation(member2, date, time, theme2);
-        reservationRepository.save(reservation1);
-        reservationRepository.save(reservation2);
+        Waiting waiting1 = new Waiting(member1, date, time, theme, 1L);
+        Waiting waiting2 = new Waiting(member2, date, time, theme, 2L);
+        waitingRepository.save(waiting1);
+        waitingRepository.save(waiting2);
 
-        assertThat(reservationRepository.findByFilters(
-            theme1.getId(), member1.getId(), null, null)).hasSize(1);
+        assertThat(waitingRepository.countByDateAndThemeIdAndTimeId(
+            date, theme.getId(), time.getId())).isEqualTo(2);
     }
 
     @Test
-    @DisplayName("해당 날짜, 시간, 테마로 예약이 있다면 true를 반환한다.")
-    void existReservationByDateTimeAndTheme() {
+    @DisplayName("날짜, 시간, 테마, 사용자 정보와 일치하는 예약 대기가 존재하면 true를 반환한다.")
+    void existsByDateAndTimeIdAndThemeIdAndMemberId() {
         Member member = saveMember(1L);
         Theme theme = saveTheme(1L);
         ReservationTime time = saveTime(LocalTime.of(10, 0));
@@ -117,16 +96,16 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
 
-        Reservation reservation = new Reservation(member, date, time, theme);
-        reservationRepository.save(reservation);
+        Waiting waiting = new Waiting(member, date, time, theme, 1L);
+        waitingRepository.save(waiting);
 
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+        assertThat(waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
             date, time.getId(), theme.getId(), member.getId())).isTrue();
     }
 
     @Test
-    @DisplayName("해당 날짜, 시간, 테마로 예약이 없다면 false 반환한다.")
-    void notExistReservationByDateTimeAndTheme() {
+    @DisplayName("날짜, 시간, 테마, 사용자 정보와 일치하는 예약 대기가 존재하면 false를 반환한다.")
+    void notExistsByDateAndTimeIdAndThemeIdAndMemberId() {
         Member member = saveMember(1L);
         Theme theme = saveTheme(1L);
         ReservationTime time = saveTime(LocalTime.of(10, 0));
@@ -135,10 +114,10 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
 
-        Reservation reservation = new Reservation(member, date, time, theme);
-        reservationRepository.save(reservation);
+        Waiting waiting = new Waiting(member, date, time, theme, 1L);
+        waitingRepository.save(waiting);
 
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+        assertThat(waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
             date, time.getId(), theme.getId() + 1, member.getId())).isFalse();
     }
 

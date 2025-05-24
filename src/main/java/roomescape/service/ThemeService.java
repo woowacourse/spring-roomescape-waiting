@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,7 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findTopReservedThemes() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
         return themeRepository.findTopRankByDateBetween(today.minusDays(TOP_RANK_PERIOD_DAYS), today).stream()
             .limit(TOP_MAX_SIZE)

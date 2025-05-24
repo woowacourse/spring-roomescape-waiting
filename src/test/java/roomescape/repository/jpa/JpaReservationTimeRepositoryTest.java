@@ -7,24 +7,36 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.DirtiesContext;
 import roomescape.entity.ReservationTime;
 
 @DataJpaTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class JpaReservationTimeRepositoryTest {
 
     @Autowired
-    private JpaReservationTimeRepository jpaReservationTimeRepository;
+    private JpaReservationTimeRepository reservationTimeRepository;
+
+    @Test
+    @DisplayName("모든 시간대를 조회할 수 있다.")
+    void findAllOrderByStartAtAsc() {
+        LocalTime time1 = LocalTime.of(10, 0);
+        LocalTime time2 = LocalTime.of(11, 0);
+        LocalTime time3 = LocalTime.of(12, 0);
+
+        reservationTimeRepository.save(new ReservationTime(time1));
+        reservationTimeRepository.save(new ReservationTime(time2));
+        reservationTimeRepository.save(new ReservationTime(time3));
+
+        assertThat(reservationTimeRepository.findAllByOrderByStartAtAsc()).hasSize(3);
+    }
 
     @Test
     @DisplayName("해당 시간이 있다면 true를 반환한다.")
     void existTimeByStartAt() {
         LocalTime time = LocalTime.of(10, 0);
 
-        jpaReservationTimeRepository.save(new ReservationTime(time));
+        reservationTimeRepository.save(new ReservationTime(time));
 
-        assertThat(jpaReservationTimeRepository.existsByStartAt(time)).isTrue();
+        assertThat(reservationTimeRepository.existsByStartAt(time)).isTrue();
     }
 
     @Test
@@ -32,6 +44,6 @@ class JpaReservationTimeRepositoryTest {
     void notExistTimeByStartAt() {
         LocalTime time = LocalTime.of(11, 0);
 
-        assertThat(jpaReservationTimeRepository.existsByStartAt(time)).isFalse();
+        assertThat(reservationTimeRepository.existsByStartAt(time)).isFalse();
     }
 }
