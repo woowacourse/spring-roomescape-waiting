@@ -37,7 +37,6 @@ public class ReservationOperation {
 
     @Transactional
     public void cancel(Reservation reservation) {
-        reservation.checkOwner(memberId);
         reservation.changeToCancel();
         reservationWaitingRepository.findFirstPendingBySchedule(reservation.getSchedule())
                 .ifPresent(reservationWaiting -> {

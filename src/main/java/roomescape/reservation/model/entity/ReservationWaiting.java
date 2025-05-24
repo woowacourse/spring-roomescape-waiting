@@ -1,6 +1,8 @@
 package roomescape.reservation.model.entity;
 
-import static roomescape.reservation.model.entity.vo.ReservationWaitingStatus.*;
+import static roomescape.reservation.model.entity.vo.ReservationWaitingStatus.ACCEPTED;
+import static roomescape.reservation.model.entity.vo.ReservationWaitingStatus.CANCELED;
+import static roomescape.reservation.model.entity.vo.ReservationWaitingStatus.PENDING;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,10 +22,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import roomescape.global.exception.AuthorizationException;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationWaitingDetails;
 import roomescape.reservation.model.entity.vo.ReservationWaitingStatus;
+import roomescape.reservation.model.exception.ReservationAuthException.InvalidOwnerException;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 
 @Entity
@@ -90,7 +92,7 @@ public class ReservationWaiting {
 
     public void checkOwner(Long memberId) {
         if (!Objects.equals(member.getId(), memberId)) {
-            throw new AuthorizationException("해당 웨이팅을 취소할 권한이 없습니다.");
+            throw new InvalidOwnerException();
         }
     }
 

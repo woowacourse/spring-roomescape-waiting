@@ -1,6 +1,7 @@
 package roomescape.reservation.model.entity;
 
-import static roomescape.reservation.model.entity.vo.ReservationStatus.*;
+import static roomescape.reservation.model.entity.vo.ReservationStatus.CANCELED;
+import static roomescape.reservation.model.entity.vo.ReservationStatus.CONFIRMED;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,11 +20,11 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.global.exception.AuthorizationException;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationDetails;
-import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 import roomescape.reservation.model.entity.vo.ReservationStatus;
+import roomescape.reservation.model.exception.ReservationAuthException.InvalidOwnerException;
+import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 import roomescape.reservation.model.vo.Schedule;
 
 @Getter
@@ -106,7 +107,7 @@ public class Reservation {
 
     public void checkOwner(Long memberId) {
         if (!Objects.equals(member.getId(), memberId)) {
-            throw new AuthorizationException("해당 예약을 취소할 권한이 없습니다.");
+            throw new InvalidOwnerException();
         }
     }
 
