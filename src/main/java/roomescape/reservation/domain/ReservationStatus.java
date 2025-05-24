@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ReservationStatus {
 
-    RESERVED("예약"),
+    BOOKED("예약"),
     PAID("결제 완료"),
     ;
 

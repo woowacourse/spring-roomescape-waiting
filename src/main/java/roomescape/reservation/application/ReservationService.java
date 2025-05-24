@@ -1,6 +1,6 @@
 package roomescape.reservation.application;
 
-import static roomescape.reservation.domain.ReservationStatus.RESERVED;
+import static roomescape.reservation.domain.ReservationStatus.BOOKED;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,7 +59,7 @@ public class ReservationService {
         final Theme theme = getThemeById(themeId);
         final Member member = getMemberById(memberId);
 
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member, RESERVED);
+        final Reservation reservation = new Reservation(date, reservationTime, theme, member, BOOKED);
 
         return reservationRepository.save(reservation);
     }

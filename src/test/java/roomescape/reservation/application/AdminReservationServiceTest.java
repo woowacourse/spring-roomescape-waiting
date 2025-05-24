@@ -7,7 +7,7 @@ import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservati
 import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservationTime3;
 import static roomescape.fixture.domain.ThemeFixture.notSavedTheme1;
 import static roomescape.fixture.domain.ThemeFixture.notSavedTheme2;
-import static roomescape.reservation.domain.ReservationStatus.RESERVED;
+import static roomescape.reservation.domain.ReservationStatus.BOOKED;
 import static roomescape.reservation.domain.ReservationStatus.values;
 
 import java.time.LocalDate;
@@ -65,7 +65,7 @@ class AdminReservationServiceTest {
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
         final CreateReservationRequest request =
-                new CreateReservationRequest(member.getId(), date, timeId, themeId, RESERVED);
+                new CreateReservationRequest(member.getId(), date, timeId, themeId, BOOKED);
 
         // when & then
         Assertions.assertThatCode(() -> adminReservationService.createReservation(request))
@@ -81,11 +81,11 @@ class AdminReservationServiceTest {
         final Member member = memberRepository.save(notSavedMember1());
 
         reservationRepository.save(
-                new Reservation(date, reservationTime, theme, member, RESERVED));
+                new Reservation(date, reservationTime, theme, member, BOOKED));
 
         final CreateReservationRequest request =
                 new CreateReservationRequest(member.getId(), date, reservationTime.getId(), theme.getId()
-                        , RESERVED);
+                        , BOOKED);
 
         // when & then
         Assertions.assertThatThrownBy(() -> adminReservationService.createReservation(request))
@@ -102,7 +102,7 @@ class AdminReservationServiceTest {
 
         final CreateReservationRequest request =
                 new CreateReservationRequest(member.getId(), date, timeId, themeId,
-                        RESERVED);
+                        BOOKED);
 
         // when & then
         Assertions.assertThatCode(() -> adminReservationService.createReservation(request))
@@ -117,7 +117,7 @@ class AdminReservationServiceTest {
         final Theme theme = themeRepository.save(notSavedTheme1());
         final Member member = memberRepository.save(notSavedMember1());
         final Reservation reservation = reservationRepository.save(
-                new Reservation(date, time, theme, member, RESERVED));
+                new Reservation(date, time, theme, member, BOOKED));
 
         // when & then
         Assertions.assertThatCode(() -> adminReservationService.deleteAsAdmin(reservation.getId()))
@@ -131,7 +131,7 @@ class AdminReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(notSavedReservationTime1());
         final Theme theme = themeRepository.save(notSavedTheme1());
         final Member member = memberRepository.save(notSavedMember1());
-        reservationRepository.save(new Reservation(date, time, theme, member, RESERVED));
+        reservationRepository.save(new Reservation(date, time, theme, member, BOOKED));
 
         // when & then
         Assertions.assertThatThrownBy(() -> adminReservationService.deleteAsAdmin(Long.MAX_VALUE))
@@ -153,10 +153,10 @@ class AdminReservationServiceTest {
         final Theme theme2 = themeRepository.save(notSavedTheme2());
 
         reservationRepository.save(
-                new Reservation(date1, time1, theme1, member, RESERVED)
+                new Reservation(date1, time1, theme1, member, BOOKED)
         );
         reservationRepository.save(
-                new Reservation(date2, time2, theme2, member, RESERVED)
+                new Reservation(date2, time2, theme2, member, BOOKED)
         );
 
         // when
@@ -179,9 +179,9 @@ class AdminReservationServiceTest {
         final LocalDate date2 = LocalDate.now().plusDays(2);
         final LocalDate date3 = LocalDate.now().plusDays(3);
 
-        reservationRepository.save(new Reservation(date1, time1, theme, member, RESERVED));
-        reservationRepository.save(new Reservation(date2, time2, theme, member, RESERVED));
-        reservationRepository.save(new Reservation(date3, time3, theme, member, RESERVED));
+        reservationRepository.save(new Reservation(date1, time1, theme, member, BOOKED));
+        reservationRepository.save(new Reservation(date2, time2, theme, member, BOOKED));
+        reservationRepository.save(new Reservation(date3, time3, theme, member, BOOKED));
 
         final FilteredReservationsRequest request1 =
                 new FilteredReservationsRequest(theme.getId(), member.getId(), date1, date2);

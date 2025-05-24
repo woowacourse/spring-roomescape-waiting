@@ -149,7 +149,7 @@ class ThemeServiceTest {
                 reservationRepository.save(
                         new Reservation(
                                 now.minusDays(themeIndex), times.get(timeIndex), themes.get(themeIndex), member,
-                                ReservationStatus.RESERVED
+                                ReservationStatus.BOOKED
                         )
                 );
             }
@@ -160,7 +160,7 @@ class ThemeServiceTest {
             reservationRepository.save(
                     new Reservation(
                             weekAgo.minusDays(2), times.get(timeIndex), themes.get(5), member,
-                            ReservationStatus.RESERVED
+                            ReservationStatus.BOOKED
                     )
             );
         }
@@ -170,7 +170,7 @@ class ThemeServiceTest {
             reservationRepository.save(
                     new Reservation(
                             now.plusDays(timeIndex), times.get(timeIndex), themes.get(6), member,
-                            ReservationStatus.RESERVED
+                            ReservationStatus.BOOKED
                     )
             );
         }

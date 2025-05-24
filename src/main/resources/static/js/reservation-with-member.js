@@ -7,7 +7,7 @@ const MEMBER_API_ENDPOINT = '/members';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
-const statusesOptions = [{id: 'WAITING', name: '예약 대기'}, {id: 'RESERVED', name: '예약'}];
+const statusesOptions = [{id: 'WAITING', name: '예약 대기'}, {id: 'BOOKED', name: '예약'}];
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
@@ -168,7 +168,7 @@ function saveRow(event) {
     const timeSelect = row.querySelector('#time-select');
     const statusSelect = row.querySelector('#status-select');
 
-    if (statusSelect.value == 'RESERVED') {
+    if (statusSelect.value == 'BOOKED') {
         const reservation = {
             date: dateInput.value,
             themeId: themeSelect.value,

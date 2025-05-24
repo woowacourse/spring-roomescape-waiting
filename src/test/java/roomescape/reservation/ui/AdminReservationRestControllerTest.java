@@ -206,7 +206,7 @@ class AdminReservationRestControllerTest {
         final String themeId = createThemeResponses.get(0).extract().body()
                 .as(Map.class)
                 .get("id").toString();
-        final String status = ReservationStatus.RESERVED.name();
+        final String status = ReservationStatus.BOOKED.name();
 
         return createReservationParams(memberId, date, timeId, themeId, status);
     }
@@ -221,7 +221,7 @@ class AdminReservationRestControllerTest {
         final String themeId = createThemeResponses.get(1).extract().body()
                 .as(Map.class)
                 .get("id").toString();
-        final String status = ReservationStatus.RESERVED.name();
+        final String status = ReservationStatus.BOOKED.name();
 
         return createReservationParams(memberId, date, timeId, themeId, status);
     }

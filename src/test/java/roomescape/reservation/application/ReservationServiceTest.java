@@ -107,7 +107,7 @@ class ReservationServiceTest {
                 new MemberAuthInfo(member.getId(), member.getRole());
 
         reservationRepository.save(
-                new Reservation(date, reservationTime, theme, member, ReservationStatus.RESERVED));
+                new Reservation(date, reservationTime, theme, member, ReservationStatus.BOOKED));
 
         // when & then
         Assertions.assertThatThrownBy(() -> reservationService.create(request, memberAuthInfo.id()))
@@ -123,7 +123,7 @@ class ReservationServiceTest {
         final Member member1 = memberRepository.save(notSavedMember1());
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
-                ReservationStatus.RESERVED);
+                ReservationStatus.BOOKED);
         final Long reservationId = reservationRepository.save(reservation).getId();
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
@@ -143,7 +143,7 @@ class ReservationServiceTest {
         final Member member2 = memberRepository.save(notSavedMember2());
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
-                ReservationStatus.RESERVED);
+                ReservationStatus.BOOKED);
         final Long reservationId = reservationRepository.save(reservation).getId();
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
@@ -161,7 +161,7 @@ class ReservationServiceTest {
         final Member member1 = memberRepository.save(notSavedMember1());
 
         final Reservation reservation = new Reservation(date, reservationTime1, theme1, member1,
-                ReservationStatus.RESERVED);
+                ReservationStatus.BOOKED);
         reservationRepository.save(reservation);
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
@@ -186,7 +186,7 @@ class ReservationServiceTest {
                 .filter(AvailableReservationTimeResponse::alreadyBooked)
                 .count();
         reservationRepository.save(
-                new Reservation(date, reservationTime1, theme, member, ReservationStatus.RESERVED));
+                new Reservation(date, reservationTime1, theme, member, ReservationStatus.BOOKED));
 
         // when
         final long afterCount = reservationService.findAvailableReservationTimes(request)
@@ -211,11 +211,11 @@ class ReservationServiceTest {
         final Theme theme2 = themeRepository.save(notSavedTheme2());
 
         reservationRepository.save(
-                new Reservation(date1, time1, theme1, member, ReservationStatus.RESERVED)
+                new Reservation(date1, time1, theme1, member, ReservationStatus.BOOKED)
         );
 
         reservationRepository.save(
-                new Reservation(date2, time2, theme2, member, ReservationStatus.RESERVED)
+                new Reservation(date2, time2, theme2, member, ReservationStatus.BOOKED)
         );
 
         // when
