@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -40,14 +39,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE r.theme = :theme
                 AND r.date = :date
                 AND r.time = :time
-                AND w.status = :status
+                AND w.status = roomescape.domain.ReservationStatus.WAITING
                 AND w.savedDateTime < :myCreatedAt
             """)
     long countByReservationWaitingOrderByCreatedAt(
             @Param("theme") Theme theme,
             @Param("date") LocalDate date,
             @Param("time") ReservationTime time,
-            @Param("status") ReservationStatus status,
             @Param("myCreatedAt") LocalDateTime myCreatedAt
     );
 }

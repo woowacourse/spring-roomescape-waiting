@@ -32,7 +32,6 @@ public class ReservationQueryService {
     }
 
     public List<ReservationWaitingDto> getReservationsByMember(Long memberId) {
-
         Member member = memberService.getMemberEntityById(memberId);
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
         return memberReservations.stream()

@@ -47,4 +47,8 @@ public class Waiting {
     public ReservationStatus getStatus() {
         return status;
     }
+
+    public void setStatus(ReservationStatus reservationStatus) {
+        this.status = reservationStatus;
+    }
 }

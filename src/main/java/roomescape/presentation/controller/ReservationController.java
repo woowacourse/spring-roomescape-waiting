@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationCommandService;
 import roomescape.application.ReservationQueryService;
+import roomescape.application.WaitingService;
 import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
@@ -27,10 +28,13 @@ public class ReservationController {
 
     private final ReservationCommandService commandService;
     private final ReservationQueryService queryService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationQueryService queryService, ReservationCommandService commandService) {
+    public ReservationController(ReservationQueryService queryService, ReservationCommandService commandService,
+                                 WaitingService waitingService) {
         this.queryService = queryService;
         this.commandService = commandService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -67,6 +71,15 @@ public class ReservationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
         commandService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaiting(
+            @PathVariable("id") Long id,
+            @AuthenticatedMemberId MemberIdDto memberIdDto
+    ) {
+        waitingService.deleteWaiting(id, memberIdDto.id());
         return ResponseEntity.noContent().build();
     }
 }

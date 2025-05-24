@@ -97,6 +97,10 @@ public class Reservation {
         return this.waiting.getStatus() == ReservationStatus.WAITING;
     }
 
+    public void cancel() {
+        this.waiting.setStatus(ReservationStatus.CANCELED);
+    }
+
     public void setTime(ReservationTime time) {
         this.time = time;
     }
