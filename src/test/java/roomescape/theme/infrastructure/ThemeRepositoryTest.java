@@ -97,13 +97,20 @@ class ThemeRepositoryTest {
         final LocalDate date1 = LocalDate.now().plusDays(1);
         final LocalDate date2 = LocalDate.now().plusDays(5);
 
-        ReservationSlot reservationSlot1 = reservationSlotRepository.save(new ReservationSlot(date1, time1, theme1));
-        ReservationSlot reservationSlot2 = reservationSlotRepository.save(new ReservationSlot(date1, time2, theme2));
-        ReservationSlot reservationSlot3 = reservationSlotRepository.save(new ReservationSlot(date1, time3, theme1));
-        ReservationSlot reservationSlot4 = reservationSlotRepository.save(new ReservationSlot(date2, time1, theme2));
-        ReservationSlot reservationSlot5 = reservationSlotRepository.save(new ReservationSlot(date2, time2, theme1));
-        ReservationSlot reservationSlot6 = reservationSlotRepository.save(new ReservationSlot(date2, time2, theme2));
-        ReservationSlot reservationSlot7 = reservationSlotRepository.save(new ReservationSlot(date2, time3, theme2));
+        final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
+                new ReservationSlot(date1, time1, theme1));
+        final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
+                new ReservationSlot(date1, time2, theme2));
+        final ReservationSlot reservationSlot3 = reservationSlotRepository.save(
+                new ReservationSlot(date1, time3, theme1));
+        final ReservationSlot reservationSlot4 = reservationSlotRepository.save(
+                new ReservationSlot(date2, time1, theme2));
+        final ReservationSlot reservationSlot5 = reservationSlotRepository.save(
+                new ReservationSlot(date2, time2, theme1));
+        final ReservationSlot reservationSlot6 = reservationSlotRepository.save(
+                new ReservationSlot(date2, time2, theme2));
+        final ReservationSlot reservationSlot7 = reservationSlotRepository.save(
+                new ReservationSlot(date2, time3, theme2));
 
         reservationRepository.save(new Reservation(member, reservationSlot1));
         reservationRepository.save(new Reservation(member, reservationSlot2));

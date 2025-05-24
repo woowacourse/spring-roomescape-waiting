@@ -77,7 +77,7 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when
-        MemberReservationResponse response = reservationService.createForMember(request, memberAuthInfo.id());
+        final MemberReservationResponse response = reservationService.createForMember(request, memberAuthInfo.id());
 
         // then
         assertAll(
@@ -196,7 +196,7 @@ class ReservationServiceTest {
         reservationService.deleteReservation(reservation.getId(), adminAuthInfo);
 
         // then
-        assertThat(reservationRepository.findById(reservation.getId()).isEmpty());
+        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
     }
 
     @Test
@@ -224,7 +224,7 @@ class ReservationServiceTest {
 
         // then
         assertAll(
-                () -> assertThat(reservationRepository.findById(confirmedReservation.getId()).isEmpty()),
+                () -> assertThat(reservationRepository.findById(confirmedReservation.getId())).isEmpty(),
                 () -> assertThat(reservationSlot.getConfirmedReservation()).isEqualTo(waitingReservation)
         );
     }
@@ -398,17 +398,17 @@ class ReservationServiceTest {
                 new ReservationSlot(date, time, theme2));
 
         reservationSlot1.addReservation(reservationRepository.save(new Reservation(member1, reservationSlot1)));
-        Reservation waitingReservation1 = reservationRepository.save(new Reservation(member2, reservationSlot1));
+        final Reservation waitingReservation1 = reservationRepository.save(new Reservation(member2, reservationSlot1));
         reservationSlot1.addReservation(waitingReservation1);
         reservationSlot1.assignConfirmedIfEmpty();
 
         reservationSlot2.addReservation(reservationRepository.save(new Reservation(member2, reservationSlot2)));
-        Reservation waitingReservation2 = reservationRepository.save(new Reservation(member1, reservationSlot2));
+        final Reservation waitingReservation2 = reservationRepository.save(new Reservation(member1, reservationSlot2));
         reservationSlot2.addReservation(waitingReservation2);
         reservationSlot2.assignConfirmedIfEmpty();
 
         // when
-        List<AdminReservationWaitingResponse> responses = reservationService.findReservationWaitings();
+        final List<AdminReservationWaitingResponse> responses = reservationService.findReservationWaitings();
 
         // then
         assertAll(

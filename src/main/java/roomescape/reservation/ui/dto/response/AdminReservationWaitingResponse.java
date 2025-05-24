@@ -13,7 +13,7 @@ public record AdminReservationWaitingResponse(
         LocalTime reservationStartAt
 ) {
     public static AdminReservationWaitingResponse from(final Reservation reservation) {
-        ReservationSlot reservationSlot = reservation.getReservationSlot();
+        final ReservationSlot reservationSlot = reservation.getReservationSlot();
         return new AdminReservationWaitingResponse(
                 reservation.getId(),
                 reservation.getMember().getName(),

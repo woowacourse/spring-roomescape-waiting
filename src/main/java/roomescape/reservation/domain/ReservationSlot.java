@@ -50,7 +50,7 @@ public class ReservationSlot {
     @JoinColumn(name = "confirmed_reservation_id")
     private Reservation confirmedReservation;
 
-    public ReservationSlot(Long id, LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationSlot(final Long id, final LocalDate date, final ReservationTime time, final Theme theme) {
         validateDate(date);
         validateTime(time);
         validateFutureReservation(date, time);
@@ -61,7 +61,7 @@ public class ReservationSlot {
         this.theme = theme;
     }
 
-    public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme) {
         this(null, date, time, theme);
     }
 
@@ -97,7 +97,7 @@ public class ReservationSlot {
                 .toList();
     }
 
-    public void addReservation(Reservation reservation) {
+    public void addReservation(final Reservation reservation) {
         if (allReservations.size() >= MAX_WAITING_COUNT) {
             throw new ResourceLimitExceededException("최대 예약 대기 개수를 초과했습니다.");
         }
@@ -120,7 +120,7 @@ public class ReservationSlot {
                 .orElseThrow(() -> new IllegalStateException("예약 데이터가 존재하지 않습니다."));
     }
 
-    public void removeReservation(Reservation reservation) {
+    public void removeReservation(final Reservation reservation) {
         if (!allReservations.contains(reservation)) {
             return;
         }

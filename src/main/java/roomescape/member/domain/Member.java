@@ -93,7 +93,7 @@ public class Member {
         return role == AuthRole.ADMIN;
     }
 
-    public void validateDeletableReservation(Reservation reservation) {
+    public void validateDeletableReservation(final Reservation reservation) {
         if (!this.isAdmin() && !Objects.equals(reservation.getMember(), this)) {
             throw new AuthorizationException("삭제할 권한이 없습니다.");
         }

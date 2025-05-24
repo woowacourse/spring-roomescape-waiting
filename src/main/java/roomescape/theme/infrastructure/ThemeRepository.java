@@ -13,7 +13,7 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     boolean existsByName(String name);
 
-    default Theme getByIdOrThrow(Long id) {
+    default Theme getByIdOrThrow(final Long id) {
         return this.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
     }
@@ -31,10 +31,10 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
             final LocalDate to,
             final Pageable pageable);
 
-    default List<Theme> getTopNThemesInPeriod(LocalDate dateFrom, LocalDate dateTo, int limit) {
-        int FIRST_PAGE = 0;
+    default List<Theme> getTopNThemesInPeriod(final LocalDate dateFrom, final LocalDate dateTo, final int limit) {
+        final int FIRST_PAGE = 0;
 
-        Pageable topThemePageable = PageRequest.of(FIRST_PAGE, limit);
+        final Pageable topThemePageable = PageRequest.of(FIRST_PAGE, limit);
         return findTopNThemesByReservationCountInDateRange(dateFrom, dateTo, topThemePageable);
     }
 }

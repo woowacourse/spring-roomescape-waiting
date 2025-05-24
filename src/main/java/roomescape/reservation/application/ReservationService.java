@@ -68,7 +68,7 @@ public class ReservationService {
         final Member member = memberRepository.getByIdOrThrow(memberAuthInfo.id());
         member.validateDeletableReservation(reservation);
 
-        ReservationSlot reservationSlot = reservation.getReservationSlot();
+        final ReservationSlot reservationSlot = reservation.getReservationSlot();
         reservation.delete();
         reservationRepository.delete(reservation);
 
@@ -145,11 +145,11 @@ public class ReservationService {
     private Reservation registerReservation(final LocalDate date, final Long timeId, final Long themeId,
                                             final Long memberId) {
 
-        ReservationSlot reservationSlot = getReservationSlot(date, timeId, themeId);
+        final ReservationSlot reservationSlot = getReservationSlot(date, timeId, themeId);
         validateMemberDuplicateReservation(reservationSlot, memberId);
 
-        Member member = memberRepository.getByIdOrThrow(memberId);
-        Reservation reservation = new Reservation(member, reservationSlot);
+        final Member member = memberRepository.getByIdOrThrow(memberId);
+        final Reservation reservation = new Reservation(member, reservationSlot);
         reservationSlot.addReservation(reservation);
         resolveSlotAfterChange(reservationSlot);
         return reservation;
@@ -161,13 +161,13 @@ public class ReservationService {
     }
 
     private ReservationSlot registerReservationSlot(final LocalDate date, final Long timeId, final Long themeId) {
-        ReservationTime time = reservationTimeRepository.getByIdOrThrow(timeId);
-        Theme theme = themeRepository.getByIdOrThrow(themeId);
+        final ReservationTime time = reservationTimeRepository.getByIdOrThrow(timeId);
+        final Theme theme = themeRepository.getByIdOrThrow(themeId);
 
         return reservationSlotRepository.save(new ReservationSlot(date, time, theme));
     }
 
-    private void resolveSlotAfterChange(ReservationSlot reservationSlot) {
+    private void resolveSlotAfterChange(final ReservationSlot reservationSlot) {
         if (reservationSlot.shouldBeDeleted()) {
             reservationSlotRepository.delete(reservationSlot);
             return;
@@ -175,7 +175,7 @@ public class ReservationService {
         reservationSlot.assignConfirmedIfEmpty();
     }
 
-    private List<AdminReservationResponse> mapSlotReservations(ReservationSlot reservationSlot) {
+    private List<AdminReservationResponse> mapSlotReservations(final ReservationSlot reservationSlot) {
         return reservationSlot.getAllReservations().stream()
                 .map(reservation -> AdminReservationResponse.from(
                         reservation,

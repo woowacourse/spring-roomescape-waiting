@@ -16,7 +16,7 @@ public record AdminReservationResponse(
 ) {
 
     public static AdminReservationResponse from(final Reservation reservation, final Long rank) {
-        ReservationSlot reservationSlot = reservation.getReservationSlot();
+        final ReservationSlot reservationSlot = reservation.getReservationSlot();
         return new AdminReservationResponse(
                 reservation.getId(),
                 IdName.from(reservation.getMember()),

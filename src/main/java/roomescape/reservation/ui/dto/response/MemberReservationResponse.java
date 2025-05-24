@@ -14,7 +14,7 @@ public record MemberReservationResponse(
 ) {
 
     public static MemberReservationResponse from(final Reservation reservation, final Long rank) {
-        ReservationSlot reservationSlot = reservation.getReservationSlot();
+        final ReservationSlot reservationSlot = reservation.getReservationSlot();
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservationSlot.getTheme().getName(),

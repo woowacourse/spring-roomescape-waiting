@@ -35,7 +35,7 @@ public class Reservation {
     @JoinColumn(name = "reservation_slot_id", nullable = false)
     private ReservationSlot reservationSlot;
 
-    public Reservation(Long id, Member member, ReservationSlot reservationSlot) {
+    public Reservation(final Long id, final Member member, final ReservationSlot reservationSlot) {
         validateMember(member);
         validateReservationSlot(reservationSlot);
         this.id = id;
@@ -43,7 +43,7 @@ public class Reservation {
         this.reservationSlot = reservationSlot;
     }
 
-    public Reservation(Member member, ReservationSlot reservationSlot) {
+    public Reservation(final Member member, final ReservationSlot reservationSlot) {
         this(null, member, reservationSlot);
     }
 
@@ -52,7 +52,7 @@ public class Reservation {
         reservationSlot = null;
     }
 
-    private void validateReservationSlot(ReservationSlot reservationSlot) {
+    private void validateReservationSlot(final ReservationSlot reservationSlot) {
         if (reservationSlot == null) {
             throw new IllegalArgumentException("예약 정보는 null이면 안됩니다.");
         }
