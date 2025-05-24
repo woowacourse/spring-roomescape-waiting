@@ -43,7 +43,7 @@ dependencies {
     testImplementation 'io.rest-assured:rest-assured:5.3.1'
 
     // 테스트 n+1 탐지기
-    implementation 'com.github.joon6093:jpa-nplus1-detector:2.3.0'
+    testImplementation 'com.github.joon6093:jpa-nplus1-detector:2.3.0'
 }
 
 test {
