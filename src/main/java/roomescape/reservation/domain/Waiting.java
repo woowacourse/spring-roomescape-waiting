@@ -1,7 +1,6 @@
 package roomescape.reservation.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -13,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import roomescape.member.domain.Member;
 
 @Entity
@@ -38,9 +36,6 @@ public class Waiting {
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     protected Waiting() {}
 
     public Waiting(
@@ -64,11 +59,6 @@ public class Waiting {
             final Theme theme
     ) {
         this(null, date, member, time, theme);
-    }
-
-    @PrePersist
-    protected void createdAt() {
-        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {

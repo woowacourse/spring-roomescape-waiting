@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,13 @@ public class WaitingService {
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+    }
+
+    public List<WaitingResponse> getAll() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 
     public WaitingResponse createWaiting(final WaitingCreateRequest request) {

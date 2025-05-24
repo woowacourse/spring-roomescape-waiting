@@ -111,6 +111,20 @@ class WaitingServiceTest {
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
+    @DisplayName("모든 예약대기 목록을 조회한다.")
+    @Test
+    void getAll() {
+        // given
+        LocalDate date = getTomorrow();
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        Waiting waiting = waitingRepository.save(new Waiting(date, member, time, theme));
+
+        // when & then
+        assertThat(waitingService.getAll()).hasSize(1);
+    }
+
     private LocalDate getTomorrow() {
         return LocalDate.now().plusDays(1L);
     }
