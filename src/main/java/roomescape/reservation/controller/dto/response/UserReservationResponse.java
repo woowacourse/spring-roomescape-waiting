@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.application.dto.response.UserReservationServiceResponse;
-import roomescape.reservation.model.vo.ReservationStatus;
 
 // TODO : Reservation id와 ReservationWaiting id 의미 분리
 public record UserReservationResponse(
@@ -12,7 +11,7 @@ public record UserReservationResponse(
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
-        ReservationStatus status,
+        String status,
         int rank
 ) {
 

@@ -1,5 +1,7 @@
 package roomescape.reservation.model.entity;
 
+import static roomescape.reservation.model.entity.vo.ReservationWaitingStatus.*;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationWaitingDetails;
+import roomescape.reservation.model.entity.vo.ReservationWaitingStatus;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 
 @Entity
@@ -36,6 +39,9 @@ public class ReservationWaiting {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Column(nullable = false)
+    private ReservationWaitingStatus status;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
     private ReservationTime time;
@@ -49,8 +55,10 @@ public class ReservationWaiting {
     private Member member;
 
     @Builder
-    public ReservationWaiting(LocalDate date, ReservationTime time, ReservationTheme theme, Member member) {
+    private ReservationWaiting(LocalDate date, ReservationWaitingStatus status, ReservationTime time,
+            ReservationTheme theme, Member member) {
         this.date = date;
+        this.status = status;
         this.time = time;
         this.theme = theme;
         this.member = member;
@@ -59,21 +67,30 @@ public class ReservationWaiting {
     public static ReservationWaiting createFuture(ReservationWaitingDetails details) {
         LocalDateTime requestedDateTime = LocalDateTime.of(details.date(), details.reservationTime().getStartAt());
         validateFutureTime(requestedDateTime);
-        return new ReservationWaiting(
-                details.date(),
-                details.reservationTime(),
-                details.reservationTheme(),
-                details.member()
-        );
+        return ReservationWaiting.builder()
+                .date(details.date())
+                .status(PENDING)
+                .time(details.reservationTime())
+                .theme(details.reservationTheme())
+                .member(details.member())
+                .build();
+    }
+
+    public void changeToAccept() {
+        this.status = ACCEPTED;
+    }
+
+    public void changeToCancel() {
+        this.status = CANCELED;
+    }
+
+    public boolean hasNotEqualsMemberId(Long memberId) {
+        return !Objects.equals(member.getId(), memberId);
     }
 
     private static void validateFutureTime(LocalDateTime requestedDateTime) {
         if (requestedDateTime.isBefore(LocalDateTime.now())) {
             throw new InvalidReservationTimeException("예약시간이 과거시간이 될 수 없습니다. 미래시간으로 입력해주세요.");
         }
-    }
-
-    public boolean hasNotEqualsMemberId(Long memberId) {
-        return !Objects.equals(member.getId(), memberId);
     }
 }

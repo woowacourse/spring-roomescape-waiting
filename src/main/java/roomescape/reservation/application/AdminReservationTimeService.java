@@ -9,14 +9,14 @@ import roomescape.reservation.application.dto.response.ReservationTimeServiceRes
 import roomescape.reservation.model.entity.ReservationTime;
 import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
-import roomescape.reservation.model.service.ReservationTimeValidator;
+import roomescape.reservation.model.service.ReservationTimeOperation;
 
 @Service
 @RequiredArgsConstructor
 public class AdminReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationTimeValidator reservationTimeValidator;
+    private final ReservationTimeOperation reservationTimeOperation;
 
     public ReservationTimeServiceResponse create(CreateReservationTimeServiceRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.save(request.toReservationTime());
@@ -31,13 +31,11 @@ public class AdminReservationTimeService {
     }
 
     public void delete(Long id) {
-        ReservationTime reservationTime = reservationTimeRepository.getById(id);
         try {
-            reservationTimeValidator.validateNotInUse(id);
+            ReservationTime reservationTime = reservationTimeRepository.getById(id);
+            reservationTimeOperation.removeTime(reservationTime);
         } catch (ReservationException e) {
             throw new BusinessRuleViolationException(e.getMessage(), e);
         }
-
-        reservationTimeRepository.remove(reservationTime);
     }
 }

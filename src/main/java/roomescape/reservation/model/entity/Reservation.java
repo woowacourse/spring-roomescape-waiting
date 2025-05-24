@@ -1,5 +1,7 @@
 package roomescape.reservation.model.entity;
 
+import static roomescape.reservation.model.entity.vo.ReservationStatus.*;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationDetails;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
-import roomescape.reservation.model.vo.ReservationStatus;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
 
 @Getter
 @Entity
@@ -31,6 +33,9 @@ public class Reservation {
 
     @Column(nullable = false)
     private LocalDate date;
+
+    @Column(nullable = false)
+    private ReservationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
@@ -45,29 +50,43 @@ public class Reservation {
     private Member member;
 
     @Builder
-    public Reservation(LocalDate date, ReservationTime time, ReservationTheme theme, Member member) {
+    private Reservation(LocalDate date, ReservationStatus status, ReservationTime time, ReservationTheme theme, Member member) {
         this.date = date;
+        this.status = status;
         this.time = time;
         this.theme = theme;
         this.member = member;
     }
 
-    public static Reservation fromWaiting(ReservationWaiting waiting) {
-        return new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember());
+    public static Reservation confirmedFromWaiting(ReservationWaiting waiting) {
+        return Reservation.builder()
+                .date(waiting.getDate())
+                .status(CONFIRMED)
+                .time(waiting.getTime())
+                .theme(waiting.getTheme())
+                .member(waiting.getMember())
+                .build();
     }
 
-    public ReservationStatus determineReservationStatus(LocalDateTime now) {
-        return ReservationStatus.determineStatus(LocalDateTime.of(date, time.getStartAt()), now);
+    public static Reservation createFuture(ReservationDetails details) {
+        LocalDateTime requestedDateTime = LocalDateTime.of(details.date(), details.reservationTime().getStartAt());
+        validateFutureTime(requestedDateTime);
+
+        return Reservation.builder()
+                .date(details.date())
+                .status(CONFIRMED)
+                .time(details.reservationTime())
+                .theme(details.reservationTheme())
+                .member(details.member())
+                .build();
     }
 
     public boolean hasNotEqualsMemberId(Long memberId) {
         return !Objects.equals(member.getId(), memberId);
     }
 
-    public static Reservation createFuture(ReservationDetails details) {
-        LocalDateTime requestedDateTime = LocalDateTime.of(details.date(), details.reservationTime().getStartAt());
-        validateFutureTime(requestedDateTime);
-        return new Reservation(details.date(), details.reservationTime(), details.reservationTheme(), details.member());
+    public void changeToCancel() {
+        this.status = CANCELED;
     }
 
     private static void validateFutureTime(LocalDateTime requestedDateTime) {

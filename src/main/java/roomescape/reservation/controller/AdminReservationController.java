@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,9 +53,9 @@ public class AdminReservationController {
                 .toList();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable("id") Long id) {
-        adminReservationService.delete(id);
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/{id}/cancel")
+    public void cancel(@PathVariable("id") Long id) {
+        adminReservationService.cancel(id);
     }
 }

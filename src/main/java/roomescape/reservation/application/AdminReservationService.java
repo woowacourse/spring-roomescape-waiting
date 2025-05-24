@@ -35,7 +35,7 @@ public class AdminReservationService {
                 .toList();
     }
 
-    public void delete(Long id) {
+    public void cancel(Long id) {
         Reservation reservation = reservationRepository.getById(id);
         reservationOperation.cancel(reservation);
     }

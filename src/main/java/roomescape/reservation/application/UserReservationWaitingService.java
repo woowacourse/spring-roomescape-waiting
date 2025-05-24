@@ -19,19 +19,17 @@ public class UserReservationWaitingService {
 
     public void create(CreateReservationWaitingServiceRequest request) {
         try {
-            ReservationWaiting reservationWaiting = reservationWaitingOperation.waiting(request.date(),
-                    request.themeId(), request.themeId(), request.memberId());
-            reservationWaitingRepository.save(reservationWaiting);
+            reservationWaitingOperation.waiting(request.date(), request.themeId(), request.themeId(), request.memberId());
         } catch (ReservationException e) {
             throw new BusinessRuleViolationException(e.getMessage(), e);
         }
     }
 
-    public void delete(Long reservationWaitingId, Long memberId) {
+    public void cancel(Long reservationWaitingId, Long memberId) {
         ReservationWaiting reservationWaiting = reservationWaitingRepository.getById(reservationWaitingId);
         if (reservationWaiting.hasNotEqualsMemberId(memberId)) {
-            throw new AuthorizationException("해당 웨이팅을 삭제할 권한이 없습니다.");
+            throw new AuthorizationException("해당 웨이팅을 취소할 권한이 없습니다.");
         }
-        reservationWaitingRepository.remove(reservationWaiting);
+        reservationWaiting.changeToCancel();
     }
 }

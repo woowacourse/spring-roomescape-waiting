@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +16,8 @@ import roomescape.auth.web.resolver.AuthenticationPrincipal;
 import roomescape.reservation.application.UserReservationService;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.controller.dto.request.UserCreateReservationRequest;
-import roomescape.reservation.controller.dto.response.UserReservationResponse;
 import roomescape.reservation.controller.dto.response.ReservationResponse;
+import roomescape.reservation.controller.dto.response.UserReservationResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,13 +46,13 @@ public class UserReservationController {
                 .toList();
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("{id}")
-    public void delete(
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("{id}/cancel")
+    public void cancel(
             @PathVariable("id") Long id,
             @AuthenticationPrincipal AuthenticatedMember authenticatedMember
     ) {
         Long memberId = authenticatedMember.id();
-        userReservationService.delete(id, memberId);
+        userReservationService.cancel(id, memberId);
     }
 }

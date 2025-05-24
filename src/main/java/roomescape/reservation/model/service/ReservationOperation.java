@@ -3,6 +3,7 @@ package roomescape.reservation.model.service;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
 import roomescape.reservation.model.dto.ReservationDetails;
@@ -25,19 +26,27 @@ public class ReservationOperation {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationValidator reservationValidator;
 
+    @Transactional
     public Reservation reserve(LocalDate date, Long timeId, Long themeId, Long memberId) {
-        ReservationDetails reservationDetails = createReservationDetails(date, timeId, themeId, memberId);
         reservationValidator.validateNoDuplication(date, timeId, themeId);
-        return Reservation.createFuture(reservationDetails);
+        ReservationDetails reservationDetails = createReservationDetails(date, timeId, themeId, memberId);
+        Reservation reservation = Reservation.createFuture(reservationDetails);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return savedReservation;
     }
 
+    @Transactional
     public void cancel(Reservation reservation) {
-        reservationRepository.remove(reservation);
+        reservation.changeToCancel();
         reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()
-        ).ifPresent(reservationWaiting -> reservationRepository.save(Reservation.fromWaiting(reservationWaiting)));
+        ).ifPresent(reservationWaiting -> {
+            reservationWaiting.changeToAccept();
+            Reservation newReservation = Reservation.confirmedFromWaiting(reservationWaiting);
+            reservationRepository.save(newReservation);
+        });
     }
 
     private ReservationDetails createReservationDetails(LocalDate date, Long timeId, Long themeId, Long memberId) {

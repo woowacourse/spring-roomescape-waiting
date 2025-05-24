@@ -8,14 +8,14 @@ import roomescape.reservation.application.dto.response.ReservationThemeServiceRe
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
-import roomescape.reservation.model.service.ReservationThemeValidator;
+import roomescape.reservation.model.service.ReservationThemeOperation;
 
 @Service
 @RequiredArgsConstructor
 public class AdminReservationThemeService {
 
     private final ReservationThemeRepository reservationThemeRepository;
-    private final ReservationThemeValidator reservationThemeValidator;
+    private final ReservationThemeOperation reservationThemeOperation;
 
     public ReservationThemeServiceResponse create(CreateReservationThemeServiceRequest request) {
         ReservationTheme reservationTheme = reservationThemeRepository.save(request.toReservationTheme());
@@ -23,12 +23,11 @@ public class AdminReservationThemeService {
     }
 
     public void delete(Long id) {
-        ReservationTheme reservationTheme = reservationThemeRepository.getById(id);
         try {
-            reservationThemeValidator.validateNotInUse(id);
+            ReservationTheme reservationTheme = reservationThemeRepository.getById(id);
+            reservationThemeOperation.removeTheme(reservationTheme);
         } catch (ReservationException e) {
             throw new BusinessRuleViolationException(e.getMessage(), e);
         }
-        reservationThemeRepository.remove(reservationTheme);
     }
 }

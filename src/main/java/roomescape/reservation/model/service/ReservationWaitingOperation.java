@@ -24,12 +24,13 @@ public class ReservationWaitingOperation {
     private final ReservationValidator reservationValidator;
     private final ReservationWaitingValidator reservationWaitingValidator;
 
-    public ReservationWaiting waiting(LocalDate date, Long timeId, Long themeId, Long memberId) {
+    public void waiting(LocalDate date, Long timeId, Long themeId, Long memberId) {
         ReservationWaitingDetails reservationWaitingDetails = createReservationWaitingDetails(date, timeId, themeId,
                 memberId);
         reservationValidator.validateExistence(date, timeId, themeId);
         reservationWaitingValidator.validateAlreadyWaiting(date, timeId, themeId, memberId);
-        return ReservationWaiting.createFuture(reservationWaitingDetails);
+        ReservationWaiting reservationWaiting = ReservationWaiting.createFuture(reservationWaitingDetails);
+        reservationWaitingRepository.save(reservationWaiting);
     }
 
     private ReservationWaitingDetails createReservationWaitingDetails(

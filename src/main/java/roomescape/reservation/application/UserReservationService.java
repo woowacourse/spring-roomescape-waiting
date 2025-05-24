@@ -1,6 +1,5 @@
 package roomescape.reservation.application;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -19,7 +18,6 @@ import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.ReservationWaitingRepository;
 import roomescape.reservation.model.repository.dto.ReservationWaitingWithRank;
 import roomescape.reservation.model.service.ReservationOperation;
-import roomescape.reservation.model.vo.ReservationStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -32,9 +30,8 @@ public class UserReservationService {
     @Transactional
     public ReservationServiceResponse create(CreateReservationServiceRequest request) {
         try {
-            Reservation reservation = reservationOperation.reserve(request.date(), request.timeId(),
+            Reservation savedReservation = reservationOperation.reserve(request.date(), request.timeId(),
                     request.themeId(), request.memberId());
-            Reservation savedReservation = reservationRepository.save(reservation);
             return ReservationServiceResponse.from(savedReservation);
         } catch (ReservationException e) {
             throw new BusinessRuleViolationException(e.getMessage(), e);
@@ -55,7 +52,7 @@ public class UserReservationService {
     }
 
     @Transactional
-    public void delete(Long id, Long memberId) {
+    public void cancel(Long id, Long memberId) {
         Reservation reservation = reservationRepository.getById(id);
         if (reservation.hasNotEqualsMemberId(memberId)) {
             throw new AuthorizationException("해당 예약을 취소할 권한이 없습니다.");
@@ -69,8 +66,7 @@ public class UserReservationService {
     ) {
         List<UserReservationServiceResponse> responses = new ArrayList<>();
         for (Reservation reservation : reservations) {
-            ReservationStatus reservationStatus = reservation.determineReservationStatus(LocalDateTime.now());
-            responses.add(UserReservationServiceResponse.of(reservation, reservationStatus));
+            responses.add(UserReservationServiceResponse.of(reservation));
         }
         for (ReservationWaitingWithRank waitingWithRank : reservationWaitingWithRanks) {
             ReservationWaiting reservationWaiting = waitingWithRank.getReservationWaiting();

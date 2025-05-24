@@ -3,7 +3,7 @@ package roomescape.reservation.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,11 +32,11 @@ public class UserReservationWaitingController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void delete(
+    @PatchMapping("/{id}/cancel")
+    public void cancel(
             @PathVariable("id") Long id,
             @AuthenticationPrincipal AuthenticatedMember member
     ) {
-        userReservationWaitingService.delete(id, member.id());
+        userReservationWaitingService.cancel(id, member.id());
     }
 }
