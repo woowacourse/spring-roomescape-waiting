@@ -5,15 +5,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.auth.dto.LoginMember;
-import roomescape.booking.reservation.ReservationRepository;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
 import roomescape.util.TestFactory;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,13 +23,11 @@ public class MemberServiceTest {
 
     private MemberService memberService;
     private MemberRepository memberRepository;
-    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
         memberRepository = mock(MemberRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        memberService = new MemberService(memberRepository, reservationRepository);
+        memberService = new MemberService(memberRepository);
     }
 
     @DisplayName("member를 생성하여 저장한다.")
@@ -92,17 +87,5 @@ public class MemberServiceTest {
 
         // then
         assertThat(actual).isEmpty();
-    }
-
-    @DisplayName("member로 예약 목록을 불러올 때, member를 찾을 수 없는 경우 예외를 발생시킨다")
-    @Test
-    void readReservationsByMember() {
-        // given
-        String notExistEmail = "may@gmail.com";
-        given(memberRepository.findByEmail(notExistEmail))
-                .willReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> memberService.readAllReservationsByMember(new LoginMember("may", notExistEmail, MemberRole.MEMBER)));
     }
 }

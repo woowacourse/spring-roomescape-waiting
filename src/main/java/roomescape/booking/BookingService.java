@@ -4,16 +4,16 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
+import roomescape.booking.dto.BookingResponse;
 import roomescape.booking.reservation.Reservation;
 import roomescape.booking.reservation.ReservationRepository;
-import roomescape.booking.reservation.dto.ReservationAndWaitingResponse;
+import roomescape.booking.schedule.Schedule;
 import roomescape.booking.waiting.Waiting;
 import roomescape.booking.waiting.WaitingRepository;
 import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
-import roomescape.schedule.Schedule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,16 +26,14 @@ public class BookingService {
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
 
-    public List<ReservationAndWaitingResponse> readAllByMember(final LoginMember loginMember) {
+    public List<BookingResponse> readAllByMember(final LoginMember loginMember) {
         Member member = getMemberByEmail(loginMember.email());
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         List<Waiting> waitings = waitingRepository.findAllByMember(member);
 
-        List<ReservationAndWaitingResponse> responses = new ArrayList<>();
-        reservations.stream()
-                .forEach(reservation -> responses.add(ReservationAndWaitingResponse.of(reservation)));
-        waitings.stream()
-                .forEach(waiting -> responses.add(ReservationAndWaitingResponse.of(waiting)));
+        List<BookingResponse> responses = new ArrayList<>();
+        reservations.forEach(reservation -> responses.add(BookingResponse.of(reservation)));
+        waitings.forEach(waiting -> responses.add(BookingResponse.of(waiting)));
 
         return responses;
     }
