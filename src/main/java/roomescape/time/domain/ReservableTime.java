@@ -5,9 +5,9 @@ import java.time.LocalTime;
 
 public final class ReservableTime {
 
-    private long timeId;
-    private LocalTime startAt;
-    private boolean isBooked;
+    private final long timeId;
+    private final LocalTime startAt;
+    private final boolean isBooked;
 
     public ReservableTime(final long timeId, final Time startAt, final boolean isBooked) {
         this.timeId = timeId;

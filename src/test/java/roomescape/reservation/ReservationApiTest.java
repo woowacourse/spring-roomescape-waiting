@@ -15,7 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.global.auth.JwtTokenProvider;
 import roomescape.reservation.dto.CreateReservationRequest;
-import roomescape.reservation.dto.UserCreateReservationRequest;
+import roomescape.reservation.dto.CreateUserReservationRequest;
 
 import java.time.LocalDate;
 
@@ -31,7 +31,7 @@ public class ReservationApiTest {
     class CreateReservationTest {
 
         private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
-        private static final UserCreateReservationRequest REQUEST = new UserCreateReservationRequest(TOMORROW, 1L, 1L);
+        private static final CreateUserReservationRequest REQUEST = new CreateUserReservationRequest(TOMORROW, 1L, 1L);
         private static String TOKEN;
 
         @BeforeEach

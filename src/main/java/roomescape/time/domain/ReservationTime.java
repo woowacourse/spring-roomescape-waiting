@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -21,6 +22,10 @@ public final class ReservationTime {
         this.startAt = startAt;
     }
 
+    public ReservationTime(final LocalTime startAt) {
+        this(null, startAt);
+    }
+
     public ReservationTime() {
 
     }
@@ -29,10 +34,6 @@ public final class ReservationTime {
         if (startAt == null) {
             throw new IllegalArgumentException("시간을 입력해야 합니다.");
         }
-    }
-
-    public ReservationTime(final LocalTime startAt) {
-        this(null, startAt);
     }
 
     public Long getId() {
