@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
@@ -34,6 +35,7 @@ public class WaitingService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
+    @Transactional
     public WaitingResponse create(
             final CreateWaitingRequest.ForMember request,
             final Long memberId
@@ -81,6 +83,7 @@ public class WaitingService {
         return reservationTime;
     }
 
+    @Transactional
     public void deleteIfOwner(final Long waitingId, final Long memberId) {
         final Waiting waiting = getWaitingById(waitingId);
         final Member member = getMemberById(memberId);
@@ -112,6 +115,7 @@ public class WaitingService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingWithRankResponse.ForMember> findAllWaitingWithRankByMemberId(final Long memberId) {
         final List<WaitingWithRank> waitingWithRanks = waitingRepository.findAllWaitingWithRankByMemberId(memberId);
 

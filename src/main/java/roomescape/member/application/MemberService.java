@@ -3,6 +3,7 @@ package roomescape.member.application;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthRole;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.ResourceNotFoundException;
@@ -18,6 +19,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    @Transactional
     public MemberResponse.IdName create(final SignUpRequest request) {
         final Member member = new Member(
                 request.name(),
@@ -30,6 +32,7 @@ public class MemberService {
         return new MemberResponse.IdName(saved.getId(), saved.getName());
     }
 
+    @Transactional
     public void delete(final Long memberId) {
         final Member found = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
@@ -40,6 +43,7 @@ public class MemberService {
         memberRepository.deleteById(memberId);
     }
 
+    @Transactional(readOnly = true)
     public List<IdName> findAllNames() {
         return memberRepository.findAll().stream()
                 .map(IdName::from)

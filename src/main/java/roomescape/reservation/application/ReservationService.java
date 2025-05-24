@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
@@ -35,6 +36,7 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public ReservationResponse create(
             final CreateBookedReservationRequest.ForMember request,
             final Long memberId
@@ -74,6 +76,7 @@ public class ReservationService {
         return reservationTime;
     }
 
+    @Transactional
     public void deleteIfOwner(final Long reservationId, final Long memberId) {
         final Reservation reservation = getReservationById(reservationId);
         final Member member = getMemberById(memberId);
@@ -85,6 +88,7 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
             final AvailableReservationTimeRequest request
     ) {
@@ -109,6 +113,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse.ForMember> findReservationsByMemberId(final Long memberId) {
         final Member member = getMemberById(memberId);
 

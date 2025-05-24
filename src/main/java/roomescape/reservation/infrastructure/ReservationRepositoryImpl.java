@@ -51,13 +51,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Reservation> findAll() {
         return jpaReservationRepository.findAll();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(
             final Long themeId,
             final Long memberId,
@@ -68,7 +66,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Reservation> findAllByDateAndTheme(
             final LocalDate date,
             final Theme theme
@@ -76,7 +73,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         return jpaReservationRepository.findAllByDateAndTheme(date, theme);
     }
 
-    @Transactional(readOnly = true)
+    @Override
     public List<Reservation> findAllByMember(final Member member) {
         return jpaReservationRepository.findAllByMember(member);
     }

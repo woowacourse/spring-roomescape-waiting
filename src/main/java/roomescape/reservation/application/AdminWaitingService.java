@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
@@ -31,6 +32,7 @@ public class AdminWaitingService {
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
+    @Transactional
     public WaitingResponse create(final CreateWaitingRequest request) {
         final ReservationTime time = getReservationTimeById(request.timeId());
         final Theme theme = getThemeById(request.themeId());
@@ -68,6 +70,7 @@ public class AdminWaitingService {
         return waitingRepository.save(waiting);
     }
 
+    @Transactional
     public void deleteAsAdmin(final Long waitingId) {
         if (!waitingRepository.existsById(waitingId)) {
             throw new ResourceNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
@@ -76,6 +79,7 @@ public class AdminWaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingWithRankResponse> findAllWaitingWithRank() {
         return waitingRepository.findAllWaitingWithRank().stream()
                 .map(WaitingWithRankResponse::from)

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 
@@ -27,19 +26,16 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<ReservationTime> findById(final Long id) {
         return jpaRepository.findById(id);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ReservationTime> findAllByStartAt(final LocalTime startAt) {
         return jpaRepository.findAllByStartAt(startAt);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ReservationTime> findAll() {
         return jpaRepository.findAll();
     }
