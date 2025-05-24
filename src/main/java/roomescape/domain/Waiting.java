@@ -103,8 +103,4 @@ public class Waiting {
     public Theme getTheme() {
         return theme;
     }
-
-    public LocalDateTime getCreateAt() {
-        return createAt;
-    }
 }

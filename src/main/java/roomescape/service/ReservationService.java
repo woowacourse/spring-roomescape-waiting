@@ -70,7 +70,8 @@ public class ReservationService {
     }
 
     private List<ReservationWithStatusResponse> findWaitingByMemberId(Long memberId) {
-        return waitingRepository.findByMemberId(memberId).stream()
+        return waitingRepository.findByMemberIdSortedByCreateAt(memberId)
+                .stream()
                 .map(ReservationWithStatusResponse::from)
                 .toList();
     }

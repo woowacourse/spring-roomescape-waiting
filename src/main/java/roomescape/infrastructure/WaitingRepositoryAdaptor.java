@@ -8,6 +8,7 @@ import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 import roomescape.domain.repository.WaitingRepository;
 
 @Repository
@@ -50,6 +51,11 @@ public class WaitingRepositoryAdaptor implements WaitingRepository {
             final Theme theme,
             final Member member) {
         return jpaWaitingRepository.findByDateAndReservationTimeAndThemeAndMember(date, time, theme, member);
+    }
+
+    @Override
+    public List<WaitingWithRank> findByMemberIdSortedByCreateAt(final Long memberId) {
+        return jpaWaitingRepository.findByMemberIdSortedByCreateAt(memberId);
     }
 
     @Override

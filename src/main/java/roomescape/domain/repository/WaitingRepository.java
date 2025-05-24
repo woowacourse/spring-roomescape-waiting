@@ -7,6 +7,7 @@ import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 
 public interface WaitingRepository {
 
@@ -24,4 +25,6 @@ public interface WaitingRepository {
 
     Optional<Waiting> findByDateAndReservationTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme,
                                                                     Member member);
+
+    List<WaitingWithRank> findByMemberIdSortedByCreateAt(Long memberId);
 }
