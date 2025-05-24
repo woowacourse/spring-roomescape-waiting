@@ -117,7 +117,16 @@ class ReservationJpaRepositoryTest {
                 reservationRepository.save(
                         Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member)))
                 .isInstanceOf(DataIntegrityViolationException.class);
+    }
 
+    @Test
+    void 멤버의_예약을_검사한다() {
+        //when
+        boolean result = reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeIdAndMemberId(
+                예약날짜_내일, reservationTime.getId(), theme.getId(), member.getId()
+        );
+        //then
+        assertThat(result).isTrue();
     }
 
 }

@@ -135,4 +135,26 @@ class WaitingServiceTest {
                 .hasMessage("[ERROR] 대기를 찾을 수 없습니다.");
     }
 
+    @Test
+    void 예약과_대기는_동시에_신청이_불가하다() {
+        //given
+        Member savedMember = new Member(1L, new Name("매트"), new Email("matt.kakao"), new Password("1234"), Role.MEMBER);
+        ReservationTime savedReservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme savedTheme = new Theme(1L, "test", "test", "test");
+        when(memberService.findById(any(Long.class))).thenReturn(savedMember);
+        when(reservationTimeService.getReservationTime(any(Long.class))).thenReturn(savedReservationTime);
+        when(themeService.getTheme(any(Long.class))).thenReturn(savedTheme);
+        when(reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeIdAndMemberId(
+                any(ReservationDate.class), any(Long.class), any(Long.class), any(Long.class)
+        )).thenReturn(true);
+
+        //when-then
+        assertThatThrownBy(() ->
+                waitingService.createById(savedMember.getId(), new ReservationRequest(
+                        예약날짜_내일.getDate(), savedTheme.getId(), savedReservationTime.getId()
+                )))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("[ERROR] 이미 예약을 한 회원입니다. 예약을 취소 후 대기를 신청해 주세요.");
+    }
+
 }

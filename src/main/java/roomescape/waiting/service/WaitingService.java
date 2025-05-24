@@ -40,8 +40,13 @@ public class WaitingService {
     public ReservationResponse createById(Long memberId, ReservationRequest request) {
         Member member = memberService.findById(memberId);
         ReservationDate reservationDate = new ReservationDate(request.date());
-        ReservationTime reservationTime = reservationTimeService.getReservationTime(request.timeId());
-        Theme theme = themeService.getTheme(request.themeId());
+        Long timeId = request.timeId();
+        ReservationTime reservationTime = reservationTimeService.getReservationTime(timeId);
+        Long themeId = request.themeId();
+        Theme theme = themeService.getTheme(themeId);
+
+        validateAlreadyReservation(memberId, reservationDate, timeId, themeId);
+
         Waiting waiting = Waiting.create(reservationDate, reservationTime, theme, member);
         Waiting created = waitingRepository.save(waiting);
 
@@ -95,5 +100,13 @@ public class WaitingService {
     private Waiting getWaiting(Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 대기를 찾을 수 없습니다."));
+    }
+
+    private void validateAlreadyReservation(Long memberId, ReservationDate reservationDate, Long timeId, Long themeId) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeIdAndMemberId(
+                reservationDate, timeId, themeId, memberId
+        )) {
+            throw new IllegalArgumentException("[ERROR] 이미 예약을 한 회원입니다. 예약을 취소 후 대기를 신청해 주세요.");
+        }
     }
 }
