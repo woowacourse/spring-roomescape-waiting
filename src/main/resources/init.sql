@@ -10,7 +10,9 @@ INSERT INTO member (name, email, password, role) VALUES ('코기','ind07152@nave
 INSERT INTO member (name, email, password, role) VALUES ('율무','ind07162@naver.com','asd','USER');
 INSERT INTO member (name, email, password, role) VALUES ('ADMIN','admin@naver.com','1234','ADMIN');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (1, '2025-05-23', 1, 1,'RESERVED', '2025-04-22 14:30:00');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (1, '2025-05-28', 2, 1,'RESERVED', '2025-04-22 14:30:00');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (2, '2025-05-26', 1, 3,'RESERVED', '2025-04-22 14:30:00');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (2, '2025-05-18', 1, 2,'RESERVED', '2025-04-22 14:30:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (1, '2025-06-23', 1, 1,'RESERVED', '2025-04-22 14:30:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (1, '2025-06-28', 2, 1,'RESERVED', '2025-04-22 14:30:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (2, '2025-06-26', 1, 3,'RESERVED', '2025-04-22 14:30:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (2, '2025-06-28', 1, 2,'RESERVED', '2025-04-22 14:30:00');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (2, '2025-06-28', 2, 1,'WAITED', '2025-04-22 14:30:02');
+INSERT INTO reservation (member_id, date, time_id, theme_id, status, created_at) VALUES (1, '2025-06-28', 1, 2,'WAITED', '2025-04-22 14:30:02');
