@@ -12,7 +12,7 @@ public interface WaitingRepository {
 
     boolean existsById(Long waitingId);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long aLong, Long aLong1, Long memberId);
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 
     Optional<Waiting> findById(Long waitingId);
 
