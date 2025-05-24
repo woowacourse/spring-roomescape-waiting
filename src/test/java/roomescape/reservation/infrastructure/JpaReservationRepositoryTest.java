@@ -333,9 +333,9 @@ class JpaReservationRepositoryTest {
         em.flush();
         em.clear();
         // when
-        repository.changeReservationStatus(5L, ReservationStatus.RESERVED);
+        repository.changeReservationStatus(reservation.getId(), ReservationStatus.RESERVED);
         // then
-        Reservation findReservation = em.find(Reservation.class, 5L);
+        Reservation findReservation = em.find(Reservation.class, reservation.getId());
         assertThat(findReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
     }
 }
