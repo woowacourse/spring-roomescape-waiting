@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.util.Objects;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = "id")
 public class Reservation {
@@ -71,5 +72,9 @@ public class Reservation {
 
     public boolean isSameTheme(Long themeId) {
         return this.theme.getId().equals(themeId);
+    }
+
+    public boolean isWaitingStatus() {
+        return this.status.equals(Status.WAITING);
     }
 }

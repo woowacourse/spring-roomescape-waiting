@@ -14,7 +14,6 @@ import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.dto.admin.AdminReservationRequest;
@@ -27,7 +26,6 @@ import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
-
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
@@ -48,12 +46,6 @@ public class ReservationService {
     public List<ReservationResponse> findAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
-                .toList();
-    }
-
-    public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(MyReservationResponse::from)
                 .toList();
     }
 
@@ -162,13 +154,7 @@ public class ReservationService {
     }
 
     public void deleteById(final Long id) {
-        searchReservation(id);
         reservationRepository.deleteById(id);
-    }
-
-    private void searchReservation(final Long id) {
-        reservationRepository.findById(id)
-                .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_RESERVATION_ID.getMessage()));
     }
 
     private Member searchMember(final Long memberId) {

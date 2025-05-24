@@ -167,13 +167,4 @@ class ReservationServiceTest {
 
         verify(reservationRepository, times(1)).findByWaitingId(1L);
     }
-
-    @DisplayName("예약 삭제 시 예약 아이디가 존재하지 않는 경우 예외를 발생시킨다")
-    @Test
-    void exception_invalid_id() {
-        assertThatThrownBy(() -> reservationService.deleteById(1L))
-                .isInstanceOf(InvalidIdException.class);
-
-        verify(reservationRepository, times(1)).findById(1L);
-    }
 }

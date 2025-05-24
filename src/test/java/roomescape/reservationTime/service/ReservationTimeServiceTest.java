@@ -76,20 +76,10 @@ class ReservationTimeServiceTest {
                 .isInstanceOf(DuplicateException.class);
     }
 
-    @DisplayName("시간 내역을 삭제 시 존재하지 않는 시간 아이디인 경우 예외를 발생시킨다")
-    @Test
-    void exception_delete_invalid_timeId() {
-        when(timeRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
-                .isInstanceOf(InvalidIdException.class);
-    }
-
     @DisplayName("시간 내역을 삭제 시 이미 예약된 시간 아이디인 경우 예외를 발생시킨다")
     @Test
     void exception_delete_occupied_timeId() {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
-        when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         when(timeRepository.existsById(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))

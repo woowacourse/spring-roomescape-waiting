@@ -97,14 +97,8 @@ public class ReservationTimeService {
     }
 
     public void deleteById(final Long id) {
-        searchReservationTimeId(id);
         validateUnoccupiedTime(id);
         timeRepository.deleteById(id);
-    }
-
-    private void searchReservationTimeId(final Long id) {
-        timeRepository.findById(id)
-                .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_TIME_ID.getMessage()));
     }
 
     private void validateUnoccupiedTime(final Long id) {
