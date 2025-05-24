@@ -50,7 +50,7 @@ public class Member {
         this.role = role;
     }
 
-    public static Member withoutRole(
+    public static Member withDefaultRole(
             @NonNull final String name,
             @NonNull final String email,
             @NonNull final String password

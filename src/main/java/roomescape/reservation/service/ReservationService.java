@@ -1,15 +1,19 @@
 package roomescape.reservation.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 import roomescape.auth.dto.LoginMember;
-import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
@@ -26,6 +30,7 @@ import roomescape.theme.repository.ThemeRepository;
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private final Clock clock;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -33,8 +38,7 @@ public class ReservationService {
 
     public List<ReservationResponse> findReservationsByCriteria(final ReservationSearchRequest request) {
         final List<Reservation> reservations = reservationRepository.findByCriteria(request.themeId(),
-                request.memberId(), request.dateFrom(),
-                request.dateTo());
+                request.memberId(), request.dateFrom(), request.dateTo());
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
@@ -45,40 +49,66 @@ public class ReservationService {
     }
 
     public ReservationResponse saveReservation(final ReservationRequest request, final LoginMember loginMember) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+        final ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
+        final Theme theme = themeRepository.getById(request.themeId());
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
-            throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
+            return new ReservationResponse(waitingReservation(request.date(), reservationTime, theme, loginMember));
         }
+        return new ReservationResponse(bookedReservation(request.date(), reservationTime, theme, loginMember));
+    }
 
+    private Reservation waitingReservation(LocalDate date, ReservationTime reservationTime,
+            Theme theme, LoginMember loginMember) {
         final Member member = Member.from(loginMember);
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
-        final Reservation newReservation = reservationRepository.save(reservation);
-        return new ReservationResponse(newReservation);
+        if (reservationRepository.existsByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member)) {
+            throw new IllegalArgumentException("이미 예약한 사용자입니다.");
+        }
+        Long lastWaitingRank = reservationRepository.getLastWaitingRank(theme, date, reservationTime).orElse(0L);
+        Reservation reservation = Reservation.waiting(date, reservationTime, theme, member, LocalDateTime.now(clock),
+                lastWaitingRank + 1);
+
+        return reservationRepository.save(reservation);
+    }
+
+    private Reservation bookedReservation(LocalDate date, ReservationTime reservationTime,
+            Theme theme, LoginMember loginMember) {
+        final Member member = Member.from(loginMember);
+        Reservation reservation = Reservation.of(date, reservationTime, theme, member, LocalDateTime.now(clock));
+
+        return reservationRepository.save(reservation);
     }
 
     public ReservationResponse saveAdminReservation(final AdminReservationRequest request) {
-        final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
-        final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-        final Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
+        final ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
+        final Theme theme = themeRepository.getById(request.themeId());
+        final Member member = memberRepository.getById(request.memberId());
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
             throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
         }
-        final Reservation reservation = Reservation.booked(request.date(), reservationTime, theme, member);
+        final Reservation reservation = Reservation.of(request.date(), reservationTime, theme, member,
+                LocalDateTime.now(clock));
         final Reservation newReservation = reservationRepository.save(reservation);
         return new ReservationResponse(newReservation);
     }
 
     public void deleteReservation(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("존재하지 않는 예약입니다. id=" + id);
+        Reservation reservation = reservationRepository.getById(id);
+        Long deleteRank = reservation.getReservationStatus().getRank();
+        if (reservation.isBooked()) {
+            deleteRank = 0L;
         }
+        List<ReservationStatus> reservationStatuses = reservationRepository.findAllWaiting(reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme());
+        reduceWaitingRanks(deleteRank, reservationStatuses);
         reservationRepository.deleteById(id);
+    }
+
+    private void reduceWaitingRanks(final Long deleteRank, final List<ReservationStatus> reservationStatuses) {
+        reservationStatuses.stream()
+                .filter(waiting -> waiting.getRank() != null)
+                .filter(waiting -> waiting.getRank() > deleteRank)
+                .forEach(ReservationStatus::reduceRank);
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {

@@ -3,8 +3,6 @@ package roomescape;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -13,6 +11,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +19,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.ReservationController;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.repository.WaitingRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -45,6 +49,9 @@ class MissionStepTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -127,6 +134,7 @@ class MissionStepTest {
         themeRepository.save(Theme.of("name", "desc", "thumb"));
         params.put("timeId", "1");
         params.put("themeId", "1");
+        params.put("isWaiting", "false");
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -190,6 +198,7 @@ class MissionStepTest {
         // given
         reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
         themeRepository.save(Theme.of("name", "desc", "thumb"));
+        waitingRepository.save(ReservationStatus.booked());
 
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()
@@ -201,8 +210,8 @@ class MissionStepTest {
                 .extract()
                 .cookie("token");
         jdbcTemplate.update(
-                "INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (?, ?, ?, ?, ?)",
-                "2023-08-05", 1, 1, 1, "BOOKED");
+                "INSERT INTO reservation (date, time_id, theme_id, member_id, status_id) VALUES (?, ?, ?, ?, ?)",
+                "2023-08-05", 1, 1, 1, 1);
 
         // when
         // then
@@ -235,6 +244,7 @@ class MissionStepTest {
         params.put("date", "2999-08-05");
         params.put("timeId", "1");
         params.put("themeId", "1");
+        params.put("isWaiting", "false");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -291,6 +301,7 @@ class MissionStepTest {
         reservation.put("date", "2999-08-05");
         reservation.put("timeId", 1);
         reservation.put("themeId", "1");
+        reservation.put("isWaiting", "false");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

@@ -1,5 +1,14 @@
 package roomescape.auth.infrastructure.jwt;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.stereotype.Component;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwt;
@@ -10,11 +19,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
-import javax.crypto.SecretKey;
-import org.springframework.stereotype.Component;
 import roomescape.auth.infrastructure.TokenProvider;
 import roomescape.exception.TokenCreationException;
 import roomescape.exception.UnauthorizedException;
@@ -22,21 +26,23 @@ import roomescape.exception.UnauthorizedException;
 @Component
 public class JwtTokenProvider implements TokenProvider {
 
+    private final Clock clock;
     private final SecretKey key;
     private final JwtParser jwtParser;
     private final Duration validity;
 
-    public JwtTokenProvider(final JwtProperties jwtProperties) {
+    public JwtTokenProvider(final JwtProperties jwtProperties, Clock clock) {
         this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
         this.jwtParser = Jwts.parser()
                 .verifyWith(key)
                 .build();
         this.validity = Duration.ofMillis(jwtProperties.getExpireLength());
+        this.clock = clock;
     }
 
     @Override
     public String createToken(final Claims claims) {
-        final Instant now = Instant.now();
+        final Instant now = clock.instant();
         try {
             return Jwts.builder()
                     .claims(claims)
