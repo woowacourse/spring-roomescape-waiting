@@ -52,17 +52,17 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllReservations() {
-        List<Reservation> reservations = reservationRepository.findAll();
+        final List<Reservation> reservations = reservationRepository.findAll();
         return ReservationResponse.from(reservations);
     }
 
     public void deleteReservationById(final Long id) {
-        Reservation reservation = getReservation(id);
+        final Reservation reservation = getReservation(id);
         reservationRepository.deleteById(reservation.getId());
     }
 
     public ReservationResponse createReservation(final ReservationCreateRequest request, final Long memberId) {
-        Reservation created = createReservation(
+        final Reservation created = createReservation(
                 new ReservationDate(request.date()),
                 request.timeId(),
                 request.themeId(),
@@ -72,7 +72,7 @@ public class ReservationService {
     }
 
     public ReservationResponse createReservationByAdmin(final AdminCreateReservationRequest request) {
-        Reservation created = createReservation(
+        final Reservation created = createReservation(
                 new ReservationDate(request.date()),
                 request.timeId(),
                 request.themeId(),
@@ -87,14 +87,14 @@ public class ReservationService {
             final Long themeId,
             final Long memberId
     ) {
-        ReservationTime time = reservationTimeRepository.findById(timeId)
+        final ReservationTime time = reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NoSuchElementException("예약 시간을 찾을 수 없습니다."));
-        ReservationDateTime dateTime = new ReservationDateTime(date, time, clock);
-        validateReservationAvailability(dateTime);
-
-        Theme theme = themeRepository.findById(themeId)
+        final ReservationDateTime dateTime = new ReservationDateTime(date, time, clock);
+        final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new NoSuchElementException("해당 테마가 존재하지 않습니다."));
-        Member member = memberRepository.findById(memberId)
+        validateReservationAvailability(dateTime, theme);
+
+        final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버가 존재하지 않습니다."));
         return reservationRepository.save(
                 new Reservation(
@@ -102,9 +102,9 @@ public class ReservationService {
                         new ReservationSchedule(dateTime.getReservationDate(), dateTime.getReservationTime(), theme)));
     }
 
-    private void validateReservationAvailability(final ReservationDateTime dateTime) {
-        if (reservationRepository.existsByScheduleReservationDateAndScheduleReservationTime(
-                dateTime.getReservationDate(), dateTime.getReservationTime())) {
+    private void validateReservationAvailability(final ReservationDateTime dateTime, final Theme theme) {
+        if (reservationRepository.existsByScheduleReservationDateAndScheduleReservationTimeAndScheduleTheme(
+                dateTime.getReservationDate(), dateTime.getReservationTime(), theme)) {
             throw new IllegalStateException("이미 예약이 찼습니다.");
         }
     }

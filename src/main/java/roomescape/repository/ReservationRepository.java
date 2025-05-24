@@ -9,13 +9,15 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
-    boolean existsByScheduleReservationDateAndScheduleReservationTime(
+    boolean existsByScheduleReservationDateAndScheduleReservationTimeAndScheduleTheme(
             final ReservationDate reservationDate,
-            final ReservationTime reservationTime
+            final ReservationTime reservationTime,
+            final Theme theme
     );
 
     @Query("SELECT r.id FROM Reservation r WHERE r.schedule.reservationTime.id = :timeId")

@@ -101,7 +101,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 이미_예약된_시간이면_예외가_발생한다() {
+    void 이미_예약된_시간과_테마면_예외가_발생한다() {
         // given
         var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
         var reservationTime = reservationTimeDbFixture.예약시간(time);

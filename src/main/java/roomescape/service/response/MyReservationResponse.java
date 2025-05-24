@@ -3,7 +3,6 @@ package roomescape.service.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingWithRank;
@@ -33,19 +32,7 @@ public record MyReservationResponse(
                 waiting.getTheme().getName().name(),
                 waiting.getDate(),
                 waiting.getStartAt(),
-                ReservationStatus.대기.getDisplay() + " (" + waitingWithRank.rank() + "순위)"
+                waitingWithRank.rank() + 1 + "번째 " + ReservationStatus.대기.getDisplay()
         );
-    }
-
-    public static List<MyReservationResponse> from(final List<Reservation> reservations) {
-        return reservations.stream()
-                .map(MyReservationResponse::from)
-                .toList();
-    }
-
-    public static List<MyReservationResponse> fromWaiting(final List<WaitingWithRank> waitingWithRanks) {
-        return waitingWithRanks.stream()
-                .map(MyReservationResponse::fromWaiting)
-                .toList();
     }
 }
