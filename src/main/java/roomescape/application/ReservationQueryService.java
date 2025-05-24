@@ -39,7 +39,7 @@ public class ReservationQueryService {
                 .map(reservation -> {
                             String displayStatus = ReservationStatus.name(reservation.getWaiting().getStatus());
                             if (reservation.isWaiting()) {
-                                displayStatus = waitingService.countWaitingReservation(reservation);
+                                displayStatus = waitingService.countWaitingReservation(reservation) + "번째 예약대기";
                             }
                             return new ReservationWaitingDto(
                                     reservation.getId(),
