@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.WaitingRequest;
@@ -36,6 +37,12 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+    }
+
+    public List<WaitingResponse> findAllWaitings() {
+        return waitingRepository.findAll().stream()
+            .map(WaitingResponse::from)
+            .toList();
     }
 
     public WaitingResponse addWaitingAfterNow(Member member, WaitingRequest request) {

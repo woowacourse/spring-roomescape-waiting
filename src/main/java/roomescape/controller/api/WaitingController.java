@@ -1,6 +1,8 @@
 package roomescape.controller.api;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +23,11 @@ public class WaitingController {
     private WaitingController(
         WaitingService waitingService) {
         this.waitingService = waitingService;
+    }
+
+    @GetMapping
+    public List<WaitingResponse> readWaitings() {
+        return waitingService.findAllWaitings();
     }
 
     @PostMapping

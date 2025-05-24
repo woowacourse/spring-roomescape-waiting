@@ -12,6 +12,7 @@ import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
 import roomescape.entity.Theme;
+import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.repository.jpa.JpaMemberRepository;
@@ -67,6 +68,15 @@ public class ReservationService {
             reservationRepository.save(new Reservation(member, request.date(), time, theme)));
     }
 
+    private void validateDateTimeAfterNow(LocalDate date, ReservationTime time) {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
+        if (date.isBefore(now.toLocalDate()) ||
+            (date.isEqual(now.toLocalDate()) && time.isBefore(now.toLocalTime()))) {
+            throw new InvalidInputException("과거 예약은 불가능");
+        }
+    }
+
     public ReservationResponse addReservation(ReservationRequest request) {
         Member member = memberRepository.findById(request.memberId())
             .orElseThrow(() -> new NotFoundException("member"));
@@ -77,16 +87,16 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new NotFoundException("theme"));
 
+        validateDuplicateReservationAboutMemberId(member, request);
+
         return ReservationResponse.from(
             reservationRepository.save(new Reservation(member, request.date(), time, theme)));
     }
 
-    private void validateDateTimeAfterNow(LocalDate date, ReservationTime time) {
-        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-
-        if (date.isBefore(now.toLocalDate()) ||
-            (date.isEqual(now.toLocalDate()) && time.isBefore(now.toLocalTime()))) {
-            throw new InvalidInputException("과거 예약은 불가능");
+    private void validateDuplicateReservationAboutMemberId(Member member, ReservationRequest request) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+            request.date(), request.timeId(), request.themeId(), member.getId())) {
+            throw new DuplicatedException("reservation");
         }
     }
 

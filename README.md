@@ -7,11 +7,13 @@
 * http://localhost:8080/admin/time: 사용자가 예약할 수 있는 시간 관리 페이지
 * http://localhost:8080/admin/theme: 사용자가 이용할 수 있는 방탈출 테마 관리 페이지
 * http://localhost:8080/admin/reservation: 사용자 예약 관리 페이지
+* http://localhost:8080/admin/waiting: 사용자 예약 대기 관리 페이지
 
 ### 사용자 페이지
 
 * http://localhost:8080/: 사용자 예약 기준으로 탑10 방탈출 테마 확인 페이지
 * http://localhost:8080/reservation: 사용자가 예약을 할 수 있는 페이지
+* http://localhost:8080/reservation-mine: 사용자가 자신의 예약 목록을 확인할 수 있는 페이지
 * http://localhost:8080/signup: 사용자가 회원가입을 할 수 있는 페이지
 * http://localhost:8080/login: 사용자가 로그인을 할 수 있는 페이지
 
@@ -43,7 +45,7 @@
 
 ### 4. 관리자 예약 대기 관리 기능
 
-- [ ] 어드민은 예약 대기 목록을 조회할 수 있다.
+- [x] 어드민은 예약 대기 목록을 조회할 수 있다.
 - [ ] 어드민은 예약 대기를 승인/거절할 수 있다.
     - [ ] 예약 취소가 발생하면 예약 대기자가 있는 경우 예약을 승인(수동)
     - [ ] 예약이 취소되지 않았다면 예약을 승인할 수 없음
@@ -67,6 +69,7 @@
 | `/admin/reservation`   | GET    | 예약 관리 페이지 보기    |
 | `/admin/time`          | GET    | 예약 시간 관리 페이지 보기 |
 | `/admin/theme`         | GET    | 테마 관리 페이지 보기    |
+| `/admin/waiting`       | GET    | 예약 대기 관리 페이지 보기 |
 | `/admin/reservations`  | POST   | 예약 추가           |
 | `/reservations/{id}`   | DELETE | 예약 삭제           |
 | `/reservations/filter` | GET    | 예약 필터링 조회       |
@@ -76,6 +79,7 @@
 | `/times/{id}`          | DELETE | 예약 시간 삭제        |
 | `/themes`              | POST   | 테마 추가           |
 | `/themes/{id}`         | DELETE | 테마 삭제           |
+| `/waitings`            | GET    | 예약 대기 목록 조회     |
 
 ### 사용자(User)
 
