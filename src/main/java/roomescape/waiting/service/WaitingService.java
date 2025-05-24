@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.dto.LoginMemberInfo;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.waiting.domain.Waiting;
@@ -46,14 +47,15 @@ public class WaitingService {
                 .toList();
     }
 
-    public void cancelById(long id, long loginMemberId) {
+    public void cancelById(long id, LoginMemberInfo loginMemberInfo) {
         Waiting waiting = getWaiting(id);
-        // 리팩터링 TODO
-        if (waiting.getMember().getId() != loginMemberId) {
-            throw new IllegalArgumentException("해당 대기에 대한 취소 권한이 없습니다.");
+        boolean isSameMember = waiting.hasSameMemberId(loginMemberInfo.id());
+        if (isSameMember || loginMemberInfo.isAdmin()) {
+            waitingRepository.delete(waiting);
+            waitingRepository.pullPriority(waiting.getId() + 1, 1);
+            return;
         }
-        waitingRepository.delete(waiting);
-        waitingRepository.pullPriority(waiting.getId() + 1, 1);
+        throw new IllegalArgumentException("해당 대기에 대한 취소 권한이 없습니다.");
     }
 
     /**

@@ -8,4 +8,8 @@ public record LoginMemberInfo(long id, String name, String email, MemberRole mem
     public LoginMemberInfo(final Member member) {
         this(member.getId(), member.getName(), member.getEmail(), member.getRole());
     }
+
+    public boolean isAdmin() {
+        return memberRole == MemberRole.ADMIN;
+    }
 }

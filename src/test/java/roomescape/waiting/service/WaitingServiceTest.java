@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -20,6 +21,7 @@ import roomescape.fake.TestCurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.dto.LoginMemberInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -184,12 +186,29 @@ public class WaitingServiceTest {
         LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
         Waiting waiting = new Waiting(null, tomorrow, savedReservationTime, savedTheme, savedMember1, 1L);
         Waiting savedWaiting = waitingRepository.save(waiting);
+        LoginMemberInfo loginMemberInfo = new LoginMemberInfo(savedMember2);
 
         // when
         // then
-        assertThatThrownBy(() -> waitingService.cancelById(savedWaiting.getId(), savedMember2.getId()))
+        assertThatThrownBy(() -> waitingService.cancelById(savedWaiting.getId(), loginMemberInfo))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("해당 대기에 대한 취소 권한이 없습니다.");
+    }
+
+    @DisplayName("관리자는 사용자의 예약 대기를 거절해 삭제할 수 있다")
+    @Test
+    void should_NotThrowException_WhenCancelWaitingByAdmin() {
+        // given
+        Member admin = memberRepository.save(new Member(null, "관리자", "이메일", "비번", MemberRole.ADMIN));
+        LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
+        Waiting waiting = new Waiting(null, tomorrow, savedReservationTime, savedTheme, savedMember1, 1L);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+        LoginMemberInfo loginMemberInfo = new LoginMemberInfo(admin);
+
+        // when
+        // then
+        assertThatCode(() -> waitingService.cancelById(savedWaiting.getId(), loginMemberInfo))
+                .doesNotThrowAnyException();
     }
 
     @DisplayName("자신의 예약 대기를 취소할 수 있다.")
@@ -199,9 +218,10 @@ public class WaitingServiceTest {
         LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
         Waiting waiting = new Waiting(null, tomorrow, savedReservationTime, savedTheme, savedMember1, 1L);
         Waiting savedWaiting = waitingRepository.save(waiting);
+        LoginMemberInfo loginMemberInfo = new LoginMemberInfo(savedMember1);
 
         // when
-        waitingService.cancelById(savedWaiting.getId(), savedMember1.getId());
+        waitingService.cancelById(savedWaiting.getId(), loginMemberInfo);
 
         // then
         boolean exists = waitingRepository.existsByIdAndMemberId(savedWaiting.getId(), savedMember1.getId());

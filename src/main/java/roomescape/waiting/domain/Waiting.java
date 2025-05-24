@@ -63,4 +63,8 @@ public class Waiting {
     public long getPriority() {
         return priority;
     }
+
+    public boolean hasSameMemberId(long other) {
+        return member.getId() == other;
+    }
 }
