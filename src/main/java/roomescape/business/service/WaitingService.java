@@ -31,27 +31,35 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse insert(final LoginMember loginMember, final WaitingRequest waitingRequest) {
+        validateReservationAlreadyExisted(loginMember, waitingRequest);
+
+        final Theme theme = queryService.getThemeById(waitingRequest.themeId());
+        final ReservationTime reservationTime = queryService.getReservationTimeById(waitingRequest.timeId());
+
+        validateWaitingAlreadyExisted(loginMember, waitingRequest);
+
+        final Member member = queryService.getMemberById(loginMember.id());
+        final Waiting waiting = new Waiting(member, theme, reservationTime, waitingRequest.date());
+
+        return WaitingResponse.from(waitingRepository.save(waiting));
+    }
+
+    private void validateReservationAlreadyExisted(final LoginMember loginMember, final WaitingRequest waitingRequest) {
         final Reservation reservation = queryService.getReservationByDateAndTimeIdAndThemeId(
                 waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId());
 
         if(reservation.isSameMember(loginMember.id())) {
             throw new BadRequestException("사용자가 예약한 항목입니다. 예약 대기가 불가능합니다.");
         }
+    }
 
-        final Theme theme = queryService.getThemeById(waitingRequest.themeId());
-        final ReservationTime reservationTime = queryService.getReservationTimeById(waitingRequest.timeId());
-
+    private void validateWaitingAlreadyExisted(final LoginMember loginMember, final WaitingRequest waitingRequest) {
         boolean isAlreadyExisted = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waitingRequest.date(),
                 waitingRequest.timeId(), waitingRequest.themeId(), loginMember.id());
 
         if(isAlreadyExisted) {
             throw new BadRequestException("이미 예약 대기를 하였습니다.");
         }
-
-        final Member member = queryService.getMemberById(loginMember.id());
-        final Waiting waiting = new Waiting(member, theme, reservationTime, waitingRequest.date());
-
-        return WaitingResponse.from(waitingRepository.save(waiting));
     }
 
     @Transactional
