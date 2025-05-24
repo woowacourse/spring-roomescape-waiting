@@ -95,6 +95,6 @@ class ReservationRepositoryTest {
     @DisplayName("예약 슬롯 별 대기열로 이루어진 대기열들을 불러온다.")
     void findQueuesBySlots() {
         var queues = reservationRepository.findQueuesBySlots(List.of(savedReservation.slot()));
-        assertThat(queues).isInstanceOf(Queues.class);
+        assertThat(queues).isInstanceOf(ReservationQueues.class);
     }
 }

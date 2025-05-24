@@ -9,8 +9,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.Queues;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationQueues;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationSlot;
@@ -57,12 +57,19 @@ public class ReservationService {
 
     public List<ReservationWithOrder> findAllWaitings() {
         var allWaitings = reservationRepository.findAll(byStatus(ReservationStatus.WAITING));
-        var queues = new Queues(allWaitings);
+        var queues = new ReservationQueues(allWaitings);
         return queues.orderOfAll(allWaitings);
     }
 
+    @Transactional
     public void removeByIdForce(final long id) {
-        reservationRepository.deleteByIdOrElseThrow(id);
+        var reservation = reservationRepository.getById(id);
+        if (reservation.isReserved()) {
+            var queues = reservationRepository.findQueuesBySlots(List.of(reservation.slot()));
+            var nextReservation = queues.findNext(reservation);
+            nextReservation.ifPresent(Reservation::confirm);
+        }
+        reservationRepository.delete(reservation);
     }
 
     @Transactional
@@ -70,7 +77,6 @@ public class ReservationService {
         var user = userRepository.getById(userId);
         var reservation = reservationRepository.getById(reservationId);
         user.cancelReservation(reservation);
-        reservationRepository.delete(reservation);
     }
 
     private Reservation reserve(final long userId, final ReservationSlot slot, final ReservationStatus status) {

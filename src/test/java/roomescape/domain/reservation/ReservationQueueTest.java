@@ -71,6 +71,24 @@ class ReservationQueueTest {
             .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    @DisplayName("주어진 예약 다음 순번의 예약을 찾는다.")
+    void findNext() {
+        // given
+        var reservation1 = reservationOf(slot, user1);
+        var reservation2 = reservationOf(slot, user2);
+        var reservation3 = reservationOf(slot, user3);
+
+        var queue = new ReservationQueue(List.of(reservation1, reservation2, reservation3));
+
+        // when & then
+        assertAll(
+            () -> assertThat(queue.findNext(reservation1)).hasValue(reservation2),
+            () -> assertThat(queue.findNext(reservation2)).hasValue(reservation3),
+            () -> assertThat(queue.findNext(reservation3)).isEmpty()
+        );
+    }
+
     private Reservation reservationOf(final ReservationSlot slot, final User user) {
         return new Reservation(
             DUMMY_ID_GENERATOR.incrementAndGet(),
@@ -79,6 +97,4 @@ class ReservationQueueTest {
             ReservationStatus.RESERVED
         );
     }
-
-
 }

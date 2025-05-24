@@ -65,6 +65,10 @@ public class TestRepositoryHelper {
         return saveTheme(TestFixtures.anyTheme());
     }
 
+    public Reservation findReservation(final long id) {
+        return em.find(Reservation.class, id);
+    }
+
     public Reservation saveReservation(final Reservation reservation) {
         em.persist(reservation);
         return em.find(Reservation.class, reservation.id());

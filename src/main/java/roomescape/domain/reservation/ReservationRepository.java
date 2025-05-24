@@ -27,9 +27,9 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
     }
 
     @Transactional(readOnly = true)
-    default Queues findQueuesBySlots(final List<ReservationSlot> slots) {
+    default ReservationQueues findQueuesBySlots(final List<ReservationSlot> slots) {
         var reservations = findAll(toSpecs(slots));
-        return new Queues(reservations);
+        return new ReservationQueues(reservations);
     }
 
     private Specification<Reservation> toSpecs(final List<ReservationSlot> slots) {

@@ -119,7 +119,7 @@ class ReservationServiceTest extends ServiceTest {
 
     @Test
     @DisplayName("예약을 삭제한다.")
-    void deleteReservation() {
+    void removeByIdForce() {
         // given
         var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
@@ -132,11 +132,27 @@ class ReservationServiceTest extends ServiceTest {
     }
 
     @Test
+    @DisplayName("예약을 삭제했을 때 뒤따르던 예약 대기가 있으면 첫번째 대기가 확정된다.")
+    void removeByIdForceWithFollowingWaitings() {
+        // given
+        var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        var user2 = repositoryHelper.saveAnyUser();
+        var waiting = service.waitFor(user2.id(), tomorrow(), timeSlot.id(), theme.id());
+
+        // when
+        service.removeByIdForce(reserved.id());
+
+        // then
+        var reloadedWaiting = repositoryHelper.findReservation(waiting.id());
+        assertThat(reloadedWaiting.status()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @Test
     @DisplayName("예약 대기를 취소한다.")
     void cancelWaiting() {
         // given
-        User user2 = new User(new UserName("user2"), new Email("user2@email.com"), new Password("pw"));
-        repositoryHelper.saveUser(user2);
+        var user2 = repositoryHelper.saveAnyUser();
 
         service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
         var waited = service.waitFor(user2.id(), tomorrow(), timeSlot.id(), theme.id());

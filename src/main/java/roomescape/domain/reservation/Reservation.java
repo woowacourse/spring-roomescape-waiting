@@ -47,8 +47,19 @@ public class Reservation {
         return this.slot.equals(reservation.slot);
     }
 
+    public boolean isReserved() {
+        return this.status == ReservationStatus.RESERVED;
+    }
+
     public boolean isWaiting() {
         return this.status == ReservationStatus.WAITING;
+    }
+
+    public void confirm() {
+        if (isReserved()) {
+            throw new IllegalStateException("이미 확정된 예약입니다.");
+        }
+        this.status = ReservationStatus.RESERVED;
     }
 
     public void cancel() {

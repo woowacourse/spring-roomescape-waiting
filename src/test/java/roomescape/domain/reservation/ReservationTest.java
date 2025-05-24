@@ -33,6 +33,13 @@ public class ReservationTest {
     }
 
     @Test
+    @DisplayName("예약이 확정 상태인 지 확인한다.")
+    void isReserved() {
+        var reservation = reservationOf(ReservationStatus.RESERVED);
+        assertThat(reservation.isReserved()).isTrue();
+    }
+
+    @Test
     @DisplayName("예약이 대기 상태인 지 확인한다.")
     void isWaiting() {
         var reservation = reservationOf(ReservationStatus.WAITING);
@@ -50,6 +57,19 @@ public class ReservationTest {
 
         // then
         assertThat(reservation.status()).isEqualTo(ReservationStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName("대기 상태의 예약을 확정시킬 수 있다.")
+    void confirm() {
+        // given
+        var reservation = reservationOf(ReservationStatus.WAITING);
+
+        // when
+        reservation.confirm();
+
+        // then
+        assertThat(reservation.status()).isEqualTo(ReservationStatus.RESERVED);
     }
 
     @ParameterizedTest
