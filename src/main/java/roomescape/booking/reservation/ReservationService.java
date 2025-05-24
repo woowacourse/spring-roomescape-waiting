@@ -7,6 +7,8 @@ import roomescape.booking.reservation.dto.AdminFilterReservationRequest;
 import roomescape.booking.reservation.dto.AdminReservationRequest;
 import roomescape.booking.reservation.dto.ReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
+import roomescape.booking.schedule.Schedule;
+import roomescape.booking.schedule.ScheduleRepository;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
@@ -14,8 +16,6 @@ import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
-import roomescape.schedule.Schedule;
-import roomescape.schedule.ScheduleRepository;
 
 import java.time.LocalDate;
 import java.util.List;

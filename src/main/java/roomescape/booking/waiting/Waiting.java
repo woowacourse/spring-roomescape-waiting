@@ -5,8 +5,8 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.booking.schedule.Schedule;
 import roomescape.member.Member;
-import roomescape.schedule.Schedule;
 
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

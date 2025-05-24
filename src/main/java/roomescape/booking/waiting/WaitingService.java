@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.schedule.Schedule;
+import roomescape.booking.schedule.ScheduleRepository;
 import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
@@ -15,8 +17,6 @@ import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
 import roomescape.exception.custom.reason.waiting.WaitingNotFoundException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
-import roomescape.schedule.Schedule;
-import roomescape.schedule.ScheduleRepository;
 
 import java.time.LocalDate;
 import java.util.List;

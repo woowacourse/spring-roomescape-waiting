@@ -1,13 +1,13 @@
-package roomescape.schedule;
+package roomescape.booking.schedule;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.booking.schedule.dto.ScheduleRequest;
+import roomescape.booking.schedule.dto.ScheduleResponse;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepository;
-import roomescape.schedule.dto.ScheduleRequest;
-import roomescape.schedule.dto.ScheduleResponse;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
 

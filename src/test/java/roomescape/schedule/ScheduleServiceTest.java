@@ -5,12 +5,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.booking.schedule.Schedule;
+import roomescape.booking.schedule.ScheduleRepository;
+import roomescape.booking.schedule.ScheduleService;
+import roomescape.booking.schedule.dto.ScheduleRequest;
+import roomescape.booking.schedule.dto.ScheduleResponse;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepository;
-import roomescape.schedule.dto.ScheduleRequest;
-import roomescape.schedule.dto.ScheduleResponse;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeRepository;
 
