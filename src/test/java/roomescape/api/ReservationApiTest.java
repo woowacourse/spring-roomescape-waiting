@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-public class ReservationApiTest {
+class ReservationApiTest {
 
     private static final Map<String, String> RESERVATION_BODY = new HashMap<>();
     private static final Map<String, String> TIME_BODY = new HashMap<>();
@@ -240,7 +240,6 @@ public class ReservationApiTest {
         }
     }
 
-
     @DisplayName("member가 가진 예약이 없다면 빈 리스트를 반환한다.")
     @Test
     void readAllMemberReservations() {
@@ -253,7 +252,7 @@ public class ReservationApiTest {
         // when
         RestAssured.given().port(port).log().all()
                 .cookie(cookie)
-                .when().get("/members/reservations")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(0));
@@ -272,10 +271,92 @@ public class ReservationApiTest {
         // when
         RestAssured.given().port(port).log().all()
                 .cookie(cookie)
-                .when().get("/members/reservations")
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @DisplayName("예약이 존재할 때 reservation을 waiting을 생성한다.")
+    @Test
+    void createWaiting(){
+        // given
+        givenCreateMember();
+        final Cookie cookie = givenAuthCookie();
+
+        AUTH_BODY.put("email", "asd123@email.com");
+        MEMBER_BODY.put("email", "asd123@email.com");
+        givenCreateMember();
+        final Cookie anotherCookie = givenAuthCookie();
+        givenCreateReservationTime();
+        givenCreateTheme();
+        givenCreateReservation(cookie);
+
+        RESERVATION_BODY.put("memberId", "2");
+
+        // when & then
+        RestAssured.given().port(port).log().all()
+                .contentType(ContentType.JSON)
+                .cookie(anotherCookie)
+                .body(RESERVATION_BODY)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @DisplayName("예약이 존재하지 않는다면 400을 응답한다.")
+    @Test
+    void createWaiting1(){
+        // given
+        givenCreateMember();
+        final Cookie cookie = givenAuthCookie();
+        givenCreateReservationTime();
+        givenCreateTheme();
+
+        // when & then
+        RestAssured.given().port(port).log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(RESERVATION_BODY)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @DisplayName("모든 대기 상태의 reservation을 조회한다.")
+    @Test
+    void readAllWaiting() {
+        // given
+        givenCreateMember();
+        final Cookie cookie = givenAuthCookie();
+        givenCreateReservationTime();
+        givenCreateTheme();
+        givenCreateReservation(cookie);
+
+        MEMBER_BODY.put("email", "asd11@nav.com");
+        AUTH_BODY.put("email", "asd11@nav.com");
+        RESERVATION_BODY.put("memberId", "2");
+        givenCreateMember();
+        final Cookie cookie1 = givenAuthCookie();
+        givenCreateWaitingReservation(cookie1);
+
+        // when
+        RestAssured.given().port(port).log().all()
+                .cookie(cookie)
+                .when().get("/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
+
+    private void givenCreateWaitingReservation(final Cookie cookie) {
+        RestAssured.given().port(port).log().all()
+                .contentType(ContentType.JSON)
+                .cookie(cookie)
+                .body(RESERVATION_BODY)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(201);
     }
 
     private void givenCreateReservationTime() {

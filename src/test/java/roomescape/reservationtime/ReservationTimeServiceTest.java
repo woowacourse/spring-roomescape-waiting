@@ -2,45 +2,81 @@ package roomescape.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
-import roomescape.reservation.ReservationStatus;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryImpl;
+import roomescape.member.domain.MemberRole;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryImpl;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
-import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepositoryImpl;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepositoryImpl;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@Transactional(propagation = Propagation.SUPPORTS)
+@Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import({
+        MemberRepositoryImpl.class,
+        ThemeRepositoryImpl.class,
+        ReservationRepositoryImpl.class,
+        ReservationTimeRepositoryImpl.class,
+        ReservationTimeService.class
+})
 public class ReservationTimeServiceTest {
 
-    private final ReservationTimeService reservationTimeService;
+    @MockitoSpyBean
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationTimeService reservationTimeService;
 
-    public ReservationTimeServiceTest() {
-        reservationTimeRepository = mock(ReservationTimeRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        themeRepository = mock(ThemeRepository.class);
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository,
-                themeRepository);
+    private final ReservationRepository reservationRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
+
+
+    @Autowired
+    public ReservationTimeServiceTest(
+            final ReservationTimeRepository reservationTimeRepository,
+            final ReservationTimeService reservationTimeService,
+
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository,
+            final ThemeRepository themeRepository
+            ) {
+
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationTimeService = reservationTimeService;
+
+        this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
     }
 
     @Nested
@@ -53,17 +89,13 @@ public class ReservationTimeServiceTest {
             // given
             final LocalTime startAt = LocalTime.of(12, 40);
             final ReservationTimeRequest request = new ReservationTimeRequest(startAt);
-            given(reservationTimeRepository.existsByStartAt(startAt))
-                    .willReturn(false);
-            final ReservationTime reservationTime = new ReservationTime(1L, startAt);
-            given(reservationTimeRepository.save(new ReservationTime(startAt)))
-                    .willReturn(reservationTime);
+            final ReservationTimeResponse expected = ReservationTimeResponse.from(new ReservationTime(1L, startAt));
 
             // when
             final ReservationTimeResponse actual = reservationTimeService.create(request);
 
             // then
-            assertThat(actual).isEqualTo(ReservationTimeResponse.from(reservationTime));
+            assertThat(actual).isEqualTo(expected);
         }
 
         @DisplayName("이미 존재하는 시간이라면, 예외가 발생한다.")
@@ -72,11 +104,8 @@ public class ReservationTimeServiceTest {
             // given
             final LocalTime startAt = LocalTime.of(12, 40);
             final ReservationTimeRequest request = new ReservationTimeRequest(startAt);
-            given(reservationTimeRepository.existsByStartAt(startAt))
-                    .willReturn(true);
-            final ReservationTime reservationTime = new ReservationTime(1L, startAt);
-            given(reservationTimeRepository.save(new ReservationTime(startAt)))
-                    .willReturn(reservationTime);
+            final ReservationTime reservationTime = new ReservationTime(startAt);
+            reservationTimeRepository.save(reservationTime);
 
             // when
             assertThatThrownBy(() -> {
@@ -93,10 +122,8 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllTime1() {
             // given
-            given(reservationTimeRepository.findAll())
-                    .willReturn(List.of(
-                            new ReservationTime(1L, LocalTime.of(12, 40))
-                    ));
+            final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
+            reservationTimeRepository.save(reservationTime);
 
             // when
             final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
@@ -111,14 +138,11 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllTime2() {
             // given
-            given(reservationTimeRepository.findAll())
-                    .willReturn(List.of());
-
             // when
             final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
 
             // then
-            assertThat(actual).hasSize(0);
+            assertThat(actual).isEmpty();
         }
     }
 
@@ -130,23 +154,17 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes() {
             // given
-            final Long dummyThemeId = 1L;
-            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
-            given(reservationTimeRepository.findAll())
-                    .willReturn(List.of(
-                            new ReservationTime(1L,LocalTime.of(12, 0)),
-                            new ReservationTime(2L,LocalTime.of(13, 0)),
-                            new ReservationTime(3L,LocalTime.of(14, 0))
-                    ));
-            given(themeRepository.findById(dummyThemeId))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
-                    .willReturn(List.of());
+
+            themeRepository.save(theme);
+            reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+            reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+            reservationTimeRepository.save(new ReservationTime(LocalTime.of(14, 0)));
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
-                    dummyThemeId, targetDate);
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailable(
+                    1L, targetDate);
 
             // then
             assertThat(allAvailableTimes).hasSize(3);
@@ -156,24 +174,23 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes1() {
             // given
-            final Long dummyThemeId = 1L;
-            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
-            final LocalDate targetDate = LocalDate.of(2026, 12, 1);
-            final ReservationTime savedTime = new ReservationTime(1L, LocalTime.of(12, 0));
-            given(reservationTimeRepository.findAll())
-                    .willReturn(List.of(
-                            savedTime
-                    ));
-            given(themeRepository.findById(dummyThemeId))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
-                    .willReturn(List.of(
-                            new Reservation(1L, null, null, savedTime, theme, ReservationStatus.PENDING))
-                    );
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
+            final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
+            final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, time, theme,
+                    ReservationStatus.WAITING, currentDateTime);
+
+            memberRepository.save(member);
+            reservationTimeRepository.save(time);
+            themeRepository.save(theme);
+            reservationRepository.save(reservation);
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
-                    dummyThemeId, targetDate);
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailable(
+                    1L, reservationDate.date());
 
             // then
             assertThat(allAvailableTimes.getFirst().alreadyBooked()).isTrue();
@@ -183,20 +200,16 @@ public class ReservationTimeServiceTest {
         @Test
         void findAllAvailableTimes2() {
             // given
-            final Long dummyThemeId = 1L;
-            final Theme theme = new Theme(dummyThemeId, "메이", "테마", "asd");
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
-            given(reservationTimeRepository.findAll())
-                    .willReturn(List.of(
-                            new ReservationTime(1L,LocalTime.of(12, 0))
-                    ));
-            given(themeRepository.findById(dummyThemeId))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
-                    .willReturn(List.of());
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
+            final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
+
+            themeRepository.save(theme);
+            reservationTimeRepository.save(time);
+
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
-                    dummyThemeId, targetDate);
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailable(
+                    1L, targetDate);
 
             // then
             assertThat(allAvailableTimes.getFirst().alreadyBooked()).isFalse();
@@ -213,11 +226,8 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById1() {
             // given
-            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
-            given(reservationTimeRepository.findById(reservationTime.getId()))
-                    .willReturn(Optional.of(reservationTime));
-            given(reservationRepository.existsByReservationTime(reservationTime))
-                    .willReturn(false);
+            final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
+            reservationTimeRepository.save(reservationTime);
 
             // when
             reservationTimeService.deleteById(1L);
@@ -230,10 +240,6 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById2() {
             // given
-            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
-            given(reservationTimeRepository.findById(reservationTime.getId()))
-                    .willReturn(Optional.empty());
-
             // when & then
             assertThatThrownBy(() -> {
                 reservationTimeService.deleteById(1L);
@@ -244,11 +250,20 @@ public class ReservationTimeServiceTest {
         @Test
         void deleteTimeById3() {
             // given
-            final ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 40));
-            given(reservationTimeRepository.findById(reservationTime.getId()))
-                    .willReturn(Optional.of(reservationTime));
-            given(reservationRepository.existsByReservationTime(reservationTime))
-                    .willReturn(true);
+            final Theme theme = new Theme("메이", "테마", "thumbnail");
+            final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
+            final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, time, theme,
+                    ReservationStatus.WAITING, currentDateTime);
+
+
+            memberRepository.save(member);
+            reservationTimeRepository.save(time);
+            themeRepository.save(theme);
+            reservationRepository.save(reservation);
 
             // when & then
             assertThatThrownBy(() -> {

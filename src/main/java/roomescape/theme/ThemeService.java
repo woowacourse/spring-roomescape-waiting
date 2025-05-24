@@ -6,9 +6,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.repository.ReservationJpaRepository;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.repository.ThemeRepository;
 
 @Service
 @AllArgsConstructor
@@ -18,7 +20,7 @@ public class ThemeService {
     private static final int BETWEEN_DAY_END = 1;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationJpaRepository reservationJpaRepository;
 
     public ThemeResponse create(
             final ThemeRequest request
@@ -39,7 +41,7 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<ThemeResponse> findTopRankThemes(final int size) {
+    public List<ThemeResponse> findTopRank(final int size) {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
         final LocalDate to = now.minusDays(BETWEEN_DAY_END);
@@ -52,9 +54,9 @@ public class ThemeService {
             final Long id
     ) {
         final Theme theme = themeRepository.findById(id)
-                .orElseThrow(() -> new ThemeNotFoundException());
+                .orElseThrow(ThemeNotFoundException::new);
 
-        if(reservationRepository.existsByTheme(theme)) {
+        if (reservationJpaRepository.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
 

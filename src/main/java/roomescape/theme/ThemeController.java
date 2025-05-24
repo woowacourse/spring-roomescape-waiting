@@ -42,7 +42,7 @@ public class ThemeController {
     public ResponseEntity<List<ThemeResponse>> readTopRankThemes(
             @RequestParam(value = "size", defaultValue = "10") final int size
     ) {
-        final List<ThemeResponse> topRankThemes = themeService.findTopRankThemes(size);
+        final List<ThemeResponse> topRankThemes = themeService.findTopRank(size);
         return ResponseEntity.ok(topRankThemes);
     }
 

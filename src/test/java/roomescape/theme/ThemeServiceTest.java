@@ -2,36 +2,78 @@ package roomescape.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.anyInt;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryImpl;
+import roomescape.member.domain.MemberRole;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryImpl;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepositoryImpl;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepositoryImpl;
 
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
+@Transactional(propagation = Propagation.SUPPORTS)
+@Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import({
+        MemberRepositoryImpl.class,
+        ReservationTimeRepositoryImpl.class,
+        ReservationRepositoryImpl.class,
+        ThemeRepositoryImpl.class,
+        ThemeService.class
+})
 class ThemeServiceTest {
 
+    @MockitoSpyBean
     private final ThemeRepository themeRepository;
     private final ThemeService themeService;
+
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeServiceTest() {
-        themeRepository = mock(ThemeRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        themeService = new ThemeService(themeRepository, reservationRepository);
+    @Autowired
+    public ThemeServiceTest(
+            final ThemeRepository themeRepository,
+            final ThemeService themeService,
+
+            final ReservationRepository reservationRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final MemberRepository memberRepository
+    ) {
+        this.themeRepository = themeRepository;
+        this.themeService = themeService;
+
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.memberRepository = memberRepository;
+
     }
 
     @Nested
@@ -43,16 +85,15 @@ class ThemeServiceTest {
         void create() {
             // given
             final ThemeRequest themeRequest = new ThemeRequest("로키", "로키로키", "http://www.google.com");
-            final Theme theme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
-            final Theme savedTheme = new Theme(1L, theme.getName(), theme.getDescription(), theme.getThumbnail());
-            given(themeRepository.save(theme))
-                    .willReturn(savedTheme);
+            final Theme theme = new Theme(1L, themeRequest.name(), themeRequest.description(),
+                    themeRequest.thumbnail());
+            final ThemeResponse expected = ThemeResponse.from(theme);
 
             // when
             final ThemeResponse actual = themeService.create(themeRequest);
 
             // then
-            assertThat(actual).isEqualTo(ThemeResponse.from(savedTheme));
+            assertThat(actual).isEqualTo(expected);
         }
     }
 
@@ -65,18 +106,22 @@ class ThemeServiceTest {
         void findAll1() {
             // given
             final List<Theme> themes = List.of(
-                    new Theme(1L, "로키1", "로키로키1", "http://www.google.com/1"),
-                    new Theme(2L, "로키2", "로키로키2", "http://www.google.com/2"),
-                    new Theme(3L, "로키3", "로키로키3", "http://www.google.com/3")
+                    new Theme("로키1", "로키로키1", "http://www.google.com/1"),
+                    new Theme("로키2", "로키로키2", "http://www.google.com/2"),
+                    new Theme("로키3", "로키로키3", "http://www.google.com/3")
             );
-            given(themeRepository.findAll())
-                    .willReturn(themes);
+            for (final Theme theme : themes) {
+                themeRepository.save(theme);
+            }
 
             // when
             final List<ThemeResponse> actual = themeService.findAll();
 
             // then
-            assertThat(actual).hasSize(3);
+            assertThat(actual)
+                    .hasSize(3)
+                    .extracting(ThemeResponse::id)
+                    .contains(1L, 2L, 3L);
         }
 
         @DisplayName("테마가 없다면 빈 컬렉션을 반환한다.")
@@ -98,21 +143,53 @@ class ThemeServiceTest {
         @Test
         void findTopRankThemes() {
             // given
+            final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
+            final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
+            reservationTimeRepository.save(reservationTime);
+            memberRepository.save(member);
+
             final List<Theme> themes = List.of(
-                    new Theme(1L, "1", "2", "3"),
-                    new Theme(2L, "1", "2", "3"),
-                    new Theme(3L, "1", "2", "3"),
-                    new Theme(4L, "1", "2", "3"),
-                    new Theme(5L, "1", "2", "3")
+                    new Theme("1", "2", "3"),
+                    new Theme("1", "2", "3"),
+                    new Theme("1", "2", "3")
             );
-            given(themeRepository.findAllOrderByRank(any(), any(), anyInt()))
-                    .willReturn(themes);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2024, 12, 25, 12, 0);
+            final List<Reservation> reservations = List.of(
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(1)), member, reservationTime, themes.get(0),
+                            ReservationStatus.PENDING, currentDateTime),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(2)), member, reservationTime,
+                            themes.get(0),
+                            ReservationStatus.PENDING, currentDateTime),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(3)), member, reservationTime,
+                            themes.get(0),
+                            ReservationStatus.PENDING, currentDateTime),
+
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(1)), member, reservationTime,
+                            themes.get(1),
+                            ReservationStatus.PENDING, currentDateTime),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(2)), member, reservationTime,
+                            themes.get(1),
+                            ReservationStatus.PENDING, currentDateTime),
+
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(1)), member, reservationTime,
+                            themes.get(2),
+                            ReservationStatus.PENDING, currentDateTime)
+            );
+            for (final Theme theme : themes) {
+                themeRepository.save(theme);
+            }
+            for(final Reservation reservation : reservations) {
+                reservationRepository.save(reservation);
+            }
 
             // when
-            final List<ThemeResponse> actual = themeService.findTopRankThemes(5);
+            final List<ThemeResponse> actual = themeService.findTopRank(3);
 
             // then
-            assertThat(actual).hasSize(5);
+            assertThat(actual)
+                    .hasSize(3)
+                    .extracting(ThemeResponse::id)
+                    .containsExactly(1L, 2L, 3L);
         }
 
     }
@@ -125,15 +202,11 @@ class ThemeServiceTest {
         @Test
         void deleteById1() {
             // given
-            final Long id = 1L;
-            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
-            given(themeRepository.findById(id))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.existsByTheme(theme))
-                    .willReturn(false);
+            final Theme theme = new Theme("로키", "로키로키", "http://www.google.com");
+            themeRepository.save(theme);
 
             // when
-            themeService.deleteById(id);
+            themeService.deleteById(1L);
 
             // then
             then(themeRepository).should().delete(theme);
@@ -144,11 +217,6 @@ class ThemeServiceTest {
         void deleteById2() {
             // given
             final Long id = 1L;
-            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
-            given(themeRepository.findById(id))
-                    .willReturn(Optional.empty());
-            given(reservationRepository.existsByTheme(theme))
-                    .willReturn(true);
 
             // when & then
             assertThatThrownBy(() -> {
@@ -160,16 +228,23 @@ class ThemeServiceTest {
         @Test
         void deleteById3() {
             // given
-            final Long id = 1L;
-            final Theme theme = new Theme(id, "로키", "로키로키", "http://www.google.com");
-            given(themeRepository.findById(id))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.existsByTheme(theme))
-                    .willReturn(true);
+            final Theme theme = new Theme("로키", "로키로키", "http://www.google.com");
+            final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
+            final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
+
+            memberRepository.save(member);
+            reservationTimeRepository.save(reservationTime);
+            themeRepository.save(theme);
+            reservationRepository.save(reservation);
 
             // when & then
             assertThatThrownBy(() -> {
-                themeService.deleteById(id);
+                themeService.deleteById(1L);
             }).isInstanceOf(ThemeUsedException.class);
         }
     }

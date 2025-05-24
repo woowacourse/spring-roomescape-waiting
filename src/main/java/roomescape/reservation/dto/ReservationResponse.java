@@ -3,7 +3,7 @@ package roomescape.reservation.dto;
 import java.time.LocalDate;
 import roomescape.exception.custom.reason.ResponseInvalidException;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -23,7 +23,7 @@ public record ReservationResponse(
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getDate(),
+                reservation.getDate().date(),
                 MemberResponse.from(reservation.getMember()),
                 ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme())
