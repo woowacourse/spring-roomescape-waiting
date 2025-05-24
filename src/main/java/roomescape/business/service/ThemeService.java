@@ -22,7 +22,8 @@ public class ThemeService {
     private final ReservationRepository reservationRepository;
     private final CurrentUtil currentUtil;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository, final CurrentUtil currentUtil) {
+    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository,
+                        final CurrentUtil currentUtil) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
         this.currentUtil = currentUtil;
@@ -30,10 +31,9 @@ public class ThemeService {
 
     public ThemeResponse insert(final ThemeRequest themeRequest) {
         validateNameIsNotDuplicate(themeRequest.name());
-        final Theme theme = themeRequest.toDomain();
-        final Long id = themeRepository.save(theme)
-                .getId();
-        return new ThemeResponse(id, theme.getName(), theme.getDescription(), theme.getThumbnail());
+        final Theme theme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
+        themeRepository.save(theme);
+        return new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 
     private void validateNameIsNotDuplicate(final String name) {
@@ -45,14 +45,18 @@ public class ThemeService {
     public List<ThemeResponse> findAll() {
         return themeRepository.findAll()
                 .stream()
-                .map(ThemeResponse::from)
+                .map(theme -> new ThemeResponse(
+                        theme.getId(),
+                        theme.getName(),
+                        theme.getDescription(),
+                        theme.getThumbnail()))
                 .toList();
     }
 
     public ThemeResponse findById(final Long id) {
         final Theme theme = themeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(id)));
-        return ThemeResponse.from(theme);
+        return new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 
     public void deleteById(final Long id) {
