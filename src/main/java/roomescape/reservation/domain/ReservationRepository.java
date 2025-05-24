@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ReservationRepository {
@@ -10,6 +11,8 @@ public interface ReservationRepository {
     void deleteById(Long id);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+
+    List<Reservation> findAllWaitingReservations(LocalDateTime now);
 
     List<Reservation> findAll();
 
@@ -23,8 +26,6 @@ public interface ReservationRepository {
     boolean hasSameReservation(Reservation reservation);
 
     boolean existsByThemeId(Long themeId);
-
-    List<Reservation> findByMemberId(Long memberId);
 
     List<ReservationWithRank> findReservationWithRankByMemberId(Long memberId);
 }

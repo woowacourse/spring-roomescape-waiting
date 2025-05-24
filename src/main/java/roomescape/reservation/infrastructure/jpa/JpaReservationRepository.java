@@ -20,9 +20,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByThemeId(Long themeId);
 
-    @EntityGraph(attributePaths = {"theme", "time"})
-    List<Reservation> findByMemberId(Long id);
-
     @EntityGraph(attributePaths = {"theme", "member", "time"})
     List<Reservation> findAll();
 }

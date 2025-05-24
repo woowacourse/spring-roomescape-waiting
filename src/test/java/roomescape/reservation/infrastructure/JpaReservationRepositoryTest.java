@@ -205,18 +205,6 @@ class JpaReservationRepositoryTest {
         );
     }
 
-    @Test
-    @DisplayName("본인 예약들을 조회한다.")
-    void findByMemberGetId_test() {
-        // when
-        List<Reservation> findReservations = repository.findByMemberId(1L);
-        // then
-        assertThat(findReservations).hasSize(3);
-        assertThat(findReservations.get(0).name()).isEqualTo("코기");
-        assertThat(findReservations.get(1).name()).isEqualTo("코기");
-        assertThat(findReservations.get(2).name()).isEqualTo("코기");
-    }
-
     @ParameterizedTest
     @MethodSource
     @DisplayName("특정 상태의 예약이 존재하는지 확인한다.")
@@ -298,6 +286,37 @@ class JpaReservationRepositoryTest {
         assertAll(
                 () -> assertThat(reservations2).hasSize(1),
                 () -> assertThat(reservations2.get(0).getRank()).isEqualTo(1)
+        );
+    }
+
+    @Test
+    @DisplayName("모든 미래 예약을 가져온다.")
+    void findAllWaitingReservations_test() {
+        // given
+        ReservationTime reservationTime = em.find(ReservationTime.class, 1L);
+        Theme theme1 = em.find(Theme.class, 1L);
+        Theme theme2 = em.find(Theme.class, 2L);
+        Member member1 = em.find(Member.class, 2L);
+        Member member2 = em.find(Member.class, 3L);
+        Reservation reservation1 = Reservation.createWithoutId(LocalDateTime.of(2025, 3, 22, 21, 10), member1,
+                LocalDate.of(2025, 4, 28), reservationTime, theme1, ReservationStatus.WAITED);
+        Reservation reservation2 = Reservation.createWithoutId(LocalDateTime.of(2025, 3, 22, 20, 10), member2,
+                LocalDate.of(2025, 4, 28), reservationTime, theme1, ReservationStatus.WAITED);
+        Reservation reservation3 = Reservation.createWithoutId(LocalDateTime.of(2025, 3, 22, 20, 15), member2,
+                LocalDate.of(2025, 4, 18), reservationTime, theme2, ReservationStatus.WAITED);
+        em.persist(reservation1);
+        em.persist(reservation2);
+        em.persist(reservation3);
+        em.flush();
+        em.clear();
+        LocalDateTime now = LocalDateTime.of(2025, 4, 20, 10, 0);
+        // when
+        List<Reservation> waitingReservations = repository.findAllWaitingReservations(now);
+        // then
+        assertAll(
+                () -> assertThat(waitingReservations).hasSize(2),
+                () -> assertThat(waitingReservations.get(0).getDate()).isEqualTo(LocalDate.of(2025, 4, 28)),
+                () -> assertThat(waitingReservations.get(1).getDate()).isEqualTo(LocalDate.of(2025, 4, 28))
         );
     }
 }

@@ -1,6 +1,7 @@
 package roomescape.reservation.infrastructure.jpa;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -13,4 +14,6 @@ public interface ReservationCustomRepository {
                               Long memberId, ReservationStatus status);
 
     List<ReservationWithRank> findReservationWithRankById(Long memberId);
+
+    List<Reservation> findAllWaitingReservations(LocalDateTime now);
 }

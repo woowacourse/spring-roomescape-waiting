@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
@@ -62,6 +63,19 @@ public class ReservationCustomRepositoryImpl implements ReservationCustomReposit
                          where r.member.id = :memberId
                         """)
                 .setParameter("memberId", memberId)
+                .getResultList();
+    }
+
+    @Override
+    public List<Reservation> findAllWaitingReservations(LocalDateTime now) {
+        return em.createQuery("""
+                        SELECT r FROM Reservation r JOIN FETCH r.time JOIN FETCH r.theme JOIN FETCH r.member
+                        WHERE r.status = :status
+                        AND (r.date > :nowDate OR (r.date = :nowDate AND r.time.startAt > :nowTime))
+                        """, Reservation.class)
+                .setParameter("nowDate", now.toLocalDate())
+                .setParameter("nowTime", now.toLocalTime())
+                .setParameter("status", ReservationStatus.WAITED)
                 .getResultList();
     }
 

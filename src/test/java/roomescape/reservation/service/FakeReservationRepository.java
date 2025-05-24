@@ -1,7 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,11 +19,6 @@ public class FakeReservationRepository implements ReservationRepository {
 
     public FakeReservationRepository(List<Reservation> reservations) {
         this.reservations = reservations;
-    }
-
-    @Override
-    public List<Reservation> findAll() {
-        return Collections.unmodifiableList(reservations);
     }
 
     @Override
@@ -67,13 +62,6 @@ public class FakeReservationRepository implements ReservationRepository {
     public boolean existsByThemeId(Long themeId) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.themeId().equals(themeId));
-    }
-
-    @Override
-    public List<Reservation> findByMemberId(Long memberId) {
-        return reservations.stream()
-                .filter(reservation -> reservation.memberId().equals(memberId))
-                .toList();
     }
 
     @Override
@@ -127,6 +115,19 @@ public class FakeReservationRepository implements ReservationRepository {
                 .toList();
     }
 
+    @Override
+    public List<Reservation> findAllWaitingReservations(LocalDateTime now) {
+        return reservations.stream()
+                .filter(Reservation::isWaitingStatus)
+                .filter(reservation -> checkFutureDateTime(now, reservation))
+                .toList();
+    }
+
+    @Override
+    public List<Reservation> findAll() {
+        return reservations;
+    }
+
     private boolean matchMemberId(Reservation reservation, Long memberId) {
         return memberId == null || reservation.memberId().equals(memberId);
     }
@@ -147,5 +148,10 @@ public class FakeReservationRepository implements ReservationRepository {
             return false;
         }
         return true;
+    }
+
+    private boolean checkFutureDateTime(LocalDateTime now, Reservation reservation) {
+        LocalDateTime dateTime = LocalDateTime.of(reservation.getDate(), reservation.reservationTime());
+        return dateTime.isAfter(now);
     }
 }

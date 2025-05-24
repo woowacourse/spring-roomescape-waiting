@@ -1,6 +1,7 @@
 package roomescape.reservation.infrastructure.jpa;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
@@ -30,6 +31,11 @@ public class ReservationJpaRepository implements ReservationRepository {
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
         return jpaReservationRepository.findByDateAndThemeId(date, themeId);
+    }
+
+    @Override
+    public List<Reservation> findAllWaitingReservations(LocalDateTime now) {
+        return jpaReservationRepository.findAllWaitingReservations(now);
     }
 
     @Override
@@ -63,11 +69,6 @@ public class ReservationJpaRepository implements ReservationRepository {
     @Override
     public boolean existsByThemeId(Long themeId) {
         return jpaReservationRepository.existsByThemeId(themeId);
-    }
-
-    @Override
-    public List<Reservation> findByMemberId(Long memberId) {
-        return jpaReservationRepository.findByMemberId(memberId);
     }
 
     @Override
