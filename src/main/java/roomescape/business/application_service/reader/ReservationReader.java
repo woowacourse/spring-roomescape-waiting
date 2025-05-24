@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class ReservationReader {
 
     private final Reservations reservations;
-    private final ReservationSlotHelper slotReader;
+    private final ReservationSlotHelper slotHelper;
 
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom, final LocalDate dateTo) {
         List<Reservation> reservations = this.reservations.findAllWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
@@ -30,7 +30,7 @@ public class ReservationReader {
     }
 
     public List<MyReservationDto> getMyReservations(final String userIdValue) {
-        List<ReservationSlot> slots = slotReader.getAllSlotsContainsReserverOf(userIdValue);
+        List<ReservationSlot> slots = slotHelper.getAllSlotsContainsReserverOf(userIdValue);
         Id userId = Id.create(userIdValue);
         Map<Reservation, Integer> reservationsWithWaitingNumber = slots.stream()
                 .collect(Collectors.toMap(

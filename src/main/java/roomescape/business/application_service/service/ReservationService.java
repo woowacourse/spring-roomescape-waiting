@@ -29,13 +29,13 @@ public class ReservationService {
 
     private final Users users;
     private final Reservations reservations;
-    private final ReservationSlotHelper slotReader;
+    private final ReservationSlotHelper slotHelper;
 
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue, final String userIdValue) {
         User user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
 
-        ReservationSlot slot = slotReader.findByDateAndTimeIdAndThemeIdOrElseSave(date, timeIdValue, themeIdValue);
+        ReservationSlot slot = slotHelper.findByDateAndTimeIdAndThemeIdOrElseSave(date, timeIdValue, themeIdValue);
 
         if (!reservations.isSlotFreeFor(slot, user)) {
             throw new DuplicatedException(RESERVATION_DUPLICATED);
