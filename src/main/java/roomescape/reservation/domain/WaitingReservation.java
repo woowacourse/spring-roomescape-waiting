@@ -2,8 +2,6 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,7 +9,6 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,7 +23,7 @@ import roomescape.theme.domain.Theme;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = "id")
-public class Reservation {
+public class WaitingReservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,10 +41,13 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    public Reservation(final LocalDate date,
-                       final ReservationTime time,
-                       final Theme theme,
-                       final Member member
+    @CreationTimestamp
+    private LocalTime createdAt;
+
+    public WaitingReservation(final LocalDate date,
+                              final ReservationTime time,
+                              final Theme theme,
+                              final Member member
     ) {
         validateIsNonNull(date);
         validateIsNonNull(time);

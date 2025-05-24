@@ -11,7 +11,7 @@ public record MyReservationResponse(Long reservationId, String theme, LocalDate 
             reservation.getTheme().getName(),
             reservation.getDate(),
             reservation.getTime().getStartAt(),
-            reservation.getReservationStatus().getStatus()
+            "예약"
         );
     }
 }

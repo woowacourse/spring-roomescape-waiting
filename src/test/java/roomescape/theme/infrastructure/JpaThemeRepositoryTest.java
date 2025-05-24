@@ -14,7 +14,6 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;

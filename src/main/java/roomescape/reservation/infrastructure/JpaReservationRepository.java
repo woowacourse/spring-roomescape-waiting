@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 
 public interface JpaReservationRepository extends CrudRepository<Reservation, Long> {
 
@@ -22,5 +21,5 @@ public interface JpaReservationRepository extends CrudRepository<Reservation, Lo
 
     boolean existsByThemeId(Long themeId);
 
-    boolean existsByThemeIdAndTimeIdAndDateAndReservationStatus(Long themeId, Long timeId, LocalDate date, ReservationStatus status);
+    boolean existsByThemeIdAndTimeIdAndDate(Long themeId, Long timeId, LocalDate date);
 }

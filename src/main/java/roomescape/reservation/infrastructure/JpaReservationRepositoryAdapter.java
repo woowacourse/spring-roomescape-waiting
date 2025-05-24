@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationStatus;
 
 @Repository
 public class JpaReservationRepositoryAdapter implements ReservationRepository {
@@ -73,7 +72,7 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByThemeIdAndTimeIdAndDateAndReserved(Long themeId, Long timeId, LocalDate date, ReservationStatus status) {
-        return jpaReservationRepository.existsByThemeIdAndTimeIdAndDateAndReservationStatus(themeId, timeId, date, status);
+    public boolean existsByThemeIdAndTimeIdAndDate(Long themeId, Long timeId, LocalDate date) {
+        return jpaReservationRepository.existsByThemeIdAndTimeIdAndDate(themeId, timeId, date);
     }
 }

@@ -14,17 +14,22 @@ import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;
+import roomescape.reservation.application.WaitingReservationService;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.application.ReservationFacadeService;
+import roomescape.reservation.presentation.dto.WaitingReservationResponse;
 
 @RestController
 public class MemberReservationController {
 
     private final ReservationFacadeService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public MemberReservationController(final ReservationFacadeService reservationService) {
+    public MemberReservationController(ReservationFacadeService reservationService,
+                                       WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @PostMapping("/reservations")
@@ -34,18 +39,17 @@ public class MemberReservationController {
         return ResponseEntity.created(URI.create("/reservation")).body(response);
     }
 
+    @PostMapping("/reservation-waiting")
+    public ResponseEntity<WaitingReservationResponse> createWaitingReservation(@RequestBody final ReservationRequest request,
+                                                                               @LoginMember final LoginMemberInfo memberInfo) {
+        WaitingReservationResponse response = waitingReservationService.createWaitingReservation(request, memberInfo.id());
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
         List<MyReservationResponse> response = reservationService.getMemberReservations(loginMemberInfo);
 
-        return ResponseEntity.ok().body(response);
-    }
-
-    @PostMapping("/reservation-waiting")
-    public ResponseEntity<ReservationResponse> createWaitingReservation(@RequestBody final ReservationRequest request,
-                                                                        @LoginMember final LoginMemberInfo memberInfo) {
-        System.out.println(request.timeId());
-        ReservationResponse response = reservationService.createWaitingReservation(request, memberInfo.id());
         return ResponseEntity.ok().body(response);
     }
 
