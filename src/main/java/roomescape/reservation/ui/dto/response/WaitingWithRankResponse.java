@@ -21,9 +21,9 @@ public record WaitingWithRankResponse(
         return new WaitingWithRankResponse(
                 waitingWithRank.getWaiting().getId(),
                 MemberResponse.IdName.from(waitingWithRank.getWaiting().getMember()),
-                waitingWithRank.getWaiting().getDate(),
-                ReservationTimeResponse.from(waitingWithRank.getWaiting().getTime()),
-                ThemeResponse.from(waitingWithRank.getWaiting().getTheme()),
+                waitingWithRank.getWaiting().getReservationSlot().getDate(),
+                ReservationTimeResponse.from(waitingWithRank.getWaiting().getReservationSlot().getTime()),
+                ThemeResponse.from(waitingWithRank.getWaiting().getReservationSlot().getTheme()),
                 waitingWithRank.getRank() + "번째 예약 대기"
         );
     }
@@ -40,9 +40,9 @@ public record WaitingWithRankResponse(
         public static WaitingWithRankResponse.ForMember from(final WaitingWithRank waitingWithRank) {
             return new WaitingWithRankResponse.ForMember(
                     waitingWithRank.getWaiting().getId(),
-                    waitingWithRank.getWaiting().getDate(),
-                    waitingWithRank.getWaiting().getTime().getStartAt(),
-                    waitingWithRank.getWaiting().getTheme().getName(),
+                    waitingWithRank.getWaiting().getReservationSlot().getDate(),
+                    waitingWithRank.getWaiting().getReservationSlot().getTime().getStartAt(),
+                    waitingWithRank.getWaiting().getReservationSlot().getTheme().getName(),
                     waitingWithRank.getRank() + "번째 예약 대기"
             );
         }

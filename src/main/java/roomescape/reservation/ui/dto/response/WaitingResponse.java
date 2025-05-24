@@ -18,9 +18,9 @@ public record WaitingResponse(
     public static WaitingResponse from(final Waiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),
-                waiting.getDate(),
-                ReservationTimeResponse.from(waiting.getTime()),
-                ThemeResponse.from(waiting.getTheme()),
+                waiting.getReservationSlot().getDate(),
+                ReservationTimeResponse.from(waiting.getReservationSlot().getTime()),
+                ThemeResponse.from(waiting.getReservationSlot().getTheme()),
                 IdName.from(waiting.getMember()),
                 waiting.getCreatedAt()
         );

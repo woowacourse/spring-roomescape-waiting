@@ -6,8 +6,11 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.theme.domain.Theme;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,13 +33,15 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         return jpaReservationRepository.existsById(id);
     }
 
-    @Override
-    public boolean existsByDateAndTimeIdAndThemeId(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId
+    public boolean existsByReservationSlot(
+            final ReservationSlot reservationSlot
     ) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return jpaReservationRepository.existsByReservationSlot(reservationSlot);
+    }
+
+    @Override
+    public boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member) {
+        return jpaReservationRepository.existsByReservationSlotAndMember(reservationSlot, member);
     }
 
     @Override
@@ -64,27 +69,15 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByDateAndThemeId(
+    public List<Reservation> findAllByDateAndTheme(
             final LocalDate date,
-            final Long themeId
+            final Theme theme
     ) {
-        return jpaReservationRepository.findAllByDateAndThemeId(date, themeId);
+        return jpaReservationRepository.findAllByDateAndTheme(date, theme);
     }
 
-    @Override
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByMemberId(final Long memberId) {
-        return jpaReservationRepository.findAllByMemberId(memberId);
-    }
-
-    @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                date, timeId, themeId, memberId
-        );
+    public List<Reservation> findAllByMember(final Member member) {
+        return jpaReservationRepository.findAllByMember(member);
     }
 }

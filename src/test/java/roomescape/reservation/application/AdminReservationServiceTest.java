@@ -28,6 +28,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
@@ -108,7 +109,7 @@ class AdminReservationServiceTest {
         final Member member = memberRepository.save(notSavedMember1());
 
         reservationRepository.save(
-                new Reservation(date, reservationTime, theme, member, BOOKED));
+                Reservation.of(ReservationSlot.of(date, reservationTime, theme), member, BOOKED));
 
         final CreateReservationRequest request =
                 new CreateReservationRequest(member.getId(), date, reservationTime.getId(), theme.getId()
@@ -127,7 +128,7 @@ class AdminReservationServiceTest {
         final Theme theme = themeRepository.save(notSavedTheme1());
         final Member member = memberRepository.save(notSavedMember1());
         final Reservation reservation = reservationRepository.save(
-                new Reservation(date, time, theme, member, BOOKED));
+                Reservation.of(ReservationSlot.of(date, time, theme), member, BOOKED));
 
         // when
         adminReservationService.deleteAsAdmin(reservation.getId());
@@ -161,10 +162,10 @@ class AdminReservationServiceTest {
         final Theme theme2 = themeRepository.save(notSavedTheme2());
 
         reservationRepository.save(
-                new Reservation(date1, time1, theme1, member, BOOKED)
+                Reservation.of(ReservationSlot.of(date1, time1, theme1), member, BOOKED)
         );
         reservationRepository.save(
-                new Reservation(date2, time2, theme2, member, BOOKED)
+                Reservation.of(ReservationSlot.of(date2, time2, theme2), member, BOOKED)
         );
 
         // when
@@ -187,9 +188,9 @@ class AdminReservationServiceTest {
         final LocalDate date2 = LocalDate.now().plusDays(2);
         final LocalDate date3 = LocalDate.now().plusDays(3);
 
-        reservationRepository.save(new Reservation(date1, time1, theme, member, BOOKED));
-        reservationRepository.save(new Reservation(date2, time2, theme, member, BOOKED));
-        reservationRepository.save(new Reservation(date3, time3, theme, member, BOOKED));
+        reservationRepository.save(Reservation.of(ReservationSlot.of(date1, time1, theme), member, BOOKED));
+        reservationRepository.save(Reservation.of(ReservationSlot.of(date2, time2, theme), member, BOOKED));
+        reservationRepository.save(Reservation.of(ReservationSlot.of(date3, time3, theme), member, BOOKED));
 
         final FilteredReservationsRequest request1 =
                 new FilteredReservationsRequest(theme.getId(), member.getId(), date1, date2);

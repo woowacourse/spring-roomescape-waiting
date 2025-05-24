@@ -15,6 +15,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
@@ -38,28 +39,28 @@ public class AdminReservationService {
     private final WaitingRepository waitingRepository;
 
     public ReservationResponse create(final CreateReservationRequest request) {
+        final ReservationTime time = getReservationTimeById(request.timeId());
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberById(request.memberId());
+
         return ReservationResponse.from(
-                createBookedReservation(request.date(), request.timeId(), request.themeId(), request.memberId())
+                createBookedReservation(request.date(), time, theme, member)
         );
     }
 
     private Reservation createBookedReservation(
             final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId
+            final ReservationTime time,
+            final Theme theme,
+            final Member member
     ) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
+        final ReservationSlot reservationSlot = ReservationSlot.of(date, time, theme);
+
+        if (reservationRepository.existsByReservationSlot(reservationSlot)) {
+            throw new AlreadyExistException("해당 예약 슬롯에 예약이 있습니다.");
         }
 
-        final Reservation reservation = new Reservation(
-                date,
-                getReservationTimeById(timeId),
-                getThemeById(themeId),
-                getMemberById(memberId),
-                BOOKED
-        );
+        final Reservation reservation = Reservation.of(reservationSlot, member, BOOKED);
 
         return reservationRepository.save(reservation);
     }
@@ -71,10 +72,8 @@ public class AdminReservationService {
         }
 
         final Reservation reservation = getReservationById(reservationId);
-        final Optional<Waiting> optionalWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
+        final Optional<Waiting> optionalWaiting = waitingRepository.findFirstByReservationSlotOrderByCreatedAt(
+                reservation.getReservationSlot()
         );
         if (optionalWaiting.isPresent()) {
             final Waiting waiting = optionalWaiting.get();

@@ -19,9 +19,9 @@ public record ReservationResponse(
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme()),
+                reservation.getReservationSlot().getDate(),
+                ReservationTimeResponse.from(reservation.getReservationSlot().getTime()),
+                ThemeResponse.from(reservation.getReservationSlot().getTheme()),
                 IdName.from(reservation.getMember()),
                 reservation.getStatus().getDescription()
         );
@@ -39,9 +39,9 @@ public record ReservationResponse(
         public static ForMember from(final Reservation reservation) {
             return new ForMember(
                     reservation.getId(),
-                    reservation.getTheme().getName(),
-                    reservation.getDate(),
-                    reservation.getTime().getStartAt(),
+                    reservation.getReservationSlot().getTheme().getName(),
+                    reservation.getReservationSlot().getDate(),
+                    reservation.getReservationSlot().getTime().getStartAt(),
                     reservation.getStatus().getDescription()
             );
         }

@@ -1,10 +1,11 @@
 package roomescape.reservation.infrastructure;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingRepository;
 import roomescape.reservation.domain.WaitingWithRank;
@@ -36,14 +37,8 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId) {
-        return jpaWaitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                date, timeId, themeId, memberId
-        );
+    public boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member) {
+        return jpaWaitingRepository.existsByReservationSlotAndMember(reservationSlot, member);
     }
 
     @Override
@@ -62,10 +57,8 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId) {
-        return jpaWaitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(date, timeId, themeId);
+    public Optional<Waiting> findFirstByReservationSlotOrderByCreatedAt(
+            final ReservationSlot reservationSlot) {
+        return jpaWaitingRepository.findFirstByReservationSlotOrderByCreatedAt(reservationSlot);
     }
 }

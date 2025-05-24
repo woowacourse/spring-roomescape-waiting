@@ -1,8 +1,8 @@
 package roomescape.reservation.domain;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.member.domain.Member;
 
 public interface WaitingRepository {
 
@@ -14,7 +14,7 @@ public interface WaitingRepository {
 
     boolean existsById(Long waitingId);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member);
 
     Optional<Waiting> findById(Long waitingId);
 
@@ -22,5 +22,5 @@ public interface WaitingRepository {
 
     List<WaitingWithRank> findAllWaitingWithRank();
 
-    Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(LocalDate date, Long timeId, Long themeId);
+    Optional<Waiting> findFirstByReservationSlotOrderByCreatedAt(ReservationSlot reservationSlot);
 }

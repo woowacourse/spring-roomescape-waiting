@@ -16,6 +16,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
@@ -38,34 +39,32 @@ public class ReservationService {
             final CreateReservationRequest.ForMember request,
             final Long memberId
     ) {
-        return ReservationResponse.from(
-                createReservedReservation(request.date(), request.timeId(), request.themeId(), memberId)
-        );
+        final ReservationTime time = getReservationTime(request.date(), request.timeId());
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberById(memberId);
+
+        return ReservationResponse.from(createReservedReservation(request.date(), time, theme, member));
     }
 
     private Reservation createReservedReservation(
             final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId
+            final ReservationTime time,
+            final Theme theme,
+            final Member member
     ) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                date, timeId, themeId
-        )) {
-            throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
+        final ReservationSlot reservationSlot = ReservationSlot.of(date, time, theme);
+
+        if (reservationRepository.existsByReservationSlot(reservationSlot)) {
+            throw new AlreadyExistException("해당 예약 슬롯에 예약이 있습니다.");
         }
 
-        final ReservationTime reservationTime = getReservationTime(date, timeId);
-        final Theme theme = getThemeById(themeId);
-        final Member member = getMemberById(memberId);
-
-        final Reservation reservation = new Reservation(date, reservationTime, theme, member, BOOKED);
+        final Reservation reservation = Reservation.of(reservationSlot, member, BOOKED);
 
         return reservationRepository.save(reservation);
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
-        final ReservationTime reservationTime = getReservationTimeById(timeId);
+        final ReservationTime reservationTime = getReservationTime(timeId);
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         if (reservationDateTime.isBefore(now)) {
@@ -90,11 +89,13 @@ public class ReservationService {
             final AvailableReservationTimeRequest request
     ) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final List<LocalTime> bookedTimes = reservationRepository.findAllByDateAndThemeId(
+        final Theme theme = getThemeById(request.themeId());
+
+        final List<LocalTime> bookedTimes = reservationRepository.findAllByDateAndTheme(
                         request.date(),
-                        request.themeId()
+                        theme
                 ).stream()
-                .map(reservation -> reservation.getTime().getStartAt())
+                .map(reservation -> reservation.getReservationSlot().getTime().getStartAt())
                 .toList();
 
         return reservationTimes.stream()
@@ -109,7 +110,9 @@ public class ReservationService {
     }
 
     public List<ReservationResponse.ForMember> findReservationsByMemberId(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId).stream()
+        final Member member = getMemberById(memberId);
+
+        return reservationRepository.findAllByMember(member).stream()
                 .map(ReservationResponse.ForMember::from)
                 .toList();
     }
@@ -119,7 +122,7 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
     }
 
-    private ReservationTime getReservationTimeById(final Long timeId) {
+    private ReservationTime getReservationTime(final Long timeId) {
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
     }

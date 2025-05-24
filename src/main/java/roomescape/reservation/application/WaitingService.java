@@ -12,6 +12,7 @@ import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.domain.Waiting;
@@ -37,35 +38,34 @@ public class WaitingService {
             final CreateWaitingRequest.ForMember request,
             final Long memberId
     ) {
-        return WaitingResponse.from(
-                createWaiting(request.date(), request.timeId(), request.themeId(), memberId)
-        );
+        final ReservationTime time = getReservationTime(request.date(), request.timeId());
+        final Theme theme = getThemeById(request.themeId());
+        final Member member = getMemberById(memberId);
+
+        return WaitingResponse.from(createWaiting(request.date(), time, theme, member));
     }
 
     private Waiting createWaiting(
             final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId
+            final ReservationTime time,
+            final Theme theme,
+            final Member member
     ) {
-        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        final ReservationSlot reservationSlot = ReservationSlot.of(date, time, theme);
+
+        if (!reservationRepository.existsByReservationSlot(reservationSlot)) {
             throw new ResourceNotFoundException("예약이 없는 상태에서 예약 대기를 추가할 수 없습니다.");
         }
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
-            throw new AlreadyExistException("해당 날짜와 시간에 이미 해당 테마에 대한 본인 예약이 있습니다.");
+        if (reservationRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
+            throw new AlreadyExistException("해당 예약 슬롯에 본인 예약이 있습니다.");
         }
 
-        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId)) {
+        if (waitingRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
             throw new AlreadyExistException("신청한 예약 대기가 이미 존재합니다.");
         }
 
-        final ReservationTime reservationTime = getReservationTime(date, timeId);
-        final Theme theme = getThemeById(themeId);
-        final Member member = getMemberById(memberId);
-
-        final Waiting waiting =
-                new Waiting(date, reservationTime, theme, member, LocalDateTime.now());
+        final Waiting waiting = Waiting.of(reservationSlot, member, LocalDateTime.now());
 
         return waitingRepository.save(waiting);
     }

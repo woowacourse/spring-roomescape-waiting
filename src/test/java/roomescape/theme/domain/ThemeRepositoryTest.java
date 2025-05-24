@@ -2,6 +2,7 @@ package roomescape.theme.domain;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.fixture.domain.MemberFixture.notSavedMember1;
+import static roomescape.reservation.domain.ReservationStatus.BOOKED;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,7 +19,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 
@@ -63,9 +64,11 @@ class ThemeRepositoryTest {
         for (int themeIndex = 0; themeIndex < 5; themeIndex++) {
             for (int timeIndex = 0; timeIndex < themeCounts.get(themeIndex); timeIndex++) {
                 reservationRepository.save(
-                        new Reservation(
-                                now.minusDays(themeIndex), times.get(timeIndex), themes.get(themeIndex), member,
-                                ReservationStatus.BOOKED
+                        Reservation.of(
+                                ReservationSlot.of(now.minusDays(themeIndex), times.get(timeIndex),
+                                        themes.get(themeIndex)),
+                                member,
+                                BOOKED
                         )
                 );
             }
@@ -74,9 +77,10 @@ class ThemeRepositoryTest {
         // theme.get(5)는 weekAgo보다 이전 날짜로 예약 10개 추가 -> weekAgo~now 기간에는 예약 0개로 취급되어야 함
         for (int timeIndex = 0; timeIndex < 10; timeIndex++) {
             reservationRepository.save(
-                    new Reservation(
-                            weekAgo.minusDays(2), times.get(timeIndex), themes.get(5), member,
-                            ReservationStatus.BOOKED
+                    Reservation.of(
+                            ReservationSlot.of(weekAgo.minusDays(2), times.get(timeIndex), themes.get(5)),
+                            member,
+                            BOOKED
                     )
             );
         }
@@ -84,9 +88,10 @@ class ThemeRepositoryTest {
         // theme.get(6) 테마는 now날짜에 예약 1개, now보다 이후 날짜에 예약 10개 -> weekAgo~now 기간에는 예약 1개로 취급되어야 함
         for (int timeIndex = 0; timeIndex < 11; timeIndex++) {
             reservationRepository.save(
-                    new Reservation(
-                            now.plusDays(timeIndex), times.get(timeIndex), themes.get(6), member,
-                            ReservationStatus.BOOKED
+                    Reservation.of(
+                            ReservationSlot.of(now.plusDays(timeIndex), times.get(timeIndex), themes.get(6)),
+                            member,
+                            BOOKED
                     )
             );
         }

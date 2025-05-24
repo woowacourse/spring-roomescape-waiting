@@ -59,23 +59,23 @@ class ReservationRepositoryTest {
 
         // member1, theme1, yesterday~tomorrow 예약
         final Reservation reservation1 = reservationRepository.save(
-                new Reservation(yesterday, time1, theme1, member1, BOOKED));
+                Reservation.of(ReservationSlot.of(yesterday, time1, theme1), member1, BOOKED));
         final Reservation reservation2 = reservationRepository.save(
-                new Reservation(today, time2, theme1, member1, BOOKED));
+                Reservation.of(ReservationSlot.of(today, time2, theme1), member1, BOOKED));
         final Reservation reservation3 = reservationRepository.save(
-                new Reservation(tomorrow, time1, theme1, member1, BOOKED));
+                Reservation.of(ReservationSlot.of(tomorrow, time1, theme1), member1, BOOKED));
 
         // member1, theme1, 날짜 범위 밖(dayAfterTomorrow) 예약
         reservationRepository.save(
-                new Reservation(dayAfterTomorrow, time1, theme1, member1, BOOKED));
+                Reservation.of(ReservationSlot.of(dayAfterTomorrow, time1, theme1), member1, BOOKED));
 
         // member2, theme1 예약
         reservationRepository.save(
-                new Reservation(today, time1, theme1, member2, BOOKED));
+                Reservation.of(ReservationSlot.of(today, time1, theme1), member2, BOOKED));
 
         // member1, theme2 예약
         reservationRepository.save(
-                new Reservation(today, time1, theme2, member1, BOOKED));
+                Reservation.of(ReservationSlot.of(today, time1, theme2), member1, BOOKED));
 
         // when
         final List<Reservation> founds = reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(
