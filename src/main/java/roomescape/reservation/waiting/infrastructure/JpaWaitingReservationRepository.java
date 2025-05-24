@@ -1,5 +1,6 @@
 package roomescape.reservation.waiting.infrastructure;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,8 +15,10 @@ public interface JpaWaitingReservationRepository extends CrudRepository<WaitingR
 
     boolean existsByIdAndMemberId(Long id, Long memberId);
 
+    boolean existsByThemeIdAndTimeIdAndDateAndMemberId(Long themeId, Long timeId, LocalDate date, Long memberId);
+
     @Query("""
-        SELECT new roomescape.reservation.domain.dto.WaitingReservationWithRank(
+        SELECT new roomescape.reservation.waiting.domain.dto.WaitingReservationWithRank(
             w,
             (SELECT COUNT(w2)
                 FROM WaitingReservation w2

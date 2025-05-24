@@ -8,6 +8,7 @@ import roomescape.member.application.service.MemberQueryService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.waiting.application.service.WaitingReservationCommandService;
+import roomescape.reservation.waiting.application.service.WaitingReservationQueryService;
 import roomescape.reservation.waiting.domain.WaitingReservation;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.WaitingReservationResponse;
@@ -21,17 +22,20 @@ public class WaitingReservationFacadeService {
 
     private final ReservationQueryService reservationQueryService;
     private final WaitingReservationCommandService waitingReservationCommandService;
+    private final WaitingReservationQueryService waitingReservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
     private final MemberQueryService memberQueryService;
 
     public WaitingReservationFacadeService(final ReservationQueryService reservationQueryService,
                                            final WaitingReservationCommandService waitingReservationCommandService,
+                                           final WaitingReservationQueryService waitingReservationQueryService,
                                            final ReservationTimeQueryService reservationTimeQueryService,
                                            final ThemeQueryService themeQueryService,
                                            final MemberQueryService memberQueryService) {
         this.reservationQueryService = reservationQueryService;
         this.waitingReservationCommandService = waitingReservationCommandService;
+        this.waitingReservationQueryService = waitingReservationQueryService;
         this.reservationTimeQueryService = reservationTimeQueryService;
         this.themeQueryService = themeQueryService;
         this.memberQueryService = memberQueryService;
@@ -42,6 +46,7 @@ public class WaitingReservationFacadeService {
         Theme theme = themeQueryService.findById(request.themeId());
         Member member = memberQueryService.findById(memberId);
         validateExistsReservation(theme.getId(), time.getId(), request.date());
+        validateExistsWaiting(request, memberId);
 
         LocalDateTime now = LocalDateTime.now();
         WaitingReservation waitingReservation = new WaitingReservation(request.date(), time, theme, member);
@@ -50,6 +55,12 @@ public class WaitingReservationFacadeService {
         WaitingReservation responseWaiting = waitingReservationCommandService.save(waitingReservation);
 
         return WaitingReservationResponse.from(responseWaiting);
+    }
+
+    private void validateExistsWaiting(final ReservationRequest request, final Long memberId) {
+        if (waitingReservationQueryService.isExistsWaitingReservation(request.themeId(), request.timeId(), request.date(), memberId)) {
+            throw new BusinessException("중복 예약 대기 할 수 없습니다.");
+        }
     }
 
     private void validateExistsReservation(final Long themeId, final Long timeId, final LocalDate date) {

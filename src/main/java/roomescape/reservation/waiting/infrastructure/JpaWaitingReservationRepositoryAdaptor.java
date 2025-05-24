@@ -1,5 +1,6 @@
 package roomescape.reservation.waiting.infrastructure;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.waiting.domain.WaitingReservation;
@@ -33,5 +34,10 @@ public class JpaWaitingReservationRepositoryAdaptor implements WaitingReservatio
     @Override
     public boolean existsByIdAndMemberId(Long id, Long memberId) {
         return jpaWaitingReservationRepository.existsByIdAndMemberId(id, memberId);
+    }
+
+    @Override
+    public boolean existsByThemeIdAndTimeIdAndDateAndMemberId(Long themeId, Long timeId, LocalDate date, Long memberId) {
+        return jpaWaitingReservationRepository.existsByThemeIdAndTimeIdAndDateAndMemberId(themeId, timeId, date, memberId);
     }
 }
