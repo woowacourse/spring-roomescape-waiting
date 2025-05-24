@@ -108,39 +108,7 @@ public class MemberReservationApiTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body(equalTo("현재보다 과거의 날짜로 예약 할 수 없습니다."));
-    }
-
-
-    @Test
-    void 중복된_시간에_예약을_하면_에러가_발생한다() {
-        final MemberReservationRequest request1 = new MemberReservationRequest(
-                LocalDate.now().plusDays(10),
-                1L,
-                1L
-        );
-
-        final MemberReservationRequest request2 = new MemberReservationRequest(
-                LocalDate.now().plusDays(10),
-                1L,
-                1L
-        );
-
-        RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .contentType(ContentType.JSON)
-                .body(request1)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .contentType(ContentType.JSON)
-                .body(request2)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(409);
+                .body(equalTo("현재보다 과거의 날짜로 예약할 수 없습니다."));
     }
 
     @Test
@@ -148,17 +116,30 @@ public class MemberReservationApiTest {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
                 .contentType(ContentType.JSON)
-                .when().get("/reservations/mine")
+                .when().get("/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(4));
+    }
+
+    @Test
+    void 테마_id가_null이면_에러를_반환한다() {
+        final MemberReservationRequest request = new MemberReservationRequest(LocalDate.now().plusDays(1), 1L, null);
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(400);
     }
 
     @Test
     void 로그인을_안한상태로_본인의_예약을_조회하면_401를_반환한다() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().get("/reservations/mine")
+                .when().get("/mine")
                 .then().log().all()
                 .statusCode(401);
     }

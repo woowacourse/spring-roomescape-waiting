@@ -31,18 +31,31 @@ VALUES ('컨저링', '실화 기반의 공포가 현실이 된다, 악령이 도
         'https://upload.wikimedia.org/wikipedia/ko/c/c6/%EC%BB%A8%EC%A0%80%EB%A7%81.jpg');
 
 -- 2 -> 1 -> 3
+-- 과거 예약
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 2, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', -4, CURRENT_DATE), 2, 2, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 2, 2, 2);
 
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 1, 2, 1, 'CONFIRMATION');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -4, CURRENT_DATE), 2, 2, 1, 'CONFIRMATION');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 2, 2, 2, 'CONFIRMATION');
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 3, 1, 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 1, 3);
 
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 3, 1, 2, 'CONFIRMATION');
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 1, 3, 'CONFIRMATION');
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 3, 3);
 
-INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES (DATEADD('DAY', -3, CURRENT_DATE), 4, 3, 3, 'CONFIRMATION');
+-- 미래 예약
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', +3, CURRENT_DATE), 2, 2, 2);
+INSERT INTO reservation (date, time_id, theme_id, member_id)
+VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 2);
+
+INSERT INTO waiting (date, time_id, theme_id, member_id, waiting_status, created_at)
+VALUES (DATEADD('DAY', +3, CURRENT_DATE), 2, 2, 1, 'PENDING', TIMESTAMPADD(HOUR, 9, DATEADD('DAY', +3, CURRENT_DATE)));
+INSERT INTO waiting (date, time_id, theme_id, member_id, waiting_status, created_at)
+VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 3, 'PENDING', TIMESTAMPADD(HOUR, 10, DATEADD('DAY', +4, CURRENT_DATE)));
+INSERT INTO waiting (date, time_id, theme_id, member_id, waiting_status, created_at)
+VALUES (DATEADD('DAY', +4, CURRENT_DATE), 3, 1, 1, 'PENDING', TIMESTAMPADD(HOUR, 11, DATEADD('DAY', +3, CURRENT_DATE)));
