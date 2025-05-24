@@ -34,9 +34,43 @@ class WaitingControllerTest {
                 .cookie("token", tokenValue)
                 .contentType(ContentType.JSON)
                 .body(waitingParams)
-                .when().post("/reservations")
+                .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @DisplayName("예약대기를 삭제한다.")
+    @Test
+    void deleteReservationWaiting() {
+        int timeId = addReservationTime("10:00");
+        int themeId = addTheme();
+        String tokenValue = getAdminLoginTokenValue();
+        Map<String, Object> reservationParams = Map.of(
+                "date", getTomorrow(),
+                "timeId", timeId,
+                "themeId", themeId
+        );
+
+        int waitingId = RestAssured.given()
+                .cookie("token", tokenValue)
+                .contentType(ContentType.JSON)
+                .body(reservationParams)
+                .when().post("/reservations/waiting")
+                .then().extract().path("id");
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/" + waitingId)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @DisplayName("존재하지 않는 예약대기를 삭제할 경우 NOT_FOUND 반환한다.")
+    @Test
+    void deleteNonExistsReservationWaiting() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/0")
+                .then().log().all()
+                .statusCode(404);
     }
 
     private String getAdminLoginTokenValue() {

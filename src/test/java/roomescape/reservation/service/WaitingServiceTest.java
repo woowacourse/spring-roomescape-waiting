@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -16,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.AlreadyInUseException;
+import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
@@ -85,6 +87,28 @@ class WaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> waitingService.createWaiting(request))
                 .isInstanceOf(AlreadyInUseException.class);
+    }
+
+    @DisplayName("예약대기를 삭제한다.")
+    @Test
+    void deleteReservationWaiting() {
+        // given
+        LocalDate date = getTomorrow();
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        Waiting waiting = waitingRepository.save(new Waiting(date, member, time, theme));
+
+        // when & then
+        assertThatCode(() -> waitingService.deleteWaiting(waiting.getId()))
+                .doesNotThrowAnyException();
+    }
+
+    @DisplayName("예약이 존재하지 않으면 예외를 반환한다.")
+    @Test
+    void deleteNonExistsReservationWaiting() {
+        assertThatThrownBy(() -> waitingService.deleteWaiting(1L))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     private LocalDate getTomorrow() {

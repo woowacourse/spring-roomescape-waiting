@@ -90,4 +90,11 @@ public class WaitingService {
             throw new IllegalArgumentException("이미 지난 예약 시간입니다.");
         }
     }
+
+    public void deleteWaiting(final Long id) {
+        if (!waitingRepository.existsById(id)) {
+            throw new EntityNotFoundException("존재하지 않는 예약 대기입니다.");
+        }
+        waitingRepository.deleteById(id);
+    }
 }

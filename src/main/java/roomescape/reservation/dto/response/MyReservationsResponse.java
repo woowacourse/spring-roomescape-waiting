@@ -6,9 +6,10 @@ import java.time.LocalTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.WaitingWithRank;
 
 public record MyReservationsResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm")
@@ -23,6 +24,16 @@ public record MyReservationsResponse(
                 reservation.getDate(),
                 reservation.startTime(),
                 reservation.statusDescription()
+        );
+    }
+
+    public static MyReservationsResponse from(final WaitingWithRank waitingWithRank) {
+        return new MyReservationsResponse(
+                waitingWithRank.getId(),
+                waitingWithRank.themeName(),
+                waitingWithRank.getDate(),
+                waitingWithRank.startTime(),
+                String.valueOf(waitingWithRank.getRank())
         );
     }
 }
