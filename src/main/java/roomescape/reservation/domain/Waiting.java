@@ -8,10 +8,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import roomescape.global.common.TimeStamp;
 import roomescape.member.domain.Member;
 
 @Entity
-public class Waiting {
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "UPDATE waiting SET deleted_at = NOW() WHERE id = ?")
+public class Waiting extends TimeStamp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

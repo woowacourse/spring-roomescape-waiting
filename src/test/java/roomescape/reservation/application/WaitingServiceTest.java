@@ -11,12 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.reservation.application.repository.ReservationTimeRepository;
-import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.WaitingRequest;
 
@@ -94,5 +94,4 @@ class WaitingServiceTest {
         // then
         assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(1);
     }
-
 }

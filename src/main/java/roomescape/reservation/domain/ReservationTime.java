@@ -6,9 +6,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import roomescape.global.common.TimeStamp;
 
 @Entity
-public class ReservationTime {
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "UPDATE reservation_time SET deleted_at = NOW() WHERE id = ?")
+public class ReservationTime extends TimeStamp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
