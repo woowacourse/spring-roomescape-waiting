@@ -21,7 +21,7 @@ import java.net.URI;
 import java.util.List;
 
 @Controller
-@RequestMapping("/reservations/waiting")
+@RequestMapping("/waitings")
 public class WaitingController {
 
     private final WaitingService waitingService;
@@ -37,7 +37,7 @@ public class WaitingController {
         Waiting waiting = waitingService.getWaitingById(addedWaitingId);
 
         WaitingResponseDto waitingResponseDto = new WaitingResponseDto(addedWaitingId, waiting.getName(), waiting.getStartAt(), waiting.getDate(), waiting.getThemeName());
-        return ResponseEntity.created(URI.create("/reservations/waiting/" + addedWaitingId)).body(waitingResponseDto);
+        return ResponseEntity.created(URI.create("/waitings/" + addedWaitingId)).body(waitingResponseDto);
     }
 
     @GetMapping
