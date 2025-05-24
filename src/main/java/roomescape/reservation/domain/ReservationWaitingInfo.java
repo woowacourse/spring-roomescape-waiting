@@ -1,4 +1,4 @@
-package roomescape.reservation.application;
+package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -6,9 +6,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import roomescape.reservation.domain.ReservationTime;
+import java.util.Objects;
 import roomescape.theme.domain.Theme;
 
+/***
+ * 추후에 사용할 코드입니다.
+ */
 @Entity
 public class ReservationWaitingInfo {
 
@@ -53,5 +56,19 @@ public class ReservationWaitingInfo {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ReservationWaitingInfo that = (ReservationWaitingInfo) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
