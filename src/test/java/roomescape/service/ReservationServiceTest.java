@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DEFAULT_DATE;
 import static roomescape.TestFixture.createDefaultMember;
@@ -11,14 +12,17 @@ import static roomescape.TestFixture.createNewReservation;
 import static roomescape.TestFixture.createWaiting;
 
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DatabaseCleaner;
+import roomescape.TestFixture;
 import roomescape.controller.dto.request.ReservationSearchCondition;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -29,6 +33,9 @@ import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
 import roomescape.domain.repository.WaitingRepository;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.UnAvailableReservationException;
+import roomescape.service.dto.param.CreateBookingParam;
 import roomescape.service.dto.result.ReservationResult;
 
 @SpringBootTest
@@ -113,6 +120,89 @@ class ReservationServiceTest {
                         .isEqualTo(List.of(ReservationResult.from(reservation1)))
         );
     }
+
+    @Nested
+    @DisplayName("예약 생성")
+    class createReservation {
+
+        @DisplayName("예약을 생성한다.")
+        @Test
+        void createTest() {
+            //given
+            ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
+            Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+            Member member = memberRepository.save(TestFixture.createDefaultMember());
+            CreateBookingParam createBookingParam = new CreateBookingParam(member.getId(), DEFAULT_DATE, reservationTime.getId(), theme.getId());
+
+            //when
+            ReservationResult reservationResult = reservationService.create(createBookingParam);
+
+            //then
+            Reservation reservation = reservationRepository.findById(reservationResult.id()).get();
+            assertThat(reservation.getId()).isNotNull();
+        }
+
+        @DisplayName("예약을 생성할 때, 예약자 ID가 데이터베이스에 존재하지 않는다면 예외가 발생한다.")
+        @Test
+        void createError_whenRequiredEntityNotFound() {
+            //give
+            Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+            Member member = memberRepository.save(TestFixture.createDefaultMember());
+            CreateBookingParam createBookingParam = new CreateBookingParam(member.getId(), DEFAULT_DATE, 1L, theme.getId());
+
+            //when & then
+            assertThatThrownBy(() -> reservationService.create(createBookingParam))
+                    .isInstanceOf(NotFoundException.class);
+        }
+
+        @DisplayName("중복된 예약이 있으면 예외가 발생한다")
+        @Test
+        void createError_whenDuplicatedReservation() {
+            //given
+            Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+            ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
+            Member member = memberRepository.save(TestFixture.createDefaultMember());
+            Reservation reservation = reservationRepository.save(TestFixture.createNewReservation(member, DEFAULT_DATE, reservationTime, theme));
+
+            //when & then
+            assertThatThrownBy(() -> reservationService.create(new CreateBookingParam(member.getId(), reservation.getDate(), reservationTime.getId(), theme.getId())))
+                    .isInstanceOf(UnAvailableReservationException.class)
+                    .hasMessage("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
+        }
+
+        @DisplayName("지난 날짜에 대한 예약이라면 예외가 발생한다")
+        @Test
+        void createError_whenReservationIsPast() {
+            //given
+            LocalDateTime reservationDateTime = LocalDateTime.now().minusDays(1);
+
+            Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+            ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createTimeFrom(reservationDateTime.toLocalTime()));
+            Member member = memberRepository.save(TestFixture.createDefaultMember());
+
+            //when & then
+            assertThatThrownBy(() -> reservationService.create(new CreateBookingParam(member.getId(), reservationDateTime.toLocalDate(), reservationTime.getId(), theme.getId())))
+                    .isInstanceOf(UnAvailableReservationException.class)
+                    .hasMessage("지난 날짜와 시간에 대한 예약은 불가능합니다.");
+        }
+
+        @DisplayName("예약일이 오늘인 경우 예약 시간까지 10분도 남지 않았다면 예외가 발생한다")
+        @Test
+        void createError_whenReservationTooSoon() {
+            //given
+            LocalDateTime reservationDateTime = LocalDateTime.now().plusMinutes(10);
+
+            Theme theme = themeRepository.save(TestFixture.createDefaultTheme());
+            ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createTimeFrom(reservationDateTime.toLocalTime()));
+            Member member = memberRepository.save(TestFixture.createDefaultMember());
+
+            //when & then
+            assertThatThrownBy(() -> reservationService.create(new CreateBookingParam(member.getId(), reservationDateTime.toLocalDate(), reservationTime.getId(), theme.getId())))
+                    .isInstanceOf(UnAvailableReservationException.class)
+                    .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
+        }
+    }
+
 
     @DisplayName("예약자 ID로 예약을 삭제한다.")
     @Test

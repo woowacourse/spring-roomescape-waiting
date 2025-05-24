@@ -12,10 +12,6 @@ import roomescape.exception.UnAvailableReservationException;
 
 class ReservationPolicyTest {
 
-    private static final String PAST_RESERVATION_MESSAGE = "지난 날짜와 시간에 대한 예약은 불가능합니다.";
-    private static final String TOO_SOON_RESERVATION_MESSAGE = "예약 시간까지 10분도 남지 않아 예약이 불가합니다.";
-    private static final String DUPLICATE_RESERVATION_MESSAGE = "테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.";
-
     @ParameterizedTest
     @CsvSource({
             "2025-04-23T12:00, 2025-04-23T11:59",
@@ -30,7 +26,7 @@ class ReservationPolicyTest {
         // when & then
         assertThatThrownBy(() -> policy.validateReservationAvailable(reservation, false))
                 .isInstanceOf(UnAvailableReservationException.class)
-                .hasMessage(PAST_RESERVATION_MESSAGE);
+                .hasMessage("지난 날짜와 시간에 대한 예약은 불가능합니다.");
     }
 
     @ParameterizedTest
@@ -47,7 +43,7 @@ class ReservationPolicyTest {
         // when & then
         assertThatThrownBy(() -> policy.validateReservationAvailable(reservation, false))
                 .isInstanceOf(UnAvailableReservationException.class)
-                .hasMessage(TOO_SOON_RESERVATION_MESSAGE);
+                .hasMessage("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
     }
 
     @ParameterizedTest
@@ -61,7 +57,7 @@ class ReservationPolicyTest {
         // when & then
         assertThatThrownBy(() -> policy.validateReservationAvailable(reservation, true))
                 .isInstanceOf(UnAvailableReservationException.class)
-                .hasMessage(DUPLICATE_RESERVATION_MESSAGE);
+                .hasMessage("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
     }
 
     private Reservation reservationAt(LocalDateTime dateTime) {

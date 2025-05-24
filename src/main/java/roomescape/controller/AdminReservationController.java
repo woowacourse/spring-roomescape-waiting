@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.CreateReservationAdminRequest;
 import roomescape.controller.dto.response.BookingResponse;
-import roomescape.service.ReservationCreationService;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.param.CreateBookingParam;
 import roomescape.service.dto.result.ReservationResult;
@@ -21,11 +20,9 @@ import roomescape.service.dto.result.ReservationResult;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final ReservationCreationService reservationCreationService;
     private final ReservationService reservationService;
 
-    public AdminReservationController(ReservationCreationService reservationCreationService, ReservationService reservationService) {
-        this.reservationCreationService = reservationCreationService;
+    public AdminReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
@@ -38,7 +35,7 @@ public class AdminReservationController {
                 reservationRequest.timeId(),
                 reservationRequest.themeId()
         );
-        ReservationResult reservationResult = reservationCreationService.create(createBookingParam);
+        ReservationResult reservationResult = reservationService.create(createBookingParam);
         return BookingResponse.from(reservationResult);
     }
 

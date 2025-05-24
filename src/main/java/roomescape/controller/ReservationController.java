@@ -14,7 +14,6 @@ import roomescape.controller.dto.request.CreateBookingRequest;
 import roomescape.controller.dto.request.LoginMemberInfo;
 import roomescape.controller.dto.request.ReservationSearchCondition;
 import roomescape.controller.dto.response.BookingResponse;
-import roomescape.service.ReservationCreationService;
 import roomescape.service.ReservationService;
 import roomescape.service.dto.result.ReservationResult;
 
@@ -22,13 +21,10 @@ import roomescape.service.dto.result.ReservationResult;
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationCreationService reservationCreationService;
     private final ReservationService reservationService;
 
 
-    public ReservationController(ReservationCreationService reservationCreationService,
-                                 ReservationService reservationService) {
-        this.reservationCreationService = reservationCreationService;
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
@@ -43,7 +39,7 @@ public class ReservationController {
             @Valid @RequestBody CreateBookingRequest createBookingRequest,
             @LoginMember LoginMemberInfo loginMemberInfo) {
 
-        ReservationResult reservationResult = reservationCreationService.create(createBookingRequest.toServiceParam(loginMemberInfo.id()));
+        ReservationResult reservationResult = reservationService.create(createBookingRequest.toServiceParam(loginMemberInfo.id()));
         return ResponseEntity.status(HttpStatus.CREATED).body(BookingResponse.from(reservationResult));
     }
 }

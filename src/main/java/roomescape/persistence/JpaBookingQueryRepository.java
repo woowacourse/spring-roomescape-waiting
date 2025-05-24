@@ -13,14 +13,12 @@ public interface JpaBookingQueryRepository extends JpaRepository<Reservation, Lo
     @Query(value = """
         SELECT
             r.id AS id,
-            m.name AS memberName,
             'RESERVED' AS type,
             t.name AS themeName,
             r.date AS date,
             rt.start_at AS time,
             0 AS rank
         FROM reservation r
-        JOIN member m ON r.member_id = m.id
         JOIN theme t ON r.theme_id = t.id
         JOIN reservation_time rt ON r.time_id = rt.id
         WHERE r.member_id = :memberId
@@ -29,7 +27,6 @@ public interface JpaBookingQueryRepository extends JpaRepository<Reservation, Lo
 
         SELECT
             w.id AS id,
-            m.name AS memberName,
             'WAITED' AS type,
             t.name AS themeName,
             w.date AS date,
@@ -45,7 +42,6 @@ public interface JpaBookingQueryRepository extends JpaRepository<Reservation, Lo
                       )
             ) + 1 AS rank
         FROM waiting w
-        JOIN member m ON w.member_id = m.id
         JOIN theme t ON w.theme_id = t.id
         JOIN reservation_time rt ON w.time_id = rt.id
         WHERE w.member_id = :memberId
