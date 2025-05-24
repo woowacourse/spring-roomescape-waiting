@@ -14,7 +14,7 @@ import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 
 @DataJpaTest
