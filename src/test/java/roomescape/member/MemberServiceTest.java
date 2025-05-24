@@ -16,8 +16,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.PasswordEncoder;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryImpl;
 
 @DataJpaTest
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

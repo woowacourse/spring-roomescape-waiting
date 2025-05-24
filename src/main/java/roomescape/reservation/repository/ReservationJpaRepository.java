@@ -1,11 +1,15 @@
-package roomescape.reservation;
+package roomescape.reservation.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.member.Member;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.theme.Theme;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.dto.WaitingRankReservation;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
 

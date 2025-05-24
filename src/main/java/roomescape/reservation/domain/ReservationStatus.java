@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

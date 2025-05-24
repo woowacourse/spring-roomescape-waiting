@@ -13,10 +13,10 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.exception.custom.reason.auth.AuthNotExistsEmailException;
 import roomescape.exception.custom.reason.auth.AuthNotValidPasswordException;
-import roomescape.member.Member;
-import roomescape.member.MemberRepository;
-import roomescape.member.MemberRepositoryImpl;
-import roomescape.member.MemberRole;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryImpl;
+import roomescape.member.domain.MemberRole;
 
 @DataJpaTest
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

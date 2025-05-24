@@ -1,9 +1,10 @@
-package roomescape.member;
+package roomescape.member.repository;
 
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
 
 @Repository
 @AllArgsConstructor

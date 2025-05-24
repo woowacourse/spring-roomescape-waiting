@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.PasswordEncoder;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
+import roomescape.member.repository.MemberRepository;
 
 @Service
 @AllArgsConstructor

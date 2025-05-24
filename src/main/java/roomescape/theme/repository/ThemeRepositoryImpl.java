@@ -1,10 +1,11 @@
-package roomescape.theme;
+package roomescape.theme.repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.theme.domain.Theme;
 
 @Repository
 @AllArgsConstructor

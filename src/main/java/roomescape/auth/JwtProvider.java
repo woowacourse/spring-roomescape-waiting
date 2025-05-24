@@ -10,7 +10,7 @@ import java.security.Key;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.member.MemberRole;
+import roomescape.member.domain.MemberRole;
 
 @Component
 public class JwtProvider {

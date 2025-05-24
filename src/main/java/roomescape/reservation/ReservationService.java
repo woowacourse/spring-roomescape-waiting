@@ -13,17 +13,21 @@ import roomescape.exception.custom.reason.reservation.ReservationNotExistsPendin
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
-import roomescape.member.Member;
-import roomescape.member.MemberRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.AdminFilterReservationRequest;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MineReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepository;
-import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @Service
 @RequiredArgsConstructor

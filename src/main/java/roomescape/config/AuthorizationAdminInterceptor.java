@@ -12,7 +12,7 @@ import roomescape.auth.JwtProvider;
 import roomescape.auth.TokenBody;
 import roomescape.exception.custom.reason.auth.AuthNotExistsCookieException;
 import roomescape.exception.custom.reason.auth.AuthNotValidTokenException;
-import roomescape.member.MemberRole;
+import roomescape.member.domain.MemberRole;
 
 @AllArgsConstructor
 public class AuthorizationAdminInterceptor implements HandlerInterceptor {

@@ -1,9 +1,10 @@
-package roomescape.theme;
+package roomescape.theme.repository;
 
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.theme.domain.Theme;
 
 public interface ThemeJpaRepository extends JpaRepository<Theme, Long> {
     @Query(nativeQuery = true,

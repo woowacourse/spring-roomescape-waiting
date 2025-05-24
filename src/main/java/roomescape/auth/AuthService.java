@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.exception.custom.reason.auth.AuthNotExistsEmailException;
 import roomescape.exception.custom.reason.auth.AuthNotValidPasswordException;
-import roomescape.member.Member;
-import roomescape.member.MemberJpaRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberJpaRepository;
 
 @Service
 @AllArgsConstructor

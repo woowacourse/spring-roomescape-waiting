@@ -20,20 +20,23 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.member.Member;
-import roomescape.member.MemberRepository;
-import roomescape.member.MemberRepositoryImpl;
-import roomescape.member.MemberRole;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationDate;
-import roomescape.reservation.ReservationRepository;
-import roomescape.reservation.ReservationRepositoryImpl;
-import roomescape.reservation.ReservationStatus;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepository;
-import roomescape.reservationtime.ReservationTimeRepositoryImpl;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.MemberRepositoryImpl;
+import roomescape.member.domain.MemberRole;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryImpl;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepositoryImpl;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
+import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.repository.ThemeRepositoryImpl;
 
 @DataJpaTest
 @Transactional(propagation = Propagation.SUPPORTS)

@@ -10,14 +10,16 @@ import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflic
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExistsThemeException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationDate;
-import roomescape.reservation.ReservationRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
-import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @Service
 @AllArgsConstructor

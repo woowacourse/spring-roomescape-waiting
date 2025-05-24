@@ -26,19 +26,24 @@ import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeEx
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
 import roomescape.exception.custom.reason.reservation.ReservationPastTimeException;
-import roomescape.member.Member;
-import roomescape.member.MemberRepositoryImpl;
-import roomescape.member.MemberRole;
+import roomescape.member.domain.Member;
+import roomescape.member.repository.MemberRepositoryImpl;
+import roomescape.member.domain.MemberRole;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.AdminFilterReservationRequest;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.MineReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepository;
-import roomescape.reservationtime.ReservationTimeRepositoryImpl;
-import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepositoryImpl;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationRepositoryImpl;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepositoryImpl;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepositoryImpl;
 
 @DataJpaTest
 @Sql(scripts = "classpath:/initialize_database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

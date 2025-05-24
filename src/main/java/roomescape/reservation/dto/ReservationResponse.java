@@ -3,7 +3,7 @@ package roomescape.reservation.dto;
 import java.time.LocalDate;
 import roomescape.exception.custom.reason.ResponseInvalidException;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.Reservation;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.theme.dto.ThemeResponse;
 

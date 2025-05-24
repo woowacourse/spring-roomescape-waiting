@@ -1,4 +1,4 @@
-package roomescape.reservation;
+package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -18,9 +18,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import roomescape.exception.custom.reason.reservation.ReservationPastTimeException;
-import roomescape.member.Member;
-import roomescape.reservationtime.ReservationTime;
-import roomescape.theme.Theme;
+import roomescape.member.domain.Member;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Entity
 @Getter
