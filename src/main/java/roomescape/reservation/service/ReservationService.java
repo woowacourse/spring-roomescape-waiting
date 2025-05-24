@@ -12,6 +12,7 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.waiting.repository.WaitingRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,19 +28,16 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> getAll() {
@@ -51,10 +49,19 @@ public class ReservationService {
     }
 
     public List<MyReservationsResponse> getAllMemberReservations(LoginMember loginMember) {
-        return reservationRepository.findAllByMemberId(loginMember.id())
-                .stream()
-                .map(MyReservationsResponse::from)
-                .toList();
+        ArrayList<MyReservationsResponse> results = new ArrayList<>(
+                reservationRepository.findAllByMemberId(loginMember.id())
+                        .stream()
+                        .map(MyReservationsResponse::from)
+                        .toList()
+        );
+        results.addAll(
+                waitingRepository.findAllWaitingInfoByMemberId(loginMember.id())
+                        .stream()
+                        .map(MyReservationsResponse::from)
+                        .toList()
+        );
+        return Collections.unmodifiableList(results);
     }
 
     public List<ReservationResponse> findReservationByFiltering(final FilteringReservationRequest request) {
