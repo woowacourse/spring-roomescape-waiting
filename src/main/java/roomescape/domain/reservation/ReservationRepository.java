@@ -9,7 +9,7 @@ import roomescape.exception.NotFoundException;
 public interface ReservationRepository extends BaseRepository<Reservation, Long> {
 
     @Override
-    Reservation save(Reservation entity);
+    Reservation save(Reservation reservation);
 
     @Override
     Optional<Reservation> findById(Long id);
@@ -19,16 +19,16 @@ public interface ReservationRepository extends BaseRepository<Reservation, Long>
 
     ReservationQueues findQueuesBySlots(List<ReservationSlot> slots);
 
-    Reservations findAllWithWrapping(Specification<Reservation> spec);
+    Reservations findAllWithWrapping(Specification<Reservation> specification);
 
     @Override
     List<Reservation> findAll(Specification<Reservation> specification);
 
     @Override
-    boolean exists(Specification<Reservation> spec);
+    boolean exists(Specification<Reservation> specification);
 
     @Override
-    void delete(Reservation entity);
+    void delete(Reservation reservation);
 
     @Override
     void deleteByIdOrElseThrow(Long id) throws NotFoundException;

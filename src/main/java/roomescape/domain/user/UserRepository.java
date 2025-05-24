@@ -9,7 +9,7 @@ import roomescape.exception.NotFoundException;
 public interface UserRepository extends BaseRepository<User, Long> {
 
     @Override
-    User save(User entity);
+    User save(User user);
 
     @Override
     Optional<User> findById(Long id);

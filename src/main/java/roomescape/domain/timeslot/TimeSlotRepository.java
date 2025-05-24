@@ -9,7 +9,7 @@ import roomescape.exception.NotFoundException;
 public interface TimeSlotRepository extends BaseRepository<TimeSlot, Long> {
 
     @Override
-    TimeSlot save(TimeSlot entity);
+    TimeSlot save(TimeSlot timeSlot);
 
     @Override
     Optional<TimeSlot> findById(Long id);
@@ -23,10 +23,10 @@ public interface TimeSlotRepository extends BaseRepository<TimeSlot, Long> {
     List<TimeSlot> findAll(Specification<TimeSlot> specification);
 
     @Override
-    boolean exists(Specification<TimeSlot> spec);
+    boolean exists(Specification<TimeSlot> specification);
 
     @Override
-    void delete(TimeSlot entity);
+    void delete(TimeSlot timeSlot);
 
     @Override
     void deleteByIdOrElseThrow(Long id) throws NotFoundException;

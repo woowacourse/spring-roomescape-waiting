@@ -9,7 +9,7 @@ import roomescape.exception.NotFoundException;
 public interface ThemeRepository extends BaseRepository<Theme, Long> {
 
     @Override
-    Theme save(Theme entity);
+    Theme save(Theme theme);
 
     @Override
     Optional<Theme> findById(Long id);
@@ -23,10 +23,10 @@ public interface ThemeRepository extends BaseRepository<Theme, Long> {
     List<Theme> findAll(Specification<Theme> specification);
 
     @Override
-    boolean exists(Specification<Theme> spec);
+    boolean exists(Specification<Theme> specification);
 
     @Override
-    void delete(Theme entity);
+    void delete(Theme theme);
 
     @Override
     void deleteByIdOrElseThrow(Long id) throws NotFoundException;
