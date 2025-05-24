@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    List<Waiting> findAll();
-
     @Query(value = """
                 SELECT w FROM Waiting w
                 WHERE w.schedule = :schedule
