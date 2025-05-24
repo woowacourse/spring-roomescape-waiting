@@ -60,6 +60,9 @@ public class ReservationService {
     private Reservation waitingReservation(LocalDate date, ReservationTime reservationTime,
             Theme theme, LoginMember loginMember) {
         final Member member = Member.from(loginMember);
+        if (reservationRepository.existsByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member)) {
+            throw new IllegalArgumentException("이미 예약한 사용자입니다.");
+        }
         Long lastWaitingRank = reservationRepository.getLastWaitingRank(theme, date, reservationTime).orElse(0L);
         Reservation reservation = Reservation.waiting(date, reservationTime, theme, member, LocalDateTime.now(clock),
                 lastWaitingRank + 1);

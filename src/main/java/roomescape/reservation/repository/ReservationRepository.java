@@ -72,4 +72,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("time") ReservationTime time,
             @Param("theme") Theme theme
     );
+
+    boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime reservationTime, Theme theme, Member member);
 }

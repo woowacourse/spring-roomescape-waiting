@@ -103,11 +103,15 @@ class ReservationServiceIntegrationTest {
         LocalDate date = LocalDate.now().plusDays(1);
         ReservationRequest waitingRequest1 = new ReservationRequest(date, time.getId(), theme.getId());
         ReservationRequest waitingRequest2 = new ReservationRequest(date, time.getId(), theme.getId());
+        Member member2 = Member.withDefaultRole("member", "mem2@naver.com", "1234");
+        memberRepository.save(member2);
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
+        LoginMember loginMember2 = new LoginMember(member2.getId(), member2.getName(), member2.getEmail(),
+                member2.getRole());
 
         ReservationResponse response1 = reservationService.saveReservation(waitingRequest1, loginMember);
-        ReservationResponse response2 = reservationService.saveReservation(waitingRequest2, loginMember);
+        ReservationResponse response2 = reservationService.saveReservation(waitingRequest2, loginMember2);
         Reservation waitingReservation1 = reservationRepository.findById(response1.id()).orElseThrow();
         Reservation waitingReservation2 = reservationRepository.findById(response2.id()).orElseThrow();
 
