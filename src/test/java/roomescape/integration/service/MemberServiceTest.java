@@ -4,18 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.ClockConfig;
+import roomescape.common.ServiceTestBase;
 import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.service.MemberService;
 import roomescape.service.response.MemberResponse;
 
-@Transactional
-@SpringBootTest
-@Import(ClockConfig.class)
-class MemberServiceTest {
+class MemberServiceTest extends ServiceTestBase {
 
     @Autowired
     private MemberDbFixture memberDbFixture;

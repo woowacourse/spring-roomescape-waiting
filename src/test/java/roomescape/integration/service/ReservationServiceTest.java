@@ -11,10 +11,7 @@ import java.time.LocalTime;
 import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.ClockConfig;
+import roomescape.common.ServiceTestBase;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.integration.fixture.MemberDbFixture;
@@ -24,10 +21,7 @@ import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.service.ReservationService;
 import roomescape.service.request.ReservationCreateRequest;
 
-@Transactional
-@SpringBootTest
-@Import(ClockConfig.class)
-class ReservationServiceTest {
+class ReservationServiceTest extends ServiceTestBase {
 
     @Autowired
     private ReservationService service;

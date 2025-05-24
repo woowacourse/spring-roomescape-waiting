@@ -9,10 +9,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.ClockConfig;
+import roomescape.common.ServiceTestBase;
 import roomescape.global.dto.SessionMember;
 import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.integration.fixture.ReservationDateFixture;
@@ -22,10 +19,7 @@ import roomescape.integration.fixture.WaitingDbFixture;
 import roomescape.service.WaitingService;
 import roomescape.service.request.WaitingCreateRequest;
 
-@Transactional
-@SpringBootTest
-@Import(ClockConfig.class)
-class WaitingServiceTest {
+class WaitingServiceTest extends ServiceTestBase {
 
     @Autowired
     private WaitingService waitingService;
