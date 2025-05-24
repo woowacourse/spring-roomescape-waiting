@@ -86,6 +86,10 @@ public class Member {
         return !this.password.equals(password);
     }
 
+    public boolean isMember() {
+        return role == AuthRole.MEMBER;
+    }
+
     public boolean isAdmin() {
         return role == AuthRole.ADMIN;
     }

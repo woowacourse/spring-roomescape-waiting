@@ -13,6 +13,7 @@ import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_1;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
@@ -142,7 +143,48 @@ class ReservationRepositoryTest {
         final Long rank = reservationRepository.getReservationRankByReservationId(target.getId());
 
         // then
-        assertThat(rank).isEqualTo(3);
+        assertThat(rank).isEqualTo(2);
+    }
+
+    @Test
+    void ID에_해당하는_첫번째_우선순위의_예약을_조회한다() {
+        // given
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+
+        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
+        final Member member3 = memberRepository.save(NOT_SAVED_MEMBER_3());
+
+        reservationRepository.save(Reservation.createForRegister(date, time, theme, member1, BookingStatus.WAITING));
+        reservationRepository.save(Reservation.createForRegister(date, time, theme, member2, BookingStatus.WAITING));
+        reservationRepository.save(Reservation.createForRegister(date, time, theme, member3, BookingStatus.WAITING));
+
+        // when
+        Reservation firstRankReservation = reservationRepository.findFirstRankWaitingBy(date, time.getId(),
+                theme.getId()).get();
+
+        // then
+        assertAll(
+                () -> assertThat(firstRankReservation.getMember().getName()).isEqualTo(member1.getName()),
+                () -> assertThat(firstRankReservation.getMember().getId()).isEqualTo(member1.getId()),
+                () -> assertThat(firstRankReservation.getStatus()).isEqualTo(BookingStatus.WAITING),
+                () -> assertThat(Objects.equals(firstRankReservation.getDate(), date)).isTrue(),
+                () -> assertThat(Objects.equals(firstRankReservation.getTime(), time)).isTrue(),
+                () -> assertThat(Objects.equals(firstRankReservation.getTheme(), theme)).isTrue()
+        );
+    }
+
+    @Test
+    void ID에_해당하는_첫번째_우선순위의_예약이_없으면_Empty를_반환한다() {
+        // given
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+
+        // when & then
+        assertThat(reservationRepository.findFirstRankWaitingBy(date, time.getId(), theme.getId())).isEmpty();
     }
 
     static Stream<Arguments> 테마ID_사용자ID_날짜_범위에_해당하는_예약_목록을_조회한다() {

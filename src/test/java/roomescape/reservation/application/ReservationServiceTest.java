@@ -181,6 +181,59 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 관리자는_모든_예약을_삭제할_수_있다() {
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+
+        final Member member
+                = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Reservation reservation = Reservation.createForRegister(date, time, theme, member,
+                BookingStatus.CONFIRMED);
+        final Reservation savedReservation = reservationRepository.save(reservation);
+
+        final Member admin = memberRepository.save(NOT_SAVED_ADMIN_1());
+        final MemberAuthInfo adminAuthInfo = new MemberAuthInfo(admin.getId(), admin.getRole());
+
+        // when & then
+        assertAll(
+                () -> assertThatCode(
+                        () -> reservationService.deleteReservation(savedReservation.getId(), adminAuthInfo))
+                        .doesNotThrowAnyException(),
+                () -> assertThatThrownBy(() -> reservationRepository.getByIdOrThrow(savedReservation.getId()))
+                        .isInstanceOf(ResourceNotFoundException.class)
+                        .hasMessage("해당 예약을 찾을 수 없습니다.")
+        );
+    }
+
+    @Test
+    void 예약을_삭제하면_우선순위의_예약_대기가_예약_상태로_변경된다() {
+        // given
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
+
+        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Reservation reservation1 = Reservation.createForRegister(date, time, theme, member1,
+                BookingStatus.CONFIRMED);
+        final Reservation confirmedReservation = reservationRepository.save(reservation1);
+
+        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
+        Reservation reservation2 = Reservation.createForRegister(date, time, theme, member2, BookingStatus.WAITING);
+        final Reservation waitingReservation = reservationRepository.save(reservation2);
+
+        final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
+
+        // when
+        reservationService.deleteReservation(confirmedReservation.getId(), member1AuthInfo);
+
+        assertAll(
+                () -> assertThat(reservationRepository.findById(confirmedReservation.getId())).isEmpty(),
+                () -> assertThat(waitingReservation.getStatus()).isEqualTo(BookingStatus.CONFIRMED)
+        );
+    }
+
+    @Test
     void 예약_목록_전체를_조회한다() {
         // given
         final int beforeCount = reservationService.findAll().size();

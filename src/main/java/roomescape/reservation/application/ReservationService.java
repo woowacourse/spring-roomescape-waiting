@@ -68,16 +68,9 @@ public class ReservationService {
         final Reservation reservation = reservationRepository.getByIdOrThrow(reservationId);
         final Member member = memberRepository.getByIdOrThrow(memberAuthInfo.id());
 
-        if (member.isAdmin()) {
-            reservationRepository.deleteById(reservationId);
-            return;
-        }
+        validateDeletableBy(reservation, member);
 
-        if (!Objects.equals(reservation.getMember(), member)) {
-            throw new AuthorizationException("삭제할 권한이 없습니다.");
-        }
-
-        reservationRepository.deleteById(reservationId);
+        cancelAndConfirmNextReservation(reservation);
     }
 
     @Transactional(readOnly = true)
@@ -135,7 +128,15 @@ public class ReservationService {
                 .toList();
     }
 
-    private BookingState getBookingState(final LocalDate date, final Long timeId, final Long themeId) {
+    private void cancelAndConfirmNextReservation(Reservation reservation) {
+        reservationRepository.delete(reservation);
+
+        reservationRepository.findFirstRankWaitingBy(
+                        reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())
+                .ifPresent(Reservation::confirmReservation);
+    }
+
+    private BookingStatus getBookingStatus(final LocalDate date, final Long timeId, final Long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             return BookingStatus.WAITING;
         }
@@ -158,4 +159,9 @@ public class ReservationService {
         }
     }
 
+    private void validateDeletableBy(Reservation reservation, Member member) {
+        if (member.isMember() && !Objects.equals(reservation.getMember(), member)) {
+            throw new AuthorizationException("삭제할 권한이 없습니다.");
+        }
+    }
 }

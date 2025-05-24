@@ -16,4 +16,8 @@ public class MemberFixture {
     public static Member NOT_SAVED_MEMBER_3() {
         return new Member("루키", "roo@kie.com", "비밀번호", AuthRole.MEMBER);
     }
+
+    public static Member NOT_SAVED_ADMIN_1() {
+        return new Member("찰리", "char@lie.com", "비밀번호", AuthRole.ADMIN);
+    }
 }
