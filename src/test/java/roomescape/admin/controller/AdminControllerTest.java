@@ -35,11 +35,6 @@ import roomescape.user.domain.User;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AdminControllerTest {
 
-    @Autowired
-    private ThemeTestDataConfig themeTestDataConfig;
-    @Autowired
-    private ReservationTimeTestDataConfig reservationTimeTestDataConfig;
-
     @LocalServerPort
     int port;
 
@@ -50,8 +45,8 @@ class AdminControllerTest {
 
     private static LocalDate date;
 
-    private final Long themeId = themeTestDataConfig.getSavedId();
-    private final Long reservationTimeId = reservationTimeTestDataConfig.getSavedId();
+    private static Long themeId;
+    private static Long reservationTimeId;
 
     private static User memberStatic;
     private static User adminStatic;
@@ -61,12 +56,17 @@ class AdminControllerTest {
     @BeforeAll
     public static void setUp(@Autowired AuthService authService,
                              @Autowired MemberTestDataConfig memberTestDataConfig,
-                             @Autowired AdminTestDataConfig adminTestDataConfig
+                             @Autowired AdminTestDataConfig adminTestDataConfig,
+                             @Autowired ThemeTestDataConfig themeTestDataConfig,
+                             @Autowired ReservationTimeTestDataConfig reservationTimeTestDataConfig
     ) {
         date = LocalDate.now().plusDays(1);
 
         memberStatic = memberTestDataConfig.getSavedUser();
         adminStatic = adminTestDataConfig.getSavedAdmin();
+
+        themeId = themeTestDataConfig.getSavedId();
+        reservationTimeId = reservationTimeTestDataConfig.getSavedId();
 
         memberTokenResponseDto = authService.login(
                 AuthFixture.createTokenRequestDto(memberStatic.getEmail(), memberStatic.getPassword()));
@@ -100,7 +100,7 @@ class AdminControllerTest {
                     .statusCode(HttpStatus.CREATED.value());
         }
 
-        @DisplayName("memberId에 role이 ROLE_ADMIN 일 때 401 A를 반환한다")
+        @DisplayName("memberId에 role이 ROLE_ADMIN 일 때 401 Unauthorized를 반환한다")
         @Test
         void createReservation_throwException_byAdminId() {
             // given
@@ -124,7 +124,7 @@ class AdminControllerTest {
     }
 
     @Nested
-    @DisplayName("POST /admin/waitings 요청")
+    @DisplayName("GET /admin/waitings 요청")
     class findAllWaitings {
 
         @DisplayName("어드민 권한자가 요청했을 때 200 OK를 반환한다")
@@ -144,9 +144,9 @@ class AdminControllerTest {
                     .cookies("token", token)
                     .contentType(ContentType.JSON)
                     .body(dto)
-                    .when().post("/admin/waitings")
+                    .when().get("/admin/waitings")
                     .then().log().all()
-                    .statusCode(HttpStatus.UNAUTHORIZED.value());
+                    .statusCode(HttpStatus.OK.value());
         }
     }
 }
