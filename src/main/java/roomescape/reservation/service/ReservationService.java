@@ -52,15 +52,28 @@ public class ReservationService {
     public ReservationResponse saveReservation(final ReservationRequest request, final LoginMember loginMember) {
         final ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
         final Theme theme = themeRepository.getById(request.themeId());
-        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)
-                && !request.isWaiting()) {
-            throw new ReservationException("해당 시간은 이미 예약되어있습니다.");
+        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
+            return new ReservationResponse(waitingReservation(request.date(), reservationTime, theme, loginMember));
         }
+        return new ReservationResponse(bookedReservatioin(request.date(), reservationTime, theme, loginMember));
+    }
 
+    private Reservation waitingReservation(LocalDate date, ReservationTime reservationTime,
+            Theme theme, LoginMember loginMember) {
         final Member member = Member.from(loginMember);
-        final Reservation reservation = saveReservation(request.date(), reservationTime, theme, member,
-                request.isWaiting());
-        return new ReservationResponse(reservation);
+        Long lastWaitingRank = reservationRepository.getLastWaitingRank(theme, date, reservationTime).orElse(0L);
+        Reservation reservation = Reservation.waiting(date, reservationTime, theme, member, LocalDateTime.now(clock),
+                lastWaitingRank + 1);
+
+        return reservationRepository.save(reservation);
+    }
+
+    private Reservation bookedReservatioin(LocalDate date, ReservationTime reservationTime,
+            Theme theme, LoginMember loginMember) {
+        final Member member = Member.from(loginMember);
+        Reservation reservation = Reservation.of(date, reservationTime, theme, member, LocalDateTime.now(clock));
+
+        return reservationRepository.save(reservation);
     }
 
     private Reservation saveReservation(LocalDate date, ReservationTime reservationTime, Theme theme,
@@ -96,7 +109,8 @@ public class ReservationService {
         if (reservation.getReservationStatus().getStatus() == Status.BOOKED) {
             deleteRank = 0L;
         }
-        List<ReservationStatus> reservationStatuses = reservationRepository.findAllWaiting(reservation.getDate(), reservation.getTime(),
+        List<ReservationStatus> reservationStatuses = reservationRepository.findAllWaiting(reservation.getDate(),
+                reservation.getTime(),
                 reservation.getTheme());
         reduceWaitingRanks(deleteRank, reservationStatuses);
         reservationRepository.deleteById(id);

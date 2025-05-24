@@ -24,7 +24,7 @@ VALUES ('BOOKED', null);
 INSERT INTO reservation_status(status, rank)
 VALUES ('BOOKED', null);
 
-INSERT INTO reservation(date, time_id, theme_id, member_id, waiting_id)
+INSERT INTO reservation(date, time_id, theme_id, member_id, status_id)
 VALUES ('2999-05-01', 1, 1, 1, 1);
-INSERT INTO reservation(date, time_id, theme_id, member_id, waiting_id)
+INSERT INTO reservation(date, time_id, theme_id, member_id, status_id)
 VALUES ('2999-05-01', 2, 2, 2, 2);

@@ -64,7 +64,7 @@ class ReservationServiceIntegrationTest {
     void 예약_생성_성공() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId(), false);
+        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId());
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
 
@@ -85,7 +85,7 @@ class ReservationServiceIntegrationTest {
     void 예약_시간_검증_실패() {
         // given
         LocalDate date = LocalDate.now().minusDays(1);
-        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId(), false);
+        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId());
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
 
@@ -101,8 +101,8 @@ class ReservationServiceIntegrationTest {
     void 대기_목록_관리_성공() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        ReservationRequest waitingRequest1 = new ReservationRequest(date, time.getId(), theme.getId(), false);
-        ReservationRequest waitingRequest2 = new ReservationRequest(date, time.getId(), theme.getId(), true);
+        ReservationRequest waitingRequest1 = new ReservationRequest(date, time.getId(), theme.getId());
+        ReservationRequest waitingRequest2 = new ReservationRequest(date, time.getId(), theme.getId());
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
 
@@ -118,25 +118,5 @@ class ReservationServiceIntegrationTest {
         // then
         assertThat(updatedReservation2.getReservationStatus().getStatus()).isEqualTo(Status.BOOKED);
         assertThat(updatedReservation2.getReservationStatus().getRank()).isEqualTo(0L);
-    }
-
-    @Test
-    void 예약_시간_중복_검증() {
-        // given
-        LocalDate date = LocalDate.now().plusDays(1);
-        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId(), false);
-        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
-                member.getRole());
-
-        // 동일한 시간대에 예약 생성
-        ReservationResponse response = reservationService.saveReservation(request, loginMember);
-        Reservation firstReservation = reservationRepository.findById(response.id()).orElseThrow();
-
-        // when & then
-        assertThatThrownBy(() ->
-                reservationService.saveReservation(request, loginMember)
-        )
-                .isInstanceOf(ReservationException.class)
-                .hasMessage("해당 시간은 이미 예약되어있습니다.");
     }
 }

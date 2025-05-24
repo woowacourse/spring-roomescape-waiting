@@ -210,7 +210,7 @@ class MissionStepTest {
                 .extract()
                 .cookie("token");
         jdbcTemplate.update(
-                "INSERT INTO reservation (date, time_id, theme_id, member_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO reservation (date, time_id, theme_id, member_id, status_id) VALUES (?, ?, ?, ?, ?)",
                 "2023-08-05", 1, 1, 1, 1);
 
         // when

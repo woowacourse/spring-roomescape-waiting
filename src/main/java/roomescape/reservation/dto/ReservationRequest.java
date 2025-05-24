@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 public record ReservationRequest(
         @NotNull @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         @NotNull Long timeId,
-        @NotNull Long themeId,
-        @NotNull Boolean isWaiting
+        @NotNull Long themeId
 ) {
 }

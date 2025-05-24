@@ -149,8 +149,7 @@ function onReservationButtonClick() {
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
-            timeId: selectedTimeId,
-            isWaiting: false,
+            timeId: selectedTimeId
         };
 
         fetch('/reservations', {
@@ -186,8 +185,7 @@ function onWaitButtonClick() {
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
-            timeId: selectedTimeId,
-            isWaiting: true,
+            timeId: selectedTimeId
         };
 
         fetch('/reservations', {
