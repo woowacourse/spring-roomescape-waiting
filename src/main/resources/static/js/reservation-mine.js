@@ -26,7 +26,11 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        let status = item.status;
+
+        if (status.includes('대기')) {
+            status = status.replace('대기', '번째 예약 대기');
+        }
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
@@ -55,7 +59,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = '/reservations/waiting/' + id; // 예약 대기 취소 API 엔드포인트
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

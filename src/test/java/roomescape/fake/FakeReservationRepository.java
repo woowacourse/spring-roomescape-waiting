@@ -82,4 +82,20 @@ public class FakeReservationRepository implements ReservationRepositoryInterface
                 .filter(reservation -> reservation.getMember().equals(member))
                 .toList();
     }
+
+    @Override
+    public List<Reservation> findByThemeAndMemberAndDateBetween(
+            final Theme theme,
+            final Member member,
+            final LocalDate dateFrom,
+            final LocalDate dateTo) {
+        return reservations.values().stream()
+                .filter(reservation ->
+                        reservation.getTheme().equals(theme) &&
+                                reservation.getMember().equals(member) &&
+                                !reservation.getDate().isBefore(dateFrom) &&
+                                !reservation.getDate().isAfter(dateTo)
+                )
+                .toList();
+    }
 }

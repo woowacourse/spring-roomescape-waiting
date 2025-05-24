@@ -6,20 +6,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
-import roomescape.common.exception.ReservationException;
+import roomescape.common.exception.WaitingException;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
 
 @Getter
-@ToString
-@NoArgsConstructor
+@Table(name = "waiting")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Reservation {
-
+public class Waiting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,20 +34,20 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime time) {
+    public Waiting(final Long id, final Member member, final ReservationTime time, final Theme theme,
+                   final LocalDate date) {
         validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
         this.id = id;
         this.member = member;
-        this.theme = theme;
         this.date = date;
         this.time = time;
+        this.theme = theme;
     }
 
-    public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+    public Waiting(final Member member, final ReservationTime time, final Theme theme, final LocalDate date) {
         validateMember(member);
         validateDate(date);
         validateTime(time);
@@ -60,25 +60,25 @@ public class Reservation {
 
     private void validateMember(final Member member) {
         if (member == null) {
-            throw new ReservationException("Member cannot be null");
+            throw new WaitingException("Member cannot be null");
         }
     }
 
     private void validateDate(final LocalDate date) {
         if (date == null) {
-            throw new ReservationException("Date cannot be null");
+            throw new WaitingException("Date cannot be null");
         }
     }
 
     private void validateTime(final ReservationTime time) {
         if (time == null) {
-            throw new ReservationException("Time cannot be null");
+            throw new WaitingException("Time cannot be null");
         }
     }
 
     private void validateTheme(final Theme theme) {
         if (theme == null) {
-            throw new ReservationException("Theme cannot be null");
+            throw new WaitingException("Theme cannot be null");
         }
     }
 }

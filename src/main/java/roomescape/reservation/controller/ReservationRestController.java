@@ -1,5 +1,6 @@
 package roomescape.reservation.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationResponse;
+import roomescape.reservation.dto.CreateWaitingRequest;
+import roomescape.reservation.dto.CreateWaitingResponse;
 import roomescape.reservation.dto.ReservationMineResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -76,11 +80,44 @@ public class ReservationRestController {
 
     @GetMapping("/mine")
     public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
-        final List<Reservation> reservations = reservationService.findByMember(member);
-        final List<ReservationMineResponse> reservationMineResponses = reservations.stream()
+        final List<ReservationMineResponse> reservationMineResponses = reservationService.findByMember(member)
+                .stream()
                 .map(ReservationMineResponse::from)
                 .toList();
+        final List<ReservationMineResponse> waitingMineResponses = reservationService.findWaitingByMember(member)
+                .stream()
+                .map(waiting -> {
+                    final long rank = reservationService.getRankInWaiting(waiting);
+                    return ReservationMineResponse.from(waiting, rank);
+                })
+                .toList();
 
-        return ResponseEntity.ok(reservationMineResponses);
+        final List<ReservationMineResponse> combined = new ArrayList<>();
+        combined.addAll(reservationMineResponses);
+        combined.addAll(waitingMineResponses);
+
+        return ResponseEntity.ok(combined);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<CreateWaitingResponse> createWaitingReservation(
+            @RequestBody final CreateWaitingRequest createWaitingRequest,
+            final Member member
+    ) {
+        final Waiting savedWaiting = reservationService.createWaitingReservation(
+                member,
+                createWaitingRequest.date(),
+                createWaitingRequest.time(),
+                createWaitingRequest.theme()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreateWaitingResponse.from(savedWaiting));
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable final Long id) {
+        reservationService.deleteWaitingById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
