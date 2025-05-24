@@ -47,8 +47,9 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> getReservationTimes(final LocalDate date, final Long themeId) {
-        List<Long> bookedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId).stream()
-                .map(reservation -> reservation.getReservationTime().getId())
+        List<Long> bookedTimeIds = reservationRepository.findByReservationInfoDateAndReservationInfoThemeId(date,
+                        themeId).stream()
+                .map(reservation -> reservation.getReservationInfo().getReservationTime().getId())
                 .toList();
 
         return reservationTimeRepository.findAll().stream()
@@ -66,7 +67,7 @@ public class ReservationTimeService {
     }
 
     private void validateIsDuplicatedReservation(Long id) {
-        if (reservationRepository.existsByReservationTimeId(id)) {
+        if (reservationRepository.existsByReservationInfoReservationTimeId(id)) {
             throw new IllegalStateException("예약이 이미 존재하는 시간입니다.");
         }
     }

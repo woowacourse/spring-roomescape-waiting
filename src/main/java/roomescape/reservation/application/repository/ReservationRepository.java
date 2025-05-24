@@ -9,14 +9,14 @@ import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
-    List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findByReservationInfoDateAndReservationInfoThemeId(LocalDate date, Long themeId);
 
     @Query("""
                 SELECT r FROM Reservation r
                 WHERE (:memberId IS NULL OR r.member.id = :memberId)
-                  AND (:themeId IS NULL OR r.theme.id = :themeId)
-                  AND (:fromDate IS NULL OR r.date >= :fromDate)
-                  AND (:endDate IS NULL OR r.date <= :endDate)
+                  AND (:themeId IS NULL OR r.reservationInfo.theme.id = :themeId)
+                  AND (:fromDate IS NULL OR r.reservationInfo.date >= :fromDate)
+                  AND (:endDate IS NULL OR r.reservationInfo.date <= :endDate)
             """)
     List<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(
             @Param("memberId") Long memberId,
@@ -27,9 +27,9 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
 
     List<Reservation> findByMemberId(Long memberId);
 
-    boolean existsByReservationTimeId(Long timeId);
+    boolean existsByReservationInfoReservationTimeId(Long timeId);
 
-    boolean existsByDateAndReservationTimeStartAt(LocalDate date, LocalTime startAt);
+    boolean existsByReservationInfoDateAndReservationInfoReservationTimeStartAt(LocalDate date, LocalTime startAt);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByReservationInfoThemeId(Long themeId);
 }

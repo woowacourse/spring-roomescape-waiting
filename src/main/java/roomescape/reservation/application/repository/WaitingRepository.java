@@ -1,11 +1,11 @@
 package roomescape.reservation.application.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.domain.ReservationInfo;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 
@@ -18,18 +18,16 @@ public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
                 w,
                 (SELECT COUNT(w2)
                  FROM Waiting w2
-                 WHERE w2.theme = w.theme
-                   AND w2.date = w.date
-                   AND w2.reservationTime = w.reservationTime
+                 WHERE w2.reservationInfo.theme = w.reservationInfo.theme
+                   AND w2.reservationInfo.date = w.reservationInfo.date
+                   AND w2.reservationInfo.reservationTime = w.reservationInfo.reservationTime
                    AND w2.id < w.id)+1)
             FROM Waiting w
             WHERE w.member.id = :memberId
             """)
-    List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+    List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
-    Optional<Waiting> findFirstByDateAndReservationTimeIdAndThemeIdOrderByIdAsc(
-            LocalDate date,
-            Long reservationTimeId,
-            Long themeId
+    Optional<Waiting> findFirstByReservationInfoOrderByIdAsc(
+            ReservationInfo reservationInfo
     );
 }

@@ -16,10 +16,10 @@ public class WaitingResponse {
 
     public WaitingResponse(final Waiting waiting) {
         this.id = waiting.getId();
-        this.date = waiting.getDate();
+        this.date = waiting.getReservationInfo().getDate();
         this.member = new MemberResponse(waiting.getMember());
-        this.theme = new ThemeResponse(waiting.getTheme());
-        this.time = new ReservationTimeResponse(waiting.getReservationTime());
+        this.theme = new ThemeResponse(waiting.getReservationInfo().getTheme());
+        this.time = new ReservationTimeResponse(waiting.getReservationInfo().getReservationTime());
     }
 
     public Long getId() {

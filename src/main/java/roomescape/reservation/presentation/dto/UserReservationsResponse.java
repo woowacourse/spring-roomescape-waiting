@@ -19,18 +19,18 @@ public class UserReservationsResponse {
 
     public UserReservationsResponse(final Reservation reservation) {
         this.id = reservation.getId();
-        this.theme = reservation.getTheme().getName();
-        this.date = reservation.getDate();
-        this.time = reservation.getReservationTime().getStartAt();
+        this.theme = reservation.getReservationInfo().getTheme().getName();
+        this.date = reservation.getReservationInfo().getDate();
+        this.time = reservation.getReservationInfo().getReservationTime().getStartAt();
         this.status = "예약";
     }
 
     public UserReservationsResponse(final WaitingWithRank reservation) {
         Waiting waiting = reservation.getWaiting();
         this.id = waiting.getId();
-        this.theme = waiting.getTheme().getName();
-        this.date = waiting.getDate();
-        this.time = waiting.getReservationTime().getStartAt();
+        this.theme = waiting.getReservationInfo().getTheme().getName();
+        this.date = waiting.getReservationInfo().getDate();
+        this.time = waiting.getReservationInfo().getReservationTime().getStartAt();
         this.status = reservation.getRank() + "번째 예약대기";
     }
 

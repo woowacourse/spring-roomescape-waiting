@@ -53,7 +53,7 @@ public class ThemeService {
     }
 
     private void validateIsReservationExist(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByReservationInfoThemeId(id)) {
             throw new IllegalStateException("예약이 이미 존재하는 테마입니다.");
         }
     }

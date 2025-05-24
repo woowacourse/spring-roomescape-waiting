@@ -17,9 +17,9 @@ public class ReservationResponse {
     public ReservationResponse(final Reservation reservation) {
         this.id = reservation.getId();
         this.member = new MemberResponse(reservation.getMember());
-        this.theme = new ThemeResponse(reservation.getTheme());
-        this.date = reservation.getDate();
-        this.time = new ReservationTimeResponse(reservation.getReservationTime());
+        this.theme = new ThemeResponse(reservation.getReservationInfo().getTheme());
+        this.date = reservation.getReservationInfo().getDate();
+        this.time = new ReservationTimeResponse(reservation.getReservationInfo().getReservationTime());
     }
 
     public Long getId() {

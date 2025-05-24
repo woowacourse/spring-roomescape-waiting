@@ -105,7 +105,7 @@ public class ReservationService {
                 .map(UserReservationsResponse::new)
                 .toList();
 
-        final List<UserReservationsResponse> waitings = waitingRepository.findWaitingsWithRankByMemberId(
+        final List<UserReservationsResponse> waitings = waitingRepository.findWaitingWithRankByMemberId(
                         memberId).stream()
                 .map(UserReservationsResponse::new)
                 .toList();
@@ -124,18 +124,14 @@ public class ReservationService {
 
         reservationRepository.delete(reservation);
 
-        final Optional<Waiting> waiting = waitingRepository.findFirstByDateAndReservationTimeIdAndThemeIdOrderByIdAsc(
-                reservation.getDate(),
-                reservation.getReservationTime().getId(),
-                reservation.getTheme().getId()
+        final Optional<Waiting> waiting = waitingRepository.findFirstByReservationInfoOrderByIdAsc(
+                reservation.getReservationInfo()
         );
 
         waiting.ifPresent(value -> {
             reservationRepository.save(new Reservation(
                     value.getMember(),
-                    value.getTheme(),
-                    value.getDate(),
-                    value.getReservationTime()
+                    value.getReservationInfo()
             ));
 
             waitingRepository.delete(waiting.get());
@@ -166,7 +162,7 @@ public class ReservationService {
     }
 
     private void validateIsDuplicate(final LocalDate reservationDate, final ReservationTime reservationTime) {
-        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservationDate,
+        if (reservationRepository.existsByReservationInfoDateAndReservationInfoReservationTimeStartAt(reservationDate,
                 reservationTime.getStartAt())) {
             throw new IllegalStateException("중복된 일시의 예약은 불가능합니다.");
         }

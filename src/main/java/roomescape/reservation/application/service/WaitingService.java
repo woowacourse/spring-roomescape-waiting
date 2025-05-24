@@ -85,9 +85,7 @@ public class WaitingService {
 
         final Reservation reservation = new Reservation(
                 waiting.getMember(),
-                waiting.getTheme(),
-                waiting.getDate(),
-                waiting.getReservationTime()
+                waiting.getReservationInfo()
         );
 
         waitingRepository.delete(waiting);
