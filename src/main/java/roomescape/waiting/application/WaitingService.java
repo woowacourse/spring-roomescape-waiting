@@ -3,6 +3,7 @@ package roomescape.waiting.application;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
@@ -20,6 +21,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -42,6 +44,7 @@ public class WaitingService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public WaitingIdResponse addWaiting(@Valid MemberReservationRequest request, Long memberId) {
         ReservationTime reservationTime = getReservationTime(request.timeId());
         Member member = getMember(memberId);
@@ -76,6 +79,7 @@ public class WaitingService {
             .toList();
     }
 
+    @Transactional
     public void cancel(Long memberId, Long waitingId) {
         Waiting waiting = getWaiting(waitingId);
         if (!waiting.getMember().getId().equals(memberId)) {
@@ -86,7 +90,6 @@ public class WaitingService {
 
     public List<WaitingInfoResponse> getAllWaitingInfos() {
         List<Waiting> waitings = waitingRepository.findAll();
-        System.out.println("waitingSize = " + waitings.size());
         return waitings.stream()
             .map(WaitingInfoResponse::from)
             .toList();
