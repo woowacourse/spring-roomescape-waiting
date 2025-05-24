@@ -7,7 +7,6 @@ import roomescape.time.dto.ReservationTimeResponse;
 
 import java.time.LocalDate;
 
-// TODO: 생성 시간 정보
 public record WaitingResponse(
         Long id,
         MemberResponse member,

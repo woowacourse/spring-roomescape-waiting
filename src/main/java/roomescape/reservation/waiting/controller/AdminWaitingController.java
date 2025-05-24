@@ -1,9 +1,8 @@
 package roomescape.reservation.waiting.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.waiting.dto.WaitingResponse;
 import roomescape.reservation.waiting.service.WaitingService;
 
@@ -19,9 +18,21 @@ public class AdminWaitingController {
         this.waitingService = waitingService;
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<ReservationResponse> approve(@PathVariable final long id) {
+        ReservationResponse response = waitingService.approveWaiting(id);
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping
     public ResponseEntity<List<WaitingResponse>> findAll() {
         List<WaitingResponse> responses = waitingService.getAllWaitings();
         return ResponseEntity.ok().body(responses);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deny(@PathVariable final long id) {
+        waitingService.cancelWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -36,7 +36,7 @@ public class UserWaitingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
-        waitingService.cancelWaitingById(id);
+        waitingService.cancelWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }
