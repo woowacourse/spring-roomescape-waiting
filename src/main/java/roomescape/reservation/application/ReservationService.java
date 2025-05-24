@@ -22,6 +22,7 @@ import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
 import roomescape.reservation.ui.dto.request.ReservationsByfilterRequest;
 import roomescape.reservation.ui.dto.response.AdminReservationResponse;
+import roomescape.reservation.ui.dto.response.AdminReservationWaitingResponse;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 import roomescape.theme.domain.Theme;
@@ -125,6 +126,13 @@ public class ReservationService {
         return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(reservation -> MemberReservationResponse.from(reservation,
                         reservationRepository.getReservationRankByReservationId(reservation.getId())))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminReservationWaitingResponse> findReservationWaitings() {
+        return reservationRepository.findAllByStatus(BookingStatus.WAITING).stream()
+                .map(AdminReservationWaitingResponse::from)
                 .toList();
     }
 

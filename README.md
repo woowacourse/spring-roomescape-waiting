@@ -37,7 +37,6 @@
 | GET         | /admin/reservations/filtered  |           O           | ADMIN             | 200 OK           | 조건부 예약 목록 조회 (회원 id, 테마 id, 시작 기간, 끝 기간으로 필터링)                             |
 | GET         | /reservations/available-times |           X           | PUBLIC            | 200 OK           | 조건부 예약 가능한 시간 목록 조회(예약 날짜, 테마 id)                                          |
 | GET         | /statuses                     |           O           | ADMIN, MEMBER     | 200 OK           | 모든 예약 상태 목록 조회                                                             |
-| GET         | /reservations/waiting         |           O           | ADMIN, MEMBER     | 200 OK           | 내 예약 대기 목록 조회                                                              |
 | GET         | /admin/reservations/waiting   |           O           | ADMIN             | 200 OK           | 모든 예약 대기 목록 조회                                                             |
 | DELETE      | /reservations/waiting         |           O           | ADMIN, MEMBER     | 200 OK           | 예약 대기 목록 삭제                                                                |
 

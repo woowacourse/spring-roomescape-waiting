@@ -37,6 +37,7 @@ import roomescape.reservation.ui.dto.request.AdminCreateReservationRequest;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
 import roomescape.reservation.ui.dto.request.MemberCreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AdminReservationResponse;
+import roomescape.reservation.ui.dto.response.AdminReservationWaitingResponse;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 import roomescape.theme.domain.Theme;
@@ -399,6 +400,46 @@ class ReservationServiceTest {
                                         "대기",
                                         1L)
                         )
+        );
+    }
+
+    @Test
+    void 예약_대기_목록을_조회한다() {
+        // given
+        final LocalDate date = LocalDate.now().plusDays(1);
+        final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
+        final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
+        final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
+
+        final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
+        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
+
+        reservationRepository.save(
+                Reservation.createForRegister(date, time, theme1, member1, BookingStatus.CONFIRMED)
+        );
+        Reservation waitingReservation1 = reservationRepository.save(
+                Reservation.createForRegister(date, time, theme1, member2, BookingStatus.WAITING)
+        );
+
+        reservationRepository.save(
+                Reservation.createForRegister(date, time, theme2, member2, BookingStatus.CONFIRMED)
+        );
+        Reservation waitingReservation2 = reservationRepository.save(
+                Reservation.createForRegister(date, time, theme2, member1, BookingStatus.WAITING)
+        );
+
+        // when
+        List<AdminReservationWaitingResponse> responses = reservationService.findReservationWaitings();
+
+        // then
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses).extracting(AdminReservationWaitingResponse::reservationId)
+                        .containsExactlyInAnyOrder(waitingReservation1.getId(), waitingReservation2.getId()),
+                () -> assertThat(responses).extracting(AdminReservationWaitingResponse::memberName)
+                        .containsExactlyInAnyOrder(member1.getName(), member2.getName()),
+                () -> assertThat(responses).extracting(AdminReservationWaitingResponse::reservationDate)
+                        .containsExactlyInAnyOrder(date, date)
         );
     }
 }

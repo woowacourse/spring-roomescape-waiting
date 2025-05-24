@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.exception.resource.ResourceNotFoundException;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -77,4 +78,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         }
         return Optional.of(result.getFirst());
     }
+
+    List<Reservation> findAllByStatus(BookingStatus bookingStatus);
 }
