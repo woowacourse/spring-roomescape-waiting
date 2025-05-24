@@ -119,7 +119,7 @@ GET /reservations HTTP/1.1
 ### Request
 
 ```
-GET /me/reservations HTTP/1.1
+GET /mine/reservations HTTP/1.1
 
 cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 host: localhost:8080
@@ -151,7 +151,7 @@ Content-Type: application/json
         "theme": "테마3",
         "date": "2024-03-01",
         "time": "14:00",
-        "status": "예약"
+        "status": "예약 대기"
     }
 ]
 ```
