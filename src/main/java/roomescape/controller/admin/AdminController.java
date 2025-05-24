@@ -33,12 +33,11 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponseDto> addReservations(
             @RequestBody @Valid AdminReservationAddDto newReservationDto) {
-        AddReservationDto addReservationDto = new AddReservationDto(ADMIN_CREATED_MESSAGE, newReservationDto.date(),
+        AddReservationDto addReservationDto = new AddReservationDto(newReservationDto.date(),
                 newReservationDto.timeId(),
                 newReservationDto.themeId());
 
-        long id = reserveTicketService.addReservation(addReservationDto,
-                newReservationDto.memberId());
+        long id = reserveTicketService.addReservation(addReservationDto, newReservationDto.memberId());
         Reservation reservation = reservationService.getReservationById(id);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation.getId(),

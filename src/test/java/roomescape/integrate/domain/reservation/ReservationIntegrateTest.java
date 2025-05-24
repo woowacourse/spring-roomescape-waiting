@@ -150,6 +150,6 @@ class ReservationIntegrateTest {
         List<MyReservationMemberResponseDto> myReservationMemberResponseDtos = response.jsonPath()
                 .getList("", MyReservationMemberResponseDto.class);
 
-        assertThat(myReservationMemberResponseDtos.getFirst().status()).contains("예약");
+        assertThat(myReservationMemberResponseDtos.getFirst().status()).contains("Reserved");
     }
 }

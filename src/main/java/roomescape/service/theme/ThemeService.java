@@ -25,7 +25,6 @@ public class ThemeService {
         return themeRepository.save(theme);
     }
 
-    @Transactional
     public void deleteThemeById(long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new InvalidThemeException("예약이 존재하는 테마는 삭제할 수 없습니다.");

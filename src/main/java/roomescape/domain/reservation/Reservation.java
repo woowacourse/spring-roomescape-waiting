@@ -7,14 +7,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Objects;
+
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.reservation.InvalidReservationException;
 
 @Entity
 public class Reservation {
@@ -22,16 +23,18 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(length = 30)
+    @Column(length = 30, nullable = false)
     private String name;
+    @Column(nullable = false)
     private LocalDate date;
     @ManyToOne
+    @JoinColumn(nullable = false)
     private ReservationTime time;
     @ManyToOne
+    @JoinColumn(nullable = false)
     private Theme theme;
-
     @Enumerated(EnumType.STRING)
-    @Column(length = 15)
+    @Column(length = 15, nullable = false)
     private ReservationStatus reservationStatus;
 
     protected Reservation() {
@@ -50,10 +53,10 @@ public class Reservation {
 
     private void validate(String name, LocalDate date, ReservationTime time) {
         if (name == null || name.isBlank()) {
-            throw new InvalidReservationException("이름은 공백일 수 없습니다");
+            throw new IllegalArgumentException("이름은 공백일 수 없습니다");
         }
         if (date == null || time == null) {
-            throw new InvalidReservationException("시간은 공백일 수 없습니다.");
+            throw new IllegalArgumentException("시간은 공백일 수 없습니다.");
         }
     }
 
@@ -108,5 +111,18 @@ public class Reservation {
 
     public String getReservationStatus() {
         return reservationStatus.getStatus();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Reservation that = (Reservation) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

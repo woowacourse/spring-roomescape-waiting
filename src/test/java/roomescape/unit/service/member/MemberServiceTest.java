@@ -13,6 +13,7 @@ import roomescape.dto.member.LoginRequestDto;
 import roomescape.dto.member.SignupRequestDto;
 import roomescape.infrastructure.auth.jwt.JwtTokenProvider;
 import roomescape.service.member.MemberService;
+import roomescape.unit.config.ServiceFixture;
 import roomescape.unit.repository.member.FakeMemberRepository;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -25,7 +26,8 @@ class MemberServiceTest {
     @BeforeEach
     void setUp() {
         jwtTokenProvider = new JwtTokenProvider(TEST_SECRET_KEY);
-        memberService = new MemberService(new BCryptPasswordEncoder(), new FakeMemberRepository(), jwtTokenProvider);
+        FakeMemberRepository fakeMemberRepository = ServiceFixture.fakeMemberRepository();
+        memberService = new MemberService(new BCryptPasswordEncoder(), fakeMemberRepository, jwtTokenProvider);
     }
 
     @Test

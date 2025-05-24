@@ -10,6 +10,8 @@ import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepositoryImpl;
 import roomescape.repository.theme.ThemeRepository;
 import roomescape.repository.theme.ThemeRepositoryImpl;
+import roomescape.repository.waiting.WaitingRepository;
+import roomescape.repository.waiting.WaitingRepositoryImpl;
 
 @Configuration
 public class RepositoryConfig {
@@ -33,5 +35,10 @@ public class RepositoryConfig {
     @Bean
     public MemberRepository memberRepository(MemberRepositoryImpl memberRepository) {
         return memberRepository;
+    }
+
+    @Bean
+    public WaitingRepository waitingRepository(WaitingRepositoryImpl waitingRepository) {
+        return waitingRepository;
     }
 }

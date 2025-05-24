@@ -39,7 +39,6 @@ public class MemberService {
         return jwtTokenProvider.createToken(member);
     }
 
-    @Transactional
     public long signup(SignupRequestDto signupRequestDto) {
         boolean isDuplicateUserExist = memberRepository.existByUsername(signupRequestDto.email());
         if (isDuplicateUserExist) {
