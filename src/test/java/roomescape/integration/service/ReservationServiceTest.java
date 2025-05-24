@@ -178,4 +178,75 @@ class ReservationServiceTest {
             softly.assertThat(response.status()).isEqualTo("예약");
         });
     }
+
+    @Test
+    void 멤버로_예약을_조회할_수_있다() {
+        // given
+        var member1 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var member2 = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme, member1);
+        reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme, member2);
+
+        // when
+        var result = service.findAllReservationsWithFilter(
+                member1.getId(), null, 예약날짜_오늘.date(), 예약날짜_오늘.date());
+
+        // then
+        assertThat(result).allMatch(r -> r.name().equals("한스"));
+    }
+
+    @Test
+    void 테마로_예약을_조회할_수_있다() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme1 = themeDbFixture.공포();
+        var theme2 = themeDbFixture.로맨스();
+        reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme1, member);
+        reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme2, member);
+
+        // when
+        var result = service.findAllReservationsWithFilter(
+                null, theme1.getId(), 예약날짜_오늘.date(), 예약날짜_오늘.date());
+
+        // then
+        assertThat(result).allMatch(r -> r.theme().id().equals(theme1.getId()));
+    }
+
+    @Test
+    void 날짜_범위로_예약을_조회할_수_있다() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        var date1 = 예약날짜_오늘;
+        var date2 = roomescape.integration.fixture.ReservationDateFixture.예약날짜_25_4_22;
+        reservationDbFixture.예약_생성(date1, reservationTime, theme, member);
+        reservationDbFixture.예약_생성(date2, reservationTime, theme, member);
+
+        // when
+        var result = service.findAllReservationsWithFilter(
+                null, null, date1.date(), date2.date());
+
+        // then
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void 조건에_맞는_예약이_없으면_빈_리스트를_반환한다() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme, member);
+
+        // when
+        var result = service.findAllReservationsWithFilter(
+                999L, 999L, java.time.LocalDate.of(2099, 1, 1), java.time.LocalDate.of(2099, 1, 2));
+
+        // then
+        assertThat(result).isEmpty();
+    }
 }
