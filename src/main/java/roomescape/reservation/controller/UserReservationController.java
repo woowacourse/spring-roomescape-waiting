@@ -39,7 +39,9 @@ public class UserReservationController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/mine")
-    public List<UserReservationResponse> getAll(@AuthenticationPrincipal AuthenticatedMember member) {
+    public List<UserReservationResponse> getAll(
+            @AuthenticationPrincipal AuthenticatedMember member
+    ) {
         return userReservationService.getAllByMemberId(member.id())
                 .stream()
                 .map(UserReservationResponse::from)

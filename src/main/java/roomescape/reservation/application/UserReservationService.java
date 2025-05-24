@@ -19,6 +19,7 @@ import roomescape.reservation.model.service.ReservationOperation;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserReservationService {
 
     private final ReservationRepository reservationRepository;

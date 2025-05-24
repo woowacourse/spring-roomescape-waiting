@@ -80,7 +80,7 @@ class UserReservationServiceTest extends IntegrationTestSupport {
         ReservationServiceResponse response = userReservationService.create(request);
 
         // then
-        List<Reservation> reservations = reservationRepository.getAll();
+        List<Reservation> reservations = reservationRepository.getConfirmedAll();
         assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(1);
             softly.assertThat(reservations.getFirst().getMember().getId()).isEqualTo(response.id());

@@ -4,10 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
 
 public interface ReservationRepository {
 
-    List<Reservation> getAll();
+    List<Reservation> getAllByStatuses(List<ReservationStatus> statuses);
 
     Reservation save(Reservation reservation);
 
