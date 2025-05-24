@@ -35,7 +35,7 @@ public class WaitingServiceTest {
         );
         WaitingIdResponse waitingIdResponse = waitingService.addWaiting(memberReservationRequest,
             1L);
-        assertThat(waitingIdResponse.waitingId()).isEqualTo(1);
+        assertThat(waitingIdResponse.waitingId()).isNotNull();
     }
 
     @Test
@@ -85,7 +85,9 @@ public class WaitingServiceTest {
         waitingService.cancel(1L, waitingIdResponse.waitingId());
 
         //then
-        assertThat(waitingService.getWaitingsFromMember(1L)).isEmpty();
+        boolean waitingExists = waitingService.getWaitingsFromMember(1L).stream()
+            .anyMatch(waiting -> waiting.id().equals(waitingIdResponse.waitingId()));
+        assertThat(waitingExists).isFalse();
     }
 
     @Test

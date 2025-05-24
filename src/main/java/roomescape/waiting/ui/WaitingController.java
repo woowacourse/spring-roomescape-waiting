@@ -57,5 +57,4 @@ public class WaitingController {
         List<WaitingInfoResponse> allWaitingInfos = waitingService.getAllWaitingInfos();
         return new ResponseEntity<>(allWaitingInfos, HttpStatus.OK);
     }
-
 }
