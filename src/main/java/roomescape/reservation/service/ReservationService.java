@@ -1,11 +1,11 @@
 package roomescape.reservation.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;

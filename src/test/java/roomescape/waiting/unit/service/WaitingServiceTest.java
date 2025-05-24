@@ -75,7 +75,7 @@ public class WaitingServiceTest {
         var waiting = new Waiting(1L, reservationSlot, member);
         when(waitingRepository.save(any()))
                 .thenReturn(waiting);
-        when(waitingRepository.countByReservationSlotAndMemberId(any(), anyLong()))
+        when(waitingRepository.countByReservationSlotAndIdLessThan(any(), any()))
                 .thenReturn(1L);
 
         when(memberRepository.findById(anyLong()))

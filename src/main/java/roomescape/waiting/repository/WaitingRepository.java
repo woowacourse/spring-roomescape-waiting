@@ -10,7 +10,7 @@ import roomescape.waiting.entity.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    long countByReservationSlotAndMemberId(ReservationSlot reservationSlot, Long memberId);
+    long countByReservationSlotAndIdLessThan(ReservationSlot reservationSlot, Long id);
 
     @Query("""
             SELECT new roomescape.waiting.entity.WaitingWithRank(

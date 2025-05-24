@@ -1,9 +1,9 @@
 package roomescape.waiting.service;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ForbiddenException;
@@ -40,7 +40,7 @@ public class WaitingService {
         Waiting waiting = new Waiting(reservationSlot, member);
         Waiting saved = waitingRepository.save(waiting);
 
-        Long rank = waitingRepository.countByReservationSlotAndMemberId(reservationSlot, loginMember.id());
+        Long rank = waitingRepository.countByReservationSlotAndIdLessThan(reservationSlot, waiting.getId());
         return WaitingCreateResponse.from(saved, rank);
     }
 
