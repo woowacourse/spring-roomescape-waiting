@@ -23,7 +23,7 @@ public class AdminPageController {
         return "admin/time";
     }
 
-    @GetMapping("/themes")
+    @GetMapping("/theme")
     public String getThemePage() {
         return "admin/theme";
     }
