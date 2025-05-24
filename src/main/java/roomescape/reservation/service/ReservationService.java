@@ -6,11 +6,12 @@ import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.waiting.domain.Waiting;
+import roomescape.reservation.waiting.domain.WaitingWithRank;
 import roomescape.reservation.waiting.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -75,13 +76,16 @@ public class ReservationService {
 
     public List<MyReservationResponse> getMyReservations(final LoginMember loginMember) {
         final List<Reservation> reservations = reservationRepository.findAllByMemberIdOrderByDateDesc(loginMember.id());
-        final List<Waiting> waitings = waitingRepository.findByMemberId(loginMember.id());
+        final List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
 
         return Stream.concat(
                 reservations.stream()
-                        .map(reservation -> new MyReservationResponse(reservation, "예약")),
+                        .map(reservation -> new MyReservationResponse(reservation, ReservationStatus.RESERVED.getDescription())),
                 waitings.stream()
-                        .map(waiting -> new MyReservationResponse(waiting, "예약 대기"))
+                        .map(waitingWithRank -> new MyReservationResponse(
+                                waitingWithRank.getWaiting(),
+                                waitingWithRank.getDescription(ReservationStatus.WAITING))
+                        )
         ).toList();
     }
 
