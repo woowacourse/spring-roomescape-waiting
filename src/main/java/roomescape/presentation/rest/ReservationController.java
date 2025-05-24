@@ -71,7 +71,7 @@ public class ReservationController {
         if (!authenticationInfo.isAdmin()) {
             throw new AuthorizationException("관리자에게만 허용된 작업입니다.");
         }
-        service.removeByIdForce(id);
+        service.removeById(id);
     }
 
     @DeleteMapping("/wait/{id}")

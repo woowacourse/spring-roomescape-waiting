@@ -119,12 +119,12 @@ class ReservationServiceTest extends ServiceTest {
 
     @Test
     @DisplayName("예약을 삭제한다.")
-    void removeByIdForce() {
+    void removeById() {
         // given
         var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
         // when
-        service.removeByIdForce(reserved.id());
+        service.removeById(reserved.id());
 
         // then
         var reservations = service.findAllReservations(NONE_FILTERING);
@@ -133,7 +133,7 @@ class ReservationServiceTest extends ServiceTest {
 
     @Test
     @DisplayName("예약을 삭제했을 때 뒤따르던 예약 대기가 있으면 첫번째 대기가 확정된다.")
-    void removeByIdForceWithFollowingWaitings() {
+    void removeByIdWithFollowingWaitings() {
         // given
         var reserved = service.reserve(user.id(), tomorrow(), timeSlot.id(), theme.id());
 
@@ -141,7 +141,7 @@ class ReservationServiceTest extends ServiceTest {
         var waiting = service.waitFor(user2.id(), tomorrow(), timeSlot.id(), theme.id());
 
         // when
-        service.removeByIdForce(reserved.id());
+        service.removeById(reserved.id());
 
         // then
         var reloadedWaiting = repositoryHelper.findReservation(waiting.id());

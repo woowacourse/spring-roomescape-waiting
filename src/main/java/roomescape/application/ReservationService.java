@@ -62,7 +62,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void removeByIdForce(final long id) {
+    public void removeById(final long id) {
         var reservation = reservationRepository.getById(id);
         if (reservation.isReserved()) {
             var queues = reservationRepository.findQueuesBySlots(List.of(reservation.slot()));

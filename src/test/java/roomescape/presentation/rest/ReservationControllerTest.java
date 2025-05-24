@@ -94,7 +94,7 @@ class ReservationControllerTest {
         mockMvc.perform(delete("/reservations/1"))
             .andExpect(status().isForbidden());
 
-        Mockito.verify(reservationService, never()).removeByIdForce(1L);
+        Mockito.verify(reservationService, never()).removeById(1L);
     }
 
     @Test

@@ -32,14 +32,14 @@ class ReservationControllerAdminTest {
         mockMvc.perform(delete("/reservations/1"))
             .andExpect(status().isNoContent());
 
-        Mockito.verify(reservationService, times(1)).removeByIdForce(1L);
+        Mockito.verify(reservationService, times(1)).removeById(1L);
     }
 
     @Test
     @DisplayName("예약 삭제 요청시, 주어진 아이디에 해당하는 예약이 없다면 NOT FOUND를 응답한다.")
     void deleteWhenNotFound() throws Exception {
         Mockito.doThrow(new NotFoundException("should be thrown"))
-            .when(reservationService).removeByIdForce(eq(999L));
+            .when(reservationService).removeById(eq(999L));
 
         mockMvc.perform(delete("/reservations/999"))
             .andExpect(status().isNotFound());
