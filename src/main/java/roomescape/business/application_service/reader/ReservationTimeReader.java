@@ -24,7 +24,7 @@ public class ReservationTimeReader {
         return ReservationTimeDto.fromEntities(reservationTimes);
     }
 
-    public List<ReservableReservationTimeDto> getAllByDateAndThemeId(final LocalDate date, final String themeIdValue) {
+    public List<ReservableReservationTimeDto> getAllBy(final LocalDate date, final String themeIdValue) {
         Id themeId = Id.create(themeIdValue);
         List<ReservationTime> available = reservationTimes.findAvailableByDateAndThemeId(date, themeId);
         List<ReservationTime> notAvailable = reservationTimes.findNotAvailableByDateAndThemeId(date, themeId);

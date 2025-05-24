@@ -25,7 +25,7 @@ public class ThemeReader {
     private static final int AGGREGATE_START_DATE_INTERVAL = 7;
     private static final int AGGREGATE_END_DATE_INTERVAL = 1;
 
-    public List<ThemeDto> getPopular(final int size) {
+    public List<ThemeDto> getPopulars(final int size) {
         LocalDate now = LocalDate.now();
         List<Theme> popularThemes = themes.findPopularThemes(
                 now.minusDays(AGGREGATE_START_DATE_INTERVAL),

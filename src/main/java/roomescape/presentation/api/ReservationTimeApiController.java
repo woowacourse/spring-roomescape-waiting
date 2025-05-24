@@ -55,7 +55,7 @@ public class ReservationTimeApiController {
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") String themeId
     ) {
-        List<ReservableReservationTimeDto> reservationTimeDtos = timeReader.getAllByDateAndThemeId(date, themeId);
+        List<ReservableReservationTimeDto> reservationTimeDtos = timeReader.getAllBy(date, themeId);
         List<BookedReservationTimeResponse> responses = BookedReservationTimeResponse.from(reservationTimeDtos);
         return ResponseEntity.ok(responses);
     }

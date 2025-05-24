@@ -30,7 +30,7 @@ public class ReservationReader {
     }
 
     public List<MyReservationDto> getMyReservations(final String userIdValue) {
-        List<ReservationSlot> slots = slotHelper.getAllSlotsContainsReserverOf(userIdValue);
+        List<ReservationSlot> slots = slotHelper.getAllBy(userIdValue);
         Id userId = Id.create(userIdValue);
         Map<Reservation, Integer> reservationsWithWaitingNumber = slots.stream()
                 .collect(Collectors.toMap(

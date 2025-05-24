@@ -35,7 +35,7 @@ public class ReservationService {
         User user = users.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
 
-        ReservationSlot slot = slotHelper.findByDateAndTimeIdAndThemeIdOrElseSave(date, timeIdValue, themeIdValue);
+        ReservationSlot slot = slotHelper.getOrCreateBy(date, timeIdValue, themeIdValue);
 
         if (!reservations.isSlotFreeFor(slot, user)) {
             throw new DuplicatedException(RESERVATION_DUPLICATED);

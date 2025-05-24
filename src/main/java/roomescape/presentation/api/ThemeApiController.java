@@ -48,7 +48,7 @@ public class ThemeApiController {
     @GetMapping("/themes/popular")
     @AuthRequired
     public ResponseEntity<List<ThemeResponse>> getPopularThemes(@RequestParam(value = "size", defaultValue = "10") int size) {
-        List<ThemeDto> popularThemeDtos = themeReader.getPopular(size);
+        List<ThemeDto> popularThemeDtos = themeReader.getPopulars(size);
         List<ThemeResponse> responses = ThemeResponse.from(popularThemeDtos);
         return ResponseEntity.ok(responses);
     }

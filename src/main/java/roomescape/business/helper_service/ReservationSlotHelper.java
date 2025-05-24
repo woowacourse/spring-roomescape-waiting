@@ -25,11 +25,11 @@ public class ReservationSlotHelper {
     private final Themes themes;
     private final ReservationTimes reservationTimes;
 
-    public List<ReservationSlot> getAllSlotsContainsReserverOf(final String userIdValue) {
+    public List<ReservationSlot> getAllBy(final String userIdValue) {
         return slots.findAllSlotsContainsReserverOf(Id.create(userIdValue));
     }
 
-    public ReservationSlot findByDateAndTimeIdAndThemeIdOrElseSave(final LocalDate date, final String timeIdValue, final String themeIdValue) {
+    public ReservationSlot getOrCreateBy(final LocalDate date, final String timeIdValue, final String themeIdValue) {
         return slots.findByDateAndTimeIdAndThemeId(date, Id.create(timeIdValue), Id.create(themeIdValue))
                 .orElseGet(() -> addAndGet(date, timeIdValue, themeIdValue));
     }
