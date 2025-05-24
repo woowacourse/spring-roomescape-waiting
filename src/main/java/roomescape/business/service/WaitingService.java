@@ -14,6 +14,7 @@ import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.WaitingRequest;
 import roomescape.presentation.dto.WaitingResponse;
+import roomescape.util.CurrentUtil;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,12 +22,14 @@ public class WaitingService {
 
     private final QueryService queryService;
     private final WaitingRepository waitingRepository;
+    private final CurrentUtil currentUtil;
 
     public WaitingService(final QueryService queryService,
-                          final WaitingRepository waitingRepository) {
+                          final WaitingRepository waitingRepository, final CurrentUtil currentUtil) {
 
         this.queryService = queryService;
         this.waitingRepository = waitingRepository;
+        this.currentUtil = currentUtil;
     }
 
     @Transactional
@@ -58,7 +61,7 @@ public class WaitingService {
                 waitingRequest.timeId(), waitingRequest.themeId(), loginMember.id());
 
         if(isAlreadyExisted) {
-            throw new BadRequestException("이미 예약 대기를 하였습니다.");
+            throw new BadRequestException("이미 예약 대기를 하였습니다");
         }
     }
 
@@ -66,7 +69,7 @@ public class WaitingService {
     public void deleteById(final Long id) {
         Waiting waiting = getById(id);
 
-        if(waiting.isPast()) {
+        if(waiting.isPast(currentUtil.getCurrentDate())) {
             throw new BadRequestException("이전 예약 대기는 삭제할 수 없습니다.");
         }
         waitingRepository.deleteById(id);
