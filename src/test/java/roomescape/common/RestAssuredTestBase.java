@@ -11,7 +11,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberEmail;
 import roomescape.domain.member.MemberEncodedPassword;
@@ -50,28 +49,28 @@ public class RestAssuredTestBase {
 
 
     public RestLoginMember generateLoginMember() {
-        return generateLogin(MemberRole.MEMBER);
+        return generateLogin("leehyeonsu4888@gmail.com", MemberRole.MEMBER);
     }
 
     public RestLoginMember generateLoginAdmin() {
-        return generateLogin(MemberRole.ADMIN);
+        return generateLogin("leehyeonsu48888@gmail.com", MemberRole.ADMIN);
     }
 
-    private RestLoginMember generateLogin(final MemberRole memberRole) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        Member member = memberRepository.save(new Member(
+    private RestLoginMember generateLogin(final String email, final MemberRole memberRole) {
+        var encoder = new BCryptPasswordEncoder();
+        var member = memberRepository.save(new Member(
                 null,
                 new MemberName("홍길동"),
-                new MemberEmail("leehyeonsu4888@gmail.com"),
+                new MemberEmail(email),
                 new MemberEncodedPassword(encoder.encode("gustn111!!")),
                 memberRole
         ));
 
-        Map<String, Object> request = Map.of(
+        var request = Map.of(
                 "password", "gustn111!!",
-                "email", "leehyeonsu4888@gmail.com"
+                "email", email
         );
-        String sessionId = RestAssured.given().log().all()
+        var sessionId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/login")

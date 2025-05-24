@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.time.AvailableReservationTime;
@@ -19,13 +18,13 @@ public interface ReservationTimeRepository extends ListCrudRepository<Reservatio
             )
             FROM ReservationTime rt
             LEFT JOIN Reservation r
-                ON r.reservationTime = rt AND r.reservationDate.date = :date AND r.theme.id = :themeId
+                ON r.schedule.reservationTime = rt AND r.schedule.reservationDate.date = :date AND r.schedule.theme.id = :themeId
             GROUP BY rt
             """)
     List<AvailableReservationTime> findAllAvailableReservationTimes(
-            @Param("date") LocalDate date,
-            @Param("themeId") Long themeId
+            @Param("date") final LocalDate date,
+            @Param("themeId") final Long themeId
     );
 
-    boolean existsByStartAt(LocalTime startAt);
+    boolean existsByStartAt(final LocalTime startAt);
 }

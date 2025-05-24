@@ -10,6 +10,7 @@ public record MemberEncodedPassword(
         @Column(nullable = false)
         String password
 ) {
+
     public MemberEncodedPassword(final String password) {
         this.password = Objects.requireNonNull(password, "password은 null일 수 없습니다.");
     }

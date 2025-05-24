@@ -34,7 +34,7 @@ public class ReservationController {
             @RequestBody @Valid final ReservationCreateRequest request,
             final SessionMember sessionMember
     ) {
-        ReservationResponse response = reservationService.createReservation(request, sessionMember.id());
+        final ReservationResponse response = reservationService.createReservation(request, sessionMember.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);

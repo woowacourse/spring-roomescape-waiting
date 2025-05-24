@@ -36,4 +36,14 @@ class AdminPageTest extends RestAssuredTestBase {
                 .then().log().all()
                 .statusCode(200);
     }
+
+    @Test
+    void 어드민_대기_관리_페이지_조회() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("JSESSIONID", generateLoginAdmin().sessionId())
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
 }

@@ -1,6 +1,7 @@
 package roomescape.integration.api.rest;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -13,7 +14,7 @@ import roomescape.integration.api.RestLoginMember;
 class ThemeRestTest extends RestAssuredTestBase {
 
     private RestLoginMember restLoginMember;
-    private Map<String, String> createThemeRequest = Map.of(
+    private final Map<String, String> createThemeRequest = Map.of(
             "name", "공포방탈출",
             "description", "무서운 분위기 속에서 탈출",
             "thumbnail", "https://example.com/horror.jpg"

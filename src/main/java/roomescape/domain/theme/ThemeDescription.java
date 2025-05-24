@@ -11,6 +11,7 @@ public record ThemeDescription(
         @Size(max = ThemeDescription.MAX_DESCRIPTION_LENGTH)
         String description
 ) {
+
     private static final int MAX_DESCRIPTION_LENGTH = 30;
 
     public ThemeDescription(final String description) {

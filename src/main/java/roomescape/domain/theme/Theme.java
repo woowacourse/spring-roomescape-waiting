@@ -25,6 +25,9 @@ public class Theme {
     @Embedded
     private ThemeThumbnail thumbnail;
 
+    protected Theme() {
+    }
+
     public Theme(
             final Long id,
             final ThemeName name,
@@ -35,9 +38,6 @@ public class Theme {
         this.name = Objects.requireNonNull(name, "name은 null일 수 없습니다.");
         this.description = Objects.requireNonNull(description, "description은 null일 수 없습니다.");
         this.thumbnail = Objects.requireNonNull(thumbnail, "thumbnail은 null일 수 없습니다.");
-    }
-
-    public Theme() {
     }
 
     public Long getId() {

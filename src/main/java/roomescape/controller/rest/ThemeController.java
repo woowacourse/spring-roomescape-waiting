@@ -32,7 +32,7 @@ public class ThemeController {
 
     @PostMapping
     public ResponseEntity<ThemeResponse> createTheme(@RequestBody @Valid final CreateThemeRequest request) {
-        ThemeResponse response = themeService.createTheme(request);
+        final ThemeResponse response = themeService.createTheme(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -46,7 +46,7 @@ public class ThemeController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> popularThemes() {
-        List<ThemeResponse> popularThemes = themeService.getWeeklyPopularThemes();
+        final List<ThemeResponse> popularThemes = themeService.getWeeklyPopularThemes();
         return ResponseEntity.ok(popularThemes);
     }
 }

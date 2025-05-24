@@ -1,6 +1,7 @@
 package roomescape.unit.domain.member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +12,7 @@ class MemberEmailTest {
 
     @Test
     void 이메일은_null일_수_없다() {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberEmail(null))
                 .isInstanceOf(NullPointerException.class);
     }
@@ -26,7 +27,7 @@ class MemberEmailTest {
             "nsu.gmail.com.@com",
     })
     void 이메일_형식이_아니면_예외가_발생한다(String email) {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberEmail(email))
                 .isInstanceOf(IllegalStateException.class);
     }
@@ -37,7 +38,7 @@ class MemberEmailTest {
             "123456789012345678901234567890123456789012",
     })
     void 이메일이_40자_초과면_예외가_발생한다(String email) {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberEmail(email))
                 .isInstanceOf(IllegalStateException.class);
     }
@@ -49,7 +50,7 @@ class MemberEmailTest {
             "2222222222222222222leehyeons.u@gmail.com"
     })
     void 이메일을_올바르게_생성한다(String email) {
-        // when & then
+        // when // then
         assertThatCode(() -> new MemberEmail(email))
                 .doesNotThrowAnyException();
     }
