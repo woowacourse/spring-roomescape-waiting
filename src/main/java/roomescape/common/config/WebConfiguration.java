@@ -29,9 +29,4 @@ public class WebConfiguration implements WebMvcConfigurer {
         registry.addInterceptor(new AdminRoleInterceptor(authService))
                 .addPathPatterns("/admin/**");
     }
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/admin/waiting").setViewName("admin/waiting");
-    }
 }

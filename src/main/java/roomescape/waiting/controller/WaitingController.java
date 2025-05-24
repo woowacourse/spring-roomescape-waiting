@@ -37,10 +37,6 @@ public class WaitingController {
         return ResponseEntity.ok().body(response);
     }
 
-    /**
-     * TODO
-     * Login과 admin 검증
-     */
     @GetMapping
     public ResponseEntity<List<WaitingResponse>> findAllWaiting() {
         List<WaitingResponse> responses = waitingService.findAll().stream()

@@ -48,10 +48,6 @@ public class WaitingService {
                 .toList();
     }
 
-    /**
-     * TODO
-     * 지난 날짜 대기까지 조회??
-     */
     public List<WaitingInfo> findAll() {
         return waitingRepository.findAll()
                 .stream()
@@ -88,10 +84,6 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
-    /**
-     * TODO
-     * 락이 필요하다.
-     */
     public WaitingInfo addWaiting(WaitingAddCommand command) {
         ReservationTime reservationTime = getReservationTime(command.timeId());
         Theme theme = getTheme(command.themeId());
