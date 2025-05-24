@@ -10,7 +10,6 @@ import roomescape.business.domain.Reservation;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
@@ -20,22 +19,24 @@ import roomescape.util.CurrentUtil;
 @Transactional(readOnly = true)
 public class ThemeService {
 
+    private final QueryService queryService;
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
     private final CurrentUtil currentUtil;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository, final CurrentUtil currentUtil) {
+    public ThemeService(final QueryService queryService,
+                        final ThemeRepository themeRepository,
+                        final CurrentUtil currentUtil) {
+
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
         this.currentUtil = currentUtil;
+        this.queryService = queryService;
     }
 
     @Transactional
     public ThemeResponse insert(final ThemeRequest themeRequest) {
         validateNameIsNotDuplicate(themeRequest.name());
         final Theme theme = themeRequest.toDomain();
-        final Long id = themeRepository.save(theme)
-                .getId();
+        final Long id = themeRepository.save(theme).getId();
         return new ThemeResponse(id, theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 
@@ -75,7 +76,7 @@ public class ThemeService {
 
     private List<ThemeResponse> findPopularThemesBetween(final LocalDate startDate, final LocalDate endDate) {
         final List<Theme> themes = themeRepository.findAll();
-        final List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
+        final List<Reservation> reservations = queryService.findByDateBetween(startDate, endDate);
         final Map<Long, Long> themeReservationCount = calculateThemeReservationCount(reservations);
         final List<Theme> sortedThemes = sortedThemesByReservationCount(themes, themeReservationCount);
         return sortedThemes.stream()

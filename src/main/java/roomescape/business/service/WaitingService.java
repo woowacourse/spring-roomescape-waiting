@@ -1,6 +1,5 @@
 package roomescape.business.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +10,6 @@ import roomescape.business.domain.Theme;
 import roomescape.business.domain.Waiting;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.WaitingRequest;
@@ -23,28 +21,25 @@ public class WaitingService {
 
     private final QueryService queryService;
     private final WaitingRepository waitingRepository;
-    private final ReservationRepository reservationRepository;
 
     public WaitingService(final QueryService queryService,
-                          final WaitingRepository waitingRepository,
-                          final ReservationRepository reservationRepository) {
+                          final WaitingRepository waitingRepository) {
 
         this.queryService = queryService;
         this.waitingRepository = waitingRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
     public WaitingResponse insert(final LoginMember loginMember, final WaitingRequest waitingRequest) {
-        final Theme theme = queryService.getThemeById(waitingRequest.themeId());
-        final ReservationTime reservationTime = queryService.getReservationTimeById(waitingRequest.timeId());
-
-        Reservation reservation = getReservationByDateAndTimeIdAndThemeId(
+        final Reservation reservation = queryService.getReservationByDateAndTimeIdAndThemeId(
                 waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId());
 
         if(reservation.isSameMember(loginMember.id())) {
             throw new BadRequestException("사용자가 예약한 항목입니다. 예약 대기가 불가능합니다.");
         }
+
+        final Theme theme = queryService.getThemeById(waitingRequest.themeId());
+        final ReservationTime reservationTime = queryService.getReservationTimeById(waitingRequest.timeId());
 
         boolean isAlreadyExisted = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waitingRequest.date(),
                 waitingRequest.timeId(), waitingRequest.themeId(), loginMember.id());
@@ -55,14 +50,8 @@ public class WaitingService {
 
         final Member member = queryService.getMemberById(loginMember.id());
         final Waiting waiting = new Waiting(member, theme, reservationTime, waitingRequest.date());
-        Waiting savedWaiting = waitingRepository.save(waiting);
 
-        return WaitingResponse.from(savedWaiting);
-    }
-
-    private Reservation getReservationByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
-        return reservationRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
-                .orElseThrow(() -> new NotFoundException("예약이 존재하지 않아 예약 대기를 할 수 없습니다."));
+        return WaitingResponse.from(waitingRepository.save(waiting));
     }
 
     @Transactional
