@@ -35,6 +35,24 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
+    private void validateName(final String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name 필드가 비어있습니다.");
+        }
+    }
+
+    private void validateDescription(final String description) {
+        if (description == null) {
+            throw new IllegalArgumentException("description 필드가 null 입니다.");
+        }
+    }
+
+    private void validateThumbnail(final String thumbnail) {
+        if (thumbnail == null) {
+            throw new IllegalArgumentException("thumbnail 필드가 null 입니다.");
+        }
+    }
+
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);
     }
@@ -56,23 +74,5 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
-    }
-
-    private void validateName(final String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("name 필드가 비어있습니다.");
-        }
-    }
-
-    private void validateDescription(final String description) {
-        if (description == null) {
-            throw new IllegalArgumentException("description 필드가 null 입니다.");
-        }
-    }
-
-    private void validateThumbnail(final String thumbnail) {
-        if (thumbnail == null) {
-            throw new IllegalArgumentException("thumbnail 필드가 null 입니다.");
-        }
     }
 }
