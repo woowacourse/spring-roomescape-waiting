@@ -13,25 +13,30 @@ import roomescape.reservation.model.entity.vo.ReservationWaitingStatus;
 
 public class ReservationTestFixture {
 
+    private static int identifier = 0;
+
     public static ReservationTime getReservationTimeFixture() {
+        identifier++;
         return ReservationTime.builder()
-            .startAt(LocalTime.of(13, 0))
+            .startAt(LocalTime.of(13, identifier % 60))
             .build();
     }
 
     public static ReservationTheme getReservationThemeFixture() {
+        identifier++;
         return ReservationTheme.builder()
-            .name("탈출")
-            .description("탈출하는 내용")
-            .thumbnail("a.com")
+            .name("탈출" + identifier)
+            .description("탈출하는 내용" + identifier)
+            .thumbnail("a.com" + identifier)
             .build();
     }
 
     public static Member getUserFixture() {
+        identifier++;
         return Member.builder()
-            .name("웨이드")
-            .email("wade@naver.com")
-            .password("1234")
+            .name("웨이드" + identifier)
+            .email("wade@naver.com" + identifier)
+            .password("1234" + identifier)
             .role(Role.USER)
             .build();
     }
@@ -98,4 +103,13 @@ public class ReservationTestFixture {
                 .build();
     }
 
+    public static ReservationWaiting createAcceptWaiting(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme, Member member) {
+        return ReservationWaiting.builder()
+                .date(date)
+                .time(reservationTime)
+                .theme(reservationTheme)
+                .member(member)
+                .status(ReservationWaitingStatus.ACCEPTED)
+                .build();
+    }
 }
