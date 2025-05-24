@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.application.repository.ReservationRepository;
-import roomescape.reservation.application.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.presentation.dto.ReservationTimeResponse;
@@ -30,6 +30,7 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(reservationTimeRepository.save(reservationTime));
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getReservationTimes() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::new)
@@ -46,9 +47,11 @@ public class ReservationTimeService {
         reservationTimeRepository.delete(reservationTime);
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getReservationTimes(final LocalDate date, final Long themeId) {
-        List<Long> bookedTimeIds = reservationRepository.findByDateAndThemeId(date, themeId).stream()
-                .map(reservation -> reservation.getReservationTime().getId())
+        List<Long> bookedTimeIds = reservationRepository.findByReservationInfoDateAndReservationInfoThemeId(date,
+                        themeId).stream()
+                .map(reservation -> reservation.getReservationInfo().getReservationTime().getId())
                 .toList();
 
         return reservationTimeRepository.findAll().stream()
@@ -66,7 +69,7 @@ public class ReservationTimeService {
     }
 
     private void validateIsDuplicatedReservation(Long id) {
-        if (reservationRepository.existsByReservationTimeId(id)) {
+        if (reservationRepository.existsByReservationInfoReservationTimeId(id)) {
             throw new IllegalStateException("예약이 이미 존재하는 시간입니다.");
         }
     }

@@ -7,9 +7,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import roomescape.global.common.TimeStamp;
 
 @Entity
-public class Member {
+@SQLRestriction("deleted_at is NULL")
+@SQLDelete(sql = "UPDATE member SET deleted_at = NOW() WHERE id = ?")
+public class Member extends TimeStamp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

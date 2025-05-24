@@ -15,16 +15,19 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.member.application.repository.MemberRepository;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.ReservationServiceTest.ReservationConfig;
-import roomescape.reservation.application.repository.ReservationRepository;
-import roomescape.reservation.application.repository.ReservationTimeRepository;
-import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.reservation.presentation.dto.WaitingRequest;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -32,6 +35,8 @@ import roomescape.reservation.presentation.dto.ReservationResponse;
 class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
+    @Autowired
+    private WaitingService waitingService;
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
@@ -135,10 +140,18 @@ class ReservationServiceTest {
         );
         reservationService.createAdminReservation(adminReservationRequest);
 
+        WaitingRequest waitingRequest = new WaitingRequest(
+                LocalDate.of(2025, 8, 5),
+                theme.getId(),
+                reservationTime.getId()
+        );
+
+        waitingService.createWaiting(waitingRequest, 2L);
+
         // when - then
         assertAll(
                 () -> assertThat(reservationService.getUserReservations(1L).size()).isEqualTo(0),
-                () -> assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(1)
+                () -> assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(2)
         );
     }
 
@@ -167,6 +180,42 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약 삭제 시 자동으로 다음 대기 요청이 승인된다")
+    void when_deleteReservation_then_auto_acceptTest() {
+        // given
+        ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(15, 40)));
+
+        Theme theme = themeRepository.save(new Theme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"));
+
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(
+                LocalDate.of(2025, 8, 5),
+                theme.getId(),
+                reservationTime.getId(),
+                2L
+        );
+
+        reservationService.createAdminReservation(adminReservationRequest);
+
+        WaitingRequest waitingRequest = new WaitingRequest(
+                LocalDate.of(2025, 8, 5),
+                theme.getId(),
+                reservationTime.getId()
+        );
+
+        waitingService.createWaiting(waitingRequest, 2L);
+
+        // when
+        reservationService.deleteReservation(1L);
+
+        // then
+        assertAll(
+                () -> assertThat(reservationService.getReservations(2L, null, null, null).size()).isEqualTo(1),
+                () -> assertThat(waitingService.getWaitings().size()).isEqualTo(0)
+        );
+    }
+
+    @Test
     @DisplayName("저장되어 있지 않은 id로 요청을 보내면 예외가 발생한다.")
     void deleteExceptionTest() {
         assertThatThrownBy(() -> reservationService.deleteReservation(1L))
@@ -180,11 +229,25 @@ class ReservationServiceTest {
                 ReservationRepository reservationRepository,
                 ReservationTimeRepository reservationTimeRepository,
                 ThemeRepository themeRepository,
-                MemberRepository memberRepository
+                MemberRepository memberRepository,
+                WaitingRepository waitingRepository
         ) {
             return new ReservationService(
-                    reservationRepository, reservationTimeRepository, themeRepository, memberRepository
+                    waitingRepository, reservationRepository, reservationTimeRepository, themeRepository,
+                    memberRepository
             );
+        }
+
+        @Bean
+        public WaitingService waitingService(
+                ReservationTimeRepository reservationTimeRepository,
+                ThemeRepository themeRepository,
+                MemberRepository memberRepository,
+                WaitingRepository waitingRepository,
+                ReservationRepository reservationRepository
+        ) {
+            return new WaitingService(waitingRepository, reservationRepository, reservationTimeRepository,
+                    themeRepository, memberRepository);
         }
     }
 }

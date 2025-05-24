@@ -4,10 +4,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class TokenRequest {
-    @Email
+
+    @Email(message = "이메일 형식이 올바르지 않습니다")
     private final String email;
 
-    @NotBlank
+    @NotBlank(message = "비밀번호는 공백일 수 없습니다")
     private final String password;
 
     public TokenRequest(String email, String password) {

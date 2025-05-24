@@ -1,4 +1,4 @@
-package roomescape.reservation.application.repository;
+package roomescape.reservation.domain.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
@@ -11,8 +11,8 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
     @Query("""
                         SELECT t
                         FROM Theme t
-                        INNER JOIN Reservation r ON t.id = r.theme.id
-                        WHERE r.date BETWEEN TIMESTAMPADD(DAY, -7, CURRENT_DATE()) AND TIMESTAMPADD(DAY, -1, CURRENT_DATE())
+                        INNER JOIN Reservation r ON t.id = r.reservationInfo.theme.id
+                        WHERE r.reservationInfo.date BETWEEN TIMESTAMPADD(DAY, -7, CURRENT_DATE()) AND TIMESTAMPADD(DAY, -1, CURRENT_DATE())
                         GROUP BY t.id, t.name, t.description, t.thumbnail
                         ORDER BY COUNT(*) DESC
                         LIMIT 10

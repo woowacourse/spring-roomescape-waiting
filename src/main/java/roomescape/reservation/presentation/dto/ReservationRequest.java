@@ -1,19 +1,17 @@
 package roomescape.reservation.presentation.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public class ReservationRequest {
 
-    @NotNull
+    @NotNull(message = "날짜는 반드시 입력해야 합니다")
     private final LocalDate date;
 
-    @NotNull
+    @NotNull(message = "테마는 반드시 입력해야 합니다")
     private final Long themeId;
 
-    @NotNull
+    @NotNull(message = "시작 시간은 반드시 입력해야 합니다")
     private final Long timeId;
 
     public ReservationRequest(final LocalDate date, final Long themeId, final Long timeId) {

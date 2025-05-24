@@ -4,13 +4,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class SignUpRequest {
-    @Email
+
+    @Email(message = "이메일 형식이 올바르지 않습니다")
     private final String email;
 
-    @NotBlank
+    @NotBlank(message = "비밀번호는 공백일 수 없습니다")
     private final String password;
 
-    @NotBlank
+    @NotBlank(message = "이름은 공백일 수 없습니다")
     private final String name;
 
     public SignUpRequest(String email, String password, String name) {
