@@ -20,7 +20,6 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -55,10 +54,9 @@ class ReservationJpaRepositoryTest {
         );
         theme = themeRepository.save(new Theme("공포", "ss", "ss"));
         reservation = reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
+                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member));
         reservationRepository.save(
-                Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member,
-                        ReservationStatus.RESERVATION));
+                Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member));
     }
 
     @Test
@@ -87,28 +85,17 @@ class ReservationJpaRepositoryTest {
         //given
         Theme theme1 = themeRepository.save(new Theme("웃음", "aa", "aa"));
         Theme theme2 = themeRepository.save(new Theme("슬픔", "bb", "bb"));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(2L), reservationTime, theme, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(3L), reservationTime, theme, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(4L), reservationTime, theme, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(5L), reservationTime, theme, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(6L), reservationTime, theme1, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(7L), reservationTime, theme1, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(8L), reservationTime, theme, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(9L), reservationTime, theme, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(10L), reservationTime, theme, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(11L), reservationTime, theme2, member,
-                ReservationStatus.RESERVATION));
-        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(12L), reservationTime, theme2, member,
-                ReservationStatus.RESERVATION));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(2L), reservationTime, theme, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(3L), reservationTime, theme, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(4L), reservationTime, theme, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(5L), reservationTime, theme, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(6L), reservationTime, theme1, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(7L), reservationTime, theme1, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(8L), reservationTime, theme, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(9L), reservationTime, theme, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(10L), reservationTime, theme, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(11L), reservationTime, theme2, member));
+        reservationRepository.save(Reservation.create(LocalDate.now().minusDays(12L), reservationTime, theme2, member));
 
         // when
         LocalDate endDate = LocalDate.now().minusDays(1L);
@@ -128,8 +115,7 @@ class ReservationJpaRepositoryTest {
         //when - then
         assertThatThrownBy(() ->
                 reservationRepository.save(
-                        Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member,
-                                ReservationStatus.RESERVATION)))
+                        Reservation.create(LocalDate.now().minusDays(1L), reservationTime, theme, member)))
                 .isInstanceOf(DataIntegrityViolationException.class);
 
     }

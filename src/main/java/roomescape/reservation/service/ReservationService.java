@@ -4,20 +4,18 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
-import roomescape.user.controller.dto.ReservationRequest;
+import roomescape.user.controller.dto.request.ReservationRequest;
 import roomescape.user.controller.dto.response.MemberReservationResponse;
 
 @Service
@@ -37,7 +35,6 @@ public class ReservationService {
         this.memberService = memberService;
     }
 
-    @Transactional
     public ReservationResponse create(Long memberId, ReservationRequest request) {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
@@ -50,19 +47,6 @@ public class ReservationService {
         return createReservation(request, reservationDate, member);
     }
 
-    @Transactional
-    public ReservationResponse createByName(String name, ReservationRequest request) {
-        Long timeId = request.timeId();
-        ReservationDate reservationDate = new ReservationDate(request.date());
-
-        if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
-        }
-
-        Member member = memberService.findByName(name);
-        return createReservation(request, reservationDate, member);
-    }
-
     public void deleteById(Long id) {
         Reservation reservation = getReservation(id);
         reservationRepository.deleteById(reservation.getId());
@@ -71,11 +55,11 @@ public class ReservationService {
     public List<ReservationResponse> getAll() {
         List<Reservation> reservations = reservationRepository.findAll();
 
-        return ReservationResponse.from(reservations);
+        return ReservationResponse.fromReservation(reservations);
     }
 
     public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate start, LocalDate end) {
-        return ReservationResponse.from(
+        return ReservationResponse.fromReservation(
                 reservationRepository.findByFilter(
                         memberId, themeId, start, end
                 )
@@ -84,7 +68,7 @@ public class ReservationService {
 
     public List<MemberReservationResponse> findAllByMemberId(Long id) {
         return reservationRepository.findAllByMemberId(id).stream()
-                .map(MemberReservationResponse::from)
+                .map(MemberReservationResponse::fromReservation)
                 .toList();
     }
 
@@ -99,8 +83,8 @@ public class ReservationService {
         ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.getTheme(request.themeId());
         Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
+                .getDate(), reservationTime, theme, member));
 
-        return ReservationResponse.from(created);
+        return ReservationResponse.fromReservation(created);
     }
 }

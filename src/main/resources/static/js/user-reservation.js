@@ -41,11 +41,6 @@ function renderTheme(themes) {
         const themeId = theme.id;
 
         console.log(name, theme);
-        /*
-        TODO: [3단계] 사용자 예약 - 테마 목록 조회 API 호출 후 렌더링
-              response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-              createSlot('theme', theme name, theme id) 형태로 호출
-        */
         themeSlots.appendChild(createSlot('theme', name, themeId));
     });
 }
@@ -57,9 +52,6 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
-        if (booked) {
-            div.classList.add('disabled');
-        }
     }
     return div;
 }
@@ -121,10 +113,6 @@ function renderAvailableTimes(times) {
         return;
     }
     times.forEach(time => {
-        /*
-        TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출 후 렌더링
-              response 명세에 맞춰 createSlot 함수 호출 시 값 설정
-        */
         const startAt = time.startAt;
         const timeId = time.id;
         const alreadyBooked = time.isReserved;
@@ -149,12 +137,12 @@ function checkDateAndThemeAndTime() {
         } else {
             // 선택된 시간이 예약 가능한 경우
             reserveButton.classList.remove("disabled");
-            waitButton.classList.remove("disabled");
+            waitButton.classList.add("disabled"); // 예약 대기 버튼 비활성화
         }
     } else {
         // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
         reserveButton.classList.add("disabled");
-        waitButton.classList.remove("disabled");
+        waitButton.classList.add("disabled");
     }
 }
 
@@ -209,14 +197,14 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
         /*
         TODO: [3단계] 예약 대기 생성 요청 API 호출
          */
-        fetch('', {
+        fetch(`/reservations/waiting/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

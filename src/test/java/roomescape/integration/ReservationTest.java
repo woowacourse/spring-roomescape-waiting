@@ -26,7 +26,6 @@ import roomescape.member.role.Role;
 import roomescape.member.service.AuthService;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -183,7 +182,7 @@ public class ReservationTest extends BaseTest {
     void 방탈출_예약_목록을_조회한다() {
 
         reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
+                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member));
 
         List<ReservationResponse> response = RestAssured.given().log().all()
                 .when().get("/reservations")

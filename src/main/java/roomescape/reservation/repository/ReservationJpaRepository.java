@@ -7,11 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.domain.Theme;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>, ReservationRepository {
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     @Query("""
                 select r
                 from Reservation r
@@ -29,6 +32,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("endDate") LocalDate endDate
     );
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     @Query("""
                 select r
                 from Reservation r
@@ -41,6 +45,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("memberId") Long memberId
     );
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     @Query("""
                 select r
                 from Reservation r
@@ -51,6 +56,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     List<Reservation> findAll(
     );
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     @Query("""
                 select r
                 from Reservation r
@@ -63,6 +69,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("reservationId") Long id
     );
 
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     @Query("""
                 select th
                 from Reservation r

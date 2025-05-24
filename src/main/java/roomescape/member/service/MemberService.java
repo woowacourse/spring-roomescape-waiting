@@ -38,14 +38,6 @@ public class MemberService {
         throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
     }
 
-    public Member findByName(String name) {
-        Optional<Member> member = memberRepository.findByName(new Name(name));
-        if (member.isPresent()) {
-            return member.get();
-        }
-        throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
-    }
-
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
