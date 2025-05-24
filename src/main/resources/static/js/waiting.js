@@ -18,9 +18,9 @@ function render(data) {
 
         const id = waiting.id;
         const name = waiting.member.name;
-        const theme = waiting.reservation.theme.name;
-        const date = waiting.reservation.date;
-        const startAt = waiting.reservation.time.startAt;
+        const theme = waiting.theme.name;
+        const date = waiting.date;
+        const startAt = waiting.time.startAt;
 
         row.insertCell(0).textContent = id;            // 예약 대기 id
         row.insertCell(1).textContent = name;          // 예약자명

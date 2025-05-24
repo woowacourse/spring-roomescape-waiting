@@ -1,5 +1,6 @@
 package roomescape.support.fake;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,16 +14,18 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
     private Long index = 1L;
 
     @Override
-    public boolean existsByReservationIdAndMemberId(final long reservationId, final long memberId) {
+    public     boolean existsByReservationAndMemberId(LocalDate date, long timeId, long themeId, long memberId) {
         return reservationWaitings.stream()
-                .anyMatch(reservationWaiting -> reservationWaiting.reservation().id() == reservationId &&
+                .anyMatch(reservationWaiting -> reservationWaiting.date() == date &&
+                        reservationWaiting.time().id() == timeId &&
+                        reservationWaiting.theme().id() == themeId &&
                         reservationWaiting.member().id() == memberId);
     }
 
     @Override
     public ReservationWaiting save(final ReservationWaiting reservationWaiting) {
         final ReservationWaiting newReservationWaiting = new ReservationWaiting(index++,
-                reservationWaiting.reservation(), reservationWaiting.member());
+                reservationWaiting.date(), reservationWaiting.time(), reservationWaiting.theme(), reservationWaiting.member());
         reservationWaitings.add(newReservationWaiting);
 
         return newReservationWaiting;

@@ -1,10 +1,11 @@
 package roomescape.reservation.domain.waiting;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationWaitingRepository {
 
-    boolean existsByReservationIdAndMemberId(long reservationId, long memberId);
+    boolean existsByReservationAndMemberId(LocalDate date, long timeId, long themeId, long memberId);
 
     ReservationWaiting save(ReservationWaiting reservationWaiting);
 

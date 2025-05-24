@@ -26,9 +26,9 @@ public record ReservationMineInfo(
     public ReservationMineInfo(final ReservationWaitingInfo reservationWaitingInfo) {
         this(
                 reservationWaitingInfo.id(),
-                reservationWaitingInfo.reservation().date(),
-                reservationWaitingInfo.reservation().time(),
-                reservationWaitingInfo.reservation().theme(),
+                reservationWaitingInfo.date(),
+                reservationWaitingInfo.time(),
+                reservationWaitingInfo.theme(),
                 reservationWaitingInfo.status()
         );    }
 }

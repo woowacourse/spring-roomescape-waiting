@@ -1,5 +1,6 @@
 package roomescape.reservation.infrastructure.jpa.waiting;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.waiting.ReservationWaiting;
@@ -16,8 +17,8 @@ public class ReservationWaitingImpl implements ReservationWaitingRepository {
     }
 
     @Override
-    public boolean existsByReservationIdAndMemberId(final long reservationId, final long memberId) {
-        return reservationWaitingJpaRepository.existsByReservationIdAndMemberId(reservationId, memberId);
+    public     boolean existsByReservationAndMemberId(final LocalDate date, final long timeId, final long themeId, final long memberId) {
+        return reservationWaitingJpaRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
     }
 
     @Override

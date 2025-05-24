@@ -80,21 +80,6 @@ public class ReservationService {
         }
     }
 
-    private Member findMember(final long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
-    }
-
-    private ReservationTime findReservationTime(final long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
-    }
-
-    private Theme findTheme(final long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
-    }
-
     public List<ReservationInfo> findReservationsBySearchCondition() {
         return reservationRepository.findAll().stream()
                 .map(ReservationInfo::new)
@@ -128,5 +113,20 @@ public class ReservationService {
 
     public void cancelReservationById(final long id) {
         reservationRepository.deleteById(id);
+    }
+
+    private ReservationTime findReservationTime(final long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
+    }
+
+    private Theme findTheme(final long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
+    }
+
+    private Member findMember(final long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
     }
 }

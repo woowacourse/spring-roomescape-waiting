@@ -41,10 +41,10 @@ VALUES
     (1, '2025-04-24', 1,  7);
 
 
-INSERT INTO RESERVATION_WAITING (RESERVATION_ID, MEMBER_ID)
+INSERT INTO RESERVATION_WAITING (MEMBER_ID, DATE, TIME_ID, THEME_ID)
 VALUES
-    (2, 2),
-    (2, 1),
-    (3, 2),
-    (3, 3),
-    (3, 1)
+    (2, '2025-04-30', 2, 11),
+    (1, '2025-04-30', 2, 11),
+    (2, '2025-04-29', 1, 11),
+    (3, '2025-04-29', 1, 11),
+    (1, '2025-04-29', 1, 11)
