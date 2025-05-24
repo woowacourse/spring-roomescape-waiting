@@ -21,11 +21,14 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
@@ -43,6 +46,8 @@ class WaitingServiceTest {
     private ThemeRepository themeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
     @Autowired
     private WaitingService waitingService;
 
@@ -123,6 +128,50 @@ class WaitingServiceTest {
 
         // when & then
         assertThat(waitingService.getAll()).hasSize(1);
+    }
+
+    @DisplayName("예약 대기를 승인한다.")
+    @Test
+    void acceptWaiting() {
+        // given
+        LocalDate date = getTomorrow();
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        WaitingCreateRequest request =
+                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
+        WaitingResponse response = waitingService.createWaiting(request);
+
+        // when
+        ReservationResponse reservationResponse = waitingService.acceptWaiting(response.id());
+
+        // then
+        assertAll(
+                () -> assertThat(waitingService.getAll()).isEmpty(),
+                () -> assertThat(reservationResponse.id()).isNotNull(),
+                () -> assertThat(reservationResponse.date()).isEqualTo(getTomorrow()),
+                () -> assertThat(reservationResponse.theme().name()).isEqualTo("테마1"),
+                () -> assertThat(reservationResponse.time().startAt()).isEqualTo(LocalTime.of(10, 0))
+        );
+
+    }
+
+    @DisplayName("이미 예약이 존재하면 예약대기를 승인할 수 없다.")
+    @Test
+    void acceptWaitingInAlreadyBooked() {
+        // given
+        LocalDate date = getTomorrow();
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        reservationRepository.save(new Reservation(member, date, time, theme));
+        WaitingCreateRequest request =
+                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
+        WaitingResponse response = waitingService.createWaiting(request);
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.acceptWaiting(response.id()))
+                .isInstanceOf(AlreadyInUseException.class);
     }
 
     private LocalDate getTomorrow() {

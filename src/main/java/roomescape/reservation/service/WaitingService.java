@@ -12,11 +12,14 @@ import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
@@ -28,17 +31,20 @@ public class WaitingService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(
             final WaitingRepository waitingRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<WaitingResponse> getAll() {
@@ -107,5 +113,26 @@ public class WaitingService {
             throw new EntityNotFoundException("존재하지 않는 예약 대기입니다.");
         }
         waitingRepository.deleteById(id);
+    }
+
+    @Transactional
+    public ReservationResponse acceptWaiting(final Long id) {
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 대기입니다."));
+        if (hasAlreadyBooked(waiting)) {
+            throw new AlreadyInUseException("이미 예약이 존재합니다.");
+        }
+        Reservation reservation = new Reservation(
+                waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme()
+        );
+        waitingRepository.deleteById(id);
+        Reservation savedReservation = reservationRepository.save(reservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
+    private boolean hasAlreadyBooked(final Waiting waiting) {
+        return reservationRepository.existsByDateAndTimeIdAndThemeId(
+                waiting.getDate(), waiting.getTheme().getId(), waiting.getTime().getId()
+        );
     }
 }

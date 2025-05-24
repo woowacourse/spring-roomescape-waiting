@@ -48,3 +48,7 @@ insert into waiting (date, time_id, theme_id, member_id)
 values ('2025-05-11', 2, 2, 1);
 insert into waiting (date, time_id, theme_id, member_id)
 values ('2025-05-11', 3, 3, 1);
+
+-- 로키 예약 대기 목록
+insert into waiting (date, time_id, theme_id, member_id)
+values ('2025-05-11', 1, 1, 3);
