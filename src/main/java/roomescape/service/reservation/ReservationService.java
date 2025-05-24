@@ -36,7 +36,6 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
-    @Transactional
     public long addReservation(AddReservationDto newReservation, String memberName) {
         ReservationTime reservationTime = reservationTimeRepository.findById(newReservation.timeId())
                 .orElseThrow(() -> new InvalidReservationTimeException("존재하지 않는 예약 시간 id입니다."));

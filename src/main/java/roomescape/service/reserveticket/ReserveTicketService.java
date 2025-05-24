@@ -26,7 +26,6 @@ public class ReserveTicketService {
         this.reserveTicketRepository = reserveTicketRepository;
     }
 
-    @Transactional
     public long addReservation(AddReservationDto newReservationDto, long memberId) {
         Member member = memberService.getMemberById(memberId);
         long reservationId = reservationService.addReservation(newReservationDto, member.getName());
