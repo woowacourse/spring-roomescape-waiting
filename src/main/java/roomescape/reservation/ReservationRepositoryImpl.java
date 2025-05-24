@@ -1,6 +1,5 @@
 package roomescape.reservation;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +35,14 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByThemeAndDate(final Theme theme, final LocalDate date) {
+    public List<Reservation> findAllByThemeAndDate(final Theme theme, final ReservationDate date) {
         return reservationJpaRepository.findAllByThemeAndDate(theme, date);
     }
 
     @Override
     public List<Reservation> findAllByMemberAndThemeAndDateBetween(final Member member, final Theme theme,
-                                                                   final LocalDate from,
-                                                                   final LocalDate to) {
+                                                                   final ReservationDate from,
+                                                                   final ReservationDate to) {
         return reservationJpaRepository.findAllByMemberAndThemeAndDateBetween(member, theme, from, to);
     }
 
@@ -53,7 +52,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByAsc(final LocalDate date,
+    public List<Reservation> findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByAsc(final ReservationDate date,
                                                                                          final ReservationTime reservationTime,
                                                                                          final Theme theme,
                                                                                          final ReservationStatus reservationStatus) {
@@ -73,7 +72,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDuplicateMember(final LocalDate date,
+    public boolean existsByDuplicateMember(final ReservationDate date,
                                            final ReservationTime reservationTime,
                                            final Theme theme, final Member member) {
         return reservationJpaRepository.existsByDateAndReservationTimeAndThemeAndMember(date, reservationTime, theme,
@@ -83,7 +82,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public boolean existsDuplicateStatus(
             final ReservationTime reservationTime,
-            final LocalDate date,
+            final ReservationDate date,
             final Theme theme,
             final ReservationStatus reservationStatus
     ) {

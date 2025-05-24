@@ -23,7 +23,7 @@ public record ReservationResponse(
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getDate(),
+                reservation.getDate().date(),
                 MemberResponse.from(reservation.getMember()),
                 ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme())

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.then;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +25,7 @@ import roomescape.member.MemberRepository;
 import roomescape.member.MemberRepositoryImpl;
 import roomescape.member.MemberRole;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDate;
 import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.ReservationRepositoryImpl;
 import roomescape.reservation.ReservationStatus;
@@ -148,21 +150,27 @@ class ThemeServiceTest {
                     new Theme("1", "2", "3"),
                     new Theme("1", "2", "3")
             );
+            final LocalDateTime currentDateTime = LocalDateTime.of(2024, 12, 25, 12, 0);
             final List<Reservation> reservations = List.of(
-                    new Reservation(LocalDate.now().minusDays(1), member, reservationTime, themes.get(0),
-                            ReservationStatus.PENDING),
-                    new Reservation(LocalDate.now().minusDays(2), member, reservationTime, themes.get(0),
-                            ReservationStatus.PENDING),
-                    new Reservation(LocalDate.now().minusDays(3), member, reservationTime, themes.get(0),
-                            ReservationStatus.PENDING),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(1)), member, reservationTime, themes.get(0),
+                            ReservationStatus.PENDING, currentDateTime),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(2)), member, reservationTime,
+                            themes.get(0),
+                            ReservationStatus.PENDING, currentDateTime),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(3)), member, reservationTime,
+                            themes.get(0),
+                            ReservationStatus.PENDING, currentDateTime),
 
-                    new Reservation(LocalDate.now().minusDays(1), member, reservationTime, themes.get(1),
-                            ReservationStatus.PENDING),
-                    new Reservation(LocalDate.now().minusDays(2), member, reservationTime, themes.get(1),
-                            ReservationStatus.PENDING),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(1)), member, reservationTime,
+                            themes.get(1),
+                            ReservationStatus.PENDING, currentDateTime),
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(2)), member, reservationTime,
+                            themes.get(1),
+                            ReservationStatus.PENDING, currentDateTime),
 
-                    new Reservation(LocalDate.now().minusDays(1), member, reservationTime, themes.get(2),
-                            ReservationStatus.PENDING)
+                    Reservation.of(ReservationDate.fromQuery(LocalDate.now().minusDays(1)), member, reservationTime,
+                            themes.get(2),
+                            ReservationStatus.PENDING, currentDateTime)
             );
             for (final Theme theme : themes) {
                 themeRepository.save(theme);
@@ -220,8 +228,11 @@ class ThemeServiceTest {
             final Theme theme = new Theme("로키", "로키로키", "http://www.google.com");
             final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
-            final Reservation reservation = new Reservation(LocalDate.of(2026, 12, 29), member, reservationTime, theme,
-                    ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepository.save(member);
             reservationTimeRepository.save(reservationTime);

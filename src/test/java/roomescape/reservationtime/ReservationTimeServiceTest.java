@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.then;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,7 @@ import roomescape.member.MemberRepository;
 import roomescape.member.MemberRepositoryImpl;
 import roomescape.member.MemberRole;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDate;
 import roomescape.reservation.ReservationRepository;
 import roomescape.reservation.ReservationRepositoryImpl;
 import roomescape.reservation.ReservationStatus;
@@ -171,9 +173,12 @@ public class ReservationTimeServiceTest {
             // given
             final Theme theme = new Theme("메이", "테마", "thumbnail");
             final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
-            final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
-            final Reservation reservation = new Reservation(targetDate, member, time, theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, time, theme,
+                    ReservationStatus.WAITING, currentDateTime);
 
             memberRepository.save(member);
             reservationTimeRepository.save(time);
@@ -182,7 +187,7 @@ public class ReservationTimeServiceTest {
 
             // when
             final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailable(
-                    1L, targetDate);
+                    1L, reservationDate.date());
 
             // then
             assertThat(allAvailableTimes.getFirst().alreadyBooked()).isTrue();
@@ -244,9 +249,13 @@ public class ReservationTimeServiceTest {
             // given
             final Theme theme = new Theme("메이", "테마", "thumbnail");
             final Member member = new Member("email", "pass", "name", MemberRole.MEMBER);
-            final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             final ReservationTime time = new ReservationTime(LocalTime.of(12, 0));
-            final Reservation reservation = new Reservation(targetDate, member, time, theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, time, theme,
+                    ReservationStatus.WAITING, currentDateTime);
+
 
             memberRepository.save(member);
             reservationTimeRepository.save(time);

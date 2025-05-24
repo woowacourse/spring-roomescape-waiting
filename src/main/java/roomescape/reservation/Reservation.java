@@ -1,6 +1,7 @@
 package roomescape.reservation;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,18 +11,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import roomescape.exception.custom.reason.reservation.ReservationPastTimeException;
 import roomescape.member.Member;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 @Entity
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public class Reservation {
@@ -31,8 +34,8 @@ public class Reservation {
     @EqualsAndHashCode.Include
     private final Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Embedded
+    private ReservationDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
@@ -54,14 +57,25 @@ public class Reservation {
         id = null;
     }
 
-    public Reservation(
-            final LocalDate date,
+    public static Reservation of(
+            final ReservationDate date,
             final Member member,
             final ReservationTime reservationTime,
             final Theme theme,
-            final ReservationStatus reservationStatus
-    ) {
-        this(null, date, member, reservationTime, theme, reservationStatus);
+            final ReservationStatus reservationStatus,
+            final LocalDateTime currentDateTime
+            ) {
+        validatePastTime(date, reservationTime, currentDateTime);
+
+        return new Reservation(null, date, member, reservationTime, theme, reservationStatus);
+    }
+
+    private static void validatePastTime(final ReservationDate date, final ReservationTime reservationTime,
+                                  final LocalDateTime currentDateTime) {
+        if(date.isToday(currentDateTime.toLocalDate())
+                && reservationTime.isBefore(currentDateTime.toLocalTime())){
+            throw new ReservationPastTimeException();
+        }
     }
 
     public boolean isWaiting() {

@@ -1,7 +1,7 @@
 package roomescape.reservation;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,8 +13,6 @@ import roomescape.exception.custom.reason.reservation.ReservationNotExistsPendin
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
-import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
-import roomescape.exception.custom.reason.reservation.ReservationPastTimeException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
 import roomescape.reservation.dto.AdminFilterReservationRequest;
@@ -54,11 +52,13 @@ public class ReservationService {
 
     private ReservationResponse save(final LocalDate date, final ReservationTime reservationTime,
                                      final Theme theme, final Member member) {
-        validateDuplicatePending(date, reservationTime, theme);
-        validatePastDateTime(date, reservationTime);
+        final LocalDateTime currentTimestamp = LocalDateTime.now();
+        final ReservationDate reservationDate = ReservationDate.of(date, currentTimestamp.toLocalDate());
 
-        final Reservation notSavedReservation = new Reservation(date, member, reservationTime, theme,
-                ReservationStatus.PENDING);
+        validateDuplicatePending(reservationDate, reservationTime, theme);
+
+        final Reservation notSavedReservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                ReservationStatus.PENDING, currentTimestamp);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -69,13 +69,14 @@ public class ReservationService {
         final ReservationTime reservationTime = getReservationTimeById(request.timeId());
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberByEmail(loginMember.email());
+        final LocalDateTime currentTimestamp = LocalDateTime.now();
+        final ReservationDate reservationDate = ReservationDate.of(request.date(), currentTimestamp.toLocalDate());
 
-        validateNotExistsPending(request.date(), reservationTime, theme);
-        validateDuplicateMember(request, reservationTime, theme, member);
-        validatePastDateTime(request.date(), reservationTime);
+        validateNotExistsPending(reservationDate, reservationTime, theme);
+        validateDuplicateMember(reservationDate, reservationTime, theme, member);
 
-        final Reservation notSavedReservation = new Reservation(request.date(), member, reservationTime, theme,
-                ReservationStatus.WAITING);
+        final Reservation notSavedReservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                ReservationStatus.WAITING, currentTimestamp);
         final Reservation savedReservation = reservationRepository.save(notSavedReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -96,10 +97,12 @@ public class ReservationService {
     public List<ReservationResponse> readAllByMemberAndThemeAndDateRange(final AdminFilterReservationRequest request) {
         final Theme theme = getThemeById(request.themeId());
         final Member member = getMemberById(request.memberId());
+        final ReservationDate fromDate = ReservationDate.fromQuery(request.from());
+        final ReservationDate toDate = ReservationDate.fromQuery(request.to());
 
         return reservationRepository.findAllByMemberAndThemeAndDateBetween(
                         member, theme,
-                        request.from(), request.to()
+                        fromDate, toDate
                 ).stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -138,25 +141,8 @@ public class ReservationService {
         }
     }
 
-    private void validatePastDateTime(final LocalDate date, final ReservationTime reservationTime) {
-        final LocalDate today = LocalDate.now();
-        final LocalDate reservationDate = date;
-        if (reservationDate.isBefore(today)) {
-            throw new ReservationPastDateException();
-        }
-        if (reservationDate.isEqual(today)) {
-            validatePastTime(reservationTime);
-        }
-    }
-
-    private void validatePastTime(final ReservationTime reservationTime) {
-        if (reservationTime.isBefore(LocalTime.now())) {
-            throw new ReservationPastTimeException();
-        }
-    }
-
     private void validateDuplicatePending(
-            final LocalDate date, final ReservationTime reservationTime,
+            final ReservationDate date, final ReservationTime reservationTime,
             final Theme theme
     ) {
         if (reservationRepository.existsDuplicateStatus(
@@ -166,7 +152,7 @@ public class ReservationService {
     }
 
     private void validateNotExistsPending(
-            final LocalDate date, final ReservationTime reservationTime,
+            final ReservationDate date, final ReservationTime reservationTime,
             final Theme theme
     ) {
         if (!reservationRepository.existsDuplicateStatus(
@@ -175,11 +161,11 @@ public class ReservationService {
         }
     }
 
-    private void validateDuplicateMember(final ReservationRequest request, final ReservationTime reservationTime,
+    private void validateDuplicateMember(final ReservationDate date, final ReservationTime reservationTime,
                                          final Theme theme,
                                          final Member member) {
         if (reservationRepository.existsByDuplicateMember(
-                request.date(), reservationTime, theme, member)) {
+                date, reservationTime, theme, member)) {
             throw new ReservationConflictException();
         }
     }

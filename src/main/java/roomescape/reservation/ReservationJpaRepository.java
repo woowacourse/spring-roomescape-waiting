@@ -1,6 +1,5 @@
 package roomescape.reservation;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +24,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
         JOIN FETCH r.reservationTime
     WHERE r.theme = :theme AND r.date = :date
     """)
-    List<Reservation> findAllByThemeAndDate(Theme theme, LocalDate date);
+    List<Reservation> findAllByThemeAndDate(Theme theme, ReservationDate date);
 
     @Query(value = """
     SELECT r
@@ -35,7 +34,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
         JOIN FETCH r.reservationTime
     WHERE r.member = :member AND r.theme = :theme AND r.date BETWEEN :from AND :to
     """)
-    List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
+    List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, ReservationDate from, ReservationDate to);
 
     @Query(value = """
     SELECT r
@@ -47,7 +46,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     """)
     List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
     List<Reservation> findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByIdAsc(
-            LocalDate date,
+            ReservationDate date,
             ReservationTime reservationTime,
             Theme theme,
             ReservationStatus reservationStatus
@@ -77,13 +76,13 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     boolean existsByReservationTime(ReservationTime reservationTime);
     boolean existsByTheme(Theme theme);
     boolean existsByDateAndReservationTimeAndThemeAndMember(
-            LocalDate date,
+            ReservationDate date,
             ReservationTime reservationTime,
             Theme theme,
             Member member
     );
     boolean existsByReservationTimeAndDateAndThemeAndReservationStatus(
-            ReservationTime reservationTime, LocalDate date,
+            ReservationTime reservationTime, ReservationDate date,
             Theme theme,
             ReservationStatus reservationStatus
     );

@@ -2,9 +2,11 @@ package roomescape.reservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.BDDMockito.then;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -56,8 +58,6 @@ public class ReservationServiceTest {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepositoryImpl themeRepositoryFacade;
     private final MemberRepositoryImpl memberRepositoryFacade;
-    @Autowired
-    private ReservationJpaRepository reservationJpaRepository;
 
     @Autowired
     public ReservationServiceTest(
@@ -94,15 +94,20 @@ public class ReservationServiceTest {
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
-            final ReservationResponse expected = ReservationResponse.from(
-                    new Reservation(1L, LocalDate.of(2025, 12, 30), member, reservationTime, theme,
-                            ReservationStatus.PENDING));
 
             // when
-            final ReservationResponse response = reservationService.create(request, loginMember);
+            final ReservationResponse actual = reservationService.create(request, loginMember);
 
             // then
-            assertThat(response).isEqualTo(expected);
+            assertSoftly(s -> {
+                s.assertThat(actual.id()).isNotNull();
+                s.assertThat(actual.theme().name()).isEqualTo("야당");
+                s.assertThat(actual.theme().description()).isEqualTo("야당당");
+                s.assertThat(actual.theme().thumbnail()).isEqualTo("123");
+                s.assertThat(actual.date()).isEqualTo(LocalDate.of(2025, 12, 30));
+                s.assertThat(actual.time().startAt()).isEqualTo(LocalTime.of(12, 40));
+                s.assertThat(actual.member().name()).isEqualTo("boogie");
+            });
         }
 
         @DisplayName("테마가 존재하지 않으면 예외가 발생한다.")
@@ -160,15 +165,18 @@ public class ReservationServiceTest {
             }).isInstanceOf(ReservationNotExistsMemberException.class);
         }
 
-        @DisplayName("이미 해당 시간, 날짜, 테마에 예약이 존재한다면 예외가 발생한다.")
+        @DisplayName("이미 해당 시간, 날짜, 테마에 PENDING 상태의 예약이 존재한다면 예외가 발생한다.")
         @Test
         void create3() {
             // given
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), member, reservationTime, theme,
-                    ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);
@@ -240,16 +248,22 @@ public class ReservationServiceTest {
             reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
 
-            final AdminReservationRequest request = new AdminReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L, 1L);
-            final ReservationResponse expected = ReservationResponse.from(
-                    new Reservation(1L, LocalDate.of(2025, 12, 30), member, reservationTime, theme,
-                            ReservationStatus.PENDING));
+            final AdminReservationRequest request = new AdminReservationRequest(
+                    LocalDate.of(2025, 12, 30), 1L, 1L, 1L);
 
             // when
-            final ReservationResponse response = reservationService.createForAdmin(request);
+            final ReservationResponse actual = reservationService.createForAdmin(request);
 
             // then
-            assertThat(response).isEqualTo(expected);
+            assertSoftly(s -> {
+                s.assertThat(actual.id()).isNotNull();
+                s.assertThat(actual.theme().name()).isEqualTo("야당");
+                s.assertThat(actual.theme().description()).isEqualTo("야당당");
+                s.assertThat(actual.theme().thumbnail()).isEqualTo("123");
+                s.assertThat(actual.date()).isEqualTo(LocalDate.of(2025, 12, 30));
+                s.assertThat(actual.time().startAt()).isEqualTo(LocalTime.of(22, 40));
+                s.assertThat(actual.member().name()).isEqualTo("boogie");
+            });
         }
 
         @DisplayName("테마가 존재하지 않으면 예외가 발생한다.")
@@ -303,16 +317,19 @@ public class ReservationServiceTest {
             }).isInstanceOf(ReservationNotExistsMemberException.class);
         }
 
-        @DisplayName("이미 해당 시간, 날짜, 테마에 예약이 존재한다면 예외가 발생한다.")
+        @DisplayName("이미 해당 시간, 날짜, 테마에 PENDING 상태의 예약이 존재한다면 예외가 발생한다.")
         @Test
         void create3() {
             // given
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), member, reservationTime,
-                    theme,
-                    ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
+
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
@@ -388,8 +405,11 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservation = new Reservation(LocalDate.of(2024, 12, 1), member, reservationTime, theme,
-                    ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);
@@ -439,23 +459,27 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservationMin = new Reservation(LocalDate.of(2024, 12, 1), member, reservationTime,
-                    theme,
-                    ReservationStatus.PENDING);
-            final Reservation reservationMax = new Reservation(LocalDate.of(2024, 12, 30), member, reservationTime,
-                    theme,
-                    ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 11, 25, 12, 0);
+            final ReservationDate minReservationDate = ReservationDate.of(LocalDate.of(2025, 12, 1),
+                    currentDateTime.toLocalDate());
+            final Reservation minReservation = Reservation.of(minReservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
+
+            final ReservationDate maxReservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation maxReservation = Reservation.of(maxReservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);
             themeRepositoryFacade.save(theme);
-            reservationRepository.save(reservationMin);
-            reservationRepository.save(reservationMax);
+            reservationRepository.save(minReservation);
+            reservationRepository.save(maxReservation);
 
             final AdminFilterReservationRequest request = new AdminFilterReservationRequest(
                     1L, 1L,
-                    LocalDate.of(2024, 1, 1),
-                    LocalDate.of(2024, 12, 31)
+                    LocalDate.of(2025, 1, 1),
+                    LocalDate.of(2025, 12, 31)
             );
 
             // when
@@ -478,8 +502,12 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), member, reservationTime, theme,
-                    ReservationStatus.PENDING);
+
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);
@@ -510,15 +538,18 @@ public class ReservationServiceTest {
             // given
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
             final MineReservationResponse expected = new MineReservationResponse(
-                    1L, "테마", LocalDate.of(2026, 12, 31),
+                    1L, "테마", LocalDate.of(2025, 12, 30),
                     LocalTime.of(12, 40), "예약", 0L
             );
 
             final Member member = new Member(loginMember.email(), "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("테마", "설명", "썸네일");
-            final Reservation reservation = new Reservation(LocalDate.of(2026, 12, 31), member,
-                    reservationTime, theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);
@@ -555,12 +586,17 @@ public class ReservationServiceTest {
         @Test
         void create1() {
             // given
-            final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+
             final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
-                    theme, ReservationStatus.PENDING);
+            final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
+
+            final Reservation reservation = Reservation.of(reservationDate, anotherMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
@@ -570,15 +606,20 @@ public class ReservationServiceTest {
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
-            final ReservationResponse expected = ReservationResponse.from(
-                    new Reservation(2L, LocalDate.of(2025, 12, 30), member, reservationTime, theme,
-                            ReservationStatus.WAITING));
 
             // when
-            final ReservationResponse response = reservationService.createWaiting(request, loginMember);
+            final ReservationResponse actual = reservationService.createWaiting(request, loginMember);
 
             // then
-            assertThat(response).isEqualTo(expected);
+            assertSoftly(s -> {
+                s.assertThat(actual.id()).isNotNull();
+                s.assertThat(actual.theme().name()).isEqualTo("야당");
+                s.assertThat(actual.theme().description()).isEqualTo("야당당");
+                s.assertThat(actual.theme().thumbnail()).isEqualTo("123");
+                s.assertThat(actual.date()).isEqualTo(LocalDate.of(2025, 12, 30));
+                s.assertThat(actual.time().startAt()).isEqualTo(LocalTime.of(12, 40));
+                s.assertThat(actual.member().name()).isEqualTo("boogie");
+            });
         }
 
         @DisplayName("member가 존재하지 않으면 예외가 발생한다.")
@@ -588,8 +629,11 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
             final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
-                    theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, anotherMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             reservationTimeRepository.save(reservationTime);
             memberRepositoryFacade.save(anotherMember);
@@ -614,8 +658,11 @@ public class ReservationServiceTest {
             final Theme theme = new Theme("야당", "야당당", "123");
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 41));
             final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
-                    theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, anotherMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             reservationTimeRepository.save(reservationTime);
             memberRepositoryFacade.save(member);
@@ -641,8 +688,11 @@ public class ReservationServiceTest {
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
             final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
-                    theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, anotherMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             themeRepositoryFacade.save(theme);
             memberRepositoryFacade.save(member);
@@ -666,9 +716,11 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), member, reservationTime,
-                    theme,
-                    ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);
@@ -684,7 +736,7 @@ public class ReservationServiceTest {
             }).isInstanceOf(ReservationConflictException.class);
         }
 
-        @DisplayName("이미 해당 시간, 날짜, 테마에 waiting 예약이 존재하지 않는다면 예외가 발생한다.")
+        @DisplayName("이미 해당 시간, 날짜, 테마에 pending 상태의 예약이 존재하지 않는다면 예외가 발생한다.")
         @Test
         void create6() {
             // given
@@ -714,8 +766,11 @@ public class ReservationServiceTest {
             final Theme theme = new Theme("야당", "야당당", "123");
 
             final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
-            final Reservation reservation = new Reservation(LocalDate.of(2024, 12, 30), anotherMember, reservationTime,
-                    theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, anotherMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
@@ -741,8 +796,11 @@ public class ReservationServiceTest {
             final Theme theme = new Theme("야당", "야당당", "123");
 
             final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
-            final Reservation reservation = new Reservation(LocalDate.now(), anotherMember, reservationTime,
-                    theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.now().minusMinutes(1);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.now(),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, anotherMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime.minusMinutes(1));
 
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
@@ -769,8 +827,11 @@ public class ReservationServiceTest {
             final Theme theme = new Theme("야당", "야당당", "123");
 
             final Member anotherMember = new Member("xxxx", "pass", "아서", MemberRole.MEMBER);
-            final Reservation reservation = new Reservation(LocalDate.of(2025, 12, 30), anotherMember, reservationTime,
-                    theme, ReservationStatus.PENDING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2024, 12, 30, 12, 30);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, anotherMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             memberRepositoryFacade.save(anotherMember);
@@ -782,15 +843,20 @@ public class ReservationServiceTest {
 
             final ReservationRequest request = new ReservationRequest(LocalDate.of(2025, 12, 30), 1L, 1L);
             final LoginMember loginMember = new LoginMember("boogie", "email", MemberRole.MEMBER);
-            final ReservationResponse expected = ReservationResponse.from(
-                    new Reservation(2L, LocalDate.of(2025, 12, 30), member, reservationTime, theme,
-                            ReservationStatus.WAITING));
 
             // when
             final ReservationResponse actual = reservationService.createWaiting(request, loginMember);
 
             // then
-            assertThat(actual).isEqualTo(expected);
+            assertSoftly(s -> {
+                s.assertThat(actual.id()).isNotNull();
+                s.assertThat(actual.theme().name()).isEqualTo("야당");
+                s.assertThat(actual.theme().description()).isEqualTo("야당당");
+                s.assertThat(actual.theme().thumbnail()).isEqualTo("123");
+                s.assertThat(actual.date()).isEqualTo(LocalDate.of(2025, 12, 30));
+                s.assertThat(actual.time().startAt()).isEqualTo(reservationTime.getStartAt());
+                s.assertThat(actual.member().name()).isEqualTo("boogie");
+            });
 
         }
 
@@ -803,15 +869,17 @@ public class ReservationServiceTest {
             final Member waitingMember1 = new Member("email2", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.now().plusMinutes(1));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation pendingReservation = new Reservation(LocalDate.now(), pendingMember, reservationTime,
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation pendingReservation = Reservation.of(reservationDate, pendingMember, reservationTime, theme,
+                    ReservationStatus.PENDING, currentDateTime);
+            final Reservation waitingReservation = Reservation.of(reservationDate, waitingMember, reservationTime,
                     theme,
-                    ReservationStatus.PENDING);
-            final Reservation waitingReservation = new Reservation(LocalDate.now(), waitingMember, reservationTime,
+                    ReservationStatus.WAITING, currentDateTime);
+            final Reservation waitingReservation1 = Reservation.of(reservationDate, waitingMember1, reservationTime,
                     theme,
-                    ReservationStatus.WAITING);
-            final Reservation waitingReservation1 = new Reservation(LocalDate.now(), waitingMember1, reservationTime,
-                    theme,
-                    ReservationStatus.WAITING);
+                    ReservationStatus.WAITING, currentDateTime);
 
             memberRepositoryFacade.save(pendingMember);
             memberRepositoryFacade.save(waitingMember);
@@ -848,8 +916,11 @@ public class ReservationServiceTest {
             final Member member = new Member("email", "pass", "boogie", MemberRole.MEMBER);
             final ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 40));
             final Theme theme = new Theme("야당", "야당당", "123");
-            final Reservation reservation = new Reservation(LocalDate.of(2026, 12, 1), member, reservationTime, theme,
-                    ReservationStatus.WAITING);
+            final LocalDateTime currentDateTime = LocalDateTime.of(2025, 12, 25, 12, 0);
+            final ReservationDate reservationDate = ReservationDate.of(LocalDate.of(2025, 12, 30),
+                    currentDateTime.toLocalDate());
+            final Reservation reservation = Reservation.of(reservationDate, member, reservationTime, theme,
+                    ReservationStatus.WAITING, currentDateTime);
 
             memberRepositoryFacade.save(member);
             reservationTimeRepository.save(reservationTime);

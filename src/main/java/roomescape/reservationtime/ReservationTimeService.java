@@ -11,6 +11,7 @@ import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExis
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationDate;
 import roomescape.reservation.ReservationRepository;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
@@ -44,10 +45,11 @@ public class ReservationTimeService {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(ReservationTimeNotExistsThemeException::new);
+        final ReservationDate queryDate = ReservationDate.fromQuery(date);
 
         final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllByThemeAndDate(
                         theme,
-                        date).stream()
+                        queryDate).stream()
                 .map(Reservation::getReservationTime)
                 .collect(Collectors.toSet());
 

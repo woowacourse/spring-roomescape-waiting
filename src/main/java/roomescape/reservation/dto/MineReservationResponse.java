@@ -18,7 +18,7 @@ public record MineReservationResponse(
         return new MineReservationResponse(
                 waitingRankReservation.getReservation().getId(),
                 waitingRankReservation.getReservation().getTheme().getName(),
-                waitingRankReservation.getReservation().getDate(),
+                waitingRankReservation.getReservation().getDate().date(), 
                 waitingRankReservation.getReservation().getReservationTime().getStartAt(),
                 waitingRankReservation.getReservation().getReservationStatus().getMessage(),
                 waitingRankReservation.getWaitingRank()
