@@ -1,6 +1,6 @@
 -- 사용자
 INSERT INTO member (id, name, email, password, role)
-VALUES (1, '매트', 'matt@kakao.com', '1234', 'ADMIN');
+VALUES (1, '찰리', '찰리@kakao.com', '1234', 'ADMIN');
 
 -- 시간
 INSERT INTO reservation_time (id, start_at)
