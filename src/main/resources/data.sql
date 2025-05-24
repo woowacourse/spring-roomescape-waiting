@@ -1,5 +1,9 @@
 INSERT INTO members (name, email, password, role)
 VALUES ('어드민이에용', 'admin@admin.com', 'admin', 'ADMIN');
+INSERT INTO members (name, email, password, role)
+VALUES ('일반 회원1', 'asd@asd.com', 'asd', 'MEMBER');
+INSERT INTO members (name, email, password, role)
+VALUES ('일반 회원2', 'asd2@asd2.com', 'asd2', 'MEMBER');
 
 INSERT INTO reservation_times (start_at)
 VALUES ('10:00');
