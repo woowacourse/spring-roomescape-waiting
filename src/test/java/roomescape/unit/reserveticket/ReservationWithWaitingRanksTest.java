@@ -1,4 +1,4 @@
-package roomescape.domain.reserveticket;
+package roomescape.unit.reserveticket;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -11,8 +11,9 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reserveticket.ReservationWithWaitingRank;
+import roomescape.domain.reserveticket.ReservationWithWaitingRanks;
 import roomescape.domain.theme.Theme;
-import roomescape.service.reserveticket.ReservationWithWaitingRank;
 
 class ReservationWithWaitingRanksTest {
 
