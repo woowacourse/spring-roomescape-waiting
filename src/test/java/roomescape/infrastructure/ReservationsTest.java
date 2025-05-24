@@ -73,29 +73,9 @@ class ReservationsTest {
                 .doesNotThrowAnyException();
     }
 
-    @Test
-    void 모든_예약을_찾을_수_있다() {
-        // given
-        String themeId = testUtil.insertTheme();
-        String timeId = testUtil.insertReservationTime();
-        String userId1 = testUtil.insertUser();
-        String userId2 = testUtil.insertUser();
-        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
-        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
-        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
-        String reservationId2 = testUtil.insertReservation(slotId2, userId2);
-
-        // when
-        final List<Reservation> result = sut.findAll();
-
-        // then
-        assertThat(result).extracting(r -> r.getId().value())
-                .containsExactlyInAnyOrder(reservationId1, reservationId2);
-    }
-
     @Nested
     class 필터링_조회_테스트 {
-        
+
         @Test
         void 테마아이디로_예약을_필터링할_수_있다() {
             // given
@@ -294,28 +274,6 @@ class ReservationsTest {
     }
 
     @Test
-    void 사용자_ID로_예약을_조회할_수_있다() {
-        // given
-        String themeId = testUtil.insertTheme();
-        String timeId = testUtil.insertReservationTime();
-        String userId1 = testUtil.insertUser();
-        String userId2 = testUtil.insertUser();
-        String slotId1 = testUtil.insertSlot(DATE1, timeId, themeId);
-        String slotId2 = testUtil.insertSlot(DATE2, timeId, themeId);
-        String slotId3 = testUtil.insertSlot(DATE3, timeId, themeId);
-        String reservationId1 = testUtil.insertReservation(slotId1, userId1);
-        String reservationId2 = testUtil.insertReservation(slotId2, userId1);
-        String reservationId3 = testUtil.insertReservation(slotId3, userId2);
-
-        // when
-        final List<Reservation> result = sut.findAllByUserId(Id.create(userId1));
-
-        // then
-        assertThat(result).extracting(r -> r.getId().value())
-                .containsExactlyInAnyOrder(reservationId1, reservationId2);
-    }
-
-    @Test
     void ID_기준으로_예약을_찾을_수_있다() {
         // given
         String themeId = testUtil.insertTheme();
@@ -330,22 +288,6 @@ class ReservationsTest {
         // then
         assertThat(result).isPresent();
         assertThat(result.get().getId().value()).isEqualTo(reservationId);
-    }
-
-    @Test
-    void ID_기준으로_존재하는지_확인할_수_있다() {
-        // given
-        String themeId = testUtil.insertTheme();
-        String timeId = testUtil.insertReservationTime();
-        String userId = testUtil.insertUser();
-        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
-        String reservationId = testUtil.insertReservation(slotId, userId);
-
-        // when
-        final boolean result = sut.existById(Id.create(reservationId));
-
-        // then
-        assertThat(result).isTrue();
     }
 
     @Test
@@ -375,22 +317,6 @@ class ReservationsTest {
 
         // when
         final boolean result = sut.existByThemeId(Id.create(themeId));
-
-        // then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void 시간_날짜_테마_기준으로_존재하는지_확인할_수_있다() {
-        // given
-        String themeId = testUtil.insertTheme();
-        String timeId = testUtil.insertReservationTime(LocalTime.of(10, 0));
-        String userId = testUtil.insertUser();
-        String slotId = testUtil.insertSlot(DATE1, timeId, themeId);
-        String reservationId = testUtil.insertReservation(slotId, userId);
-
-        // when
-        final boolean result = sut.isDuplicateDateAndTimeAndTheme(DATE1, LocalTime.of(10, 0), Id.create(themeId));
 
         // then
         assertThat(result).isTrue();

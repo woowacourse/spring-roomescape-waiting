@@ -10,7 +10,6 @@ import roomescape.business.model.vo.Id;
 import roomescape.infrastructure.jpa.dao.JpaReservationDao;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,28 +29,13 @@ public class JpaReservations implements Reservations {
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return dao.findAll();
-    }
-
-    @Override
     public List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo) {
         return dao.findAllWithFilter(themeId, memberId, dateFrom, dateTo);
     }
 
     @Override
-    public List<Reservation> findAllByUserId(Id userId) {
-        return dao.findAllByUserId(userId);
-    }
-
-    @Override
     public Optional<Reservation> findById(Id id) {
         return dao.findById(id);
-    }
-
-    @Override
-    public boolean existById(Id reservationId) {
-        return dao.existsById(reservationId);
     }
 
     @Override
@@ -62,11 +46,6 @@ public class JpaReservations implements Reservations {
     @Override
     public boolean existByThemeId(Id themeId) {
         return dao.existsBySlotThemeId(themeId);
-    }
-
-    @Override
-    public boolean isDuplicateDateAndTimeAndTheme(LocalDate date, LocalTime time, Id themeId) {
-        return dao.existsBySlotDateValueAndSlotTimeStartTimeValueAndSlotThemeId(date, time, themeId);
     }
 
     @Override

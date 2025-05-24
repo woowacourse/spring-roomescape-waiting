@@ -9,7 +9,6 @@ import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
@@ -32,10 +31,6 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo
     );
-
-    List<Reservation> findAllByUserId(Id userId);
-
-    boolean existsBySlotDateValueAndSlotTimeStartTimeValueAndSlotThemeId(LocalDate date, LocalTime time, Id themeId);
 
     boolean existsBySlotTimeId(Id timeId);
 
