@@ -1,5 +1,6 @@
 package roomescape.reservation.ui.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.member.ui.dto.MemberResponse.IdName;
@@ -8,28 +9,29 @@ import roomescape.theme.ui.dto.ThemeResponse;
 
 public record ReservationResponse(
         Long id,
-        IdName member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
+        IdName member,
         String status
 ) {
 
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
+                reservation.getReservationSlot().getDate(),
+                ReservationTimeResponse.from(reservation.getReservationSlot().getTime()),
+                ThemeResponse.from(reservation.getReservationSlot().getTheme()),
                 IdName.from(reservation.getMember()),
-                reservation.getDate(),
-                ReservationTimeResponse.from(reservation.getTime()),
-                ThemeResponse.from(reservation.getTheme()),
                 reservation.getStatus().getDescription()
         );
     }
 
     public record ForMember(
             Long id,
-            String theme,
+            String themeName,
             LocalDate date,
+            @JsonFormat(pattern = "HH:mm")
             LocalTime time,
             String status
     ) {
@@ -37,9 +39,9 @@ public record ReservationResponse(
         public static ForMember from(final Reservation reservation) {
             return new ForMember(
                     reservation.getId(),
-                    reservation.getTheme().getName(),
-                    reservation.getDate(),
-                    reservation.getTime().getStartAt(),
+                    reservation.getReservationSlot().getTheme().getName(),
+                    reservation.getReservationSlot().getDate(),
+                    reservation.getReservationSlot().getTime().getStartAt(),
                     reservation.getStatus().getDescription()
             );
         }

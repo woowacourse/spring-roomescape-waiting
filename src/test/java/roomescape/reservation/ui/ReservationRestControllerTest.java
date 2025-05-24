@@ -12,7 +12,6 @@ import static roomescape.fixture.ui.ThemeApiFixture.createThemes;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.ui.dto.LoginRequest;
 import roomescape.member.ui.dto.SignUpRequest;
+import roomescape.reservation.ui.dto.request.CreateBookedReservationRequest.ForMember;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
+import roomescape.reservation.ui.dto.response.ReservationTimeResponse;
+import roomescape.theme.ui.dto.ThemeResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -36,9 +38,9 @@ import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 @DisplayName("회원 예약 관리 API 테스트")
 class ReservationRestControllerTest {
 
-    private final String date = LocalDate.now().plusDays(1).toString();
-    private List<ValidatableResponse> createReservationTimeResponses;
-    private List<ValidatableResponse> createThemeResponses;
+    private final LocalDate date = LocalDate.now().plusDays(1);
+    private List<ReservationTimeResponse> createReservationTimeResponses;
+    private List<ThemeResponse> createThemeResponses;
 
     @BeforeEach
     void setUp() {
@@ -57,7 +59,7 @@ class ReservationRestControllerTest {
         final SignUpRequest signUpRequest = signUpRequest1();
         final Map<String, String> memberCookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest.email(), signUpRequest.password()));
-        final Map<String, String> reservationParams = reservationParams1();
+        final ForMember reservationParams = bookedReservationRequest1();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -73,7 +75,9 @@ class ReservationRestControllerTest {
         final SignUpRequest signUpRequest = signUpRequest1();
         final Map<String, String> memberCookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest.email(), signUpRequest.password()));
-        final Map<String, String> reservationParams = pastReservationParams();
+        final
+
+        ForMember reservationParams = pastBookedReservationRequest();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -86,7 +90,7 @@ class ReservationRestControllerTest {
 
     @Test
     void 로그인_상태가_아니면_예약을_추가할_수_없다() {
-        final Map<String, String> reservationParams = reservationParams1();
+        final ForMember reservationParams = bookedReservationRequest1();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -102,7 +106,7 @@ class ReservationRestControllerTest {
         final SignUpRequest signUpRequest = signUpRequest1();
         final Map<String, String> memberCookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest.email(), signUpRequest.password()));
-        final Map<String, String> reservationParams = reservationParams1();
+        final ForMember reservationParams = bookedReservationRequest1();
 
         // member가 예약 추가
         final Integer reservationId = RestAssured.given().log().all()
@@ -158,7 +162,7 @@ class ReservationRestControllerTest {
         final SignUpRequest signUpRequest = signUpRequest1();
         final Map<String, String> memberCookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest.email(), signUpRequest.password()));
-        final Map<String, String> reservationParams = reservationParams1();
+        final ForMember reservationParams = bookedReservationRequest1();
 
         final int sizeBeforeCreate = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -197,8 +201,8 @@ class ReservationRestControllerTest {
         final Map<String, String> member2Cookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest2.email(), signUpRequest2.password()));
 
-        final Map<String, String> reservationParams1 = reservationParams1();
-        final Map<String, String> reservationParams2 = reservationParams2();
+        final ForMember reservationParams1 = bookedReservationRequest1();
+        final ForMember reservationParams2 = bookedReservationRequest2();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -216,12 +220,11 @@ class ReservationRestControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
 
-        final Integer themeId = createThemeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").hashCode();
+        final Long themeId = createThemeResponses.get(0).id();
+
         final List<AvailableReservationTimeResponse> availableReservationTimeResponses =
                 RestAssured.given().log().all()
-                        .queryParam("date", date)
+                        .queryParam("date", date.toString())
                         .queryParam("themeId", themeId)
                         .when().get("/reservations/available-times")
                         .then().log().all()
@@ -241,7 +244,7 @@ class ReservationRestControllerTest {
         final SignUpRequest signUpRequest = signUpRequest1();
         final Map<String, String> memberCookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest.email(), signUpRequest.password()));
-        final Map<String, String> reservationParams1 = reservationParams1();
+        final ForMember reservationParams1 = bookedReservationRequest1();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -251,7 +254,7 @@ class ReservationRestControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
 
-        final Map<String, String> reservationParams2 = reservationParams2();
+        final ForMember reservationParams2 = bookedReservationRequest2();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -271,50 +274,25 @@ class ReservationRestControllerTest {
                 .body("size()", is(2));
     }
 
-    private Map<String, String> reservationParams1() {
-        final String timeId = createReservationTimeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String themeId = createThemeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
+    private ForMember bookedReservationRequest1() {
+        final Long timeId = createReservationTimeResponses.get(0).id();
+        final Long themeId = createThemeResponses.get(0).id();
 
-        return createReservationParams(date, timeId, themeId);
+        return new ForMember(date, timeId, themeId);
     }
 
-    private Map<String, String> reservationParams2() {
-        final String timeId = createReservationTimeResponses.get(1).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String themeId = createThemeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
+    private ForMember bookedReservationRequest2() {
+        final Long timeId = createReservationTimeResponses.get(1).id();
+        final Long themeId = createThemeResponses.get(0).id();
 
-        return createReservationParams(date, timeId, themeId);
+        return new ForMember(date, timeId, themeId);
     }
 
-    private Map<String, String> pastReservationParams() {
-        final String date = LocalDate.now().minusDays(5).toString();
-        final String timeId = createReservationTimeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String themeId = createThemeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
+    private ForMember pastBookedReservationRequest() {
+        final LocalDate date = LocalDate.now().minusDays(5);
+        final Long timeId = createReservationTimeResponses.get(0).id();
+        final Long themeId = createThemeResponses.get(0).id();
 
-        return createReservationParams(date, timeId, themeId);
-    }
-
-
-    private Map<String, String> createReservationParams(
-            final String date,
-            final String timeId,
-            final String themeId
-    ) {
-        return Map.ofEntries(
-                Map.entry("date", date),
-                Map.entry("timeId", timeId),
-                Map.entry("themeId", themeId)
-        );
+        return new ForMember(date, timeId, themeId);
     }
 }

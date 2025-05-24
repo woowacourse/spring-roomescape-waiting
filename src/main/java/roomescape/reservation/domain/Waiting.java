@@ -3,14 +3,13 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -18,11 +17,11 @@ import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 
 @Entity
-@Table(name = "reservations")
+@Table(name = "waitings")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = {"id"})
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,34 +34,30 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ReservationStatus status;
+    private LocalDateTime createdAt;
 
-    private Reservation(
+    private Waiting(
             final ReservationSlot reservationSlot,
             final Member member,
-            final ReservationStatus status
+            final LocalDateTime createdAt
     ) {
         validateReservationSlot(reservationSlot);
         validateMember(member);
-        validateStatus(status);
+        validateCreatedAt(createdAt);
 
+        this.id = id;
         this.reservationSlot = reservationSlot;
         this.member = member;
-        this.status = status;
+        this.createdAt = createdAt;
     }
 
-    public static Reservation of(
+    public static Waiting of(
             final ReservationSlot reservationSlot,
             final Member member,
-            final ReservationStatus status
+            final LocalDateTime createdAt
     ) {
-        return new Reservation(reservationSlot, member, status);
-    }
-
-    public void updateMember(final Member member) {
-        this.member = member;
+        return new Waiting(reservationSlot, member, createdAt);
     }
 
     private void validateReservationSlot(final ReservationSlot reservationSlot) {
@@ -77,9 +72,9 @@ public class Reservation {
         }
     }
 
-    private void validateStatus(final ReservationStatus status) {
-        if (status == null) {
-            throw new IllegalArgumentException("예약 상태는 null이면 안됩니다.");
+    private void validateCreatedAt(final LocalDateTime createdAt) {
+        if (createdAt == null) {
+            throw new IllegalArgumentException("생성 시간이 null이면 안됩니다.");
         }
     }
 }

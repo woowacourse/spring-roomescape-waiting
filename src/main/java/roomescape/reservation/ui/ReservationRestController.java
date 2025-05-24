@@ -4,9 +4,9 @@ import static roomescape.auth.domain.AuthRole.ADMIN;
 import static roomescape.auth.domain.AuthRole.MEMBER;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,36 +20,36 @@ import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
+import roomescape.reservation.ui.dto.request.CreateBookedReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/reservations")
+@RequiredArgsConstructor
 public class ReservationRestController {
 
     private final ReservationService reservationService;
 
     @PostMapping
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<ReservationResponse> create(
-            @RequestBody @Valid final CreateReservationRequest.ForMember request,
+    public ResponseEntity<ReservationResponse> createReservation(
+            @RequestBody @Valid final CreateBookedReservationRequest.ForMember request,
             final MemberAuthInfo memberAuthInfo
     ) {
-        final ReservationResponse response = reservationService.create(request, memberAuthInfo.id());
+        final ReservationResponse response =
+                reservationService.create(request, memberAuthInfo.id());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(response);
+        return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @DeleteMapping("/{id}")
     @RequiresRole(authRoles = {ADMIN, MEMBER})
-    public ResponseEntity<Void> delete(
+    public ResponseEntity<Void> deleteReservation(
             @PathVariable final Long id,
             final MemberAuthInfo memberAuthInfo
     ) {
-        reservationService.deleteIfOwner(id, memberAuthInfo);
+        reservationService.deleteIfOwner(id, memberAuthInfo.id());
 
         return ResponseEntity.noContent().build();
     }

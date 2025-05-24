@@ -6,8 +6,11 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.theme.domain.Theme;
 
 @Repository
 @RequiredArgsConstructor
@@ -25,18 +28,15 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         jpaReservationRepository.deleteById(id);
     }
 
-    @Override
-    public boolean existsById(Long id) {
-        return jpaReservationRepository.existsById(id);
+    public boolean existsByReservationSlot(
+            final ReservationSlot reservationSlot
+    ) {
+        return jpaReservationRepository.existsByReservationSlot(reservationSlot);
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId
-    ) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member) {
+        return jpaReservationRepository.existsByReservationSlotAndMember(reservationSlot, member);
     }
 
     @Override
@@ -46,13 +46,16 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    public Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot) {
+        return jpaReservationRepository.findByReservationSlot(reservationSlot);
+    }
+
+    @Override
     public List<Reservation> findAll() {
         return jpaReservationRepository.findAll();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(
             final Long themeId,
             final Long memberId,
@@ -63,17 +66,15 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllByDateAndThemeId(
+    public List<Reservation> findAllByDateAndTheme(
             final LocalDate date,
-            final Long themeId
+            final Theme theme
     ) {
-        return jpaReservationRepository.findAllByDateAndThemeId(date, themeId);
+        return jpaReservationRepository.findAllByDateAndTheme(date, theme);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllByMemberId(final Long memberId) {
-        return jpaReservationRepository.findAllByMemberId(memberId);
+    public List<Reservation> findAllByMember(final Member member) {
+        return jpaReservationRepository.findAllByMember(member);
     }
 }

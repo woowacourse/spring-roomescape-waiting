@@ -2,9 +2,9 @@ package roomescape.fixture.ui;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.SignUpRequest;
 
 public class MemberApiFixture {
@@ -42,7 +42,7 @@ public class MemberApiFixture {
                 .statusCode(HttpStatus.CREATED.value());
     }
 
-    public static List<ValidatableResponse> signUpMembers(final int count) {
+    public static List<MemberResponse> signUpMembers(final int count) {
         if (SIGN_UP_REQUESTS.size() < count) {
             throw new IllegalStateException("회원 픽스처의 개수는 최대 " + SIGN_UP_REQUESTS.size() + "개만 가능합니다.");
         }
@@ -54,7 +54,9 @@ public class MemberApiFixture {
                         .body(member)
                         .when().post("/members")
                         .then().log().all()
-                        .statusCode(HttpStatus.CREATED.value()))
+                        .statusCode(HttpStatus.CREATED.value())
+                        .extract().as(MemberResponse.class)
+                )
                 .toList();
     }
 }

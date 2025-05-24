@@ -3,6 +3,8 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.member.domain.Member;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository {
 
@@ -10,18 +12,20 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    boolean existsById(Long id);
-
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByReservationSlot(ReservationSlot reservationSlot);
 
     Optional<Reservation> findById(Long id);
+
+    Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot);
 
     List<Reservation> findAll();
 
     List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(Long themeId, Long memberId, LocalDate dateFrom,
                                                               LocalDate dateTo);
 
-    List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
 
-    List<Reservation> findAllByMemberId(Long memberId);
+    List<Reservation> findAllByMember(Member member);
+
+    boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member);
 }

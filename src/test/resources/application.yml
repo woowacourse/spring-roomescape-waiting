@@ -15,10 +15,10 @@ spring:
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  #    show-sql: true
+  #    properties:
+  #      hibernate:
+  #        format_sql: true
   sql:
     init:
       mode: always
@@ -28,3 +28,7 @@ security:
     access-token:
       secret-key: since-jjwt-api-0.11-secret-key-must-be-longer-than-32-bytes
       validity-in-milliseconds: 900000 # 15 minutes
+
+logging:
+  level:
+    org.hibernate.SQL: debug
