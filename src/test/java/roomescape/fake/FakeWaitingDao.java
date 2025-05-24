@@ -4,6 +4,7 @@ import roomescape.reservation.waiting.domain.Waiting;
 import roomescape.reservation.waiting.domain.WaitingWithRank;
 import roomescape.reservation.waiting.repository.WaitingRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +16,8 @@ public class FakeWaitingDao implements WaitingRepository {
 
     @Override
     public Waiting save(final Waiting waiting) {
-        Waiting newWaiting = new Waiting(index++, waiting.getMember(), waiting.getDate(),
-                waiting.getTime(), waiting.getTheme());
+        Waiting newWaiting = new Waiting(index++, LocalDateTime.now(), waiting.getDate(), waiting.getTime(),
+                waiting.getMember(), waiting.getTheme());
         waitings.add(newWaiting);
         return newWaiting;
     }
