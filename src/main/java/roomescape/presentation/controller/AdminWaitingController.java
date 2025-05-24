@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,5 +30,11 @@ public class AdminWaitingController {
     @DeleteMapping("/{id}")
     public void deleteWaiting(@PathVariable(name = "id") final Long waitingId) {
         waitingService.cancel(waitingId);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/{id}")
+    public Long approveWaiting(@PathVariable(name = "id") final Long waitingId) {
+        return waitingService.approveWaiting(waitingId);
     }
 }

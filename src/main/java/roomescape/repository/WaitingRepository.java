@@ -9,13 +9,6 @@ import roomescape.model.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    boolean existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
-            LocalDate date,
-            Long themeId,
-            Long reservationTimeId,
-            Long memberId);
-
-
     List<Waiting> findAllByMemberId(Long id);
 
     @Query("SELECT new roomescape.model.WaitingWithRank(" +
@@ -29,4 +22,10 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
            "FROM Waiting w " +
            "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+
+    boolean existsByDateAndThemeIdAndReservationTimeIdAndMemberId(
+            LocalDate date,
+            Long themeId,
+            Long reservationTimeId,
+            Long memberId);
 }

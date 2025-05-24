@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -222,6 +223,46 @@ class WaitingServiceTest {
 
         //then
         assertThat(actual).isEmpty();
+    }
+
+    @DisplayName("승인을 하려는 대기가 취소되지 않은 예약 이라면 예외가 발생한다.")
+    @Test
+    void nonApproveWaiting() {
+        //given
+        Reservation reservation = createReservation();
+
+        Waiting waiting = Waiting.of(reservation.getDate(), reservation.getTheme(), reservation.getReservationTime(),
+                reservation.getMember(), timeProvider.getCurrentDateTime());
+
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        //when //then
+        assertThatThrownBy(() -> waitingService.approveWaiting(savedWaiting.getId()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("이미 예약이 등록되어 대기 신청을 승인할 수 없습니다. 예약이 취소되면 대기 승인을 할 수 있습니다.");
+    }
+
+    @DisplayName("취소된 예약의 예약 대기를 승인할 수 있다.")
+    @Test
+    void approveWaiting() {
+        //given
+        Reservation reservation = createReservation();
+
+        Waiting waiting = Waiting.of(reservation.getDate(), reservation.getTheme(), reservation.getReservationTime(),
+                reservation.getMember(), timeProvider.getCurrentDateTime());
+
+        Waiting savedWaiting = waitingRepository.save(waiting);
+        reservationRepository.deleteById(reservation.getId());
+
+        //when
+        Long savedReservationId = waitingService.approveWaiting(savedWaiting.getId());
+
+        //then
+        Optional<Waiting> deleteWaiting = waitingRepository.findById(waiting.getId());
+        assertThat(deleteWaiting).isEmpty();
+
+        Optional<Reservation> approveReservation = reservationRepository.findById(savedReservationId);
+        assertThat(approveReservation).isPresent();
     }
 
     private Reservation createReservation() {
