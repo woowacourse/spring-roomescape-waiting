@@ -46,6 +46,6 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public void deleteWaitingReservation(@PathVariable @NotNull final Long id) {
-        reservationService.deleteReservation(id);
+        reservationService.deleteById(id);
     }
 }

@@ -27,4 +27,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     List<Reservation> findByMember(final Member member);
+
+    boolean existsByRoomEscapeInformationId(Long roomEscapeInformationId);
 }

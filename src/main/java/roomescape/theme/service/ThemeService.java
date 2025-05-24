@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ReservationException;
 import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.theme.domain.Theme;
@@ -40,6 +41,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(final Long id) {
         if (roomEscapeInformationRepository.existsByThemeId((id))) {
             throw new ReservationException("해당 테마로 예약된 건이 존재합니다.");

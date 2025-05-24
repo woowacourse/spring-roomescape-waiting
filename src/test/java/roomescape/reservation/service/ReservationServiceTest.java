@@ -39,7 +39,7 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-    
+
     @Autowired
     private ReservationService service;
 
@@ -138,7 +138,7 @@ class ReservationServiceTest {
         tm.persistAndFlush(reservation);
 
         // when
-        service.deleteReservation(reservation.getId());
+        service.deleteById(reservation.getId());
 
         // then
         assertThat(reservationRepository.findByCriteria(null, null, null, null))

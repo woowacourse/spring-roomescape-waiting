@@ -11,6 +11,7 @@ import roomescape.reservation.domain.RoomEscapeInformation;
 import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.dto.WaitingReservationRequest;
 import roomescape.reservation.dto.WaitingReservationResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.reservation.repository.WaitingReservationRepository;
 
@@ -18,10 +19,11 @@ import roomescape.reservation.repository.WaitingReservationRepository;
 @RequiredArgsConstructor
 public class WaitingReservationService {
 
+    private final ReservationRepository reservationRepository;
     private final WaitingReservationRepository waitingReservationRepository;
     private final MemberRepository memberRepository;
     private final RoomEscapeInformationRepository roomEscapeInformationRepository;
-    
+
     @Transactional
     public WaitingReservationResponse save(final WaitingReservationRequest request, final LoginMember loginMember) {
         final Member member = memberRepository.findById(loginMember.id())
@@ -37,7 +39,20 @@ public class WaitingReservationService {
         return new WaitingReservationResponse(waitingReservationRepository.save(waitingReservation));
     }
 
+    @Transactional
     public void deleteById(final Long id) {
-        this.waitingReservationRepository.deleteById(id);
+        final WaitingReservation waitingReservation = waitingReservationRepository.findById(id)
+                .orElse(null);
+        if (waitingReservation == null) {
+            return;
+        }
+        final Long infoId = waitingReservation.getRoomEscapeInformation().getId();
+        waitingReservationRepository.delete(waitingReservation);
+
+        boolean hasBooked = reservationRepository.existsByRoomEscapeInformationId(infoId);
+        boolean hasWaiting = waitingReservationRepository.existsByRoomEscapeInformationId(infoId);
+        if (!hasBooked && !hasWaiting) {
+            roomEscapeInformationRepository.deleteById(infoId);
+        }
     }
 }

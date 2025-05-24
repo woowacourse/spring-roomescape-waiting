@@ -3,6 +3,7 @@ package roomescape.reservationtime.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ReservationException;
 import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -29,6 +30,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(final Long id) {
         if (roomEscapeInformationRepository.existsByTimeId(id)) {
             throw new ReservationException("해당 시간으로 예약된 건이 존재합니다.");

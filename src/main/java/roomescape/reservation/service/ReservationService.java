@@ -90,8 +90,21 @@ public class ReservationService {
         }
     }
 
-    public void deleteReservation(final Long id) {
+    @Transactional
+    public void deleteById(final Long id) {
+        final Reservation reservation = reservationRepository.findById(id)
+                .orElse(null);
+        if (reservation == null) {
+            return;
+        }
+        final Long infoId = reservation.getRoomEscapeInformation().getId();
         reservationRepository.deleteById(id);
+
+        boolean hasBooked = reservationRepository.existsByRoomEscapeInformationId(infoId);
+        boolean hasWaiting = waitingReservationRepository.existsByRoomEscapeInformationId(infoId);
+        if (!hasBooked && !hasWaiting) {
+            roomEscapeInformationRepository.deleteById(infoId);
+        }
     }
 
     public List<MyReservationResponse> findMyReservations(final LoginMember loginMember) {

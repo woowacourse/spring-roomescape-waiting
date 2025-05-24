@@ -27,4 +27,6 @@ public interface WaitingReservationRepository extends JpaRepository<WaitingReser
             where w.member = :member
             """)
     List<WaitingReservationWithRank> findWaitingReservationByMember(@Param("member") Member member);
+
+    boolean existsByRoomEscapeInformationId(Long roomEscapeInformationId);
 }
