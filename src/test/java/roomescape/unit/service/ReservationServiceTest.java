@@ -90,7 +90,7 @@ class ReservationServiceTest {
                 reservationTime1, theme1);
         reservationRepository.save(reservation1);
         // when
-        List<ReservationWithStatusResponse> memberReservations = reservationService.findReservationByMemberId(1L);
+        List<ReservationWithStatusResponse> memberReservations = reservationService.findBookingHistory(1L);
 
         // then
         assertThat(memberReservations.size()).isEqualTo(1);

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -28,8 +29,8 @@ public class WaitingRepositoryAdaptor implements WaitingRepository {
     }
 
     @Override
-    public void deleteById(final Long id) {
-        jpaWaitingRepository.deleteById(id);
+    public List<Waiting> findByThemeId(final Long id) {
+        return jpaWaitingRepository.findByThemeId(id);
     }
 
     @Override
@@ -38,10 +39,16 @@ public class WaitingRepositoryAdaptor implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findByDateAndReservationTimeAndTheme(
+    public Optional<Waiting> findByDateAndReservationTimeAndThemeAndMember(
             final LocalDate date,
             final ReservationTime time,
-            final Theme theme) {
-        return jpaWaitingRepository.findByDateAndReservationTimeAndTheme(date, time, theme);
+            final Theme theme,
+            final Member member) {
+        return jpaWaitingRepository.findByDateAndReservationTimeAndThemeAndMember(date, time, theme, member);
+    }
+
+    @Override
+    public void deleteById(final Long id) {
+        jpaWaitingRepository.deleteById(id);
     }
 }

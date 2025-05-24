@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.ExistedReservationException;
@@ -23,12 +25,16 @@ public class ThemeService {
 
     private static final int TOP_THEMES_COUNT = 10;
     private static final int THEME_TRACKING_PERIOD = 7;
+
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository,
+                        final WaitingRepository waitingRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +84,8 @@ public class ThemeService {
 
     public void deleteThemeById(long id) {
         List<Reservation> reservations = reservationRepository.findByThemeId(id);
-        if (!reservations.isEmpty()) {
+        List<Waiting> waitings = waitingRepository.findByThemeId(id);
+        if (!reservations.isEmpty() || !waitings.isEmpty()) {
             throw new ExistedReservationException();
         }
         themeRepository.deleteById(id);

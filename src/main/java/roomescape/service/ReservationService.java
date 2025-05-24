@@ -101,7 +101,7 @@ public class ReservationService {
         Waiting waiting = Waiting.createWithoutId(member, date, reservationTime, theme, createAt);
 
         waiting.validateDateTime();
-        validateWaitingDuplicate(date, reservationTime, theme);
+        validateWaitingDuplicate(date, reservationTime, theme, member);
 
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(savedWaiting);
@@ -113,8 +113,8 @@ public class ReservationService {
         }
     }
 
-    private void validateWaitingDuplicate(LocalDate date, ReservationTime time, Theme theme) {
-        if (waitingRepository.findByDateAndReservationTimeAndTheme(date, time, theme).isPresent()) {
+    private void validateWaitingDuplicate(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        if (waitingRepository.findByDateAndReservationTimeAndThemeAndMember(date, time, theme, member).isPresent()) {
             throw new ExistedReservationException();
         }
     }

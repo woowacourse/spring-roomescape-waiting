@@ -47,8 +47,7 @@ public class ReservationController {
             @Authenticated Long memberId,
             @Valid @RequestBody WaitingCreateRequest request) {
         WaitingResponse waitingResponse = reservationService.createWaiting(
-                memberId, request.timeId(), request.themeId(), request.date(), LocalDateTime.now()
-        );
+                memberId, request.timeId(), request.themeId(), request.date(), LocalDateTime.now());
         return ResponseEntity
                 .created(URI.create("/reservations/waitings/" + waitingResponse.id()))
                 .body(waitingResponse);

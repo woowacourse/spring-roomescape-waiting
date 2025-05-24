@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -14,5 +15,8 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findByMemberId(Long id);
 
-    Optional<Waiting> findByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    List<Waiting> findByThemeId(Long id);
+
+    Optional<Waiting> findByDateAndReservationTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme,
+                                                                    Member member);
 }

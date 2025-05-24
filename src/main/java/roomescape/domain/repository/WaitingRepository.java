@@ -3,6 +3,7 @@ package roomescape.domain.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -15,7 +16,10 @@ public interface WaitingRepository {
 
     List<Waiting> findByMemberId(Long id);
 
+    List<Waiting> findByThemeId(Long id);
+
     void deleteById(Long id);
 
-    Optional<Waiting> findByDateAndReservationTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
+    Optional<Waiting> findByDateAndReservationTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme,
+                                                                    Member member);
 }
