@@ -50,4 +50,6 @@ values
 -- 예약 대기
 insert into waiting (member_id, theme_id, date, reservation_time_id, created_at, modified_at)
 values
-    (2, 1, TIMESTAMPADD(DAY, +1, CURRENT_DATE()), 1, CURRENT_TIME, CURRENT_TIME);
+    (1, 1, TIMESTAMPADD(DAY, +1, CURRENT_DATE()), 1, CURRENT_TIME, TIMESTAMPADD(DAY, +1, CURRENT_DATE())),
+    (2, 1, TIMESTAMPADD(DAY, +1, CURRENT_DATE()), 1, CURRENT_TIME, CURRENT_TIME),
+    (3, 1, TIMESTAMPADD(DAY, +1, CURRENT_DATE()), 1, CURRENT_TIME, CURRENT_TIME);

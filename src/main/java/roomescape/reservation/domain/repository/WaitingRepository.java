@@ -21,7 +21,7 @@ public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
                  WHERE w2.reservationInfo.theme = w.reservationInfo.theme
                    AND w2.reservationInfo.date = w.reservationInfo.date
                    AND w2.reservationInfo.reservationTime = w.reservationInfo.reservationTime
-                   AND w2.id < w.id)+1)
+                   AND w2.modifiedAt < w.modifiedAt)+1)
             FROM Waiting w
             WHERE w.member.id = :memberId
             """)
