@@ -75,11 +75,7 @@ public class Waiting {
             final Member member,
             final LocalDateTime createdAt
     ) {
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.member = member;
-        this.createdAt = createdAt;
+        this(null, date, time, theme, member, createdAt);
     }
 
     private void validateDate(final LocalDate date) {
