@@ -48,16 +48,16 @@ public class WaitingService {
                 .orElseThrow(() -> new BadRequestException("예약자를 찾을 수 없습니다."));
         final Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new BadRequestException("테마가 존재하지 않습니다."));
-        Waiting waiting = Waiting.register(request.date(), time, member, theme);
-        Waiting savedWaiting = waitingRepository.save(waiting);
+        final Waiting waiting = Waiting.register(request.date(), time, member, theme);
+        final Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingResponse(savedWaiting);
     }
 
-    public ReservationResponse approveWaiting(long id) {
-        Waiting waiting = waitingRepository.findById(id)
+    public ReservationResponse approveWaiting(final long id) {
+        final Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("예약 대기가 존재하지 않습니다."));
         validateNoDuplicateReservation(waiting);
-        Reservation reservation = Reservation.register(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
+        final Reservation reservation = Reservation.register(waiting.getMember(), waiting.getDate(), waiting.getTime(), waiting.getTheme());
         waitingRepository.deleteById(id);
         reservationRepository.save(reservation);
         return new ReservationResponse(reservation);
@@ -69,12 +69,12 @@ public class WaitingService {
                 .toList();
     }
 
-    public void cancelWaiting(long id) {
+    public void cancelWaiting(final long id) {
         waitingRepository.deleteById(id);
     }
 
-    private void validateNoDuplicateReservation(Waiting waiting) {
-        boolean alreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
+    private void validateNoDuplicateReservation(final Waiting waiting) {
+        final boolean alreadyReserved = reservationRepository.existsByDateAndTimeIdAndThemeId(
                 waiting.getDate(),
                 waiting.getTime().getId(),
                 waiting.getTheme().getId()

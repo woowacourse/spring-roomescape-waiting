@@ -14,19 +14,19 @@ public class AdminWaitingController {
 
     private final WaitingService waitingService;
 
-    public AdminWaitingController(WaitingService waitingService) {
+    public AdminWaitingController(final WaitingService waitingService) {
         this.waitingService = waitingService;
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> approve(@PathVariable final long id) {
-        ReservationResponse response = waitingService.approveWaiting(id);
+        final ReservationResponse response = waitingService.approveWaiting(id);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping
     public ResponseEntity<List<WaitingResponse>> findAll() {
-        List<WaitingResponse> responses = waitingService.getAllWaitings();
+        final List<WaitingResponse> responses = waitingService.getAllWaitings();
         return ResponseEntity.ok().body(responses);
     }
 

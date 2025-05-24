@@ -23,7 +23,7 @@ public class Waiting {
     @ManyToOne
     private Theme theme;
 
-    public Waiting(Long id, LocalDateTime createdAt, LocalDate date, ReservationTime time, Member member, Theme theme) {
+    public Waiting(final Long id, final LocalDateTime createdAt, final LocalDate date, final ReservationTime time, final Member member, final Theme theme) {
         this.id = id;
         this.createdAt = createdAt;
         this.date = date;
@@ -35,7 +35,7 @@ public class Waiting {
     public Waiting() {
     }
 
-    public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Waiting(final Long id, final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
         this.id = id;
         this.createdAt = LocalDateTime.now();
         this.member = member;
@@ -44,7 +44,7 @@ public class Waiting {
         this.theme = theme;
     }
 
-    public static Waiting register(LocalDate date, ReservationTime time, Member member, Theme theme) {
+    public static Waiting register(final LocalDate date, final ReservationTime time, final Member member, final Theme theme) {
         return new Waiting(null, LocalDateTime.now(), date, time, member, theme);
     }
 
