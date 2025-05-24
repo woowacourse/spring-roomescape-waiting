@@ -7,6 +7,9 @@ import roomescape.member.model.Role;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.entity.ReservationWaiting;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
+import roomescape.reservation.model.entity.vo.ReservationWaitingStatus;
 
 public class ReservationTestFixture {
 
@@ -33,12 +36,23 @@ public class ReservationTestFixture {
             .build();
     }
 
-    public static Reservation createReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme) {
+    public static Reservation createConfirmedReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme) {
         return Reservation.builder()
-            .date(date)
-            .time(reservationTime)
-            .theme(reservationTheme)
-            .build();
+                .date(date)
+                .time(reservationTime)
+                .theme(reservationTheme)
+                .status(ReservationStatus.CONFIRMED)
+                .build();
+    }
+
+    public static Reservation createConfirmedReservation(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme, Member member) {
+        return Reservation.builder()
+                .date(date)
+                .time(reservationTime)
+                .theme(reservationTheme)
+                .status(ReservationStatus.CONFIRMED)
+                .member(member)
+                .build();
     }
 
     public static ReservationTime createTime(LocalTime time) {
@@ -63,4 +77,15 @@ public class ReservationTestFixture {
             .role(Role.USER)
             .build();
     }
+
+    public static ReservationWaiting createPendingWaiting(LocalDate date, ReservationTime reservationTime, ReservationTheme reservationTheme, Member member) {
+        return ReservationWaiting.builder()
+                .date(date)
+                .time(reservationTime)
+                .theme(reservationTheme)
+                .member(member)
+                .status(ReservationWaitingStatus.PENDING)
+                .build();
+    }
+
 }

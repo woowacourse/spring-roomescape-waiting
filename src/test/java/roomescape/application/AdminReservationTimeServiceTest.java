@@ -37,7 +37,7 @@ class AdminReservationTimeServiceTest extends IntegrationTestSupport {
         // given
         ReservationTime reservationTime = ReservationTestFixture.getReservationTimeFixture();
         ReservationTheme reservationTheme = ReservationTestFixture.getReservationThemeFixture();
-        Reservation reservation = ReservationTestFixture.createReservation(LocalDate.now().minusDays(10), reservationTime, reservationTheme);
+        Reservation reservation = ReservationTestFixture.createConfirmedReservation(LocalDate.now().minusDays(10), reservationTime, reservationTheme);
 
         reservationTimeRepository.save(reservationTime);
         reservationThemeRepository.save(reservationTheme);

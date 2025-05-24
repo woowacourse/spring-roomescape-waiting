@@ -8,7 +8,7 @@ import roomescape.reservation.model.vo.Schedule;
 
 public interface ReservationWaitingRepository {
 
-    void save(ReservationWaiting reservationWaiting);
+    ReservationWaiting save(ReservationWaiting reservationWaiting);
 
     List<ReservationWaitingWithRank> findAllWithRankByMemberId(Long memberId);
 

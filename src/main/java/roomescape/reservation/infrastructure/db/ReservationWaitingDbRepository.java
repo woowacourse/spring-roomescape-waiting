@@ -19,8 +19,8 @@ public class ReservationWaitingDbRepository implements ReservationWaitingReposit
 
     private final ReservationWaitingJpaRepository reservationWaitingJpaRepository;
     @Override
-    public void save(ReservationWaiting reservationWaiting) {
-        reservationWaitingJpaRepository.save(reservationWaiting);
+    public ReservationWaiting save(ReservationWaiting reservationWaiting) {
+        return reservationWaitingJpaRepository.save(reservationWaiting);
     }
 
     @Override

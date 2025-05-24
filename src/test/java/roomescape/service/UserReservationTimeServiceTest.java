@@ -43,9 +43,9 @@ class UserReservationTimeServiceTest extends IntegrationTestSupport {
         ReservationTime reservationTime3 = ReservationTestFixture.createTime(LocalTime.parse("10:10"));
         ReservationTheme reservationTheme = ReservationTestFixture.createTheme("테마이름", "설명", "썸네일");
         LocalDate date = LocalDate.now().plusDays(20);
-        Reservation reservation1 = ReservationTestFixture.createReservation(date, reservationTime1,
+        Reservation reservation1 = ReservationTestFixture.createConfirmedReservation(date, reservationTime1,
             reservationTheme);
-        Reservation reservation2 = ReservationTestFixture.createReservation(date, reservationTime2,
+        Reservation reservation2 = ReservationTestFixture.createConfirmedReservation(date, reservationTime2,
             reservationTheme);
         reservationTimeRepository.save(reservationTime1);
         reservationTimeRepository.save(reservationTime2);
