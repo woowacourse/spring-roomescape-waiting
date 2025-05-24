@@ -17,7 +17,7 @@ import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 
 @Service
-public class WaitingReservationService {
+public class WaitingReservationFacadeService {
 
     private final ReservationQueryService reservationQueryService;
     private final WaitingReservationCommandService waitingReservationCommandService;
@@ -25,11 +25,11 @@ public class WaitingReservationService {
     private final ThemeQueryService themeQueryService;
     private final MemberQueryService memberQueryService;
 
-    public WaitingReservationService(ReservationQueryService reservationQueryService,
-                                     WaitingReservationCommandService waitingReservationCommandService,
-                                     ReservationTimeQueryService reservationTimeQueryService,
-                                     ThemeQueryService themeQueryService,
-                                     MemberQueryService memberQueryService) {
+    public WaitingReservationFacadeService(final ReservationQueryService reservationQueryService,
+                                           final WaitingReservationCommandService waitingReservationCommandService,
+                                           final ReservationTimeQueryService reservationTimeQueryService,
+                                           final ThemeQueryService themeQueryService,
+                                           final MemberQueryService memberQueryService) {
         this.reservationQueryService = reservationQueryService;
         this.waitingReservationCommandService = waitingReservationCommandService;
         this.reservationTimeQueryService = reservationTimeQueryService;
@@ -37,7 +37,7 @@ public class WaitingReservationService {
         this.memberQueryService = memberQueryService;
     }
 
-    public WaitingReservationResponse createWaitingReservation(ReservationRequest request, Long memberId) {
+    public WaitingReservationResponse createWaitingReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeQueryService.findById(request.timeId());
         Theme theme = themeQueryService.findById(request.themeId());
         Member member = memberQueryService.findById(memberId);
@@ -52,7 +52,7 @@ public class WaitingReservationService {
         return WaitingReservationResponse.from(responseWaiting);
     }
 
-    private void validateExistsReservation(Long themeId, Long timeId, LocalDate date) {
+    private void validateExistsReservation(final Long themeId, final Long timeId, final LocalDate date) {
         if (!reservationQueryService.isExistsReservedReservation(themeId, timeId, date)) {
             throw new BusinessException("대기할 예약이 존재하지 않습니다.");
         }
@@ -62,5 +62,9 @@ public class WaitingReservationService {
         if (waitingReservation.isCannotReserveDateTime(now)) {
             throw new BusinessException("예약할 수 없는 날짜와 시간입니다.");
         }
+    }
+
+    public void deleteByIdWithMemberId(final Long memberId, final Long reservationId) {
+        waitingReservationCommandService.deleteByIdAndMemberId(reservationId, memberId);
     }
 }

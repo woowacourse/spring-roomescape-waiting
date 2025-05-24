@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.login.presentation.dto.SearchCondition;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.dto.WaitingReservationWithRank;
 
 @Service
 public class ReservationQueryService {
@@ -19,10 +18,6 @@ public class ReservationQueryService {
 
     public List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate date) {
         return reservationRepository.findBy(date, themeId);
-    }
-
-    public List<Reservation> findByThemeIdAndTimeIdAndDate(final Long themeId, final Long timeId, final LocalDate date) {
-        return reservationRepository.findBy(themeId, timeId, date);
     }
 
     public List<Reservation> findByMemberId(final Long memberId) {

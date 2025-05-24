@@ -2,7 +2,6 @@ package roomescape.reservation.application.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.reservation.domain.dto.WaitingReservationWithRank;
 

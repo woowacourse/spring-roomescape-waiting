@@ -5,31 +5,33 @@ import java.net.URI;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
-import roomescape.member.presentation.dto.MyReservationResponse;
-import roomescape.reservation.application.WaitingReservationService;
+import roomescape.reservation.application.ReservationFacadeService;
+import roomescape.reservation.application.WaitingReservationFacadeService;
+import roomescape.reservation.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
-import roomescape.reservation.application.ReservationFacadeService;
 import roomescape.reservation.presentation.dto.WaitingReservationResponse;
 
 @RestController
 public class MemberReservationController {
 
     private final ReservationFacadeService reservationService;
-    private final WaitingReservationService waitingReservationService;
+    private final WaitingReservationFacadeService waitingReservationFacadeService;
 
     public MemberReservationController(ReservationFacadeService reservationService,
-                                       WaitingReservationService waitingReservationService) {
+                                       WaitingReservationFacadeService waitingReservationFacadeService) {
         this.reservationService = reservationService;
-        this.waitingReservationService = waitingReservationService;
+        this.waitingReservationFacadeService = waitingReservationFacadeService;
     }
 
     @PostMapping("/reservations")
@@ -42,7 +44,7 @@ public class MemberReservationController {
     @PostMapping("/reservation-waiting")
     public ResponseEntity<WaitingReservationResponse> createWaitingReservation(@RequestBody final ReservationRequest request,
                                                                                @LoginMember final LoginMemberInfo memberInfo) {
-        WaitingReservationResponse response = waitingReservationService.createWaitingReservation(request, memberInfo.id());
+        WaitingReservationResponse response = waitingReservationFacadeService.createWaitingReservation(request, memberInfo.id());
         return ResponseEntity.ok().body(response);
     }
 
@@ -51,6 +53,13 @@ public class MemberReservationController {
         List<MyReservationResponse> response = reservationService.getMemberReservations(loginMemberInfo);
 
         return ResponseEntity.ok().body(response);
+    }
+
+    @DeleteMapping("/reservations/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@LoginMember LoginMemberInfo loginMemberInfo,
+                                                         @PathVariable("id") Long reservationId) {
+        waitingReservationFacadeService.deleteByIdWithMemberId(loginMemberInfo.id(), reservationId);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(value = DateTimeParseException.class)

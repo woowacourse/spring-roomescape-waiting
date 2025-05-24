@@ -3,10 +3,16 @@ package roomescape.reservation.infrastructure;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.domain.dto.WaitingReservationWithRank;
 
 public interface JpaWaitingReservationRepository extends CrudRepository<WaitingReservation, Long> {
+
+    @Transactional
+    void deleteByIdAndMemberId(Long id, Long memberId);
+
+    boolean existsByIdAndMemberId(Long id, Long memberId);
 
     @Query("""
         SELECT new roomescape.reservation.domain.dto.WaitingReservationWithRank(

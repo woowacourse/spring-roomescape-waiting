@@ -1,6 +1,7 @@
 package roomescape.reservation.application.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.BusinessException;
 import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.domain.WaitingReservationRepository;
 
@@ -15,5 +16,17 @@ public class WaitingReservationCommandService {
 
     public WaitingReservation save(final WaitingReservation waitingReservation) {
         return waitingReservationRepository.save(waitingReservation);
+    }
+
+    public void deleteByIdAndMemberId(final Long reservationId, final Long memberId) {
+        validateExistsWaitingReservation(reservationId, memberId);
+
+        waitingReservationRepository.deleteByIdAndMemberId(reservationId, memberId);
+    }
+
+    private void validateExistsWaitingReservation(Long reservationId, Long memberId) {
+        if (!waitingReservationRepository.existsByIdAndMemberId(reservationId, memberId)) {
+            throw new BusinessException("존재하지 않는 대기 예약입니다.");
+        }
     }
 }

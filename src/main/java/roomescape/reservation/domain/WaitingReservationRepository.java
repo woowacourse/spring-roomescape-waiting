@@ -8,4 +8,8 @@ public interface WaitingReservationRepository {
     WaitingReservation save(WaitingReservation waitingReservation);
 
     List<WaitingReservationWithRank> findWaitingsWithRankByMember_Id(Long memberId);
+
+    void deleteByIdAndMemberId(Long id, Long memberId);
+
+    boolean existsByIdAndMemberId(Long id, Long memberId);
 }

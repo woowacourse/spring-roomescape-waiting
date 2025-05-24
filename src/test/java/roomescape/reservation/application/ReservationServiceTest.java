@@ -25,7 +25,7 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
-import roomescape.member.presentation.dto.MyReservationResponse;
+import roomescape.reservation.presentation.dto.MyReservationResponse;
 import roomescape.member.application.service.MemberQueryService;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
