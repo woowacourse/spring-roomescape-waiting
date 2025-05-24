@@ -42,6 +42,4 @@ class JpaWaitingRepositoryTest {
         assertThat(waiting.getWaiting().getMember().getId()).isEqualTo(2L);
         assertThat(waiting.getRank()).isEqualTo(1);
     }
-
-
 }
