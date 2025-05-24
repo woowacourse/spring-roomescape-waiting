@@ -24,7 +24,7 @@ public class Theme {
     @Column(nullable = false)
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(Long id, String name, String description, String thumbnail) {
@@ -56,10 +56,9 @@ public class Theme {
 
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Theme theme)) {
             return false;
         }
-        Theme theme = (Theme) o;
         return Objects.equals(getId(), theme.getId());
     }
 

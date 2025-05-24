@@ -9,7 +9,8 @@ FROM member;
 
 -- member 데이터
 INSERT INTO member(name, email, password, role)
-VALUES ('훌라', 'test@test.com', 'test', 'USER'),
+VALUES ('플린트', 'test@test.com', 'test', 'USER'),
+       ('훌라', 'test2@test2.com', 'test2', 'USER'),
        ('어드민', 'admin@admin.com', 'admin', 'ADMIN');
 
 -- theme 데이터
@@ -24,3 +25,15 @@ VALUES ('10:00'),
        ('12:00'),
        ('14:00'),
        ('16:00');
+
+-- reservation 데이터
+INSERT INTO reservation(member_id, date, time_id, theme_id, status, create_at)
+VALUES (1, DATEADD('DAY', -1, CURRENT_DATE), 1, 1, 'RESERVED', DATEADD('DAY', -1, CURRENT_DATE)),
+       (2, DATEADD('DAY', -2, CURRENT_DATE), 2, 2, 'RESERVED', DATEADD('DAY', -2, CURRENT_DATE)),
+       (3, DATEADD('DAY', -3, CURRENT_DATE), 3, 2, 'RESERVED', DATEADD('DAY', -3, CURRENT_DATE)),
+       (1, DATEADD('DAY', -1, CURRENT_DATE), 2, 3, 'RESERVED', DATEADD('DAY', -1, CURRENT_DATE)),
+       (2, DATEADD('DAY', -4, CURRENT_DATE), 3, 3, 'RESERVED', DATEADD('DAY', -4, CURRENT_DATE)),
+       (3, DATEADD('DAY', -5, CURRENT_DATE), 4, 3, 'RESERVED', DATEADD('DAY', -5, CURRENT_DATE)),
+       (1, '2025-07-01', 1, 1, 'RESERVED', '2025-05-20 10:15:00'),
+       (2, '2025-07-01', 1, 1, 'WAIT', '2025-05-21 08:00:00'),
+       (3, '2025-07-01', 1, 1, 'WAIT', '2025-05-21 08:01:00');

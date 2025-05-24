@@ -13,7 +13,10 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
+import org.hibernate.annotations.CreationTimestamp;
+import roomescape.exception.custom.InvalidReservationException;
 import roomescape.global.ReservationStatus;
 
 @Entity
@@ -42,7 +45,11 @@ public class Reservation {
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation() {
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createAt;
+
+    protected Reservation() {
     }
 
     public Reservation(Long id,
@@ -74,6 +81,23 @@ public class Reservation {
         this(null, member, date, reservationTime, theme, status);
     }
 
+    public long calculateWaitRank(List<Reservation> allReservations) {
+        return allReservations.stream()
+                .filter(this::isSameReservationCondition)
+                .filter(reservation -> reservation.isCreateAtBeforeOrEqual(this))
+                .count();
+    }
+
+    private boolean isSameReservationCondition(Reservation target) {
+        return this.theme.equals(target.theme)
+                && this.date.equals(target.date)
+                && this.reservationTime.equals(target.reservationTime);
+    }
+
+    private boolean isCreateAtBeforeOrEqual(Reservation reservation) {
+        return !this.createAt.isAfter(reservation.createAt);
+    }
+
     public boolean isBefore(LocalDateTime compareDateTime) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, getStartAt());
         return reservationDateTime.isBefore(compareDateTime);
@@ -83,6 +107,14 @@ public class Reservation {
         if (member != null) {
             member.removeReservation(this);
         }
+    }
+
+    public void changeStatusWaitToReserve() {
+        if (member == null) {
+            throw new InvalidReservationException("Member 가 없는 대기 reservation은 예약으로 변경할 수 없습니다.");
+        }
+
+        this.status = ReservationStatus.RESERVED;
     }
 
     public Long getId() {
@@ -121,16 +153,19 @@ public class Reservation {
         return status;
     }
 
-    public void setMember(Member member) {
+    protected void setMember(Member member) {
         this.member = member;
+    }
+
+    protected void setStatus(ReservationStatus status) {
+        this.status = status;
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Reservation that)) {
             return false;
         }
-        Reservation that = (Reservation) o;
         return Objects.equals(getId(), that.getId());
     }
 

@@ -5,20 +5,28 @@ import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import roomescape.annotation.CheckRole;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationWaitResponse;
 import roomescape.entity.Reservation;
+import roomescape.global.ReservationStatus;
+import roomescape.global.Role;
 import roomescape.service.ReservationService;
 
 @RestController
 @RequestMapping("/admin")
+@CheckRole(Role.ADMIN)
 public class AdminController {
 
     private final ReservationService reservationService;
@@ -44,10 +52,8 @@ public class AdminController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservationByAdmin(
-            @RequestBody @Valid AdminCreateReservationRequest request
-    ) {
-        Reservation reservation = reservationService.addReservationByAdmin(request);
-        ReservationResponse response = ReservationResponse.from(reservation);
+            @RequestBody @Valid AdminCreateReservationRequest request) {
+        ReservationResponse response = reservationService.addReservationByAdmin(request);
 
         URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/reservations/{id}")
@@ -55,5 +61,24 @@ public class AdminController {
                 .toUri();
 
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping("/reservations/waiting")
+    public ResponseEntity<List<ReservationWaitResponse>> getWaitReservations() {
+        List<ReservationWaitResponse> responses = reservationService.findAllByStatus(ReservationStatus.WAIT);
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @PutMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> approveWaitReservation(@PathVariable("id") Long reservationId) {
+        reservationService.approveWaitReservationByAdmin(reservationId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/reservations/waiting/{id}")
+    public ResponseEntity<Void> rejectWaitReservation(@PathVariable("id") Long reservationId) {
+        reservationService.rejectWaitReservationByAdmin(reservationId);
+        return ResponseEntity.noContent().build();
     }
 }

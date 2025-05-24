@@ -2,7 +2,7 @@ package roomescape.global;
 
 public enum ReservationStatus {
     RESERVED("예약"),
-    WAIT("대기");
+    WAIT("%d 번째 예약대기");
 
     private final String text;
 
@@ -10,7 +10,7 @@ public enum ReservationStatus {
         this.text = text;
     }
 
-    public String getText() {
-        return text;
+    public String renderText(long rank) {
+        return this.text.formatted(rank);
     }
 }

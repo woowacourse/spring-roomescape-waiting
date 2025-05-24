@@ -2,14 +2,19 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.ReservationWithRank;
 import roomescape.entity.Reservation;
+import roomescape.entity.ReservationTime;
+import roomescape.entity.Theme;
+import roomescape.global.ReservationStatus;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findAllByDateAndTheme_Id(LocalDate date, Long themeId);
+    List<Reservation> findAllByDateAndThemeIdAndStatus(LocalDate date, Long themeId, ReservationStatus status);
 
     List<Reservation> findAllByDateBetween(LocalDate start, LocalDate end);
 
@@ -25,11 +30,37 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                       @Param("dateFrom") LocalDate dateFrom,
                                       @Param("dateTo") LocalDate dateTo);
 
-    boolean existsByReservationTimeIdAndThemeIdAndDate(Long reservationTimeId, Long themeId, LocalDate date);
+    @Query(value = """
+            select r
+            from Reservation r
+            join fetch r.member
+            join fetch r.reservationTime
+            join fetch r.theme
+            where r.status = :status
+            """)
+    List<Reservation> findAllFetchByStatus(@Param("status") ReservationStatus status);
+
+    Optional<Reservation> findByDateAndReservationTimeAndThemeAndStatus(LocalDate date,
+                                                                        ReservationTime reservationTime,
+                                                                        Theme theme,
+                                                                        ReservationStatus status);
 
     boolean existsByReservationTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
 
-    List<Reservation> findAllByMemberId(Long memberId);
+    @Query(value = """
+            select new roomescape.domain.ReservationWithRank(r,
+                        (select count(rw)
+                         from Reservation rw
+                         where rw.theme = r.theme
+                         and rw.date = r.date
+                         and rw.reservationTime = r.reservationTime
+                         and rw.status = :status
+                         and rw.createAt <= r.createAt))
+            from Reservation r
+            where r.member.id = :memberId
+            """)
+    List<ReservationWithRank> findReservationWithRank(@Param("memberId") Long memberId,
+                                                      @Param("status") ReservationStatus status);
 }
