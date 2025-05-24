@@ -93,7 +93,7 @@ class ReservationControllerIntegrationTest {
                 .statusCode(HttpStatus.CREATED.value())
                 .body("theme.name", equalTo("테마1"))
                 .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("time.startAt", equalTo("14:00:00"));
+                .body("time.startAt", equalTo("14:00"));
     }
 
     @Test

@@ -10,7 +10,6 @@ import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
 import roomescape.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.presentation.dto.ReservationTimeRequest;
@@ -20,14 +19,14 @@ import roomescape.presentation.dto.ReservationTimeResponse;
 @Transactional(readOnly = true)
 public class ReservationTimeService {
 
+    private final QueryService queryService;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
-                                  final ReservationRepository reservationRepository) {
+    public ReservationTimeService(final QueryService queryService,
+                                  final ReservationTimeRepository reservationTimeRepository) {
 
+        this.queryService = queryService;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
@@ -66,7 +65,7 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponse> findAvailableTimes(final LocalDate date, final Long themeId) {
-        final List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
+        final List<Reservation> reservations = queryService.findByDateAndThemeId(date, themeId);
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(reservationTime -> {
@@ -76,7 +75,8 @@ public class ReservationTimeService {
                 .collect(Collectors.toList());
     }
 
-    private boolean containReservationTime(final List<Reservation> reservations, final ReservationTime reservationTime) {
+    private boolean containReservationTime(final List<Reservation> reservations,
+                                           final ReservationTime reservationTime) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.isSameReservationTime(reservationTime));
     }
