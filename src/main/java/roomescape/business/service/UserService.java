@@ -1,5 +1,9 @@
 package roomescape.business.service;
 
+import static roomescape.exception.ErrorCode.EMAIL_DUPLICATED;
+import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
+
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.business.dto.UserDto;
@@ -8,11 +12,6 @@ import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
 import roomescape.exception.business.InvalidCreateArgumentException;
 import roomescape.exception.business.NotFoundException;
-
-import java.util.List;
-
-import static roomescape.exception.ErrorCode.EMAIL_DUPLICATED;
-import static roomescape.exception.ErrorCode.USER_NOT_EXIST;
 
 @Service
 @RequiredArgsConstructor

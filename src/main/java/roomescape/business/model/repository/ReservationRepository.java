@@ -1,12 +1,16 @@
 package roomescape.business.model.repository;
 
-import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.vo.Id;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationTime;
+import roomescape.business.model.entity.Theme;
+import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ReservationDate;
+import roomescape.business.model.vo.ReservationStatus;
+import roomescape.business.dto.ReservationWithAheadDto;
 
 public interface ReservationRepository {
 
@@ -14,7 +18,10 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findAllReservationWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo,
+                                                   ReservationStatus reservationStatus);
+
+    List<ReservationWithAheadDto> findReservationsWithAhead(Id userId);
 
     Optional<Reservation> findById(Id id);
 
@@ -27,4 +34,6 @@ public interface ReservationRepository {
     boolean isDuplicateDateAndTimeAndTheme(LocalDate date, LocalTime time, Id themeId);
 
     void deleteById(Id reservationId);
+
+    void updateWaitingReservations(ReservationDate date, ReservationTime time, Theme theme);
 }

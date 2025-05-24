@@ -1,5 +1,16 @@
 package roomescape.business.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,14 +24,6 @@ import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ThemeName;
 import roomescape.exception.business.NotFoundException;
 import roomescape.exception.business.RelatedEntityExistException;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -86,9 +89,12 @@ class ThemeServiceTest {
         );
 
         List<ThemeDto> expectedThemes = Arrays.asList(
-                new ThemeDto(Id.create("theme-id-1"), new ThemeName("Popular Theme One"), "Description One", "thumbnail1.jpg"),
-                new ThemeDto(Id.create("theme-id-2"), new ThemeName("Popular Theme Two"), "Description Two", "thumbnail2.jpg"),
-                new ThemeDto(Id.create("theme-id-3"), new ThemeName("Popular Theme Three"), "Description Three", "thumbnail3.jpg")
+                new ThemeDto(Id.create("theme-id-1"), new ThemeName("Popular Theme One"), "Description One",
+                        "thumbnail1.jpg"),
+                new ThemeDto(Id.create("theme-id-2"), new ThemeName("Popular Theme Two"), "Description Two",
+                        "thumbnail2.jpg"),
+                new ThemeDto(Id.create("theme-id-3"), new ThemeName("Popular Theme Three"), "Description Three",
+                        "thumbnail3.jpg")
         );
 
         when(themeRepository.findPopularThemes(any(LocalDate.class), any(LocalDate.class), eq(size)))

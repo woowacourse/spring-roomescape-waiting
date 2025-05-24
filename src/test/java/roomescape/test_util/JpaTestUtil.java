@@ -1,5 +1,8 @@
 package roomescape.test_util;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import roomescape.business.model.entity.Reservation;
@@ -7,13 +10,11 @@ import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.infrastructure.JpaReservationDao;
 import roomescape.infrastructure.JpaReservationTimeDao;
 import roomescape.infrastructure.JpaThemeDao;
 import roomescape.infrastructure.JpaUserDao;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Component
 public class JpaTestUtil {
@@ -36,12 +37,12 @@ public class JpaTestUtil {
         userDao.save(User.restore(id, "USER", name, name + "@email.com", "password123"));
     }
 
-    public void insertReservation(final String id, final LocalDate date, final String timeId, final String themeId,
-                                  final String userId) {
+    public void insertReservation(final String id, final LocalDate date, final String timeId, final String themeId, final String userId,
+                                  ReservationStatus reservationStatus) {
         User user = userDao.findById(Id.create(userId)).get();
         ReservationTime time = timeDao.findById(Id.create(timeId)).get();
         Theme theme = themeDao.findById(Id.create(themeId)).get();
-        reservationDao.save(Reservation.restore(id, user, date, time, theme));
+        reservationDao.save(Reservation.restore(id, user, date, time, theme, reservationStatus, LocalDateTime.now()));
     }
 
     public void insertReservationTime(final String id, final LocalTime time) {

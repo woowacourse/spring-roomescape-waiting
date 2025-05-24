@@ -1,6 +1,9 @@
 package roomescape.presentation.api;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,10 +23,6 @@ import roomescape.presentation.dto.request.ReservationTimeRequest;
 import roomescape.presentation.dto.response.BookedReservationTimeResponse;
 import roomescape.presentation.dto.response.ReservationTimeResponse;
 
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 public class ReservationTimeApiController {
@@ -33,7 +32,8 @@ public class ReservationTimeApiController {
     @PostMapping("/times")
     @AuthRequired
     @Role(UserRole.ADMIN)
-    public ResponseEntity<ReservationTimeResponse> createReservationTime(@RequestBody @Valid ReservationTimeRequest request) {
+    public ResponseEntity<ReservationTimeResponse> createReservationTime(
+            @RequestBody @Valid ReservationTimeRequest request) {
         ReservationTimeDto dtos = reservationTimeService.addAndGet(request.startAtToLocalTime());
         ReservationTimeResponse response = ReservationTimeResponse.from(dtos);
         return ResponseEntity.created(URI.create("/times")).body(response);
@@ -53,7 +53,8 @@ public class ReservationTimeApiController {
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") String themeId
     ) {
-        List<ReservableReservationTimeDto> reservationTimeDtos = reservationTimeService.getAllByDateAndThemeId(date, themeId);
+        List<ReservableReservationTimeDto> reservationTimeDtos = reservationTimeService.getAllByDateAndThemeId(date,
+                themeId);
         List<BookedReservationTimeResponse> responses = BookedReservationTimeResponse.from(reservationTimeDtos);
         return ResponseEntity.ok(responses);
     }

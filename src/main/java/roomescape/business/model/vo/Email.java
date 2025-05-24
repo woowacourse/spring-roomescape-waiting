@@ -1,12 +1,11 @@
 package roomescape.business.model.vo;
 
+import static roomescape.exception.ErrorCode.EMAIL_FORMAT_INVALID;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import roomescape.exception.business.InvalidCreateArgumentException;
-
 import java.util.regex.Pattern;
-
-import static roomescape.exception.ErrorCode.EMAIL_FORMAT_INVALID;
+import roomescape.exception.business.InvalidCreateArgumentException;
 
 @Embeddable
 public record Email(

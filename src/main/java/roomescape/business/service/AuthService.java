@@ -1,5 +1,8 @@
 package roomescape.business.service;
 
+import static roomescape.exception.SecurityErrorCode.INVALID_EMAIL;
+import static roomescape.exception.SecurityErrorCode.INVALID_PASSWORD;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.AuthToken;
@@ -7,9 +10,6 @@ import roomescape.auth.jwt.JwtUtil;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.exception.auth.AuthenticationException;
-
-import static roomescape.exception.SecurityErrorCode.INVALID_EMAIL;
-import static roomescape.exception.SecurityErrorCode.INVALID_PASSWORD;
 
 @Service
 @RequiredArgsConstructor

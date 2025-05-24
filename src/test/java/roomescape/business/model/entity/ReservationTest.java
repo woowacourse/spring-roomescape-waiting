@@ -1,13 +1,15 @@
 package roomescape.business.model.entity;
 
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import roomescape.exception.business.InvalidCreateArgumentException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.*;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import roomescape.business.model.vo.ReservationStatus;
+import roomescape.exception.business.InvalidCreateArgumentException;
 
 class ReservationTest {
 
@@ -27,7 +29,8 @@ class ReservationTest {
             final User user = User.create(NAME, EMAIL, PASSWORD);
 
             // when
-            final Reservation reservation = Reservation.create(user, DATE, RESERVATION_TIME, THEME);
+            final Reservation reservation = Reservation.create(user, DATE, RESERVATION_TIME, THEME, ReservationStatus.RESERVED,
+                    LocalDateTime.now());
 
             // then
             assertThat(reservation).isNotNull();
@@ -42,7 +45,8 @@ class ReservationTest {
             final LocalDate pastDate = LocalDate.now().minusDays(1);
             final User user = User.create(NAME, EMAIL, PASSWORD);
 
-            assertThatThrownBy(() -> Reservation.create(user, pastDate, RESERVATION_TIME, THEME))
+            assertThatThrownBy(() -> Reservation.create(user, pastDate, RESERVATION_TIME, THEME, ReservationStatus.RESERVED,
+                    LocalDateTime.now()))
                     .isInstanceOf(InvalidCreateArgumentException.class);
         }
 
@@ -51,7 +55,8 @@ class ReservationTest {
             final LocalDate over7DaysDate = LocalDate.now().plusDays(8);
             final User user = User.create(NAME, EMAIL, PASSWORD);
 
-            assertThatThrownBy(() -> Reservation.create(user, over7DaysDate, RESERVATION_TIME, THEME))
+            assertThatThrownBy(() -> Reservation.create(user, over7DaysDate, RESERVATION_TIME, THEME, ReservationStatus.RESERVED,
+                    LocalDateTime.now()))
                     .isInstanceOf(InvalidCreateArgumentException.class);
         }
     }

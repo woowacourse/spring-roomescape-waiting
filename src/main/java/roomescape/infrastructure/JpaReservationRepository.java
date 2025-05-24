@@ -1,15 +1,19 @@
 package roomescape.infrastructure;
 
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Repository;
-import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.repository.ReservationRepository;
-import roomescape.business.model.vo.Id;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
+import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationTime;
+import roomescape.business.model.entity.Theme;
+import roomescape.business.model.repository.ReservationRepository;
+import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ReservationDate;
+import roomescape.business.model.vo.ReservationStatus;
+import roomescape.business.dto.ReservationWithAheadDto;
 
 @Primary
 @Repository
@@ -32,8 +36,14 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo) {
-        return dao.findAllWithFilter(themeId, memberId, dateFrom, dateTo);
+    public List<Reservation> findAllReservationWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo,
+                                                          ReservationStatus reservationStatus) {
+        return dao.findAllWithFilter(themeId, memberId, dateFrom, dateTo, reservationStatus);
+    }
+
+    @Override
+    public List<ReservationWithAheadDto> findReservationsWithAhead(Id userId) {
+        return dao.findReservationsWithAhead(userId);
     }
 
     @Override
@@ -64,5 +74,10 @@ public class JpaReservationRepository implements ReservationRepository {
     @Override
     public void deleteById(Id reservationId) {
         dao.deleteById(reservationId);
+    }
+
+    @Override
+    public void updateWaitingReservations(ReservationDate date, ReservationTime time, Theme theme) {
+        dao.updateWaitingReservations(date, time, theme);
     }
 }
