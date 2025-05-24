@@ -10,11 +10,9 @@ import roomescape.member.domain.Member;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-
     @Query("select m from Member m where m.email = :email and m.password.password = :password")
     Optional<Member> findByEmailAndPassword(@Param(value = "email") String email,
                                             @Param(value = "password") String Password);
 
     boolean existsByEmail(String email);
-
 }

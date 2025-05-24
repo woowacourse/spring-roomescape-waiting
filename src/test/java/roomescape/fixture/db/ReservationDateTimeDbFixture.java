@@ -3,6 +3,7 @@ package roomescape.fixture.db;
 import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import roomescape.fixture.entity.ReservationDateFixture;
 import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;

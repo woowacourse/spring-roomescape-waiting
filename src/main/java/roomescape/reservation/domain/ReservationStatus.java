@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum ReservationStatus {
 
-    RESERVED("예약");
-
-    private final String message;
+    RESERVED,
+    WAITING,
+    CANCELED_RESERVATION,
+    CANCELED_WAITING
+    ;
 }

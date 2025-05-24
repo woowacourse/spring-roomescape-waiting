@@ -1,7 +1,6 @@
 package roomescape.theme.controller;
 
 import static roomescape.theme.controller.response.ThemeSuccessCode.CREATE_THEME;
-import static roomescape.theme.controller.response.ThemeSuccessCode.DELETE_THEME;
 import static roomescape.theme.controller.response.ThemeSuccessCode.GET_POPULAR_THEMES;
 import static roomescape.theme.controller.response.ThemeSuccessCode.GET_THEMES;
 
@@ -52,9 +51,7 @@ public class ThemeApiController {
     public ResponseEntity<ApiResponse<Void>> deleteTheme(@PathVariable Long id) {
         themeService.deleteById(id);
 
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body(ApiResponse.success(DELETE_THEME));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/popular")

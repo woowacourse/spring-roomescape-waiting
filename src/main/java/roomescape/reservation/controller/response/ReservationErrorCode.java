@@ -8,7 +8,10 @@ import roomescape.global.response.ErrorCode;
 @RequiredArgsConstructor
 public enum ReservationErrorCode implements ErrorCode {
 
-    PAST_RESERVATION("RSF001", "지난 날짜에는 예약할 수 없습니다.");
+    PAST_RESERVATION("RSF001", "지난 날짜에는 예약할 수 없습니다."),
+    ALREADY_RESERVATION("RSF002", "이미 예약된 상태입니다."),
+    INVALID_STATUS_TRANSITION("RSF003", "예약 상태 전환이 유효하지 않습니다."),
+    ;
 
     private final String value;
     private final String message;

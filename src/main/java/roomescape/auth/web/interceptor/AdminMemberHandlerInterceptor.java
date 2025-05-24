@@ -18,6 +18,14 @@ public class AdminMemberHandlerInterceptor implements HandlerInterceptor {
     private final AuthService authService;
     private final CookieProvider cookieProvider;
 
+    private static Cookie[] getCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new TokenNotFoundException("쿠키가 존재하지 않습니다.");
+        }
+        return cookies;
+    }
+
     @Override
     public boolean preHandle(
             HttpServletRequest request,
@@ -32,13 +40,5 @@ public class AdminMemberHandlerInterceptor implements HandlerInterceptor {
             throw new NotAdminException("관리자 권한이 없습니다.");
         }
         return true;
-    }
-
-    private static Cookie[] getCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new TokenNotFoundException("쿠키가 존재하지 않습니다.");
-        }
-        return cookies;
     }
 }

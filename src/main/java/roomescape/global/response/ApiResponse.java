@@ -11,6 +11,12 @@ public class ApiResponse<T> {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final T data;
 
+    private ApiResponse(String code, String message, T data) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
+    }
+
     public static ApiResponse<Void> success(SuccessCode code) {
         return new ApiResponse<>(code.getValue(), code.getMessage(), null);
     }
@@ -19,13 +25,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(code.getValue(), code.getMessage(), data);
     }
 
-    public static ApiResponse<Void> fail(ErrorCode code, String message) {
-        return new ApiResponse<>(code.getValue(), message, null);
-    }
-
-    private ApiResponse(String code, String message, T data) {
-        this.code = code;
-        this.message = message;
-        this.data = data;
+    public static ApiResponse<Void> fail(ErrorCode code) {
+        return new ApiResponse<>(code.getValue(), code.getMessage(), null);
     }
 }

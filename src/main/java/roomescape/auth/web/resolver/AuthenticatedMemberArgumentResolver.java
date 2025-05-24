@@ -20,6 +20,17 @@ public class AuthenticatedMemberArgumentResolver implements HandlerMethodArgumen
     private final AuthService authService;
     private final CookieProvider cookieProvider;
 
+    private static Cookie[] getCookies(HttpServletRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException();
+        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            throw new TokenNotFoundException("토큰이 존재하지 않습니다.");
+        }
+        return cookies;
+    }
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(Authenticated.class);
@@ -38,16 +49,5 @@ public class AuthenticatedMemberArgumentResolver implements HandlerMethodArgumen
         }
 
         return authService.getMemberId(token);
-    }
-
-    private static Cookie[] getCookies(HttpServletRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException();
-        }
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
-            throw new TokenNotFoundException("토큰이 존재하지 않습니다.");
-        }
-        return cookies;
     }
 }

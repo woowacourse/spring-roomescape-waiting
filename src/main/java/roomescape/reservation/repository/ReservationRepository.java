@@ -14,23 +14,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             select exists
                 (select r from Reservation r
-                where r.reservationDatetime.reservationDate.date = :date and r.reservationDatetime.reservationTime.id = :timeId)
+                where r.reservationDateTime.reservationDate.date = :date and r.reservationDateTime.reservationTime.id = :timeId)
             """)
-    boolean existsByDateAndTimeId(@Param(value = "date") LocalDate date, @Param(value = "timeId") Long timeId);
+    boolean existsByDateAndTimeId(@Param("date") LocalDate date, @Param("timeId") Long timeId);
 
     @Query("""
              select exists
                 (select r from Reservation r
-                where r.reservationDatetime.reservationTime.id = :timeId)
+                where r.reservationDateTime.reservationTime.id = :timeId)
             """)
-    boolean existsByTimeId(@Param(value = "timeId") Long timeId);
+    boolean existsByTimeId(@Param("timeId") Long timeId);
 
     boolean existsByTheme_Id(Long themeId);
 
     @Query("""
             select count(*) from Reservation r
             where r.theme.id = :themeId
-            and r.reservationDatetime.reservationDate.date between :from and :to
+            and r.reservationDateTime.reservationDate.date between :from and :to
             """)
     long countReservationByThemeIdAndDuration(
             @Param("from") LocalDate from,
@@ -39,37 +39,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("""
-            select r.reservationDatetime.reservationTime.id
+            select r.reservationDateTime.reservationTime.id
             from Reservation r
-            where r.reservationDatetime.reservationDate.date = :date and r.theme.id = :themeId
+            where r.reservationDateTime.reservationDate.date = :date and r.theme.id = :themeId
             """)
-    List<Long> findReservedTimeIdsByDateAndTheme(@Param(value = "date") LocalDate date,
-                                                 @Param(value = "themeId") Long themeId);
-
-    @Query("""
-                select r from Reservation r
-                join fetch r.reservationDatetime.reservationTime t
-                join fetch r.theme th
-                join fetch r.reserver m
-                where (:themeId is null or r.theme.id = :themeId)
-                  and (:memberId is null or r.reserver.id = :memberId)
-                  and (:fromDate is null or r.reservationDatetime.reservationDate.date >= :fromDate)
-                  and (:toDate is null or r.reservationDatetime.reservationDate.date <= :toDate)
-            """)
-    List<Reservation> findFilteredReservations(
-            @Param("themeId") Long themeId,
-            @Param("memberId") Long memberId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
-
-    @Query("""
-            select r
-            from Reservation r
-            join fetch r.reserver
-            join fetch r.reservationDatetime.reservationTime
-            join fetch r.theme
-            where r.reserver.id = :memberId
-            """)
-    List<Reservation> findByMemberId(@Param("memberId") Long memberId);
+    List<Long> findReservedTimeIdsByDateAndTheme(@Param("date") LocalDate date,
+                                                 @Param("themeId") Long themeId);
 }
