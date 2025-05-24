@@ -129,22 +129,20 @@ class AdminReservationServiceTest {
         final Reservation reservation = reservationRepository.save(
                 new Reservation(date, time, theme, member, BOOKED));
 
-        // when & then
-        Assertions.assertThatCode(() -> adminReservationService.deleteAsAdmin(reservation.getId()))
-                .doesNotThrowAnyException();
+        // when
+        adminReservationService.deleteAsAdmin(reservation.getId());
+
+        // then
+        Assertions.assertThat(reservationRepository.findById(reservation.getId()).isEmpty()).isTrue();
     }
 
     @Test
     void 삭제하려는_예약이_존재하지_않는_경우_예외가_발생한다() {
         // given
-        final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime time = reservationTimeRepository.save(notSavedReservationTime1());
-        final Theme theme = themeRepository.save(notSavedTheme1());
-        final Member member = memberRepository.save(notSavedMember1());
-        reservationRepository.save(new Reservation(date, time, theme, member, BOOKED));
+        final Long notExistWaitingId = Long.MAX_VALUE;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> adminReservationService.deleteAsAdmin(Long.MAX_VALUE))
+        Assertions.assertThatThrownBy(() -> adminReservationService.deleteAsAdmin(notExistWaitingId))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 

@@ -8,20 +8,20 @@ import roomescape.theme.ui.dto.ThemeResponse;
 
 public record WaitingResponse(
         Long id,
-        IdName member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
+        IdName member,
         LocalDateTime createdAt
 ) {
 
     public static WaitingResponse from(final Waiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),
-                IdName.from(waiting.getMember()),
                 waiting.getDate(),
                 ReservationTimeResponse.from(waiting.getTime()),
                 ThemeResponse.from(waiting.getTheme()),
+                IdName.from(waiting.getMember()),
                 waiting.getCreatedAt()
         );
     }
