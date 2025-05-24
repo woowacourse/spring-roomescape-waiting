@@ -70,4 +70,8 @@ public class WaitInfo {
     public String getCreatedAt() {
         return createdAt;
     }
+
+    public void setRank(final Long rank) {
+        this.rank = rank;
+    }
 }

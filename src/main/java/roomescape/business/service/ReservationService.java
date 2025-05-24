@@ -73,7 +73,7 @@ public class ReservationService {
         waitInfoRepository.save(waitInfo);
 
         return new ReservationResponse(
-                reservation.getId(),
+                waitInfo.getId(),
                 member.getName(),
                 theme.getName(),
                 date,
@@ -103,7 +103,7 @@ public class ReservationService {
         final Reservation reservation =
                 reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).get();
 
-        validateWaitInfoExists(reservation.getId());
+        validateWaitInfoExistsByReservationId(reservation.getId());
         validateWaitInfoIsNotDuplicate(memberId, reservation.getId());
 
         final Long rank = waitInfoRepository.countByReservationId(reservation.getId()) + 1;
@@ -150,7 +150,7 @@ public class ReservationService {
         }
     }
 
-    private void validateWaitInfoExists(Long reservationId) {
+    private void validateWaitInfoExistsByReservationId(Long reservationId) {
         if (!waitInfoRepository.existsByReservationId(reservationId)) {
             throw new NotFoundException("예약 대기자가 없습니다. 예약하기를 사용해주세요.");
         }
@@ -167,7 +167,7 @@ public class ReservationService {
         final List<WaitInfo> waitInfos = waitInfoRepository.findByRank(1L);
         return waitInfos.stream()
                 .map(waitInfo -> new ReservationResponse(
-                        waitInfo.getReservation().getId(),
+                        waitInfo.getId(),
                         waitInfo.getMember().getName(),
                         waitInfo.getReservation().getTheme().getName(),
                         waitInfo.getReservation().getDate(),
@@ -201,11 +201,44 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteById(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(id));
+    public void deleteById(final Long waitInfoId) {
+        validateWaitInfoExistsById(waitInfoId);
+        final WaitInfo waitInfo = waitInfoRepository.findById(waitInfoId).get();
+        waitInfoRepository.deleteById(waitInfoId);
+
+        final Long reservationId = waitInfo.getReservation().getId();
+        updateWaitInfoRank(reservationId);
+    }
+
+    private void validateWaitInfoExistsById(final Long waitInfoId) {
+        if (!waitInfoRepository.existsById(waitInfoId)) {
+            throw new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d".formatted(waitInfoId));
         }
-        reservationRepository.deleteById(id);
+    }
+
+    private void updateWaitInfoRank(final Long reservationId) {
+        final List<WaitInfo> waitInfos = waitInfoRepository.findByReservationId(reservationId);
+        final List<WaitInfo> sortedWaitInfos = waitInfos.stream()
+                .sorted((w1, w2) -> w1.getCreatedAt().compareTo(w2.getCreatedAt()))
+                .toList();
+        for (int i = 0; i < sortedWaitInfos.size(); i++) {
+            final WaitInfo updatedWaitInfo = sortedWaitInfos.get(i);
+            updatedWaitInfo.setRank((long) (i + 1));
+            waitInfoRepository.save(updatedWaitInfo);
+        }
+    }
+
+    public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
+        validateWaitInfoExistsByIdAndMemberId(waitInfoId, memberId);
+
+        deleteById(waitInfoId);
+    }
+
+    private void validateWaitInfoExistsByIdAndMemberId(final Long waitInfoId, final Long memberId) {
+        if (!waitInfoRepository.existsByIdAndMemberId(waitInfoId, memberId)) {
+            throw new NotFoundException(
+                    "해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d, 멤버 id: %d".formatted(waitInfoId, memberId));
+        }
     }
 
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
@@ -221,7 +254,6 @@ public class ReservationService {
                 .toList();
     }
 
-    // TODO: 테스트 추가, 랭크 계산이 잘 계산되는지 확인하기
     private String calculateStatus(final WaitInfo waitInfo) {
         final Long rank = waitInfoRepository.countByIdLessThanEqualAndReservationId(
                 waitInfo.getId(),
@@ -233,17 +265,6 @@ public class ReservationService {
         return "%d번째 예약대기".formatted(rank);
     }
 
-    // TODO: 테스트 추가, 예약 대기 삭제가 잘 되는지 확인
-    public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
-        if (!waitInfoRepository.existsByIdAndMemberId(waitInfoId, memberId)) {
-            throw new NotFoundException(
-                    "해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d, 멤버 id: %d".formatted(waitInfoId, memberId));
-        }
-
-        waitInfoRepository.deleteById(waitInfoId);
-    }
-
-    // TODO: 테스트 추가. 승인되지 않은 예약만 가져오는지 확인
     public List<WaitResponse> findWaitInfoByStatusNotApprove() {
         final List<WaitInfo> waitInfos = waitInfoRepository.findByRankNot(1L);
 
