@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import roomescape.member.application.exception.MemberFieldRequiredException;
 
 @Entity
@@ -76,6 +77,23 @@ public class Member {
         if (email == null) {
             throw new MemberFieldRequiredException("이메일");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Member member = (Member) o;
+        if (member.getId() == null || this.getId() == null) {
+            return false;
+        }
+        return Objects.equals(id, member.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public Long getId() {

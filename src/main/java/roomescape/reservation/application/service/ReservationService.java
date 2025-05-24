@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.exception.MemberNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.application.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.application.exception.NotReservationOwnerException;
 import roomescape.reservation.application.exception.ReservationInPastException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
 import roomescape.reservation.application.exception.ReservationTimeNotFoundException;
@@ -58,10 +58,6 @@ public class ReservationService {
 
         if (LocalDateTime.now().isAfter(LocalDateTime.of(request.date(), reservationTime.getStartAt()))) {
             throw new ReservationInPastException();
-        }
-
-        if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
-            throw new ReservationAlreadyExistsException();
         }
 
         ReservationStatus status = getReservationStatus(request.date(), reservationTime, theme);
@@ -143,8 +139,8 @@ public class ReservationService {
         Reservation targetReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException(reservationId));
 
-        if (!targetReservation.getMember().getId().equals(member.getId())) {
-            throw new IllegalArgumentException("예약의 주인이 아닙니다.");
+        if (!targetReservation.getMember().equals(member)) {
+            throw new NotReservationOwnerException("예약의 주인이 아닙니다.");
         }
 
         reservationRepository.delete(targetReservation);
