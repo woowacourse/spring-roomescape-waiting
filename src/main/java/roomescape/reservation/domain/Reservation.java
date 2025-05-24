@@ -87,7 +87,7 @@ public class Reservation {
         return this.member.equals(member);
     }
 
-    public void reAssignedTo(Member member) {
+    public void setMember(Member member) {
         this.member = member;
     }
 

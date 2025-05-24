@@ -138,7 +138,7 @@ public class ReservationService {
         }
 
         Waiting firstWaiting = waitings.getFirst();
-        reservation.reAssignedTo(firstWaiting.getMember());
+        reservation.setMember(firstWaiting.getMember());
 
         waitingRepository.deleteById(firstWaiting.getId());
     }
