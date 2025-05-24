@@ -20,6 +20,7 @@ public class WaitingService {
         this.memberService = memberService;
     }
 
+    @Transactional(readOnly = true)
     public long countWaitingReservation(Reservation reservation) {
         if (!reservation.isWaiting()) {
             throw new IllegalArgumentException("예약 대기 상태가 아닙니다.");
