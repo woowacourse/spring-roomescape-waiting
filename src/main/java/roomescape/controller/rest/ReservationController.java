@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.dto.SessionMember;
 import roomescape.service.ReservationService;
-import roomescape.service.request.ReservationCreateRequest;
+import roomescape.service.request.CreateReservationRequest;
 import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
 
@@ -31,7 +31,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
-            @RequestBody @Valid final ReservationCreateRequest request,
+            @RequestBody @Valid final CreateReservationRequest request,
             final SessionMember sessionMember
     ) {
         ReservationResponse response = reservationService.createReservation(request, sessionMember.id());
@@ -41,7 +41,7 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable final Long id) {
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id) {
         reservationService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
     }

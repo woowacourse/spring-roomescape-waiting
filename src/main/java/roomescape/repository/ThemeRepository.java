@@ -11,13 +11,10 @@ import roomescape.domain.theme.Theme;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
-            SELECT t
-            FROM Theme t
-            LEFT JOIN Reservation r ON r.theme = t
-            WHERE r.reservationDate.date IS NOT NULL
-              AND r.reservationDate.date >= :startDate
-              AND r.reservationDate.date < :endDate
-            GROUP BY t
+            SELECT t FROM Theme t
+            LEFT JOIN ReservationSchedule rs on t.id = rs.theme.id
+            INNER JOIN Reservation r on rs.id = r.schedule.id
+            GROUP BY t.id
             ORDER BY COUNT(r.id) DESC
             """)
     List<Theme> findPopularThemeDuringAWeek(

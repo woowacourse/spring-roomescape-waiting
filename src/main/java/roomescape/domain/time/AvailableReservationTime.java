@@ -1,13 +1,13 @@
 package roomescape.domain.time;
 
-import java.util.Objects;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
 
 public record AvailableReservationTime(
-        ReservationTime time,
+        ReservationSchedule schedule,
         boolean available
 ) {
-    public AvailableReservationTime(final ReservationTime time, final boolean available) {
-        this.time = Objects.requireNonNull(time, "time은 null일 수 없습니다.");
+    public AvailableReservationTime(final ReservationSchedule schedule, final boolean available) {
+        this.schedule = schedule;
         this.available = available;
     }
 }

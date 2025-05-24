@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.domain.reservation.schdule.ReservationDate;
 import roomescape.domain.time.ReservationTime;
 
 public class ReservationDateTime {

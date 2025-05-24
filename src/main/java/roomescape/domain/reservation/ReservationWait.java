@@ -1,5 +1,8 @@
 package roomescape.domain.reservation;
 
+import static org.hibernate.annotations.GenerationTime.INSERT;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,17 +12,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import org.hibernate.annotations.Generated;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.schdule.ReservationSchedule;
-import roomescape.domain.theme.Theme;
-import roomescape.domain.time.ReservationTime;
 
 @Entity
-@Table(name = "reservation")
-public class Reservation {
+@Table(name = "reservation_wait")
+public class ReservationWait {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,10 +34,14 @@ public class Reservation {
     @JoinColumn(name = "schedule_id")
     private ReservationSchedule schedule;
 
-    protected Reservation() {
+    @Generated(INSERT)
+    @Column(name = "created_at", updatable = false, insertable = false)
+    private LocalDateTime createdAt;
+
+    protected ReservationWait() {
     }
 
-    public Reservation(
+    public ReservationWait(
             final Long id,
             final Member member,
             final ReservationSchedule schedule
@@ -54,23 +59,17 @@ public class Reservation {
         return member;
     }
 
-    public LocalDate getDate() {
-        return schedule.getDate();
-    }
-
-    public ReservationTime getReservationTime() {
-        return schedule.getReservationTime();
-    }
-
-    public LocalTime getStartAt() {
-        return schedule.getStartAt();
-    }
-
-    public Theme getTheme() {
-        return schedule.getTheme();
-    }
-
     public ReservationSchedule getSchedule() {
         return schedule;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Long calculateRank() {
+        return schedule.getWaits().stream()
+                .filter(wait -> wait.getCreatedAt().isBefore(this.createdAt))
+                .count() + 1;
     }
 }

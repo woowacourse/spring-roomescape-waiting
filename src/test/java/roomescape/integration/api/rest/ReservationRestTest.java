@@ -1,55 +1,52 @@
 package roomescape.integration.api.rest;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static roomescape.common.Constant.FIXED_CLOCK;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.RestAssuredTestBase;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.ReservationTime;
 import roomescape.integration.api.RestLoginMember;
+import roomescape.integration.fixture.ReservationDateFixture;
+import roomescape.integration.fixture.ReservationDbFixture;
+import roomescape.integration.fixture.ReservationScheduleDbFixture;
+import roomescape.integration.fixture.ReservationTimeDbFixture;
+import roomescape.integration.fixture.ThemeDbFixture;
 
 class ReservationRestTest extends RestAssuredTestBase {
 
-    private static final LocalDate RESERVATION_DATE = LocalDate.now(FIXED_CLOCK).plusDays(1);
-    private static final String THEME_NAME = "어드벤처";
-    private Integer timeId;
-    private Integer themeId;
+    @Autowired
+    private ReservationDbFixture reservationDbFixture;
+
     private RestLoginMember restLoginMember;
 
+    private ReservationSchedule schedule;
+
     @BeforeEach
-    void setUp() {
+    void setUp(
+            @Autowired ReservationScheduleDbFixture reservationScheduleDbFixture,
+            @Autowired ReservationTimeDbFixture reservationTimeDbFixture,
+            @Autowired ThemeDbFixture themeDbFixture
+    ) {
         restLoginMember = generateLoginMember();
-        timeId = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .cookie("JSESSIONID", restLoginMember.sessionId())
-                .body(Map.of("startAt", "10:00"))
-                .when().post("/times")
-                .then().statusCode(201)
-                .extract().path("id");
-        themeId = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .cookie("JSESSIONID", restLoginMember.sessionId())
-                .body(Map.of(
-                        "name", THEME_NAME,
-                        "description", "정글 탐험 컨셉",
-                        "thumbnail", "https://example.com/adventure.jpg"
-                ))
-                .when().post("/themes")
-                .then().statusCode(201)
-                .extract().path("id");
+        Theme theme = themeDbFixture.공포();
+        ReservationTime time = reservationTimeDbFixture.예약시간_10시();
+        schedule = reservationScheduleDbFixture.createSchedule(ReservationDateFixture.예약날짜_오늘, time, theme);
     }
 
     @Test
     void 예약을_생성한다() {
         Map<String, Object> request = Map.of(
-                "date", LocalDate.now(FIXED_CLOCK).plusDays(1).toString(),
-                "timeId", timeId,
-                "themeId", themeId
+                "date", schedule.getDate().toString(),
+                "timeId", schedule.getReservationTime().getId(),
+                "themeId", schedule.getTheme().getId()
         );
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -60,72 +57,70 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .statusCode(201)
                 .body("id", is(1))
                 .body("name", is("홍길동"))
-                .body("date", is(RESERVATION_DATE.toString()))
-                .body("time.startAt", is("10:00"))
-                .body("theme.name", is("어드벤처"));
+                .body("date", is(schedule.getDate().toString()))
+                .body("time.startAt", is(schedule.getReservationTime().getStartAt().toString()))
+                .body("theme.name", is(schedule.getTheme().getName().name()));
     }
 
     @Test
     void 예약_목록을_조회한다() {
-        예약을_생성한다();
+        reservationDbFixture.예약_생성(schedule, restLoginMember.member());
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("JSESSIONID", restLoginMember.sessionId())
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", greaterThan(0))
-                .body("[0].name", is("홍길동"))
-                .body("[0].time.id", is(1))
-                .body("[0].time.startAt", is("10:00"))
-                .body("[0].theme.id", is(1))
-                .body("[0].theme.name", is("어드벤처"))
-                .body("[0].theme.description", is("정글 탐험 컨셉"))
-                .body("[0].theme.thumbnail", is("https://example.com/adventure.jpg"));
+                .body("[0].name", is(restLoginMember.member().getName().name()))
+                .body("[0].time.id", is(schedule.getReservationTime().getId().intValue()))
+                .body("[0].time.startAt", is(schedule.getReservationTime().getStartAt().toString()))
+                .body("[0].theme.id", is(schedule.getTheme().getId().intValue()))
+                .body("[0].theme.name", is(schedule.getTheme().getName().name()))
+                .body("[0].theme.description", is(schedule.getTheme().getDescription().description()))
+                .body("[0].theme.thumbnail", is(schedule.getTheme().getThumbnail().thumbnail()));
     }
 
     @Test
     void 필터를_이용해서_예약_목록을_조회한다() {
-        예약을_생성한다();
+        reservationDbFixture.예약_생성(schedule, restLoginMember.member());
         RestAssured.given().log().all()
-                .param("themeId", themeId)
+                .param("theme", schedule.getTheme().getId())
                 .cookie("JSESSIONID", restLoginMember.sessionId())
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", greaterThan(0))
-                .body("[0].name", is("홍길동"))
-                .body("[0].time.id", is(1))
-                .body("[0].time.startAt", is("10:00"))
-                .body("[0].theme.id", is(1))
-                .body("[0].theme.name", is("어드벤처"))
-                .body("[0].theme.description", is("정글 탐험 컨셉"))
-                .body("[0].theme.thumbnail", is("https://example.com/adventure.jpg"));
+                .body("[0].name", is(restLoginMember.member().getName().name()))
+                .body("[0].time.id", is(schedule.getReservationTime().getId().intValue()))
+                .body("[0].time.startAt", is(schedule.getReservationTime().getStartAt().toString()))
+                .body("[0].theme.id", is(schedule.getTheme().getId().intValue()))
+                .body("[0].theme.name", is(schedule.getTheme().getName().name()))
+                .body("[0].theme.description", is(schedule.getTheme().getDescription().description()))
+                .body("[0].theme.thumbnail", is(schedule.getTheme().getThumbnail().thumbnail()));
     }
 
     @Test
     void 예약을_삭제한다() {
-        예약을_생성한다();
+        Reservation reservation = reservationDbFixture.예약_생성(schedule, restLoginMember.member());
         RestAssured.given().log().all()
                 .cookie("JSESSIONID", restLoginMember.sessionId())
-                .when().delete("/reservations/{id}", 1)
+                .when().delete("/reservations/{id}", reservation.getId())
                 .then().log().all()
                 .statusCode(204);
     }
 
     @Test
     void 내_예약을_조회한다() {
-        예약을_생성한다();
+        Reservation reservation = reservationDbFixture.예약_생성(schedule, restLoginMember.member());
+        ReservationSchedule schedule = reservation.getSchedule();
         RestAssured.given().log().all()
                 .cookie("JSESSIONID", restLoginMember.sessionId())
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].reservationId", is(1))
-                .body("[0].theme", is(THEME_NAME))
-                .body("[0].date", is(RESERVATION_DATE.toString()))
-                .body("[0].time", is("10:00"))
-                .body("[0].status", is("예약"));
+                .body("[0].reservationId", is(reservation.getId().intValue()))
+                .body("[0].theme", is(schedule.getTheme().getName().name()))
+                .body("[0].date", is(schedule.getDate().toString()))
+                .body("[0].time", is(schedule.getReservationTime().getStartAt().toString()));
     }
 }

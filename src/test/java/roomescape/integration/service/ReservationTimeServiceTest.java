@@ -20,21 +20,21 @@ import roomescape.domain.member.MemberEncodedPassword;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationDateTime;
+import roomescape.domain.reservation.schdule.ReservationDate;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
 import roomescape.domain.theme.ThemeThumbnail;
 import roomescape.domain.time.ReservationTime;
+import roomescape.integration.fixture.ReservationScheduleDbFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.ReservationTimeService;
-import roomescape.service.request.AvailableReservationTimeRequest;
 import roomescape.service.request.CreateReservationTimeRequest;
-import roomescape.service.response.AvailableReservationTimeResponse;
 import roomescape.service.response.ReservationTimeResponse;
 
 @Transactional
@@ -56,6 +56,8 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+    @Autowired
+    private ReservationScheduleDbFixture reservationScheduleDbFixture;
 
     @Test
     void 예약시간을_생성할_수_있다() {
@@ -113,9 +115,8 @@ class ReservationTimeServiceTest {
     void 예약이_존재하는_시간은_삭제할_수_없다() {
         // given
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        ReservationDateTime reservationDateTime = new ReservationDateTime(
-                new ReservationDate(LocalDate.of(2025, 5, 5)), time, FIXED_CLOCK
-        );
+        ReservationDate date = new ReservationDate(LocalDate.of(2025, 5, 5));
+        ReservationDateTime reservationDateTime = new ReservationDateTime(date, time, FIXED_CLOCK);
         Member member = memberRepository.save(new Member(
                 null,
                 new MemberName("한스"),
@@ -129,13 +130,8 @@ class ReservationTimeServiceTest {
                 new ThemeDescription("공포입니다."),
                 new ThemeThumbnail("썸네일")
         ));
-        Reservation reservation = reservationRepository.save(new Reservation(
-                null,
-                member,
-                reservationDateTime.getReservationDate(),
-                reservationDateTime.getReservationTime(),
-                theme
-        ));
+        ReservationSchedule schedule = reservationScheduleDbFixture.createSchedule(date, time, theme);
+        reservationRepository.save(new Reservation(null, member, schedule));
 
         // when & then
         assertThatThrownBy(() -> service.deleteReservationTimeById(time.getId()))
@@ -166,22 +162,5 @@ class ReservationTimeServiceTest {
         // when & then
         assertThatThrownBy(() -> service.getReservationTime(1L))
                 .isInstanceOf(NoSuchElementException.class);
-    }
-
-    @Test
-    void 예약가능한_시간들을_조회할_수_있다() {
-        // given
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(11, 0)));
-
-        // when
-        List<AvailableReservationTimeResponse> result = service.findAvailableReservationTimes(
-                new AvailableReservationTimeRequest(LocalDate.of(2025, 5, 5), 1L));
-
-        // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.get(0).startAt()).isEqualTo(LocalTime.of(10, 0));
-            softly.assertThat(result.get(0).isReserved()).isFalse();
-        });
     }
 }

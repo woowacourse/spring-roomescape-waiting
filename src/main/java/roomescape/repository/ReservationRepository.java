@@ -1,22 +1,17 @@
 package roomescape.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long>,
         JpaSpecificationExecutor<Reservation> {
 
-    boolean existsByReservationDateAndReservationTime_Id(
-            final ReservationDate reservationDate,
-            final Long timeId
-    );
+    List<Reservation> findAllByMember_Id(final Long memberId);
 
-    boolean existsByReservationTime_Id(final Long timeId);
+    boolean existsByScheduleId(Long scheduleId);
 
-    boolean existsByTheme_Id(final Long themeId);
-
-    List<Reservation> findByMember_Id(final Long memberId);
+    Optional<Reservation> findByScheduleId(Long scheduleId);
 }

@@ -20,8 +20,9 @@ import roomescape.domain.member.MemberEncodedPassword;
 import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationDateTime;
+import roomescape.domain.reservation.schdule.ReservationDate;
+import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
@@ -30,6 +31,7 @@ import roomescape.domain.time.ReservationTime;
 import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.integration.fixture.ReservationDateFixture;
 import roomescape.integration.fixture.ReservationDbFixture;
+import roomescape.integration.fixture.ReservationScheduleDbFixture;
 import roomescape.integration.fixture.ReservationTimeDbFixture;
 import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.repository.MemberRepository;
@@ -71,6 +73,8 @@ class ThemeServiceTest {
 
     @Autowired
     private ReservationTimeDbFixture reservationTimeDbFixture;
+    @Autowired
+    private ReservationScheduleDbFixture reservationScheduleDbFixture;
 
     @Test
     void 테마를_생성할_수_있다() {
@@ -123,6 +127,7 @@ class ThemeServiceTest {
                         new ThemeThumbnail("썸네일")
                 )
         );
+        ReservationDate date = new ReservationDate(LocalDate.of(2025, 5, 5));
         ReservationTime time = reservationTimeRepository.save(
                 new ReservationTime(null, LocalTime.of(10, 0)));
         ReservationDateTime reservationDateTime = new ReservationDateTime(
@@ -136,13 +141,8 @@ class ThemeServiceTest {
                 MemberRole.MEMBER
         ));
 
-        Reservation reservation = reservationRepository.save(new Reservation(
-                null,
-                member,
-                reservationDateTime.getReservationDate(),
-                reservationDateTime.getReservationTime(),
-                theme
-        ));
+        ReservationSchedule schedule = reservationScheduleDbFixture.createSchedule(date, time, theme);
+        reservationRepository.save(new Reservation(null, member, schedule));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
@@ -161,11 +161,14 @@ class ThemeServiceTest {
         // given
         Theme 공포 = themeDbFixture.공포();
         Theme 로맨스 = themeDbFixture.로맨스();
-        Member 한스 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
-        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
+        Member member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        ReservationTime time = reservationTimeDbFixture.예약시간_10시();
         ReservationDate 예약날짜_7일전 = ReservationDateFixture.예약날짜_7일전;
-        Reservation 공포_예약 = reservationDbFixture.예약_생성(예약날짜_7일전, reservationTime, 공포, 한스);
-        Reservation 로맨스_예약 = reservationDbFixture.예약_생성(예약날짜_7일전, reservationTime, 로맨스, 한스);
+        ReservationSchedule schedule1 = reservationScheduleDbFixture.createSchedule(예약날짜_7일전, time, 공포);
+        ReservationSchedule schedule2 = reservationScheduleDbFixture.createSchedule(예약날짜_7일전, time, 로맨스);
+
+        reservationRepository.save(new Reservation(null, member, schedule1));
+        reservationRepository.save(new Reservation(null, member, schedule2));
 
         // when
         List<ThemeResponse> result = themeService.getWeeklyPopularThemes();

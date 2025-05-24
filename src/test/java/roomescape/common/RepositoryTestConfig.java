@@ -7,10 +7,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.integration.fixture.ReservationDbFixture;
+import roomescape.integration.fixture.ReservationScheduleDbFixture;
 import roomescape.integration.fixture.ReservationTimeDbFixture;
 import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationScheduleRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
@@ -35,6 +37,11 @@ public class RepositoryTestConfig {
     @Bean
     public MemberDbFixture memberDbFixture(final MemberRepository repository) {
         return new MemberDbFixture(repository);
+    }
+
+    @Bean
+    public ReservationScheduleDbFixture reservationScheduleDbFixture(final ReservationScheduleRepository repository) {
+        return new ReservationScheduleDbFixture(repository);
     }
 
     @Bean
