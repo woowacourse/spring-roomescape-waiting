@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ReservationException;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -26,7 +26,7 @@ class ReservationTimeServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private RoomEscapeInformationRepository roomEscapeInformationRepository;
 
     private ReservationTimeService service;
 
@@ -35,7 +35,7 @@ class ReservationTimeServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+        service = new ReservationTimeService(reservationTimeRepository, roomEscapeInformationRepository);
         reservationTimeRepository.saveAll(List.of(
                 ReservationTime.from(time1),
                 ReservationTime.from(time2)

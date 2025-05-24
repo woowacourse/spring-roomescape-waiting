@@ -13,7 +13,7 @@ import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 
 @DataJpaTest
 @Sql("/data.sql")
-class JdbcReservationTimeRepositoryTest {
+class ReservationTimeRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository repository;
@@ -28,8 +28,8 @@ class JdbcReservationTimeRepositoryTest {
         // then
         SoftAssertions.assertSoftly(soft -> {
                     soft.assertThat(allAvailable).hasSize(RESERVATION_TIME_COUNT);
-                    soft.assertThat(allAvailable.get(0).alreadyBooked()).isTrue();
-                    soft.assertThat(allAvailable.get(1).alreadyBooked()).isFalse();
+                    soft.assertThat(allAvailable).extracting(AvailableReservationTimeResponse::alreadyBooked)
+                            .containsExactly(true, false);
                 }
         );
     }

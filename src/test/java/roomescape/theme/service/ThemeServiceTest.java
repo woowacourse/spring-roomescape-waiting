@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ReservationException;
-import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
@@ -22,7 +22,7 @@ import roomescape.theme.repository.ThemeRepository;
 class ThemeServiceTest {
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private RoomEscapeInformationRepository roomEscapeInformationRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -31,7 +31,7 @@ class ThemeServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ThemeService(themeRepository, reservationRepository);
+        service = new ThemeService(themeRepository, roomEscapeInformationRepository);
     }
 
     @Test

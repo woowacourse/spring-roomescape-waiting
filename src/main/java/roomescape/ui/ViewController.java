@@ -36,6 +36,11 @@ public class ViewController {
         return "reservation-mine";
     }
 
+    @GetMapping("/admin/waiting")
+    public String getWaitingReservationsPage() {
+        return "admin/waiting";
+    }
+
     @GetMapping("/")
     public String getHomePage() {
         return "index";

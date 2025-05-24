@@ -13,7 +13,7 @@ import roomescape.theme.domain.Theme;
 
 @DataJpaTest
 @Sql("/data.sql")
-class JdbcThemeRepositoryTest {
+class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository repository;

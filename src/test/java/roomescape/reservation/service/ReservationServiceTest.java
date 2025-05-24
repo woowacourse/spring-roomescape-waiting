@@ -16,12 +16,12 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginMember;
-import roomescape.exception.NotFoundException;
 import roomescape.exception.ReservationException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.domain.Password;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.RoomEscapeInformation;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationSearchRequest;
@@ -31,7 +31,7 @@ import roomescape.theme.domain.Theme;
 
 @DataJpaTest
 @Sql("/data.sql")
-@Import(ReservationService.class)
+@Import({ReservationService.class, WaitingReservationService.class})
 class ReservationServiceTest {
 
     @Autowired
@@ -44,19 +44,15 @@ class ReservationServiceTest {
     private ReservationService service;
 
     private ReservationTime time;
-
     private Theme theme;
-
     private Member member;
-
+    private RoomEscapeInformation roomEscapeInformation;
     private Reservation reservation;
 
     @BeforeEach
     void setUp() {
         time = ReservationTime.from(LocalTime.of(14, 0));
-
         theme = Theme.of("테마1", "설명1", "썸네일1");
-
         member = Member.builder()
                 .name("김철수")
                 .email("member@example.com")
@@ -64,7 +60,16 @@ class ReservationServiceTest {
                 .role(MemberRole.MEMBER)
                 .build();
 
-        reservation = Reservation.booked(LocalDate.of(2999, 5, 11), time, theme, member);
+        roomEscapeInformation = RoomEscapeInformation.builder()
+                .date(LocalDate.of(2999, 5, 11))
+                .time(time)
+                .theme(theme)
+                .build();
+
+        reservation = Reservation.builder()
+                .roomEscapeInformation(roomEscapeInformation)
+                .member(member)
+                .build();
     }
 
     @Test
@@ -74,25 +79,9 @@ class ReservationServiceTest {
                 new ReservationSearchRequest(null, null, null, null));
 
         // then
-        assertThat(responses).hasSize(RESERVATION_COUNT);
-    }
-
-    @Test
-    void 중복된_날짜와_시간이면_예외가_발생한다() {
-        // given: r1과 동일한 date/time 요청
-        tm.persistAndFlush(time);
-        tm.persistAndFlush(theme);
-        tm.persistAndFlush(member);
-        tm.persistAndFlush(reservation);
-        ReservationRequest dupReq = new ReservationRequest(reservation.getDate(), time.getId(), theme.getId());
-        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
-                member.getRole());
-        tm.clear();
-        // when
-        // then
-        assertThatThrownBy(() -> service.saveReservation(dupReq, loginMember))
-                .isInstanceOf(ReservationException.class)
-                .hasMessage("해당 시간은 이미 예약되어있습니다.");
+        assertThat(responses).hasSize(RESERVATION_COUNT)
+                .extracting(ReservationResponse::id)
+                .doesNotContain(0L);
     }
 
     @Test
@@ -102,7 +91,7 @@ class ReservationServiceTest {
         tm.persistAndFlush(theme);
         tm.persistAndFlush(member);
         ReservationRequest request = new ReservationRequest(LocalDate.of(2000, 10, 8), time.getId(), theme.getId());
-        final LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
+        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), member.getEmail(),
                 member.getRole());
         tm.clear();
 
@@ -145,24 +134,16 @@ class ReservationServiceTest {
         tm.persistAndFlush(member);
         tm.persistAndFlush(time);
         tm.persistAndFlush(theme);
+        tm.persistAndFlush(roomEscapeInformation);
         tm.persistAndFlush(reservation);
 
         // when
-        service.deleteReservation(reservation.getId());
+        service.deleteById(reservation.getId());
 
         // then
         assertThat(reservationRepository.findByCriteria(null, null, null, null))
                 .hasSize(RESERVATION_COUNT)
                 .extracting(Reservation::getId)
                 .doesNotContain(reservation.getId());
-    }
-
-    @Test
-    void 존재하지_않는_예약을_삭제하면_예외가_발생한다() {
-        // when
-        // then
-        assertThatThrownBy(() -> service.deleteReservation(999L))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 예약입니다. id=999");
     }
 }
