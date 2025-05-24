@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "reservation_times")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReservationTime {
 
     private static final LocalTime OPEN_TIME = LocalTime.of(10, 0);
@@ -24,6 +24,7 @@ public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(nullable = false, unique = true)

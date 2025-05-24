@@ -19,12 +19,13 @@ import roomescape.member.domain.Member;
 @Table(name = "reservations")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,7 +50,6 @@ public class Reservation {
 
     public void delete() {
         reservationSlot.removeReservation(this);
-        reservationSlot = null;
     }
 
     private void validateReservationSlot(final ReservationSlot reservationSlot) {

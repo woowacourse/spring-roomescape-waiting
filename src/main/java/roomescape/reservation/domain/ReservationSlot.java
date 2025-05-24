@@ -29,26 +29,33 @@ import roomescape.theme.domain.Theme;
 @Table(name = "reservation_slots")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode(of = "id")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReservationSlot {
 
     private static final int MAX_WAITING_COUNT = 20;
-    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+
+    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private final List<Reservation> allReservations = new ArrayList<>();
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
     @Column(nullable = false)
     private LocalDate date;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
     private ReservationTime time;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id")
     private Theme theme;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "confirmed_reservation_id")
     private Reservation confirmedReservation;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    private Long id;
+
 
     public ReservationSlot(final Long id, final LocalDate date, final ReservationTime time, final Theme theme) {
         validateDate(date);
@@ -92,8 +99,7 @@ public class ReservationSlot {
     }
 
     public List<Reservation> getWaitingReservations() {
-        return allReservations.stream()
-                .filter(reservation -> !Objects.equals(reservation, confirmedReservation))
+        return allReservations.stream().filter(reservation -> !Objects.equals(reservation, confirmedReservation))
                 .toList();
     }
 
@@ -115,8 +121,7 @@ public class ReservationSlot {
     }
 
     private Reservation getFirstRankWaiting() {
-        return allReservations.stream()
-                .min(Comparator.comparing(Reservation::getId))
+        return allReservations.stream().min(Comparator.comparing(Reservation::getId))
                 .orElseThrow(() -> new IllegalStateException("예약 데이터가 존재하지 않습니다."));
     }
 
