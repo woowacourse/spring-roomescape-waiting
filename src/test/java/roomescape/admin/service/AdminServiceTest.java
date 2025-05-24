@@ -12,6 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.fixture.ReservationFixture;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.ReservationTimeTestDataConfig;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.ThemeTestDataConfig;
@@ -33,6 +36,8 @@ class AdminServiceTest {
     @Autowired
     private WaitingRepository waitingRepository;
     @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
     private MemberTestDataConfig memberTestDataConfig;
     @Autowired
     private ThemeTestDataConfig themeTestDataConfig;
@@ -48,20 +53,30 @@ class AdminServiceTest {
         private final ReservationTime savedTime = timeTestDataConfig.getSavedReservationTime();
 
         private Waiting createAndSaveWaiting(LocalDate date, ReservationTime time, Theme theme) {
-            Waiting waiting = createWaiting(date, time, theme);
+            Waiting waiting = createWaiting(date, time, theme, savedMember);
             return waitingRepository.save(waiting);
         }
 
-        private Waiting createWaiting(LocalDate date, ReservationTime time, Theme theme) {
-            return WaitingFixture.create(date, time, theme, savedMember);
+        private Waiting createWaiting(LocalDate date, ReservationTime time, Theme theme, User member) {
+            return WaitingFixture.create(date, time, theme, member);
         }
 
         @DisplayName("예약 대기 목록이 여러 개 일 때 List 형태로 반환된다")
         @Test
         void findAll_success_whenWaitingsExists() {
             // given
-            createAndSaveWaiting(LocalDate.now().plusDays(1), savedTime, savedTheme);
-            createAndSaveWaiting(LocalDate.now().plusDays(2), savedTime, savedTheme);
+            Reservation reservation1 = ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(1),
+                    savedTime,
+                    savedTheme, savedMember);
+            Reservation reservation2 = ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2),
+                    savedTime,
+                    savedTheme, savedMember);
+            Reservation savedReservation1 = reservationRepository.save(reservation1);
+            Reservation savedReservation2 = reservationRepository.save(reservation2);
+
+            createAndSaveWaiting(savedReservation1.getDate(), savedReservation1.getReservationTime(), savedReservation1.getTheme());
+            createAndSaveWaiting(savedReservation2.getDate(), savedReservation2.getReservationTime(),
+                    savedReservation2.getTheme());
 
             // when
             List<WaitingResponseDto> responseDtos = adminService.findAllWaitings();

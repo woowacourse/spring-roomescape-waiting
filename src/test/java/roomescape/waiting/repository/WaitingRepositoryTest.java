@@ -98,4 +98,35 @@ class WaitingRepositoryTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("예약 정보로 가장 빠른 대기 조회")
+    class FindOneByReservationInfoDescTest {
+
+        @DisplayName("예약 정보(date, timeId, themeId)에 해당하는 Waiting 중 가장 id가 작은 것을 조회한다")
+        @Test
+        void findOneByReservationInfoDesc_success() {
+            // given
+            Reservation reservation = createReservationDefault();
+            Reservation savedReservation = reservationRepository.save(reservation);
+
+            Waiting waiting1 = waitingRepository.save(WaitingFixture.createByReservation(savedReservation));
+            Waiting waiting2 = waitingRepository.save(WaitingFixture.createByReservation(savedReservation));
+
+            // when
+            Waiting found = waitingRepository.findOneByReservationInfoDesc(
+                    savedReservation.getDate(),
+                    savedReservation.getReservationTime().getId(),
+                    savedReservation.getTheme().getId()
+            ).orElseThrow();
+
+            // then
+            Assertions.assertThat(found.getId()).isEqualTo(
+                    List.of(waiting1, waiting2).stream()
+                            .map(Waiting::getId)
+                            .min(Long::compareTo)
+                            .orElseThrow()
+            );
+        }
+    }
 }

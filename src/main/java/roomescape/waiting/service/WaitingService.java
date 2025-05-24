@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.exception.NotFoundReservationTimeException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -20,13 +21,16 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
                           ReservationTimeRepository reservationTimeRepository,
+                          ReservationRepository reservationRepository,
                           ThemeRepository themeRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
     }
 
@@ -41,6 +45,7 @@ public class WaitingService {
                 .orElseThrow(NotFoundReservationTimeException::new);
         Theme theme = themeRepository.findById(requestDto.themeId())
                 .orElseThrow(NotFoundThemeException::new);
+
         return requestDto.toEntity(reservationTime, theme, member);
     }
 
@@ -50,13 +55,13 @@ public class WaitingService {
                 .toList();
     }
 
-    private static WaitingResponseDto convertWaitingResponseDto(Waiting savedWaiting) {
-        return WaitingResponseDto.of(savedWaiting);
-    }
-
     public void delete(Long waitingId) {
         findByIdOrThrow(waitingId);
         waitingRepository.deleteById(waitingId);
+    }
+
+    private static WaitingResponseDto convertWaitingResponseDto(Waiting savedWaiting) {
+        return WaitingResponseDto.of(savedWaiting);
     }
 
     private void findByIdOrThrow(Long waitingId) {

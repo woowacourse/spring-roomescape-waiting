@@ -191,12 +191,14 @@ function onWaitButtonClick() {
     const selectedDate = document.getElementById("datepicker").value;
     const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
     const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+    const selectedReservationId = document.querySelector('.time-slot.active')?.getAttribute('data-reservation-id');
 
-    if (selectedDate && selectedThemeId && selectedTimeId) {
+    if (selectedDate && selectedThemeId && selectedTimeId && selectedReservationId) {
         const reservationData = {
             date: selectedDate,
             themeId: selectedThemeId,
-            timeId: selectedTimeId
+            timeId: selectedTimeId,
+            reservationId: selectedReservationId
         };
 
         /*

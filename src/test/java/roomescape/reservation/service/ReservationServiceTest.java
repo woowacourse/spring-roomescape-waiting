@@ -1,6 +1,6 @@
 package roomescape.reservation.service;
 
-import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.global.exception.ConflictException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.dto.ReservationInfo;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.ReservationRepository;
@@ -26,9 +27,12 @@ import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
 import roomescape.user.fixture.UserFixture;
 import roomescape.user.repository.UserRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.fixture.WaitingFixture;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = AFTER_CLASS)
+@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
     @Autowired
@@ -38,17 +42,27 @@ class ReservationServiceTest {
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
     @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
     private ThemeRepository themeRepository;
     @Autowired
     private UserRepository userRepository;
 
+    private ReservationTime savedReservationTime;
     private Theme savedTheme;
     private User savedUser;
+    @Autowired
+    private ReservationService reservationService;
 
     @BeforeEach
     void beforeEach() {
+        savedReservationTime = reservationTimeRepository.save(ReservationTimeFixture.create(LocalTime.of(14, 14)));
         savedTheme = themeRepository.save(new Theme("name1", "dd", "tt"));
         savedUser = userRepository.save(UserFixture.create(Role.ROLE_MEMBER, "n1", "e1", "p1"));
+    }
+
+    private Reservation createDefaultReservationByBookedStatus(LocalDate date) {
+        return ReservationFixture.createByBookedStatus(date, savedReservationTime, savedTheme, savedUser);
     }
 
     private ReservationTime createAndSaveReservationTime(LocalTime time) {
@@ -116,6 +130,76 @@ class ReservationServiceTest {
             Assertions.assertThatCode(
                     () -> service.add(requestDto, savedUser)
             ).doesNotThrowAnyException();
+        }
+    }
+
+    @Nested
+    @DisplayName("예약 삭제 기능")
+    class cancelReservationAndReturnInfo {
+
+        @Nested
+        @DisplayName("예약 삭제 성공 기능")
+        class cancelReservationAndReturnInfo_success {
+
+            @DisplayName("존재하는 예약의 id로 요청을 하면 예약은 삭제된다")
+            @Test
+            void cancelReservationAndReturnInfo_success_byExistingReservationId() {
+                // given
+                Reservation reservation = createDefaultReservationByBookedStatus(
+                        LocalDate.now().plusDays(1));
+                Reservation savedReservation = reservationRepository.save(reservation);
+
+                // before then
+                Assertions.assertThat(reservationRepository.findAll()).hasSize(1);
+
+                // when
+                reservationService.cancelReservationAndReturnInfo(savedReservation.getId());
+
+                // then
+                Assertions.assertThat(reservationRepository.findAll()).hasSize(0);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("대기를 예약으로 승인 기능")
+    class approveWaiting {
+
+        private Waiting createAndSaveWaitingByReservation(Reservation reservation) {
+            Waiting waiting = createWaitingByReservation(reservation);
+            return waitingRepository.save(waiting);
+        }
+
+        private Waiting createWaitingByReservation(Reservation reservation) {
+            return WaitingFixture.create(reservation.getDate(),
+                    reservation.getReservationTime(),
+                    reservation.getTheme(),
+                    reservation.getUser());
+        }
+
+        @DisplayName("예약의 정보로 요청하면 대기가 예약으로 승인된다")
+        @Test
+        void cancelReservationAndReturnInfoAndApproveWaiting_success_byReservationInfo() {
+            // given
+            Reservation reservation = createDefaultReservationByBookedStatus(
+                    LocalDate.now().plusDays(1));
+            Reservation savedReservation = reservationRepository.save(reservation);
+
+            Waiting savedWaiting1 = createAndSaveWaitingByReservation(reservation);
+            Waiting savedWaiting2 = createAndSaveWaitingByReservation(reservation);
+
+            // before then
+            Assertions.assertThat(reservationRepository.findAll()).hasSize(1);
+            Assertions.assertThat(waitingRepository.findAll()).hasSize(2);
+
+            // when
+            ReservationInfo reservationInfo = reservationService.cancelReservationAndReturnInfo(reservation.getId());
+            reservationService.approveWaiting(reservationInfo);
+
+            // then
+            Assertions.assertThat(reservationRepository.findAll()).hasSize(1);
+            Assertions.assertThat(waitingRepository.findAll()).hasSize(1);
+            Assertions.assertThat(savedWaiting1.getDate()).isEqualTo(reservation.getDate());
         }
     }
 }

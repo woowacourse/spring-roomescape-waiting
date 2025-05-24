@@ -10,6 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.fixture.ReservationFixture;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.ReservationTimeTestDataConfig;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.ThemeTestDataConfig;
@@ -24,6 +28,7 @@ import roomescape.waiting.fixture.WaitingFixture;
 @DataJpaTest
 @Import({
         WaitingService.class,
+        ReservationService.class,
         MemberTestDataConfig.class,
         ReservationTimeTestDataConfig.class,
         ThemeTestDataConfig.class
@@ -32,6 +37,8 @@ class WaitingServiceTest {
 
     @Autowired
     private WaitingService waitingService;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     private static User savedMember;
     private static ReservationTime savedTime;
@@ -52,14 +59,17 @@ class WaitingServiceTest {
     @DisplayName("예약 대기 추가 기능")
     class create {
 
-        @DisplayName("예약 대기 추가 기능이 잘 작동하는 지")
+        @DisplayName("예약 대기 추가 요청이 들어왔을 때 예약 대기 객체가 잘 생성되는 지")
         @Test
         void create_success() {
             // given
-            WaitingRequestDto requestDto = WaitingFixture.createReqDto(
-                    LocalDate.now().plusDays(2),
-                    savedTime.getId(),
-                    savedTheme.getId());
+            Reservation reservation = ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2),
+                    savedTime,
+                    savedTheme, savedMember);
+            Reservation savedReservation = reservationRepository.save(reservation);
+            WaitingRequestDto requestDto = WaitingFixture.createReqDto(savedReservation.getDate(),
+                    savedReservation.getReservationTime().getId(),
+                    savedReservation.getTheme().getId());
 
             // when
             WaitingResponseDto responseDto = waitingService.create(requestDto, savedMember);
@@ -81,10 +91,13 @@ class WaitingServiceTest {
         @Test
         void deleteById_success_byExistingWaitingId() {
             // given
-            WaitingRequestDto requestDto = WaitingFixture.createReqDto(
-                    LocalDate.now().plusDays(2),
-                    savedTime.getId(),
-                    savedTheme.getId());
+            Reservation reservation = ReservationFixture.createByBookedStatus(LocalDate.now().plusDays(2),
+                    savedTime,
+                    savedTheme, savedMember);
+            Reservation savedReservation = reservationRepository.save(reservation);
+            WaitingRequestDto requestDto = WaitingFixture.createReqDto(savedReservation.getDate(),
+                    savedReservation.getReservationTime().getId(),
+                    savedReservation.getTheme().getId());
 
             WaitingResponseDto waitingResponseDto = waitingService.create(requestDto, savedMember);
 

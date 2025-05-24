@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.reservation.domain.dto.ReservationInfo;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservation.domain.dto.ReservationResponseDto;
 import roomescape.reservation.service.ReservationService;
@@ -39,8 +40,9 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{reservationId}")
-    public ResponseEntity<Void> deleteById(@PathVariable("reservationId") Long id) {
-        service.deleteById(id);
+    public ResponseEntity<Void> cancelAndApproveWaiting(@PathVariable("reservationId") Long id) {
+        ReservationInfo reservationInfo = service.cancelReservationAndReturnInfo(id);
+        service.approveWaiting(reservationInfo);
         return ResponseEntity.noContent().build();
     }
 }
