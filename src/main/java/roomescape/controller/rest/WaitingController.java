@@ -33,4 +33,10 @@ public class WaitingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable final Long id) {
+        waitingService.deleteWaitingById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -52,4 +52,9 @@ public class WaitingService {
         return WaitingResponse.from(waitingRepository.save(waiting));
     }
 
+    public void deleteWaitingById(final Long id) {
+        final Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("예약 대기 정보를 찾을 수 없습니다."));
+        waitingRepository.delete(waiting);
+    }
 }
