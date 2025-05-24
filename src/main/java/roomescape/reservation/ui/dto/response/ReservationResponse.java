@@ -9,20 +9,20 @@ import roomescape.theme.ui.dto.ThemeResponse;
 
 public record ReservationResponse(
         Long id,
-        IdName member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
+        IdName member,
         String status
 ) {
 
     public static ReservationResponse from(final Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                IdName.from(reservation.getMember()),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()),
                 ThemeResponse.from(reservation.getTheme()),
+                IdName.from(reservation.getMember()),
                 reservation.getStatus().getDescription()
         );
     }
