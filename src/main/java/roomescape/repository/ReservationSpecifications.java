@@ -20,7 +20,7 @@ public class ReservationSpecifications {
             if (themeId == null) {
                 return null;
             }
-            return builder.equal(root.get("theme").get("id"), themeId);
+            return builder.equal(root.get("schedule").get("theme").get("id"), themeId);
         };
     }
 
@@ -29,7 +29,10 @@ public class ReservationSpecifications {
             if (fromDate == null) {
                 return null;
             }
-            return builder.greaterThanOrEqualTo(root.get("reservationDate").get("date"), fromDate);
+            return builder.greaterThanOrEqualTo(
+                    root.get("schedule").get("reservationDate").get("date"),
+                    fromDate
+            );
         };
     }
 
@@ -38,7 +41,10 @@ public class ReservationSpecifications {
             if (toDate == null) {
                 return null;
             }
-            return builder.lessThanOrEqualTo(root.get("reservationDate").get("date"), toDate);
+            return builder.lessThanOrEqualTo(
+                    root.get("schedule").get("reservationDate").get("date"),
+                    toDate
+            );
         };
     }
 }

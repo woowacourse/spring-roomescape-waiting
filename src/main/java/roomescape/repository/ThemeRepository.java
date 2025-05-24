@@ -13,10 +13,10 @@ public interface ThemeRepository extends ListCrudRepository<Theme, Long> {
     @Query("""
             SELECT t
             FROM Theme t
-            LEFT JOIN Reservation r ON r.theme = t
-            WHERE r.reservationDate.date IS NOT NULL
-              AND r.reservationDate.date >= :startDate
-              AND r.reservationDate.date < :endDate
+            LEFT JOIN Reservation r ON r.schedule.theme = t
+            WHERE r.schedule.reservationDate.date IS NOT NULL
+              AND r.schedule.reservationDate.date >= :startDate
+              AND r.schedule.reservationDate.date < :endDate
             GROUP BY t
             ORDER BY COUNT(r.id) DESC
             """)

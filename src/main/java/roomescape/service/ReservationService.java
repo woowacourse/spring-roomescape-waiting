@@ -10,6 +10,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationDateTime;
+import roomescape.domain.reservation.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.MemberRepository;
@@ -91,12 +92,14 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("해당 멤버가 존재하지 않습니다."));
         return reservationRepository.save(
-                new Reservation(null, member, dateTime.getReservationDate(), dateTime.getReservationTime(), theme));
+                new Reservation(
+                        null, member,
+                        new ReservationSchedule(dateTime.getReservationDate(), dateTime.getReservationTime(), theme)));
     }
 
     private void validateReservationAvailability(final ReservationDateTime dateTime) {
-        if (reservationRepository.existsByReservationDateAndReservationTime_Id(dateTime.getReservationDate(),
-                dateTime.getTimeId())) {
+        if (reservationRepository.existsByScheduleReservationDateAndScheduleReservationTime(
+                dateTime.getReservationDate(), dateTime.getReservationTime())) {
             throw new IllegalStateException("이미 예약이 찼습니다.");
         }
     }
@@ -121,7 +124,7 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllMyReservation(final Long id) {
-        List<Reservation> reservations = reservationRepository.findByMember_Id(id);
+        List<Reservation> reservations = reservationRepository.findByMemberId(id);
         return MyReservationResponse.from(reservations);
     }
 }

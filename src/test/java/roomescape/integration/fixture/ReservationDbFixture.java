@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.ReservationRepository;
@@ -37,6 +38,6 @@ public class ReservationDbFixture {
             final Theme theme,
             final Member member
     ) {
-        return reservationRepository.save(new Reservation(null, member, date, time, theme));
+        return reservationRepository.save(new Reservation(null, member, new ReservationSchedule(date, time, theme)));
     }
 }

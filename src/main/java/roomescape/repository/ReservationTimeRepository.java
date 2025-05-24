@@ -18,7 +18,7 @@ public interface ReservationTimeRepository extends ListCrudRepository<Reservatio
             )
             FROM ReservationTime rt
             LEFT JOIN Reservation r
-                ON r.reservationTime = rt AND r.reservationDate.date = :date AND r.theme.id = :themeId
+                ON r.schedule.reservationTime = rt AND r.schedule.reservationDate.date = :date AND r.schedule.theme.id = :themeId
             GROUP BY rt
             """)
     List<AvailableReservationTime> findAllAvailableReservationTimes(

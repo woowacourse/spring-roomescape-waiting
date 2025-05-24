@@ -42,7 +42,7 @@ public class ReservationTimeService {
     }
 
     public void deleteReservationTimeById(final Long id) {
-        if (reservationRepository.existsByReservationTime_Id(id)) {
+        if (reservationRepository.existsByReservationTimeId(id)) {
             throw new IllegalArgumentException("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
         ReservationTime reservationTime = getReservationTime(id);
