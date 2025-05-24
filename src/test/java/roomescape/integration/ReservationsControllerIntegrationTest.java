@@ -24,6 +24,7 @@ import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
 import roomescape.business.domain.WaitInfo;
+import roomescape.business.service.ReservationService;
 import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
@@ -39,15 +40,18 @@ class ReservationsControllerIntegrationTest {
     @LocalServerPort
     private int port;
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
+    private ReservationService reservationService;
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
     private WaitInfoRepository waitInfoRepository;
+
 
     @BeforeEach
     void setUp() {
@@ -55,7 +59,7 @@ class ReservationsControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인한 회원이 올바른 예약 정보로 요청하면 예약이 성공적으로 생성된다")
+    @DisplayName("로그인한 회원이 올바른 예약 정보로 예약하면 예약이 성공적으로 생성된다")
     void createByLoginMember_WithValidRequest_ReturnsCreatedReservation() {
         // given
         final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
@@ -64,10 +68,10 @@ class ReservationsControllerIntegrationTest {
         final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("멤버", "USER", "member@test.com", "pass");
         memberRepository.save(member);
 
-        final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
+        final LoginRequest loginRequest = new LoginRequest("member@test.com", "pass");
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
@@ -86,9 +90,10 @@ class ReservationsControllerIntegrationTest {
                 .post("/reservations")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("theme.name", equalTo("테마1"))
-                .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("time.startAt", equalTo("14:00:00"));
+                .body("memberName", equalTo("멤버"))
+                .body("themeName", equalTo("테마1"))
+                .body("date", equalTo(futureDate.toString()))
+                .body("startAt", equalTo("14:00:00"));
     }
 
     @Test
@@ -113,30 +118,33 @@ class ReservationsControllerIntegrationTest {
         final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("어드민", "ADMIN", "admin@test.com", "pass");
         memberRepository.save(member);
 
-        final Reservation reservation1 = new Reservation(LocalDate.now().plusDays(1),reservationTime, theme);
-        reservationRepository.save(reservation1);
-        final Reservation reservation2 = new Reservation(LocalDate.now().plusDays(2),reservationTime, theme);
-        reservationRepository.save(reservation2);
-        final Reservation reservation3 = new Reservation(LocalDate.now().plusDays(3),reservationTime, theme);
-        reservationRepository.save(reservation3);
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.now().plusDays(1), reservationTime.getId());
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.now().plusDays(2), reservationTime.getId());
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.now().plusDays(3), reservationTime.getId());
 
-        final Long memberId = 1L;
-        final Long themeId = 1L;
         final String formattedDateFrom = LocalDate.now().toString();
         final String formattedDateTo = LocalDate.now().plusDays(2).toString();
 
+        final LoginRequest loginRequest = new LoginRequest("admin@test.com", "pass");
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
         // when & then
         given()
+                .cookie("token", token)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .queryParam("memberId", memberId)
-                .queryParam("themeId", themeId)
+                .queryParam("memberId", member.getId())
+                .queryParam("themeId", theme.getId())
                 .queryParam("dateFrom", formattedDateFrom)
                 .queryParam("dateTo", formattedDateTo)
                 .when()
-                .get("/reservations/filter")
+                .get("admin/reservations/filter")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2));

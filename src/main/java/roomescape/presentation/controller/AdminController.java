@@ -1,5 +1,6 @@
 package roomescape.presentation.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.business.service.ReservationService;
 import roomescape.presentation.dto.ReservationRequest;
@@ -36,6 +38,20 @@ public class AdminController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservationResponse);
+    }
+
+    @GetMapping("/reservations/filter")
+    public ResponseEntity<List<ReservationResponse>> readFilter(
+            @RequestParam(required = false) final Long memberId,
+            @RequestParam(required = false) final Long themeId,
+            @RequestParam(required = false) final LocalDate dateFrom,
+            @RequestParam(required = false) final LocalDate dateTo
+    ) {
+        final List<ReservationResponse> reservationResponses = reservationService.findAllFilter(
+                memberId, themeId, dateFrom, dateTo
+        );
+
+        return ResponseEntity.ok(reservationResponses);
     }
 
     // TODO: 통합 테스트 추가.

@@ -75,21 +75,6 @@ public class ReservationsController {
         return ResponseEntity.ok(reservationResponses);
     }
 
-    // TODO: 컨트롤러 이동 및 테스트 변경, 사유: 어드민 페이지에서만 사용 가능함.
-    @GetMapping("/filter")
-    public ResponseEntity<List<ReservationResponse>> readFilter(
-            @RequestParam(required = false) final Long memberId,
-            @RequestParam(required = false) final Long themeId,
-            @RequestParam(required = false) final LocalDate dateFrom,
-            @RequestParam(required = false) final LocalDate dateTo
-    ) {
-        final List<ReservationResponse> reservationResponses = reservationService.findAllFilter(
-                memberId, themeId, dateFrom, dateTo
-        );
-
-        return ResponseEntity.ok(reservationResponses);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final Long id) {
         reservationService.deleteById(id);

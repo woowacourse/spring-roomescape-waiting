@@ -1,6 +1,6 @@
 let isEditing = false;
 const RESERVATION_API_ENDPOINT = '/reservations';
-const RESERVATION_FILTERING_API_ENDPOINT = '/reservations/filter';
+const RESERVATION_FILTERING_API_ENDPOINT = '/admin/reservations/filter';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
