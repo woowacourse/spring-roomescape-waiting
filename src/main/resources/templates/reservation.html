@@ -31,12 +31,12 @@
         <a class="nav-link" href="/login">Login</a>
       </li>
       <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">
-          <img class="profile-image" src="/image/default-profile.png" alt="Profile">
+        <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"
+           id="navbarDropdown" role="button">
+          <img alt="Profile" class="profile-image" src="/image/default-profile.png">
           <span id="profile-name">Profile</span> <!-- 프로필 이름을 넣을 span 추가 -->
         </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        <div aria-labelledby="navbarDropdown" class="dropdown-menu">
           <a class="dropdown-item" href="/reservation/mine">My Reservation</a>
           <div class="dropdown-divider"></div>
           <a class="dropdown-item" href="#" id="logout-btn">Logout</a>
@@ -78,6 +78,7 @@
   <!-- Reservation Button -->
   <div class="button-group float-right">
     <button class="btn btn-primary mt-3 disabled" id="reserve-button">예약하기</button>
+    <button class="btn btn-secondary mt-3 disabled" id="wait-button">예약대기</button>
   </div>
 </div>
 </div>

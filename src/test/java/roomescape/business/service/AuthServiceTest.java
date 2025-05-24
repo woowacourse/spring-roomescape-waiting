@@ -8,8 +8,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import roomescape.auth.AuthToken;
 import roomescape.auth.jwt.JwtUtil;
+import roomescape.business.application_service.service.AuthService;
 import roomescape.business.model.entity.User;
-import roomescape.business.model.repository.UserRepository;
+import roomescape.business.model.repository.Users;
 import roomescape.exception.auth.AuthenticationException;
 
 import java.util.Optional;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private Users users;
 
     @Mock
     private JwtUtil jwtUtil;
@@ -34,11 +35,10 @@ class AuthServiceTest {
         // given
         String email = "test@example.com";
         String password = "password123";
-        String encodedPassword = new BCryptPasswordEncoder().encode(password);
-        User user = User.restore("user-id", "USER", "Test User", email, encodedPassword);
+        User user = User.member("Test User", email, password);
         AuthToken expectedAuth = mock(AuthToken.class);
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(users.findByEmail(email)).thenReturn(Optional.of(user));
         when(jwtUtil.createToken(user)).thenReturn(expectedAuth);
 
         // when
@@ -46,7 +46,7 @@ class AuthServiceTest {
 
         // then
         assertThat(result).isEqualTo(expectedAuth);
-        verify(userRepository).findByEmail(email);
+        verify(users).findByEmail(email);
         verify(jwtUtil).createToken(user);
     }
 
@@ -56,13 +56,13 @@ class AuthServiceTest {
         String email = "nonexistent@example.com";
         String password = "password123";
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(users.findByEmail(email)).thenReturn(Optional.empty());
 
         // when, then
         assertThatThrownBy(() -> sut.authenticate(email, password))
                 .isInstanceOf(AuthenticationException.class);
 
-        verify(userRepository).findByEmail(email);
+        verify(users).findByEmail(email);
         verifyNoInteractions(jwtUtil);
     }
 
@@ -73,15 +73,15 @@ class AuthServiceTest {
         String wrongPassword = "wrongPassword";
         String correctPassword = "correctPassword";
         String encodedPassword = new BCryptPasswordEncoder().encode(correctPassword);
-        User user = User.restore("user-id", "USER", "Test User", email, encodedPassword);
+        User user = User.member("Test User", email, encodedPassword);
 
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(users.findByEmail(email)).thenReturn(Optional.of(user));
 
         // when, then
         assertThatThrownBy(() -> sut.authenticate(email, wrongPassword))
                 .isInstanceOf(AuthenticationException.class);
 
-        verify(userRepository).findByEmail(email);
+        verify(users).findByEmail(email);
         verifyNoInteractions(jwtUtil);
     }
 }

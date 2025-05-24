@@ -31,7 +31,7 @@ class JJWTJwtUtilTest {
     @Test
     void 유효한_사용자정보로_토큰을_생성한다() {
         // given
-        User user = User.restore("1", UserRole.USER.name(), "dompoo", "dompoo@email.com", "password");
+        User user = User.member("dompoo", "dompoo@email.com", "password");
 
         // when
         AuthToken authToken = sut.createToken(user);
@@ -87,7 +87,7 @@ class JJWTJwtUtilTest {
     @Test
     void 어드민_역할의_토큰을_생성하고_검증한다() {
         // given
-        User user = User.restore("1", UserRole.ADMIN.name(), "dompoo", "dompoo@email.com", "password");
+        User user = User.admin("dompoo", "dompoo@email.com", "password");
 
         // when
         AuthToken authToken = sut.createToken(user);

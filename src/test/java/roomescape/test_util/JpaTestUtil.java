@@ -1,55 +1,85 @@
 package roomescape.test_util;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.test.context.TestComponent;
+import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.JpaReservationDao;
-import roomescape.infrastructure.JpaReservationTimeDao;
-import roomescape.infrastructure.JpaThemeDao;
-import roomescape.infrastructure.JpaUserDao;
+import roomescape.infrastructure.jpa.JpaReservationSlots;
+import roomescape.infrastructure.jpa.JpaReservationTimes;
+import roomescape.infrastructure.jpa.JpaReservations;
+import roomescape.infrastructure.jpa.JpaThemes;
+import roomescape.infrastructure.jpa.JpaUsers;
+import roomescape.infrastructure.jpa.dao.JpaReservationDao;
+import roomescape.infrastructure.jpa.dao.JpaReservationSlotDao;
+import roomescape.infrastructure.jpa.dao.JpaReservationTimeDao;
+import roomescape.infrastructure.jpa.dao.JpaThemeDao;
+import roomescape.infrastructure.jpa.dao.JpaUserDao;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Random;
 
-@Component
+@TestComponent
+@Import({JpaReservations.class, JpaReservationTimes.class, JpaThemes.class, JpaUsers.class, JpaReservationSlots.class})
 public class JpaTestUtil {
 
-    private final JpaReservationDao reservationDao;
-    private final JpaReservationTimeDao timeDao;
-    private final JpaUserDao userDao;
-    private final JpaThemeDao themeDao;
-
     @Autowired
-    public JpaTestUtil(JpaReservationDao reservationDao, JpaReservationTimeDao timeDao,
-                       JpaUserDao userDao, JpaThemeDao themeDao) {
-        this.reservationDao = reservationDao;
-        this.timeDao = timeDao;
-        this.userDao = userDao;
-        this.themeDao = themeDao;
+    private JpaReservationSlotDao slotDao;
+    @Autowired
+    private JpaReservationDao reservationDao;
+    @Autowired
+    private JpaReservationTimeDao timeDao;
+    @Autowired
+    private JpaUserDao userDao;
+    @Autowired
+    private JpaThemeDao themeDao;
+
+    public String insertUser() {
+        String name = generateRandomAlphabetString(5);
+        String email = name + "@email.com";
+        User user = User.member(name, email, "password123");
+        return userDao.save(user).getId().value();
     }
 
-    public void insertUser(final String id, final String name) {
-        userDao.save(User.restore(id, "USER", name, name + "@email.com", "password123"));
+    public String insertUser(final String name, final String email) {
+        User user = User.member(name, email, "password123");
+        return userDao.save(user).getId().value();
     }
 
-    public void insertReservation(final String id, final LocalDate date, final String timeId, final String themeId,
-                                  final String userId) {
-        User user = userDao.findById(Id.create(userId)).get();
-        ReservationTime time = timeDao.findById(Id.create(timeId)).get();
-        Theme theme = themeDao.findById(Id.create(themeId)).get();
-        reservationDao.save(Reservation.restore(id, user, date, time, theme));
+    public String insertReservation(final String slotId, final String userId) {
+        User user = userDao.findById(Id.create(userId)).orElseThrow();
+        ReservationSlot slot = slotDao.findById(Id.create(slotId)).orElseThrow();
+        Reservation reservation = new Reservation(user, slot);
+        return reservationDao.save(reservation).getId().value();
     }
 
-    public void insertReservationTime(final String id, final LocalTime time) {
-        timeDao.save(ReservationTime.restore(id, time));
+    public String insertSlot(final LocalDate date, final String timeId, final String themeId) {
+        ReservationTime time = timeDao.findById(Id.create(timeId)).orElseThrow();
+        Theme theme = themeDao.findById(Id.create(themeId)).orElseThrow();
+        ReservationSlot slot = new ReservationSlot(time, date, theme);
+        return slotDao.save(slot).getId().value();
     }
 
-    public void insertTheme(final String id, final String name) {
-        themeDao.save(Theme.restore(id, name, "", ""));
+    public String insertReservationTime() {
+        LocalTime time = LocalTime.of(10, 0).plusSeconds((long) (Math.random() * 60));
+        ReservationTime reservationTime = new ReservationTime(time);
+        return timeDao.save(reservationTime).getId().value();
+    }
+
+    public String insertReservationTime(final LocalTime time) {
+        ReservationTime reservationTime = new ReservationTime(time);
+        return timeDao.save(reservationTime).getId().value();
+    }
+
+    public String insertTheme() {
+        String name = generateRandomAlphabetString(5);
+        Theme theme = new Theme(name, "", "");
+        return themeDao.save(theme).getId().value();
     }
 
     public int countReservation() {
@@ -65,9 +95,24 @@ public class JpaTestUtil {
     }
 
     public void deleteAll() {
-        reservationDao.deleteAll();
-        timeDao.deleteAll();
-        themeDao.deleteAll();
-        userDao.deleteAll();
+        reservationDao.deleteAllInBatch();
+        slotDao.deleteAllInBatch();
+        timeDao.deleteAllInBatch();
+        themeDao.deleteAllInBatch();
+        userDao.deleteAllInBatch();
     }
+
+    public String generateRandomAlphabetString(int length) {
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        StringBuilder result = new StringBuilder();
+        Random random = new Random();
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(alphabet.length());
+            result.append(alphabet.charAt(index));
+        }
+
+        return result.toString();
+    }
+
 }

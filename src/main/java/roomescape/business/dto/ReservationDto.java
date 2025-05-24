@@ -17,9 +17,9 @@ public record ReservationDto(
         return new ReservationDto(
                 reservation.getId(),
                 UserDto.fromEntity(reservation.getUser()),
-                reservation.getDate(),
-                ReservationTimeDto.fromEntity(reservation.getTime()),
-                ThemeDto.fromEntity(reservation.getTheme())
+                reservation.getSlot().getDate(),
+                ReservationTimeDto.fromEntity(reservation.getSlot().getTime()),
+                ThemeDto.fromEntity(reservation.getSlot().getTheme())
         );
     }
 
