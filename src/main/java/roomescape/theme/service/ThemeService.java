@@ -3,7 +3,6 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,11 +44,8 @@ public class ThemeService {
     }
 
     public Theme getTheme(Long id) {
-        Optional<Theme> theme = themeRepository.findById(id);
-        if (theme.isPresent()) {
-            return theme.get();
-        }
-        throw new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다.");
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 
     public List<ThemeResponse> getPopularThemes() {

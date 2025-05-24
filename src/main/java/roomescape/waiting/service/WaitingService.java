@@ -1,7 +1,7 @@
 package roomescape.waiting.service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
@@ -61,12 +61,9 @@ public class WaitingService {
     }
 
     public void deleteById(Long id) {
-        Optional<Waiting> waiting = waitingRepository.findById(id);
-        if (waiting.isPresent()) {
-            waitingRepository.deleteById(id);
-            return;
-        }
-        throw new IllegalArgumentException("[ERROR] 대기를 찾을 수 없습니다.");
+        waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 대기를 찾을 수 없습니다."));
+        waitingRepository.deleteById(id);
     }
 
     public List<ReservationResponse> findAll() {
@@ -77,9 +74,7 @@ public class WaitingService {
     }
 
     public ReservationResponse approveWaitingById(Long id) {
-        Optional<Waiting> byId = waitingRepository.findById(id);
-        validateEmpty(byId);
-        Waiting waiting = byId.get();
+        Waiting waiting = getWaiting(id);
         validateDuplicateReservation(waiting);
         waitingRepository.deleteById(id);
         Reservation reservation = waiting.toReservation();
@@ -88,15 +83,17 @@ public class WaitingService {
     }
 
     private void validateDuplicateReservation(Waiting waiting) {
-        if (reservationRepository.existsByReservationDateAndReservationTimeId(waiting.getReservationDate(),
-                waiting.getReservationTime().getId())) {
+        ReservationDate reservationDate = waiting.getReservationDate();
+        Long timeId = waiting.getReservationTime().getId();
+        Long themeId = waiting.getTheme().getId();
+        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(reservationDate, timeId,
+                themeId)) {
             throw new IllegalArgumentException("[ERROR] 현재 예약이 존재합니다. 취소 후 다시 요청해 주세요.");
         }
     }
 
-    private static void validateEmpty(Optional<Waiting> byId) {
-        if (byId.isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 존재하지 않는 대기입니다.");
-        }
+    private Waiting getWaiting(Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 대기를 찾을 수 없습니다."));
     }
 }

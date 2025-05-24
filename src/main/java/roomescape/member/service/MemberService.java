@@ -2,7 +2,6 @@ package roomescape.member.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import roomescape.member.controller.request.SignUpRequest;
 import roomescape.member.controller.response.MemberResponse;
@@ -31,11 +30,8 @@ public class MemberService {
     }
 
     public Member findById(Long id) {
-        Optional<Member> member = memberRepository.findById(id);
-        if (member.isPresent()) {
-            return member.get();
-        }
-        throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
+        return memberRepository.findById(id).
+                orElseThrow(() -> new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다."));
     }
 
     public List<MemberResponse> findAll() {
