@@ -39,6 +39,11 @@ public class WaitingRepositoryAdaptor implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findByReservationTimeId(final Long id) {
+        return jpaWaitingRepository.findByReservationTimeId(id);
+    }
+
+    @Override
     public Optional<Waiting> findByDateAndReservationTimeAndThemeAndMember(
             final LocalDate date,
             final ReservationTime time,

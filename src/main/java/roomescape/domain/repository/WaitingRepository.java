@@ -18,6 +18,8 @@ public interface WaitingRepository {
 
     List<Waiting> findByThemeId(Long id);
 
+    List<Waiting> findByReservationTimeId(Long id);
+
     void deleteById(Long id);
 
     Optional<Waiting> findByDateAndReservationTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme,

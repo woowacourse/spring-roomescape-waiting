@@ -17,6 +17,8 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findByThemeId(Long id);
 
+    List<Waiting> findByReservationTimeId(Long id);
+
     Optional<Waiting> findByDateAndReservationTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme,
                                                                     Member member);
 }
