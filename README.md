@@ -103,7 +103,8 @@
 ### 예약 대기 요청
 
 예약하기, 예약대기는 예약 대기 목록에 추가하는 기능입니다.  
-예약 가능 슬롯 `Reservation`(date, time, theme)과 예약 대기 `WaitInfo`는 `ReservationService`를 통해 관리합니다.  
+예약 가능 슬롯 `Reservation`(date, time, theme)과 예약 대기 `WaitInfo`는 `ReservationService`를 통해 관리합니다.
+현재 예약 대기의 순위는 예약 대기 목록에 추가된 순서대로 부여됩니다.
 예약 대기의 순위가 1순위인 경우 예약 상태, 그 외는 예약 대기 상태로 판단합니다.
 
 - [x] 예약 대기 요청 기능 구현
