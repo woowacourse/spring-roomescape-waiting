@@ -31,4 +31,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
 
     List<Reservation> findAllByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
+
+    boolean existsByTheme(Theme theme);
 }

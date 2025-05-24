@@ -1,6 +1,7 @@
 package roomescape.reservation.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.reservation.application.exception.ThemeNotFoundException;
+import roomescape.reservation.application.exception.UsingThemeException;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
@@ -77,17 +80,52 @@ class ThemeServiceTest {
         });
     }
 
+
+    @DisplayName("테마 삭제 시 존재하지 않는 테마일 경우 예외가 발생한다.")
+    @Test
+    void deleteByIdTest_notFoundTheme() {
+        // given
+        Long themeId = 1L;
+
+        when(themeRepository.findById(themeId)).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> themeService.deleteById(themeId))
+                .isInstanceOf(ThemeNotFoundException.class);
+    }
+
+    @DisplayName("예약이 존재하는 테마일 경우 테마를 삭제할 수 없다.")
+    @Test
+    void deleteByIdTest_existsReservation() {
+        // given
+        Long themeId = 1L;
+
+        Theme theme = new Theme(themeId, "테마1", "설명1", "썸네일1");
+
+        when(themeRepository.findById(themeId)).thenReturn(Optional.of(theme));
+        when(reservationRepository.existsByTheme(theme)).thenReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> themeService.deleteById(themeId))
+                .isInstanceOf(UsingThemeException.class);
+    }
+
+
     @DisplayName("테마를 삭제할 수 있다")
     @Test
     void deleteByIdTest() {
         // given
         Long themeId = 1L;
 
+        Theme theme = new Theme(themeId, "테마1", "설명1", "썸네일1");
+
+        when(themeRepository.findById(themeId)).thenReturn(Optional.of(theme));
+        when(reservationRepository.existsByTheme(theme)).thenReturn(false);
         // when
         themeService.deleteById(themeId);
 
         // then
-        verify(themeRepository).deleteById(themeId);
+        verify(themeRepository).delete(theme);
     }
 
     @DisplayName("지난 7일간 가장 많이 예약된 상위 10개의 테마를 조회한다")

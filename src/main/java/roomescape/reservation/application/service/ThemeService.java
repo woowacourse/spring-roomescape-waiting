@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.application.exception.ThemeNotFoundException;
+import roomescape.reservation.application.exception.UsingThemeException;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
@@ -33,7 +34,14 @@ public class ThemeService {
     }
 
     public void deleteById(Long id) {
-        themeRepository.deleteById(id);
+        Theme theme = themeRepository.findById(id)
+                .orElseThrow(() -> new ThemeNotFoundException(id));
+
+        if (reservationRepository.existsByTheme(theme)) {
+            throw new UsingThemeException();
+        }
+
+        themeRepository.delete(theme);
     }
 
     public List<PopularThemeResponse> getPopularThemes() {
