@@ -3,6 +3,7 @@ package roomescape.reservation.application;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
@@ -48,12 +50,10 @@ public class AdminWaitingService {
             final Member member
     ) {
         final ReservationSlot reservationSlot = ReservationSlot.of(date, time, theme);
+        final Reservation reservation = reservationRepository.findByReservationSlot(reservationSlot)
+                .orElseThrow(() -> new ResourceNotFoundException("예약이 없는 상태에서 예약 대기를 추가할 수 없습니다."));
 
-        if (!reservationRepository.existsByReservationSlot(reservationSlot)) {
-            throw new ResourceNotFoundException("예약이 없는 상태에서 예약 대기를 추가할 수 없습니다.");
-        }
-
-        if (reservationRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
+        if (Objects.equals(reservation.getMember(), member)) {
             throw new AlreadyExistException("해당 예약 슬롯에 본인 예약이 있습니다.");
         }
 

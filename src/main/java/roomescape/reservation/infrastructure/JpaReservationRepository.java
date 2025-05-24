@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
@@ -14,6 +15,8 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     boolean existsByReservationSlot(ReservationSlot reservationSlot);
 
     boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member);
+    
+    Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot);
 
     @Query("""
             SELECT r

@@ -12,11 +12,11 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    boolean existsById(Long id);
-
     boolean existsByReservationSlot(ReservationSlot reservationSlot);
 
     Optional<Reservation> findById(Long id);
+
+    Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot);
 
     List<Reservation> findAll();
 

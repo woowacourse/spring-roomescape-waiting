@@ -28,11 +28,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         jpaReservationRepository.deleteById(id);
     }
 
-    @Override
-    public boolean existsById(Long id) {
-        return jpaReservationRepository.existsById(id);
-    }
-
     public boolean existsByReservationSlot(
             final ReservationSlot reservationSlot
     ) {
@@ -48,6 +43,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Transactional(readOnly = true)
     public Optional<Reservation> findById(final Long id) {
         return jpaReservationRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot) {
+        return jpaReservationRepository.findByReservationSlot(reservationSlot);
     }
 
     @Override
