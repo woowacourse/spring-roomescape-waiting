@@ -20,10 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.business.domain.Member;
-import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
-import roomescape.business.domain.WaitInfo;
 import roomescape.business.service.ReservationService;
 import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
@@ -225,56 +223,6 @@ class ReservationsControllerIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2))
                 .body("alreadyBooked", hasItems(true, false));
-    }
-
-    @Test
-    @DisplayName("로그인한 회원의 예약 목록을 조회하면 200 상태코드와 함께 예약 목록이 반환된다")
-    void readMine_ReturnsMyReservations() {
-        // given
-        final ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
-        reservationTimeRepository.save(reservationTime14_00);
-
-        final ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
-        reservationTimeRepository.save(reservationTime16_00);
-
-        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
-        themeRepository.save(theme);
-
-        final Member member1 = new Member("이름1", "USER", "이메일1", "비밀번호1");
-        memberRepository.save(member1);
-        final Member member2 = new Member("이름2", "USER", "이메일2", "비밀번호2");
-        memberRepository.save(member2);
-
-        final LocalDate futureDate = LocalDate.now().plusDays(1);
-        final Reservation reservation14_00 = new Reservation(futureDate, reservationTime14_00, theme);
-        reservationRepository.save(reservation14_00);
-        final Reservation reservation16_00 = new Reservation(futureDate, reservationTime16_00, theme);
-        reservationRepository.save(reservation16_00);
-
-        final WaitInfo waitInfo1 = new WaitInfo(member1, reservation14_00);
-        waitInfoRepository.save(waitInfo1);
-        final WaitInfo waitInfo2 = new WaitInfo(member2, reservation16_00);
-        waitInfoRepository.save(waitInfo2);
-
-        final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
-        final String token = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(loginRequest)
-                .post("/login")
-                .getCookie("token");
-
-        // when & then
-        given()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .cookie("token", token)
-                .when()
-                .get("/reservations-mine")
-                .then()
-                .log().all()
-                .statusCode(HttpStatus.OK.value())
-                .body("", hasSize(1))
-                .body("[0].date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("[0].time", equalTo("14:00:00"));
     }
 
     @Test

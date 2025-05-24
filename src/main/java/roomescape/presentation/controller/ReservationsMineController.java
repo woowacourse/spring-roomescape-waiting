@@ -32,7 +32,6 @@ public class ReservationsMineController {
         return ResponseEntity.ok(reservationMineResponses);
     }
 
-    // TODO: 통합 테스트 추가, 삭제 성공 시나리오, waitInfoId, memberId가 없는 경우 실패 시나리오
     @DeleteMapping("/{waitInfoId}")
     public ResponseEntity<List<ReservationMineResponse>> deleteReservation(
             @AuthenticationPrincipal final LoginMember loginMember,
