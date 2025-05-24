@@ -1,10 +1,10 @@
-package roomescape.reservation.dto.response;
+package roomescape.reservation.service.dto.response;
 
 import java.time.LocalDate;
 
-import roomescape.member.dto.response.MemberResponse;
+import roomescape.member.service.dto.response.MemberResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.theme.dto.response.ThemeResponse;
+import roomescape.theme.service.dto.response.ThemeResponse;
 
 public record ReservationResponse(
         Long id,

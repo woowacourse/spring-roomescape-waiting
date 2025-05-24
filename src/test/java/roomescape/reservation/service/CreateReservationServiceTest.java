@@ -14,12 +14,12 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
+import roomescape.reservation.service.dto.request.ReservationCreateRequest;
+import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.service.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.response.ThemeResponse;
+import roomescape.theme.service.dto.response.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;

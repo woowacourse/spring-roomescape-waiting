@@ -1,4 +1,4 @@
-package roomescape.reservation.dto.response;
+package roomescape.reservation.service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.reservation.domain.Reservation;
