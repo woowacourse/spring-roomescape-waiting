@@ -83,8 +83,10 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
         Reservation reservation = Reservation.createWithoutId(member, date, reservationTime, theme);
+
         reservation.validateDateTime();
         validateDuplicate(date, reservationTime, theme);
+
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -97,7 +99,9 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
         Waiting waiting = Waiting.createWithoutId(member, date, reservationTime, theme, createAt);
+
         waiting.validateDateTime();
+        validateWaitingDuplicate(date, reservationTime, theme);
 
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(savedWaiting);
@@ -105,6 +109,12 @@ public class ReservationService {
 
     private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
         if (reservationRepository.findByDateAndReservationTimeAndTheme(date, time, theme).isPresent()) {
+            throw new ExistedReservationException();
+        }
+    }
+
+    private void validateWaitingDuplicate(LocalDate date, ReservationTime time, Theme theme) {
+        if (waitingRepository.findByDateAndReservationTimeAndTheme(date, time, theme).isPresent()) {
             throw new ExistedReservationException();
         }
     }
