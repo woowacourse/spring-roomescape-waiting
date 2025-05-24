@@ -12,6 +12,7 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
 import java.time.LocalDate;
@@ -77,10 +78,20 @@ public class ReservationService {
     }
 
     public void delete(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
-        }
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
         reservationRepository.deleteById(id);
+        handleWaiting(reservation);
+    }
+
+    private void handleWaiting(Reservation reservation) {
+        Waiting firstWaiting = waitingRepository.findFirstByReservationInfo(
+                reservation.getDate(), reservation.getTime(), reservation.getTheme()
+        );
+        if (firstWaiting != null) {
+            waitingRepository.delete(firstWaiting);
+            reservationRepository.save(Reservation.of(firstWaiting));
+        }
     }
 
     public List<BookedReservationTimeResponse> getAvailableTimes(final LocalDate date, final Long themeId) {

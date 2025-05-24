@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.domain.Waiting;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -59,6 +60,15 @@ public class Reservation {
 
     public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
         this(null, member, date, time, theme);
+    }
+
+    public static Reservation of(Waiting waiting) {
+        return new Reservation(
+                waiting.getMember(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme()
+        );
     }
 
     public Long getId() {
