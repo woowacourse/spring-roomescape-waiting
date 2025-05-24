@@ -43,3 +43,17 @@ Content-Type: application/json
     }
 }
 ```
+
+## 예약 대기 취소 API
+
+### Request
+
+```
+DELETE /reservations/waitings/1 HTTP/1.1
+```
+
+### Response
+
+```
+HTTP/1.1 204
+```

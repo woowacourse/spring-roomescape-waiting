@@ -15,19 +15,19 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDateTime createdAt;
-    private LocalDate reservationDate;
+    private LocalDate date;
     @ManyToOne
-    private ReservationTime reservationTime;
+    private ReservationTime time;
     @ManyToOne
     private Member member;
     @ManyToOne
     private Theme theme;
 
-    public Waiting(Long id, LocalDateTime createdAt, LocalDate reservationDate, ReservationTime reservationTime, Member member, Theme theme) {
+    public Waiting(Long id, LocalDateTime createdAt, LocalDate date, ReservationTime time, Member member, Theme theme) {
         this.id = id;
         this.createdAt = createdAt;
-        this.reservationDate = reservationDate;
-        this.reservationTime = reservationTime;
+        this.date = date;
+        this.time = time;
         this.member = member;
         this.theme = theme;
     }
@@ -35,8 +35,8 @@ public class Waiting {
     public Waiting() {
     }
 
-    public static Waiting register(LocalDate reservationDate, ReservationTime reservationTime, Member member, Theme theme) {
-        return new Waiting(null, LocalDateTime.now(), reservationDate, reservationTime, member, theme);
+    public static Waiting register(LocalDate date, ReservationTime time, Member member, Theme theme) {
+        return new Waiting(null, LocalDateTime.now(), date, time, member, theme);
     }
 
     public Long getId() {
@@ -47,12 +47,12 @@ public class Waiting {
         return createdAt;
     }
 
-    public LocalDate getReservationDate() {
-        return reservationDate;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Member getMember() {

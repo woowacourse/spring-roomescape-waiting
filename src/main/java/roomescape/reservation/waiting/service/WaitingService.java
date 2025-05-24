@@ -54,5 +54,9 @@ public class WaitingService {
                 .map(WaitingResponse::new)
                 .toList();
     }
+
+    public void cancelWaitingById(long id) {
+        waitingRepository.deleteById(id);
+    }
 }
 

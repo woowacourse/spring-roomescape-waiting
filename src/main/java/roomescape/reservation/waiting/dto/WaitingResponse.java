@@ -20,8 +20,8 @@ public record WaitingResponse(
         this(
                 waiting.getId(),
                 new MemberResponse(waiting.getMember()),
-                waiting.getReservationDate(),
-                new ReservationTimeResponse(waiting.getReservationTime()),
+                waiting.getDate(),
+                new ReservationTimeResponse(waiting.getTime()),
                 new ThemeResponse(waiting.getTheme())
         );
     }

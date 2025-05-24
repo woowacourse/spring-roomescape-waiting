@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record MyReservationResponse(
-        long reservationId,
+        long id,
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
@@ -21,7 +21,7 @@ public record MyReservationResponse(
     }
 
     public MyReservationResponse(final Waiting waiting, final String status) {
-        this(waiting.getId(), waiting.getTheme().getName().getValue(), waiting.getReservationDate(),
-                waiting.getReservationTime().getStartAt(), status);
+        this(waiting.getId(), waiting.getTheme().getName().getValue(), waiting.getDate(),
+                waiting.getTime().getStartAt(), status);
     }
 }

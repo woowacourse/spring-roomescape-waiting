@@ -6,6 +6,7 @@
     - 예약 취소
     - [예약 대기 API](reservation-waiting.md)
         - 예약 대기 추가
+        - 예약 대기 취소
 - [시간 API](time.md)
     - 시간 추가
     - 시간 목록 조회
