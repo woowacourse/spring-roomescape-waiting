@@ -7,11 +7,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reserveticket.ReservationWithWaitingRanks;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.reserveticket.ReserveTicketFinder;
+import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
+import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
 import roomescape.service.member.MemberService;
@@ -161,5 +164,17 @@ public class ReserveTicketService {
 
     private ReserveTicket getReservationTicketById(Long id) {
         return reserveTicketRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("예약 티켓을 찾을 수 없습니다"));
+    }
+
+    public Reservation getReservationById(long addedReservationId) {
+        return reservationService.getReservationById(addedReservationId);
+    }
+
+    public ReservationSlotTimes availableReservationTimes(AvailableTimeRequestDto availableTimeRequestDto) {
+        return reservationService.availableReservationTimes(availableTimeRequestDto);
+    }
+
+    public List<Theme> getRankingThemes(LocalDate date, int themeRankingStartRange, int themeRankingEndRange) {
+        return reservationService.getRankingThemes(date, themeRankingStartRange, themeRankingEndRange);
     }
 }

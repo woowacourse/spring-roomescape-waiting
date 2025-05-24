@@ -28,7 +28,6 @@ import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
-import roomescape.service.reservation.ReservationService;
 import roomescape.service.reserveticket.ReserveTicketService;
 import roomescape.service.reserveticket.ReserveTicketWaiting;
 
@@ -39,12 +38,9 @@ public class ReservationController {
     private static final int THEME_RANKING_END_RANGE = 7;
     private static final int THEME_RANKING_START_RANGE = 1;
 
-    private final ReservationService reservationService;
     private final ReserveTicketService reserveTicketService;
 
-    public ReservationController(ReservationService reservationService,
-                                 ReserveTicketService reserveTicketService) {
-        this.reservationService = reservationService;
+    public ReservationController(ReserveTicketService reserveTicketService) {
         this.reserveTicketService = reserveTicketService;
     }
 
@@ -82,7 +78,7 @@ public class ReservationController {
             @RequestBody @Valid AddReservationDto newReservationDto,
             @AuthenticationPrincipal UserInfo userInfo) {
         long addedReservationId = reserveTicketService.addReservation(newReservationDto, userInfo.id());
-        Reservation reservation = reservationService.getReservationById(addedReservationId);
+        Reservation reservation = reserveTicketService.getReservationById(addedReservationId);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
                 reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
@@ -98,7 +94,7 @@ public class ReservationController {
     @GetMapping("/available-times")
     public ResponseEntity<List<ReservationTimeSlotResponseDto>> availableReservationTimes(
             @Valid @ModelAttribute AvailableTimeRequestDto availableTimeRequestDto) {
-        ReservationSlotTimes reservationSlotTimes = reservationService.availableReservationTimes(
+        ReservationSlotTimes reservationSlotTimes = reserveTicketService.availableReservationTimes(
                 availableTimeRequestDto);
         List<ReservationSlot> availableBookTimes = reservationSlotTimes.getAvailableBookTimes();
 
@@ -111,7 +107,7 @@ public class ReservationController {
 
     @GetMapping("/popular-themes")
     public ResponseEntity<List<ThemeResponseDto>> popularThemes() {
-        List<Theme> rankingThemes = reservationService.getRankingThemes(LocalDate.now(), THEME_RANKING_START_RANGE,
+        List<Theme> rankingThemes = reserveTicketService.getRankingThemes(LocalDate.now(), THEME_RANKING_START_RANGE,
                 THEME_RANKING_END_RANGE);
 
         List<ThemeResponseDto> themeResponseDtos = rankingThemes.stream()
@@ -142,7 +138,7 @@ public class ReservationController {
             @RequestBody @Valid AddReservationDto newReservationDto,
             @AuthenticationPrincipal UserInfo userInfo) {
         long addedReservationId = reserveTicketService.addWaitingReservation(newReservationDto, userInfo.id());
-        Reservation reservation = reservationService.getReservationById(addedReservationId);
+        Reservation reservation = reserveTicketService.getReservationById(addedReservationId);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
                 reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());

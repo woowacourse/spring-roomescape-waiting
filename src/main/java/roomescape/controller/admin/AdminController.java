@@ -17,7 +17,6 @@ import roomescape.dto.admin.AdminReservationAddDto;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.dto.reservationmember.ReservationTicketWaitingDto;
-import roomescape.service.reservation.ReservationService;
 import roomescape.service.reserveticket.ReserveTicketService;
 import roomescape.service.reserveticket.ReserveTicketWaiting;
 
@@ -25,11 +24,9 @@ import roomescape.service.reserveticket.ReserveTicketWaiting;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final ReservationService reservationService;
     private final ReserveTicketService reserveTicketService;
 
-    public AdminController(ReservationService reservationService, ReserveTicketService reserveTicketService) {
-        this.reservationService = reservationService;
+    public AdminController(ReserveTicketService reserveTicketService) {
         this.reserveTicketService = reserveTicketService;
     }
 
@@ -42,7 +39,7 @@ public class AdminController {
 
         long id = reserveTicketService.addReservation(addReservationDto,
                 newReservationDto.memberId());
-        Reservation reservation = reservationService.getReservationById(id);
+        Reservation reservation = reserveTicketService.getReservationById(id);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation.getId(),
                 reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
@@ -79,7 +76,7 @@ public class AdminController {
 
         long id = reserveTicketService.addReservation(addReservationDto,
                 newReservationDto.memberId());
-        Reservation reservation = reservationService.getReservationById(id);
+        Reservation reservation = reserveTicketService.getReservationById(id);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation.getId(),
                 reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
