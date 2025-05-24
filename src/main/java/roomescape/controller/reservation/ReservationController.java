@@ -17,18 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
-import roomescape.domain.reserveticket.ReserveTicket;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reserveticket.ReserveTicketWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
-import roomescape.dto.reservationmember.ReservationMemberResponseDto;
+import roomescape.dto.reservationmember.ReservationTicketResponseDto;
+import roomescape.dto.reservationmember.ReservationTicketWaitingDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
-import roomescape.service.reservation.ReservationService;
 import roomescape.service.reserveticket.ReserveTicketService;
 
 @RestController
@@ -38,50 +38,50 @@ public class ReservationController {
     private static final int THEME_RANKING_END_RANGE = 7;
     private static final int THEME_RANKING_START_RANGE = 1;
 
-    private final ReservationService reservationService;
     private final ReserveTicketService reserveTicketService;
 
-    public ReservationController(ReservationService reservationService,
-                                 ReserveTicketService reserveTicketService) {
-        this.reservationService = reservationService;
+    public ReservationController(ReserveTicketService reserveTicketService) {
         this.reserveTicketService = reserveTicketService;
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationMemberResponseDto>> reservations(@RequestParam(required = false) Long themeId,
+    public ResponseEntity<List<ReservationTicketResponseDto>> reservations(@RequestParam(required = false) Long themeId,
                                                                            @RequestParam(required = false) Long memberId,
                                                                            @RequestParam(required = false) LocalDate dateFrom,
                                                                            @RequestParam(required = false) LocalDate dateTo) {
-        List<ReserveTicket> reserveTickets = null;
+        List<ReserveTicketWaiting> reserveTickets = null;
         boolean isFilterMode = true;
         if (themeId == null && memberId == null && dateFrom == null && dateTo == null) {
             isFilterMode = false;
-            reserveTickets = reserveTicketService.allReservations();
+            reserveTickets = reserveTicketService.allReservationTickets();
         }
 
         if (isFilterMode) {
             reserveTickets = reserveTicketService.searchReservations(themeId, memberId, dateFrom, dateTo);
         }
 
-        List<ReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reservationMember) -> new ReservationMemberResponseDto(reservationMember.getId(),
-                        reservationMember.getName(),
-                        reservationMember.getThemeName(),
-                        reservationMember.getDate(),
-                        reservationMember.getStartAt()))
+        List<ReservationTicketResponseDto> reservationDtos = reserveTickets.stream()
+                .filter(reserveTicketWaiting -> reserveTicketWaiting.getReservationStatus()
+                        .equals(ReservationStatus.RESERVATION))
+                .map((reservationTicketWaiting) -> new ReservationTicketResponseDto(reservationTicketWaiting.getId(),
+                        reservationTicketWaiting.getName(),
+                        reservationTicketWaiting.getThemeName(),
+                        reservationTicketWaiting.getDate(),
+                        reservationTicketWaiting.getStartAt()))
                 .toList();
         return ResponseEntity.ok(reservationDtos);
     }
+
 
     @PostMapping
     public ResponseEntity<ReservationResponseDto> addReservations(
             @RequestBody @Valid AddReservationDto newReservationDto,
             @AuthenticationPrincipal UserInfo userInfo) {
         long addedReservationId = reserveTicketService.addReservation(newReservationDto, userInfo.id());
-        Reservation reservation = reservationService.getReservationById(addedReservationId);
+        Reservation reservation = reserveTicketService.getReservationById(addedReservationId);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
-                reservation.getName(), reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
+                reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
         return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
     }
 
@@ -94,7 +94,7 @@ public class ReservationController {
     @GetMapping("/available-times")
     public ResponseEntity<List<ReservationTimeSlotResponseDto>> availableReservationTimes(
             @Valid @ModelAttribute AvailableTimeRequestDto availableTimeRequestDto) {
-        ReservationSlotTimes reservationSlotTimes = reservationService.availableReservationTimes(
+        ReservationSlotTimes reservationSlotTimes = reserveTicketService.availableReservationTimes(
                 availableTimeRequestDto);
         List<ReservationSlot> availableBookTimes = reservationSlotTimes.getAvailableBookTimes();
 
@@ -107,7 +107,7 @@ public class ReservationController {
 
     @GetMapping("/popular-themes")
     public ResponseEntity<List<ThemeResponseDto>> popularThemes() {
-        List<Theme> rankingThemes = reservationService.getRankingThemes(LocalDate.now(), THEME_RANKING_START_RANGE,
+        List<Theme> rankingThemes = reserveTicketService.getRankingThemes(LocalDate.now(), THEME_RANKING_START_RANGE,
                 THEME_RANKING_END_RANGE);
 
         List<ThemeResponseDto> themeResponseDtos = rankingThemes.stream()
@@ -118,17 +118,42 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(
+    public ResponseEntity<List<ReservationTicketWaitingDto>> myReservations(
             @AuthenticationPrincipal UserInfo userInfo) {
-        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(userInfo.id());
-        List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getReservationId(),
-                        reservationMember.getName(),
-                        reservationMember.getThemeName(),
-                        reservationMember.getDate(),
-                        reservationMember.getStartAt(),
-                        reservationMember.getStatus()))
+        List<ReserveTicketWaiting> reserveTickets = reserveTicketService.memberReservationWaitingTickets(userInfo.id());
+        List<ReservationTicketWaitingDto> reservationDtos = reserveTickets.stream()
+                .map((reserveTicket) -> new ReservationTicketWaitingDto(reserveTicket.getId(),
+                        reserveTicket.getName(),
+                        reserveTicket.getThemeName(),
+                        reserveTicket.getDate(),
+                        reserveTicket.getStartAt(),
+                        reserveTicket.getReservationStatus().getStatus(),
+                        reserveTicket.getWaitRank()))
                 .toList();
         return ResponseEntity.ok(reservationDtos);
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponseDto> addWaitingReservations(
+            @RequestBody @Valid AddReservationDto newReservationDto,
+            @AuthenticationPrincipal UserInfo userInfo) {
+        long addedReservationId = reserveTicketService.addWaitingReservation(newReservationDto, userInfo.id());
+        Reservation reservation = reserveTicketService.getReservationById(addedReservationId);
+
+        ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
+                reservation.getStartAt(), reservation.getDate(), reservation.getThemeName());
+        return ResponseEntity.created(URI.create("/reservations/" + addedReservationId)).body(reservationResponseDto);
+    }
+
+    @PostMapping("/waiting/{id}")
+    public ResponseEntity<ReservationResponseDto> changeWaitingToReservation(@PathVariable Long id) {
+        reserveTicketService.changeWaitingToReservation(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<ReservationResponseDto> removeWaitingReservations(@PathVariable Long id) {
+        reserveTicketService.deleteReservation(id);
+        return ResponseEntity.noContent().build();
     }
 }

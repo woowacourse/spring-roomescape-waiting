@@ -15,7 +15,6 @@ import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.reservation.InvalidReservationException;
 
 @Entity
 public class Reservation {
@@ -23,7 +22,6 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
     private LocalDate date;
 
     @JoinColumn(name = "time_id")
@@ -42,22 +40,17 @@ public class Reservation {
 
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time);
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme,
+                       ReservationStatus reservationStatus) {
+        this(id, date, time, theme);
+        this.reservationStatus = reservationStatus;
+    }
+
+    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
-        this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
-    }
-
-    private void validate(String name, LocalDate date, ReservationTime time) {
-        if (name == null || name.isBlank()) {
-            throw new InvalidReservationException("이름은 공백일 수 없습니다");
-        }
-        if (date == null || time == null) {
-            throw new InvalidReservationException("시간은 공백일 수 없습니다.");
-        }
     }
 
     public boolean isBeforeDateTime(LocalDateTime compareDateTime) {
@@ -81,12 +74,12 @@ public class Reservation {
         return dateFrom.isEqual(date) || dateFrom.isBefore(date);
     }
 
-    public Long getId() {
-        return id;
+    public void waitingToReservation() {
+        this.reservationStatus = ReservationStatus.RESERVATION;
     }
 
-    public String getName() {
-        return name;
+    public Long getId() {
+        return id;
     }
 
     public LocalDate getDate() {
@@ -109,8 +102,8 @@ public class Reservation {
         return theme.getName();
     }
 
-    public String getReservationStatus() {
-        return reservationStatus.getStatus();
+    public ReservationStatus getReservationStatus() {
+        return reservationStatus;
     }
 
     @Override

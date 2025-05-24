@@ -1,10 +1,15 @@
 package roomescape.unit.repository.reserveticket;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
@@ -17,6 +22,27 @@ public class FakeReserveTicketRepository implements ReserveTicketRepository {
     @Override
     public List<ReserveTicket> findAll() {
         return Collections.unmodifiableList(reserveTickets);
+    }
+
+    @Override
+    public List<ReserveTicket> findAllBySameReservation(long themeId, LocalDate date, long timeId,
+                                                        ReservationStatus reservationStatus) {
+        return reserveTickets.stream()
+                .filter(ticket -> {
+                    Reservation reservation = ticket.getReservation();
+                    return reservation.getTheme().getId() == themeId
+                            && reservation.getDate().equals(date)
+                            && reservation.getReservationTime().getId() == timeId
+                            && reservation.getReservationStatus() == reservationStatus;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<ReserveTicket> findById(Long id) {
+        return reserveTickets.stream()
+                .filter(ticket -> Objects.equals(ticket.getId(), id))
+                .findFirst();
     }
 
     @Override

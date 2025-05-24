@@ -21,10 +21,10 @@ public class FakeReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         Reservation newReservation = new Reservation(
                 index.getAndIncrement(),
-                reservation.getName(),
                 reservation.getDate(),
                 reservation.getReservationTime(),
-                reservation.getTheme()
+                reservation.getTheme(),
+                reservation.getReservationStatus()
         );
         reservations.add(newReservation);
         return newReservation;
@@ -79,6 +79,15 @@ public class FakeReservationRepository implements ReservationRepository {
         return reservations.stream()
                 .filter(r -> r.getId().equals(id))
                 .findAny();
+    }
+
+    @Override
+    public int countByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId) {
+        return (int) reservations.stream()
+                .filter(r -> r.getTheme().isSameTheme(themeId))
+                .filter(r -> r.getDate().isEqual(date))
+                .filter(r -> r.getReservationTime().getId().equals(timeId))
+                .count();
     }
 
     @Override
