@@ -189,6 +189,6 @@ public class ReservationService {
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .toList();
 
-        return reservations.indexOf(reservation) + 1;
+        return reservations.indexOf(reservation);
     }
 }
