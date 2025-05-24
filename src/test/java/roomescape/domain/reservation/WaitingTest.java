@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
 import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;

@@ -38,21 +38,12 @@ class DeleteReservationServiceTest extends AbstractServiceIntegrationTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    ApplicationEventPublisher eventPublisher;
-
-    @Autowired
     private TestReservationCancelListener testListener;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     private DeleteReservationService deleteReservationService;
-
-    @TestConfiguration
-    static class TestListenerConfig {
-
-        @Bean
-        public TestReservationCancelListener testReservationCancelListener() {
-            return new TestReservationCancelListener();
-        }
-    }
 
     @BeforeEach
     void setUp() {
@@ -93,5 +84,14 @@ class DeleteReservationServiceTest extends AbstractServiceIntegrationTest {
         // then
         assertThat(testListener.isCalled())
                 .isTrue();
+    }
+
+    @TestConfiguration
+    static class TestListenerConfig {
+
+        @Bean
+        public TestReservationCancelListener testReservationCancelListener() {
+            return new TestReservationCancelListener();
+        }
     }
 }

@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.auth.dto.LoginCommand;
 import roomescape.application.auth.dto.LoginResult;
-import roomescape.infrastructure.error.exception.LoginAuthException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.repository.MemberRepository;
+import roomescape.infrastructure.error.exception.LoginAuthException;
 import roomescape.infrastructure.security.AccessToken;
 import roomescape.infrastructure.security.JwtProvider;
 

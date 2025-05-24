@@ -14,8 +14,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.domain.BaseEntity;
-import roomescape.infrastructure.error.exception.ReservationException;
 import roomescape.domain.member.Member;
+import roomescape.infrastructure.error.exception.ReservationException;
 
 @Entity
 public class Reservation extends BaseEntity {
