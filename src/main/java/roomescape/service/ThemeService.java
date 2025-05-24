@@ -45,8 +45,7 @@ public class ThemeService {
                         new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail()))
                 .toList();
     }
-
-
+    
     @Transactional(readOnly = true)
     public List<ThemeResponse> getTopThemes() {
         LocalDate startDate = LocalDate.now().minusDays(THEME_TRACKING_PERIOD);

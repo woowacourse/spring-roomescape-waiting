@@ -123,4 +123,9 @@ public class ReservationService {
         reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.deleteById(id);
     }
+
+    public void deleteWaitingById(Long id) {
+        waitingRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
+        waitingRepository.deleteById(id);
+    }
 }
