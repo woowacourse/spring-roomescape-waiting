@@ -10,6 +10,8 @@ import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.waiting.domain.Waiting;
+import roomescape.reservation.waiting.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -17,6 +19,7 @@ import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class ReservationService {
@@ -25,17 +28,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public ReservationResponse createReservation(final CreateReservationRequest request) {
@@ -44,14 +50,14 @@ public class ReservationService {
         return new ReservationResponse(savedReservation);
     }
 
-    public List<ReservationResponse> getReservations() {
+    public List<ReservationResponse> getAllReservations() {
         final List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
-    public List<ReservationResponse> getReservations(
+    public List<ReservationResponse> getFilteredReservations(
             final Long memberId,
             final Long themeId,
             final LocalDate dateFrom,
@@ -69,9 +75,14 @@ public class ReservationService {
 
     public List<MyReservationResponse> getMyReservations(final LoginMember loginMember) {
         final List<Reservation> reservations = reservationRepository.findAllByMemberIdOrderByDateDesc(loginMember.id());
-        return reservations.stream()
-                .map(MyReservationResponse::new)
-                .toList();
+        final List<Waiting> waitings = waitingRepository.findByMemberId(loginMember.id());
+
+        return Stream.concat(
+                reservations.stream()
+                        .map(reservation -> new MyReservationResponse(reservation, "예약")),
+                waitings.stream()
+                        .map(waiting -> new MyReservationResponse(waiting, "예약 대기"))
+        ).toList();
     }
 
     public void cancelReservationById(final long id) {

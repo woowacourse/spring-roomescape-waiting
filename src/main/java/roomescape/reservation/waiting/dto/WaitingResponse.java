@@ -1,0 +1,29 @@
+package roomescape.reservation.waiting.dto;
+
+import roomescape.member.dto.MemberResponse;
+import roomescape.reservation.waiting.domain.Waiting;
+import roomescape.theme.dto.ThemeResponse;
+import roomescape.time.dto.ReservationTimeResponse;
+
+import java.time.LocalDate;
+
+// TODO: 생성 시간 정보
+public record WaitingResponse(
+        Long id,
+        MemberResponse member,
+        LocalDate date,
+        ReservationTimeResponse time,
+        ThemeResponse theme
+) {
+
+    public WaitingResponse(final Waiting waiting) {
+        this(
+                waiting.getId(),
+                new MemberResponse(waiting.getMember()),
+                waiting.getReservationDate(),
+                new ReservationTimeResponse(waiting.getReservationTime()),
+                new ThemeResponse(waiting.getTheme())
+        );
+    }
+}
+

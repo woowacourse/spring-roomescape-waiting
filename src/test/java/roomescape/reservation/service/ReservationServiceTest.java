@@ -33,7 +33,7 @@ class ReservationServiceTest {
     private final FakeThemeDao themeDao = new FakeThemeDao();
     private final FakeMemberDao fakeMemberDao = new FakeMemberDao();
     private final ReservationService reservationService = new ReservationService(reservationDao, reservationTimeDao,
-            themeDao, fakeMemberDao);
+            themeDao, fakeMemberDao, null);
 
     @BeforeEach
     void setUp() {
@@ -53,7 +53,7 @@ class ReservationServiceTest {
     void testFindAll() {
         // given
         // when
-        List<ReservationResponse> reservations = reservationService.getReservations();
+        List<ReservationResponse> reservations = reservationService.getAllReservations();
         // then
         assertThat(reservations).hasSize(2);
     }
@@ -65,7 +65,7 @@ class ReservationServiceTest {
         // when
         reservationService.cancelReservationById(1L);
         // then
-        assertThat(reservationService.getReservations()).hasSize(1);
+        assertThat(reservationService.getAllReservations()).hasSize(1);
     }
 
     @DisplayName("나의 예약 목록을 조회할 수 있다.")

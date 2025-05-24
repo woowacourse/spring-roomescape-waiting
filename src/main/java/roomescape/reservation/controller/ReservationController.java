@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.global.auth.AuthMember;
 import roomescape.global.auth.LoginMember;
 import roomescape.reservation.dto.CreateReservationRequest;
+import roomescape.reservation.dto.CreateUserReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.UserCreateReservationRequest;
 import roomescape.reservation.service.ReservationService;
 
 import java.net.URI;
@@ -26,12 +26,12 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createForUser(
-            @RequestBody @Valid final UserCreateReservationRequest request,
+            @RequestBody @Valid final CreateUserReservationRequest request,
             @AuthMember final LoginMember member
     ) {
         final CreateReservationRequest newRequest = new CreateReservationRequest(
-                request.date(), request.timeId(), request.themeId(), member.id());
-
+                request.date(), request.timeId(), request.themeId(), member.id()
+        );
         final ReservationResponse response = reservationService.createReservation(newRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
@@ -44,7 +44,7 @@ public class ReservationController {
 
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> findAll() {
-        final List<ReservationResponse> responses = reservationService.getReservations();
+        final List<ReservationResponse> responses = reservationService.getAllReservations();
         return ResponseEntity.ok().body(responses);
     }
 
@@ -55,7 +55,7 @@ public class ReservationController {
             @RequestParam(value = "dateFrom") final LocalDate dateFrom,
             @RequestParam(value = "dateTo") final LocalDate dateTo
     ) {
-        final List<ReservationResponse> responses = reservationService.getReservations(
+        final List<ReservationResponse> responses = reservationService.getFilteredReservations(
                 memberId,
                 themeId,
                 dateFrom,
@@ -65,7 +65,7 @@ public class ReservationController {
     }
 
     @GetMapping("/me/reservations")
-    public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthMember LoginMember loginMember) {
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(@AuthMember final LoginMember loginMember) {
         final List<MyReservationResponse> responses = reservationService.getMyReservations(loginMember);
         return ResponseEntity.ok().body(responses);
     }
