@@ -113,4 +113,8 @@ public class Reservation {
             throw new ReservationException("예약은 현재 시간 이후로 가능합니다.");
         }
     }
+
+    public boolean isBooked() {
+        return reservationStatus.getStatus() == Status.BOOKED;
+    }
 }
