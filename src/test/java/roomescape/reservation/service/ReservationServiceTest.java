@@ -211,7 +211,7 @@ class ReservationServiceTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(myReservations).hasSize(1);
-            softly.assertThat(myReservations.get(0).reservationId()).isEqualTo(reservation1.getId());
+            softly.assertThat(myReservations.get(0).id()).isEqualTo(reservation1.getId());
             softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
             softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
             softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());

@@ -7,7 +7,9 @@ import static roomescape.reservation.controller.response.ReservationSuccessCode.
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +33,7 @@ public class ReservationApiController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ReservationResponse>> createReservation(
+    public ResponseEntity<ApiResponse<ReservationResponse>> reserve(
             @RequestBody @Valid ReserveByUserRequest request,
             @Authenticated Long memberId
     ) {
@@ -51,5 +53,16 @@ public class ReservationApiController {
         return ResponseEntity.ok(
                 ApiResponse.success(GET_MY_RESERVATIONS, responses)
         );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable Long id
+    ) {
+        reservationService.deleteById(id);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
