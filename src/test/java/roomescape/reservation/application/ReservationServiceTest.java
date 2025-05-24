@@ -29,10 +29,14 @@ import roomescape.member.presentation.dto.MyReservationResponse;
 import roomescape.member.application.service.MemberQueryService;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
+import roomescape.reservation.application.service.WaitingReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
+import roomescape.reservation.infrastructure.JpaWaitingReservationRepository;
+import roomescape.reservation.infrastructure.JpaWaitingReservationRepositoryAdaptor;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.application.ReservationServiceTest.ReservationConfig;
 import roomescape.reservation.time.domain.ReservationTime;
@@ -78,10 +82,10 @@ class ReservationServiceTest {
         LocalDate nowLater4Days = LocalDate.now().plusDays(4);
 
         Reservation reservation1 = jpaReservationRepository.save(
-            new Reservation(nowLater4Days, time1, theme, member, ReservationStatus.RESERVED)
+            new Reservation(nowLater4Days, time1, theme, member)
         );
         Reservation reservation2 = jpaReservationRepository.save(
-            new Reservation(nowLater4Days, time2, theme, member, ReservationStatus.RESERVED)
+            new Reservation(nowLater4Days, time2, theme, member)
         );
 
         // when
@@ -132,6 +136,11 @@ class ReservationServiceTest {
         }
 
         @Bean
+        public WaitingReservationRepository waitingReservationRepository(JpaWaitingReservationRepository jpaWaitingReservationRepository) {
+            return new JpaWaitingReservationRepositoryAdaptor(jpaWaitingReservationRepository);
+        }
+
+        @Bean
         public ReservationTimeRepository reservationTimeRepository(JpaReservationTimeRepository jpaReservationTimeRepository) {
             return new JpaReservationTimeRepositoryAdaptor(jpaReservationTimeRepository);
         }
@@ -157,6 +166,11 @@ class ReservationServiceTest {
         }
 
         @Bean
+        public WaitingReservationQueryService waitingReservationQueryService(WaitingReservationRepository waitingReservationRepository) {
+            return new WaitingReservationQueryService(waitingReservationRepository);
+        }
+
+        @Bean
         public ReservationTimeQueryService reservationTimeQueryService(ReservationTimeRepository reservationTimeRepository) {
             return new ReservationTimeQueryService(reservationTimeRepository);
         }
@@ -175,6 +189,7 @@ class ReservationServiceTest {
         public ReservationFacadeService reservationFacadeService(
             ReservationQueryService reservationQueryService,
             ReservationCommandService reservationCommandService,
+            WaitingReservationQueryService waitingReservationQueryService,
             ReservationTimeQueryService reservationTimeQueryService,
             ThemeQueryService themeQueryService,
             MemberQueryService memberQueryService
@@ -182,6 +197,7 @@ class ReservationServiceTest {
             return new ReservationFacadeService(
                 reservationQueryService,
                 reservationCommandService,
+                waitingReservationQueryService,
                 reservationTimeQueryService,
                 themeQueryService,
                 memberQueryService);

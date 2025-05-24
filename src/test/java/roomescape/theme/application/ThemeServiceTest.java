@@ -74,13 +74,13 @@ class ThemeServiceTest {
 
         LocalDate now = LocalDate.now();
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time1, theme1, member, ReservationStatus.RESERVED)
+            new Reservation(now.minusDays(2), time1, theme1, member)
         );
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time2, theme1, member, ReservationStatus.RESERVED)
+            new Reservation(now.minusDays(2), time2, theme1, member)
         );
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time1, theme3, member, ReservationStatus.RESERVED)
+            new Reservation(now.minusDays(2), time1, theme3, member)
         );
 
         // when

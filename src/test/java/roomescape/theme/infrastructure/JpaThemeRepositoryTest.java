@@ -43,9 +43,9 @@ class JpaThemeRepositoryTest {
             new Member(new Name("율무"), new Email("test@email.com"), new Password("password"))
         );
         LocalDate now = LocalDate.now();
-        jpaReservationRepository.save(new Reservation(now.minusDays(1), time, theme, member, ReservationStatus.RESERVED));
-        jpaReservationRepository.save(new Reservation(now.minusDays(2), time, theme, member, ReservationStatus.RESERVED));
-        jpaReservationRepository.save(new Reservation(now.minusDays(8), time, theme, member, ReservationStatus.RESERVED));
+        jpaReservationRepository.save(new Reservation(now.minusDays(1), time, theme, member));
+        jpaReservationRepository.save(new Reservation(now.minusDays(2), time, theme, member));
+        jpaReservationRepository.save(new Reservation(now.minusDays(8), time, theme, member));
 
         LocalDate start = LocalDate.now().minusDays(4);
         LocalDate end = LocalDate.now();

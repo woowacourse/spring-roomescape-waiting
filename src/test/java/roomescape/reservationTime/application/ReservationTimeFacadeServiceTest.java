@@ -76,8 +76,8 @@ class ReservationTimeFacadeServiceTest {
             new Member(new Name("율무"), new Email("test@email.com"), new Password("password"))
         );
 
-        jpaReservationRepository.save(new Reservation(now, time1, theme, member, ReservationStatus.RESERVED));
-        jpaReservationRepository.save(new Reservation(now, time2, theme, member, ReservationStatus.RESERVED));
+        jpaReservationRepository.save(new Reservation(now, time1, theme, member));
+        jpaReservationRepository.save(new Reservation(now, time2, theme, member));
 
         // when
         List<TimeConditionResponse> responses = reservationTimeFacadeService.getTimesWithCondition(
