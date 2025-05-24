@@ -20,11 +20,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
             SELECT r 
-                FROM Reservation r 
-                WHERE (:themeId IS NULL OR r.theme.id = :themeId) 
-                    AND (:memberId IS NULL OR r.member.id = :memberId) 
-                    AND (:dateFrom IS NULL OR r.date >= :dateFrom) 
-                    AND (:dateTo IS NULL OR r.date <= :dateTo)
+            FROM Reservation r 
+            WHERE (:themeId IS NULL OR r.theme.id = :themeId) 
+                AND (:memberId IS NULL OR r.member.id = :memberId) 
+                AND (:dateFrom IS NULL OR r.date >= :dateFrom) 
+                AND (:dateTo IS NULL OR r.date <= :dateTo)
             """)
     List<Reservation> findByMemberAndThemeAndDateRange(
             @Param("memberId") Long member,
@@ -34,14 +34,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("""
-                SELECT COUNT(r) + 1
-                FROM Reservation r
-                JOIN r.waiting w
-                WHERE r.theme = :theme
-                  AND r.date = :date
-                  AND r.time = :time
-                  AND w.status = :status
-                  AND w.savedDateTime < :myCreatedAt
+            SELECT COUNT(r) + 1
+            FROM Reservation r
+            JOIN r.waiting w
+            WHERE r.theme = :theme
+                AND r.date = :date
+                AND r.time = :time
+                AND w.status = :status
+                AND w.savedDateTime < :myCreatedAt
             """)
     long countByReservationWaitingOrderByCreatedAt(
             @Param("theme") Theme theme,
