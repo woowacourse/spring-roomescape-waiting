@@ -11,6 +11,15 @@ import roomescape.reservation.domain.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
+    @Query("""
+            SELECT w2
+            FROM Waiting w2
+            JOIN FETCH w2.theme
+            JOIN FETCH w2.member
+            JOIN FETCH w2.time
+            """)
+    List<Waiting> findAll();
+
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(
             LocalDate date,
             Long timeId,
