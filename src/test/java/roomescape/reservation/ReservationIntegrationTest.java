@@ -114,9 +114,21 @@ public class ReservationIntegrationTest {
     @DisplayName("잘못된 예약 id로 삭제 요청 시 400 응답을 준다.")
     @Test
     void when_given_wrong_id() {
+        Map<String, Object> loginParam = new HashMap<>();
+        loginParam.put("email", "member1@email.com");
+        loginParam.put("password", "password");
+
+        String token = RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .body(loginParam)
+            .when().post("/login")
+            .then().log().all()
+            .extract().cookie("token");
+
         RestAssured.given().log().all()
-                .when().delete("/reservations/10")
-                .then().log().all()
-                .statusCode(400);
+            .when().header("Cookie", "token="+token)
+            .delete("/reservations/10")
+            .then().log().all()
+            .statusCode(400);
     }
 }
