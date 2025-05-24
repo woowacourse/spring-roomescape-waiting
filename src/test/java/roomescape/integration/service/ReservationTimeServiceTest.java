@@ -60,7 +60,8 @@ class ReservationTimeServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> service.createReservationTime(request))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 존재하는 예약 시간입니다.");
     }
 
     @Test
@@ -100,14 +101,16 @@ class ReservationTimeServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> service.deleteReservationTimeById(time.getId()))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
 
     @Test
     void 존재하지_않는_예약시간은_삭제할_수_없다() {
         // when // then
         assertThatThrownBy(() -> service.deleteReservationTimeById(1L))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
 
     @Test
@@ -126,7 +129,8 @@ class ReservationTimeServiceTest extends ServiceTestBase {
     void 예약시간_ID로_조회시_없으면_예외() {
         // when // then
         assertThatThrownBy(() -> service.getReservationTime(1L))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
 
     @Test

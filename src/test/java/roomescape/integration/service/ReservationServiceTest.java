@@ -91,7 +91,8 @@ class ReservationServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
 
     @Test
@@ -110,7 +111,8 @@ class ReservationServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("이미 예약이 찼습니다.");
     }
 
     @Test
@@ -122,7 +124,8 @@ class ReservationServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> service.createReservation(request, member.getId()))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("해당 테마가 존재하지 않습니다.");
     }
 
     @Test
@@ -147,7 +150,8 @@ class ReservationServiceTest extends ServiceTestBase {
     void 삭제할_예약이_없으면_예외() {
         // when // then
         assertThatThrownBy(() -> service.deleteReservationById(999L))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("예약을 찾을 수 없습니다.");
     }
 
     @Test

@@ -79,7 +79,7 @@ class MemberArgumentResolverTest {
         // when // then
         assertThatThrownBy(() -> resolver.resolveArgument(null, null, webRequest, null))
                 .isInstanceOf(AuthenticationException.class)
-                .hasMessageContaining("로그인이 필요합니다.");
+                .hasMessage("로그인이 필요합니다.");
     }
 
     static class DummyController {

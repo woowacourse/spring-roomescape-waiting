@@ -98,14 +98,16 @@ class ThemeServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("이미 예약이 존재해서 테마를 삭제할 수 없습니다.");
     }
 
     @Test
     void 존재하지_않는_테마는_삭제할_수_없다() {
         // when // then
         assertThatThrownBy(() -> themeService.deleteThemeById(999L))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("해당 테마가 존재하지 않습니다.");
     }
 
     @Test

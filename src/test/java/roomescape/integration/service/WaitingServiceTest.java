@@ -71,7 +71,8 @@ class WaitingServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> waitingService.createWaiting(request, member.getId()))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("이미 대기가 존재합니다.");
     }
 
     @Test
@@ -130,6 +131,7 @@ class WaitingServiceTest extends ServiceTestBase {
 
         // when // then
         assertThatThrownBy(() -> waitingService.deleteWaitingById(response.id(), sessionMember))
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("해당 대기를 삭제할 권한이 없습니다.");
     }
 } 
