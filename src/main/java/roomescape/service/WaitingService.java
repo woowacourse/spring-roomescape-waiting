@@ -72,9 +72,16 @@ public class WaitingService {
         }
     }
 
-    public void deleteWaitingById(final Long id) {
+    public void deleteWaitingById(final Long id, final Long memberId) {
         final Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("예약 대기 정보를 찾을 수 없습니다."));
+        validateWaitingOwner(waiting, memberId);
         waitingRepository.delete(waiting);
+    }
+
+    private void validateWaitingOwner(final Waiting waiting, final Long memberId) {
+        if (!waiting.getMember().getId().equals(memberId)) {
+            throw new IllegalStateException("해당 대기를 삭제할 권한이 없습니다.");
+        }
     }
 }
