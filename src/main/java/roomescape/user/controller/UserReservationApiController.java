@@ -1,6 +1,5 @@
 package roomescape.user.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,14 +46,9 @@ public class UserReservationApiController {
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse
     ) {
-        List<MemberReservationResponse> allReservationByMemberId = reservationService.findAllByMemberId(
-                memberResponse.id());
-        List<MemberReservationResponse> allWaitingReservationByMemberId = waitingService.findAllByMemberId(
+        List<MemberReservationResponse> allReservationsAndWaitings = reservationService.findAllReservationsAndWaitings(
                 memberResponse.id());
 
-        List<MemberReservationResponse> allCombined = new ArrayList<>(allReservationByMemberId);
-        allCombined.addAll(allWaitingReservationByMemberId);
-
-        return ResponseEntity.ok().body(allCombined);
+        return ResponseEntity.ok().body(allReservationsAndWaitings);
     }
 }

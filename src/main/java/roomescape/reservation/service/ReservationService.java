@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
 import roomescape.user.controller.dto.request.ReservationRequest;
 import roomescape.user.controller.dto.response.MemberReservationResponse;
+import roomescape.waiting.service.WaitingService;
 
 @Service
 public class ReservationService {
@@ -25,14 +27,16 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberService memberService;
+    private final WaitingService waitingService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeService reservationTimeService,
-                              ThemeService themeService, MemberService memberService) {
+                              ThemeService themeService, MemberService memberService, WaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
+        this.waitingService = waitingService;
     }
 
     public ReservationResponse create(Long memberId, ReservationRequest request) {
@@ -70,6 +74,14 @@ public class ReservationService {
         return reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::fromReservation)
                 .toList();
+    }
+
+    public List<MemberReservationResponse> findAllReservationsAndWaitings(Long id) {
+        List<MemberReservationResponse> allReservation = findAllByMemberId(id);
+        List<MemberReservationResponse> allWaitings = waitingService.findAllByMemberId(id);
+        List<MemberReservationResponse> allCombined = new ArrayList<>(allReservation);
+        allCombined.addAll(allWaitings);
+        return allCombined;
     }
 
     private Reservation getReservation(Long id) {

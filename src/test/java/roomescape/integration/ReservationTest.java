@@ -61,6 +61,8 @@ public class ReservationTest extends BaseTest {
 
     private Map<String, Object> reservation;
 
+    private Map<String, Object> waiting;
+
     private String token;
 
     private ReservationTime reservationTime;
@@ -84,6 +86,12 @@ public class ReservationTest extends BaseTest {
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
         reservation.put("memberId", 1);
+
+        waiting = new HashMap<>();
+        waiting.put("date", "2025-08-05");
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+        waiting.put("memberId", 1);
     }
 
     @Test

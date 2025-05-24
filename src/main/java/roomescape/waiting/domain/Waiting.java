@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -63,6 +64,10 @@ public class Waiting {
         return new Waiting(null, reservationDate, reservationTime, theme, member);
     }
 
+    public Reservation toReservation() {
+        return Reservation.create(reservationDate.getDate(), reservationTime, theme, member);
+    }
+
     public Long getId() {
         return id;
     }
@@ -87,4 +92,7 @@ public class Waiting {
         return member;
     }
 
+    public ReservationDate getReservationDate() {
+        return reservationDate;
+    }
 }

@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
@@ -23,14 +25,16 @@ public class WaitingService {
     private final MemberService memberService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
                           MemberService memberService, ReservationTimeService reservationTimeService,
-                          ThemeService themeService) {
+                          ThemeService themeService, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.memberService = memberService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.reservationRepository = reservationRepository;
     }
 
     public ReservationResponse createById(Long memberId, ReservationRequest request) {
@@ -50,6 +54,12 @@ public class WaitingService {
                 .toList();
     }
 
+    public List<MemberReservationResponse> findAllWithRank() {
+        return waitingRepository.findAllWithRank().stream()
+                .map(MemberReservationResponse::fromWaitingWithRank)
+                .toList();
+    }
+
     public void deleteById(Long id) {
         Optional<Waiting> waiting = waitingRepository.findById(id);
         if (waiting.isPresent()) {
@@ -57,5 +67,36 @@ public class WaitingService {
             return;
         }
         throw new IllegalArgumentException("[ERROR] 대기를 찾을 수 없습니다.");
+    }
+
+    public List<ReservationResponse> findAll() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(ReservationResponse::fromWaiting)
+                .toList();
+    }
+
+    public ReservationResponse approveWaitingById(Long id) {
+        Optional<Waiting> byId = waitingRepository.findById(id);
+        validateEmpty(byId);
+        Waiting waiting = byId.get();
+        validateDuplicateReservation(waiting);
+        waitingRepository.deleteById(id);
+        Reservation reservation = waiting.toReservation();
+        Reservation save = reservationRepository.save(reservation);
+        return ReservationResponse.fromReservation(save);
+    }
+
+    private void validateDuplicateReservation(Waiting waiting) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeId(waiting.getReservationDate(),
+                waiting.getReservationTime().getId())) {
+            throw new IllegalArgumentException("[ERROR] 현재 예약이 존재합니다. 취소 후 다시 요청해 주세요.");
+        }
+    }
+
+    private static void validateEmpty(Optional<Waiting> byId) {
+        if (byId.isEmpty()) {
+            throw new IllegalArgumentException("[ERROR] 존재하지 않는 대기입니다.");
+        }
     }
 }

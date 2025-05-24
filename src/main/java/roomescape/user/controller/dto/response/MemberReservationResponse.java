@@ -9,6 +9,7 @@ import roomescape.waiting.domain.WaitingWithRank;
 public record MemberReservationResponse(
         Long id,
         LocalDate date,
+        String name,
         ReservationTimeResponse time,
         ThemeResponse theme,
         String reservationStatus
@@ -20,6 +21,7 @@ public record MemberReservationResponse(
         return new MemberReservationResponse(
                 reservation.getId(),
                 reservation.getDate(),
+                reservation.getMember().getName(),
                 ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme()),
                 "예약"
@@ -30,6 +32,7 @@ public record MemberReservationResponse(
         return new MemberReservationResponse(
                 waitingWithRank.getWaiting().getId(),
                 waitingWithRank.getWaiting().getDate(),
+                waitingWithRank.getWaiting().getMember().getName(),
                 ReservationTimeResponse.from(waitingWithRank.getWaiting().getReservationTime()),
                 ThemeResponse.from(waitingWithRank.getWaiting().getTheme()),
                 String.format(STATUS, waitingWithRank.getRank() + 1)

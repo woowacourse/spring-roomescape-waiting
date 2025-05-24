@@ -16,4 +16,6 @@ public interface WaitingRepository {
     Optional<Waiting> findById(Long id);
 
     void deleteById(Long id);
+
+    List<WaitingWithRank> findAllWithRank();
 }
