@@ -67,10 +67,6 @@ public class AdminReservationService {
 
     @Transactional
     public void deleteAsAdmin(final Long reservationId) {
-        if (!reservationRepository.existsById(reservationId)) {
-            throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
-        }
-
         final Reservation reservation = getReservationById(reservationId);
         final Optional<Waiting> optionalWaiting = waitingRepository.findFirstByReservationSlotOrderByCreatedAt(
                 reservation.getReservationSlot()
