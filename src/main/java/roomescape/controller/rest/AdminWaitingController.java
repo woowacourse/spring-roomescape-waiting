@@ -34,8 +34,7 @@ public class AdminWaitingController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable final Long id,
-                                              final SessionMember sessionMember) {
+    public ResponseEntity<Void> deleteWaiting(@PathVariable final Long id, final SessionMember sessionMember) {
         waitingService.deleteWaitingById(id, sessionMember);
         return ResponseEntity.ok().build();
     }

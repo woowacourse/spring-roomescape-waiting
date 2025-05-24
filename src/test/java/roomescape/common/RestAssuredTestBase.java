@@ -49,26 +49,26 @@ public class RestAssuredTestBase {
 
 
     public RestLoginMember generateLoginMember() {
-        return generateLogin(MemberRole.MEMBER);
+        return generateLogin("leehyeonsu4888@gmail.com", MemberRole.MEMBER);
     }
 
     public RestLoginMember generateLoginAdmin() {
-        return generateLogin(MemberRole.ADMIN);
+        return generateLogin("leehyeonsu48888@gmail.com", MemberRole.ADMIN);
     }
 
-    private RestLoginMember generateLogin(final MemberRole memberRole) {
+    private RestLoginMember generateLogin(final String email, final MemberRole memberRole) {
         var encoder = new BCryptPasswordEncoder();
         var member = memberRepository.save(new Member(
                 null,
                 new MemberName("홍길동"),
-                new MemberEmail("leehyeonsu4888@gmail.com"),
+                new MemberEmail(email),
                 new MemberEncodedPassword(encoder.encode("gustn111!!")),
                 memberRole
         ));
 
         var request = Map.of(
                 "password", "gustn111!!",
-                "email", "leehyeonsu4888@gmail.com"
+                "email", email
         );
         var sessionId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

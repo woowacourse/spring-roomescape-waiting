@@ -74,7 +74,7 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", greaterThan(0))
+                .body("size()", is(1))
                 .body("[0].name", is("홍길동"))
                 .body("[0].time.id", is(1))
                 .body("[0].time.startAt", is("10:00"))

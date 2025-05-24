@@ -1,5 +1,7 @@
 package roomescape.integration.fixture;
 
+import static roomescape.common.Constant.FIXED_CLOCK;
+
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.domain.member.Member;
@@ -21,7 +23,7 @@ public class WaitingDbFixture {
 
     public Waiting 대기_25_4_22(final ReservationTime time, final Theme theme, final Member member) {
         ReservationDate date = ReservationDateFixture.예약날짜_25_4_22;
-        return createWaiting(date, time, theme, member, LocalDateTime.now());
+        return createWaiting(date, time, theme, member, LocalDateTime.now(FIXED_CLOCK));
     }
 
     public Waiting 대기_생성(
