@@ -18,6 +18,7 @@ import roomescape.waiting.dto.request.WaitingCreateRequest;
 import roomescape.waiting.dto.response.WaitingCreateResponse;
 import roomescape.waiting.dto.response.WaitingReadResponse;
 import roomescape.waiting.entity.Waiting;
+import roomescape.waiting.entity.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
@@ -61,21 +62,24 @@ public class WaitingService {
     public void acceptWaiting(Long id) {
         Waiting waiting = getWaitingById(id);
 
-        deleteReservationByWaiting(waiting);
+        reservationRepository.deleteByReservationSlot(waiting.getReservationSlot());
         reservationRepository.flush();
+        convertWaitingToReservation(waiting);
+    }
+
+    public void changeWaitingToReservation(ReservationSlot reservationSlot) {
+        waitingRepository.findFirstByReservationSlot(reservationSlot)
+                .ifPresent(this::convertWaitingToReservation);
+    }
+
+    public List<WaitingWithRank> getWaitingWithRanksByMemberId(Long memberId) {
+        return waitingRepository.findWaitingsWithRankByMemberId(memberId);
+    }
+
+    private void convertWaitingToReservation(Waiting waiting) {
         waitingRepository.delete(waiting);
         Reservation reservation = new Reservation(waiting.getReservationSlot(), waiting.getMember());
         reservationRepository.save(reservation);
-    }
-
-    private void deleteReservationByWaiting(Waiting waiting) {
-        reservationRepository.findByReservationSlot(waiting.getReservationSlot())
-                .ifPresent(reservationRepository::delete);
-    }
-
-    private Waiting getWaitingById(Long id) {
-        return waitingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
     }
 
     private void validateLoginMember(Long waitingId, LoginMember loginMember) {
@@ -108,6 +112,11 @@ public class WaitingService {
         if (waitingRepository.existsByReservationSlotAndMemberId(reservationSlot, loginMember.id())) {
             throw new BadRequestException("중복된 예약 대기가 존재합니다.");
         }
+    }
+
+    private Waiting getWaitingById(Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
     }
 
     private Member getMemberById(Long memberId) {

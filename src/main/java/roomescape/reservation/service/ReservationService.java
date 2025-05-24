@@ -29,18 +29,19 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.entity.WaitingWithRank;
-import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.WaitingService;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ReservationService {
 
+    private final WaitingService waitingService;
+
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final WaitingRepository waitingRepository;
     private final ReservationSlotRepository reservationSlotRepository;
 
     public ReservationCreateResponse createReservation(Long memberId, ReservationCreateRequest request) {
@@ -91,7 +92,7 @@ public class ReservationService {
         Member member = getMemberById(loginMember.id());
 
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
+        List<WaitingWithRank> waitingWithRanks = waitingService.getWaitingWithRanksByMemberId(loginMember.id());
 
         return ReservationByMemberResponse.of(reservations, waitingWithRanks);
     }
@@ -101,16 +102,7 @@ public class ReservationService {
                 .ifPresent(reservation -> {
                     reservationRepository.deleteById(id);
                     reservationRepository.flush();
-                    changeWaitingToReservation(reservation);
-                });
-    }
-
-    private void changeWaitingToReservation(Reservation reservation) {
-        waitingRepository.findFirstByReservationSlot(reservation.getReservationSlot())
-                .ifPresent(waiting -> {
-                    waitingRepository.delete(waiting);
-                    Reservation reservationByWaiting = new Reservation(waiting.getReservationSlot(), waiting.getMember());
-                    reservationRepository.save(reservationByWaiting);
+                    waitingService.changeWaitingToReservation(reservation.getReservationSlot());
                 });
     }
 

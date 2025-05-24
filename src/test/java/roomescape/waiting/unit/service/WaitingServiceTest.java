@@ -24,7 +24,6 @@ import roomescape.global.error.exception.ForbiddenException;
 import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
-import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
@@ -63,7 +62,6 @@ class WaitingServiceTest {
     private Member otherMember;
     private Member admin;
     private LoginMember loginMember;
-    private Reservation reservation;
 
     @BeforeEach
     void setUp() {
@@ -78,7 +76,6 @@ class WaitingServiceTest {
         loginMember = new LoginMember(member.getId(), member.getName(), member.getRole());
 
         waiting = new Waiting(1L, reservationSlot, member);
-        reservation = new Reservation(1L, reservationSlot, otherMember);
     }
 
     @Test
@@ -209,8 +206,6 @@ class WaitingServiceTest {
         //given
         when(waitingRepository.findById(anyLong()))
                 .thenReturn(Optional.of(waiting));
-        when(reservationRepository.findByReservationSlot(any()))
-                .thenReturn(Optional.of(reservation));
 
         //when & then
         assertThatCode(() -> waitingService.acceptWaiting(waiting.getId()))

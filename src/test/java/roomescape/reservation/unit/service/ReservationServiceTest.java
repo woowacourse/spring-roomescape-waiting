@@ -38,8 +38,7 @@ import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.waiting.entity.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.service.WaitingService;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -60,7 +59,7 @@ class ReservationServiceTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private WaitingRepository waitingRepository;
+    private WaitingService waitingService;
 
     @Mock
     private ReservationSlotRepository reservationSlotRepository;
@@ -268,19 +267,13 @@ class ReservationServiceTest {
         var otherMember = new Member("미소", "miso@email.com", "password", RoleType.USER);
         var reservation = new Reservation(1L, reservationSlot, otherMember);
 
-        var waiting = new Waiting(reservationSlot, member);
-
         when(reservationRepository.findById(anyLong()))
                 .thenReturn(Optional.of(reservation));
-        when(waitingRepository.findFirstByReservationSlot(any(ReservationSlot.class)))
-                .thenReturn(Optional.of(waiting));
 
         //when
         reservationService.deleteReservation(reservation.getId());
 
         //then
-        verify(reservationRepository).save(any(Reservation.class));
-        verify(waitingRepository).delete(any(Waiting.class));
         verify(reservationRepository).deleteById(anyLong());
     }
 
@@ -295,7 +288,7 @@ class ReservationServiceTest {
                 .thenReturn(Optional.of(member));
         when(reservationRepository.findAllByMember(member))
                 .thenReturn(inDbReservations);
-        when(waitingRepository.findWaitingsWithRankByMemberId(anyLong()))
+        when(waitingService.getWaitingWithRanksByMemberId(anyLong()))
                 .thenReturn(List.of());
 
         // when

@@ -30,4 +30,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByReservationSlot(ReservationSlot reservationSlot);
 
     boolean existsByReservationSlotAndMemberId(ReservationSlot reservationSlot, Long memberId);
+
+    void deleteByReservationSlot(ReservationSlot reservationSlot);
 }
