@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
@@ -22,17 +24,20 @@ public class WaitingService {
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final Clock clock;
 
     public WaitingService(
             final WaitingRepository waitingRepository,
             final MemberRepository memberRepository,
             final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository
+            final ThemeRepository themeRepository,
+            final Clock clock
     ) {
         this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.clock = clock;
     }
 
     public WaitingResponse createWaiting(final WaitingCreateRequest request, final Long memberId) {
@@ -46,7 +51,8 @@ public class WaitingService {
         final Waiting waiting = new Waiting(
                 null,
                 member,
-                new ReservationSchedule(new ReservationDate(request.date()), time, theme)
+                new ReservationSchedule(new ReservationDate(request.date()), time, theme),
+                LocalDateTime.now(clock)
         );
 
         return WaitingResponse.from(waitingRepository.save(waiting));
