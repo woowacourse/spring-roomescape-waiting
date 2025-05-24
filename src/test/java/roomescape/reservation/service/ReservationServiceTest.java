@@ -24,9 +24,11 @@ import roomescape.member.service.FakeMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationWithRank;
 import roomescape.reservation.dto.request.ReservationConditionRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationWaitingRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
@@ -40,7 +42,7 @@ class ReservationServiceTest {
     private DateTime dateTime = new DateTime() {
         @Override
         public LocalDateTime now() {
-            return LocalDateTime.of(2025, 1, 5, 10, 0);
+            return LocalDateTime.of(2024, 1, 5, 10, 0);
         }
 
         @Override
@@ -88,8 +90,8 @@ class ReservationServiceTest {
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member2, LocalDate.of(2025, 5, 22),
                         reservationTime1, theme2, ReservationStatus.RESERVED));
         reservationRepository.save(
-                Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member1, LocalDate.of(2025, 5, 22),
-                        reservationTime1, theme1, ReservationStatus.WAITED));
+                Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 13), member1, LocalDate.of(2025, 5, 22),
+                        reservationTime1, theme2, ReservationStatus.WAITED));
     }
 
     @DisplayName("지나간 날짜와 시간에 대한 예약을 생성할 수 없다.")
@@ -98,15 +100,16 @@ class ReservationServiceTest {
     void cant_not_reserve_before_now(final LocalDate date, final Long timeId) {
         assertThatThrownBy(
                 () -> reservationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약할 수 없는 날짜와 시간입니다.");
     }
 
     private static Stream<Arguments> cant_not_reserve_before_now() {
         return Stream.of(
-                Arguments.of(LocalDate.of(2024, 10, 5), 1L),
-                Arguments.of(LocalDate.of(2025, 1, 3), 1L),
-                Arguments.of(LocalDate.of(2025, 1, 2), 1L),
-                Arguments.of(LocalDate.of(2025, 1, 1), 2L)
+                Arguments.of(LocalDate.of(2023, 10, 5), 1L),
+                Arguments.of(LocalDate.of(2024, 1, 3), 1L),
+                Arguments.of(LocalDate.of(2024, 1, 2), 1L),
+                Arguments.of(LocalDate.of(2024, 1, 1), 2L)
         );
     }
 
@@ -115,7 +118,8 @@ class ReservationServiceTest {
     void cant_not_reserve_duplicate() {
         assertThatThrownBy(() -> reservationService.createReservation(
                 new ReservationRequest(LocalDate.of(2024, 10, 6), 1L, 1L), 1L))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 예약이 존재합니다.");
     }
 
     @Test
@@ -157,8 +161,8 @@ class ReservationServiceTest {
         return Stream.of(
                 Arguments.of(1L, null, null, null, 4),
                 Arguments.of(2L, null, null, null, 1),
-                Arguments.of(null, 1L, null, null, 2),
-                Arguments.of(null, 2L, null, null, 3),
+                Arguments.of(null, 1L, null, null, 1),
+                Arguments.of(null, 2L, null, null, 4),
                 Arguments.of(null, 3L, null, null, 0),
                 Arguments.of(null, null, LocalDate.of(2024, 10, 6), null, 5),
                 Arguments.of(null, null, LocalDate.of(2024, 10, 7), null, 4),
@@ -172,37 +176,22 @@ class ReservationServiceTest {
         );
     }
 
-//    @Test
-//    @DisplayName("본인 예약들을 dto로 변환한다.")
-//    void getMyReservations_dto_test() {
-//        // given
-//        MyReservationResponse expected1 = MyReservationResponse.from(reservations.get(0));
-//        MyReservationResponse expected2 = MyReservationResponse.from(reservations.get(1));
-//        MyReservationResponse expected3 = MyReservationResponse.from(reservations.get(2));
-//
-//        // when
-//        List<MyReservationResponse> responses = reservationService.getMyReservations(1L);
-//        // then
-//        assertThat(responses).hasSize(3);
-//        assertThat(responses.get(0)).isEqualTo(expected1);
-//        assertThat(responses.get(1)).isEqualTo(expected2);
-//        assertThat(responses.get(2)).isEqualTo(expected3);
-//    }
-
     @Test
     @DisplayName("예약 가능한 상태에서는 대기 상태로 예약할 수 없다.")
     void createWaitingReservation_whenCanReserve() {
         assertThatThrownBy(() -> reservationService.createWaitingReservation(
                 new ReservationWaitingRequest(LocalDate.of(2025, 5, 21), 1L, 1L), 1L))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 가능한 상태에서는 대기할 수 없습니다.");
     }
 
     @Test
     @DisplayName("이미 대기 상태로 예약한 경우 대기 상태로 예약할 수 없다.")
     void createWaitingReservation_whenAlreadyWaiting() {
         assertThatThrownBy(() -> reservationService.createWaitingReservation(
-                new ReservationWaitingRequest(LocalDate.of(2025, 5, 22), 1L, 1L), 1L))
-                .isInstanceOf(IllegalArgumentException.class);
+                new ReservationWaitingRequest(LocalDate.of(2025, 5, 22), 1L, 2L), 1L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 예약 대기를 신청했습니다");
     }
 
     @Test
@@ -211,15 +200,34 @@ class ReservationServiceTest {
         // given
         ReservationResponse expected = new ReservationResponse(
                 6L, "대기", new ReservationMemberResponse("홍길동"),
-                LocalDate.of(2025, 5, 22),
+                LocalDate.of(2024, 10, 8),
                 new ReservationTimeResponse(1L, LocalTime.of(10, 0)),
                 new ThemeResponse(2L, "테스트2", "설명", "localhost:8080")
         );
         // when
         ReservationResponse response = reservationService.createWaitingReservation(
-                new ReservationWaitingRequest(LocalDate.of(2025, 5, 22), 1L, 2L), 1L);
+                new ReservationWaitingRequest(LocalDate.of(2024, 10, 8), 1L, 2L), 2L);
         // then
         assertThat(response).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("본인 예약들을 dto로 변환한다.")
+    void getMyReservations_dto_test() {
+        // given
+        MyReservationResponse expected1 = MyReservationResponse.from(new ReservationWithRank(reservations.get(0), 0L));
+        MyReservationResponse expected2 = MyReservationResponse.from(new ReservationWithRank(reservations.get(1), 0L));
+        MyReservationResponse expected3 = MyReservationResponse.from(new ReservationWithRank(reservations.get(2), 0L));
+        MyReservationResponse expected4 = MyReservationResponse.from(new ReservationWithRank(reservations.get(4), 1L));
+
+        // when
+        List<MyReservationResponse> responses = reservationService.getMyReservations(1L);
+        // then
+        assertThat(responses).hasSize(4);
+        assertThat(responses.get(0)).isEqualTo(expected1);
+        assertThat(responses.get(1)).isEqualTo(expected2);
+        assertThat(responses.get(2)).isEqualTo(expected3);
+        assertThat(responses.get(3)).isEqualTo(expected4);
     }
 
 }
