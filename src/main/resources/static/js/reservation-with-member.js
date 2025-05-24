@@ -1,5 +1,6 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/admin/reservations';
+const RESERVATION_API_ENDPOINT = `/reservations`;
+const RESERVATION_ADMIN_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead(RESERVATION_API_ENDPOINT)
+    requestRead(RESERVATION_ADMIN_API_ENDPOINT)
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
@@ -39,7 +40,11 @@ function render(data) {
         row.insertCell(2).textContent = item.theme.name;      // 테마 name
         row.insertCell(3).textContent = item.date;            // date
         row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
-        row.insertCell(5).textContent = item.status;          // 예약 상태 status
+        if (item.status === '예약') {
+            row.insertCell(5).textContent = item.status;
+        } else {
+            row.insertCell(5).textContent = `${item.rank}번째 예약${item.status}`;
+        }      // 예약 상태 status
 
         const actionCell = row.insertCell(row.cells.length);
         actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
@@ -235,7 +240,7 @@ function requestCreate(reservation) {
         body: JSON.stringify(reservation)
     };
 
-    return fetch(`${RESERVATION_API_ENDPOINT}`, requestOptions)
+    return fetch(`${RESERVATION_ADMIN_API_ENDPOINT}`, requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');
