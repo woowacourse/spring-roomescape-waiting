@@ -33,7 +33,7 @@ class ReservationRestControllerTest {
     @Test
     void 요청_형식이_맞지_않아_예약_정보_저장에_실패하는_경우_bad_request를_반환한다() {
         //given
-        final Map<String, String> params = createReservationRequestJsonMap("2025 04 15", "1", "1");
+        final Map<String, String> params = createConfirmReservationRequestJsonMap("2025 04 15", "1", "1");
 
         //when & then
         RestAssured.given().log().all()
@@ -49,7 +49,7 @@ class ReservationRestControllerTest {
         //given
         final String payload = "wooga@gmail.com";
         final String token = jwtTokenProvider.createToken(payload);
-        final Map<String, String> params = createReservationRequestJsonMap("2025-10-15", "1", "1");
+        final Map<String, String> params = createConfirmReservationRequestJsonMap("2025-10-15", "1", "1");
 
         //when & then
         RestAssured.given().log().all()
@@ -66,7 +66,7 @@ class ReservationRestControllerTest {
         //given
         final String payload = "wooga@gmail.com";
         final String token = jwtTokenProvider.createToken(payload);
-        final Map<String, String> params = createReservationRequestJsonMap("2026-10-15", "1", "1");
+        final Map<String, String> params = createConfirmReservationRequestJsonMap("2026-10-15", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -97,7 +97,7 @@ class ReservationRestControllerTest {
         //given
         final String payload = "wooga@gmail.com";
         final String token = jwtTokenProvider.createToken(payload);
-        final Map<String, String> params = createReservationRequestJsonMap("2026-10-15", "1", "1");
+        final Map<String, String> params = createConfirmReservationRequestJsonMap("2026-10-15", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -119,7 +119,7 @@ class ReservationRestControllerTest {
         //given
         final String payload = "wooga@gmail.com";
         final String token = jwtTokenProvider.createToken(payload);
-        final Map<String, String> params = createReservationRequestJsonMap("2026-04-15", "1", "1");
+        final Map<String, String> params = createConfirmReservationRequestJsonMap("2026-04-15", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -151,7 +151,7 @@ class ReservationRestControllerTest {
         //given
         final String payload = "wooga@gmail.com";
         final String token = jwtTokenProvider.createToken(payload);
-        final Map<String, String> params = createReservationRequestJsonMap("2026-04-15", "1", "1");
+        final Map<String, String> params = createConfirmReservationRequestJsonMap("2026-04-15", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -184,7 +184,7 @@ class ReservationRestControllerTest {
         assertThat(isJdbcTemplateInjected).isFalse();
     }
 
-    private Map<String, String> createReservationRequestJsonMap(
+    private Map<String, String> createConfirmReservationRequestJsonMap(
             final String date,
             final String themeId,
             final String timeId) {

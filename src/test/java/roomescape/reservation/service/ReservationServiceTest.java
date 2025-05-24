@@ -118,7 +118,7 @@ class ReservationServiceTest {
 
                 // when & then
                 Assertions.assertThatCode(
-                                () -> reservationService.save(savedMember, date, savedTime.getId(), savedTheme.getId()))
+                                () -> reservationService.saveReservedReservation(savedMember, date, savedTime.getId(), savedTheme.getId()))
                                 .doesNotThrowAnyException();
         }
 
@@ -215,7 +215,7 @@ class ReservationServiceTest {
 
                 // when & then
                 Assertions.assertThatThrownBy(
-                                () -> reservationService.save(member, date, savedTime.getId(), savedTheme.getId()))
+                                () -> reservationService.saveReservedReservation(member, date, savedTime.getId(), savedTheme.getId()))
                                 .isInstanceOf(PastDateException.class);
         }
 
@@ -246,7 +246,7 @@ class ReservationServiceTest {
 
                 // when & then
                 Assertions.assertThatThrownBy(
-                                () -> reservationService.save(member, date, savedTime.getId(), savedTheme.getId()))
+                                () -> reservationService.saveReservedReservation(member, date, savedTime.getId(), savedTheme.getId()))
                                 .isInstanceOf(DataExistException.class);
         }
 
@@ -269,7 +269,7 @@ class ReservationServiceTest {
 
                 // when & then
                 Assertions.assertThatThrownBy(
-                                () -> reservationService.save(savedMember, date, timeId, savedTheme.getId()))
+                                () -> reservationService.saveReservedReservation(savedMember, date, timeId, savedTheme.getId()))
                                 .isInstanceOf(DataNotFoundException.class);
         }
 
@@ -299,7 +299,7 @@ class ReservationServiceTest {
                                                 savedTheme));
 
                 // when & then
-                Assertions.assertThatThrownBy(() -> reservationService.save(
+                Assertions.assertThatThrownBy(() -> reservationService.saveReservedReservation(
                                 new Member(
                                                 new MemberName("WooGa"),
                                                 new Email("bowook316@gmail.com"),

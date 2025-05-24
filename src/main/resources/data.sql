@@ -32,16 +32,16 @@ VALUES ('Theme1', 'Description1', 'thumbnail1.jpg'),
 
 -- 인기 테마 테스트를 위한 예약 데이터 추가
 -- Theme1-9: 1개 예약, Theme10: 2개 예약, Theme11: 0개 예약
-INSERT INTO reservation (member_id, theme_id, time_id, date)
+INSERT INTO reservation (member_id, date, time_id, theme_id, status)
 VALUES
-    (1, 1, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 2, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 3, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 4, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 5, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 6, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 7, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 8, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 9, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 10, 1, CURRENT_DATE - INTERVAL '2' DAY),
-    (1, 10, 2, CURRENT_DATE - INTERVAL '2' DAY);
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 1, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 2, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 3, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 4, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 5, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 6, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 7, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 8, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 9, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 1, 10, 'CONFIRMED'),
+    (1, CURRENT_DATE - INTERVAL '2' DAY, 2, 10, 'CONFIRMED');
