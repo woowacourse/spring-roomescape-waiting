@@ -18,7 +18,8 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    boolean existsByReservationDateAndReservationTimeId(ReservationDate reservationDate, Long timeId);
+    boolean existsByReservationDateAndReservationTimeIdAndThemeId(ReservationDate reservationDate, Long timeId,
+                                                                  Long themeId);
 
     boolean existsByReservationTimeId(Long timeId);
 

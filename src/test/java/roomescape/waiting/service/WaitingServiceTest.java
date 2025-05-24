@@ -8,6 +8,7 @@ import static roomescape.common.Constant.MATT;
 import static roomescape.common.Constant.예약날짜_내일;
 
 import java.time.LocalTime;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,8 +88,8 @@ class WaitingServiceTest {
                 savedMember);
         Reservation reservation = new Reservation(1L, 예약날짜_내일.getDate(), savedReservationTime, savedTheme, savedMember);
         when(waitingRepository.findById(any(Long.class))).thenReturn(Optional.of(savedWaiting));
-        when(reservationRepository.existsByReservationDateAndReservationTimeId(any(ReservationDate.class),
-                any(Long.class)))
+        when(reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(any(ReservationDate.class),
+                any(Long.class), any(Long.class)))
                 .thenReturn(false);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
 
@@ -113,8 +114,8 @@ class WaitingServiceTest {
         Waiting savedWaiting = new Waiting(1L, 예약날짜_내일, savedReservationTime, savedTheme,
                 savedMember);
         when(waitingRepository.findById(any(Long.class))).thenReturn(Optional.of(savedWaiting));
-        when(reservationRepository.existsByReservationDateAndReservationTimeId(any(ReservationDate.class),
-                any(Long.class)))
+        when(reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(any(ReservationDate.class),
+                any(Long.class), any(Long.class)))
                 .thenReturn(true);
 
         //when-then
@@ -130,8 +131,8 @@ class WaitingServiceTest {
 
         //when-then
         assertThatThrownBy(() -> waitingService.approveWaitingById(1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("[ERROR] 존재하지 않는 대기입니다.");
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("[ERROR] 대기를 찾을 수 없습니다.");
     }
 
 }

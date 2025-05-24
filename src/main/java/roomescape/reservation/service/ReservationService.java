@@ -42,8 +42,10 @@ public class ReservationService {
     public ReservationResponse create(Long memberId, ReservationRequest request) {
         Long timeId = request.timeId();
         ReservationDate reservationDate = new ReservationDate(request.date());
+        Long themeId = request.themeId();
 
-        if (reservationRepository.existsByReservationDateAndReservationTimeId(reservationDate, timeId)) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(reservationDate, timeId,
+                themeId)) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
 

@@ -62,7 +62,9 @@ public class ReservationServiceTest {
         Theme savedTheme = new Theme(1L, "test", "test", "test");
         Reservation savedReservation = new Reservation(1L, 예약날짜_내일.getDate(), savedReservationTime, savedTheme,
                 savedMember);
-        when(reservationRepository.existsByReservationDateAndReservationTimeId(any(), any())).thenReturn(false);
+        when(reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(any(), any(),
+                any())).thenReturn(
+                false);
         when(memberService.findById(any(Long.class))).thenReturn(savedMember);
         when(reservationTimeService.getReservationTime(any(Long.class))).thenReturn(savedReservationTime);
         when(themeService.getTheme(any(Long.class))).thenReturn(savedTheme);
@@ -87,7 +89,9 @@ public class ReservationServiceTest {
     void 예약이_존재하면_예약을_생성할_수_없다() {
         ReservationTime savedReservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme savedTheme = new Theme(1L, "test", "test", "test");
-        when(reservationRepository.existsByReservationDateAndReservationTimeId(any(), any())).thenReturn(true);
+        when(reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(any(), any(),
+                any())).thenReturn(
+                true);
 
         ReservationRequest request = new ReservationRequest(
                 예약날짜_내일.getDate(),
