@@ -1,8 +1,7 @@
-package roomescape.reservation.dto;
+package roomescape.reservation.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import roomescape.reservation.domain.Reservation;
 
 @Getter
 @AllArgsConstructor

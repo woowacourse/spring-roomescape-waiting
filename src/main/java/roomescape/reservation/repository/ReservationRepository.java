@@ -6,7 +6,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.dto.WaitingRankReservation;
+import roomescape.reservation.domain.WaitingRankReservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
