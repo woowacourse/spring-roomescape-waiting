@@ -22,8 +22,11 @@ public class ThemeService {
     private final ReservationRepository reservationRepository;
     private final CurrentUtil currentUtil;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository,
-                        final CurrentUtil currentUtil) {
+    public ThemeService(
+            final ThemeRepository themeRepository,
+            final ReservationRepository reservationRepository,
+            final CurrentUtil currentUtil
+    ) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
         this.currentUtil = currentUtil;
@@ -77,7 +80,7 @@ public class ThemeService {
         final List<Theme> themes = themeRepository.findAll();
         final List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
         final Map<Long, Long> themeReservationCount = calculateThemeReservationCount(reservations);
-        final List<Theme> sortedThemes = sortedThemesByReservationCount(themes, themeReservationCount);
+        final List<Theme> sortedThemes = sortedThemesByReservationCountAndLimit10(themes, themeReservationCount);
         return sortedThemes.stream()
                 .map(ThemeResponse::from)
                 .toList();
@@ -92,14 +95,17 @@ public class ThemeService {
                 ));
     }
 
-    private List<Theme> sortedThemesByReservationCount(final List<Theme> themes,
-                                                       final Map<Long, Long> themeReservationCount) {
+    private List<Theme> sortedThemesByReservationCountAndLimit10(
+            final List<Theme> themes,
+            final Map<Long, Long> themeReservationCount
+    ) {
         return themes.stream()
                 .sorted((theme1, theme2) -> {
                     final Long theme1ReservationCount = themeReservationCount.getOrDefault(theme1.getId(), 0L);
                     final Long theme2ReservationCount = themeReservationCount.getOrDefault(theme2.getId(), 0L);
                     return theme2ReservationCount.compareTo(theme1ReservationCount);
                 })
+                .limit(10)
                 .toList();
     }
 }
