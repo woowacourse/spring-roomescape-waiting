@@ -1,5 +1,6 @@
 package roomescape.reservation.ui.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.member.ui.dto.MemberResponse;
@@ -30,6 +31,7 @@ public record WaitingWithRankResponse(
     public record ForMember(
             Long id,
             LocalDate date,
+            @JsonFormat(pattern = "HH:mm")
             LocalTime time,
             String themeName,
             String status
