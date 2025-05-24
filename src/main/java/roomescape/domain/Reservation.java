@@ -93,6 +93,10 @@ public class Reservation {
                 && this.time.getId().equals(timeId);
     }
 
+    public boolean isWaiting() {
+        return this.waiting.getStatus() == ReservationStatus.WAITING;
+    }
+
     public void setTime(ReservationTime time) {
         this.time = time;
     }

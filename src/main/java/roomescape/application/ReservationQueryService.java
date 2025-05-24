@@ -17,12 +17,14 @@ public class ReservationQueryService {
 
     private final ReservationRepository reservationRepository;
     private final MemberService memberService;
+    private final WaitingService waitingService;
 
-    public ReservationQueryService(ReservationRepository reservationRepository, MemberService memberService) {
+    public ReservationQueryService(ReservationRepository reservationRepository, MemberService memberService,
+                                   WaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.memberService = memberService;
+        this.waitingService = waitingService;
     }
-
 
     public List<ReservationDto> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
@@ -30,16 +32,24 @@ public class ReservationQueryService {
     }
 
     public List<ReservationWaitingDto> getReservationsByMember(Long memberId) {
+
         Member member = memberService.getMemberEntityById(memberId);
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
         return memberReservations.stream()
-                .map(reservation -> new ReservationWaitingDto(
-                                reservation.getId(),
-                                reservation.getTheme().getName(),
-                                reservation.getDate(),
-                                reservation.getTime().getStartAt(),
-                                ReservationStatus.name(reservation.getWaiting().getStatus())
-                        )
+                .map(reservation -> {
+                            String displayStatus = ReservationStatus.name(reservation.getWaiting().getStatus());
+                            if (reservation.isWaiting()) {
+                                displayStatus = waitingService.countWaitingReservation(reservation);
+                            }
+                            return new ReservationWaitingDto(
+                                    reservation.getId(),
+                                    reservation.getTheme().getName(),
+                                    reservation.getDate(),
+                                    reservation.getTime().getStartAt(),
+                                    displayStatus
+                            );
+                        }
+
                 )
                 .toList();
     }
