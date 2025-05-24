@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.Member;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationInfo;
 import roomescape.reservation.domain.Waiting;
@@ -17,17 +18,27 @@ import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingWithRank;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.service.ThemeService;
 
 @Service
 public class ReservationCompositeService {
+
     private final ReservationModuleService reservationModuleService;
     private final WaitingModuleService waitingModuleService;
+    private final MemberService memberService;
+    private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
 
     public ReservationCompositeService(final ReservationModuleService reservationModuleService,
-                                       final WaitingModuleService waitingModuleService) {
+                                       final WaitingModuleService waitingModuleService, MemberService memberService,
+                                       ThemeService themeService, ReservationTimeService reservationTimeService) {
         this.reservationModuleService = reservationModuleService;
         this.waitingModuleService = waitingModuleService;
+        this.memberService = memberService;
+        this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
     public List<MyReservationResponse> findMyReservations(final UserInfo userInfo) {
@@ -56,39 +67,44 @@ public class ReservationCompositeService {
                 })
                 .toList();
     }
-// 기존 그냥 Reservation 생성하기
-//    public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
-//                                      final LocalDateTime now) {
-//        reservationModuleService.checkIfReservationExists(date, timeId, themeId);
-//
-//        ReservationTime time = reservationModuleService.findReservationTime(timeId);
-//        Theme theme = reservationModuleService.findTheme(themeId);
-//        Member member = reservationModuleService.findUserByMemberId(memberId);
-//
-//        Reservation newReservation = reservationModuleService.save(
-//                Reservation.createUpcomingReservationWithUnassignedId(
-//                        member,
-//                        new ReservationInfo(date, time, theme), now));
-//        return ReservationResponse.of(newReservation, time, theme, member);
-//    }
-@Transactional
-public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
-                                  final LocalDateTime now) {
-    if (!reservationModuleService.isReservationExists(date, timeId, themeId)) {
-        return reservationModuleService.create(date, timeId, themeId, memberId, now);
+
+    @Transactional
+    public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
+                                      final LocalDateTime now) {
+        if (!reservationModuleService.isReservationExists(date, timeId, themeId)) {
+            return createReservation(date, timeId, themeId, memberId, now);
+        }
+        return createWaiting(date, timeId, themeId, memberId, now);
     }
-        ReservationTime time = reservationModuleService.findReservationTime(timeId);
-        Theme theme = reservationModuleService.findTheme(themeId);
-        Member member = reservationModuleService.findUserByMemberId(memberId);
-    int turn = waitingModuleService.findMaxOrderByDateAndTimeAndTheme(date, timeId,
-            themeId);
-    Waiting newWaiting = waitingModuleService.save(
-            Waiting.createUpcomingReservationWithUnassignedId(
-                    member,
-                    turn + 1,
-                    new ReservationInfo(date, time, theme), now));
-    return ReservationResponse.of(newWaiting, time, theme, member);
-}
+
+    private ReservationResponse createReservation(final LocalDate date, final Long timeId, final Long themeId,
+                                                 final Long memberId,
+                                                 final LocalDateTime now) {
+        reservationModuleService.checkIfReservationExists(date, timeId, themeId);
+        ReservationTime time = reservationTimeService.findReservationTime(timeId);
+        Theme theme = themeService.findTheme(themeId);
+        Member member = memberService.findUserByMemberId(memberId);
+        Reservation newReservation = reservationModuleService.save(
+                Reservation.createUpcomingReservationWithUnassignedId(
+                        member,
+                        new ReservationInfo(date, time, theme), now));
+        return ReservationResponse.of(newReservation, time, theme, member);
+    }
+
+    private ReservationResponse createWaiting(final LocalDate date, final Long timeId, final Long themeId,
+                                              final Long memberId, final LocalDateTime now) {
+        ReservationTime time = reservationTimeService.findReservationTime(timeId);
+        Theme theme = themeService.findTheme(themeId);
+        Member member = memberService.findUserByMemberId(memberId);
+        int turn = waitingModuleService.findMaxOrderByDateAndTimeAndTheme(date, timeId,
+                themeId);
+        Waiting newWaiting = waitingModuleService.save(
+                Waiting.createUpcomingReservationWithUnassignedId(
+                        member,
+                        turn + 1,
+                        new ReservationInfo(date, time, theme), now));
+        return ReservationResponse.of(newWaiting, time, theme, member);
+    }
 
     public void delete(final Long id) {
     }
