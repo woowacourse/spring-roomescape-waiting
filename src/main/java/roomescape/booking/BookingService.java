@@ -20,7 +20,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class ReservationWaitingService {
+public class BookingService {
 
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;

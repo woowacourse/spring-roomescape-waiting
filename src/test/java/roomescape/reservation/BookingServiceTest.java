@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.booking.ReservationWaitingService;
+import roomescape.booking.BookingService;
 import roomescape.booking.reservation.Reservation;
 import roomescape.booking.reservation.ReservationRepository;
 import roomescape.booking.waiting.Waiting;
@@ -28,9 +28,9 @@ import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.*;
 
 @ExtendWith(MockitoExtension.class)
-class ReservationWaitingServiceTest {
+class BookingServiceTest {
 
-    private ReservationWaitingService reservationWaitingService;
+    private BookingService bookingService;
     private ReservationRepository reservationRepository;
     private WaitingRepository waitingRepository;
 
@@ -43,7 +43,7 @@ class ReservationWaitingServiceTest {
         reservationRepository = mock(ReservationRepository.class);
         waitingRepository = mock(WaitingRepository.class);
         MemberRepository memberRepository = mock(MemberRepository.class);
-        reservationWaitingService = new ReservationWaitingService(reservationRepository, waitingRepository, memberRepository);
+        bookingService = new BookingService(reservationRepository, waitingRepository, memberRepository);
 
         ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
         Theme theme = themeWithId(1L, new Theme("테마명", "테마 설명", "썸네일 URL"));
@@ -66,7 +66,7 @@ class ReservationWaitingServiceTest {
         given(reservationRepository.save(any(Reservation.class))).willReturn(new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule()));
 
         // when
-        reservationWaitingService.deleteReservationById(1L);
+        bookingService.deleteReservationById(1L);
 
         // then
         assertThat(secondWaiting.getRank()).isEqualTo(1L);

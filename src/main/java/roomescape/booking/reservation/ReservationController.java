@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.AuthenticationPrincipal;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.ReservationWaitingService;
+import roomescape.booking.BookingService;
 import roomescape.booking.reservation.dto.ReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
 
@@ -19,7 +19,7 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final ReservationWaitingService reservationWaitingService;
+    private final BookingService bookingService;
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
@@ -40,7 +40,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteById(
             @PathVariable("id") final Long id
     ) {
-        reservationWaitingService.deleteReservationById(id);
+        bookingService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
     }
 }
