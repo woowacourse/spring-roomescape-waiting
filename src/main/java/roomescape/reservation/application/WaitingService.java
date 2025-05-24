@@ -89,7 +89,7 @@ public class WaitingService {
             throw new AuthorizationException("본인이 아니면 삭제할 수 없습니다.");
         }
 
-        reservationRepository.deleteById(waitingId);
+        waitingRepository.deleteById(waitingId);
     }
 
     private Waiting getWaitingById(final Long waitingId) {
