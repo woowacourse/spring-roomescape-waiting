@@ -41,9 +41,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId,
-                                      final Long themeId
-    ) {
+    public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId, final Long themeId) {
         validateIsDuplicate(date, timeId, themeId);
         final ReservationTime reservationTime = queryService.getReservationTimeById(timeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
