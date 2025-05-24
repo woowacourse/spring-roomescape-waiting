@@ -17,7 +17,7 @@ public interface ThemeJpaRepository extends ThemeRepository, Repository<Theme, L
     }
 
     @Modifying
-    @Query("DELETE FROM Theme t WHERE t.id = :id")
+    @Query("DELETE FROM THEME t WHERE t.id = :id")
     @Transactional
     int deleteByIdAndCount(@Param("id") final Long id);
 

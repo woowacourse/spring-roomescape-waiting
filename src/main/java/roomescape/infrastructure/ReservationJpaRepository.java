@@ -33,7 +33,7 @@ public interface ReservationJpaRepository extends ReservationRepository, Reposit
     }
 
     @Modifying
-    @Query("DELETE FROM Reservation r WHERE r.id = :id")
+    @Query("DELETE FROM RESERVATION r WHERE r.id = :id")
     @Transactional
     int deleteByIdAndCount(final Long id);
 

@@ -77,7 +77,7 @@ public class TestRepositoryHelper {
     private List<String> lookUpTableNames() {
         return em.getMetamodel().getEntities().stream()
             .filter(e -> e.getJavaType().getAnnotation(Entity.class) != null)
-            .map(e -> e.getName().toLowerCase())
+            .map(e -> e.getName().toUpperCase())
             .toList();
     }
 }

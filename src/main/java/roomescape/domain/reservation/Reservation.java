@@ -22,7 +22,7 @@ import roomescape.exception.BusinessRuleViolationException;
 @Accessors(fluent = true)
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
+@Entity(name = "RESERVATION")
 public class Reservation {
 
     @Id

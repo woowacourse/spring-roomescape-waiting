@@ -15,7 +15,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Accessors(fluent = true)
 @ToString
-@Entity
+@Entity(name = "THEME")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Theme {
 
