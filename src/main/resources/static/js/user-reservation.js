@@ -57,9 +57,6 @@ function createSlot(type, text, id, booked) {
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
-        if (booked) {
-            div.classList.add('disabled');
-        }
     }
     return div;
 }
@@ -185,7 +182,7 @@ function onReservationButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (!response.ok) throw new Error('Reservation failed');
+                if (!response.status === 201) throw new Error('Reservation failed');
                 return response.json();
             })
             .then(data => {
@@ -209,8 +206,8 @@ function onWaitButtonClick() {
     if (selectedDate && selectedThemeId && selectedTimeId) {
         const reservationData = {
             date: selectedDate,
-            theme: selectedThemeId,
-            time: selectedTimeId
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
         };
 
         fetch('/waitings', {
