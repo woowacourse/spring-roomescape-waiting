@@ -97,6 +97,18 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional
+    public void changeWaitStatusToReserved(final Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약대기입니다."));
+
+        if (reservationRepository.hasReservedReservation(reservation)) {
+            throw new IllegalArgumentException("기존 확정 예약이 취소 되지 않았습니다.");
+        }
+
+        reservationRepository.changeReservationStatus(id, ReservationStatus.RESERVED);
+    }
+
     public List<MyReservationResponse> getMyReservations(final Long id) {
         List<ReservationWithRank> reservations = reservationRepository.findReservationWithRankByMemberId(id);
         return reservations.stream()

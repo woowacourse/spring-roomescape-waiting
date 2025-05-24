@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -244,4 +245,34 @@ class ReservationServiceTest {
         assertThat(waitingReservations.get(0)).isEqualTo(expected);
     }
 
+    @Test
+    @DisplayName("존재하지 않은 예약 번호로 예약 상태를 변경하려고하면 예외가 발생한다.")
+    void changeWaitStatusToReserved_exception_noId() {
+        assertThatThrownBy(() -> reservationService.changeWaitStatusToReserved(100L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("존재하지 않는 예약대기입니다.");
+    }
+
+    @Test
+    @DisplayName("기존 확정된 예약을 삭제하지 않고 확정으로 변경하려고하면 예외가 발생한다.")
+    void changeWaitStatusToReserved_exception_hasReservedReservation() {
+        assertThatThrownBy(() -> reservationService.changeWaitStatusToReserved(5L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("기존 확정 예약이 취소 되지 않았습니다.");
+    }
+
+    @Test
+    @DisplayName("정상적인 상황이면 예약을 확정시킨다.")
+    void changeWaitStatusToReserved_test() {
+        // given
+        reservationService.deleteReservationById(4L);
+        // when
+        reservationService.changeWaitStatusToReserved(5L);
+        // then
+        Optional<Reservation> findReservation = reservations.stream()
+                .filter(reservation -> reservation.getId().equals(5L))
+                .findAny();
+        assertThat(findReservation).isPresent();
+        assertThat(findReservation.get().getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
 }
