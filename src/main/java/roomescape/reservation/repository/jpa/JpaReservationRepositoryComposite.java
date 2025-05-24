@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.schedule.domain.Schedule;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -54,5 +55,10 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     @Override
     public List<Reservation> findAllByMember(Member member) {
         return jpaReservationRepository.findAllByMember(member);
+    }
+
+    @Override
+    public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
+        return jpaReservationRepository.existsByMemberAndSchedule(member, schedule);
     }
 }

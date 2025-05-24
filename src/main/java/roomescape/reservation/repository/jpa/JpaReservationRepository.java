@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.schedule.domain.Schedule;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,4 +28,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     );
 
     List<Reservation> findAllByMember(Member member);
+
+    boolean existsByMemberAndSchedule(Member member, Schedule schedule);
 }

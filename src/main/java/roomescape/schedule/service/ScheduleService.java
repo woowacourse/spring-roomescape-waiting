@@ -27,4 +27,8 @@ public class ScheduleService {
     public Optional<Schedule> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return scheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
+
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return scheduleRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
 }

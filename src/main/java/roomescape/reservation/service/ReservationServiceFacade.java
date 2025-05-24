@@ -52,8 +52,16 @@ public class ReservationServiceFacade {
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
 
         Schedule schedule = new Schedule(null, reservationCreateRequest.date(), reservationTime, theme);
-        Schedule savedSchedule = scheduleService.save(schedule);
 
+        boolean isExists = scheduleService.existsByDateAndTimeIdAndThemeId(reservationCreateRequest.date(), reservationTime.getId(), theme.getId());
+
+        Schedule savedSchedule;
+        if (isExists) {
+            savedSchedule = scheduleService.findByDateAndTimeIdAndThemeId(reservationCreateRequest.date(), reservationTime.getId(), theme.getId())
+                    .orElseThrow(() -> new BadRequestException("예약 가능한 일정이 존재하지 않습니다."));
+        } else {
+            savedSchedule = scheduleService.save(schedule);
+        }
         List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
                 reservationCreateRequest.date(),
                 reservationCreateRequest.themeId()

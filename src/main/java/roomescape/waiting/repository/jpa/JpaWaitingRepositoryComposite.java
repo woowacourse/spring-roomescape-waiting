@@ -1,6 +1,8 @@
 package roomescape.waiting.repository.jpa;
 
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
+import roomescape.schedule.domain.Schedule;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
@@ -28,5 +30,10 @@ public class JpaWaitingRepositoryComposite implements WaitingRepository {
     @Override
     public void deleteById(Long waitingId) {
         jpaWaitingRepository.deleteById(waitingId);
+    }
+
+    @Override
+    public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
+        return jpaWaitingRepository.existsByMemberAndSchedule(member, schedule);
     }
 }

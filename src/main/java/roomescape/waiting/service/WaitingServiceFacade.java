@@ -3,8 +3,10 @@ package roomescape.waiting.service;
 import org.springframework.stereotype.Service;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.schedule.domain.Schedule;
@@ -17,13 +19,15 @@ import roomescape.waiting.dto.response.WaitingCreateResponse;
 
 @Service
 public class WaitingServiceFacade {
+    private final ReservationService reservationService;
     private final ThemeService themeService;
     private final ReservationTimeService reservationTimeService;
     private final MemberService memberService;
     private final WaitingService waitingService;
     private final ScheduleService scheduleService;
 
-    public WaitingServiceFacade(ThemeService themeService, ReservationTimeService reservationTimeService, MemberService memberService, WaitingService waitingService, ScheduleService scheduleService) {
+    public WaitingServiceFacade(ReservationService reservationService, ThemeService themeService, ReservationTimeService reservationTimeService, MemberService memberService, WaitingService waitingService, ScheduleService scheduleService) {
+        this.reservationService = reservationService;
         this.themeService = themeService;
         this.reservationTimeService = reservationTimeService;
         this.memberService = memberService;
@@ -42,6 +46,16 @@ public class WaitingServiceFacade {
 
         Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(waitingCreateRequest.date(), reservationTime.getId(), theme.getId())
                 .orElseThrow(() -> new BadRequestException("올바른 예약 일정이 존재하지 않습니다."));
+
+        boolean isConflictReservation = reservationService.existsByMemberAndSchedule(member, schedule);
+        if (isConflictReservation) {
+            throw new ConflictException("내 예약에 대기 요청 할 수 없습니다.");
+        }
+
+        boolean isConflictWaiting = waitingService.existsByMemberAndSchedule(member, schedule);
+        if (isConflictWaiting) {
+            throw new ConflictException("이미 대기 내역이 존재합니다.");
+        }
 
         Waiting waiting = waitingService.createWaiting(waitingCreateRequest, schedule, member);
 

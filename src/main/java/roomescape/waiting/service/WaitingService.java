@@ -32,4 +32,8 @@ public class WaitingService {
     public void deleteWaitingById(Long id) {
         waitingRepository.deleteById(id);
     }
+
+    public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
+        return waitingRepository.existsByMemberAndSchedule(member, schedule);
+    }
 }

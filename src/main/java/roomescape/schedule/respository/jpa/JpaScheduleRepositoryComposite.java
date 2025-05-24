@@ -29,4 +29,9 @@ public class JpaScheduleRepositoryComposite implements ScheduleRepository {
     public Optional<Schedule> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
         return jpaScheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return jpaScheduleRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
 }

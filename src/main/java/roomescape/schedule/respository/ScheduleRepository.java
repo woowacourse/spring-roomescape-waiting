@@ -11,4 +11,6 @@ public interface ScheduleRepository {
     Optional<Schedule> findById(Long id);
 
     Optional<Schedule> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

@@ -3,6 +3,8 @@ package roomescape.waiting.repository.jpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
+import roomescape.schedule.domain.Schedule;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
 
@@ -23,4 +25,6 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
                         WHERE w.member.id = :memberId
             """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
+
+    boolean existsByMemberAndSchedule(Member member, Schedule schedule);
 }

@@ -92,4 +92,8 @@ public class ReservationService {
                 .map(MyReservationAndWaitingResponse::fromReservationAndStatus)
                 .toList();
     }
+
+    public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
+        return reservationRepository.existsByMemberAndSchedule(member, schedule);
+    }
 }
