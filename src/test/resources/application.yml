@@ -13,7 +13,6 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: create
-    open-in-view: false
 
 secret:
   jwt-key: regjeoigjroigji3j2io3io4h2bjasbdjaksbdkjqu3hu23hru3rhashudhausdhas
