@@ -40,19 +40,19 @@ class ReservationCommandUseCaseTest {
 
     @Autowired
     private ReservationCommandUseCase reservationCommandUseCase;
-    
+
     @Autowired
     private ReservationRepository reservationRepository;
 
     @Autowired
     private ReservationWaitRepository reservationWaitRepository;
-    
+
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-    
+
     @Autowired
     private ThemeRepository themeRepository;
-    
+
     @Autowired
     private MemberRepository memberRepository;
 
