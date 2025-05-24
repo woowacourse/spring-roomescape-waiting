@@ -47,4 +47,8 @@ public class WaitingServiceFacade {
 
         return WaitingCreateResponse.from(waiting);
     }
+
+    public void deleteWaiting(Long id) {
+        waitingService.deleteWaitingById(id);
+    }
 }

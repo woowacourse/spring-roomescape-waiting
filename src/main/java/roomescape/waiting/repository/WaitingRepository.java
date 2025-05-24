@@ -11,4 +11,6 @@ public interface WaitingRepository {
     Waiting save(Waiting waiting);
 
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
+
+    void deleteById(Long waitingId);
 }

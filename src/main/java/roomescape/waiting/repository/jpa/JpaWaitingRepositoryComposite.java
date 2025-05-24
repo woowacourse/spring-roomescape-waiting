@@ -24,4 +24,9 @@ public class JpaWaitingRepositoryComposite implements WaitingRepository {
     public List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId) {
         return jpaWaitingRepository.findWaitingWithRankByMemberId(memberId);
     }
+
+    @Override
+    public void deleteById(Long waitingId) {
+        jpaWaitingRepository.deleteById(waitingId);
+    }
 }

@@ -12,16 +12,15 @@ import java.util.List;
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
     @Query("""
             SELECT new roomescape.waiting.domain.WaitingWithRank(
-                            w, 
-                            (SELECT COUNT(w2) 
-                             FROM Waiting w2 
-                             WHERE w2.schedule.theme = w.schedule.theme 
-                               AND w2.schedule.date = w.schedule.date 
+                            w,
+                            (SELECT COUNT(w2)
+                             FROM Waiting w2
+                             WHERE w2.schedule.theme = w.schedule.theme
+                               AND w2.schedule.date = w.schedule.date
                                AND w2.schedule.time = w.schedule.time
-                               AND w2.id < w.id)) 
-                        FROM Waiting w 
+                               AND w2.id < w.id))
+                        FROM Waiting w
                         WHERE w.member.id = :memberId
             """)
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
-
 }

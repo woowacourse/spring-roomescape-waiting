@@ -28,4 +28,8 @@ public class WaitingService {
                 .map(MyReservationAndWaitingResponse::fromWaitingAndStatus)
                 .toList();
     }
+
+    public void deleteWaitingById(Long id) {
+        waitingRepository.deleteById(id);
+    }
 }
