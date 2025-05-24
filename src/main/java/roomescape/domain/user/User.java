@@ -39,7 +39,7 @@ public class User {
     private Email email;
     @Embedded
     private Password password;
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
 
     public User(final long id, final UserName name, final UserRole role, final Email email,
