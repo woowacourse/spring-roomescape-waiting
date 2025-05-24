@@ -3,13 +3,17 @@ package roomescape.reservation.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>, ReservationRepository {
 
+    @Transactional(readOnly = true)
     @Query("""
                 select r
                 from Reservation r
@@ -27,6 +31,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("endDate") LocalDate endDate
     );
 
+    @Transactional(readOnly = true)
     @Query("""
                 select r
                 from Reservation r
@@ -39,19 +44,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("memberId") Long memberId
     );
 
-    @Query("""
-                select r
-                from Reservation r
-                join fetch r.reservationTime t
-                join fetch r.theme th
-                join fetch r.member m
-                where r.reservationDate.reservationDate between :startDate and :endDate
-            """)
-    List<Reservation> findAllByReservationDateBetween(
-            @Param("startDate") LocalDate start,
-            @Param("endDate") LocalDate end
-    );
-
+    @Transactional(readOnly = true)
     @Query("""
                 select r
                 from Reservation r
@@ -62,6 +55,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     List<Reservation> findAll(
     );
 
+    @Transactional(readOnly = true)
     @Query("""
                 select r
                 from Reservation r
@@ -72,6 +66,21 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             """)
     Optional<Reservation> findById(
             @Param("reservationId") Long id
+    );
+
+    @Transactional(readOnly = true)
+    @Query("""
+                select th
+                from Reservation r
+                join r.theme th
+                where r.reservationDate.reservationDate between :startDate and :endDate
+                group by th
+                order by count(r) desc
+            """)
+    List<Theme> findTopThemesByReservationCount(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable
     );
 
 }

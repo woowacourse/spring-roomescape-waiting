@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.BaseTest;
 import roomescape.member.controller.request.TokenLoginCreateRequest;
 import roomescape.member.domain.Email;
@@ -27,14 +26,12 @@ import roomescape.member.role.Role;
 import roomescape.member.service.AuthService;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
-@Sql("/test-data.sql")
 public class ReservationTest extends BaseTest {
 
     @LocalServerPort
@@ -64,6 +61,8 @@ public class ReservationTest extends BaseTest {
 
     private Map<String, Object> reservation;
 
+    private Map<String, Object> waiting;
+
     private String token;
 
     private ReservationTime reservationTime;
@@ -87,6 +86,12 @@ public class ReservationTest extends BaseTest {
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
         reservation.put("memberId", 1);
+
+        waiting = new HashMap<>();
+        waiting.put("date", "2025-08-05");
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+        waiting.put("memberId", 1);
     }
 
     @Test
@@ -185,7 +190,7 @@ public class ReservationTest extends BaseTest {
     void 방탈출_예약_목록을_조회한다() {
 
         reservationRepository.save(
-                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member, ReservationStatus.RESERVATION));
+                Reservation.create(예약날짜_내일.getDate(), reservationTime, theme, member));
 
         List<ReservationResponse> response = RestAssured.given().log().all()
                 .when().get("/reservations")

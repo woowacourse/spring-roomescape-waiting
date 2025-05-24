@@ -1,4 +1,4 @@
-package roomescape.reservation.resolver;
+package roomescape.member.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

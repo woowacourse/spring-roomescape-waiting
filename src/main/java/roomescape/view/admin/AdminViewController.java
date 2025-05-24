@@ -27,4 +27,9 @@ public class AdminViewController {
     public String getThemes() {
         return "admin/theme";
     }
+
+    @GetMapping("/waiting")
+    public String getWaiting() {
+        return "admin/waiting";
+    }
 }

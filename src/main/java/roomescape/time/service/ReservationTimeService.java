@@ -3,7 +3,6 @@ package roomescape.time.service;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationDate;
@@ -50,20 +49,20 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(reservationTime.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return ReservationTimeResponse.from(reservationTimes);
     }
 
+    @Transactional(readOnly = true)
     public ReservationTime getReservationTime(Long id) {
-        Optional<ReservationTime> reservationTime = reservationTimeRepository.findById(id);
-        if (reservationTime.isPresent()) {
-            return reservationTime.get();
-        }
-        throw new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다.");
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
         return reservationTimeRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),

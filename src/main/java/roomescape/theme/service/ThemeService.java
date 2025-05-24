@@ -1,14 +1,11 @@
 package roomescape.theme.service;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.request.ThemeCreateRequest;
 import roomescape.theme.controller.response.ThemeResponse;
@@ -35,48 +32,32 @@ public class ThemeService {
     @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByThemeId(id)) {
-            throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
+            throw new IllegalArgumentException("[ERROR] 해당 테마에 예약이 존재하여 삭제할 수 없습니다. 입력값:" + id);
         }
         Theme theme = getTheme(id);
         themeRepository.deleteById(theme.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getAll() {
         List<Theme> themes = themeRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
+    @Transactional(readOnly = true)
     public Theme getTheme(Long id) {
-        Optional<Theme> theme = themeRepository.findById(id);
-        if (theme.isPresent()) {
-            return theme.get();
-        }
-        throw new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다.");
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 해당 테마가 존재하지 않습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes() {
         LocalDate endDate = LocalDate.now().minusDays(1L);
         LocalDate startDate = LocalDate.now().minusDays(7L);
+        List<Theme> topThemesByReservationCount = reservationRepository.findTopThemesByReservationCount(startDate,
+                endDate, PageRequest.of(0, 10));
 
-        List<Reservation> recentReservations = reservationRepository.findAllByReservationDateBetween(startDate,
-                endDate);
-
-        List<Theme> themesSortedByPopularity = sortThemesByReservationCount(recentReservations);
-
-        return ThemeResponse.from(themesSortedByPopularity);
-    }
-
-    private List<Theme> sortThemesByReservationCount(List<Reservation> recentReservations) {
-        Map<Theme, Integer> themeCount = new HashMap<>();
-
-        recentReservations
-                .forEach(reservation -> themeCount.put(reservation.getTheme(),
-                        themeCount.getOrDefault(reservation.getTheme(), 0) + 1));
-
-        return themeCount.entrySet().stream()
-                .sorted((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()))
-                .map(Map.Entry::getKey)
-                .toList();
+        return ThemeResponse.from(topThemesByReservationCount);
     }
 
 }

@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.waiting.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -6,25 +6,24 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 @Entity
 @Table(
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"reservation_date", "reservationTime_id"})
-        },
         indexes = {
-                @Index(name = "idx_reservation_date", columnList = "reservation_date")
+                @Index(name = "idx_reservation_date_time_theme", columnList = "reservation_date, reservation_time_id, theme_id")
         }
 )
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,39 +32,40 @@ public class Reservation {
     private ReservationDate reservationDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private ReservationTime reservationTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Theme theme;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
     private Member member;
 
-    protected Reservation() {
-
+    protected Waiting() {
     }
 
-    public Reservation(
-            Long id,
-            LocalDate reservationDate,
-            ReservationTime reservationTime,
-            Theme theme,
-            Member member
-    ) {
+    public Waiting(Long id, ReservationDate reservationDate, ReservationTime reservationTime, Theme theme,
+                   Member member) {
         this.id = id;
-        this.reservationDate = new ReservationDate(reservationDate);
+        this.reservationDate = reservationDate;
         this.reservationTime = reservationTime;
         this.theme = theme;
         this.member = member;
     }
 
-    public static Reservation create(
-            LocalDate reservationDate,
+    public static Waiting create(
+            ReservationDate reservationDate,
             ReservationTime reservationTime,
             Theme theme,
             Member member
     ) {
-        return new Reservation(null, reservationDate, reservationTime, theme, member);
+        return new Waiting(null, reservationDate, reservationTime, theme, member);
+    }
+
+    public Reservation toReservation() {
+        return Reservation.create(reservationDate.getDate(), reservationTime, theme, member);
     }
 
     public Long getId() {
@@ -92,4 +92,7 @@ public class Reservation {
         return member;
     }
 
+    public ReservationDate getReservationDate() {
+        return reservationDate;
+    }
 }
