@@ -70,8 +70,7 @@
       {
         "id": 1,
         "name": "레벨2 탈출",
-        "description": "우테코 레벨2를 탈출하는 내용입니다.",
-        "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+        "themeId": 1
       }
       ```
         - response
@@ -106,7 +105,7 @@
         - 회원 대기 거절
             - request
       ```
-      DELETE /admin/waitings HTTP/1.1
+      DELETE /admin/waitings/{id} HTTP/1.1
       cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
       host: localhost:8080
       ```
