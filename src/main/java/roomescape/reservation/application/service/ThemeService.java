@@ -24,18 +24,20 @@ public class ThemeService {
     }
 
     public ThemeResponse create(ThemeRequest request) {
+
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
         return ThemeResponse.from(themeRepository.save(theme));
     }
 
     public List<ThemeResponse> getAll() {
+
         List<Theme> themes = themeRepository.findAll();
         return ThemeResponse.from(themes);
     }
 
     public void deleteById(Long id) {
-        Theme theme = themeRepository.findById(id)
-                .orElseThrow(() -> new ThemeNotFoundException(id));
+
+        Theme theme = getTheme(id);
 
         if (reservationRepository.existsByTheme(theme)) {
             throw new UsingThemeException();
@@ -45,6 +47,7 @@ public class ThemeService {
     }
 
     public List<PopularThemeResponse> getPopularThemes() {
+
         LocalDate endDate = LocalDate.now().minusDays(1);
         LocalDate startDate = endDate.minusDays(7);
         List<Long> themeIds = reservationRepository.findTopThemesByReservationCountBetween(startDate, endDate).stream()
@@ -57,5 +60,11 @@ public class ThemeService {
                     .orElseThrow(() -> new ThemeNotFoundException(themeId));
             return PopularThemeResponse.from(theme);
         }).toList();
+    }
+
+    private Theme getTheme(Long themeId) {
+        
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new ThemeNotFoundException(themeId));
     }
 }

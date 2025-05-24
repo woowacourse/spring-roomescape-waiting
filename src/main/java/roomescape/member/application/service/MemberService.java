@@ -24,15 +24,18 @@ public class MemberService {
     }
 
     public List<MemberResponse> findAllMembers() {
+
         List<Member> members = memberRepository.findAll();
         return members.stream().map(MemberResponse::from).toList();
     }
 
     public Member findMemberById(Long id) {
+
         return memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(id));
     }
 
     public MemberResponse addMember(SignupRequest signupRequest) {
+
         Member member = new Member(null, signupRequest.name(), signupRequest.email(), signupRequest.password(),
                 Role.USER);
         Member addedMember = memberRepository.save(member);
@@ -40,6 +43,7 @@ public class MemberService {
     }
 
     public String createToken(LoginRequest loginRequest) {
+        
         Member foundMember = memberRepository.findMemberByEmailAndPassword(loginRequest.email(),
                 loginRequest.password()).orElseThrow(MemberNotFoundException::new);
         String token = jwtTokenProvider.createToken(foundMember);

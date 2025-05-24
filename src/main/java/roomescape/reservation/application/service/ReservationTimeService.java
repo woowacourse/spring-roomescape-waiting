@@ -46,10 +46,6 @@ public class ReservationTimeService {
         timeRepository.deleteById(id);
     }
 
-    private boolean isReservationExists(Long id) {
-        return reservationRepository.existsByTimeId(id);
-    }
-
     public List<AvailableTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
 
         List<Long> bookedReservationTimesId = reservationRepository.findAllByDateAndThemeId(date, themeId).stream()
@@ -57,13 +53,15 @@ public class ReservationTimeService {
                 .toList();
         List<ReservationTime> reservationTimes = timeRepository.findAll();
 
-        List<AvailableTimeResponse> availableTimeResponses = reservationTimes.stream()
+        return reservationTimes.stream()
                 .map(reservationTime -> {
                     boolean alreadyBooked = bookedReservationTimesId.contains(reservationTime.getId());
                     return AvailableTimeResponse.from(reservationTime, alreadyBooked);
                 })
                 .toList();
+    }
 
-        return availableTimeResponses;
+    private boolean isReservationExists(Long id) {
+        return reservationRepository.existsByTimeId(id);
     }
 }
