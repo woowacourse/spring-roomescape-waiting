@@ -11,8 +11,8 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
-import roomescape.waiting.service.dto.CreateWaitingRequest;
-import roomescape.waiting.service.dto.CreateWaitingResponse;
+import roomescape.waiting.service.dto.request.CreateWaitingRequest;
+import roomescape.waiting.service.dto.response.CreateWaitingResponse;
 
 import java.time.LocalDateTime;
 

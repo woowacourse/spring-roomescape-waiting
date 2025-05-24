@@ -1,4 +1,4 @@
-package roomescape.waiting.service.dto;
+package roomescape.waiting.service.dto.response;
 
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.theme.dto.response.ThemeResponse;

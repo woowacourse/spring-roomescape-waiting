@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.dto.LoginMember;
 import roomescape.waiting.service.WaitingService;
-import roomescape.waiting.service.dto.CreateWaitingRequest;
-import roomescape.waiting.service.dto.CreateWaitingResponse;
+import roomescape.waiting.service.dto.request.CreateWaitingRequest;
+import roomescape.waiting.service.dto.response.CreateWaitingResponse;
 
 @RestController
 @RequestMapping("/waiting")

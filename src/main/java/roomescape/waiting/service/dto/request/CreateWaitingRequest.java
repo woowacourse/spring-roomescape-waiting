@@ -1,4 +1,4 @@
-package roomescape.waiting.service.dto;
+package roomescape.waiting.service.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 
