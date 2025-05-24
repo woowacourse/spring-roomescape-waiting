@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRequest;
+import roomescape.dto.response.WaitingResponse;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.Waiting;
@@ -17,6 +19,7 @@ import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
 public class WaitingService {
@@ -27,6 +30,13 @@ public class WaitingService {
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final TimeProvider timeProvider;
+
+    public List<WaitingResponse> findAllWaiting() {
+        final List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
 
     @Transactional
     public Long register(final WaitingRequest waitingRequest, final LoginMember loginMember) {
@@ -96,5 +106,4 @@ public class WaitingService {
                 member.getId()
         );
     }
-
 }

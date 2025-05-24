@@ -17,6 +17,7 @@ import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRequest;
+import roomescape.dto.response.WaitingResponse;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -186,6 +187,41 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.cancel(savedId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("대기 신청이 존재하지 않습니다.");
+    }
+
+    @DisplayName("모든 예약 대기 신청을 조회할 수 있다.")
+    @Test
+    void findAllWaiting() {
+        //given
+        Reservation reservation = createReservation();
+
+        LocalDateTime currentDateTime = timeProvider.getCurrentDateTime();
+
+        Waiting waiting = Waiting.of(
+                reservation.getDate(),
+                reservation.getTheme(),
+                reservation.getReservationTime(),
+                reservation.getMember(),
+                currentDateTime
+        );
+
+        waitingRepository.save(waiting);
+
+        //when
+        List<WaitingResponse> actual = waitingService.findAllWaiting();
+
+        //then
+        assertThat(actual).hasSize(1);
+    }
+
+    @DisplayName("예약 대기 목록이 없는경우 빈 리스트를 반환한다.")
+    @Test
+    void findAllWaitingIsEmpty() {
+        //given //when
+        List<WaitingResponse> actual = waitingService.findAllWaiting();
+
+        //then
+        assertThat(actual).isEmpty();
     }
 
     private Reservation createReservation() {
