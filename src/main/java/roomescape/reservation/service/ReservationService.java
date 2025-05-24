@@ -54,7 +54,7 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeAndTheme(request.date(), reservationTime, theme)) {
             return new ReservationResponse(waitingReservation(request.date(), reservationTime, theme, loginMember));
         }
-        return new ReservationResponse(bookedReservatioin(request.date(), reservationTime, theme, loginMember));
+        return new ReservationResponse(bookedReservation(request.date(), reservationTime, theme, loginMember));
     }
 
     private Reservation waitingReservation(LocalDate date, ReservationTime reservationTime,
@@ -67,24 +67,10 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    private Reservation bookedReservatioin(LocalDate date, ReservationTime reservationTime,
+    private Reservation bookedReservation(LocalDate date, ReservationTime reservationTime,
             Theme theme, LoginMember loginMember) {
         final Member member = Member.from(loginMember);
         Reservation reservation = Reservation.of(date, reservationTime, theme, member, LocalDateTime.now(clock));
-
-        return reservationRepository.save(reservation);
-    }
-
-    private Reservation saveReservation(LocalDate date, ReservationTime reservationTime, Theme theme,
-            Member member, boolean isWaiting) {
-        Reservation reservation = null;
-        if (isWaiting) {
-            Long lastWaitingRank = reservationRepository.getLastWaitingRank(theme, date, reservationTime).orElse(0L);
-            reservation = Reservation.waiting(date, reservationTime, theme, member, LocalDateTime.now(clock),
-                    lastWaitingRank + 1);
-        } else {
-            reservation = Reservation.of(date, reservationTime, theme, member, LocalDateTime.now(clock));
-        }
 
         return reservationRepository.save(reservation);
     }
