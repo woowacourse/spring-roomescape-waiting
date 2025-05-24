@@ -4,6 +4,7 @@ import static roomescape.auth.domain.AuthRole.ADMIN;
 import static roomescape.auth.domain.AuthRole.MEMBER;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class MemberRestController {
     ) {
         final MemberResponse.IdName response = memberService.create(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.created(URI.create("/members/" + response.id()))
                 .body(response);
     }
 

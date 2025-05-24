@@ -3,9 +3,9 @@ package roomescape.theme.ui;
 import static roomescape.auth.domain.AuthRole.ADMIN;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +33,7 @@ public class ThemeRestController {
     ) {
         final ThemeResponse response = themeService.create(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.created(URI.create("/themes/" + response.id()))
                 .body(response);
     }
 

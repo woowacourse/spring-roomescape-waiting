@@ -3,9 +3,9 @@ package roomescape.reservation.ui;
 import static roomescape.auth.domain.AuthRole.ADMIN;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.AdminReservationService;
-import roomescape.reservation.ui.dto.request.CreateReservationRequest;
-import roomescape.reservation.ui.dto.request.ReservationsByFilterRequest;
+import roomescape.reservation.ui.dto.request.CreateReservationByAdminRequest;
+import roomescape.reservation.ui.dto.request.FilteredReservationsRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 
@@ -33,11 +33,11 @@ public class AdminReservationRestController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(
-            @RequestBody @Valid final CreateReservationRequest request
+            @RequestBody @Valid final CreateReservationByAdminRequest request
     ) {
         final ReservationResponse response = adminReservationService.createReservation(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.created(URI.create("/admin/reservations/" + response.id()))
                 .body(response);
     }
 
@@ -60,7 +60,7 @@ public class AdminReservationRestController {
 
     @GetMapping("/reservations/filtered")
     public ResponseEntity<List<ReservationResponse>> findAllByFilter(
-            @ModelAttribute @Valid final ReservationsByFilterRequest request
+            @ModelAttribute @Valid final FilteredReservationsRequest request
     ) {
         final List<ReservationResponse> reservationResponses = adminReservationService.findAllByFilter(request);
 
@@ -72,22 +72,5 @@ public class AdminReservationRestController {
     public ResponseEntity<List<ReservationStatusResponse>> findAllReservationStatuses() {
         return ResponseEntity.ok()
                 .body(adminReservationService.findAllReservationStatuses());
-    }
-
-    @DeleteMapping("/waitings/{id}")
-    public ResponseEntity<Void> deny(
-            @PathVariable final Long id,
-            final MemberAuthInfo memberAuthInfo
-    ) {
-        adminReservationService.deleteAsAdmin(id, memberAuthInfo.authRole());
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/waitings")
-    public ResponseEntity<List<ReservationResponse>> findAllWaitings() {
-        final List<ReservationResponse> reservationResponses = adminReservationService.findAllWaitings();
-
-        return ResponseEntity.ok(reservationResponses);
     }
 }
