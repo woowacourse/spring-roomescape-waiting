@@ -2,24 +2,30 @@ package roomescape.member.ui.api;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
 import roomescape.reservation.application.reservation.service.ReservationService;
+import roomescape.reservation.application.waiting.service.ReservationWaitingService;
 import roomescape.reservation.ui.reservation.dto.AdminReservationCreateRequest;
 import roomescape.reservation.ui.reservation.dto.ReservationResponse;
+import roomescape.reservation.ui.waiting.dto.ReservationWaitingResponse;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminApiController {
 
     private final ReservationService reservationService;
+    private final ReservationWaitingService reservationWaitingService;
 
-    public AdminApiController(final ReservationService reservationService) {
+    public AdminApiController(final ReservationService reservationService, ReservationWaitingService reservationWaitingService) {
         this.reservationService = reservationService;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @PostMapping("/reservations")
@@ -28,5 +34,14 @@ public class AdminApiController {
         final URI uri = URI.create("/reservations/" + reservationInfo.id());
         final ReservationResponse response = new ReservationResponse(reservationInfo);
         return ResponseEntity.created(uri).body(response);
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<ReservationWaitingResponse>> getWaitings() {
+        final List<ReservationWaitingResponse> responses = reservationWaitingService.findAll()
+                .stream()
+                .map(ReservationWaitingResponse::new)
+                .toList();
+        return ResponseEntity.ok().body(responses);
     }
 }

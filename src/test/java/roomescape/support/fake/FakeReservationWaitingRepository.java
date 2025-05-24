@@ -35,6 +35,11 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public List<ReservationWaiting> findAll() {
+        return reservationWaitings;
+    }
+
+    @Override
     public List<ReservationWaitingWithRank> findAllWithRankByMemberId(final long memberId) {
         final AtomicLong rank = new AtomicLong(1);
 

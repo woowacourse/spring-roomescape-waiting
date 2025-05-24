@@ -1,6 +1,7 @@
 package roomescape.reservation.application.waiting.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -57,4 +58,10 @@ public class ReservationWaitingService {
         reservationWaitingRepository.deleteById(id);
     }
 
+    public List<ReservationWaitingInfo> findAll() {
+        return reservationWaitingRepository.findAll()
+                .stream()
+                .map(ReservationWaitingInfo::new)
+                .toList();
+    }
 }

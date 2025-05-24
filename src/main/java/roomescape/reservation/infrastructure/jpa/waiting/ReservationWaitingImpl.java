@@ -31,6 +31,11 @@ public class ReservationWaitingImpl implements ReservationWaitingRepository {
     }
 
     @Override
+    public List<ReservationWaiting> findAll() {
+        return reservationWaitingJpaRepository.findAll();
+    }
+
+    @Override
     public List<ReservationWaitingWithRank> findAllWithRankByMemberId(final long memberId) {
         return reservationWaitingJpaRepository.findWaitingsWithRankByMemberId(memberId);
     }

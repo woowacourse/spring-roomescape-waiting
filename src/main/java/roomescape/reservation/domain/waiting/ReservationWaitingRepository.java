@@ -10,5 +10,7 @@ public interface ReservationWaitingRepository {
 
     void deleteById(long id);
 
+    List<ReservationWaiting> findAll();
+
     List<ReservationWaitingWithRank> findAllWithRankByMemberId(long memberId);
 }
