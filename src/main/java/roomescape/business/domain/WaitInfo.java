@@ -9,9 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 public class WaitInfo {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,15 +29,16 @@ public class WaitInfo {
     @JoinColumn(name = "reservation_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Reservation reservation;
 
-    @Column(name = "wait_date_time")
-    private String waitDateTime;
+    @Column(name = "created_at")
+    private String createdAt;
 
-    @Column(name = "wait_status")
-    private String waitStatus;
+    @Column(name = "rank")
+    private Long rank;
 
     public WaitInfo(final Member member, final Reservation reservation) {
         this.member = member;
         this.reservation = reservation;
+        this.createdAt = LocalDateTime.now().format(DATE_TIME_FORMATTER);
     }
 
     protected WaitInfo() {
@@ -49,5 +54,13 @@ public class WaitInfo {
 
     public Reservation getReservation() {
         return reservation;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public Long getRank() {
+        return rank;
     }
 }

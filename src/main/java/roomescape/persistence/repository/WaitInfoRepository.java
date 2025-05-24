@@ -15,4 +15,6 @@ public interface WaitInfoRepository extends JpaRepository<WaitInfo, Long> {
     boolean existsByIdAndMemberId(Long waitInfoId, Long memberId);
 
     Long countByIdLessThanEqualAndReservationId(Long id, Long reservationId);
+
+    List<WaitInfo> findByRankNot(Long rank);
 }

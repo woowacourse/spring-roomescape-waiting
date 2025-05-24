@@ -21,6 +21,7 @@ import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
 import roomescape.presentation.dto.WaitInfoResponse;
+import roomescape.presentation.dto.WaitResponse;
 
 @Service
 public class ReservationService {
@@ -196,5 +197,19 @@ public class ReservationService {
         }
 
         waitInfoRepository.deleteById(waitInfoId);
+    }
+
+    // TODO: 테스트 추가. 승인되지 않은 예약만 가져오는지 확인
+    public List<WaitResponse> findWaitInfoByStatusNotApprove() {
+        final List<WaitInfo> waitInfos = waitInfoRepository.findByRankNot(1L);
+
+        return waitInfos.stream()
+                .map(waitInfo -> new WaitResponse(
+                        waitInfo.getId(),
+                        waitInfo.getMember().getName(),
+                        waitInfo.getReservation().getTheme().getName(),
+                        waitInfo.getReservation().getDate(),
+                        waitInfo.getReservation().getReservationTime().getStartAt()))
+                .toList();
     }
 }
