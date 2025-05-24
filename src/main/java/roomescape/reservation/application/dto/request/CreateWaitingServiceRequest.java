@@ -2,13 +2,10 @@ package roomescape.reservation.application.dto.request;
 
 import java.time.LocalDate;
 
-public class CreateWaitingServiceRequest {
-
-    public CreateWaitingServiceRequest(
+public record CreateWaitingServiceRequest (
         Long memberId,
         LocalDate date,
         Long timeId,
         Long themeId
     ) {
-    }
 }
