@@ -25,6 +25,11 @@ public class WaitingRepositoryAdaptor implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findAll() {
+        return jpaWaitingRepository.findAll();
+    }
+
+    @Override
     public Optional<Waiting> findById(final Long id) {
         return jpaWaitingRepository.findById(id);
     }

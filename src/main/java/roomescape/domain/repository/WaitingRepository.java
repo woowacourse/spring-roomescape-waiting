@@ -15,6 +15,8 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(Long id);
 
+    List<Waiting> findAll();
+
     List<Waiting> findByMemberId(Long id);
 
     List<Waiting> findByThemeId(Long id);

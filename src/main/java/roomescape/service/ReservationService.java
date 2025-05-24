@@ -25,6 +25,7 @@ import roomescape.exception.MemberNotFoundException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.WaitingNotFoundException;
 
 @Service
 @Transactional
@@ -52,6 +53,14 @@ public class ReservationService {
         List<Reservation> filteredReservations = reservationRepository.findByCondition(cond);
         return filteredReservations.stream()
                 .map(ReservationResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingResponse> findWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return waitings.stream()
+                .map(WaitingResponse::from)
                 .toList();
     }
 
@@ -126,7 +135,7 @@ public class ReservationService {
     }
 
     public void deleteWaitingById(Long id) {
-        waitingRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
+        waitingRepository.findById(id).orElseThrow(WaitingNotFoundException::new);
         waitingRepository.deleteById(id);
     }
 }
