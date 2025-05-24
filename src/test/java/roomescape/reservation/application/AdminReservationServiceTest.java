@@ -1,8 +1,6 @@
 package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
-import static roomescape.auth.domain.AuthRole.ADMIN;
 import static roomescape.fixture.domain.MemberFixture.notSavedMember1;
 import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservationTime1;
 import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservationTime2;
@@ -20,13 +18,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator.ReplaceUnderscores;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.auth.domain.AuthRole;
-import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
@@ -126,24 +120,8 @@ class AdminReservationServiceTest {
                 new Reservation(date, time, theme, member, RESERVED));
 
         // when & then
-        Assertions.assertThatCode(() -> adminReservationService.deleteAsAdmin(reservation.getId(), ADMIN))
+        Assertions.assertThatCode(() -> adminReservationService.deleteAsAdmin(reservation.getId()))
                 .doesNotThrowAnyException();
-    }
-
-    @ParameterizedTest
-    @EnumSource(mode = EXCLUDE, names = {"ADMIN"})
-    void 관리자_권한이_아닌데_예약을_삭제하려_하면_예외가_발생한다(final AuthRole authRole) {
-        // given
-        final LocalDate date = LocalDate.now().plusDays(1);
-        final ReservationTime time = reservationTimeRepository.save(notSavedReservationTime1());
-        final Theme theme = themeRepository.save(notSavedTheme1());
-        final Member member = memberRepository.save(notSavedMember1());
-        final Reservation reservation = reservationRepository.save(
-                new Reservation(date, time, theme, member, RESERVED));
-
-        // when & then
-        Assertions.assertThatThrownBy(() -> adminReservationService.deleteAsAdmin(reservation.getId(), authRole))
-                .isInstanceOf(AuthorizationException.class);
     }
 
     @Test
@@ -156,7 +134,7 @@ class AdminReservationServiceTest {
         reservationRepository.save(new Reservation(date, time, theme, member, RESERVED));
 
         // when & then
-        Assertions.assertThatThrownBy(() -> adminReservationService.deleteAsAdmin(Long.MAX_VALUE, ADMIN))
+        Assertions.assertThatThrownBy(() -> adminReservationService.deleteAsAdmin(Long.MAX_VALUE))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 

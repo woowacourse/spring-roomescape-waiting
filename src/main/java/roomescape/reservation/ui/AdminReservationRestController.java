@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.AdminReservationService;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
@@ -43,10 +42,9 @@ public class AdminReservationRestController {
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteAsAdmin(
-            @PathVariable final Long id,
-            final MemberAuthInfo memberAuthInfo
+            @PathVariable final Long id
     ) {
-        adminReservationService.deleteAsAdmin(id, memberAuthInfo.authRole());
+        adminReservationService.deleteAsAdmin(id);
 
         return ResponseEntity.noContent().build();
     }

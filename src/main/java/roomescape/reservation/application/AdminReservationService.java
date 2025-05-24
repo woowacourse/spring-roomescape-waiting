@@ -1,6 +1,5 @@
 package roomescape.reservation.application;
 
-import static roomescape.auth.domain.AuthRole.ADMIN;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 import java.time.LocalDate;
@@ -8,8 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.auth.domain.AuthRole;
-import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
@@ -61,11 +58,7 @@ public class AdminReservationService {
     }
 
 
-    public void deleteAsAdmin(final Long reservationId, final AuthRole authRole) {
-        if (authRole != ADMIN) {
-            throw new AuthorizationException("관리자만 삭제할 권한이 있습니다.");
-        }
-
+    public void deleteAsAdmin(final Long reservationId) {
         if (!reservationRepository.existsById(reservationId)) {
             throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
         }
