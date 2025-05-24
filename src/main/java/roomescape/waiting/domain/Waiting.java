@@ -49,7 +49,6 @@ public class Waiting {
     @NotNull
     private LocalDateTime createdAt;
 
-    // protected 로 한 이유는 뭐야?
     protected Waiting() {
     }
 
@@ -65,24 +64,23 @@ public class Waiting {
         return id;
     }
 
-    // @NotNull 은 왜 사용한거야? 이게 동작해?
-    public @NotNull LocalDate getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public @NotNull Member getMember() {
+    public Member getMember() {
         return member;
     }
 
-    public @NotNull Theme getTheme() {
+    public Theme getTheme() {
         return theme;
     }
 
-    public @NotNull ReservationTime getTime() {
+    public ReservationTime getTime() {
         return time;
     }
 
-    public @NotNull LocalDateTime getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 }

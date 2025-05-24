@@ -7,29 +7,38 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.UserReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.domain.WaitingWithRank;
-import roomescape.waiting.servcie.WaitingService;
+import roomescape.waiting.repository.WaitingRepository;
 
 @Service
 public class UserReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingService waitingService;
+    private final WaitingRepository waitingRepository;
 
-    public UserReservationService(ReservationRepository reservationRepository, WaitingService waitingService) {
+    public UserReservationService(ReservationRepository reservationRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
-        this.waitingService = waitingService;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<UserReservationResponse> findAllMemberReservations(Long memberId) {
+        List<UserReservationResponse> reservations = findAllReservationByMemberId(memberId);
+        List<UserReservationResponse> waitings = findAllWaitingByMemberId(memberId);
+        return mergeList(reservations, waitings);
+    }
+
+    private List<UserReservationResponse> findAllWaitingByMemberId(Long memberId) {
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
+        List<UserReservationResponse> waitingResponses = waitingWithRanks.stream()
+                .map(UserReservationResponse::from)
+                .toList();
+        return waitingResponses;
+    }
+
+    private List<UserReservationResponse> findAllReservationByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        List<UserReservationResponse> reservationResponses = reservations.stream()
+        return reservations.stream()
                 .map(UserReservationResponse::from)
                 .toList();
-        List<WaitingWithRank> waitings = waitingService.findAllByMemberWithRank(memberId);
-        List<UserReservationResponse> waitingResponses = waitings.stream()
-                .map(UserReservationResponse::from)
-                .toList();
-        return mergeList(reservationResponses, waitingResponses);
     }
 
     private List<UserReservationResponse> mergeList(List<UserReservationResponse>... lists) {

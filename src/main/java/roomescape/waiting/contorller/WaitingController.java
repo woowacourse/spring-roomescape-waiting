@@ -24,7 +24,8 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<WaitingCreateResponse> create(@Valid @RequestBody WaitingCreateRequest waitingCreateRequest, Member member) {
+    public ResponseEntity<WaitingCreateResponse> create(@Valid @RequestBody WaitingCreateRequest waitingCreateRequest,
+                                                        Member member) {
         WaitingCreateResponse waitingCreateResponse = waitingService.create(waitingCreateRequest, member);
         return ResponseEntity.ok(waitingCreateResponse);
     }

@@ -6,12 +6,13 @@ import java.util.Optional;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingWithRank;
 
 public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
-    List<Waiting> findAllByMemberId(Long memberId);
+    List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
     Optional<Waiting> findById(Long id);
 
