@@ -81,8 +81,7 @@ public class Waiting {
         return createdAt;
     }
 
-    public boolean isPast() {
-        LocalDate today = LocalDate.now();
+    public boolean isPast(LocalDate today) {
         return date.isBefore(today) || (date.isEqual(today) && time.isPast());
     }
 }
