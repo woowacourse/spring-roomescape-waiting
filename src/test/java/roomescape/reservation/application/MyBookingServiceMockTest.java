@@ -1,36 +1,35 @@
 package roomescape.reservation.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import roomescape.member.model.Member;
 import roomescape.member.model.Role;
-import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
+import roomescape.reservation.application.dto.response.MyBookingServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
 import roomescape.reservation.model.repository.ReservationRepository;
-import roomescape.reservation.model.vo.ReservationStatus;
+import roomescape.reservation.model.repository.WaitingRepository;
 
-@ExtendWith(MockitoExtension.class)
-class MyReservationServiceTest {
+@SpringBootTest
+class MyBookingServiceMockTest {
 
     @Mock
     ReservationRepository reservationRepository;
 
-    MyReservationService myReservationService;
+    @Mock
+    WaitingRepository waitingRepository;
 
+    MyBookingService myBookingService;
 
     private ReservationTime time10Am;
     private ReservationTime time2Pm;
@@ -40,7 +39,7 @@ class MyReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        myReservationService = new MyReservationService(reservationRepository);
+        myBookingService = new MyBookingService(reservationRepository, waitingRepository);
         time10Am = ReservationTime.builder()
             .id(1L)
             .startAt(LocalTime.of(10, 0))
@@ -68,7 +67,7 @@ class MyReservationServiceTest {
 
     @Test
     @DisplayName("memberId로 올바른 응답을 반환한다")
-    void getAllByMemberIdReturnMyReservationServiceResponse() {
+    void getAllByMemberId() {
         Member member1 = new Member("1234", Role.USER, "a@naver.com", "유저2", 1L);
 
         Reservation beforeTodayReservation = Reservation.builder()
@@ -88,10 +87,10 @@ class MyReservationServiceTest {
         List<Reservation> reservations = List.of(beforeTodayReservation, afterTodayReservation);
         given(reservationRepository.findAllByMemberId(1L)).willReturn(reservations);
 
-        List<MyReservationServiceResponse> expected = List.of(
-            MyReservationServiceResponse.from(beforeTodayReservation, ReservationStatus.ENDED),
-            MyReservationServiceResponse.from(afterTodayReservation, ReservationStatus.CONFIRMED)
+        List<MyBookingServiceResponse> expected = List.of(
+            MyBookingServiceResponse.from(beforeTodayReservation),
+            MyBookingServiceResponse.from(afterTodayReservation)
         );
-        Assertions.assertThat(myReservationService.getAllByMemberId(1L)).isEqualTo(expected);
+        assertThat(myBookingService.getAllByMemberId(1L)).isEqualTo(expected);
     }
 }

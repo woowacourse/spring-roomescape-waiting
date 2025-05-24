@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,6 +51,11 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.member = member;
+    }
+
+    public Reservation(LocalDate date, ReservationTime time, ReservationTheme theme,
+        Member member) {
+        this(null, date, time, theme, member);
     }
 
     public LocalDateTime getReservationDateTime() {

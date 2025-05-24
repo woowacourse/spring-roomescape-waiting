@@ -1,8 +1,6 @@
 package roomescape.reservation.model.vo;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.reservation.model.entity.ReservationTime;
 
 public enum ReservationStatus {
     CONFIRMED,
@@ -13,6 +11,5 @@ public enum ReservationStatus {
             return ENDED;
         }
         return CONFIRMED;
-
     }
 }
