@@ -18,6 +18,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reserveticket.ReserveTicketWaiting;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -29,7 +30,6 @@ import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
 import roomescape.service.reserveticket.ReserveTicketService;
-import roomescape.service.reserveticket.ReserveTicketWaiting;
 
 @RestController
 @RequestMapping("/reservations")

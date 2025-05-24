@@ -1,11 +1,9 @@
-package roomescape.service.reserveticket;
+package roomescape.domain.reserveticket;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import roomescape.domain.member.Reserver;
-import roomescape.domain.reserveticket.ReservationWithWaitingRanks;
-import roomescape.domain.reserveticket.ReserveTicketFinder;
 
 public class ReserveTicketWaitings {
 

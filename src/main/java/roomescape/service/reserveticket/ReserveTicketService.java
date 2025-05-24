@@ -12,6 +12,8 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reserveticket.ReservationWithWaitingRanks;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.reserveticket.ReserveTicketFinder;
+import roomescape.domain.reserveticket.ReserveTicketWaiting;
+import roomescape.domain.reserveticket.ReserveTicketWaitings;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
@@ -61,6 +63,7 @@ public class ReserveTicketService {
                 .stream()
                 .filter(reserveTicketWaiting -> reserveTicketWaiting.isSameMember(memberId))
                 .toList();
+
     }
 
     private ReserveTicketWaitings createReserveTicketWaiting() {

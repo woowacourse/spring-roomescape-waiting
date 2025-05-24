@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import roomescape.domain.reservation.Reservation;
-import roomescape.service.reserveticket.ReservationWithWaitingRank;
 
 public class ReservationWithWaitingRanks {
 
@@ -23,7 +21,8 @@ public class ReservationWithWaitingRanks {
         for (ReservationWithWaitingRank reservationWithRank : reservationWithWaitingRankList) {
             reservationsMap.putIfAbsent(reservationWithRank, new ArrayList<>());
 
-            List<ReservationWithWaitingRank> reservations = reservationsMap.getOrDefault(reservationWithRank, new ArrayList<>());
+            List<ReservationWithWaitingRank> reservations = reservationsMap.getOrDefault(reservationWithRank,
+                    new ArrayList<>());
             reservations.add(reservationWithRank);
             reservationsMap.put(reservationWithRank, reservations);
         }

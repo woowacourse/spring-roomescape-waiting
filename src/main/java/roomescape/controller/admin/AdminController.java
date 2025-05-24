@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reserveticket.ReserveTicketWaiting;
 import roomescape.dto.admin.AdminReservationAddDto;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.dto.reservationmember.ReservationTicketWaitingDto;
 import roomescape.service.reserveticket.ReserveTicketService;
-import roomescape.service.reserveticket.ReserveTicketWaiting;
 
 @RestController
 @RequestMapping("/admin")
