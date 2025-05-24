@@ -49,7 +49,7 @@ public class MyReservationService {
 
     public void removeWaiting(Long id) {
         Waiting waiting = waitingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("waiting"));
+            .orElseThrow(() -> new NotFoundException("waiting"));
 
         waitingRepository.deleteById(id);
 
@@ -57,7 +57,7 @@ public class MyReservationService {
             waiting.getDate(), waiting.getTheme().getId(), waiting.getTime().getId());
 
         for (Waiting remaining : remainings) {
-            remaining.setRank(remaining.getRank() - 1);
+            remaining.minusRank(1L);
         }
     }
 }

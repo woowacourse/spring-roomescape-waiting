@@ -55,8 +55,8 @@ public class Waiting {
         this.rank = rank;
     }
 
-    public void setRank(Long rank) {
-        this.rank = rank;
+    public void minusRank(Long rank) {
+        this.rank -= rank;
     }
 
     public Long getId() {
