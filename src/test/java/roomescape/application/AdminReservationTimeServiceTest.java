@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ReservationTestFixture;
-import roomescape.global.exception.BusinessRuleViolationException;
 import roomescape.reservation.application.AdminReservationTimeService;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
@@ -38,7 +37,7 @@ class AdminReservationTimeServiceTest extends IntegrationTestSupport {
         // given
         ReservationTime reservationTime = ReservationTestFixture.getReservationTimeFixture();
         ReservationTheme reservationTheme = ReservationTestFixture.getReservationThemeFixture();
-        Reservation reservation = ReservationTestFixture.createConfirmedReservation(LocalDate.now().minusDays(10), reservationTime, reservationTheme);
+        Reservation reservation = ReservationTestFixture.createConfirmedReservation(LocalDate.now().plusDays(10), reservationTime, reservationTheme);
 
         reservationTimeRepository.save(reservationTime);
         reservationThemeRepository.save(reservationTheme);
