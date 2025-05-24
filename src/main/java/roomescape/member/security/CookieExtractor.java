@@ -9,9 +9,8 @@ import org.springframework.stereotype.Component;
 public class CookieExtractor {
 
     private static final String COOKIE_NAME = "token";
-    
 
-    public static ResponseCookie createCookie(final String token, final int maxAge) {
+    public ResponseCookie createCookie(final String token, final int maxAge) {
         if (token == null) {
             throw new IllegalArgumentException("토큰 값이 null일 수 없습니다");
         }
