@@ -69,4 +69,8 @@ public class Reservation {
     public Theme getTheme() {
         return schedule.getTheme();
     }
+
+    public ReservationSchedule getSchedule() {
+        return schedule;
+    }
 }

@@ -30,7 +30,9 @@ public class ReservationWaitController {
 
     @PostMapping
     public ResponseEntity<ReservationWaitResponse> createReservationWait(
-            @RequestBody @Valid CreateReservationWaitRequest request, final SessionMember sessionMember) {
+            @RequestBody @Valid final CreateReservationWaitRequest request,
+            final SessionMember sessionMember
+    ) {
         ReservationWaitResponse response = reservationWaitService.createReservationWait(request, sessionMember.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

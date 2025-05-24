@@ -38,7 +38,7 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = `/reservations/waits/${id}/approve`;
+    const endpoint = `/reservations/waits/${id}`;
     return fetch(endpoint, {
         method: 'POST'
     }).then(response => {

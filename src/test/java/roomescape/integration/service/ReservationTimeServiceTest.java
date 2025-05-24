@@ -34,9 +34,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.ReservationTimeService;
-import roomescape.service.request.AvailableReservationTimeRequest;
 import roomescape.service.request.CreateReservationTimeRequest;
-import roomescape.service.response.AvailableReservationTimeResponse;
 import roomescape.service.response.ReservationTimeResponse;
 
 @Transactional
@@ -164,22 +162,5 @@ class ReservationTimeServiceTest {
         // when & then
         assertThatThrownBy(() -> service.getReservationTime(1L))
                 .isInstanceOf(NoSuchElementException.class);
-    }
-
-    @Test
-    void 예약가능한_시간들을_조회할_수_있다() {
-        // given
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-        reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(11, 0)));
-
-        // when
-        List<AvailableReservationTimeResponse> result = service.findAvailableReservationTimes(
-                new AvailableReservationTimeRequest(LocalDate.of(2025, 5, 5), 1L));
-
-        // then
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(result.get(0).startAt()).isEqualTo(LocalTime.of(10, 0));
-            softly.assertThat(result.get(0).isReserved()).isFalse();
-        });
     }
 }

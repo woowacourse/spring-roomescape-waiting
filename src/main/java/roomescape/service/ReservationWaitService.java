@@ -1,8 +1,11 @@
 package roomescape.service;
 
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationWait;
@@ -17,6 +20,7 @@ import roomescape.service.response.ReservationResponse;
 import roomescape.service.response.ReservationWaitResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitService {
 
     private final MemberRepository memberRepository;
@@ -28,13 +32,14 @@ public class ReservationWaitService {
             final MemberRepository memberRepository,
             final ReservationScheduleRepository reservationScheduleRepository,
             final ReservationWaitRepository reservationWaitRepository,
-            final ReservationRepository reservationRepository) {
+            final ReservationRepository reservationRepository, final EntityManager entityManager) {
         this.memberRepository = memberRepository;
         this.reservationScheduleRepository = reservationScheduleRepository;
         this.reservationWaitRepository = reservationWaitRepository;
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationWaitResponse createReservationWait(final CreateReservationWaitRequest request, Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 멤버입니다."));
@@ -47,12 +52,15 @@ public class ReservationWaitService {
         return ReservationWaitResponse.from(saved);
     }
 
+    @Transactional
     public ReservationResponse approveReservationWait(final Long waitId) {
         ReservationWait reservationWait = reservationWaitRepository.findById(waitId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 대기입니다."));
         ReservationSchedule schedule = reservationWait.getSchedule();
-        reservationRepository.findByScheduleId(schedule.getId())
-                .orElseThrow(() -> new IllegalStateException("예약 대기를 승인하려면 해당 예약 일정에 예약이 없어야 합니다."));
+        Optional<Reservation> reservation = reservationRepository.findByScheduleId(schedule.getId());
+        if (reservation.isPresent()) {
+            throw new IllegalStateException("예약 대기를 승인하려면 해당 예약 일정에 예약이 없어야 합니다.");
+        }
         Reservation savedReservation = reservationRepository.save(new Reservation(
                 null,
                 reservationWait.getMember(),

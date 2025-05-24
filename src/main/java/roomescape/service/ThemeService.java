@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.theme.DateRange;
 import roomescape.domain.theme.Theme;
@@ -19,6 +20,7 @@ import roomescape.service.request.CreateThemeRequest;
 import roomescape.service.response.ThemeResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -38,6 +40,7 @@ public class ThemeService {
         this.reservationScheduleRepository = reservationScheduleRepository;
     }
 
+    @Transactional
     public void deleteThemeById(final Long id) {
         Optional<ReservationSchedule> schedule = reservationScheduleRepository.findByTheme_Id(id);
         if (schedule.isPresent() && reservationRepository.existsByScheduleId(schedule.get().getId())) {

@@ -1,5 +1,7 @@
 package roomescape.domain.reservation;
 
+import static org.hibernate.annotations.GenerationTime.INSERT;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,6 +14,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.hibernate.annotations.Generated;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.schdule.ReservationSchedule;
 
@@ -31,7 +34,8 @@ public class ReservationWait {
     @JoinColumn(name = "schedule_id")
     private ReservationSchedule schedule;
 
-    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    @Generated(INSERT)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
     protected ReservationWait() {

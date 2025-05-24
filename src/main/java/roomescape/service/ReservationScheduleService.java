@@ -9,6 +9,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.schdule.ReservationDate;
 import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
@@ -18,6 +19,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationScheduleService {
 
     private final ReservationScheduleRepository reservationScheduleRepository;
@@ -40,6 +42,7 @@ public class ReservationScheduleService {
     }
 
     @Scheduled(cron = "0 0 0 * * *")
+    @Transactional
     public void createSchedule() {
         Set<LocalDate> scheduledDates = existingScheduledDates();
         List<ReservationSchedule> newSchedules = generateNewSchedules(scheduledDates);

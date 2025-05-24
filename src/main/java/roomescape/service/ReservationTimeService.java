@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.schdule.ReservationSchedule;
 import roomescape.domain.time.AvailableReservationTime;
 import roomescape.domain.time.ReservationTime;
@@ -17,6 +18,7 @@ import roomescape.service.response.AvailableReservationTimeResponse;
 import roomescape.service.response.ReservationTimeResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
@@ -31,6 +33,7 @@ public class ReservationTimeService {
         this.reservationScheduleRepository = reservationScheduleRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse createReservationTime(final CreateReservationTimeRequest request) {
         LocalTime startAt = request.startAt();
         if (reservationTimeRepository.existsByStartAt(startAt)) {
@@ -45,6 +48,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(reservationTimes);
     }
 
+    @Transactional
     public void deleteReservationTimeById(final Long id) {
         Optional<ReservationSchedule> schedule = reservationScheduleRepository.findByReservationTime_Id(id);
         if (schedule.isPresent() && reservationRepository.existsByScheduleId(schedule.get().getId())) {

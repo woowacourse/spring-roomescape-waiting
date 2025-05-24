@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.schdule.ReservationDate;
@@ -24,6 +25,7 @@ import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -57,6 +59,7 @@ public class ReservationService {
         reservationRepository.deleteById(reservation.getId());
     }
 
+    @Transactional
     public ReservationResponse createReservation(final CreateReservationRequest request, final Long memberId) {
         Reservation created = createReservation(
                 new ReservationDate(request.date()),
