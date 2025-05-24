@@ -10,8 +10,41 @@ import roomescape.theme.Theme;
 
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long> {
 
+    @Query(value = """
+    SELECT r
+    FROM Reservation r
+        JOIN FETCH r.theme
+        JOIN FETCH r.member
+        JOIN FETCH r.reservationTime
+    """)
+    List<Reservation> findAll();
+
+    @Query(value = """
+    SELECT r
+    FROM Reservation r
+        JOIN FETCH r.reservationTime
+    WHERE r.theme = :theme AND r.date = :date
+    """)
     List<Reservation> findAllByThemeAndDate(Theme theme, LocalDate date);
+
+    @Query(value = """
+    SELECT r
+    FROM Reservation r
+        JOIN FETCH r.theme
+        JOIN FETCH r.member
+        JOIN FETCH r.reservationTime
+    WHERE r.member = :member AND r.theme = :theme AND r.date BETWEEN :from AND :to
+    """)
     List<Reservation> findAllByMemberAndThemeAndDateBetween(Member member, Theme theme, LocalDate from, LocalDate to);
+
+    @Query(value = """
+    SELECT r
+    FROM Reservation r
+        JOIN FETCH r.theme
+        JOIN FETCH r.member
+        JOIN FETCH r.reservationTime
+    WHERE r.reservationStatus = :reservationStatus
+    """)
     List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
     List<Reservation> findAllByDateAndReservationTimeAndThemeAndReservationStatusOrderByIdAsc(
             LocalDate date,
@@ -19,6 +52,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             Theme theme,
             ReservationStatus reservationStatus
     );
+
     @Query(value = """
     SELECT  new roomescape.reservation.WaitingRankReservation(r, 
         (
