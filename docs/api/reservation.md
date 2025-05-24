@@ -151,7 +151,7 @@ Content-Type: application/json
         "theme": "테마3",
         "date": "2024-03-01",
         "time": "14:00",
-        "status": "예약"
+        "status": "예약 대기"
     }
 ]
 ```
