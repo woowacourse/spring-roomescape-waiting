@@ -110,13 +110,15 @@ public class TestConfig {
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository,
-            final ReservationRepository reservationRepository
+            final ReservationRepository reservationRepository,
+            final WaitingRepository waitingRepository
     ) {
         return new AdminReservationService(
                 reservationTimeRepository,
                 themeRepository,
                 memberRepository,
-                reservationRepository
+                reservationRepository,
+                waitingRepository
         );
     }
 }

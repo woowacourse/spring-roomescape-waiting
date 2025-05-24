@@ -80,6 +80,10 @@ public class Reservation {
         this(null, date, time, theme, member, status);
     }
 
+    public void updateMember(final Member member) {
+        this.member = member;
+    }
+
     private void validateDate(final LocalDate date) {
         if (date == null) {
             throw new IllegalArgumentException("날짜는 null이면 안됩니다.");

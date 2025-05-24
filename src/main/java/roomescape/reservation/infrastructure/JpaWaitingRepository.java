@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Waiting;
@@ -41,4 +42,6 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
                         """
     )
     List<WaitingWithRank> findAllWaitingWithRank();
+
+    Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(LocalDate date, Long timeId, Long themeId);
 }

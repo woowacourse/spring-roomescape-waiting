@@ -21,6 +21,11 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
+    public void delete(final Waiting waiting) {
+        jpaWaitingRepository.delete(waiting);
+    }
+
+    @Override
     public void deleteById(final Long waitingId) {
         jpaWaitingRepository.deleteById(waitingId);
     }
@@ -54,5 +59,13 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     @Override
     public List<WaitingWithRank> findAllWaitingWithRank() {
         return jpaWaitingRepository.findAllWaitingWithRank();
+    }
+
+    @Override
+    public Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+            final LocalDate date,
+            final Long timeId,
+            final Long themeId) {
+        return jpaWaitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(date, timeId, themeId);
     }
 }

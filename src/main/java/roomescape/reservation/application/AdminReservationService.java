@@ -5,8 +5,10 @@ import static roomescape.reservation.domain.ReservationStatus.BOOKED;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
@@ -16,6 +18,8 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.FilteredReservationsRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
@@ -31,6 +35,7 @@ public class AdminReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationResponse createReservation(final CreateReservationRequest request) {
         return ReservationResponse.from(
@@ -59,10 +64,23 @@ public class AdminReservationService {
         return reservationRepository.save(reservation);
     }
 
-
+    @Transactional
     public void deleteAsAdmin(final Long reservationId) {
         if (!reservationRepository.existsById(reservationId)) {
             throw new ResourceNotFoundException("해당 예약을 찾을 수 없습니다.");
+        }
+
+        final Reservation reservation = getReservationById(reservationId);
+        final Optional<Waiting> optionalWaiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+        if (optionalWaiting.isPresent()) {
+            final Waiting waiting = optionalWaiting.get();
+            reservation.updateMember(waiting.getMember());
+            waitingRepository.delete(waiting);
+            return;
         }
 
         reservationRepository.deleteById(reservationId);
@@ -107,5 +125,10 @@ public class AdminReservationService {
     private Member getMemberById(final Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+    }
+
+    private Reservation getReservationById(final Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
     }
 }

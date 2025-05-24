@@ -8,6 +8,8 @@ public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
+    void delete(Waiting waiting);
+
     void deleteById(Long waitingId);
 
     boolean existsById(Long waitingId);
@@ -19,4 +21,6 @@ public interface WaitingRepository {
     List<WaitingWithRank> findAllWaitingWithRankByMemberId(Long memberId);
 
     List<WaitingWithRank> findAllWaitingWithRank();
+
+    Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAt(LocalDate date, Long timeId, Long themeId);
 }
