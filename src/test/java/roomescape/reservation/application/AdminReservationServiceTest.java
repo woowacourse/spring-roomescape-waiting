@@ -36,7 +36,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.reservation.ui.dto.request.CreateReservationByAdminRequest;
+import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.FilteredReservationsRequest;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 import roomescape.theme.domain.Theme;
@@ -70,8 +70,8 @@ class AdminReservationServiceTest {
         final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
-        final CreateReservationByAdminRequest request =
-                new CreateReservationByAdminRequest(member.getId(), date, timeId, themeId, RESERVED);
+        final CreateReservationRequest request =
+                new CreateReservationRequest(member.getId(), date, timeId, themeId, RESERVED);
 
         // when & then
         Assertions.assertThatCode(() -> adminReservationService.createReservation(request))
@@ -89,8 +89,8 @@ class AdminReservationServiceTest {
         reservationRepository.save(
                 new Reservation(date, reservationTime, theme, member, RESERVED));
 
-        final CreateReservationByAdminRequest request =
-                new CreateReservationByAdminRequest(member.getId(), date, reservationTime.getId(), theme.getId()
+        final CreateReservationRequest request =
+                new CreateReservationRequest(member.getId(), date, reservationTime.getId(), theme.getId()
                         , RESERVED);
 
         // when & then
@@ -106,8 +106,8 @@ class AdminReservationServiceTest {
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
 
-        final CreateReservationByAdminRequest request =
-                new CreateReservationByAdminRequest(member.getId(), date, timeId, themeId,
+        final CreateReservationRequest request =
+                new CreateReservationRequest(member.getId(), date, timeId, themeId,
                         RESERVED);
 
         // when & then

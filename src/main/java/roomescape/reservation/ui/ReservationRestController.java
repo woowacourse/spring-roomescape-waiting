@@ -20,7 +20,7 @@ import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.auth.domain.RequiresRole;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationByAdminRequest;
+import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 
@@ -34,7 +34,7 @@ public class ReservationRestController {
     @PostMapping
     @RequiresRole(authRoles = {ADMIN, MEMBER})
     public ResponseEntity<ReservationResponse> createReservation(
-            @RequestBody @Valid final CreateReservationByAdminRequest.ForMember request,
+            @RequestBody @Valid final CreateReservationRequest.ForMember request,
             final MemberAuthInfo memberAuthInfo
     ) {
         final ReservationResponse response =

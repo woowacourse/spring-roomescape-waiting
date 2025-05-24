@@ -31,7 +31,7 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.AvailableReservationTimeRequest;
-import roomescape.reservation.ui.dto.request.CreateReservationByAdminRequest;
+import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.ReservationResponse.ForMember;
 import roomescape.theme.domain.Theme;
@@ -65,7 +65,7 @@ class ReservationServiceTest {
         final Long timeId = reservationTimeRepository.save(notSavedReservationTime1()).getId();
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
-        final CreateReservationByAdminRequest.ForMember request = new CreateReservationByAdminRequest.ForMember(date,
+        final CreateReservationRequest.ForMember request = new CreateReservationRequest.ForMember(date,
                 timeId,
                 themeId);
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
@@ -83,8 +83,8 @@ class ReservationServiceTest {
         final Long themeId = themeRepository.save(notSavedTheme1()).getId();
         final Member member = memberRepository.save(notSavedMember1());
 
-        final CreateReservationByAdminRequest.ForMember request =
-                new CreateReservationByAdminRequest.ForMember(date, timeId, themeId);
+        final CreateReservationRequest.ForMember request =
+                new CreateReservationRequest.ForMember(date, timeId, themeId);
         final MemberAuthInfo memberAuthInfo =
                 new MemberAuthInfo(member.getId(), member.getRole());
 
@@ -101,8 +101,8 @@ class ReservationServiceTest {
         final Theme theme = themeRepository.save(notSavedTheme1());
         final Member member = memberRepository.save(notSavedMember1());
 
-        final CreateReservationByAdminRequest.ForMember request =
-                new CreateReservationByAdminRequest.ForMember(date, reservationTime.getId(), theme.getId());
+        final CreateReservationRequest.ForMember request =
+                new CreateReservationRequest.ForMember(date, reservationTime.getId(), theme.getId());
         final MemberAuthInfo memberAuthInfo =
                 new MemberAuthInfo(member.getId(), member.getRole());
 

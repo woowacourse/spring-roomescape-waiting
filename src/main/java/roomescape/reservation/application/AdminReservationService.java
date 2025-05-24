@@ -19,7 +19,7 @@ import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeRepository;
-import roomescape.reservation.ui.dto.request.CreateReservationByAdminRequest;
+import roomescape.reservation.ui.dto.request.CreateReservationRequest;
 import roomescape.reservation.ui.dto.request.FilteredReservationsRequest;
 import roomescape.reservation.ui.dto.response.ReservationResponse;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
@@ -35,7 +35,7 @@ public class AdminReservationService {
     private final MemberRepository memberRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationResponse createReservation(final CreateReservationByAdminRequest request) {
+    public ReservationResponse createReservation(final CreateReservationRequest request) {
         return createReservedReservation(request.date(), request.timeId(), request.themeId(), request.memberId());
     }
 
