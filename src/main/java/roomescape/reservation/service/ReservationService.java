@@ -42,7 +42,6 @@ public class ReservationService {
         validateExistWaiting(date, reservationTime, theme);
 
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);
-
         return reservationRepository.save(reservation);
     }
 
