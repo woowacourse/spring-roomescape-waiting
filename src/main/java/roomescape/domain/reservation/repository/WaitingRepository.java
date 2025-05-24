@@ -1,9 +1,7 @@
 package roomescape.domain.reservation.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,25 +29,20 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     @EntityGraph(attributePaths = {"member", "theme", "time"})
     List<Waiting> findAllWithMemberAndThemeAndTime();
 
-    @Query("SELECT w FROM Waiting w WHERE w.id = :id")
-    @EntityGraph(attributePaths = {"theme", "time"})
-    Optional<Waiting> findByIdWithThemeAndTime(Long id);
-
-    @Query("""
-            SELECT COUNT(w)
-            FROM Waiting w
-            WHERE w.theme.id = :themeId
-              AND w.time.id = :timeId
-              AND w.date = :date
-              AND w.createdAt < :waitingCreatedAt
-            """)
-    int countWaitingsBeforeCreatedAt(@Param("date") LocalDate date,
-                                     @Param("timeId") Long timeId,
-                                     @Param("themeId") Long themeId,
-                                     @Param("waitingCreatedAt") LocalDateTime waitingCreatedAt);
-
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(@Param("date") LocalDate date,
                                                        @Param("timeId") Long timeId,
                                                        @Param("themeId") Long themeId,
                                                        @Param("memberId") Long memberId);
+
+    @Query("""
+            SELECT w
+            FROM Waiting w
+            WHERE w.date = :date
+              AND w.time.id = :timeId
+              AND w.theme.id = :themeId
+            ORDER BY w.createdAt ASC
+            """)
+    List<Waiting> findAllByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(@Param("date") LocalDate date,
+                                                                      @Param("timeId") Long timeId,
+                                                                      @Param("themeId") Long themeId);
 }

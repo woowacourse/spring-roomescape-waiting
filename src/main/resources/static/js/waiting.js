@@ -29,31 +29,8 @@ function render(data) {
 
     const actionCell = row.insertCell(row.cells.length);
 
-    actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
     actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
   });
-}
-
-function approve(event) {
-  const row = event.target.closest('tr');
-  const id = row.cells[0].textContent;
-
-  const endpoint = '/admin/waitings/' + id;
-  return fetch(endpoint, {
-    method: 'POST',
-  }).then(response => {
-    if (!response.ok) {
-      return response.json().then(data => {
-        // 서버에서 JSON 에러 메시지를 줄 경우
-        throw new Error(data.message || '예약 승인에 실패했습니다.');
-      });
-    }
-    return response;
-  })
-      .then(() => location.reload())
-      .catch(error => {
-        alert(error.message);
-      });
 }
 
 function deny(event) {

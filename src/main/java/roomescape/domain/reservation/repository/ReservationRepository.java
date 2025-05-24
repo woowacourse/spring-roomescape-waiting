@@ -17,10 +17,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                             @Param("timeId") Long timeId,
                                             @Param("themeId") Long themeId);
 
+    @Query("""   
+            SELECT r
+            FROM Reservation r
+            WHERE r.id = :id
+            """)
     @EntityGraph(attributePaths = {"time", "theme"})
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(@Param("date") LocalDate reservationDate,
-                                                        @Param("timeId") Long timeId,
-                                                        @Param("themeId") Long themeId);
+    Optional<Reservation> findByIdWithTimeAndTheme(@Param("id") Long id);
 
     boolean existsByThemeId(@Param("themeId") Long themeId);
 

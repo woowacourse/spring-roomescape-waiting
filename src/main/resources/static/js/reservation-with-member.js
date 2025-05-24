@@ -233,7 +233,16 @@ function requestDelete(id) {
 
   return fetch('/admin' + `${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
-        if (response.status !== 204) throw new Error('Delete failed');
+        if (response.status !== 204) {
+          throw new Error('Delete failed');
+        }
+      })
+      .then(() => {
+        location.reload();
+      })
+      .catch(error => {
+        alert(error.message);
+        console.error(error);
       });
 }
 

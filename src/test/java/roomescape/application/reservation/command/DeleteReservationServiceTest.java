@@ -7,7 +7,11 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
 import roomescape.application.AbstractServiceIntegrationTest;
+import roomescape.application.reservation.event.TestReservationCancelListener;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
@@ -33,11 +37,27 @@ class DeleteReservationServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private TestReservationCancelListener testListener;
+
     private DeleteReservationService deleteReservationService;
+
+    @TestConfiguration
+    static class TestListenerConfig {
+
+        @Bean
+        public TestReservationCancelListener testReservationCancelListener() {
+            return new TestReservationCancelListener();
+        }
+    }
 
     @BeforeEach
     void setUp() {
-        deleteReservationService = new DeleteReservationService(reservationRepository);
+        deleteReservationService = new DeleteReservationService(reservationRepository, eventPublisher);
+        testListener.reset();
     }
 
     @Test
@@ -51,9 +71,27 @@ class DeleteReservationServiceTest extends AbstractServiceIntegrationTest {
         );
 
         // when
-        deleteReservationService.removeById(reservation.getId());
+        deleteReservationService.cancelById(reservation.getId());
 
         // then
         assertThat(reservationRepository.findById(reservation.getId())).isNotPresent();
+    }
+
+    @Test
+    void 예약_삭제시_이벤트가_발생한다() {
+        // given
+        Member member = memberRepository.save(new Member("벨로", new Email("test@email.com"), "pw", MemberRole.NORMAL));
+        Theme theme = themeRepository.save(new Theme("테마", "설명", "이미지"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(13, 0)));
+        Reservation reservation = reservationRepository.save(
+                new Reservation(member, LocalDate.now(clock), time, theme)
+        );
+
+        // when
+        deleteReservationService.cancelById(reservation.getId());
+
+        // then
+        assertThat(testListener.isCalled())
+                .isTrue();
     }
 }

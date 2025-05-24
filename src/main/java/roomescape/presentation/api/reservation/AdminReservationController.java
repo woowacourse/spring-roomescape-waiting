@@ -49,7 +49,7 @@ public class AdminReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long reservationId) {
-        deleteReservationService.removeById(reservationId);
+        deleteReservationService.cancelById(reservationId);
         return ResponseEntity.noContent().build();
     }
 
