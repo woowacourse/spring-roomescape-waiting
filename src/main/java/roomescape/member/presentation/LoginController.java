@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.common.argumentResolver.Login;
+import roomescape.member.argumentResolver.Authentication;
 import roomescape.common.util.TokenCookieManager;
-import roomescape.member.dto.request.LoginMember;
 import roomescape.member.dto.request.LoginRequest;
 import roomescape.member.dto.response.LoginCheckResponse;
 import roomescape.member.service.LoginService;
@@ -32,7 +31,7 @@ public class LoginController {
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<LoginCheckResponse> loginCheck(@Login LoginMember member) {
+    public ResponseEntity<LoginCheckResponse> loginCheck(@Authentication roomescape.member.dto.request.LoginMember member) {
         return ResponseEntity.ok().body(new LoginCheckResponse(member.name()));
     }
 

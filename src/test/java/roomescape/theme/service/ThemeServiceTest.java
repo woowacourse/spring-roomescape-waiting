@@ -15,6 +15,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.service.FakeReservationRepository;
 import roomescape.reservation.service.FakeThemeRepository;
 import roomescape.theme.domain.Theme;
@@ -49,13 +50,13 @@ class ThemeServiceTest {
         Member member = Member.createWithId(1L, "a", "a@com", "a", Role.USER);
         reservationRepository.save(
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2025, 12, 5),
-                        null, theme1));
+                        null, theme1, ReservationStatus.RESERVED));
         reservationRepository.save(
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2025, 12, 6),
-                        null, theme1));
+                        null, theme1, ReservationStatus.RESERVED));
         reservationRepository.save(
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2025, 12, 4),
-                        null, theme3));
+                        null, theme3, ReservationStatus.RESERVED));
         themeRepository.save(theme1);
         themeRepository.save(theme2);
         themeRepository.save(theme3);

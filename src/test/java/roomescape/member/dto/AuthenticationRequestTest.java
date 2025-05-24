@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import roomescape.member.dto.request.LoginRequest;
 
-class LoginRequestTest {
+class AuthenticationRequestTest {
 
     @ParameterizedTest
     @NullAndEmptySource

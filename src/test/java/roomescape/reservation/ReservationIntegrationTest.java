@@ -125,7 +125,7 @@ public class ReservationIntegrationTest {
 
     @Test
     @DisplayName("마이 페이지를 반환한다.")
-    void get_my_page(){
+    void get_my_page() {
         RestAssured.given().log().all()
                 .when().get("/reservation-mine")
                 .then().log().all()

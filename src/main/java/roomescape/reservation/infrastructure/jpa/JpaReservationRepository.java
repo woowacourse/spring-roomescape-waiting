@@ -1,24 +1,29 @@
 package roomescape.reservation.infrastructure.jpa;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long>, ReservationCustomRepository {
 
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.time WHERE r.date = :date AND r.theme.id = :themeId")
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsByDateAndTimeStartAtAndThemeId(LocalDate date, LocalTime time, Long themeId);
+    boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId,
+                                                     ReservationStatus status);
+
+    @Modifying
+    @Query("UPDATE Reservation r SET r.status = :status WHERE r.id = :id")
+    void changeReservationStatus(Long id, ReservationStatus status);
 
     boolean existsByThemeId(Long themeId);
-
-    @EntityGraph(attributePaths = {"theme", "time"})
-    List<Reservation> findByMemberId(Long id);
 
     @EntityGraph(attributePaths = {"theme", "member", "time"})
     List<Reservation> findAll();

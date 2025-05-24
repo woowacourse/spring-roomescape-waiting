@@ -1,10 +1,14 @@
 package roomescape.reservation.infrastructure.jpa;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationWithRank;
 
 @Repository
 public class ReservationJpaRepository implements ReservationRepository {
@@ -31,6 +35,11 @@ public class ReservationJpaRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findAllWaitingReservations(LocalDateTime now) {
+        return jpaReservationRepository.findAllWaitingReservations(now);
+    }
+
+    @Override
     public List<Reservation> findAll() {
         return jpaReservationRepository.findAll();
     }
@@ -47,9 +56,15 @@ public class ReservationJpaRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean hasReservedReservation(Reservation reservation) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(reservation.getDate(),
+                reservation.timeId(), reservation.themeId(), ReservationStatus.RESERVED);
+    }
+
+    @Override
     public boolean hasSameReservation(Reservation reservation) {
-        return jpaReservationRepository.existsByDateAndTimeStartAtAndThemeId(reservation.getDate(),
-                reservation.reservationTime(), reservation.themeId());
+        return jpaReservationRepository.existsReservation(reservation.getDate(), reservation.timeId(),
+                reservation.themeId(), reservation.memberId(), reservation.getStatus());
     }
 
     @Override
@@ -58,7 +73,17 @@ public class ReservationJpaRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByMemberId(Long memberId) {
-        return jpaReservationRepository.findByMemberId(memberId);
+    public List<ReservationWithRank> findReservationWithRankByMemberId(Long memberId) {
+        return jpaReservationRepository.findReservationWithRankById(memberId);
+    }
+
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return jpaReservationRepository.findById(id);
+    }
+
+    @Override
+    public void changeReservationStatus(Long id, ReservationStatus status) {
+        jpaReservationRepository.changeReservationStatus(id, status);
     }
 }

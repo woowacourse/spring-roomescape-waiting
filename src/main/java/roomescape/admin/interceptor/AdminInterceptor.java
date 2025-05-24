@@ -1,4 +1,4 @@
-package roomescape.common.interceptor;
+package roomescape.admin.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
