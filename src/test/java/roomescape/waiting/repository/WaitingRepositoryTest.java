@@ -6,7 +6,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.ReservationTime;
@@ -23,7 +22,6 @@ import java.util.List;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @DataJpaTest(properties = "spring.sql.init.mode=never")
-@Transactional
 class WaitingRepositoryTest {
 
     private final Member member = new Member("test", "test@test.com", "12341234", Role.MEMBER);
