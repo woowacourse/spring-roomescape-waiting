@@ -75,6 +75,29 @@ public class FakeReservationRepository implements ReservationRepository {
                 .toList();
     }
 
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getId().equals(id))
+                .findAny();
+    }
+
+    @Override
+    public void changeReservationStatus(Long id, ReservationStatus status) {
+        Optional<Reservation> findReservation = reservations.stream()
+                .filter(reservation -> reservation.getId().equals(id))
+                .findAny();
+        if (findReservation.isEmpty()) {
+            return;
+        }
+        Reservation beforeReservation = findReservation.get();
+        Reservation reservation = Reservation.createWithId(beforeReservation.getId(), beforeReservation.getMember(),
+                beforeReservation.getDate(), beforeReservation.getTime(), beforeReservation.getTheme(),
+                status, beforeReservation.getCreatedAt());
+        reservations.remove(findReservation.get());
+        reservations.add(reservation);
+    }
+
     private Long findRank(Reservation memberReservation) {
         return reservations.stream()
                 .filter(reservation -> reservation.timeId().equals(memberReservation.timeId()))

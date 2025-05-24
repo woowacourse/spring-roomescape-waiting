@@ -3,6 +3,7 @@ package roomescape.reservation.infrastructure.jpa;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
@@ -74,5 +75,15 @@ public class ReservationJpaRepository implements ReservationRepository {
     @Override
     public List<ReservationWithRank> findReservationWithRankByMemberId(Long memberId) {
         return jpaReservationRepository.findReservationWithRankById(memberId);
+    }
+
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return jpaReservationRepository.findById(id);
+    }
+
+    @Override
+    public void changeReservationStatus(Long id, ReservationStatus status) {
+        jpaReservationRepository.changeReservationStatus(id, status);
     }
 }

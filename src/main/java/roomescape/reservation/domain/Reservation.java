@@ -66,6 +66,14 @@ public class Reservation {
         return new Reservation(null, member, reservationDate, time, theme, status, now);
     }
 
+    public static Reservation createWithId(final Long id, final Member member, final LocalDate date,
+                                           final ReservationTime time, final Theme theme,
+                                           final ReservationStatus status,
+                                           final LocalDateTime createdAt
+    ) {
+        return new Reservation(Objects.requireNonNull(id), member, date, time, theme, status, createdAt);
+    }
+
     private static void validateReservationDateTime(final LocalDateTime now, final LocalDate reservationDate,
                                                     final ReservationTime time) {
         LocalDate nowDate = now.toLocalDate();
@@ -77,14 +85,6 @@ public class Reservation {
         if (nowDate.isEqual(reservationDate) && time.isBeforeTime(nowTime)) {
             throw new IllegalArgumentException("예약할 수 없는 날짜와 시간입니다.");
         }
-    }
-
-    public static Reservation createWithId(final Long id, final Member member, final LocalDate date,
-                                           final ReservationTime time, final Theme theme,
-                                           final ReservationStatus status,
-                                           final LocalDateTime createdAt
-    ) {
-        return new Reservation(Objects.requireNonNull(id), member, date, time, theme, status, createdAt);
     }
 
     public LocalDateTime getCreatedAt() {

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -17,6 +18,10 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, Long timeId, Long themeId,
                                                      ReservationStatus status);
+
+    @Modifying
+    @Query("UPDATE Reservation r SET r.status = :status WHERE r.id = :id")
+    void changeReservationStatus(Long id, ReservationStatus status);
 
     boolean existsByThemeId(Long themeId);
 

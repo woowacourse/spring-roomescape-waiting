@@ -319,4 +319,23 @@ class JpaReservationRepositoryTest {
                 () -> assertThat(waitingReservations.get(1).getDate()).isEqualTo(LocalDate.of(2025, 4, 28))
         );
     }
+
+    @Test
+    @DisplayName("정상적으로 예약 상태를 바꾼다.")
+    void changeReservationStatus_test() {
+        // given
+        ReservationTime reservationTime = em.find(ReservationTime.class, 1L);
+        Theme theme = em.find(Theme.class, 1L);
+        Member member = em.find(Member.class, 2L);
+        Reservation reservation = Reservation.createWithoutId(LocalDateTime.of(2025, 3, 22, 21, 10), member,
+                LocalDate.of(2025, 4, 28), reservationTime, theme, ReservationStatus.WAITED);
+        em.persist(reservation);
+        em.flush();
+        em.clear();
+        // when
+        repository.changeReservationStatus(5L, ReservationStatus.RESERVED);
+        // then
+        Reservation findReservation = em.find(Reservation.class, 5L);
+        assertThat(findReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
 }

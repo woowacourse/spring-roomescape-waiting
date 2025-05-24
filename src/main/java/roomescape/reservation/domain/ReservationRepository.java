@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationRepository {
 
@@ -28,4 +29,8 @@ public interface ReservationRepository {
     boolean existsByThemeId(Long themeId);
 
     List<ReservationWithRank> findReservationWithRankByMemberId(Long memberId);
+
+    Optional<Reservation> findById(Long id);
+
+    void changeReservationStatus(Long id, ReservationStatus status);
 }
