@@ -18,7 +18,8 @@ class ReservationTest {
     @Test
     void createReservation_shouldThrowException_whenTimeIsBeforeNow() {
         assertThatThrownBy(() -> Reservation.createUpcomingReservationWithUnassignedId(
-                new ReservationInfo(TestFixture.makeMember(),
+                TestFixture.makeMember(),
+                new ReservationInfo(
                         LocalDate.now().minusDays(1),
                         ReservationTime.withUnassignedId(LocalTime.now().minusHours(1)),
                         theme), LocalDateTime.now())
