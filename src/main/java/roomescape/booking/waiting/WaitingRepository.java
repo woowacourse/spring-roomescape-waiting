@@ -1,4 +1,4 @@
-package roomescape.reservation.waiting;
+package roomescape.booking.waiting;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

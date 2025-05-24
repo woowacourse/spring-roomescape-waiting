@@ -1,4 +1,4 @@
-package roomescape.reservation.waiting;
+package roomescape.booking.waiting;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

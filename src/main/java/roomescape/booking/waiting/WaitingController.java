@@ -1,4 +1,4 @@
-package roomescape.reservation.waiting;
+package roomescape.booking.waiting;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -7,8 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.AuthenticationPrincipal;
 import roomescape.auth.dto.LoginMember;
-import roomescape.reservation.waiting.dto.WaitingRequest;
-import roomescape.reservation.waiting.dto.WaitingResponse;
+import roomescape.booking.waiting.dto.WaitingRequest;
+import roomescape.booking.waiting.dto.WaitingResponse;
 
 @RestController
 @RequestMapping("/waitings")

@@ -1,9 +1,9 @@
-package roomescape.reservation.waiting;
+package roomescape.booking.waiting;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import roomescape.reservation.waiting.dto.WaitingResponse;
+import roomescape.booking.waiting.dto.WaitingResponse;
 
 import java.util.List;
 

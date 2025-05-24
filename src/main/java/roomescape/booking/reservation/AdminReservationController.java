@@ -1,21 +1,15 @@
-package roomescape.reservation.reservation;
+package roomescape.booking.reservation;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import roomescape.booking.reservation.dto.AdminFilterReservationRequest;
+import roomescape.booking.reservation.dto.AdminReservationRequest;
+import roomescape.booking.reservation.dto.ReservationResponse;
 
 import java.net.URI;
 import java.util.List;
-
-import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.reservation.dto.AdminFilterReservationRequest;
-import roomescape.reservation.reservation.dto.AdminReservationRequest;
-import roomescape.reservation.reservation.dto.ReservationResponse;
 
 @RestController
 @RequestMapping("/admin/reservations")

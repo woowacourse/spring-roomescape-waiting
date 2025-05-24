@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.reservation.reservation.dto.ReservationResponse;
+import roomescape.booking.reservation.dto.ReservationResponse;
 
 import java.sql.Connection;
 import java.sql.SQLException;

@@ -1,8 +1,12 @@
-package roomescape.reservation.reservation;
+package roomescape.booking.reservation;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
+import roomescape.booking.reservation.dto.AdminFilterReservationRequest;
+import roomescape.booking.reservation.dto.AdminReservationRequest;
+import roomescape.booking.reservation.dto.ReservationRequest;
+import roomescape.booking.reservation.dto.ReservationResponse;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
@@ -10,10 +14,6 @@ import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
-import roomescape.reservation.reservation.dto.AdminFilterReservationRequest;
-import roomescape.reservation.reservation.dto.AdminReservationRequest;
-import roomescape.reservation.reservation.dto.ReservationRequest;
-import roomescape.reservation.reservation.dto.ReservationResponse;
 import roomescape.schedule.Schedule;
 import roomescape.schedule.ScheduleRepository;
 

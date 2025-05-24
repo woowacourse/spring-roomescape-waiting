@@ -1,18 +1,18 @@
-package roomescape.reservation;
+package roomescape.booking;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
+import roomescape.booking.reservation.Reservation;
+import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.dto.ReservationAndWaitingResponse;
+import roomescape.booking.waiting.Waiting;
+import roomescape.booking.waiting.WaitingRepository;
 import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
-import roomescape.reservation.reservation.Reservation;
-import roomescape.reservation.reservation.ReservationRepository;
-import roomescape.reservation.reservation.dto.ReservationAndWaitingResponse;
-import roomescape.reservation.waiting.Waiting;
-import roomescape.reservation.waiting.WaitingRepository;
 import roomescape.schedule.Schedule;
 
 import java.util.ArrayList;

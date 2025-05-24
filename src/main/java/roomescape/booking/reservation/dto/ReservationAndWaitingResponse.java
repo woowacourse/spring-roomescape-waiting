@@ -1,7 +1,7 @@
-package roomescape.reservation.reservation.dto;
+package roomescape.booking.reservation.dto;
 
-import roomescape.reservation.reservation.Reservation;
-import roomescape.reservation.waiting.Waiting;
+import roomescape.booking.reservation.Reservation;
+import roomescape.booking.waiting.Waiting;
 import roomescape.schedule.dto.ScheduleResponse;
 
 public record ReservationAndWaitingResponse(

@@ -1,4 +1,4 @@
-package roomescape.reservation.reservation;
+package roomescape.booking.reservation;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -7,9 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.AuthenticationPrincipal;
 import roomescape.auth.dto.LoginMember;
-import roomescape.reservation.ReservationWaitingService;
-import roomescape.reservation.reservation.dto.ReservationRequest;
-import roomescape.reservation.reservation.dto.ReservationResponse;
+import roomescape.booking.ReservationWaitingService;
+import roomescape.booking.reservation.dto.ReservationRequest;
+import roomescape.booking.reservation.dto.ReservationResponse;
 
 import java.util.List;
 

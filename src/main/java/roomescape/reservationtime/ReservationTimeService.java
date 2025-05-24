@@ -2,11 +2,11 @@ package roomescape.reservationtime;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.booking.reservation.ReservationRepository;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExistsThemeException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
-import roomescape.reservation.reservation.ReservationRepository;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;

@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
+import roomescape.booking.reservation.ReservationRepository;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.reservation.ReservationRepository;
 import roomescape.util.TestFactory;
 
 import java.util.List;

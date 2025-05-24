@@ -2,9 +2,9 @@ package roomescape.theme;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.booking.reservation.ReservationRepository;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 

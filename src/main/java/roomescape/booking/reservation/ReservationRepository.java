@@ -1,4 +1,4 @@
-package roomescape.reservation.reservation;
+package roomescape.booking.reservation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.member.Member;

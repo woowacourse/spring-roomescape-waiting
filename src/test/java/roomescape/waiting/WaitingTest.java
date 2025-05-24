@@ -2,9 +2,9 @@ package roomescape.waiting;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import roomescape.booking.waiting.Waiting;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
-import roomescape.reservation.waiting.Waiting;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
