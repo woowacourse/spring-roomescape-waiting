@@ -101,6 +101,31 @@ class AdminWaitingControllerTest {
                 .statusCode(201);
     }
 
+    @DisplayName("예약대기를 거절한다.")
+    @Test
+    void denyWaiting() {
+        int timeId = addReservationTime("10:00");
+        int themeId = addTheme();
+        String tokenValue = getAdminLoginTokenValue();
+        Map<String, Object> params = Map.of(
+                "date", getTomorrow(),
+                "timeId", timeId,
+                "themeId", themeId
+        );
+        int waitingId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .cookie("token", tokenValue)
+                .body(params)
+                .when().post("reservations/waiting")
+                .then().extract().path("id");
+
+        RestAssured.given().log().all()
+                .cookie("token", tokenValue)
+                .when().delete("/admin/reservations/waiting/deny/" + waitingId)
+                .then().log().all()
+                .statusCode(204);
+    }
+
     private String getAdminLoginTokenValue() {
         Map<String, String> adminLoginParams = Map.of("email", "admin@woowa.com", "password", "12341234");
         return RestAssured.given()
