@@ -37,14 +37,6 @@ public class Member {
         this(null, name, role, email, password);
     }
 
-    public Member(final Long id) {
-        this.id = id;
-        this.name = null;
-        this.role = null;
-        this.email = null;
-        this.password = null;
-    }
-
     protected Member() {
     }
 

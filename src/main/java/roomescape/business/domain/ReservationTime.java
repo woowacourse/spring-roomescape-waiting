@@ -27,11 +27,6 @@ public class ReservationTime {
         this(null, startAt);
     }
 
-    public ReservationTime(final Long id) {
-        this.id = id;
-        this.startAt = null;
-    }
-
     protected ReservationTime() {
     }
 

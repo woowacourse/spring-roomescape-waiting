@@ -37,13 +37,6 @@ public class Theme {
         this(null, name, description, thumbnail);
     }
 
-    public Theme(final Long id) {
-        this.id = id;
-        this.name = null;
-        this.description = null;
-        this.thumbnail = null;
-    }
-
     protected Theme() {
     }
 
