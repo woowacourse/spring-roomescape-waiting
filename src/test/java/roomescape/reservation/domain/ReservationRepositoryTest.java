@@ -6,7 +6,7 @@ import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservati
 import static roomescape.fixture.domain.ReservationTimeFixture.notSavedReservationTime2;
 import static roomescape.fixture.domain.ThemeFixture.notSavedTheme1;
 import static roomescape.fixture.domain.ThemeFixture.notSavedTheme2;
-import static roomescape.reservation.domain.ReservationStatus.CONFIRMED;
+import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -59,23 +59,23 @@ class ReservationRepositoryTest {
 
         // member1, theme1, yesterday~tomorrow 예약
         final Reservation reservation1 = reservationRepository.save(
-                new Reservation(yesterday, time1, theme1, member1, CONFIRMED));
+                new Reservation(yesterday, time1, theme1, member1, RESERVED));
         final Reservation reservation2 = reservationRepository.save(
-                new Reservation(today, time2, theme1, member1, CONFIRMED));
+                new Reservation(today, time2, theme1, member1, RESERVED));
         final Reservation reservation3 = reservationRepository.save(
-                new Reservation(tomorrow, time1, theme1, member1, CONFIRMED));
+                new Reservation(tomorrow, time1, theme1, member1, RESERVED));
 
         // member1, theme1, 날짜 범위 밖(dayAfterTomorrow) 예약
         reservationRepository.save(
-                new Reservation(dayAfterTomorrow, time1, theme1, member1, CONFIRMED));
+                new Reservation(dayAfterTomorrow, time1, theme1, member1, RESERVED));
 
         // member2, theme1 예약
         reservationRepository.save(
-                new Reservation(today, time1, theme1, member2, CONFIRMED));
+                new Reservation(today, time1, theme1, member2, RESERVED));
 
         // member1, theme2 예약
         reservationRepository.save(
-                new Reservation(today, time1, theme2, member1, CONFIRMED));
+                new Reservation(today, time1, theme2, member1, RESERVED));
 
         // when
         final List<Reservation> founds = reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(

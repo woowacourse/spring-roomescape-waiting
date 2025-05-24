@@ -55,7 +55,7 @@ class AdminReservationRestControllerTest {
     @Test
     void 예약을_추가한다() {
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final Map<String, String> reservationParams = ReservedReservationParams();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -68,7 +68,7 @@ class AdminReservationRestControllerTest {
 
     @Test
     void 관리자_권한이_아니면_예약을_추가할_수_없다() {
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final Map<String, String> reservationParams = ReservedReservationParams();
 
         // public 권한
         RestAssured.given().log().all()
@@ -97,7 +97,7 @@ class AdminReservationRestControllerTest {
         final Map<String, String> memberCookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final Map<String, String> reservationParams = ReservedReservationParams();
 
         // member 예약 추가
         final Integer reservationId = RestAssured.given().log().all()
@@ -120,7 +120,7 @@ class AdminReservationRestControllerTest {
 
     @Test
     void 관리자_권한이_아니면_예약을_삭제_할_수_없다() {
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final Map<String, String> reservationParams = ReservedReservationParams();
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
 
         RestAssured.given().log().all()
@@ -158,7 +158,7 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .body(confirmedReservationParams())
+                .body(ReservedReservationParams())
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -166,7 +166,7 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .body(confirmedReservationParams2())
+                .body(reservedReservationParams2())
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -196,7 +196,7 @@ class AdminReservationRestControllerTest {
         assertThat(responses).hasSize(ReservationStatus.values().length);
     }
 
-    private Map<String, String> confirmedReservationParams() {
+    private Map<String, String> ReservedReservationParams() {
         final String memberId = createMemberResponses.get(0).extract().body()
                 .as(Map.class)
                 .get("id").toString();
@@ -206,12 +206,12 @@ class AdminReservationRestControllerTest {
         final String themeId = createThemeResponses.get(0).extract().body()
                 .as(Map.class)
                 .get("id").toString();
-        final String status = ReservationStatus.CONFIRMED.name();
+        final String status = ReservationStatus.RESERVED.name();
 
         return createReservationParams(memberId, date, timeId, themeId, status);
     }
 
-    private Map<String, String> confirmedReservationParams2() {
+    private Map<String, String> reservedReservationParams2() {
         final String memberId = createMemberResponses.get(0).extract().body()
                 .as(Map.class)
                 .get("id").toString();
@@ -221,7 +221,7 @@ class AdminReservationRestControllerTest {
         final String themeId = createThemeResponses.get(1).extract().body()
                 .as(Map.class)
                 .get("id").toString();
-        final String status = ReservationStatus.CONFIRMED.name();
+        final String status = ReservationStatus.RESERVED.name();
 
         return createReservationParams(memberId, date, timeId, themeId, status);
     }
