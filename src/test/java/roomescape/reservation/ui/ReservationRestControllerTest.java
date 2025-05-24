@@ -115,7 +115,6 @@ class ReservationRestControllerTest {
         // then
         assertAll(
                 () -> assertThat(response.date()).isEqualTo(reservationParams2.get("date")),
-                () -> assertThat(response.status()).isEqualTo(BookingStatus.WAITING.getDescription()),
                 () -> assertThat(response.rank()).isEqualTo(2L)
         );
 
@@ -222,10 +221,7 @@ class ReservationRestControllerTest {
                 () -> assertThat(responses).extracting(MemberReservationResponse::id)
                         .containsExactlyInAnyOrder(1L, 2L),
                 () -> assertThat(responses).extracting(response -> response.date().toString())
-                        .containsExactlyInAnyOrder(reservationParams1.get("date"), reservationParams2().get("date")),
-                () -> assertThat(responses).extracting(MemberReservationResponse::status)
-                        .containsExactlyInAnyOrder(BookingStatus.CONFIRMED.getDescription(),
-                                BookingStatus.CONFIRMED.getDescription())
+                        .containsExactlyInAnyOrder(reservationParams1.get("date"), reservationParams2().get("date"))
         );
     }
 

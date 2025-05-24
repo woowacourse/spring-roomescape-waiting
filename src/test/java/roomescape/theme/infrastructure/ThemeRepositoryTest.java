@@ -24,10 +24,11 @@ import roomescape.fixture.config.TestConfig;
 import roomescape.fixture.domain.ReservationTimeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.ReservationSlotRepository;
 import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 
@@ -41,6 +42,9 @@ class ThemeRepositoryTest {
 
     @Autowired
     ReservationRepository reservationRepository;
+
+    @Autowired
+    ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
@@ -93,20 +97,21 @@ class ThemeRepositoryTest {
         final LocalDate date1 = LocalDate.now().plusDays(1);
         final LocalDate date2 = LocalDate.now().plusDays(5);
 
-        reservationRepository.save(
-                Reservation.createForRegister(date1, time1, theme1, member, BookingStatus.WAITING));
-        reservationRepository.save(
-                Reservation.createForRegister(date1, time2, theme2, member, BookingStatus.WAITING));
-        reservationRepository.save(
-                Reservation.createForRegister(date1, time3, theme1, member, BookingStatus.WAITING));
-        reservationRepository.save(
-                Reservation.createForRegister(date2, time1, theme2, member, BookingStatus.WAITING));
-        reservationRepository.save(
-                Reservation.createForRegister(date2, time2, theme1, member, BookingStatus.WAITING));
-        reservationRepository.save(
-                Reservation.createForRegister(date2, time2, theme2, member, BookingStatus.WAITING));
-        reservationRepository.save(
-                Reservation.createForRegister(date2, time3, theme2, member, BookingStatus.WAITING));
+        ReservationSlot reservationSlot1 = reservationSlotRepository.save(new ReservationSlot(date1, time1, theme1));
+        ReservationSlot reservationSlot2 = reservationSlotRepository.save(new ReservationSlot(date1, time2, theme2));
+        ReservationSlot reservationSlot3 = reservationSlotRepository.save(new ReservationSlot(date1, time3, theme1));
+        ReservationSlot reservationSlot4 = reservationSlotRepository.save(new ReservationSlot(date2, time1, theme2));
+        ReservationSlot reservationSlot5 = reservationSlotRepository.save(new ReservationSlot(date2, time2, theme1));
+        ReservationSlot reservationSlot6 = reservationSlotRepository.save(new ReservationSlot(date2, time2, theme2));
+        ReservationSlot reservationSlot7 = reservationSlotRepository.save(new ReservationSlot(date2, time3, theme2));
+
+        reservationRepository.save(new Reservation(member, reservationSlot1));
+        reservationRepository.save(new Reservation(member, reservationSlot2));
+        reservationRepository.save(new Reservation(member, reservationSlot3));
+        reservationRepository.save(new Reservation(member, reservationSlot4));
+        reservationRepository.save(new Reservation(member, reservationSlot5));
+        reservationRepository.save(new Reservation(member, reservationSlot6));
+        reservationRepository.save(new Reservation(member, reservationSlot7));
 
         // when
         final List<Theme> actual = themeRepository.getTopNThemesInPeriod(from, to, topN);

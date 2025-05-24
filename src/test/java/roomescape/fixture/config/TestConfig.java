@@ -3,10 +3,12 @@ package roomescape.fixture.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import roomescape.member.application.MemberService;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.ReservationSlotRepository;
 import roomescape.reservation.infrastructure.ReservationTimeRepository;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.infrastructure.ThemeRepository;
@@ -28,9 +30,15 @@ public class TestConfig {
     @Bean
     public ReservationService reservationService(final ReservationRepository reservationRepository,
                                                  final ReservationTimeRepository reservationTimeRepository,
+                                                 final ReservationSlotRepository reservationSlotRepository,
                                                  final ThemeRepository themeRepository,
                                                  final MemberRepository memberRepository) {
-        return new ReservationService(reservationRepository, reservationTimeRepository,
+        return new ReservationService(reservationRepository, reservationSlotRepository, reservationTimeRepository,
                 themeRepository, memberRepository);
+    }
+
+    @Bean
+    public MemberService memberService(final MemberRepository memberRepository) {
+        return new MemberService(memberRepository);
     }
 }
