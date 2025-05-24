@@ -115,14 +115,11 @@ public class Reservation {
         if (id == null && that.id == null) {
             return false;
         }
-        return Objects.equals(date, that.date) &&
-                Objects.equals(time, that.time) &&
-                Objects.equals(theme, that.theme) &&
-                Objects.equals(reservationStatus, that.reservationStatus);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date, time, theme, reservationStatus);
+        return Objects.hash(id);
     }
 }
