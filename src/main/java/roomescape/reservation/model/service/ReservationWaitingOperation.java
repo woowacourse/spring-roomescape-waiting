@@ -1,6 +1,5 @@
 package roomescape.reservation.model.service;
 
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.member.model.Member;
@@ -12,6 +11,7 @@ import roomescape.reservation.model.entity.ReservationWaiting;
 import roomescape.reservation.model.repository.ReservationThemeRepository;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
 import roomescape.reservation.model.repository.ReservationWaitingRepository;
+import roomescape.reservation.model.vo.Schedule;
 
 @Component
 @RequiredArgsConstructor
@@ -24,26 +24,21 @@ public class ReservationWaitingOperation {
     private final ReservationValidator reservationValidator;
     private final ReservationWaitingValidator reservationWaitingValidator;
 
-    public void waiting(LocalDate date, Long timeId, Long themeId, Long memberId) {
-        ReservationWaitingDetails reservationWaitingDetails = createReservationWaitingDetails(date, timeId, themeId,
+    public void waiting(Schedule schedule, Long memberId) {
+        ReservationWaitingDetails reservationWaitingDetails = createReservationWaitingDetails(schedule,
                 memberId);
-        reservationValidator.validateExistence(date, timeId, themeId);
-        reservationWaitingValidator.validateAlreadyWaiting(date, timeId, themeId, memberId);
+        reservationValidator.validateExistenceBySchedule(schedule);
+        reservationWaitingValidator.validateAlreadyWaiting(schedule, memberId);
         ReservationWaiting reservationWaiting = ReservationWaiting.createFuture(reservationWaitingDetails);
         reservationWaitingRepository.save(reservationWaiting);
     }
 
-    private ReservationWaitingDetails createReservationWaitingDetails(
-            LocalDate date,
-            Long timeId,
-            Long themeId,
-            Long memberId
-    ) {
-        ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
-        ReservationTheme reservationTheme = reservationThemeRepository.getById(themeId);
+    private ReservationWaitingDetails createReservationWaitingDetails(Schedule schedule, Long memberId) {
+        ReservationTime reservationTime = reservationTimeRepository.getById(schedule.timeId());
+        ReservationTheme reservationTheme = reservationThemeRepository.getById(schedule.themeId());
         Member member = memberRepository.getById(memberId);
         return ReservationWaitingDetails.builder()
-                .date(date)
+                .date(schedule.date())
                 .reservationTime(reservationTime)
                 .reservationTheme(reservationTheme)
                 .member(member)

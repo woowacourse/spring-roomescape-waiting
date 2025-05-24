@@ -19,10 +19,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.global.exception.AuthorizationException;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationDetails;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 import roomescape.reservation.model.entity.vo.ReservationStatus;
+import roomescape.reservation.model.vo.Schedule;
 
 @Getter
 @Entity
@@ -84,17 +86,27 @@ public class Reservation {
                 .build();
     }
 
-    public boolean hasNotEqualsMemberId(Long memberId) {
-        return !Objects.equals(member.getId(), memberId);
-    }
-
     public void changeToCancel() {
         this.status = CANCELED;
+    }
+
+    public Schedule getSchedule() {
+        return Schedule.builder()
+                .date(date)
+                .timeId(time.getId())
+                .themeId(theme.getId())
+                .build();
     }
 
     private static void validateFutureTime(LocalDateTime requestedDateTime) {
         if (requestedDateTime.isBefore(LocalDateTime.now())) {
             throw new InvalidReservationTimeException("예약시간이 과거시간이 될 수 없습니다. 미래시간으로 입력해주세요.");
+        }
+    }
+
+    public void checkOwner(Long memberId) {
+        if (!Objects.equals(member.getId(), memberId)) {
+            throw new AuthorizationException("해당 예약을 취소할 권한이 없습니다.");
         }
     }
 

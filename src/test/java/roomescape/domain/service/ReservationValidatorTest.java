@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.model.exception.ReservationException.InvalidReservationTimeException;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.service.ReservationValidator;
+import roomescape.reservation.model.vo.Schedule;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationValidatorTest {
@@ -30,12 +31,12 @@ class ReservationValidatorTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
         Long themeId = 1L;
-
-        given(reservationRepository.existDuplicatedDateTime(date, timeId, themeId)).willReturn(true);
+        Schedule schedule = new Schedule(date, timeId, themeId);
+        given(reservationRepository.existDuplicatedSchedule(schedule)).willReturn(true);
 
         // when & then
         assertThrows(InvalidReservationTimeException.class, () ->
-                reservationValidator.validateNoDuplication(date, timeId, themeId)
+                reservationValidator.validateNoDuplication(schedule)
         );
     }
 }

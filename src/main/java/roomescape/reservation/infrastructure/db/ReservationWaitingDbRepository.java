@@ -2,7 +2,6 @@ package roomescape.reservation.infrastructure.db;
 
 import static roomescape.reservation.model.entity.vo.ReservationWaitingStatus.PENDING;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +11,7 @@ import roomescape.reservation.infrastructure.db.dao.ReservationWaitingJpaReposit
 import roomescape.reservation.model.entity.ReservationWaiting;
 import roomescape.reservation.model.repository.ReservationWaitingRepository;
 import roomescape.reservation.model.repository.dto.ReservationWaitingWithRank;
+import roomescape.reservation.model.vo.Schedule;
 
 @Repository
 @RequiredArgsConstructor
@@ -35,8 +35,13 @@ public class ReservationWaitingDbRepository implements ReservationWaitingReposit
     }
 
     @Override
-    public Optional<ReservationWaiting> findFirstPendingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return reservationWaitingJpaRepository.findFirstByDateAndTimeIdAndThemeIdAndStatusOrderByCreatedAtAsc(date, timeId, themeId, PENDING);
+    public Optional<ReservationWaiting> findFirstPendingBySchedule(Schedule schedule) {
+        return reservationWaitingJpaRepository.findFirstByDateAndTimeIdAndThemeIdAndStatusOrderByCreatedAtAsc(
+                schedule.date(),
+                schedule.timeId(),
+                schedule.themeId(),
+                PENDING
+        );
     }
 
     @Override
@@ -45,14 +50,12 @@ public class ReservationWaitingDbRepository implements ReservationWaitingReposit
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId,
-            Long memberId) {
-        return reservationWaitingJpaRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, themeId, themeId,
-                memberId);
-    }
-
-    @Override
-    public void remove(ReservationWaiting reservationWaiting) {
-        reservationWaitingJpaRepository.delete(reservationWaiting);
+    public boolean existsByScheduleAndMemberId(Schedule schedule, Long memberId) {
+        return reservationWaitingJpaRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+                schedule.date(),
+                schedule.timeId(),
+                schedule.themeId(),
+                memberId
+        );
     }
 }

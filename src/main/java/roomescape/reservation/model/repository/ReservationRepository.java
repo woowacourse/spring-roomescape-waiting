@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.vo.ReservationStatus;
+import roomescape.reservation.model.vo.Schedule;
 
 public interface ReservationRepository {
 
@@ -16,9 +17,7 @@ public interface ReservationRepository {
 
     Reservation getById(Long id);
 
-    void remove(Reservation reservation);
-
-    boolean existDuplicatedDateTime(LocalDate date, Long timeId, Long themeId);
+    boolean existDuplicatedSchedule(Schedule schedule);
 
     boolean existsByThemeId(Long reservationThemeId);
 

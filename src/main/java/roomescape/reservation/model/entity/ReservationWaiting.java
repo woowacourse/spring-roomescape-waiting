@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import roomescape.global.exception.AuthorizationException;
 import roomescape.member.model.Member;
 import roomescape.reservation.model.dto.ReservationWaitingDetails;
 import roomescape.reservation.model.entity.vo.ReservationWaitingStatus;
@@ -87,8 +88,10 @@ public class ReservationWaiting {
         this.status = CANCELED;
     }
 
-    public boolean hasNotEqualsMemberId(Long memberId) {
-        return !Objects.equals(member.getId(), memberId);
+    public void checkOwner(Long memberId) {
+        if (!Objects.equals(member.getId(), memberId)) {
+            throw new AuthorizationException("해당 웨이팅을 취소할 권한이 없습니다.");
+        }
     }
 
     private static void validateFutureTime(LocalDateTime requestedDateTime) {

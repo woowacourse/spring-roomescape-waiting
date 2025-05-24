@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.exception.AuthorizationException;
 import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
 import roomescape.reservation.application.dto.response.UserReservationServiceResponse;
@@ -28,8 +27,7 @@ public class UserReservationService {
 
     @Transactional
     public ReservationServiceResponse create(CreateReservationServiceRequest request) {
-        Reservation savedReservation = reservationOperation.reserve(request.date(), request.timeId(),
-                request.themeId(), request.memberId());
+        Reservation savedReservation = reservationOperation.reserve(request.toSchedule(), request.memberId());
         return ReservationServiceResponse.from(savedReservation);
     }
 
@@ -49,9 +47,7 @@ public class UserReservationService {
     @Transactional
     public void cancel(Long id, Long memberId) {
         Reservation reservation = reservationRepository.getById(id);
-        if (reservation.hasNotEqualsMemberId(memberId)) {
-            throw new AuthorizationException("해당 예약을 취소할 권한이 없습니다.");
-        }
+        reservation.checkOwner(memberId);
         reservationOperation.cancel(reservation);
     }
 

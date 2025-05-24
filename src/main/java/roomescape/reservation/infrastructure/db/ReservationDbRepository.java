@@ -11,6 +11,7 @@ import roomescape.reservation.infrastructure.db.dao.ReservationJpaRepository;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.vo.ReservationStatus;
 import roomescape.reservation.model.repository.ReservationRepository;
+import roomescape.reservation.model.vo.Schedule;
 
 @Repository
 @RequiredArgsConstructor
@@ -40,13 +41,8 @@ public class ReservationDbRepository implements ReservationRepository {
     }
 
     @Override
-    public void remove(Reservation reservation) {
-        reservationJpaRepository.delete(reservation);
-    }
-
-    @Override
-    public boolean existDuplicatedDateTime(LocalDate date, Long timeId, Long themeId) {
-        return reservationJpaRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public boolean existDuplicatedSchedule(Schedule schedule) {
+        return reservationJpaRepository.existsByDateAndTimeIdAndThemeId(schedule.date(), schedule.timeId(), schedule.themeId());
     }
 
     @Override

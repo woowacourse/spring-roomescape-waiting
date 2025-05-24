@@ -1,10 +1,7 @@
 package roomescape.reservation.application.dto.request;
 
 import java.time.LocalDate;
-import roomescape.member.model.Member;
-import roomescape.reservation.model.dto.ReservationWaitingDetails;
-import roomescape.reservation.model.entity.ReservationTheme;
-import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.vo.Schedule;
 
 public record CreateReservationWaitingServiceRequest(
         Long memberId,
@@ -13,16 +10,11 @@ public record CreateReservationWaitingServiceRequest(
         Long themeId
 ) {
 
-    public ReservationWaitingDetails toReservationWaitingDetails(
-            ReservationTime reservationTime,
-            ReservationTheme reservationTheme,
-            Member member
-    ) {
-        return ReservationWaitingDetails.builder()
+    public Schedule toSchedule() {
+        return Schedule.builder()
                 .date(date)
-                .reservationTime(reservationTime)
-                .reservationTheme(reservationTheme)
-                .member(member)
+                .timeId(timeId)
+                .themeId(themeId)
                 .build();
     }
 }
