@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.AlreadyInUseException;
@@ -88,6 +89,7 @@ public class ReservationService {
         return responses;
     }
 
+    @Transactional
     public ReservationResponse create(final ReservationCreateRequest request) {
         if (isAlreadyBooked(request)) {
             throw new AlreadyInUseException("reservation is already in use");
@@ -148,6 +150,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void delete(final Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new EntityNotFoundException("존재하지 않는 예약입니다.");

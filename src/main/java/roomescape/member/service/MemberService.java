@@ -3,6 +3,7 @@ package roomescape.member.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.validation.Valid;
 import roomescape.common.exception.EntityNotFoundException;
@@ -35,6 +36,7 @@ public class MemberService {
                 .toList();
     }
 
+    @Transactional
     public void create(final @Valid MemberCreateRequest request) {
         final Member member = new Member(
                 request.name(),

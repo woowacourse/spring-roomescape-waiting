@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
@@ -34,6 +35,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new AlreadyInUseException("Reservation time already exists");
@@ -45,6 +47,7 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
+    @Transactional
     public void delete(final Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new AlreadyInUseException("Reservation is already in use");

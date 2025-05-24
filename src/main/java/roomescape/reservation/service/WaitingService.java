@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
@@ -47,6 +48,7 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public WaitingResponse createWaiting(final WaitingCreateRequest request) {
         if (hasAlreadyWaiting(request)) {
             throw new AlreadyInUseException("이미 예약 대기가 존재합니다.");
@@ -99,6 +101,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional
     public void deleteWaiting(final Long id) {
         if (!waitingRepository.existsById(id)) {
             throw new EntityNotFoundException("존재하지 않는 예약 대기입니다.");
