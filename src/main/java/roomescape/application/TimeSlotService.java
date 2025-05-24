@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Reservations;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotBookStatus;
 import roomescape.domain.timeslot.TimeSlotRepository;
@@ -42,9 +41,7 @@ public class TimeSlotService {
 
     public List<TimeSlotBookStatus> findAvailableTimeSlots(final LocalDate date, final long themeId) {
         var byDateAndTheme = Specification.allOf(byDate(date), byThemeId(themeId));
-        var foundReservations = reservationRepository.findAll(byDateAndTheme);
-        var reservations = new Reservations(foundReservations);
-
+        var reservations = reservationRepository.findAllWithWrapping(byDateAndTheme);
         var timeSlots = timeSlotRepository.findAll();
         return reservations.checkBookStatuses(timeSlots);
     }

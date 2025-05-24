@@ -8,7 +8,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Reservations;
 import roomescape.domain.theme.Description;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
@@ -41,8 +40,7 @@ public class ThemeService {
     }
 
     public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int maxCount) {
-        var foundReservations = reservationRepository.findAll(byDateBetween(startDate, endDate));
-        var reservations = new Reservations(foundReservations);
+        var reservations = reservationRepository.findAllWithWrapping(byDateBetween(startDate, endDate));
         return reservations.findPopularThemes(maxCount);
     }
 }

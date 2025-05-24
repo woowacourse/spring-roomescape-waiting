@@ -41,18 +41,6 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("아이디에 해당하는 예약을 삭제하고 삭제된 예약 수를 반환한다.")
-    void deleteByIdAndCount() {
-        var id = savedReservation.id();
-        var deletedCount = reservationRepository.deleteByIdAndCount(id);
-
-        assertAll(
-            () -> assertThat(reservationRepository.findById(id)).isEmpty(),
-            () -> assertThat(deletedCount).isEqualTo(1)
-        );
-    }
-
-    @Test
     @DisplayName("아이디에 해당하는 예약을 삭제한다.")
     void deleteByIdWhenFound() {
         var id = savedReservation.id();
