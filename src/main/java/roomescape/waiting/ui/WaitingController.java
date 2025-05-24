@@ -57,4 +57,10 @@ public class WaitingController {
         List<WaitingInfoResponse> allWaitingInfos = waitingService.getAllWaitingInfos();
         return new ResponseEntity<>(allWaitingInfos, HttpStatus.OK);
     }
+
+    @DeleteMapping("/admin/waitings/{waitingId}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("waitingId") Long id) {
+        waitingService.cancelFromAdmin(id);
+        return ResponseEntity.noContent().build();
+    }
 }

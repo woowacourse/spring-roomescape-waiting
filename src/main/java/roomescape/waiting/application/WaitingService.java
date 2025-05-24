@@ -95,6 +95,12 @@ public class WaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
+    @Transactional
+    public void cancelFromAdmin(Long waitingId) {
+        getWaiting(waitingId);
+        waitingRepository.deleteById(waitingId);
+    }
+
     public List<WaitingInfoResponse> getAllWaitingInfos() {
         List<Waiting> waitings = waitingRepository.findAll();
         return waitings.stream()
