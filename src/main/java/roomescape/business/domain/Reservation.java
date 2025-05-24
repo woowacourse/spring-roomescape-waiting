@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 
@@ -19,22 +20,19 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne
+    @JoinColumn(name = "reservation_time_id")
     private ReservationTime reservationTime;
 
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
+    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         validateDate(date);
 
-        this.id = id;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
-    }
-
-    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
-        this(null, date, reservationTime, theme);
     }
 
     protected Reservation() {

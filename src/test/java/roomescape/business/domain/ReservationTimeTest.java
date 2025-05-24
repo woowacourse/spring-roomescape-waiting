@@ -19,7 +19,7 @@ class ReservationTimeTest {
         assertAll(
                 () -> assertThatThrownBy(() -> new ReservationTime(invalidStartAt))
                         .isInstanceOf(IllegalArgumentException.class),
-                () -> assertThatThrownBy(() -> new ReservationTime(1L, invalidStartAt))
+                () -> assertThatThrownBy(() -> new ReservationTime(invalidStartAt))
                         .isInstanceOf(IllegalArgumentException.class)
         );
     }
