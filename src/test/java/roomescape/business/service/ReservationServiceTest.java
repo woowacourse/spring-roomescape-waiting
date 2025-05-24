@@ -26,6 +26,7 @@ import roomescape.persistence.repository.ThemeRepository;
 import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.presentation.dto.WaitInfoResponse;
 
 @DataJpaTest
 public class ReservationServiceTest {
@@ -152,31 +153,7 @@ public class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약하려는 방탈출 예약과 동일한 날짜, 시간, 테마가 이미 존재한다면 예외가 발생한다")
-    void insertWhenDuplicateDateAndTimeAndTheme() {
-        // given
-        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
-        memberRepository.save(member);
-
-        final Theme theme = new Theme("테마", "설명", "썸네일");
-        themeRepository.save(theme);
-
-        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
-        reservationTimeRepository.save(time);
-
-        reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId());
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.insert(
-                member.getId(),
-                theme.getId(),
-                MAX_DATE_FIXTURE,
-                time.getId())
-        ).isInstanceOf(DuplicateException.class);
-    }
-
-    @Test
-    @DisplayName("예약 시간이 현재를 기준으로 과거라면 예외가 발생한다")
+    @DisplayName("예약 대상 시간이 현재를 기준으로 과거라면 예외가 발생한다")
     void insertWhenDateAndTimeIsPast() {
         // given
         final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
@@ -193,6 +170,169 @@ public class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.insert(member.getId(), theme.getId(), pastDate, time.getId()))
                 .isInstanceOf(InvalidDateAndTimeException.class);
+    }
+
+    @Test
+    @DisplayName("방탈출이 이미 예약되어 있다면 예외가 발생한다")
+    void insertWhenAlreadyReserved() {
+        // given
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+        final Member member2 = new Member("브라운", "USER", "braun@test.com", "pass");
+        memberRepository.save(member2);
+
+        final Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+
+        reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.insert(
+                member2.getId(),
+                theme.getId(),
+                MAX_DATE_FIXTURE,
+                time.getId())
+        ).isInstanceOf(DuplicateException.class);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 추가한다")
+    void insertWait() {
+        // given
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+        final Member member2 = new Member("브라운", "USER", "braun@test.com", "pass");
+        memberRepository.save(member2);
+
+        final Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+
+        reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId());
+
+        // when
+        final WaitInfoResponse waitInfoResponse =
+                reservationService.insertWait(member2.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(waitInfoResponse.id()).isNotNull(),
+                () -> assertThat(waitInfoResponse.memberId()).isEqualTo(member2.getId()),
+                () -> assertThat(waitInfoResponse.memberName()).isEqualTo("브라운"),
+                () -> assertThat(waitInfoResponse.rank()).isEqualTo(2)
+        );
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자로 예약 대기하면 예외가 발생한다")
+    void insertWaitWhenNotExistMember() {
+        // given
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+        final Long notExistMemberId = 999L;
+
+        final Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+
+        reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId());
+
+        // when & then
+        assertThatThrownBy(
+                () -> reservationService.insertWait(notExistMemberId, theme.getId(), MAX_DATE_FIXTURE, time.getId())
+        ).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 방탈출 예약 시간으로 예약 대기하면 예외가 발생한다")
+    void insertWaitWhenNotExistReservationTime() {
+        // given
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+        final Member member2 = new Member("브라운", "USER", "braun@test.com", "pass");
+        memberRepository.save(member2);
+
+        final Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+        final Long notExistTimeId = 999L;
+
+        reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId());
+
+        // when & then
+        assertThatThrownBy(
+                () -> reservationService.insertWait(member2.getId(), notExistTimeId, MAX_DATE_FIXTURE, time.getId())
+        ).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("예약 대기 대상 시간이 현재를 기준으로 과거라면 예외가 발생한다")
+    void insertWaitWhenNotExistTheme() {
+        // given
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+
+        final Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        final LocalDate pastDate = LocalDate.MIN;
+
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+
+        // when & then
+        assertThatThrownBy(
+                () -> reservationService.insertWait(member.getId(), theme.getId(), pastDate, theme.getId())
+        ).isInstanceOf(InvalidDateAndTimeException.class);
+    }
+
+    @Test
+    @DisplayName("예약이 없을 때 예약 대기를 시도하면 예외가 발생한다")
+    void insertWaitWhenWaitEmpty() {
+        // given
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+
+        final Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+
+        // when & then
+        assertThatThrownBy(
+                () -> reservationService.insertWait(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId())
+        ).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("같은 멤버가 같은 예약 대기를 시도하면 예외가 발생한다")
+    void insertWaitWhenAlreadyWaiting() {
+        // given
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+
+        final Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+
+        reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId());
+
+        // when & then
+        assertThatThrownBy(
+                () -> reservationService.insertWait(member.getId(), theme.getId(), MAX_DATE_FIXTURE, time.getId())
+        ).isInstanceOf(DuplicateException.class);
     }
 
     @Test
@@ -295,7 +435,6 @@ public class ReservationServiceTest {
         reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE.minusDays(1), time.getId());
         reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE.minusDays(2), time.getId());
         reservationService.insert(member.getId(), theme.getId(), MAX_DATE_FIXTURE.minusDays(3), time.getId());
-
 
         // when
         final List<ReservationResponse> reservationResponses = reservationService.findAllFilter(

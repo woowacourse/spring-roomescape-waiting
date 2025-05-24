@@ -38,4 +38,6 @@ public interface WaitInfoRepository extends JpaRepository<WaitInfo, Long> {
     List<WaitInfo> findByRankNot(Long rank);
 
     List<WaitInfo> findByRank(Long rank);
+
+    Long countByReservationId(Long reservationId);
 }

@@ -58,10 +58,11 @@ public class ReservationsController {
             @RequestBody final ReservationRequest reservationRequest
     ) {
         final WaitInfoResponse waitInfoResponse = reservationService.insertWait(
-                reservationRequest.date(),
                 loginMember.id(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId());
+                reservationRequest.themeId(),
+                reservationRequest.date(),
+                reservationRequest.timeId()
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(waitInfoResponse);

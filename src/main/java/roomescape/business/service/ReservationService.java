@@ -65,11 +65,8 @@ public class ReservationService {
             final Reservation reservation = new Reservation(date, reservationTime, theme);
             reservationRepository.save(reservation);
         }
-        final Reservation reservation = reservationRepository.findByDateAndReservationTimeIdAndThemeId(
-                date,
-                timeId,
-                themeId
-        ).get();
+        final Reservation reservation =
+                reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).get();
 
         validateWaitInfoEmpty(reservation.getId());
         final WaitInfo waitInfo = new WaitInfo(member, reservation, 1L);
@@ -84,30 +81,40 @@ public class ReservationService {
         );
     }
 
-    // TODO: 테스트 추가
     public WaitInfoResponse insertWait(
-            final LocalDate date,
             final Long memberId,
-            final Long timeId,
-            final Long themeId
+            final Long themeId,
+            final LocalDate date,
+            final Long timeId
     ) {
         validateMemberIdExists(memberId);
         final Member member = memberRepository.findById(memberId).get();
         validateTimeIdExists(timeId);
         final ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
         validateThemeIdExists(themeId);
+        final Theme theme = themeRepository.findById(themeId).get();
 
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
 
-        validateReservationExists(date, timeId, themeId);
-        final Reservation reservation = reservationRepository.findByDateAndReservationTimeIdAndThemeId(
-                date, timeId, themeId).get();
+        if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
+            final Reservation reservation = new Reservation(date, reservationTime, theme);
+            reservationRepository.save(reservation);
+        }
+        final Reservation reservation =
+                reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).get();
+
         validateWaitInfoExists(reservation.getId());
         validateWaitInfoIsNotDuplicate(memberId, reservation.getId());
 
-        final WaitInfo waitInfo = new WaitInfo(member, reservation);
+        final Long rank = waitInfoRepository.countByReservationId(reservation.getId()) + 1;
+        final WaitInfo waitInfo = new WaitInfo(member, reservation, rank);
         waitInfoRepository.save(waitInfo);
-        return WaitInfoResponse.from(waitInfo);
+        return new WaitInfoResponse(
+                waitInfo.getId(),
+                waitInfo.getMember().getId(),
+                waitInfo.getMember().getName(),
+                rank
+        );
     }
 
     private void validateMemberIdExists(final Long memberId) {
@@ -128,12 +135,6 @@ public class ReservationService {
         }
     }
 
-    private void validateIsDuplicate(final LocalDate date, final Long playTimeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, playTimeId, themeId)) {
-            throw new DuplicateException("추가 하려는 예약과 같은 날짜, 시간, 테마의 예약이 이미 존재합니다.");
-        }
-    }
-
     private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
         final LocalDateTime now = LocalDateTime.now();
 
@@ -143,27 +144,18 @@ public class ReservationService {
         }
     }
 
-    // TODO: 테스트 추가
-    private void validateReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
-        if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(themeId));
-        }
-    }
-
     private void validateWaitInfoEmpty(Long reservationId) {
         if (waitInfoRepository.existsByReservationId(reservationId)) {
             throw new DuplicateException("예약이 이미 존재합니다. 예약대기를 사용해주세요.");
         }
     }
 
-    // TODO: 테스트 추가
     private void validateWaitInfoExists(Long reservationId) {
         if (!waitInfoRepository.existsByReservationId(reservationId)) {
             throw new NotFoundException("예약 대기자가 없습니다. 예약하기를 사용해주세요.");
         }
     }
 
-    // TODO: 테스트 추가
     private void validateWaitInfoIsNotDuplicate(final Long memberId, final Long reservationId) {
         if (waitInfoRepository.existsByMemberIdAndReservationId(memberId, reservationId)) {
             throw new DuplicateException("추가하려는 예약 대기가 이미 존재합니다. memberId: %d, reservationId: %d"
