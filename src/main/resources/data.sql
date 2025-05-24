@@ -2,6 +2,9 @@
 INSERT INTO member (id, name, email, password, role)
 VALUES (1, '찰리', '찰리@kakao.com', '1234', 'ADMIN');
 
+INSERT INTO member (id, name, email, password, role)
+VALUES (2, '포비', '포비@kakao.com', '1234', 'ADMIN');
+
 -- 시간
 INSERT INTO reservation_time (id, start_at)
 VALUES (1, '10:00');
@@ -56,11 +59,11 @@ INSERT INTO reservation (id, reservation_date, reservation_time_id, theme_id, me
 VALUES (17, '2025-04-30', 2, 2, 1);
 
 INSERT INTO waiting (id, reservation_date, reservation_time_id, theme_id, member_id)
-VALUES (1, '2025-04-20', 2, 1, 1);
+VALUES (1, '2025-04-20', 2, 1, 2);
 INSERT INTO waiting (id, reservation_date, reservation_time_id, theme_id, member_id)
-VALUES (2, '2025-04-20', 2, 1, 1);
+VALUES (2, '2025-04-19', 3, 2, 2);
 INSERT INTO waiting (id, reservation_date, reservation_time_id, theme_id, member_id)
-VALUES (3, '2025-04-20', 2, 1, 1);
+VALUES (3, '2025-04-18', 1, 1, 2);
 
 ALTER TABLE reservation_time
     ALTER COLUMN id RESTART WITH 4;

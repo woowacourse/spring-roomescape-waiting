@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.common.Constant.예약날짜_내일;
 import static roomescape.member.role.Role.ADMIN;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -80,7 +79,7 @@ public class WaitingJpaRepositoryTest {
         Waiting save = waitingRepository.save(waiting1);
 
         // then
-        assertThat(save.getDate()).isEqualTo(LocalDate.of(2025, 5, 25));
+        assertThat(save.getDate()).isEqualTo(예약날짜_내일.getDate());
         assertThat(save.getStartAt()).isEqualTo(LocalTime.of(10, 0));
         assertThat(save.getTheme()).isEqualTo(theme);
         assertThat(save.getMember()).isEqualTo(member);

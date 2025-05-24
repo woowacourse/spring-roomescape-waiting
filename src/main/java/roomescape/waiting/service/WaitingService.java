@@ -1,5 +1,7 @@
 package roomescape.waiting.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
@@ -60,9 +62,20 @@ public class WaitingService {
     }
 
     public List<MemberReservationResponse> findAllWithRank() {
-        return waitingRepository.findAllWithRank().stream()
-                .map(MemberReservationResponse::fromWaitingWithRank)
-                .toList();
+        List<MemberReservationResponse> responses = new ArrayList<>(
+                waitingRepository.findAllWithRank().stream()
+                        .map(MemberReservationResponse::fromWaitingWithRank)
+                        .toList()
+        );
+
+        responses.sort(
+                Comparator
+                        .comparing(MemberReservationResponse::date)
+                        .thenComparing(r -> r.time().startAt())
+                        .thenComparing(r -> r.theme().name())
+        );
+
+        return responses;
     }
 
     public void deleteById(Long id) {

@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
@@ -61,15 +62,32 @@ public class ReservationService {
     public List<ReservationResponse> getAll() {
         List<Reservation> reservations = reservationRepository.findAll();
 
-        return ReservationResponse.fromReservation(reservations);
+        List<ReservationResponse> reservationResponses = new ArrayList<>(
+                ReservationResponse.fromReservation(reservations));
+
+        reservationResponses.sort(Comparator
+                .comparing(ReservationResponse::date)
+                .thenComparing(r -> r.time().startAt())
+                .thenComparing(r -> r.theme().name())
+        );
+
+        return reservationResponses;
     }
 
     public List<ReservationResponse> searchReservations(Long memberId, Long themeId, LocalDate start, LocalDate end) {
-        return ReservationResponse.fromReservation(
-                reservationRepository.findByFilter(
-                        memberId, themeId, start, end
+        List<ReservationResponse> responses = new ArrayList<>(
+                ReservationResponse.fromReservation(
+                        reservationRepository.findByFilter(memberId, themeId, start, end)
                 )
         );
+
+        responses.sort(Comparator
+                .comparing(ReservationResponse::date)
+                .thenComparing(r -> r.time().startAt())
+                .thenComparing(r -> r.theme().name())
+        );
+
+        return responses;
     }
 
     public List<MemberReservationResponse> findAllByMemberId(Long id) {
@@ -83,6 +101,11 @@ public class ReservationService {
         List<MemberReservationResponse> allWaitings = waitingService.findAllByMemberId(id);
         List<MemberReservationResponse> allCombined = new ArrayList<>(allReservation);
         allCombined.addAll(allWaitings);
+        allCombined.sort(Comparator
+                .comparing(MemberReservationResponse::date)
+                .thenComparing(r -> r.time().startAt())
+                .thenComparing(r -> r.theme().name())
+        );
         return allCombined;
     }
 
