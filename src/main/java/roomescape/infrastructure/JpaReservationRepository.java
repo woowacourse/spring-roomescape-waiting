@@ -12,7 +12,7 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.ReservationRepository;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.business.dto.ReservationWithAheadDto;
 
 @Primary
@@ -37,7 +37,7 @@ public class JpaReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllReservationWithFilter(Id themeId, Id memberId, LocalDate dateFrom, LocalDate dateTo,
-                                                          Status reservationStatus) {
+                                                          ReservationStatus reservationStatus) {
         return dao.findAllWithFilter(themeId, memberId, dateFrom, dateTo, reservationStatus);
     }
 

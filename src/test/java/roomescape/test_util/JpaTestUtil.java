@@ -10,7 +10,7 @@ import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.infrastructure.JpaReservationDao;
 import roomescape.infrastructure.JpaReservationTimeDao;
 import roomescape.infrastructure.JpaThemeDao;
@@ -38,7 +38,7 @@ public class JpaTestUtil {
     }
 
     public void insertReservation(final String id, final LocalDate date, final String timeId, final String themeId, final String userId,
-                                  Status reservationStatus) {
+                                  ReservationStatus reservationStatus) {
         User user = userDao.findById(Id.create(userId)).get();
         ReservationTime time = timeDao.findById(Id.create(timeId)).get();
         Theme theme = themeDao.findById(Id.create(themeId)).get();

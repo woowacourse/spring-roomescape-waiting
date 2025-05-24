@@ -17,7 +17,7 @@ import lombok.Getter;
 import lombok.ToString;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -38,7 +38,7 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private ReservationStatus reservationStatus;
     private final LocalDateTime createdAt;
 
     protected Reservation() {
@@ -47,15 +47,15 @@ public class Reservation {
     }
 
     public static Reservation create(final User user, final LocalDate date, final ReservationTime time,
-                                     final Theme theme, final Status status, final LocalDateTime createdAt) {
-        return new Reservation(Id.issue(), user, ReservationDate.create(date), time, theme, status,
+                                     final Theme theme, final ReservationStatus reservationStatus, final LocalDateTime createdAt) {
+        return new Reservation(Id.issue(), user, ReservationDate.create(date), time, theme, reservationStatus,
                 createdAt.truncatedTo(ChronoUnit.MILLIS));
     }
 
     public static Reservation restore(final String id, final User user, final LocalDate date,
-                                      final ReservationTime time, final Theme theme, final Status status,
+                                      final ReservationTime time, final Theme theme, final ReservationStatus reservationStatus,
                                       final LocalDateTime createdAt) {
-        return new Reservation(Id.create(id), user, ReservationDate.restore(date), time, theme, status,
+        return new Reservation(Id.create(id), user, ReservationDate.restore(date), time, theme, reservationStatus,
                 createdAt.truncatedTo(ChronoUnit.MILLIS));
     }
 

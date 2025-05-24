@@ -20,7 +20,7 @@ import roomescape.business.model.repository.ReservationTimeRepository;
 import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
 import roomescape.presentation.dto.response.ReservationResponse;
@@ -37,7 +37,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
 
     public ReservationDto addAndGet(final LocalDate date, final String timeIdValue, final String themeIdValue,
-                                    final String userIdValue, final Status status) {
+                                    final String userIdValue, final ReservationStatus reservationStatus) {
         User user = userRepository.findById(Id.create(userIdValue))
                 .orElseThrow(() -> new NotFoundException(USER_NOT_EXIST));
         ReservationTime reservationTime = reservationTimeRepository.findById(Id.create(timeIdValue))
@@ -45,12 +45,12 @@ public class ReservationService {
         Theme theme = themeRepository.findById(Id.create(themeIdValue))
                 .orElseThrow(() -> new NotFoundException(THEME_NOT_EXIST));
 
-        if (status == Status.RESERVED && reservationRepository.isDuplicateDateAndTimeAndTheme(date,
+        if (reservationStatus == ReservationStatus.RESERVED && reservationRepository.isDuplicateDateAndTimeAndTheme(date,
                 reservationTime.startTimeValue(), theme.getId())) {
             throw new DuplicatedException(RESERVATION_DUPLICATED);
         }
 
-        Reservation reservation = Reservation.create(user, date, reservationTime, theme, status, LocalDateTime.now());
+        Reservation reservation = Reservation.create(user, date, reservationTime, theme, reservationStatus, LocalDateTime.now());
         reservationRepository.save(reservation);
         waitingService.updateWaitingReservations(reservation);
         return ReservationDto.fromEntity(reservation);
@@ -59,7 +59,7 @@ public class ReservationService {
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom,
                                        final LocalDate dateTo) {
         List<Reservation> reservations = reservationRepository.findAllReservationWithFilter(Id.create(themeIdValue),
-                Id.create(userIdValue), dateFrom, dateTo, Status.RESERVED);
+                Id.create(userIdValue), dateFrom, dateTo, ReservationStatus.RESERVED);
         return ReservationDto.fromEntities(reservations);
     }
 

@@ -4,7 +4,7 @@ import java.util.List;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 
 public record ReservationDto(
         Id id,
@@ -12,7 +12,7 @@ public record ReservationDto(
         ReservationDate date,
         ReservationTimeDto time,
         ThemeDto theme,
-        Status status
+        ReservationStatus reservationStatus
 ) {
     public static ReservationDto fromEntity(final Reservation reservation) {
         return new ReservationDto(
@@ -21,7 +21,7 @@ public record ReservationDto(
                 reservation.getDate(),
                 ReservationTimeDto.fromEntity(reservation.getTime()),
                 ThemeDto.fromEntity(reservation.getTheme()),
-                reservation.getStatus()
+                reservation.getReservationStatus()
         );
     }
 

@@ -13,7 +13,7 @@ import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.business.dto.ReservationWithAheadDto;
 
 public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
@@ -28,14 +28,14 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
                AND (:userId   IS NULL OR u.id    = :userId)
                AND (:dateFrom IS NULL OR r.date.value >= :dateFrom)
                AND (:dateTo   IS NULL OR r.date.value <= :dateTo)
-               AND (:status   IS NULL OR r.status = :status)
+               AND (:reservationStatus   IS NULL OR r.reservationStatus = :reservationStatus)
             """)
     List<Reservation> findAllWithFilter(
             @Param("themeId") Id themeId,
             @Param("userId") Id userId,
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo,
-            @Param("status") Status status);
+            @Param("reservationStatus") ReservationStatus reservationStatus);
 
     @Query("""
                 SELECT new roomescape.business.dto.ReservationWithAheadDto(
@@ -64,18 +64,18 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
     @Modifying
     @Query("""
               UPDATE Reservation r
-                 SET r.status = roomescape.business.model.vo.Status.RESERVED
+                 SET r.reservationStatus = roomescape.business.model.vo.ReservationStatus.RESERVED
                WHERE r.date       = :date
                  AND r.time       = :time
                  AND r.theme      = :theme
-                 AND r.status     = roomescape.business.model.vo.Status.WAITING
+                 AND r.reservationStatus     = roomescape.business.model.vo.ReservationStatus.WAITING
                  AND r.createdAt  = (
                      SELECT MIN(r2.createdAt)
                        FROM Reservation r2
                       WHERE r2.date    = :date
                         AND r2.time    = :time
                         AND r2.theme   = :theme
-                        AND r2.status  = roomescape.business.model.vo.Status.WAITING
+                        AND r2.reservationStatus  = roomescape.business.model.vo.ReservationStatus.WAITING
                  )
             """)
     void updateWaitingReservations(

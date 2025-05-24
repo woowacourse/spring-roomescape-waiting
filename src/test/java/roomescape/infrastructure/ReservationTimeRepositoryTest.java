@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimeRepository;
 import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.test_util.JpaTestUtil;
 
 @DataJpaTest
@@ -82,7 +82,7 @@ class ReservationTimeRepositoryTest {
         testUtil.insertTheme(themeId, "주홍색 연구");
         testUtil.insertUser(userId, "돔푸");
         testUtil.insertReservation(reservationId, LocalDate.now().plusDays(10), timeId1, themeId, userId,
-                Status.RESERVED);
+                ReservationStatus.RESERVED);
 
         // when
         final List<ReservationTime> result = sut.findAvailableByDateAndThemeId(LocalDate.now().plusDays(10),
@@ -110,7 +110,7 @@ class ReservationTimeRepositoryTest {
         testUtil.insertTheme(themeId, "주홍색 연구");
         testUtil.insertUser(userId, "돔푸");
         testUtil.insertReservation(reservationId, LocalDate.now().plusDays(10), timeId1, themeId, userId,
-                Status.RESERVED);
+                ReservationStatus.RESERVED);
 
         // when
         final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10),

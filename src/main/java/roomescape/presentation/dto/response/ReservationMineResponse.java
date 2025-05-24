@@ -5,14 +5,14 @@ import java.time.LocalTime;
 import java.util.List;
 import roomescape.business.dto.ReservationWithAheadDto;
 import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 
 public record ReservationMineResponse(
         String id,
         String themeName,
         LocalDate date,
         LocalTime time,
-        Status status,
+        ReservationStatus reservationStatus,
         Long aheadCount
 ) {
     public static ReservationMineResponse from(ReservationWithAheadDto myReservationWithAheadDto) {
@@ -22,7 +22,7 @@ public record ReservationMineResponse(
                 reservation.getTheme().getName().value(),
                 reservation.getDate().value(),
                 reservation.getTime().getStartTime().value(),
-                reservation.getStatus(),
+                reservation.getReservationStatus(),
                 myReservationWithAheadDto.aheadCount()
         );
     }

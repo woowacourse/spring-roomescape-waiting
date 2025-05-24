@@ -1,6 +1,6 @@
 package roomescape.business.model.vo;
 
-public enum Status {
+public enum ReservationStatus {
     RESERVED,
     WAITING
 }

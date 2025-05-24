@@ -3,6 +3,7 @@ package roomescape.business.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -34,7 +35,7 @@ import roomescape.business.model.repository.ThemeRepository;
 import roomescape.business.model.repository.UserRepository;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.business.model.vo.Status;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;
 
@@ -52,6 +53,9 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
+
+    @Mock
+    private WaitingService waitingService;
 
     @InjectMocks
     private ReservationService sut;
@@ -76,9 +80,10 @@ class ReservationServiceTest {
         when(themeRepository.findById(themeId)).thenReturn(Optional.of(theme));
         when(reservationRepository.isDuplicateDateAndTimeAndTheme(eq(date), eq(LocalTime.of(10, 0)), eq(theme.getId())))
                 .thenReturn(false);
+        doNothing().when(waitingService).updateWaitingReservations(any(Reservation.class));
 
         // when
-        ReservationDto result = sut.addAndGet(date, timeIdValue, themeIdValue, userIdValue, Status.RESERVED);
+        ReservationDto result = sut.addAndGet(date, timeIdValue, themeIdValue, userIdValue, ReservationStatus.RESERVED);
 
         // then
         assertThat(result).isNotNull();
@@ -101,7 +106,7 @@ class ReservationServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> sut.addAndGet(date, timeId, themeId, userIdValue, Status.RESERVED))
+        assertThatThrownBy(() -> sut.addAndGet(date, timeId, themeId, userIdValue, ReservationStatus.RESERVED))
                 .isInstanceOf(NotFoundException.class);
 
         verify(userRepository).findById(userId);
@@ -124,7 +129,7 @@ class ReservationServiceTest {
         when(reservationTimeRepository.findById(Id.create(timeId))).thenReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> sut.addAndGet(date, timeId, themeId, userId, Status.RESERVED))
+        assertThatThrownBy(() -> sut.addAndGet(date, timeId, themeId, userId, ReservationStatus.RESERVED))
                 .isInstanceOf(NotFoundException.class);
 
         verify(userRepository).findById(Id.create(userId));
@@ -152,7 +157,7 @@ class ReservationServiceTest {
         when(themeRepository.findById(themeId)).thenReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> sut.addAndGet(date, timeIdValue, themeIdValue, userIdValue, Status.RESERVED))
+        assertThatThrownBy(() -> sut.addAndGet(date, timeIdValue, themeIdValue, userIdValue, ReservationStatus.RESERVED))
                 .isInstanceOf(NotFoundException.class);
 
         verify(userRepository).findById(userId);
@@ -183,7 +188,7 @@ class ReservationServiceTest {
                 .thenReturn(true);
 
         // when, then
-        assertThatThrownBy(() -> sut.addAndGet(date, timeIdValue, themeIdValue, userIdValue, Status.RESERVED))
+        assertThatThrownBy(() -> sut.addAndGet(date, timeIdValue, themeIdValue, userIdValue, ReservationStatus.RESERVED))
                 .isInstanceOf(DuplicatedException.class);
 
         verify(userRepository).findById(userId);
@@ -212,21 +217,21 @@ class ReservationServiceTest {
         Theme theme2 = Theme.restore("theme-id-2", "Theme Two", "Description Two", "thumbnail2.jpg");
 
         List<Reservation> reservationData = Arrays.asList(
-                Reservation.restore("reservation-id-1", user1, dateFrom, time1, theme1, Status.RESERVED,
+                Reservation.restore("reservation-id-1", user1, dateFrom, time1, theme1, ReservationStatus.RESERVED,
                         LocalDateTime.now()),
-                Reservation.restore("reservation-id-2", user2, dateFrom.plusDays(1), time2, theme2, Status.RESERVED,
+                Reservation.restore("reservation-id-2", user2, dateFrom.plusDays(1), time2, theme2, ReservationStatus.RESERVED,
                         LocalDateTime.now())
         );
         List<ReservationDto> expectedReservations = Arrays.asList(
                 new ReservationDto(Id.create("reservation-id-1"), UserDto.fromEntity(user1),
                         new ReservationDate(dateFrom), ReservationTimeDto.fromEntity(time1),
-                        ThemeDto.fromEntity(theme1), Status.RESERVED),
+                        ThemeDto.fromEntity(theme1), ReservationStatus.RESERVED),
                 new ReservationDto(Id.create("reservation-id-2"), UserDto.fromEntity(user2),
                         new ReservationDate(dateFrom.plusDays(1)), ReservationTimeDto.fromEntity(time2),
-                        ThemeDto.fromEntity(theme2), Status.RESERVED)
+                        ThemeDto.fromEntity(theme2), ReservationStatus.RESERVED)
         );
 
-        when(reservationRepository.findAllReservationWithFilter(themeId, userId, dateFrom, dateTo, Status.RESERVED))
+        when(reservationRepository.findAllReservationWithFilter(themeId, userId, dateFrom, dateTo, ReservationStatus.RESERVED))
                 .thenReturn(reservationData);
 
         // when
@@ -234,7 +239,7 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEqualTo(expectedReservations);
-        verify(reservationRepository).findAllReservationWithFilter(themeId, userId, dateFrom, dateTo, Status.RESERVED);
+        verify(reservationRepository).findAllReservationWithFilter(themeId, userId, dateFrom, dateTo, ReservationStatus.RESERVED);
     }
 
     @Test
@@ -246,7 +251,7 @@ class ReservationServiceTest {
                 LocalDate.now().plusDays(5),
                 ReservationTime.create(LocalTime.of(10, 0)),
                 Theme.create("theme", "", ""),
-                Status.RESERVED, LocalDateTime.now()
+                ReservationStatus.RESERVED, LocalDateTime.now()
         );
 
         // when
