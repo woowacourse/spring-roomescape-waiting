@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.theme.domain.Theme;
 
@@ -21,15 +20,15 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
                 SELECT t
-                FROM Reservation r
-                JOIN r.theme t
-                WHERE r.date BETWEEN :from AND :to
+                FROM ReservationSlot rs
+                JOIN rs.theme t
+                WHERE rs.date BETWEEN :from AND :to
                 GROUP BY t
-                ORDER BY COUNT(r.id) DESC
+                ORDER BY COUNT(rs.id) DESC
             """)
     List<Theme> findTopNThemesByReservationCountInDateRange(
-            final @Param("from") LocalDate dateFrom,
-            final @Param("to") LocalDate dateTo,
+            final LocalDate from,
+            final LocalDate to,
             final Pageable pageable);
 
     default List<Theme> getTopNThemesInPeriod(LocalDate dateFrom, LocalDate dateTo, int limit) {

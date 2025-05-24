@@ -9,12 +9,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.auth.domain.AuthRole;
+import roomescape.exception.auth.AuthorizationException;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 @Table(name = "members")
@@ -86,11 +89,13 @@ public class Member {
         return !this.password.equals(password);
     }
 
-    public boolean isMember() {
-        return role == AuthRole.MEMBER;
-    }
-
     public boolean isAdmin() {
         return role == AuthRole.ADMIN;
+    }
+
+    public void validateDeletableReservation(Reservation reservation) {
+        if (!this.isAdmin() && !Objects.equals(reservation.getMember(), this)) {
+            throw new AuthorizationException("삭제할 권한이 없습니다.");
+        }
     }
 }

@@ -3,6 +3,7 @@ package roomescape.reservation.ui.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 
 public record AdminReservationWaitingResponse(
         Long reservationId,
@@ -12,12 +13,13 @@ public record AdminReservationWaitingResponse(
         LocalTime reservationStartAt
 ) {
     public static AdminReservationWaitingResponse from(final Reservation reservation) {
+        ReservationSlot reservationSlot = reservation.getReservationSlot();
         return new AdminReservationWaitingResponse(
                 reservation.getId(),
                 reservation.getMember().getName(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt()
+                reservationSlot.getTheme().getName(),
+                reservationSlot.getDate(),
+                reservationSlot.getTime().getStartAt()
         );
     }
 }
