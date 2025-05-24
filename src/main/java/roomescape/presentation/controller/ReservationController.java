@@ -1,7 +1,6 @@
 package roomescape.presentation.controller;
 
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.ReservationService;
+import roomescape.application.ReservationCommandService;
+import roomescape.application.ReservationQueryService;
 import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
@@ -25,20 +25,22 @@ import roomescape.presentation.controller.dto.ReservationWaitingResponse;
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationService service;
+    private final ReservationCommandService commandService;
+    private final ReservationQueryService queryService;
 
-    public ReservationController(ReservationService service) {
-        this.service = service;
+    public ReservationController(ReservationQueryService queryService, ReservationCommandService commandService) {
+        this.queryService = queryService;
+        this.commandService = commandService;
     }
 
     @GetMapping
     public List<ReservationDto> getAllReservations() {
-        return service.getAllReservations();
+        return queryService.getAllReservations();
     }
 
     @GetMapping("/member")
     public List<ReservationWaitingResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
-        List<ReservationWaitingDto> reservationWaitingDtos = service.getReservationsByMember(memberIdDto.id());
+        List<ReservationWaitingDto> reservationWaitingDtos = queryService.getReservationsByMember(memberIdDto.id());
         return reservationWaitingDtos.stream()
                 .map(ReservationWaitingResponse::from)
                 .toList();
@@ -49,7 +51,7 @@ public class ReservationController {
             @Valid @RequestBody UserReservationCreateDto request,
             @AuthenticatedMemberId MemberIdDto memberIdDto
     ) {
-        ReservationDto reservationDto = service.registerReservationByUser(request, memberIdDto.id());
+        ReservationDto reservationDto = commandService.registerReservationByUser(request, memberIdDto.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
     }
 
@@ -58,13 +60,13 @@ public class ReservationController {
             @Valid @RequestBody UserWaitingCreateDto request,
             @AuthenticatedMemberId MemberIdDto memberIdDto
     ) {
-        ReservationDto reservationDto = service.registerWaitingByUser(request, memberIdDto.id());
+        ReservationDto reservationDto = commandService.registerWaitingByUser(request, memberIdDto.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
-        service.deleteReservation(id);
+        commandService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 }
