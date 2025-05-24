@@ -28,8 +28,15 @@ INSERT INTO member (name, email, password, role)
 VALUES ('어드민', 'admin@naver.com', '1234', 'ADMIN');
 
 -- reservation 테이블 초기 데이터
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-01', 1, 2, 1),
-       ('2025-05-01', 2, 1, 2),
-       ('2025-05-02', 3, 3, 3),
-       ('2025-05-02', 1, 3, 4);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES ('2025-06-01', 1, 2, 1, 'CONFIRMED'),
+       ('2025-06-01', 2, 1, 2, 'CONFIRMED'),
+       ('2025-06-02', 3, 3, 3, 'CANCELED'),
+       ('2025-06-02', 1, 3, 4, 'CONFIRMED');
+
+INSERT INTO reservation_waiting (date, time_id, theme_id, member_id, created_at, status)
+VALUES ('2025-06-01', 1, 2, 4, CURRENT_TIMESTAMP, 'PENDING'),
+       ('2025-06-01', 1, 2, 3, DATEADD('HOUR', 1, CURRENT_TIMESTAMP), 'PENDING'),
+       ('2025-06-01', 2, 1, 3, CURRENT_TIMESTAMP, 'PENDING'),
+       ('2025-06-02', 3, 3, 2, CURRENT_TIMESTAMP, 'DENIED'),
+       ('2025-06-02', 1, 3, 1, CURRENT_TIMESTAMP, 'PENDING');

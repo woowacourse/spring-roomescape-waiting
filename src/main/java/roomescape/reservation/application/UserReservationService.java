@@ -1,66 +1,77 @@
 package roomescape.reservation.application;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.BusinessRuleViolationException;
-import roomescape.member.model.Member;
-import roomescape.member.model.MemberRepository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
-import roomescape.reservation.application.dto.response.MyReservationServiceResponse;
 import roomescape.reservation.application.dto.response.ReservationServiceResponse;
-import roomescape.reservation.model.dto.ReservationDetails;
+import roomescape.reservation.application.dto.response.UserReservationServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
-import roomescape.reservation.model.entity.ReservationTheme;
-import roomescape.reservation.model.entity.ReservationTime;
-import roomescape.reservation.model.exception.ReservationException;
+import roomescape.reservation.model.entity.ReservationWaiting;
 import roomescape.reservation.model.repository.ReservationRepository;
-import roomescape.reservation.model.repository.ReservationThemeRepository;
-import roomescape.reservation.model.repository.ReservationTimeRepository;
-import roomescape.reservation.model.service.ReservationValidator;
-import roomescape.reservation.model.vo.ReservationStatus;
+import roomescape.reservation.model.repository.ReservationWaitingRepository;
+import roomescape.reservation.model.repository.dto.ReservationWaitingWithRank;
+import roomescape.reservation.model.service.ReservationOperation;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationThemeRepository reservationThemeRepository;
-    private final MemberRepository memberRepository;
-    private final ReservationValidator reservationValidator;
+    private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationOperation reservationOperation;
 
+    @Transactional
     public ReservationServiceResponse create(CreateReservationServiceRequest request) {
-        ReservationDetails reservationDetails = createReservationDetails(request);
-        try {
-            reservationValidator.validateNoDuplication(request.date(), request.timeId(), request.themeId());
-            Reservation reservation = Reservation.createFutureReservation(reservationDetails);
-            Reservation savedReservation = reservationRepository.save(reservation);
-            return ReservationServiceResponse.from(savedReservation);
-        } catch (ReservationException e) {
-            throw new BusinessRuleViolationException(e.getMessage(), e);
-        }
+        Reservation savedReservation = reservationOperation.reserve(request.toSchedule(), request.memberId());
+        return ReservationServiceResponse.from(savedReservation);
     }
 
-    public List<MyReservationServiceResponse> getAllByMemberId(Long memberId) {
+    public List<UserReservationServiceResponse> getAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        return reservations.stream()
-                .map(this::buildMyReservationServiceResponse)
-                .toList();
-    }
+        List<ReservationWaitingWithRank> reservationWaitingWithRanks = reservationWaitingRepository.findAllWithRankByMemberId(
+                memberId);
 
-    private ReservationDetails createReservationDetails(CreateReservationServiceRequest request) {
-        ReservationTime reservationTime = reservationTimeRepository.getById(request.timeId());
-        ReservationTheme reservationTheme = reservationThemeRepository.getById(request.themeId());
-        Member member = memberRepository.getById(request.memberId());
-        return request.toReservationDetails(reservationTime, reservationTheme, member);
-    }
-
-    private MyReservationServiceResponse buildMyReservationServiceResponse(Reservation reservation) {
-        ReservationStatus reservationStatus = ReservationStatus.getStatus(
-                reservation.getReservationDateTime(), LocalDateTime.now()
+        List<UserReservationServiceResponse> responses = createUserReservationServiceResponse(
+                reservations,
+                reservationWaitingWithRanks
         );
-        return MyReservationServiceResponse.from(reservation, reservationStatus);
+
+        return sortByDateTime(responses);
+    }
+
+    @Transactional
+    public void cancel(Long id, Long memberId) {
+        Reservation reservation = reservationRepository.getById(id);
+        reservation.checkOwner(memberId);
+        reservationOperation.cancel(reservation);
+    }
+
+    private List<UserReservationServiceResponse> createUserReservationServiceResponse(
+            List<Reservation> reservations,
+            List<ReservationWaitingWithRank> reservationWaitingWithRanks
+    ) {
+        List<UserReservationServiceResponse> responses = new ArrayList<>();
+        for (Reservation reservation : reservations) {
+            responses.add(UserReservationServiceResponse.of(reservation));
+        }
+        for (ReservationWaitingWithRank waitingWithRank : reservationWaitingWithRanks) {
+            ReservationWaiting reservationWaiting = waitingWithRank.getReservationWaiting();
+            int rank = waitingWithRank.getRankToInt();
+            responses.add(UserReservationServiceResponse.of(reservationWaiting, rank));
+        }
+
+        return responses;
+    }
+
+    private List<UserReservationServiceResponse> sortByDateTime(List<UserReservationServiceResponse> responses) {
+        return responses.stream()
+                .sorted(Comparator.comparing(UserReservationServiceResponse::date)
+                        .thenComparing(UserReservationServiceResponse::time))
+                .toList();
     }
 }

@@ -25,14 +25,9 @@ public class ReservationTime {
     private LocalTime startAt;
 
     @Builder
-    public ReservationTime(Long id, LocalTime startAt) {
-        validateNotNull(startAt);
-        this.id = id;
-        this.startAt = startAt;
-    }
-
     public ReservationTime(LocalTime startAt) {
-        this(null, startAt);
+        validateNotNull(startAt);
+        this.startAt = startAt;
     }
 
     private void validateNotNull(LocalTime startAt) {

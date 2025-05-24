@@ -229,13 +229,13 @@
 
 - [Admin - 예약 삭제]
     - request
-        - method & path: `[DELETE] /admin/reservations/{id}`
+        - method & path: `[POST] /admin/reservations/{id}/cancel`
 
-          예시: `/admin/reservations/10`
+          예시: `/admin/reservations/10/cancel`
 
     - response
         - 정상 처리된 경우
-            - status code: `204 No Content`
+            - status code: `200 Ok`
         - 예외 처리
             - 존재하지 않는 예약 ID
                 - status code: `404 Not Found`
@@ -295,8 +295,27 @@
                     }
                     ```
 
+- [User - 내 예약 전체 조회]
+    - request
+        - method & path: `[GET] /reservations/mine`
+    - response
+        - 정상 처리된 경우
+            - status code: `200 OK`
+            - body
 
-
+                ```json
+                
+                [
+                	{
+                	  "reservationId": 1,
+                	  "theme": "10:00",
+                	  "date" : false,
+                	  "status" : "CONFIRMED",
+                      "rank" : 1
+                	}
+                ]
+                ```
+              
 **[ReservationTheme]**
 
 - [Admin - 테마 생성]
@@ -514,25 +533,59 @@
                 ]
                 ```
 
+**[ReservationWaiting]**
 
-**[My]**
-
-- [User - 내 예약 전체 조회]
+- [User - 예약 대기]
     - request
-        - method & path: `[GET] /reservations-mine`
+        - method & path: `[POST] /reservations/waiting`
+        - body
+
+            ```json
+            
+            {
+              "date": "2025-06-01",
+              "timeId": 3,
+              "themeId": 5
+            }
+            
+            ```
+
     - response
         - 정상 처리된 경우
-            - status code: `200 OK`
-            - body
+            - status code: `201 Created`
+            
+        - 예외 처리
+            - 유효성 검증 실패 (예: 필수 값 누락)
+                - status code: `400 Bad Request`
+                - body 예시
 
-                ```json
-                
-                [
-                	{
-                	  "reservationId": 1,
-                	  "theme": "10:00",
-                	  "date" : false,
-                	  "status" : "CONFIRMED"
-                	}
-                ]
-                ```
+                    ```json
+                    
+                    {
+                      "status": 400,
+                      "message": "테마를 필수로 입력해야 합니다.",
+                      "timestamp": "2025-05-19T14:10:32.123456"
+                    }
+                    ```
+
+- [User - 예약 대기 취소]
+    - request
+        - method & path: `[PATCH] /reservations/waiting/{id}/cancel`
+
+    - response
+        - 정상 처리된 경우
+            - status code: `204 Content`
+
+        - 예외 처리
+            - 자신의 예약 혹은 예약 대기가 아닐경우
+                - status code: `403 Forbbiden`
+                - body 예시
+
+                    ```json
+                    
+                    {
+                      "status": 403,
+                      "message": "사용자 자신의 예약 혹은 예약대기만 취소할 수 있습니다.",
+                      "timestamp": "2025-05-19T14:10:32.123456"
+                    }
+                    ```
