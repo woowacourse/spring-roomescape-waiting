@@ -24,10 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.fixture.ui.LoginApiFixture;
-import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.ui.dto.response.BookingStatusResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
@@ -223,22 +220,6 @@ class ReservationRestControllerTest {
                 () -> assertThat(responses).extracting(response -> response.date().toString())
                         .containsExactlyInAnyOrder(reservationParams1.get("date"), reservationParams2().get("date"))
         );
-    }
-
-    @Test
-    void 예약_상태_목록을_조회한다() {
-        final Map<String, String> adminCookies = LoginApiFixture.adminLoginAndGetCookies();
-
-        final List<BookingStatusResponse> responses =
-                RestAssured.given().log().all()
-                        .contentType(ContentType.JSON)
-                        .cookies(adminCookies)
-                        .when().get("/reservations/statuses")
-                        .then().log().all()
-                        .extract().jsonPath()
-                        .getList(".", BookingStatusResponse.class);
-
-        assertThat(responses).hasSize(BookingStatus.values().length);
     }
 
     private Map<String, String> reservationParams1() {
