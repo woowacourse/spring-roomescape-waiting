@@ -2,11 +2,15 @@ package roomescape.reservation.waiting.application;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.BusinessException;
 import roomescape.member.application.service.MemberQueryService;
 import roomescape.member.domain.Member;
+import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.waiting.application.service.WaitingReservationCommandService;
 import roomescape.reservation.waiting.application.service.WaitingReservationQueryService;
 import roomescape.reservation.waiting.domain.WaitingReservation;
@@ -26,14 +30,17 @@ public class WaitingReservationFacadeService {
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
     private final MemberQueryService memberQueryService;
+    private final ReservationCommandService reservationCommandService;
 
     public WaitingReservationFacadeService(final ReservationQueryService reservationQueryService,
+                                           final ReservationCommandService reservationCommandService,
                                            final WaitingReservationCommandService waitingReservationCommandService,
                                            final WaitingReservationQueryService waitingReservationQueryService,
                                            final ReservationTimeQueryService reservationTimeQueryService,
                                            final ThemeQueryService themeQueryService,
                                            final MemberQueryService memberQueryService) {
         this.reservationQueryService = reservationQueryService;
+        this.reservationCommandService = reservationCommandService;
         this.waitingReservationCommandService = waitingReservationCommandService;
         this.waitingReservationQueryService = waitingReservationQueryService;
         this.reservationTimeQueryService = reservationTimeQueryService;
@@ -77,5 +84,31 @@ public class WaitingReservationFacadeService {
 
     public void deleteByIdWithMemberId(final Long memberId, final Long reservationId) {
         waitingReservationCommandService.deleteByIdAndMemberId(reservationId, memberId);
+    }
+
+    public void acceptWaiting(final Long waitingId) {
+        WaitingReservation waiting = waitingReservationQueryService.findById(waitingId);
+        validateAlreadyExistsReservation(waiting);
+
+        waitingReservationCommandService.deleteById(waiting.getId());
+        Reservation newReservation = new Reservation(waiting.getDate(), waiting.getTime(), waiting.getTheme(), waiting.getMember());
+
+        reservationCommandService.save(newReservation);
+    }
+
+    private void validateAlreadyExistsReservation(WaitingReservation waiting) {
+        if (reservationQueryService.isExistsReservedReservation(waiting.getTheme().getId(), waiting.getTime().getId(), waiting.getDate())) {
+            throw new BusinessException("예약이 이미 존재합니다.");
+        }
+    }
+
+    public void denyWaiting(final Long waitingId) {
+        waitingReservationCommandService.deleteById(waitingId);
+    }
+
+    public List<ReservationResponse> getWaitingReservations() {
+        return waitingReservationQueryService.findAll().stream()
+            .map(ReservationResponse::from)
+            .toList();
     }
 }

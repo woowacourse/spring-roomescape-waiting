@@ -17,6 +17,8 @@ public interface JpaWaitingReservationRepository extends CrudRepository<WaitingR
 
     boolean existsByThemeIdAndTimeIdAndDateAndMemberId(Long themeId, Long timeId, LocalDate date, Long memberId);
 
+    List<WaitingReservation> findAll();
+
     @Query("""
         SELECT new roomescape.reservation.waiting.domain.dto.WaitingReservationWithRank(
             w,

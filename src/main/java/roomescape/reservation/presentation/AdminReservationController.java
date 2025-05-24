@@ -16,21 +16,44 @@ import roomescape.reservation.application.ReservationFacadeService;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.reservation.waiting.application.WaitingReservationFacadeService;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminReservationController {
 
     private final ReservationFacadeService reservationFacadeService;
+    private final WaitingReservationFacadeService waitingReservationFacadeService;
 
-    public AdminReservationController(ReservationFacadeService reservationFacadeService) {
+    public AdminReservationController(ReservationFacadeService reservationFacadeService,
+                                      WaitingReservationFacadeService waitingReservationFacadeService) {
         this.reservationFacadeService = reservationFacadeService;
+        this.waitingReservationFacadeService = waitingReservationFacadeService;
     }
 
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
         List<ReservationResponse> response = reservationFacadeService.getReservations();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/waiting-reservations")
+    public ResponseEntity<List<ReservationResponse>> getWaitingReservations() {
+        List<ReservationResponse> responses = waitingReservationFacadeService.getWaitingReservations();
+
+        return ResponseEntity.ok().body(responses);
+    }
+
+    @PostMapping("/waiting-reservations/{id}")
+    public ResponseEntity<Void> acceptWaitingReservation(@PathVariable("id") Long waitingId) {
+        waitingReservationFacadeService.acceptWaiting(waitingId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/waiting-reservations/{id}")
+    public ResponseEntity<Void> denyWaitingReservation(@PathVariable("id") Long waitingId) {
+        waitingReservationFacadeService.denyWaiting(waitingId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/reservations")

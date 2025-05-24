@@ -29,4 +29,15 @@ public class WaitingReservationCommandService {
             throw new BusinessException("존재하지 않는 대기 예약입니다.");
         }
     }
+
+    public void deleteById(final Long id) {
+        validateExistsWaitingReservation(id);
+        waitingReservationRepository.deleteById(id);
+    }
+
+    private void validateExistsWaitingReservation(Long id) {
+        if (!waitingReservationRepository.existsById(id)) {
+            throw new BusinessException("존재하지 않는 대기 예약입니다.");
+        }
+    }
 }
