@@ -32,13 +32,12 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndStatus(
+    public boolean existsByDateAndTimeIdAndThemeId(
             final LocalDate date,
             final Long timeId,
-            final Long themeId,
-            final ReservationStatus status
+            final Long themeId
     ) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndStatus(date, timeId, themeId, status);
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Override
@@ -85,14 +84,13 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
+    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(
             final LocalDate date,
             final Long timeId,
             final Long themeId,
-            final Long memberId,
-            final ReservationStatus status) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberIdAndStatus(
-                date, timeId, themeId, memberId, status
+            final Long memberId) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+                date, timeId, themeId, memberId
         );
     }
 }
