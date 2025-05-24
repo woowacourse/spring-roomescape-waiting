@@ -30,14 +30,14 @@ public class MemberService {
         return new MemberResponse.IdName(saved.getId(), saved.getName());
     }
 
-    public void delete(final Long id) {
-        final Member found = memberRepository.findById(id)
+    public void delete(final Long memberId) {
+        final Member found = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
 
         if (found.getRole() == AuthRole.ADMIN) {
-            throw new AuthorizationException("관리자는 삭제할 수 없습니다.");
+            throw new AuthorizationException("관리자 계정은 삭제할 수 없습니다.");
         }
-        memberRepository.deleteById(id);
+        memberRepository.deleteById(memberId);
     }
 
     public List<IdName> findAllNames() {
