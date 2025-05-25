@@ -1,4 +1,4 @@
-package roomescape.persistence;
+package roomescape.infrastructure.db;
 
 
 import java.time.LocalDate;
@@ -9,10 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import roomescape.infrastructure.db.MemberJpaRepository;
-import roomescape.infrastructure.db.ReservationTicketJpaRepository;
-import roomescape.infrastructure.db.ReservationTimeJpaRepository;
-import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTicket;
