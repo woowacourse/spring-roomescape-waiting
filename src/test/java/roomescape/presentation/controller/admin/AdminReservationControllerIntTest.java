@@ -96,8 +96,8 @@ public class AdminReservationControllerIntTest {
     @Sql("/test-admin-get-reservations-data.sql")
     public void request_getReservationsUsingFilter() {
         RestAssured.given().log().all()
-                .param("themeId", 1)
                 .param("memberId", 3)
+                .param("themeId", 1)
                 .param("dateFrom", "2025-04-25")
                 .param("dateTo", "2025-04-26")
                 .cookie("token", tokenForAdmin)

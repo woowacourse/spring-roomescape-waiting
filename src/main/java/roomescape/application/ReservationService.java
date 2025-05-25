@@ -105,8 +105,8 @@ public class ReservationService {
     }
 
     public List<ReservationServiceResponse> searchReservationsWith(
-            Long themeId,
             Long memberId,
+            Long themeId,
             LocalDate dateFrom,
             LocalDate dateTo
     ) {

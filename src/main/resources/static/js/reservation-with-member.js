@@ -195,7 +195,7 @@ function applyFilter(event) {
     const memberId = document.getElementById('member').value;
     const dateFrom = document.getElementById('date-from').value;
     const dateTo = document.getElementById('date-to').value;
-    const searchParams = new URLSearchParams({themeId, memberId, dateFrom, dateTo});
+    const searchParams = new URLSearchParams({memberId, themeId, dateFrom, dateTo});
 
     /*
     TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
