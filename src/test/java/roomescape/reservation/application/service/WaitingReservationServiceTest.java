@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.exception.NotReservationOwnerException;
@@ -63,12 +63,12 @@ public class WaitingReservationServiceTest {
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
         Reservation reservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
-                LocalDateTime.now());
+                SystemLocalDateTime.now());
 
         List<Reservation> waitings = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             waitings.add(new Reservation((long) i, date, time, theme, member, ReservationStatus.WAITING,
-                    LocalDateTime.now()));
+                    SystemLocalDateTime.now()));
         }
 
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
@@ -87,7 +87,7 @@ public class WaitingReservationServiceTest {
     @Test
     void deleteWaitingReservationTest() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
         long timeId = 2L;
         long themeId = 2L;
         long memberId = 2L;
@@ -98,7 +98,7 @@ public class WaitingReservationServiceTest {
 
         // 취소할 예약
         Reservation targetReservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
-                LocalDateTime.now().minusDays(3));
+                SystemLocalDateTime.now().minusDays(3));
         when(reservationRepository.findById(99L)).thenReturn(Optional.of(targetReservation));
 
         // when
@@ -112,7 +112,7 @@ public class WaitingReservationServiceTest {
     @Test
     void deleteWaitingReservationFailedTest_InvalidUser() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
         long timeId = 2L;
         long themeId = 2L;
         long memberId = 2L;
@@ -124,7 +124,7 @@ public class WaitingReservationServiceTest {
 
         // 취소할 예약
         Reservation targetReservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
-                LocalDateTime.now().minusDays(3));
+                SystemLocalDateTime.now().minusDays(3));
         when(reservationRepository.findById(99L)).thenReturn(Optional.of(targetReservation));
 
         // when & then
@@ -147,8 +147,9 @@ public class WaitingReservationServiceTest {
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
         List<Reservation> reservations = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
-            reservations.add(new Reservation(99L + i, LocalDate.now(), time, theme, member, ReservationStatus.WAITING,
-                    LocalDateTime.now().minusDays(i + 1)));
+            reservations.add(new Reservation(99L + i, SystemLocalDateTime.nowDate(), time, theme, member,
+                    ReservationStatus.WAITING,
+                    SystemLocalDateTime.now().minusDays(i + 1)));
         }
 
         when(reservationRepository.findAllByStatus(ReservationStatus.WAITING)).thenReturn(reservations);
@@ -164,7 +165,7 @@ public class WaitingReservationServiceTest {
     @Test
     void denyWaitingReservationTest() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
         long timeId = 2L;
         long themeId = 2L;
         long memberId = 2L;
@@ -174,10 +175,10 @@ public class WaitingReservationServiceTest {
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.USER);
         Reservation reservation = new Reservation(reservationId, date, time, theme, member, ReservationStatus.WAITING,
-                LocalDateTime.now());
+                SystemLocalDateTime.now());
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-        
+
         // when
         waitingReservationService.denyWaitingReservation(reservationId);
 

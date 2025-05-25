@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.exception.ReservationTimeAlreadyExistsException;
@@ -135,7 +136,7 @@ class ReservationTimeServiceTest {
     @Test
     void availableTimeTest() {
         // given
-        LocalDate date = LocalDate.now();
+        LocalDate date = SystemLocalDateTime.nowDate();
         Long themeId = 1L;
 
         Member member = new Member(10L, "name", "email@email.com", "pw", Role.USER);

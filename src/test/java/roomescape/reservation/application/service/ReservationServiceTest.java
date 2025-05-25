@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
@@ -61,7 +61,7 @@ class ReservationServiceTest {
     @Test
     void createFailed_timeNotFoundTest() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = SystemLocalDateTime.nowDate();
         Long timeId = 1L;
         Long themeId = 1L;
 
@@ -80,7 +80,7 @@ class ReservationServiceTest {
     @Test
     void createFailed_themeNotFoundTest() {
         // given
-        LocalDate today = LocalDate.now();
+        LocalDate today = SystemLocalDateTime.nowDate();
         long timeId = 1L;
         long themeId = 1L;
 
@@ -100,7 +100,7 @@ class ReservationServiceTest {
     @Test
     void createFailed_createInPastTest() {
         // given
-        LocalDate pastDate = LocalDate.now().minusDays(3);
+        LocalDate pastDate = SystemLocalDateTime.nowDate().minusDays(3);
         long timeId = 1L;
         long themeId = 1L;
         long memberId = 2L;
@@ -123,7 +123,7 @@ class ReservationServiceTest {
     @Test
     void createTest() {
         // given
-        LocalDate date = LocalDate.now().plusDays(3);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(3);
         long timeId = 1L;
         long themeId = 1L;
         long memberId = 2L;
@@ -136,7 +136,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
 
         Reservation reservation = new Reservation(reservationId, date, time, theme, member, ReservationStatus.CONFIRMED,
-                LocalDateTime.now());
+                SystemLocalDateTime.now());
 
         when(timeRepository.findById(timeId)).thenReturn(Optional.of(time));
         when(themeRepository.findById(themeId)).thenReturn(Optional.of(theme));
@@ -155,7 +155,7 @@ class ReservationServiceTest {
     @Test
     void createByAdminSuccess() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
         long timeId = 2L;
         long themeId = 2L;
         long memberId = 2L;
@@ -166,7 +166,7 @@ class ReservationServiceTest {
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "admin@a.com", "pw", Role.ADMIN);
         Reservation reservation = new Reservation(99L, date, time, theme, member, ReservationStatus.CONFIRMED,
-                LocalDateTime.now());
+                SystemLocalDateTime.now());
 
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
@@ -187,8 +187,8 @@ class ReservationServiceTest {
     @Test
     void getReservationsByConditionsTest() {
         // given
-        LocalDate dateFrom = LocalDate.now();
-        LocalDate dateTo = LocalDate.now().plusDays(7);
+        LocalDate dateFrom = SystemLocalDateTime.nowDate();
+        LocalDate dateTo = SystemLocalDateTime.nowDate().plusDays(7);
         Long themeId = 1L;
         Long memberId = 1L;
 
@@ -202,7 +202,7 @@ class ReservationServiceTest {
         for (int i = 0; i < 3; i++) {
             reservations.add(new Reservation(
                     (long) i, dateFrom.plusDays(i), time, theme, member,
-                    ReservationStatus.CONFIRMED, LocalDateTime.now()
+                    ReservationStatus.CONFIRMED, SystemLocalDateTime.now()
             ));
         }
 
@@ -226,7 +226,7 @@ class ReservationServiceTest {
     @Test
     void getReservationByMemberTest() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
         Long timeId = 1L;
         Long themeId = 1L;
         Long memberId = 1L;
@@ -240,13 +240,13 @@ class ReservationServiceTest {
         for (int i = 0; i < 2; i++) {
             reservations.add(new Reservation(
                     (long) i, date.plusDays(i), time, theme, member,
-                    ReservationStatus.CONFIRMED, LocalDateTime.now()
+                    ReservationStatus.CONFIRMED, SystemLocalDateTime.now()
             ));
         }
 
         reservations.add(new Reservation(
                 2L, date.plusDays(2), time, theme, member,
-                ReservationStatus.WAITING, LocalDateTime.now()
+                ReservationStatus.WAITING, SystemLocalDateTime.now()
         ));
 
         when(reservationRepository.findAllByMember(member)).thenReturn(reservations);
@@ -266,7 +266,7 @@ class ReservationServiceTest {
     @Test
     void deleteByIdTest() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
         long timeId = 2L;
         long themeId = 2L;
         long memberId = 2L;
@@ -278,7 +278,7 @@ class ReservationServiceTest {
 
         Reservation targetReservation = new Reservation(reservationId, date, time, theme, member,
                 ReservationStatus.WAITING,
-                LocalDateTime.now().minusDays(3));
+                SystemLocalDateTime.now().minusDays(3));
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(targetReservation));
 
         // when
@@ -292,7 +292,7 @@ class ReservationServiceTest {
     @Test
     void getAllTest() {
         // given
-        LocalDate date = LocalDate.now().plusDays(1);
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
         long timeId = 2L;
         long themeId = 2L;
         long memberId = 2L;
@@ -305,7 +305,7 @@ class ReservationServiceTest {
         for (long i = 90; i < 95; i++) {
             Reservation reservation = new Reservation(i, date, time, theme, member,
                     ReservationStatus.CONFIRMED,
-                    LocalDateTime.now().minusDays(i));
+                    SystemLocalDateTime.now().minusDays(i));
             reservations.add(reservation);
         }
 

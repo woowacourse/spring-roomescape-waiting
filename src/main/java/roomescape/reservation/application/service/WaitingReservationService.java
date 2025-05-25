@@ -1,10 +1,10 @@
 package roomescape.reservation.application.service;
 
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.exception.NotReservationOwnerException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
@@ -42,7 +42,7 @@ public class WaitingReservationService {
         Theme theme = getTheme(request.themeId());
 
         Reservation reservation = reservationRepository.save(new Reservation(request.date(),
-                time, theme, member, ReservationStatus.WAITING, LocalDateTime.now()));
+                time, theme, member, ReservationStatus.WAITING, SystemLocalDateTime.now()));
 
         return mapToReservationResponse(reservation);
     }

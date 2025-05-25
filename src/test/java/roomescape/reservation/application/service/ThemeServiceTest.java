@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.util.SystemLocalDateTime;
 import roomescape.reservation.application.exception.ThemeNotFoundException;
 import roomescape.reservation.application.exception.UsingThemeException;
 import roomescape.reservation.domain.Theme;
@@ -132,7 +133,7 @@ class ThemeServiceTest {
     @Test
     void getPopularThemesSuccess() {
         // given
-        LocalDate endDate = LocalDate.now().minusDays(1);
+        LocalDate endDate = SystemLocalDateTime.nowDate().minusDays(1);
         LocalDate startDate = endDate.minusDays(7);
 
         List<Theme> themes = List.of(

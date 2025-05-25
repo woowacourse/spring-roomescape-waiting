@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.application.exception.MemberNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
@@ -47,14 +48,14 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
 
-        if (LocalDateTime.now().isAfter(LocalDateTime.of(request.date(), reservationTime.getStartAt()))) {
+        if (SystemLocalDateTime.now().isAfter(LocalDateTime.of(request.date(), reservationTime.getStartAt()))) {
             throw new ReservationInPastException();
         }
 
         ReservationStatus status = getReservationStatus(request.date(), reservationTime, theme);
 
         Reservation newReservation = new Reservation(request.date(),
-                reservationTime, theme, member, status, LocalDateTime.now());
+                reservationTime, theme, member, status, SystemLocalDateTime.now());
 
         return mapToReservationResponse(reservationRepository.save(newReservation));
     }
@@ -81,7 +82,7 @@ public class ReservationService {
         ReservationStatus status = getReservationStatus(adminReservationRequest.date(), reservationTime, theme);
 
         Reservation newReservation = new Reservation(adminReservationRequest.date(),
-                reservationTime, theme, member, status, LocalDateTime.now());
+                reservationTime, theme, member, status, SystemLocalDateTime.now());
 
         return mapToReservationResponse(reservationRepository.save(newReservation));
     }
