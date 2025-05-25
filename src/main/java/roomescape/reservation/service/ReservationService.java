@@ -145,7 +145,7 @@ public class ReservationService {
     }
 
     private void promoteWaitingToReservation(Reservation reservation) {
-        Waiting waiting = waitingQueryUseCase.get(
+        Waiting waiting = waitingQueryUseCase.getEarliest(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()

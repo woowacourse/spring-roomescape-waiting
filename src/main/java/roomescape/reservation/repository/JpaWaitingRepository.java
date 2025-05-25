@@ -16,7 +16,17 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findByMemberId(Long memberId);
 
-    Optional<Waiting> findByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+    @Query("""
+                 SELECT w FROM Waiting w
+                 WHERE w.date = :date AND w.time.id = :timeId AND w.theme.id = :themeId
+                 ORDER BY w.createdAt ASC
+                 LIMIT 1
+            """)
+    Optional<Waiting> findEarliestByDateAndTimeIdAndThemeId(
+            ReservationDate date,
+            Long timeId,
+            Long themeId
+    );
 
     @Query("""
                 SELECT w

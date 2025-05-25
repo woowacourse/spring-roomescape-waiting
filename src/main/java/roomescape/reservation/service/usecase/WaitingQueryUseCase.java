@@ -48,8 +48,8 @@ public class WaitingQueryUseCase {
                 .toList();
     }
 
-    public Waiting get(ReservationDate date, Long timeId, Long themeId) {
-        return waitingRepository.findByParams(date, timeId, themeId)
+    public Waiting getEarliest(ReservationDate date, Long timeId, Long themeId) {
+        return waitingRepository.findEarliestByParams(date, timeId, themeId)
                 .orElseThrow(() -> new NotFoundException("예약 대기 정보를 찾을 수 없습니다."));
     }
 }

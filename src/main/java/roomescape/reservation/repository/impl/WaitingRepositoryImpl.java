@@ -31,8 +31,8 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findByParams(ReservationDate date, Long timeId, Long themeId) {
-        return jpaWaitingRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public Optional<Waiting> findEarliestByParams(ReservationDate date, Long timeId, Long themeId) {
+        return jpaWaitingRepository.findEarliestByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Override

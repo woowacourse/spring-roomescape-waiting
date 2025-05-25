@@ -21,7 +21,7 @@ public interface WaitingRepository {
 
     Waiting save(Waiting waiting);
 
-    Optional<Waiting> findByParams(ReservationDate date, Long timeId, Long themeId);
+    Optional<Waiting> findEarliestByParams(ReservationDate date, Long timeId, Long themeId);
 
     void deleteById(Long id);
 }
