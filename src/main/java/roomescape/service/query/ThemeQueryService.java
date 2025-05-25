@@ -31,9 +31,9 @@ public class ThemeQueryService {
     }
 
     public List<ThemeResponseDto> findPopularThemes() {
-        LocalDate end = LocalDate.now(clock);
-        LocalDate start = end.minusDays(7);
-        return themeRepository.findMostReservedThemesBetweenDate(start, end).stream()
+        LocalDate to = LocalDate.now(clock).minusDays(1);
+        LocalDate from = to.minusDays(7);
+        return themeRepository.findMostReservedThemesBetweenDate(from, to).stream()
                 .limit(POPULAR_THEMES_COUNT)
                 .map(ThemeResponseDto::from)
                 .toList();
