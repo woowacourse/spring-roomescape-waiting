@@ -1,6 +1,5 @@
 package roomescape.reservation.application.service;
 
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,14 +93,11 @@ public class WaitingReservationService {
     }
 
     private int calculateWaitingOrder(Reservation reservation) {
-        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeAndTime(
-                        reservation.getDate(),
-                        reservation.getTheme(),
-                        reservation.getTime()
-                ).stream()
-                .sorted(Comparator.comparing(Reservation::getCreatedAt))
-                .toList();
-
-        return reservations.indexOf(reservation);
+        return reservationRepository.countReservationsBefore(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                reservation.getCreatedAt()
+        );
     }
 }

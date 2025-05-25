@@ -1,6 +1,7 @@
 package roomescape.reservation.domain.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -29,6 +30,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     long countByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
     List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
+
+    @Query(value = "SELECT COUNT(r) "
+            + "FROM Reservation r "
+            + "WHERE r.date = :date "
+            + "AND r.time = :time "
+            + "AND r.theme = :theme "
+            + "AND r.createdAt < :createdAt")
+    int countReservationsBefore(LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt);
 
     List<Reservation> findAllByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
 

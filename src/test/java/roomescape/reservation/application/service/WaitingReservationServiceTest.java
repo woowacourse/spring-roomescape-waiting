@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,21 +60,23 @@ public class WaitingReservationServiceTest {
 
         WaitingReservationRequest request = new WaitingReservationRequest(date, timeId, themeId);
 
+        LocalDateTime createdAt = SystemLocalDateTime.now();
+
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
         Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.ADMIN);
         Reservation reservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
-                SystemLocalDateTime.now());
+                createdAt);
 
         List<Reservation> waitings = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             waitings.add(new Reservation((long) i, date, time, theme, member, ReservationStatus.WAITING,
-                    SystemLocalDateTime.now()));
+                    createdAt.minusDays(i + 1)));
         }
 
         when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
         when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
-        when(reservationRepository.findAllByDateAndThemeAndTime(date, theme, time)).thenReturn(waitings);
+        when(reservationRepository.countReservationsBefore(date, time, theme, createdAt)).thenReturn(3);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
 
         // when

@@ -152,6 +152,45 @@ class ReservationRepositoryTest {
         assertThat(result).isEqualTo(3);
     }
 
+    @Test
+    @DisplayName("특정 날짜, 시간, 테마에 대해 주어진 생성 시간보다 이전에 생성된 예약의 개수를 반환할 수 있다")
+    void countReservationsBeforeTest() {
+        // given
+        LocalDate date = LocalDate.of(2025, 5, 1);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        entityManager.persist(time);
+
+        Theme theme = new Theme("theme", "description", "thumbnail");
+        entityManager.persist(theme);
+
+        LocalDateTime baseTime = LocalDateTime.of(2025, 5, 1, 12, 0);
+
+        for (int i = 0; i < 3; i++) {
+            Reservation reservation = new Reservation(date, time, theme, member, ReservationStatus.CONFIRMED,
+                    baseTime.minusHours(i + 1));
+            entityManager.persist(reservation);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            Reservation reservation = new Reservation(date, time, theme, member, ReservationStatus.CONFIRMED,
+                    baseTime.plusHours(i + 1));
+            entityManager.persist(reservation);
+        }
+
+        Reservation otherDateReservation = new Reservation(date.plusDays(1), time, theme, member,
+                ReservationStatus.CONFIRMED, baseTime.minusHours(1));
+        entityManager.persist(otherDateReservation);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        int result = reservationRepository.countReservationsBefore(date, time, theme, baseTime);
+
+        // then
+        assertThat(result).isEqualTo(3);
+    }
+
     private void createReservationsInRange(Theme theme, int count, LocalDate startDate, Member targetMember) {
         for (int i = 0; i < count; i++) {
             ReservationTime time = new ReservationTime(LocalTime.of(10, 0).plusHours(i % 8));
