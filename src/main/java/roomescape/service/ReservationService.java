@@ -24,11 +24,13 @@ public class ReservationService {
         this.waitingReservationService = waitingReservationService;
     }
 
+    @Transactional
     public ConfirmedReservation addReservation(CreateReservationRequest request,
                                                LoginMemberRequest loginMemberRequest) {
         return confirmReservationService.addReservation(request, loginMemberRequest);
     }
 
+    @Transactional
     public ConfirmedReservation addConfirmReservationByAdmin(AdminCreateReservationRequest request) {
         return confirmReservationService.addReservationByAdmin(request);
     }
@@ -69,6 +71,7 @@ public class ReservationService {
         return confirmReservationService.findAllReservationByMember(memberId);
     }
 
+    @Transactional
     public WaitingReservation addWaiting(CreateWaitingRequest request, LoginMemberRequest loginMemberRequest) {
         return waitingReservationService.addWaiting(request, loginMemberRequest);
     }
@@ -77,6 +80,7 @@ public class ReservationService {
         return waitingReservationService.findAllWaitingWithRank(memberId);
     }
 
+    @Transactional
     public void deleteWaiting(Long id) {
         waitingReservationService.deleteById(id);
     }

@@ -59,7 +59,7 @@ public class WaitingReservationService {
             Theme theme,
             ReservationTime time
     ) {
-        return waitingReservationRepository.findFirstWaitingByDateAndThemeIdAndTimeId(
+        return waitingReservationRepository.findFirstByDateAndThemeIdAndTimeIdOrderByIdAsc(
                 date,
                 theme.getId(),
                 time.getId()

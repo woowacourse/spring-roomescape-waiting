@@ -7,6 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.AdminCreateReservationRequest;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
