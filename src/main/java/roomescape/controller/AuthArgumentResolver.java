@@ -8,9 +8,13 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.controller.util.CookieHandler;
 import roomescape.domain.member.Member;
-import roomescape.dto.auth.CurrentMember;
+import roomescape.domain.member.Role;
+import roomescape.controller.annotation.AdminMember;
+import roomescape.controller.annotation.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
+import roomescape.exception.UnauthorizationException;
 import roomescape.service.query.MemberQueryService;
 import roomescape.util.JwtTokenProvider;
 
@@ -30,7 +34,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(CurrentMember.class)
+        return (parameter.hasParameterAnnotation(CurrentMember.class) || parameter.hasParameterAnnotation(AdminMember.class))
                 && parameter.getParameterType().equals(LoginInfo.class);
     }
 
@@ -42,6 +46,12 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
         String token = cookieHandler.extractCookie(cookies, "token");
         Long id = jwtTokenProvider.extractId(token);
         Member loginMember = memberQueryService.findMemberById(id);
-        return new LoginInfo(loginMember.getId(), loginMember.getName(), loginMember.getEmail(), loginMember.getRole());
+
+        if (parameter.hasParameterAnnotation(AdminMember.class)) {
+            if (loginMember.getRole() != Role.ADMIN) {
+                throw new UnauthorizationException("관리자 권한이 없는 사용자입니다.");
+            }
+        }
+        return new LoginInfo(loginMember);
     }
 }

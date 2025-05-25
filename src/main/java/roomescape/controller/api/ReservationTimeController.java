@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.annotation.AdminMember;
+import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.time.AvailableReservationTimeResponseDto;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeResponseDto;
@@ -33,7 +35,9 @@ public class ReservationTimeController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ReservationTimeResponseDto> getAllReservationTimes() {
+    public List<ReservationTimeResponseDto> getAllReservationTimes(
+            @AdminMember LoginInfo loginInfo
+    ) {
         return reservationTimeQueryService.findAllReservationTimes();
     }
 
@@ -49,14 +53,17 @@ public class ReservationTimeController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationTimeResponseDto addReservationTime(
-            @RequestBody final ReservationTimeCreateRequestDto requestDto) {
+            @RequestBody ReservationTimeCreateRequestDto requestDto,
+            @AdminMember LoginInfo loginInfo
+    ) {
         return reservationTimeCommandService.createReservationTime(requestDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservationTime(
-            @PathVariable("id") Long id
+            @PathVariable("id") Long id,
+            @AdminMember LoginInfo loginInfo
     ) {
         reservationTimeCommandService.deleteReservationTimeById(id);
     }
