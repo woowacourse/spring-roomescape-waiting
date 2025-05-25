@@ -22,7 +22,7 @@ class TimeSlotControllerTest {
 
     @Test
     @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다")
-    void addReservationTimeTest() {
+    void addReservationTime() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(RESERVATION_BODY)
@@ -35,7 +35,7 @@ class TimeSlotControllerTest {
 
     @Test
     @DisplayName("예약 시간 조회 요청시, 존재하는 모든 예약 시간과 OK를 응답한다")
-    void findAllReservationTimeTest() {
+    void findAllReservationTime() {
         RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
@@ -45,7 +45,7 @@ class TimeSlotControllerTest {
 
     @Test
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 없다면 NOT FOUND를 응답한다.")
-    void removeReservationTimeTest_WhenReservationTimeDoesNotExisted() {
+    void removeReservationTime_WhenReservationTimeDoesNotExisted() {
         RestAssured.given().log().all()
                 .when().delete("/times/1000")
                 .then().log().all()
@@ -54,7 +54,7 @@ class TimeSlotControllerTest {
 
     @Test
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 사용 중이라면 CONFLICT를 응답한다.")
-    void removeReservationTimeTest() {
+    void removeReservationTime() {
         RestAssured.given().log().all()
                 .when().delete("/times/1")
                 .then().log().all()

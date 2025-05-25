@@ -55,7 +55,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("과거의 날짜와 시간에 대한 예약 생성 시 예외를 던진다.")
-    void saveReservationTest_WhenReservePast() {
+    void saveReservation_WhenReservePast() {
         // given
         var yesterday = LocalDate.now().minusDays(1);
 
@@ -83,7 +83,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("검색 필터로 예약을 조회할 수 있다.")
-    void findReservationsByFilterTest() {
+    void findReservationsByFilter() {
         // given
         var filter =
                 new ReservationSearchFilter(1L, 2L, LocalDate.parse("2025-05-05"), LocalDate.parse("2025-05-06"));
@@ -104,7 +104,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("예약을 삭제할 수 있다.")
-    void removeByIdTest() {
+    void removeById() {
         // when
         service.removeById(1L);
 

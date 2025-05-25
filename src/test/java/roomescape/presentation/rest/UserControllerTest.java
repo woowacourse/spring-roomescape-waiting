@@ -24,7 +24,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("멤버 추가 요청시, id를 포함한 멤버와 CREATED를 응답한다")
-    void addMemberTest() {
+    void addMember() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(MEMBER_BODY)

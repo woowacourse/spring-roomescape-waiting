@@ -28,7 +28,7 @@ class TimeSlotServiceTest {
 
     @Test
     @DisplayName("새로운 시간대를 등록할 수 있다.")
-    void saveTimeSlotTest() {
+    void saveTimeSlot() {
         // given
         var startAt = LocalTime.of(16, 0);
 
@@ -42,7 +42,7 @@ class TimeSlotServiceTest {
 
     @Test
     @DisplayName("모든 시간대를 조회할 수 있다.")
-    void findAllTimeSlotsTest() {
+    void findAllTimeSlots() {
         // when
         var timeSlots = service.findAllTimeSlots();
 
@@ -52,7 +52,7 @@ class TimeSlotServiceTest {
 
     @Test
     @DisplayName("시간대를 삭제할 수 있다.")
-    void removeByIdTest() {
+    void removeById() {
         // given
         var timeSlotId = 3L;
 
