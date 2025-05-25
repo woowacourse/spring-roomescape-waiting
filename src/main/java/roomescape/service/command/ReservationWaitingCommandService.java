@@ -10,8 +10,10 @@ import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationWaitingTicket;
+import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.exception.NotFoundException;
+import roomescape.exception.UnauthorizationException;
 import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
@@ -73,11 +75,16 @@ public class ReservationWaitingCommandService {
         return ReservationResponseDto.of(newReservation);
     }
 
-    public void deleteReservationWaiting(Long id) {
+    public void deleteReservationWaiting(Long id, LoginInfo loginInfo) {
+        long memberId = loginInfo.id();
         Optional<Reservation> reservationWaiting = reservationRepository.findById(id);
         if (reservationWaiting.isEmpty()) {
             throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
+        if (reservationWaiting.get().getMember().getId() != memberId) {
+            throw new UnauthorizationException("예약자만 예약 대기 취소가 가능합니다.");
+        }
+
         reservationRepository.deleteById(id);
     }
 }
