@@ -7,7 +7,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ public class AuthApiTest {
     @Autowired
     public JwtTokenProvider tokenProvider;
 
-    @BeforeEach
+    @AfterEach
     void setup() {
         memberRepository.deleteAll();
     }

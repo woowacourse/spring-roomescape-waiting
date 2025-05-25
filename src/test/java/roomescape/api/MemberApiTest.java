@@ -4,7 +4,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ class MemberApiTest {
     @Autowired
     public JwtTokenProvider tokenProvider;
 
-    @BeforeEach
+    @AfterEach
     void setup() {
         memberRepository.deleteAll();
     }

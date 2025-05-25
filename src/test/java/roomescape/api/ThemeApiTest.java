@@ -8,7 +8,7 @@ import static roomescape.test.fixture.DateFixture.YESTERDAY;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ class ThemeApiTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
-    @BeforeEach
+    @AfterEach
     void setup() {
         reservationRepository.deleteAll();
         memberRepository.deleteAll();
