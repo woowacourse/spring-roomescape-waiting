@@ -23,7 +23,7 @@ import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
-import roomescape.model.PendingReservation;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
@@ -85,20 +85,20 @@ public class WaitingServiceTest {
                     () -> assertThat(
                             waitingJpaRepository.findAll()
                                     .getFirst()
-                                    .getPendingReservation()
+                                    .getReservation()
                                     .getMember()
                                     .getId()
                     ).isEqualTo(member.getId()),
                     () -> assertThat(
                             waitingJpaRepository.findAll()
                                     .getFirst()
-                                    .getPendingReservation()
+                                    .getReservation()
                                     .getDate()
                     ).isEqualTo(date),
                     () -> assertThat(
                             waitingJpaRepository.findAll()
                                     .getFirst()
-                                    .getPendingReservation()
+                                    .getReservation()
                                     .getTheme()
                                     .getId()
                     ).isEqualTo(theme.getId())
@@ -158,7 +158,7 @@ public class WaitingServiceTest {
 
             Waiting waiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new PendingReservation(
+                    new Reservation(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -185,7 +185,7 @@ public class WaitingServiceTest {
 
             Waiting waiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new PendingReservation(
+                    new Reservation(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -224,7 +224,7 @@ public class WaitingServiceTest {
 
             Waiting waiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new PendingReservation(
+                    new Reservation(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -235,7 +235,7 @@ public class WaitingServiceTest {
 
             Waiting anotherWaiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new PendingReservation(
+                    new Reservation(
                             LocalDate.now().plusDays(1),
                             anotherReservationTime,
                             theme,
@@ -271,7 +271,7 @@ public class WaitingServiceTest {
 
             Waiting firstWaiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new PendingReservation(
+                    new Reservation(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -282,7 +282,7 @@ public class WaitingServiceTest {
 
             Waiting secondWaiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new PendingReservation(
+                    new Reservation(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,

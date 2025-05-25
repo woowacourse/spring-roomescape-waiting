@@ -14,7 +14,7 @@ public record WaitingAdminResponseDto(
     public WaitingAdminResponseDto(Waiting waiting) {
         this(
                 waiting.getId(),
-                waiting.getPendingReservation().getMember().getName(),
+                waiting.getReservation().getMember().getName(),
                 waiting.getThemeName(),
                 waiting.getReservationDate(),
                 waiting.getReservationTime().getStartAt()

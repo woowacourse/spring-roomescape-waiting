@@ -11,7 +11,7 @@ import roomescape.dto.request.WaitingRegisterDto;
 import roomescape.dto.response.MemberWaitingResponseDto;
 import roomescape.dto.response.WaitingResponseDto;
 import roomescape.model.Member;
-import roomescape.model.PendingReservation;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 import roomescape.model.Waiting;
@@ -34,14 +34,14 @@ public class WaitingService {
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRegisterDto.time());
         Theme theme = themeRepository.findById(waitingRegisterDto.theme());
 
-        PendingReservation pendingReservation = new PendingReservation(
+        Reservation reservation = new Reservation(
                 waitingRegisterDto.date(),
                 reservationTime,
                 theme,
                 member,
                 LocalDate.now()
         );
-        Waiting waiting = new Waiting(LocalDateTime.now(), pendingReservation);
+        Waiting waiting = new Waiting(LocalDateTime.now(), reservation);
 
         Waiting savedWaiting = waitingRepository.save(waiting);
 

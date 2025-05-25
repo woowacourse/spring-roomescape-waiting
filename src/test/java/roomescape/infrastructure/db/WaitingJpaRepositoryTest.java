@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.model.Member;
-import roomescape.model.PendingReservation;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
@@ -51,7 +51,7 @@ class WaitingJpaRepositoryTest {
         LocalDate reservationDate = LocalDate.now().plusDays(1);
         Waiting targetWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(12, 30)),
-                        new PendingReservation(
+                        new Reservation(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -63,7 +63,7 @@ class WaitingJpaRepositoryTest {
 
         Waiting secondOrderWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(13, 30)),
-                        new PendingReservation(
+                        new Reservation(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -75,7 +75,7 @@ class WaitingJpaRepositoryTest {
 
         Waiting differentThemeWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(13, 30)),
-                        new PendingReservation(
+                        new Reservation(
                                 reservationDate,
                                 savedReservationTime,
                                 anotherTheme,

@@ -25,7 +25,7 @@ import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
-import roomescape.model.PendingReservation;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
@@ -181,7 +181,7 @@ class ReservationTicketServiceTest {
 
         Waiting firstWaiting = waitingJpaRepository.save(new Waiting(
                 LocalDateTime.now(),
-                new PendingReservation(
+                new Reservation(
                         LocalDate.now().plusDays(1),
                         reservationTime,
                         theme,
@@ -192,7 +192,7 @@ class ReservationTicketServiceTest {
 
         Waiting secondWaiting = waitingJpaRepository.save(new Waiting(
                 LocalDateTime.now().plusHours(1),
-                new PendingReservation(
+                new Reservation(
                         LocalDate.now().plusDays(1),
                         reservationTime,
                         theme,

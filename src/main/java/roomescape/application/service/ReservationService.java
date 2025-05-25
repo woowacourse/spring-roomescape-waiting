@@ -120,7 +120,7 @@ public class ReservationService {
                 nextWaiting.getReservationDate(),
                 nextWaiting.getReservationTime(),
                 nextWaiting.getTheme(),
-                nextWaiting.getPendingReservation().getMember(),
+                nextWaiting.getReservation().getMember(),
                 nextWaiting.getRegisteredAt().toLocalDate()
         );
     }
