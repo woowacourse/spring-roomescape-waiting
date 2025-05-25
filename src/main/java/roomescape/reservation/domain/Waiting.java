@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.ArgumentNullException;
 import roomescape.member.domain.Member;
@@ -30,12 +32,16 @@ public class Waiting {
     @JoinColumn(nullable = false)
     private Theme theme;
 
+    @Column(nullable = false)
+    private LocalDateTime queuedAt;
+
     private Waiting(final Long id, final Member member, final ReservationTime reservationTime, final Theme theme) {
         validateNull(member, reservationTime, theme);
         this.id = id;
         this.member = member;
         this.reservationTime = reservationTime;
         this.theme = theme;
+        this.queuedAt = LocalDateTime.now();
     }
 
     protected Waiting() {
