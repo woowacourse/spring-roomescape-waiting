@@ -46,7 +46,7 @@ VALUES ('백룸', '공간왜곡 테마', '');
 INSERT INTO member (name, email, password, role)
 VALUES ('슬링키', 'email@email.com', 'pw', 'ADMIN');
 INSERT INTO member (name, email, password, role)
-VALUES ('메롱유저', 'email2@emil.com', 'pw', 'USER');
+VALUES ('메롱유저', 'email2@email.com', 'pw', 'USER');
 
 -- -- 4. 예약 (member_id는 슬링키의 id 1로 고정)
 -- -- 날짜는 최근 7일 내 (DATEADD 사용)
