@@ -43,21 +43,28 @@ public class Member {
     @Column(nullable = false)
     private AuthRole role;
 
-    public Member(final Long id, final String name, final String email, final String password, final AuthRole role) {
+    private Member(final String name, final String email, final String password, final AuthRole role) {
         validateName(name);
         validateEmail(email);
         validatePassword(password);
         validateRole(role);
 
-        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public Member(final String name, final String email, final String password, final AuthRole role) {
-        this(null, name, email, password, role);
+    public static Member of(final String name, final String email, final String password, final AuthRole role) {
+        return new Member(name, email, password, role);
+    }
+
+    public boolean isWrongPassword(final String password) {
+        return !this.password.equals(password);
+    }
+
+    public boolean isAdmin() {
+        return role == AuthRole.ADMIN;
     }
 
     private void validateName(final String name) {
@@ -85,13 +92,5 @@ public class Member {
         if (role == null) {
             throw new IllegalArgumentException("역할은 null 일 수 없습니다.");
         }
-    }
-
-    public boolean isWrongPassword(final String password) {
-        return !this.password.equals(password);
-    }
-
-    public boolean isAdmin() {
-        return role == AuthRole.ADMIN;
     }
 }

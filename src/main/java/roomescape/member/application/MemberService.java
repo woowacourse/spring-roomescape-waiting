@@ -21,7 +21,7 @@ public class MemberService {
 
     @Transactional
     public MemberResponse.IdName create(final SignUpRequest request) {
-        final Member member = new Member(
+        final Member member = Member.of(
                 request.name(),
                 request.email(),
                 request.password(),
