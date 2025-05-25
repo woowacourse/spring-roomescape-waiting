@@ -16,7 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.exception.NotFoundException;
 
 @DataJpaTest
-class TimeSlotJpaRepositoryTest {
+class TimeSlotRepositoryTest {
 
     @Autowired
     private TimeSlotRepository timeSlotRepository;

@@ -11,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.exception.NotFoundException;
 
 @DataJpaTest
-class UserJpaRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
