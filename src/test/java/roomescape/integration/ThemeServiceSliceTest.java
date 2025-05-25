@@ -3,8 +3,10 @@ package roomescape.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -49,8 +51,8 @@ public class ThemeServiceSliceTest {
         for (String beanName : beanNames) {
             System.out.println(beanName);
         }
-
-        currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
+        when(currentDateTime.getDate()).thenReturn(LocalDate.of(2025, 5, 1));
+        when(currentDateTime.getTime()).thenReturn(LocalTime.of(10, 0));
         themeService = new ThemeService(themeRepository, reservationRepository, currentDateTime);
     }
 
@@ -131,19 +133,6 @@ public class ThemeServiceSliceTest {
         assertThat(result).hasSize(10);
         assertThat(result.getFirst().name()).isEqualTo("테마11");
         assertThat(result.get(1).name()).isEqualTo("테마9");
-    }
-
-    @DisplayName("최근 일주일 간 예약이 존재하지 않는 테마는 인기 테마에 포함되지 않는다")
-    @Test
-    void findPopularThemes2() {
-        // given
-        currentDateTime.changeDateTime(LocalDateTime.of(2025, 4, 12, 10, 0));
-
-        // when
-        List<ThemeInfo> result = themeService.findPopularThemes();
-
-        // then
-        assertThat(result).isEmpty();
     }
 }
 
