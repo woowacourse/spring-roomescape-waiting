@@ -15,7 +15,7 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.AvailableReservationTime;
-import roomescape.reservation.dto.ReservationMineResponse;
+import roomescape.reservation.dto.ReservationsResponse;
 import roomescape.reservation.dto.ReservationWithRank;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -73,7 +73,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(final Long id) {
+    public void cancelById(final Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + id));
 
@@ -81,7 +81,16 @@ public class ReservationService {
             approveNextWaitingReservation(reservation.getSlot());
         }
 
-        reservationRepository.deleteById(id);
+        reservation.cancelReservation();
+    }
+
+    @Transactional
+    public void cancelWaitingById(final Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("해당 예약 대기 데이터가 존재하지 않습니다. id = " + id));
+
+
+        reservation.cancelWaiting();
     }
 
     private void approveNextWaitingReservation(ReservationSlot slot) {
@@ -93,22 +102,22 @@ public class ReservationService {
                 });
     }
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
-    }
-
     public List<AvailableReservationTime> findAvailableReservationTimes(final LocalDate date, final Long themeId) {
         return reservationSlotService.findAvailableSlots(date, themeId);
     }
 
-    public List<ReservationMineResponse> findReservationsByMember(final Member member) {
+    public List<Reservation> findAllConfirmReservations() {
+        return reservationRepository.findAllReservations(ReservationStatus.CONFIRMED);
+    }
+
+    public List<ReservationsResponse> findReservationsByMember(final Member member) {
         List<ReservationWithRank> confirmedReservations = reservationRepository
                 .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.CONFIRMED);
         List<ReservationWithRank> waitingReservations = reservationRepository
                 .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.WAITING);
 
         return Stream.concat(
-                confirmedReservations.stream().map(ReservationMineResponse::from),
-                waitingReservations.stream().map(ReservationMineResponse::from)).toList();
+                confirmedReservations.stream().map(ReservationsResponse::from),
+                waitingReservations.stream().map(ReservationsResponse::from)).toList();
     }
 }

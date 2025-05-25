@@ -18,7 +18,7 @@ import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationResponse;
-import roomescape.reservation.dto.ReservationMineResponse;
+import roomescape.reservation.dto.ReservationsResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -54,16 +54,23 @@ public class ReservationRestController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable final Long id) {
-        reservationService.deleteById(id);
+        reservationService.cancelById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("waiting/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable final Long id) {
+        reservationService.cancelWaitingById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<CreateReservationResponse>> getReservations() {
-        final List<Reservation> reservations = reservationService.findAll();
-        final List<CreateReservationResponse> createReservationResponse = reservations.stream()
-                .map(CreateReservationResponse::from)
-                .toList();
+        final List<Reservation> reservations = reservationService.findAllConfirmReservations();
+        final List<CreateReservationResponse> createReservationResponse =
+                reservations.stream()
+                        .map(CreateReservationResponse::from)
+                        .toList();
 
         return ResponseEntity.ok(createReservationResponse);
     }
@@ -82,8 +89,8 @@ public class ReservationRestController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
-        final List<ReservationMineResponse> reservations = reservationService.findReservationsByMember(member);
+    public ResponseEntity<List<ReservationsResponse>> getMyReservations(final Member member) {
+        final List<ReservationsResponse> reservations = reservationService.findReservationsByMember(member);
 
         return ResponseEntity.ok(reservations);
     }

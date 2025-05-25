@@ -44,6 +44,10 @@ function render(data) {
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
+                if (!item.reservationId) {
+                    console.error('Invalid reservation ID');
+                    return;
+                }
                 requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
@@ -54,10 +58,7 @@ function render(data) {
 }
 
 function requestDeleteWaiting(id) {
-    /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
-     */
-    return fetch(`/reservations/${id}`, {
+    return fetch(`/reservations/waiting/${id}`, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;

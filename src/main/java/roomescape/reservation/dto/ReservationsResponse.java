@@ -4,16 +4,16 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 
-public record ReservationMineResponse(
+public record ReservationsResponse(
         Long reservationId,
         String theme,
         LocalDate date,
         LocalTime time,
         String status,
         long rank) {
-    public static ReservationMineResponse from(ReservationWithRank reservationWithRank) {
+    public static ReservationsResponse from(ReservationWithRank reservationWithRank) {
         Reservation reservation = reservationWithRank.reservation();
-        return new ReservationMineResponse(
+        return new ReservationsResponse(
                 reservation.getId(),
                 reservation.getSlot().getTheme().getName(),
                 reservation.getSlot().getDate(),

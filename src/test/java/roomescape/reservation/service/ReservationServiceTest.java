@@ -90,7 +90,7 @@ class ReservationServiceTest {
                                                 savedTheme));
 
                 // when
-                final List<Reservation> reservations = reservationService.findAll();
+                final List<Reservation> reservations = reservationService.findAllConfirmReservations();
 
                 // then
                 assertThat(reservations.size()).isEqualTo(2);
@@ -145,7 +145,7 @@ class ReservationServiceTest {
                                 savedTheme));
 
                 // when & then
-                Assertions.assertThatCode(() -> reservationService.deleteById(savedReservation.getId()))
+                Assertions.assertThatCode(() -> reservationService.cancelById(savedReservation.getId()))
                                 .doesNotThrowAnyException();
         }
 

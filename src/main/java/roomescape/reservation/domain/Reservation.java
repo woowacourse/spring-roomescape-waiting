@@ -101,4 +101,18 @@ public class Reservation {
     public String getStatusValue() {
         return status.getDescription();
     }
+
+    public void cancelReservation() {
+        if (status != ReservationStatus.CONFIRMED) {
+            throw new IllegalArgumentException("승인 상태의 예약이 아닙니다.");
+        }
+        this.status = ReservationStatus.CANCELED;
+    }
+
+    public void cancelWaiting() {
+        if (status != ReservationStatus.WAITING) {
+            throw new IllegalStateException("대기 상태의 예약이 아닙니다.");
+        }
+        this.status = ReservationStatus.WAITING_CANCELED;
+    }
 }
