@@ -74,11 +74,11 @@ VALUES ('2025-05-17', 5, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-18', 6, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 7, 12, 3);
+VALUES ('2025-05-20', 7, 11, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 8, 12, 3);
+VALUES ('2025-05-20', 8, 11, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 9, 12, 3);
+VALUES ('2025-05-20', 9, 13, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-20', 10, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
@@ -89,9 +89,9 @@ VALUES ('2025-05-20', 12, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-25', 1, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 2, 10, 2);
+VALUES ('2025-05-25', 2, 9, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 3, 10, 2);
+VALUES ('2025-05-25', 3, 9, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-25', 4, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)

@@ -3,16 +3,16 @@ package roomescape.member.ui;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.response.ApiResponse;
 import roomescape.member.application.MemberService;
 import roomescape.member.application.dto.MemberRequest;
 import roomescape.member.application.dto.MemberResponse;
 
-@Controller
+@RestController
 @RequestMapping("members")
 @AllArgsConstructor
 public class MemberController {
