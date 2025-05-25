@@ -46,4 +46,8 @@ public class WaitingDomainService {
     public List<Waiting> findAllWaitingReservations() {
         return waitingRepository.findAllByWaitingStatus(WaitingStatus.WAITING);
     }
+
+    public void removeWaitingReservation(final Long waitingId) {
+        waitingRepository.deleteById(waitingId);
+    }
 }

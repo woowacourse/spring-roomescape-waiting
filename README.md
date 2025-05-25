@@ -748,6 +748,20 @@ Content-Type: application/json
 ]
 ```
 
+## 관리자용 예약 대기 삭제 기능
+### 요청
+```json
+DELETE /admin/waiting-reservations/{waitingId} HTTP/1.1
+cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+host: localhost:8080
+```
+
+### 응답
+```json
+HTTP/1.1 204
+Content-Type: application/json
+```
+
 ## 예외
 
 - DateTimeParseException : 날짜(yyyy-MM-dd) & 시간(HH:mm) 파싱 예외시 400

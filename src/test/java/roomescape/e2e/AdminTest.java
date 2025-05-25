@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
 import roomescape.waiting.presentation.dto.WaitingResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -140,5 +141,28 @@ public class AdminTest {
                 .as(new TypeRef<>() {
                 });
         assertThat(responses.size()).isOne();
+    }
+
+    @Test
+    void removeWaitingReservation() {
+        WaitingReservationResponse waitingResponse = makeWaitingReservations();
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TOKEN, ADMIN_TOKEN)
+                .pathParam("waitingId", waitingResponse.waitingId())
+                .when().delete("/admin/waiting-reservations/{waitingId}")
+                .then().log().all()
+                .statusCode(204);
+
+        List<WaitingResponse> responses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TOKEN, ADMIN_TOKEN)
+                .when().get("/admin/waiting-reservations")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(new TypeRef<>() {
+                });
+        assertThat(responses).isEmpty();
     }
 }

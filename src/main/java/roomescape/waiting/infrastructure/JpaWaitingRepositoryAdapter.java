@@ -39,4 +39,9 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
     public List<Waiting> findAllByWaitingStatus(final WaitingStatus waitingStatus) {
         return jpaWaitingRepository.findAllByWaitingStatus(waitingStatus);
     }
+
+    @Override
+    public void deleteById(final Long waitingId) {
+        jpaWaitingRepository.deleteById(waitingId);
+    }
 }

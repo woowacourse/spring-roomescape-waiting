@@ -47,4 +47,8 @@ public class WaitingApplicationService {
                 .map(WaitingResponse::from)
                 .toList();
     }
+
+    public void removeWaitingReservation(final Long waitingId) {
+        waitingDomainService.removeWaitingReservation(waitingId);
+    }
 }

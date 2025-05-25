@@ -29,39 +29,36 @@ function render(data) {
 
         const actionCell = row.insertCell(row.cells.length);
 
-        actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
+        // actionCell.appendChild(createActionButton('승인', 'btn-primary', approve));
         actionCell.appendChild(createActionButton('거절', 'btn-danger', deny));
     });
 }
 
-function approve(event) {
-    const row = event.target.closest('tr');
-    const id = row.cells[0].textContent;
-
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 승인 API 호출
-     */
-    const endpoint = '' + id;
-    return fetch(endpoint, {
-        method: ''
-    }).then(response => {
-        if (response.status === 200) return;
-        throw new Error('Delete failed');
-    }).then(() => location.reload());
-}
+// INFO: 자동 승인 기능
+// function approve(event) {
+//     const row = event.target.closest('tr');
+//     const id = row.cells[0].textContent;
+//
+//     /*
+//     TODO: [4단계] 예약 대기 목록 관리 기능
+//           예약 대기 승인 API 호출
+//      */
+//     const endpoint = '' + id;
+//     return fetch(endpoint, {
+//         method: ''
+//     }).then(response => {
+//         if (response.status === 200) return;
+//         throw new Error('Delete failed');
+//     }).then(() => location.reload());
+// }
 
 function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    /*
-    TODO: [4단계] 예약 대기 목록 관리 기능
-          예약 대기 거절 API 호출
-     */
-    const endpoint = '' + id;
+    const endpoint = '/admin/waiting-reservations/' + id;
     return fetch(endpoint, {
-        method: ''
+        method: 'DELETE'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');

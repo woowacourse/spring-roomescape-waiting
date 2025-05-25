@@ -15,4 +15,6 @@ public interface WaitingRepository {
     boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
 
     List<Waiting> findAllByWaitingStatus(WaitingStatus waitingStatus);
+
+    void deleteById(Long waitingId);
 }

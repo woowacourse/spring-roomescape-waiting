@@ -54,4 +54,13 @@ public class WaitingController {
         List<WaitingResponse> responses = waitingApplicationService.findAllWaitingReservations();
         return ResponseEntity.ok(responses);
     }
+
+    @RequireRole(MemberRole.ADMIN)
+    @DeleteMapping("/admin/waiting-reservations/{waitingId}")
+    public ResponseEntity<Void> removeWaitingReservation(
+            @PathVariable Long waitingId
+    ) {
+        waitingApplicationService.removeWaitingReservation(waitingId);
+        return ResponseEntity.noContent().build();
+    }
 }
