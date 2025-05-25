@@ -8,7 +8,6 @@ import roomescape.business.model.vo.Email;
 import roomescape.business.model.vo.Id;
 import roomescape.infrastructure.jpa.dao.JpaUserDao;
 
-import java.util.List;
 import java.util.Optional;
 
 @Primary
@@ -24,11 +23,6 @@ public class JpaUsers implements Users {
     @Override
     public void save(User user) {
         dao.save(user);
-    }
-
-    @Override
-    public List<User> findAll() {
-        return dao.findAll();
     }
 
     @Override
