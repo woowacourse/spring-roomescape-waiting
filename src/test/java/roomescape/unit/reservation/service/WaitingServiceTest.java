@@ -76,14 +76,14 @@ class WaitingServiceTest {
         var savedMember2 = memberRepository.save(member2);
         var savedTheme = themeRepository.save(theme);
         var savedTimeSlot = timeSlotRepository.save(timeSlot);
-        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), savedTimeSlot);
+        var reservationTime = new ReservationTime(LocalDate.now().plusDays(1), savedTimeSlot);
         Reservation reservation = Reservation.builder()
                 .reservationTime(reservationTime)
                 .theme(savedTheme)
                 .member(savedMember1)
                 .build();
         reservationRepository.save(reservation);
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), savedTimeSlot.getId(),
+        WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), savedTimeSlot.getId(),
                 savedTheme.getId());
         // when
         assertThatCode(() -> waitingService.createWaiting(savedMember2.getId(), request))
@@ -106,7 +106,7 @@ class WaitingServiceTest {
         var savedMember = memberRepository.save(member);
         var savedTheme = themeRepository.save(theme);
         var savedTimeSlot = timeSlotRepository.save(timeSlot);
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), savedTimeSlot.getId(),
+        WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), savedTimeSlot.getId(),
                 savedTheme.getId());
         // when
         assertThatThrownBy(() -> waitingService.createWaiting(savedMember.getId(), request))
@@ -129,14 +129,14 @@ class WaitingServiceTest {
         var savedMember = memberRepository.save(member);
         var savedTheme = themeRepository.save(theme);
         var savedTimeSlot = timeSlotRepository.save(timeSlot);
-        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), savedTimeSlot);
+        var reservationTime = new ReservationTime(LocalDate.now().plusDays(1), savedTimeSlot);
         Waiting waiting = Waiting.builder()
                 .member(savedMember)
                 .theme(savedTheme)
                 .reservationTime(reservationTime)
                 .build();
         waitingRepository.save(waiting);
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), savedTimeSlot.getId(),
+        WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), savedTimeSlot.getId(),
                 savedTheme.getId());
         // when
         assertThatThrownBy(() -> waitingService.createWaiting(savedMember.getId(), request))
@@ -159,14 +159,14 @@ class WaitingServiceTest {
         var savedMember = memberRepository.save(member);
         var savedTheme = themeRepository.save(theme);
         var savedTimeSlot = timeSlotRepository.save(timeSlot);
-        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), savedTimeSlot);
+        var reservationTime = new ReservationTime(LocalDate.now().plusDays(1), savedTimeSlot);
         Reservation reservation = Reservation.builder()
                 .member(savedMember)
                 .theme(savedTheme)
                 .reservationTime(reservationTime)
                 .build();
         reservationRepository.save(reservation);
-        WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), savedTimeSlot.getId(),
+        WaitingRequest request = new WaitingRequest(LocalDate.now().plusDays(1), savedTimeSlot.getId(),
                 savedTheme.getId());
         // when
         assertThatThrownBy(() -> waitingService.createWaiting(savedMember.getId(), request))
@@ -198,7 +198,7 @@ class WaitingServiceTest {
                         .email("email2@domain.com")
                         .password("password2").build()
         );
-        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
+        var reservationTime = new ReservationTime(LocalDate.now().plusDays(1), timeSlot);
         waitingRepository.save(
                 Waiting.builder()
                         .member(member2)
@@ -245,7 +245,7 @@ class WaitingServiceTest {
                         .email("email2@domain.com")
                         .password("password2").build()
         );
-        ReservationTime reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
+        ReservationTime reservationTime = new ReservationTime(LocalDate.now().plusDays(1), timeSlot);
         waitingRepository.save(
                 Waiting.builder()
                         .reservationTime(reservationTime)
@@ -294,7 +294,7 @@ class WaitingServiceTest {
                 .name("name1")
                 .email("email1@domain.com")
                 .password("password1").build();
-        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
+        var reservationTime = new ReservationTime(LocalDate.now().plusDays(1), timeSlot);
         waitingRepository.save(
                 Waiting.builder()
                         .reservationTime(reservationTime)
@@ -334,7 +334,7 @@ class WaitingServiceTest {
                 .name("name2")
                 .email("email2@domain.com")
                 .password("password2").build();
-        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
+        var reservationTime = new ReservationTime(LocalDate.now().plusDays(1), timeSlot);
         Reservation waiting1 = reservationRepository.save(
                 Reservation.builder()
                         .reservationTime(reservationTime)
@@ -375,7 +375,7 @@ class WaitingServiceTest {
                         .email("email1@domain.com")
                         .password("password1").build()
         );
-        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
+        var reservationTime = new ReservationTime(LocalDate.now().plusDays(1), timeSlot);
         Waiting waiting = waitingRepository.save(
                 Waiting.builder()
                         .reservationTime(reservationTime)
