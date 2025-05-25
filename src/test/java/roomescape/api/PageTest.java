@@ -107,6 +107,64 @@ class PageTest {
     }
 
     @Test
+    void 어드민_예약대기_화면_요청을_성공한다() {
+        Member admin = memberRepository.save(
+                new Member(null, "admin", "admin@domain.com", "password1", Role.ADMIN)
+        );
+
+        Map<String, Object> body = Map.of(
+                "email", admin.getEmail(),
+                "password", admin.getPassword()
+        );
+
+        String token = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/api/auth/login")
+                .then()
+                .statusCode(200)
+                .extract().cookie("token");
+
+        RestAssured.given().log().all()
+                .cookie(token)
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
+    void 관리자가_아닌_사용자가_어드민_예약대기_화면_요청_시_리다이렉트된다() {
+        Member member = memberRepository.save(
+                new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
+        );
+
+        Map<String, Object> body = Map.of(
+                "email", member.getEmail(),
+                "password", member.getPassword()
+        );
+        String token = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/api/auth/login")
+                .then()
+                .statusCode(200)
+                .extract().cookie("token");
+
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .redirects().follow(false)
+                .when().get("/admin")
+                .then().log().all()
+                .statusCode(302);
+
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/admin")
+                .then().log().all()
+                .statusCode(200);
+    }
+
+    @Test
     void 어드민_홈_화면_요청을_성공한다() {
         Member admin = memberRepository.save(
                 new Member(null, "admin", "admin@domain.com", "password1", Role.ADMIN)
