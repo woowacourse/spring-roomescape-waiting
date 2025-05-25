@@ -21,22 +21,22 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByWaitingMemberId(final Long memberId) {
+    public List<Reservation> findByReservationMemberId(final Long memberId) {
         return jpaReservationRepository.findByReservationMemberId(memberId);
     }
 
     @Override
-    public void deleteByBookingSlotIdAndMemberId(final Long reservationId, final Long memberId) {
-        jpaReservationRepository.deleteByBookingSlotIdAndMemberId(reservationId, memberId);
+    public void deleteByReservationSlotIdAndMemberId(final Long reservationId, final Long memberId) {
+        jpaReservationRepository.deleteByReservationSlotIdAndMemberId(reservationId, memberId);
     }
 
     @Override
-    public boolean existsByBookingSlotIdAndMemberId(final Long reservationId, final Long memberId) {
-        return jpaReservationRepository.existsByBookingSlotIdAndMemberId(reservationId, memberId);
+    public boolean existsByReservationSlotIdAndMemberId(final Long reservationId, final Long memberId) {
+        return jpaReservationRepository.existsByReservationSlotIdAndMemberId(reservationId, memberId);
     }
 
     @Override
-    public List<Reservation> findAllByWaitingStatus(final ReservationStatus reservationStatus) {
+    public List<Reservation> findAllByReservationStatus(final ReservationStatus reservationStatus) {
         return jpaReservationRepository.findAllByReservationStatus(reservationStatus);
     }
 

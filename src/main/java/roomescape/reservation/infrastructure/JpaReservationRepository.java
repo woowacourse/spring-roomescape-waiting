@@ -12,7 +12,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
     @Query("""
             SELECT w 
             FROM Reservation w 
-            JOIN FETCH w.bookingSlot r            
+            JOIN FETCH w.reservationSlot r            
             JOIN FETCH r.time t 
             JOIN FETCH r.theme th                   
             WHERE w.member.id = :memberId
@@ -22,17 +22,17 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
     @Modifying
     @Query("""
             DELETE FROM Reservation w 
-            WHERE w.bookingSlot.id = :reservationId
+            WHERE w.reservationSlot.id = :reservationId
             AND w.member.id = :memberId
             """)
-    void deleteByBookingSlotIdAndMemberId(Long reservationId, Long memberId);
+    void deleteByReservationSlotIdAndMemberId(Long reservationId, Long memberId);
 
-    boolean existsByBookingSlotIdAndMemberId(Long reservationId, Long memberId);
+    boolean existsByReservationSlotIdAndMemberId(Long reservationId, Long memberId);
 
     @Query("""
             SELECT w 
             FROM Reservation w 
-            JOIN FETCH w.bookingSlot r            
+            JOIN FETCH w.reservationSlot r            
             JOIN FETCH r.time t 
             JOIN FETCH r.theme th                   
             WHERE w.reservationStatus = :reservationStatus

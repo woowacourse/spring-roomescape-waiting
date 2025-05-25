@@ -11,7 +11,7 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
             SELECT th FROM Theme th 
-            left join BookingSlot as bs
+            left join ReservationSlot as bs
             on th.id = bs.theme.id 
             and bs.date between :fromDate and :toDate 
             group by th.id 

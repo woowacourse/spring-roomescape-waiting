@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.bookingslot.domain.BookingSlot;
-import roomescape.bookingslot.domain.repository.BookingSlotRepository;
+import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -35,7 +35,7 @@ class JpaReservationRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private BookingSlotRepository bookingSlotRepository;
+    private ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -54,8 +54,8 @@ class JpaReservationRepositoryTest {
         member = memberRepository.save(TestFixture.makeMember());
         reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme());
-        bookingSlotRepository.save(
-                BookingSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime, theme, NOW_DATETIME));
+        reservationSlotRepository.save(
+                ReservationSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime, theme, NOW_DATETIME));
     }
 
     @Test
@@ -64,7 +64,7 @@ class JpaReservationRepositoryTest {
         Long memberId = member.getId();
 
         // When
-        List<Reservation> reservations = reservationRepository.findByWaitingMemberId(memberId);
+        List<Reservation> reservations = reservationRepository.findByReservationMemberId(memberId);
 
         // Then
         assertThat(reservations.size()).isEqualTo(1);

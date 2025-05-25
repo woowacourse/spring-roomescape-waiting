@@ -2,8 +2,8 @@ package roomescape.reservationtime.domain.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.bookingslot.exception.ReservationNotFoundException;
-import roomescape.bookingslot.domain.service.BookingSlotDomainService;
+import roomescape.reservationslot.exception.ReservationNotFoundException;
+import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
@@ -14,12 +14,12 @@ import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 public class ReservationTimeDomainService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final BookingSlotDomainService bookingSlotDomainService;
+    private final ReservationSlotDomainService reservationSlotDomainService;
 
     public ReservationTimeDomainService(final ReservationTimeRepository reservationTimeRepository,
-                                        final BookingSlotDomainService bookingSlotDomainService) {
+                                        final ReservationSlotDomainService reservationSlotDomainService) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.bookingSlotDomainService = bookingSlotDomainService;
+        this.reservationSlotDomainService = reservationSlotDomainService;
     }
 
     public List<ReservationTime> findAll() {
@@ -27,7 +27,7 @@ public class ReservationTimeDomainService {
     }
 
     public void delete(Long id) {
-        if (bookingSlotDomainService.existsByTimeId(id)) {
+        if (reservationSlotDomainService.existsByTimeId(id)) {
             throw new ReservationTimeInUseException("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);

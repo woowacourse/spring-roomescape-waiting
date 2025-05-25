@@ -51,7 +51,7 @@ VALUES ('Admin', 'admin@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5
        ('Daniel', 'daniel@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR');
 
 -- Reservation 테이블 데이터 (ReservationStatus 제거)
-INSERT INTO booking_slots(date, time_id, theme_id)
+INSERT INTO reservation_slots(date, time_id, theme_id)
 VALUES
     -- theme_id = 12 (6회) - 2025-05-10
     ('2025-05-10', 1, 12),  -- ID: 1

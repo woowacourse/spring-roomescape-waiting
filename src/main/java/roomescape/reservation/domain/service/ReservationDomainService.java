@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
-import roomescape.bookingslot.presentation.dto.response.MyReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
@@ -24,27 +24,27 @@ public class ReservationDomainService {
     }
 
     public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
-        return reservationRepository.findByWaitingMemberId(memberInfo.id())
+        return reservationRepository.findByReservationMemberId(memberInfo.id())
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
     }
 
     @Transactional
-    public void deleteByBookingSlotIdAndMemberId(final Long reservationId, final Long memberId) {
+    public void deleteByReservationSlotIdAndMemberId(final Long reservationId, final Long memberId) {
         validateWaitingOwner(reservationId, memberId);
-        reservationRepository.deleteByBookingSlotIdAndMemberId(reservationId, memberId);
+        reservationRepository.deleteByReservationSlotIdAndMemberId(reservationId, memberId);
     }
 
     public void validateWaitingOwner(final Long reservationId, final Long memberId) {
-        boolean doesExists = reservationRepository.existsByBookingSlotIdAndMemberId(reservationId, memberId);
+        boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationId, memberId);
         if (!doesExists) {
             throw new SlotReservationOwnerException("자신의 예약 대기가 아닙니다.");
         }
     }
 
     public List<Reservation> findAllWaitingReservations() {
-        return reservationRepository.findAllByWaitingStatus(ReservationStatus.WAITING);
+        return reservationRepository.findAllByReservationStatus(ReservationStatus.WAITING);
     }
 
     public void removeWaitingReservation(final Long waitingId) {

@@ -3,7 +3,7 @@ package roomescape.theme.application;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import roomescape.bookingslot.domain.service.BookingSlotDomainService;
+import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.service.ThemeDomainService;
@@ -14,12 +14,12 @@ import roomescape.theme.presentation.dto.response.ThemeResponse;
 public class ThemeApplicationService {
 
     private final ThemeDomainService themeDomainService;
-    private final BookingSlotDomainService bookingSlotDomainService;
+    private final ReservationSlotDomainService reservationSlotDomainService;
 
     public ThemeApplicationService(final ThemeDomainService themeDomainService,
-                                   final BookingSlotDomainService bookingSlotDomainService) {
+                                   final ReservationSlotDomainService reservationSlotDomainService) {
         this.themeDomainService = themeDomainService;
-        this.bookingSlotDomainService = bookingSlotDomainService;
+        this.reservationSlotDomainService = reservationSlotDomainService;
     }
 
     public List<ThemeResponse> getThemes() {
@@ -29,7 +29,7 @@ public class ThemeApplicationService {
     }
 
     public void delete(Long id) {
-        if (bookingSlotDomainService.existsByThemeId(id)) {
+        if (reservationSlotDomainService.existsByThemeId(id)) {
             throw new ReservationTimeInUseException("해당 테마에 대한 예약이 존재하여 삭제할 수 없습니다.");
         }
         themeDomainService.deleteById(id);

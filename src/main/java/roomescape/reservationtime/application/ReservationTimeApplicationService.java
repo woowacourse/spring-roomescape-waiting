@@ -3,7 +3,7 @@ package roomescape.reservationtime.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.bookingslot.domain.service.BookingSlotDomainService;
+import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
@@ -14,12 +14,12 @@ import roomescape.reservationtime.presentation.dto.response.ReservationTimeRespo
 public class ReservationTimeApplicationService {
 
     private final ReservationTimeDomainService reservationTimeDomainService;
-    private final BookingSlotDomainService bookingSlotDomainService;
+    private final ReservationSlotDomainService reservationSlotDomainService;
 
     public ReservationTimeApplicationService(final ReservationTimeDomainService reservationTimeDomainService,
-                                             final BookingSlotDomainService bookingSlotDomainService) {
+                                             final ReservationSlotDomainService reservationSlotDomainService) {
         this.reservationTimeDomainService = reservationTimeDomainService;
-        this.bookingSlotDomainService = bookingSlotDomainService;
+        this.reservationSlotDomainService = reservationSlotDomainService;
     }
 
     public List<ReservationTimeResponse> getReservationTimes() {
@@ -39,6 +39,6 @@ public class ReservationTimeApplicationService {
 
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date,
                                                                                final Long themeId) {
-        return bookingSlotDomainService.findBookedTimesByDateAndThemeId(date, themeId);
+        return reservationSlotDomainService.findBookedTimesByDateAndThemeId(date, themeId);
     }
 }

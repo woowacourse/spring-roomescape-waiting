@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import roomescape.bookingslot.exception.ReservationNotFoundException;
-import roomescape.bookingslot.domain.repository.BookingSlotRepository;
+import roomescape.reservationslot.exception.ReservationNotFoundException;
+import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
@@ -18,12 +18,12 @@ public class ThemeDomainService {
     private static final int DAYS_TO_SUBTRACT = 1;
 
     private final ThemeRepository themeRepository;
-    private final BookingSlotRepository bookingSlotRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
 
     public ThemeDomainService(final ThemeRepository themeRepository,
-                              final BookingSlotRepository bookingSlotRepository) {
+                              final ReservationSlotRepository reservationSlotRepository) {
         this.themeRepository = themeRepository;
-        this.bookingSlotRepository = bookingSlotRepository;
+        this.reservationSlotRepository = reservationSlotRepository;
     }
 
     public List<Theme> getThemes() {
@@ -31,7 +31,7 @@ public class ThemeDomainService {
     }
 
     public void delete(Long id) {
-        if (bookingSlotRepository.existsByThemeId(id)) {
+        if (reservationSlotRepository.existsByThemeId(id)) {
             throw new ReservationTimeInUseException("해당 테마에 대한 예약이 존재하여 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);

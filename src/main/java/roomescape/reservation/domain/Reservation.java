@@ -15,7 +15,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
-import roomescape.bookingslot.domain.BookingSlot;
+import roomescape.reservationslot.domain.ReservationSlot;
 
 @Entity
 @Table(name = "reservations",
@@ -38,15 +38,15 @@ public class Reservation {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "booking_slot_id", nullable = false)
-    private BookingSlot bookingSlot;
+    private ReservationSlot reservationSlot;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Reservation(final ReservationStatus reservationStatus, final Member member, final BookingSlot bookingSlot) {
+    public Reservation(final ReservationStatus reservationStatus, final Member member, final ReservationSlot reservationSlot) {
         this.reservationStatus = reservationStatus;
         this.member = member;
-        this.bookingSlot = bookingSlot;
+        this.reservationSlot = reservationSlot;
     }
 
     public Reservation() {
@@ -73,8 +73,8 @@ public class Reservation {
         return reservationStatus;
     }
 
-    public BookingSlot getReservation() {
-        return bookingSlot;
+    public ReservationSlot getReservation() {
+        return reservationSlot;
     }
 
     public Member getMember() {

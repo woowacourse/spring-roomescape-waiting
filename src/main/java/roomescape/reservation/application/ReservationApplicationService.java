@@ -3,11 +3,11 @@ package roomescape.reservation.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.bookingslot.domain.service.BookingSlotDomainService;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.bookingslot.domain.BookingSlot;
-import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.WaitingReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.service.ReservationDomainService;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -16,29 +16,29 @@ import roomescape.reservation.presentation.dto.ReservationResponse;
 public class ReservationApplicationService {
 
     private final MemberDomainService memberDomainService;
-    private final BookingSlotDomainService bookingSlotDomainService;
+    private final ReservationSlotDomainService reservationSlotDomainService;
     private final ReservationDomainService reservationDomainService;
 
     public ReservationApplicationService(final MemberDomainService memberDomainService,
-                                         final BookingSlotDomainService bookingSlotDomainService,
+                                         final ReservationSlotDomainService reservationSlotDomainService,
                                          final ReservationDomainService reservationDomainService) {
         this.memberDomainService = memberDomainService;
-        this.bookingSlotDomainService = bookingSlotDomainService;
+        this.reservationSlotDomainService = reservationSlotDomainService;
         this.reservationDomainService = reservationDomainService;
     }
 
     public WaitingReservationResponse addWaiting(final LocalDate date, final Long timeId, final Long themeId,
                                                  final Long memberId) {
-        BookingSlot bookingSlot = bookingSlotDomainService.getReservationByDateAndTimeAndTheme(date, timeId, themeId);
+        ReservationSlot reservationSlot = reservationSlotDomainService.getReservationByDateAndTimeAndTheme(date, timeId, themeId);
         Member member = memberDomainService.getMember(memberId);
-        Reservation reservation = bookingSlot.addMemberToWaiting(member);
+        Reservation reservation = reservationSlot.addMemberToWaiting(member);
         reservationDomainService.save(reservation);
 
         return WaitingReservationResponse.from(reservation);
     }
 
     public void removeWaiting(final Long reservationId, final Long memberId) {
-        reservationDomainService.deleteByBookingSlotIdAndMemberId(reservationId, memberId);
+        reservationDomainService.deleteByReservationSlotIdAndMemberId(reservationId, memberId);
     }
 
     public List<ReservationResponse> findAllWaitingReservations() {
