@@ -1,11 +1,12 @@
 package roomescape.reservation.application;
 
 import roomescape.reservation.application.dto.MyReservationsResponse;
-import roomescape.reservation.application.dto.WaitingReservationResponse;
+import roomescape.reservation.application.dto.SimpleWaitingReservationResponse;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
+import roomescape.reservation.ui.dto.WaitingReservationResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +25,9 @@ public interface ReservationFacade {
 
     void delete(Long id);
 
-    WaitingReservationResponse addWaiting(CreateReservationWithUserIdWebRequest request);
+    List<WaitingReservationResponse> getAllWaiting();
+
+    SimpleWaitingReservationResponse addWaiting(CreateReservationWithUserIdWebRequest request);
 
     void deleteWaiting(Long id);
 }

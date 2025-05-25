@@ -119,7 +119,8 @@ class ReservationTest {
         Theme theme = createTheme();
         Reservation reservation = Reservation.withoutId(userId, todayDate, pastTime, theme);
 
-        // when & then
+        // when
+        // then
         assertThatThrownBy(() -> reservation.validatePast(now))
                 .isInstanceOf(PastTimeReservationException.class);
     }

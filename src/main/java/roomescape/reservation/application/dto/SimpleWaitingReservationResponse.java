@@ -9,16 +9,16 @@ import roomescape.user.domain.User;
 import roomescape.user.ui.dto.UserResponse;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record WaitingReservationResponse(Long waitingReservationId,
-                                         UserResponse user,
-                                         int waitingNumber) {
+public record SimpleWaitingReservationResponse(Long waitingReservationId,
+                                               UserResponse user,
+                                               int waitingNumber) {
 
-    public WaitingReservationResponse {
+    public SimpleWaitingReservationResponse {
         validate(waitingReservationId, user);
     }
 
-    public static WaitingReservationResponse from(final WaitingReservation domain, final User user) {
-        return new WaitingReservationResponse(
+    public static SimpleWaitingReservationResponse from(final WaitingReservation domain, final User user) {
+        return new SimpleWaitingReservationResponse(
                 domain.getId(),
                 UserResponse.from(user),
                 domain.getWaitingOrder());
@@ -26,7 +26,7 @@ public record WaitingReservationResponse(Long waitingReservationId,
 
     private void validate(final Long id,
                           final UserResponse user) {
-        Validator.of(WaitingReservationResponse.class)
+        Validator.of(SimpleWaitingReservationResponse.class)
                 .validateNotNull(Fields.waitingReservationId, id, DomainTerm.RESERVATION_WAITING_Id.label())
                 .validateNotNull(Fields.user, user, DomainTerm.USER.label());
     }

@@ -15,10 +15,11 @@ import roomescape.auth.session.annotation.UserSession;
 import roomescape.common.uri.UriFactory;
 import roomescape.reservation.application.ReservationFacade;
 import roomescape.reservation.application.dto.MyReservationsResponse;
-import roomescape.reservation.application.dto.WaitingReservationResponse;
+import roomescape.reservation.application.dto.SimpleWaitingReservationResponse;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
+import roomescape.reservation.ui.dto.WaitingReservationResponse;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -66,16 +67,17 @@ public class ReservationController {
     }
 
     @GetMapping("/waiting")
-    public ResponseEntity<Void> getWaiting() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<WaitingReservationResponse>> getWaiting() {
+        final List<WaitingReservationResponse> reservations = reservationFacade.getAllWaiting();
+        return ResponseEntity.ok(reservations);
     }
 
     @PostMapping("/waiting")
-    public ResponseEntity<WaitingReservationResponse> addWaiting(
+    public ResponseEntity<SimpleWaitingReservationResponse> addWaiting(
             @RequestBody final CreateReservationWebRequest request,
             @UserSession final Session session
     ) {
-        final WaitingReservationResponse reservationResponse = reservationFacade.addWaiting(
+        final SimpleWaitingReservationResponse reservationResponse = reservationFacade.addWaiting(
                 request.toRequestWithUserId(session.userId())
         );
         final URI location = UriFactory.buildPath(WAITING_PATH, String.valueOf(reservationResponse.waitingReservationId()));

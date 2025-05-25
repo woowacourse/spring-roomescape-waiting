@@ -23,8 +23,8 @@ public class WaitingReservationRepositoryImpl implements WaitingReservationRepos
     }
 
     @Override
-    public List<WaitingReservation> findAllByUserId(final Long userId) {
-        return jpaWaitingReservationRepository.findAllByUserId(userId);
+    public List<WaitingReservation> findAll() {
+        return jpaWaitingReservationRepository.findAll();
     }
 
     @Override

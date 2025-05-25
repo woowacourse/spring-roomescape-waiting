@@ -8,11 +8,12 @@ import roomescape.common.exception.DuplicateException;
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.application.dto.MyReservationsResponse;
-import roomescape.reservation.application.dto.WaitingReservationResponse;
+import roomescape.reservation.application.dto.SimpleWaitingReservationResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationViewQueryService;
 import roomescape.reservation.application.service.WaitingReservationCommandService;
+import roomescape.reservation.application.service.WaitingReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.WaitingReservation;
@@ -20,6 +21,7 @@ import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
+import roomescape.reservation.ui.dto.WaitingReservationResponse;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 
@@ -34,6 +36,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
     private final ReservationQueryService reservationQueryService;
     private final ReservationCommandService reservationCommandService;
     private final WaitingReservationCommandService waitingReservationCommandService;
+    private final WaitingReservationQueryService waitingReservationQueryService;
     private final ReservationViewQueryService reservationViewQueryService;
     private final UserQueryService userQueryService;
 
@@ -98,7 +101,18 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public WaitingReservationResponse addWaiting(final CreateReservationWithUserIdWebRequest request) {
+    public List<WaitingReservationResponse> getAllWaiting() {
+        final List<WaitingReservation> waiting = waitingReservationQueryService.getAll();
+        final List<Long> userIds = waiting.stream()
+                .map(WaitingReservation::getUserId)
+                .toList();
+
+        final List<User> users = userQueryService.getAllByIds(userIds);
+        return WaitingReservationResponse.from(waiting, users);
+    }
+
+    @Override
+    public SimpleWaitingReservationResponse addWaiting(final CreateReservationWithUserIdWebRequest request) {
         final User user = userQueryService.getById(request.userId());
         final CreateReservationServiceRequest serviceRequest = request.toServiceRequest();
 
@@ -114,7 +128,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
         final WaitingReservation waitingReservation
                 = waitingReservationCommandService.create(serviceRequest);
 
-        return WaitingReservationResponse.from(waitingReservation, user);
+        return SimpleWaitingReservationResponse.from(waitingReservation, user);
     }
 
     @Override

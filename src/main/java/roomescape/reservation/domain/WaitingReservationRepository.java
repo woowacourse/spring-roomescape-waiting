@@ -12,6 +12,8 @@ public interface WaitingReservationRepository {
 
     Optional<WaitingReservation> findById(Long id);
 
+    List<WaitingReservation> findAll();
+
     WaitingReservation save(WaitingReservation waitingReservation);
 
     int findMaxWaitingByParams(ReservationDate date, ReservationTime time, Theme theme);
@@ -19,7 +21,4 @@ public interface WaitingReservationRepository {
     void deleteById(Long id);
 
     int decrementWaitingOrderAfter(ReservationDate date, ReservationTime time, Theme theme, int waitingOrder);
-
-    List<WaitingReservation> findAllByUserId(Long userId);
-
 }
