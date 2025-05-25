@@ -9,9 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Objects;
 import roomescape.domain.ReservationStatus;
 
 @Entity
@@ -63,24 +60,6 @@ public class Reservation {
         return new Reservation(null, member, gameSchedule, status);
     }
 
-    public boolean isPast() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime reservationDateTime = LocalDateTime.of(gameSchedule.getDate(), gameSchedule.getTime().getStartAt());
-        return reservationDateTime.isBefore(now);
-    }
-
-    public boolean isDuplicated(Reservation other) {
-        return this.gameSchedule.getDate().equals(other.gameSchedule.getDate())
-               && this.gameSchedule.getTime().equals(other.gameSchedule.getTime())
-               && this.gameSchedule.getTheme().equals(other.gameSchedule.getTheme());
-    }
-
-    public boolean isAlreadyBookedTime(LocalDate date, Long themeId, Long timeId) {
-        return this.gameSchedule.getDate().equals(date)
-               && this.gameSchedule.getTheme().getId().equals(themeId)
-               && this.gameSchedule.getTime().getId().equals(timeId);
-    }
-
     public Long getId() {
         return id;
     }
@@ -95,24 +74,5 @@ public class Reservation {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Reservation that)) {
-            return false;
-        }
-        if (this.id == null || that.id == null) {
-            return false;
-        }
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }
