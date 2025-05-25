@@ -14,7 +14,7 @@ insert into reservation (id, member_id, theme_id, date, reservation_time_id) val
 insert into reservation (id, member_id, theme_id, date, reservation_time_id) values (101, 101, 100, '2025-05-15', 100);
 insert into reservation (id, member_id, theme_id, date, reservation_time_id) values (102, 101, 100, '2025-05-11', 100);
 
--- 과거 예약 대기
+-- 예약 대기
 insert into waiting (id, member_id, theme_id, date, reservation_time_id, created_at) values (100, 100, 100, '2025-05-01', 100, '2025-04-30 10:00:00');
 insert into waiting (id, member_id, theme_id, date, reservation_time_id, created_at) values (101, 101, 100, '2025-05-01', 101, '2025-04-30 10:00:00');
 insert into waiting (id, member_id, theme_id, date, reservation_time_id, created_at) values (102, 100, 100, '2025-05-11', 100, '2025-04-30 10:00:00');

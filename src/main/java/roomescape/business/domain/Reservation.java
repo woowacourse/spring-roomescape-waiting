@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reservation")
@@ -85,5 +86,9 @@ public class Reservation {
 
     public boolean isSameMember(Long id) {
         return member.isSameMember(id);
+    }
+
+    public boolean isPast(final LocalDateTime today) {
+        return date.isBefore(today.toLocalDate()) || (date.isEqual(today.toLocalDate()) && time.isPast());
     }
 }

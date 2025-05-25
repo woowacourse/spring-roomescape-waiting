@@ -42,7 +42,8 @@ public class WaitingService {
         validateWaitingAlreadyExisted(loginMember, waitingRequest);
 
         final Member member = queryService.getMemberById(loginMember.id());
-        final Waiting waiting = new Waiting(member, theme, reservationTime, waitingRequest.date());
+        final Waiting waiting = new Waiting(member, theme, reservationTime, waitingRequest.date(),
+                currentUtil.getCurrentDateTime());
 
         return WaitingResponse.from(waitingRepository.save(waiting));
     }
@@ -51,7 +52,7 @@ public class WaitingService {
         final Reservation reservation = queryService.getReservationByDateAndTimeIdAndThemeId(
                 waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId());
 
-        if(reservation.isSameMember(loginMember.id())) {
+        if (reservation.isSameMember(loginMember.id())) {
             throw new BadRequestException("사용자가 예약한 항목입니다. 예약 대기가 불가능합니다.");
         }
     }
@@ -60,7 +61,7 @@ public class WaitingService {
         boolean isAlreadyExisted = waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waitingRequest.date(),
                 waitingRequest.timeId(), waitingRequest.themeId(), loginMember.id());
 
-        if(isAlreadyExisted) {
+        if (isAlreadyExisted) {
             throw new BadRequestException("이미 예약 대기를 하였습니다");
         }
     }
@@ -69,7 +70,7 @@ public class WaitingService {
     public void deleteById(final Long id) {
         Waiting waiting = getById(id);
 
-        if(waiting.isPast(currentUtil.getCurrentDate())) {
+        if (waiting.isPast(currentUtil.getCurrentDate())) {
             throw new BadRequestException("이전 예약 대기는 삭제할 수 없습니다.");
         }
         waitingRepository.deleteById(id);
