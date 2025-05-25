@@ -3,7 +3,7 @@ package roomescape.theme;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
 import roomescape.theme.dto.ThemeRequest;
@@ -20,7 +20,7 @@ public class ThemeService {
     private static final int BETWEEN_DAY_END = 1;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationService reservationService;
 
     @Transactional
     public ThemeResponse create(
@@ -60,7 +60,7 @@ public class ThemeService {
         final Theme theme = themeRepository.findById(id)
                 .orElseThrow(ThemeNotFoundException::new);
 
-        if (reservationRepository.existsBySchedule_Theme(theme)) {
+        if (reservationService.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
 

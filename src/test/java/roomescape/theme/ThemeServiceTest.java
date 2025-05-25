@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
 import roomescape.theme.dto.ThemeRequest;
@@ -26,13 +26,13 @@ class ThemeServiceTest {
 
     private ThemeRepository themeRepository;
     private ThemeService themeService;
-    private ReservationRepository reservationRepository;
+    private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
         themeRepository = mock(ThemeRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        themeService = new ThemeService(themeRepository, reservationRepository);
+        reservationService = mock(ReservationService.class);
+        themeService = new ThemeService(themeRepository, reservationService);
     }
 
     @Nested
@@ -130,7 +130,7 @@ class ThemeServiceTest {
             final Theme theme = themeWithId(1L, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.existsBySchedule_Theme(theme))
+            given(reservationService.existsByTheme(theme))
                     .willReturn(false);
 
             // when
@@ -162,7 +162,7 @@ class ThemeServiceTest {
             final Theme theme = themeWithId(id, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.existsBySchedule_Theme(theme))
+            given(reservationService.existsByTheme(theme))
                     .willReturn(true);
 
             // when & then

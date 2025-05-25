@@ -16,6 +16,7 @@ import roomescape.exception.custom.reason.reservation.ReservationPastDateExcepti
 import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.member.Member;
 import roomescape.member.MemberService;
+import roomescape.theme.Theme;
 
 import java.util.List;
 
@@ -84,6 +85,11 @@ public class ReservationService {
     public Reservation findById(final Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByTheme(final Theme theme) {
+        return reservationRepository.existsBySchedule_Theme(theme);
     }
 
     private ReservationResponse getReservationResponse(Schedule schedule, final Member member) {
