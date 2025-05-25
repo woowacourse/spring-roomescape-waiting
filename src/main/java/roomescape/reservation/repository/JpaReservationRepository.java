@@ -16,8 +16,8 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             JOIN FETCH r.info.time t
             JOIN FETCH r.info.theme th
             JOIN FETCH r.member m
-            WHERE th.id        = :themeId
-            AND m.id         = :memberId
+            WHERE th.id = :themeId
+            AND m.id = :memberId
             AND r.info.date BETWEEN :startDate AND :endDate
             """)
     List<Reservation> findFilteredReservations(@Param("themeId") Long themeId,

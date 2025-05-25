@@ -53,10 +53,10 @@ public interface JpaWaitingReservationRepository extends WaitingReservationRepos
                 w,
                 (SELECT COUNT(w2)
                    FROM Waiting w2
-                  WHERE w2.info.date       = w.info.date
-                    AND w2.info.time.id    = w.info.time.id
-                    AND w2.info.theme.id   = w.info.theme.id
-                    AND w2.turn            <  w.turn
+                  WHERE w2.info.date = w.info.date
+                    AND w2.info.time.id = w.info.time.id
+                    AND w2.info.theme.id = w.info.theme.id
+                    AND w2.turn <  w.turn
                 ) + 1
               )
               FROM Waiting w
