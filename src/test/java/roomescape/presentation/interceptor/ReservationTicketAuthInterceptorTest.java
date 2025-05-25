@@ -19,7 +19,7 @@ import roomescape.presentation.support.CookieUtils;
 import roomescape.application.service.AuthService;
 
 @ExtendWith(MockitoExtension.class)
-class ReservationAuthInterceptorTest {
+class ReservationTicketAuthInterceptorTest {
     @Mock
     private AuthService authService;
 

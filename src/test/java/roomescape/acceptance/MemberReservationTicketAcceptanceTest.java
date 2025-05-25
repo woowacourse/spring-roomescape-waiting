@@ -14,12 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
 import roomescape.infrastructure.db.MemberJpaRepository;
-import roomescape.infrastructure.db.ReservationJpaRepository;
+import roomescape.infrastructure.db.ReservationTicketJpaRepository;
 import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
@@ -27,7 +27,7 @@ import roomescape.application.service.ReservationService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class MemberReservationAcceptanceTest {
+class MemberReservationTicketAcceptanceTest {
 
     @Autowired
     JjwtJwtTokenProvider jjwtJwtTokenProvider;
@@ -42,7 +42,7 @@ class MemberReservationAcceptanceTest {
     ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
-    ReservationJpaRepository reservationJpaRepository;
+    ReservationTicketJpaRepository reservationTicketJpaRepository;
     @Autowired
     private ReservationService reservationService;
 
@@ -59,9 +59,9 @@ class MemberReservationAcceptanceTest {
         Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
         Member savedMember = this.memberJpaRepository.save(member);
 
-        Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
+        ReservationTicket reservationTicket = new ReservationTicket(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                 savedMember, LocalDate.now());
-        Reservation savedReservation = this.reservationJpaRepository.save(reservation);
+        ReservationTicket savedReservationTicket = this.reservationTicketJpaRepository.save(reservationTicket);
 
         String token = jjwtJwtTokenProvider.createToken(savedMember.getEmail());
 
@@ -75,7 +75,7 @@ class MemberReservationAcceptanceTest {
 
         //then
         List<MemberReservationResponseDto> comparedResponse = List.of(
-                new MemberReservationResponseDto(savedReservation));
+                new MemberReservationResponseDto(savedReservationTicket));
 
         assertAll(
                 () -> assertThat(responses).hasSize(1),

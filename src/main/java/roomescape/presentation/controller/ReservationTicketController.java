@@ -15,35 +15,35 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.service.ReservationService;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.ReservationRegisterDto;
+import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
-import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.ReservationTicketResponseDto;
 
 @RestController
 @RequestMapping("/reservations")
 @RequiredArgsConstructor
-public class ReservationController {
+public class ReservationTicketController {
 
     private final ReservationService reservationService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ReservationResponseDto> getReservations() {
+    public List<ReservationTicketResponseDto> getReservations() {
         return reservationService.getAllReservations();
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public List<ReservationResponseDto> getReservations(
+    public List<ReservationTicketResponseDto> getReservations(
             @ModelAttribute ReservationSearchDto reservationSearchDto) {
         return reservationService.searchReservations(reservationSearchDto);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponseDto addReservation(
-            @RequestBody @Valid ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
-        return reservationService.saveReservation(reservationRegisterDto, loginMember);
+    public ReservationTicketResponseDto addReservation(
+            @RequestBody @Valid ReservationTicketRegisterDto reservationTicketRegisterDto, LoginMember loginMember) {
+        return reservationService.saveReservation(reservationTicketRegisterDto, loginMember);
     }
 
     @DeleteMapping("/{id}")

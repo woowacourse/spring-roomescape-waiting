@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 
-class ReservationTimeRegisterDtoTest {
+class ReservationTicketTimeRegisterDtoTest {
 
     private static Stream<Arguments> testCasesForTimeFormat() {
         return Stream.of(

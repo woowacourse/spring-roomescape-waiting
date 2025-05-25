@@ -18,15 +18,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.ReservationRegisterDto;
+import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.response.MemberReservationResponseDto;
-import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.ReservationTicketResponseDto;
 import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.PendingReservation;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
@@ -38,7 +38,7 @@ import roomescape.persistence.repository.ReservationTimeRepository;
 @Slf4j
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationServiceTest {
+class ReservationTicketServiceTest {
 
     @Autowired
     ReservationService reservationService;
@@ -73,14 +73,14 @@ class ReservationServiceTest {
     void test1() {
         // given
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        ReservationRegisterDto request = new ReservationRegisterDto(
+        ReservationTicketRegisterDto request = new ReservationTicketRegisterDto(
                 tomorrow.toString(),
                 1L,
                 1L
         );
 
         // when
-        ReservationResponseDto response = this.reservationService.saveReservation(request, this.loginMember);
+        ReservationTicketResponseDto response = this.reservationService.saveReservation(request, this.loginMember);
 
         // then
         assertAll(
@@ -93,15 +93,15 @@ class ReservationServiceTest {
     @Test
     void test3() {
         // given
-        ReservationRegisterDto request = new ReservationRegisterDto(
+        ReservationTicketRegisterDto request = new ReservationTicketRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
-        ReservationResponseDto saved = this.reservationService.saveReservation(request, this.loginMember);
+        ReservationTicketResponseDto saved = this.reservationService.saveReservation(request, this.loginMember);
 
         // when
         this.reservationService.cancelReservation(saved.id());
 
         // then
-        List<ReservationResponseDto> reservations = this.reservationService.getAllReservations();
+        List<ReservationTicketResponseDto> reservations = this.reservationService.getAllReservations();
         assertThat(reservations).isEmpty();
     }
 
@@ -109,10 +109,10 @@ class ReservationServiceTest {
     @Test
     void test4() {
         // given
-        ReservationRegisterDto request = new ReservationRegisterDto(
+        ReservationTicketRegisterDto request = new ReservationTicketRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
         this.reservationService.saveReservation(request, this.loginMember);
-        ReservationRegisterDto savedRequest = new ReservationRegisterDto(
+        ReservationTicketRegisterDto savedRequest = new ReservationTicketRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
 
         // when && then
@@ -125,7 +125,7 @@ class ReservationServiceTest {
     @Test
     void test5() {
         // given
-        ReservationRegisterDto request = new ReservationRegisterDto(
+        ReservationTicketRegisterDto request = new ReservationTicketRegisterDto(
                 LocalDate.now().toString(), 1L, 1L);
         // when && then
         assertThatThrownBy(
@@ -147,9 +147,9 @@ class ReservationServiceTest {
         Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
         Member savedMember = memberJpaRepository.save(member);
 
-        Reservation reservation = new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
+        ReservationTicket reservationTicket = new ReservationTicket(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                 savedMember, LocalDate.now());
-        Reservation savedReservation = reservationRepository.save(reservation);
+        ReservationTicket savedReservationTicket = reservationRepository.save(reservationTicket);
 
         LoginMember loginMember = new LoginMember(savedMember);
 
@@ -157,7 +157,7 @@ class ReservationServiceTest {
         List<MemberReservationResponseDto> response = reservationService.getReservationsOfMember(loginMember);
 
         List<MemberReservationResponseDto> comparedResponse = List.of(
-                new MemberReservationResponseDto(savedReservation));
+                new MemberReservationResponseDto(savedReservationTicket));
 
         //then
         assertAll(
@@ -201,7 +201,7 @@ class ReservationServiceTest {
                 )
         ));
 
-        Reservation reservation = reservationRepository.save(new Reservation(
+        ReservationTicket reservationTicket = reservationRepository.save(new ReservationTicket(
                 LocalDate.now().plusDays(1),
                 reservationTime,
                 theme,
@@ -210,11 +210,11 @@ class ReservationServiceTest {
         ));
 
         // when
-        reservationService.cancelReservation(reservation.getId());
+        reservationService.cancelReservation(reservationTicket.getId());
 
         // then
-        List<Reservation> allReservations = reservationRepository.findAll();
-        Optional<Reservation> foundReservation = allReservations.stream()
+        List<ReservationTicket> allReservationTickets = reservationRepository.findAll();
+        Optional<ReservationTicket> foundReservation = allReservationTickets.stream()
                 .filter(reservation1 -> reservation1.getReservationTime().getId().equals(reservationTime.getId()))
                 .filter(reservation1 -> reservation1.getTheme().getId().equals(theme.getId()))
                 .filter(reservation1 -> reservation1.getMember().getId().equals(user.getId()))
@@ -222,7 +222,7 @@ class ReservationServiceTest {
 
         assertAll(
                 () -> assertThat(waitingJpaRepository.findAll()).doesNotContain(firstWaiting),
-                () -> assertThat(allReservations).doesNotContain(reservation),
+                () -> assertThat(allReservationTickets).doesNotContain(reservationTicket),
                 () -> assertThat(foundReservation).isPresent()
         );
     }

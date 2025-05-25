@@ -15,7 +15,7 @@ import roomescape.persistence.repository.ReservationRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationTimeServiceTest {
+class ReservationTicketTimeServiceTest {
 
     @Autowired
     ReservationTimeService reservationTimeService;

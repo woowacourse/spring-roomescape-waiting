@@ -19,13 +19,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.ReservationTicketResponseDto;
 import roomescape.model.Role;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationAcceptanceTest {
+class ReservationTicketAcceptanceTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -52,12 +52,12 @@ class ReservationAcceptanceTest {
         insertNewReservationWithJdbcTemplate(1L, 1L);
 
         // when
-        List<ReservationResponseDto> reservations = RestAssured.given().log().all()
+        List<ReservationTicketResponseDto> reservations = RestAssured.given().log().all()
                 .cookie("token", createToken())
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationResponseDto.class);
+                .jsonPath().getList(".", ReservationTicketResponseDto.class);
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 

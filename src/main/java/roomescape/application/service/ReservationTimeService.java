@@ -15,7 +15,7 @@ import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
@@ -51,23 +51,23 @@ public class ReservationTimeService {
     }
 
     public List<AvailableReservationTimeResponseDto> getAvailableTimes(String date, Long themeId) {
-        List<Reservation> reservations = getReservationsBy(date, themeId);
+        List<ReservationTicket> reservationTickets = getReservationsBy(date, themeId);
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        Set<ReservationTime> nonDuplicatedReservationTimes = getReservationTimes(reservations);
+        Set<ReservationTime> nonDuplicatedReservationTimes = getReservationTimes(reservationTickets);
 
         reservationTimes.removeAll(nonDuplicatedReservationTimes);
 
         return getAvailableReservationTimes(reservationTimes, nonDuplicatedReservationTimes);
     }
 
-    private List<Reservation> getReservationsBy(String date, Long themeId) {
+    private List<ReservationTicket> getReservationsBy(String date, Long themeId) {
         LocalDate parsedDate = LocalDate.parse(date);
         return reservationRepository.findForThemeOnDate(themeId, parsedDate);
     }
 
-    private Set<ReservationTime> getReservationTimes(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(Reservation::getReservationTime)
+    private Set<ReservationTime> getReservationTimes(List<ReservationTicket> reservationTickets) {
+        return reservationTickets.stream()
+                .map(ReservationTicket::getReservationTime)
                 .collect(Collectors.toSet());
     }
 

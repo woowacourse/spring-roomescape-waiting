@@ -10,7 +10,7 @@ import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.model.ReservationTime;
 
 @DataJpaTest
-class ReservationTimeJpaRepositoryTest {
+class ReservationTicketTimeJpaRepositoryTest {
 
     @Autowired
     ReservationTimeJpaRepository reservationTimeJpaRepository;

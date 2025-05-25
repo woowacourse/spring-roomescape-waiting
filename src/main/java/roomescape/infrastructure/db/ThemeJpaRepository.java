@@ -14,7 +14,7 @@ public interface ThemeJpaRepository extends JpaRepository<Theme, Long> {
     @Query(value = """
             SELECT t.*
             FROM theme t
-            INNER JOIN reservation r ON t.id = r.theme_id
+            INNER JOIN reservationTicket r ON t.id = r.theme_id
             WHERE r.date >= :startDate
             AND r.date <  :endDate
             GROUP BY t.id

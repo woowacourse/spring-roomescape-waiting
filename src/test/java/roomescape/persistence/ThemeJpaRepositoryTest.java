@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
@@ -45,23 +45,23 @@ class ThemeJpaRepositoryTest {
         Member member = new Member("도기", "ff@gmail.com", "password", Role.ADMIN);
         entityManager.persist(member);
 
-        Reservation reservation = new Reservation(LocalDate.now().minusDays(1), reservationTime, theme, member,
+        ReservationTicket reservationTicket = new ReservationTicket(LocalDate.now().minusDays(1), reservationTime, theme, member,
                 LocalDate.now().minusDays(3
                 ));
-        entityManager.persist(reservation);
+        entityManager.persist(reservationTicket);
 
-        Reservation reservation1 = new Reservation(LocalDate.now().minusDays(2), reservationTime, theme, member,
+        ReservationTicket reservationTicket1 = new ReservationTicket(LocalDate.now().minusDays(2), reservationTime, theme, member,
                 LocalDate.now().minusDays(3
                 ));
-        entityManager.persist(reservation1);
+        entityManager.persist(reservationTicket1);
 
-        Reservation reservation2 = new Reservation(LocalDate.now().minusDays(2), reservationTime, theme1, member,
+        ReservationTicket reservationTicket2 = new ReservationTicket(LocalDate.now().minusDays(2), reservationTime, theme1, member,
                 LocalDate.now().minusDays(3));
-        entityManager.persist(reservation2);
+        entityManager.persist(reservationTicket2);
 
-        Reservation reservation3 = new Reservation(LocalDate.now().minusDays(2), reservationTime1, theme, member,
+        ReservationTicket reservationTicket3 = new ReservationTicket(LocalDate.now().minusDays(2), reservationTime1, theme, member,
                 LocalDate.now().minusDays(3));
-        entityManager.persist(reservation3);
+        entityManager.persist(reservationTicket3);
 
         entityManager.flush();
         entityManager.clear();

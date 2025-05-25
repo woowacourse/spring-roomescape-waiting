@@ -7,12 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.ReservationRegisterDto;
+import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
 import roomescape.dto.response.MemberReservationResponseDto;
-import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.ReservationTicketResponseDto;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 import roomescape.model.Waiting;
@@ -33,22 +33,22 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
-                                                  LoginMember loginMember) {
-        Reservation reservation = createReservation(reservationRegisterDto, loginMember);
-        assertReservationIsNotDuplicated(reservation);
+    public ReservationTicketResponseDto saveReservation(ReservationTicketRegisterDto reservationTicketRegisterDto,
+                                                        LoginMember loginMember) {
+        ReservationTicket reservationTicket = createReservation(reservationTicketRegisterDto, loginMember);
+        assertReservationIsNotDuplicated(reservationTicket);
 
-        Reservation savedReservation = reservationRepository.save(reservation);
-        return new ReservationResponseDto(savedReservation);
+        ReservationTicket savedReservationTicket = reservationRepository.save(reservationTicket);
+        return new ReservationTicketResponseDto(savedReservationTicket);
     }
 
-    public List<ReservationResponseDto> getAllReservations() {
+    public List<ReservationTicketResponseDto> getAllReservations() {
         return reservationRepository.findAll().stream()
-                .map(ReservationResponseDto::new)
+                .map(ReservationTicketResponseDto::new)
                 .toList();
     }
 
-    public List<ReservationResponseDto> searchReservations(ReservationSearchDto reservationSearchDto) {
+    public List<ReservationTicketResponseDto> searchReservations(ReservationSearchDto reservationSearchDto) {
         Long themeId = reservationSearchDto.themeId();
         Long memberId = reservationSearchDto.memberId();
         LocalDate startDate = reservationSearchDto.startDate();
@@ -59,22 +59,22 @@ public class ReservationService {
                         memberId,
                         new Period(startDate, endDate)
                 ).stream()
-                .map(ReservationResponseDto::new)
+                .map(ReservationTicketResponseDto::new)
                 .toList();
     }
 
     public void cancelReservation(Long id) {
-        Reservation reservation = reservationRepository.findById(id);
+        ReservationTicket reservationTicket = reservationRepository.findById(id);
         reservationRepository.deleteById(id);
 
-        promoteNextWaitingToReservation(reservation);
+        promoteNextWaitingToReservation(reservationTicket);
     }
 
-    private void promoteNextWaitingToReservation(Reservation reservation) {
+    private void promoteNextWaitingToReservation(ReservationTicket reservationTicket) {
         Optional<Waiting> optionalNextWaiting = waitingRepository.findNextWaiting(
-                reservation.getDate(),
-                reservation.getReservationTime(),
-                reservation.getTheme()
+                reservationTicket.getDate(),
+                reservationTicket.getReservationTime(),
+                reservationTicket.getTheme()
         );
 
         if (optionalNextWaiting.isEmpty()) {
@@ -88,35 +88,35 @@ public class ReservationService {
     }
 
     private void promoteToReservation(Waiting nextWaiting) {
-        Reservation convertedReservation = convertToReservation(nextWaiting);
-        reservationRepository.save(convertedReservation);
+        ReservationTicket convertedReservationTicket = convertToReservation(nextWaiting);
+        reservationRepository.save(convertedReservationTicket);
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findForMember(loginMember.id());
+        List<ReservationTicket> reservationTickets = reservationRepository.findForMember(loginMember.id());
 
-        return reservations.stream()
+        return reservationTickets.stream()
                 .map(MemberReservationResponseDto::new)
                 .toList();
     }
 
-    private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
-        ReservationTime time = reservationTimeRepository.findById(reservationRegisterDto.timeId());
-        Theme theme = themeRepository.findById(reservationRegisterDto.themeId());
+    private ReservationTicket createReservation(ReservationTicketRegisterDto reservationTicketRegisterDto, LoginMember loginMember) {
+        ReservationTime time = reservationTimeRepository.findById(reservationTicketRegisterDto.timeId());
+        Theme theme = themeRepository.findById(reservationTicketRegisterDto.themeId());
         Member member = memberRepository.findById(loginMember.id());
 
-        return reservationRegisterDto.convertToReservation(time, theme, member);
+        return reservationTicketRegisterDto.convertToReservation(time, theme, member);
     }
 
-    private void assertReservationIsNotDuplicated(Reservation reservation) {
-        if (reservationRepository.isDuplicatedForDateAndReservationTime(reservation.getDate(),
-                reservation.getReservationTime())) {
+    private void assertReservationIsNotDuplicated(ReservationTicket reservationTicket) {
+        if (reservationRepository.isDuplicatedForDateAndReservationTime(reservationTicket.getDate(),
+                reservationTicket.getReservationTime())) {
             throw new DuplicatedException("이미 예약이 존재합니다.");
         }
     }
 
-    private Reservation convertToReservation(Waiting nextWaiting) {
-        return new Reservation(
+    private ReservationTicket convertToReservation(Waiting nextWaiting) {
+        return new ReservationTicket(
                 nextWaiting.getReservationDate(),
                 nextWaiting.getReservationTime(),
                 nextWaiting.getTheme(),

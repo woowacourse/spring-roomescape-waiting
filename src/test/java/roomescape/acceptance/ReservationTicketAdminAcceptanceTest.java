@@ -15,7 +15,7 @@ import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationAdminAcceptanceTest {
+class ReservationTicketAdminAcceptanceTest {
 
     @Autowired
     private JjwtJwtTokenProvider jjwtJwtTokenProvider;

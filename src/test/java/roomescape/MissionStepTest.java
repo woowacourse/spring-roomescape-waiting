@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
-import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.ReservationTicketResponseDto;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
@@ -139,12 +139,12 @@ public class MissionStepTest {
                 "INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
                 String.valueOf(LocalDate.now().plusDays(1)), "1", "1", "1");
 
-        List<ReservationResponseDto> reservations = RestAssured.given().log().all()
+        List<ReservationTicketResponseDto> reservations = RestAssured.given().log().all()
                 .cookie("token", createToken())
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationResponseDto.class);
+                .jsonPath().getList(".", ReservationTicketResponseDto.class);
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 

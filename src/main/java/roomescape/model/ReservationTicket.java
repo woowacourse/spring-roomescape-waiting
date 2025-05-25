@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Reservation {
+public class ReservationTicket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,8 @@ public class Reservation {
     @ManyToOne
     private Member member;
 
-    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member, LocalDate today) {
+    public ReservationTicket(LocalDate date, ReservationTime reservationTime, Theme theme, Member member,
+                             LocalDate today) {
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;

@@ -5,8 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.common.exception.NotFoundException;
-import roomescape.infrastructure.db.ReservationJpaRepository;
-import roomescape.model.Reservation;
+import roomescape.infrastructure.db.ReservationTicketJpaRepository;
+import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.persistence.vo.Period;
 
@@ -14,16 +14,16 @@ import roomescape.persistence.vo.Period;
 @RequiredArgsConstructor
 public class ReservationRepositoryImpl implements ReservationRepository {
 
-    private final ReservationJpaRepository reservationJpaRepository;
+    private final ReservationTicketJpaRepository reservationTicketJpaRepository;
 
     @Override
     public boolean isDuplicatedForDateAndReservationTime(LocalDate date, ReservationTime time) {
-        return reservationJpaRepository.findByDateAndReservationTime(date, time).isPresent();
+        return reservationTicketJpaRepository.findByDateAndReservationTime(date, time).isPresent();
     }
 
     @Override
-    public List<Reservation> findForThemeAndMemberInPeriod(Long themeId, Long memberId, Period period) {
-        return reservationJpaRepository.findByThemeIdAndMemberIdAndDateBetween(
+    public List<ReservationTicket> findForThemeAndMemberInPeriod(Long themeId, Long memberId, Period period) {
+        return reservationTicketJpaRepository.findByThemeIdAndMemberIdAndDateBetween(
                 themeId,
                 memberId,
                 period.startDate(),
@@ -32,33 +32,33 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findForThemeOnDate(Long themeId, LocalDate date) {
-        return reservationJpaRepository.findByThemeIdAndDate(themeId, date);
+    public List<ReservationTicket> findForThemeOnDate(Long themeId, LocalDate date) {
+        return reservationTicketJpaRepository.findByThemeIdAndDate(themeId, date);
     }
 
     @Override
-    public List<Reservation> findForMember(Long memberId) {
-        return reservationJpaRepository.findByMemberId(memberId);
+    public List<ReservationTicket> findForMember(Long memberId) {
+        return reservationTicketJpaRepository.findByMemberId(memberId);
     }
 
     @Override
-    public Reservation save(Reservation reservation) {
-        return reservationJpaRepository.save(reservation);
+    public ReservationTicket save(ReservationTicket reservationTicket) {
+        return reservationTicketJpaRepository.save(reservationTicket);
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return reservationJpaRepository.findAll();
+    public List<ReservationTicket> findAll() {
+        return reservationTicketJpaRepository.findAll();
     }
 
     @Override
     public void deleteById(Long id) {
-        reservationJpaRepository.deleteById(id);
+        reservationTicketJpaRepository.deleteById(id);
     }
 
     @Override
-    public Reservation findById(Long id) {
-        return reservationJpaRepository.findById(id)
+    public ReservationTicket findById(Long id) {
+        return reservationTicketJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 예약 내역을 찾을 수 없습니다."));
     }
 }
