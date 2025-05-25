@@ -5,6 +5,7 @@ import roomescape.auth.dto.response.LoginMemberResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.theme.dto.response.ThemeResponse;
+import roomescape.waiting.domain.Waiting;
 
 import java.time.LocalDate;
 
@@ -21,6 +22,15 @@ public record ReservationResponse(
                 ReservationTimeResponse.from(reservation.getSchedule().getTime()),
                 ThemeResponse.from(reservation.getSchedule().getTheme()),
                 LoginMemberResponse.from(reservation.getMember())
+        );
+    }
+
+    public static ReservationResponse from(Waiting waiting) {
+        return new ReservationResponse(waiting.getId(),
+                waiting.getSchedule().getDate(),
+                ReservationTimeResponse.from(waiting.getSchedule().getTime()),
+                ThemeResponse.from(waiting.getSchedule().getTheme()),
+                LoginMemberResponse.from(waiting.getMember())
         );
     }
 }

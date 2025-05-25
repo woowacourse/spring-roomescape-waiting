@@ -1,8 +1,10 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
@@ -14,6 +16,7 @@ import roomescape.schedule.domain.Schedule;
 import roomescape.schedule.service.ScheduleService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.service.WaitingService;
 
 import java.util.Collection;
@@ -38,11 +41,12 @@ public class ReservationServiceFacade {
         this.waitingService = waitingService;
     }
 
+    @Transactional
     public ReservationResponse createReservation(
             ReservationCreateRequest reservationCreateRequest,
             MemberPrincipal memberPrincipal
     ) {
-        // todo 퍼사드 패턴 사용 시 예외 위치에 대해서 생각해 보기
+        // todo 검증 위치들에 대해서 생각해 보기 (책임, 통일성 등,,)
         ReservationTime reservationTime = reservationTimeService.findById(reservationCreateRequest.timeId())
                 .orElseThrow(() -> new BadRequestException("올바른 예약 시간을 찾을 수 없습니다."));
 
@@ -59,6 +63,25 @@ public class ReservationServiceFacade {
         if (isExists) {
             savedSchedule = scheduleService.findByDateAndTimeIdAndThemeId(reservationCreateRequest.date(), reservationTime.getId(), theme.getId())
                     .orElseThrow(() -> new BadRequestException("예약 가능한 일정이 존재하지 않습니다."));
+
+            boolean existsWaiting = waitingService.existsBySchedule(savedSchedule);
+
+            if (existsWaiting) {
+                // todo WaitingService 안에서 중복 문제 발생
+                boolean isConflictReservation = reservationService.existsByMemberAndSchedule(member, savedSchedule);
+                if (isConflictReservation) {
+                    throw new ConflictException("내 예약에 대기 요청 할 수 없습니다.");
+                }
+
+                boolean isConflictWaiting = waitingService.existsByMemberAndSchedule(member, savedSchedule);
+                if (isConflictWaiting) {
+                    throw new ConflictException("이미 대기 내역이 존재합니다.");
+                }
+
+                Waiting waiting = waitingService.createWaiting(reservationCreateRequest.toWaitingCreateRequest(), savedSchedule, member);
+                return ReservationResponse.from(waiting);
+            }
+
         } else {
             savedSchedule = scheduleService.save(schedule);
         }

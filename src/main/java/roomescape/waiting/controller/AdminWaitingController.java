@@ -23,6 +23,12 @@ public class AdminWaitingController {
         return ResponseEntity.ok(adminWaitingResponses);
     }
 
+    @PostMapping("/{id}")
+    public ResponseEntity<Void> accept(@PathVariable Long id) {
+        waitingService.acceptWaiting(id);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> reject(@PathVariable Long id) {
         waitingService.deleteWaiting(id);

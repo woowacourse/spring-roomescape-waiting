@@ -20,6 +20,7 @@ public class WaitingService {
     }
 
     public Waiting createWaiting(WaitingCreateRequest waitingCreateRequest, Schedule schedule, Member member) {
+        // todo 퍼사드 내에 있는 로직들 Service 로 내려야함....
         Waiting waiting = waitingCreateRequest.toWaiting(schedule, member);
         return waitingRepository.save(waiting);
     }
@@ -40,5 +41,9 @@ public class WaitingService {
 
     public List<Waiting> findAll() {
         return waitingRepository.findAll();
+    }
+
+    public boolean existsBySchedule(Schedule schedule) {
+        return waitingRepository.existsBySchedule(schedule);
     }
 }

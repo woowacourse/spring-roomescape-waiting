@@ -74,4 +74,15 @@ public class WaitingServiceFacade {
     public void deleteWaiting(Long id) {
         waitingService.deleteWaitingById(id);
     }
+
+    public void acceptWaiting(Long id) {
+        // todo : !!!!!!!! 해당 작업 진행하면 된다 !!!!!!!!!!!!
+        // 수동
+        // 대기 승인이 들어온다.
+        // 해당 스케줄에 예약이 존재하는지 확인한다.
+        // 예약이 존재하는 경우 대기 승인이 불가능하다.
+        // 예약이 존재하지 않는 경우 첫번째 대기자가 예약으로 변경된다.
+        // 대기 줄이 존재하는 경우 예약 시 대기로 넘어간다.
+        //
+    }
 }

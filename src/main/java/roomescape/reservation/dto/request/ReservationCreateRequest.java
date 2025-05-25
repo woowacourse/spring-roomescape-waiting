@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.schedule.domain.Schedule;
+import roomescape.waiting.dto.request.WaitingCreateRequest;
 
 import java.time.LocalDate;
 
@@ -22,6 +23,14 @@ public record ReservationCreateRequest(
                 null,
                 schedule,
                 member
+        );
+    }
+
+    public WaitingCreateRequest toWaitingCreateRequest() {
+        return new WaitingCreateRequest(
+                date,
+                timeId,
+                themeId
         );
     }
 }

@@ -19,4 +19,6 @@ public interface WaitingRepository {
     boolean existsByMemberAndSchedule(Member member, Schedule schedule);
 
     List<Waiting> findAll();
+
+    boolean existsBySchedule(Schedule schedule);
 }
