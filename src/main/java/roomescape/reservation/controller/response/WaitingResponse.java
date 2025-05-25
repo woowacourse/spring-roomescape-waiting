@@ -1,6 +1,7 @@
 package roomescape.reservation.controller.response;
 
 import roomescape.member.controller.response.MemberResponse;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Waiting;
 
 public record WaitingResponse(
@@ -8,7 +9,7 @@ public record WaitingResponse(
         Long id,
         ReservationResponse reservationResponse,
         MemberResponse memberResponse,
-        String status
+        ReservationStatus reservationStatus
 ) {
 
     public static WaitingResponse from(Waiting waiting) {
@@ -16,7 +17,7 @@ public record WaitingResponse(
                 waiting.getId(),
                 ReservationResponse.from(waiting.getReservation()),
                 MemberResponse.from(waiting.getMember()),
-                "예약대기"
+                ReservationStatus.WAITING
         );
     }
 }
