@@ -2,7 +2,6 @@ package roomescape.booking.reservation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.booking.schedule.Schedule;
-import roomescape.member.Member;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
@@ -13,8 +12,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllBySchedule_ThemeAndSchedule_Date(Theme theme, LocalDate date);
 
     List<Reservation> findAllByMember_IdAndSchedule_Theme_IdAndSchedule_DateBetween(Long memberId, Long themeId, LocalDate from, LocalDate to);
-
-    List<Reservation> findAllByMember(Member member);
 
     Boolean existsBySchedule_ReservationTime(ReservationTime reservationTime);
 
