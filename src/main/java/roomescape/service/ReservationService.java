@@ -74,7 +74,7 @@ public class ReservationService {
     }
 
     public List<WaitingWithRank> findALlWaitingWithRank(Long memberId) {
-        return waitingReservationService.findALlWaitingWithRank(memberId);
+        return waitingReservationService.findAllWaitingWithRank(memberId);
     }
 
     public void deleteWaiting(Long id) {

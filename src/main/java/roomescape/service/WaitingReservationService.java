@@ -46,7 +46,7 @@ public class WaitingReservationService {
         return createWaiting(loginMemberRequest.id(), request.theme(), request.date(), request.time());
     }
 
-    public List<WaitingWithRank> findALlWaitingWithRank(Long memberId) {
+    public List<WaitingWithRank> findAllWaitingWithRank(Long memberId) {
         return waitingReservationRepository.findWaitingsWithRankByMemberId(memberId);
     }
 
