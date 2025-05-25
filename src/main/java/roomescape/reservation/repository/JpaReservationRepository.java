@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -10,20 +11,16 @@ import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 
 public interface JpaReservationRepository extends ListCrudRepository<Reservation, Long>, ReservationRepository {
 
-    @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN FETCH r.info.time t
-            JOIN FETCH r.info.theme th
-            JOIN FETCH r.member m
-            WHERE th.id = :themeId
-            AND m.id = :memberId
-            AND r.info.date BETWEEN :startDate AND :endDate
-            """)
-    List<Reservation> findFilteredReservations(@Param("themeId") Long themeId,
-                                               @Param("memberId") Long memberId,
-                                               @Param("startDate") LocalDate startDate,
-                                               @Param("endDate") LocalDate endDate);
+    @EntityGraph(
+            type = EntityGraph.EntityGraphType.FETCH,
+            attributePaths = {"info.time", "info.theme", "member"}
+    )
+    List<Reservation> findByInfoThemeIdAndMemberIdAndInfoDateBetween(
+            Long themeId,
+            Long memberId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 
     @Query("""
             SELECT EXISTS (
@@ -73,11 +70,6 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             @Param("themeId") Long themeId
     );
 
-    @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN FETCH r.member m
-            WHERE m.id = :memberId
-            """)
-    List<Reservation> findByMemberId(@Param("memberId") Long memberId);
+    @EntityGraph(attributePaths = "member")
+    List<Reservation> findByMemberId(Long memberId);
 }

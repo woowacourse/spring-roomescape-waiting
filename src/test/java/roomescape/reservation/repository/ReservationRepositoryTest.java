@@ -69,7 +69,7 @@ class ReservationRepositoryTest {
         Reservation reservation2 = new Reservation(member, new ReservationInfo(futureDate, reservationTime2, theme2));
         reservationRepository.save(reservation2);
 
-        List<Reservation> filteredReservations = reservationRepository.findFilteredReservations(theme.getId(),
+        List<Reservation> filteredReservations = reservationRepository.findByInfoThemeIdAndMemberIdAndInfoDateBetween(theme.getId(),
                 member.getId(), futureDate,
                 futureDate.plusDays(1));
 

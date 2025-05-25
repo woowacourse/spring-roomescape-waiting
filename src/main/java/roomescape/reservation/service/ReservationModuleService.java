@@ -1,23 +1,17 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.Member;
-import roomescape.member.exception.MemberNotFoundException;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationInfo;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
 
 @Service
 public class ReservationModuleService {
@@ -46,7 +40,7 @@ public class ReservationModuleService {
         if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
             return reservationRepository.findAll();
         }
-        return reservationRepository.findFilteredReservations(themeId, memberId, startDate, endDate);
+        return reservationRepository.findByInfoThemeIdAndMemberIdAndInfoDateBetween(themeId, memberId, startDate, endDate);
     }
 
     public void delete(Long id) {
