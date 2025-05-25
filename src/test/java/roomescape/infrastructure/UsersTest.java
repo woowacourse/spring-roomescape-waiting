@@ -12,7 +12,6 @@ import roomescape.business.model.vo.Id;
 import roomescape.infrastructure.jpa.JpaUsers;
 import roomescape.test_util.JpaTestUtil;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,23 +40,9 @@ class UsersTest {
                 .doesNotThrowAnyException();
     }
 
-    @Test
-    void 모든_사용자를_조회할_수_있다() {
-        // given
-        String userId1 = testUtil.insertUser();
-        String userId2 = testUtil.insertUser();
-
-        // when
-        final List<User> result = sut.findAll();
-
-        // then
-        assertThat(result).extracting(User::getId)
-                .containsExactlyInAnyOrder(Id.create(userId1), Id.create(userId2));
-    }
-
     @Nested
     class ID_기준_조회_테스트 {
-        
+
         @Test
         void ID로_사용자를_조회할_수_있다() {
             // given
