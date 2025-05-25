@@ -66,6 +66,24 @@ public class WaitingService {
         return waitingRepository.findFirstByScheduleOrderByRankAsc(schedule);
     }
 
+    public void decreaseRankOfSchedule(final Schedule schedule) {
+        List<Waiting> waitings = waitingRepository.findWaitingGreaterThanRank(schedule, 0L);
+        waitings.forEach(Waiting::decrementRank);
+    }
+
+    public List<Waiting> findAllByEmail(final String email) {
+        Member member = getMemberByEmail(email);
+        return waitingRepository.findAllByMember(member);
+    }
+
+    public void delete(final Waiting waiting) {
+        waitingRepository.delete(waiting);
+    }
+
+    public boolean existsBySchedule(final Schedule schedule) {
+        return waitingRepository.existsBySchedule(schedule);
+    }
+
     private Schedule getSchedule(final LocalDate date, final Long timeId, final Long themeId) {
         return scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(date, timeId, themeId)
                 .orElseThrow(ScheduleNotExistException::new);
@@ -109,11 +127,6 @@ public class WaitingService {
         waitingsAfterRank.forEach(Waiting::decrementRank);
     }
 
-    public void decreaseRankOfSchedule(final Schedule schedule) {
-        List<Waiting> waitings = waitingRepository.findWaitingGreaterThanRank(schedule, 0L);
-        waitings.forEach(Waiting::decrementRank);
-    }
-
     private Member getMemberByEmail(final String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(ReservationNotExistsMemberException::new);
@@ -122,18 +135,5 @@ public class WaitingService {
     private Waiting getWaitingById(final Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(WaitingNotFoundException::new);
-    }
-
-    public List<Waiting> findAllByEmail(final String email) {
-        Member member = getMemberByEmail(email);
-        return waitingRepository.findAllByMember(member);
-    }
-
-    public void delete(final Waiting waiting) {
-        waitingRepository.delete(waiting);
-    }
-
-    public boolean existsBySchedule(final Schedule schedule) {
-        return waitingRepository.existsBySchedule(schedule);
     }
 }

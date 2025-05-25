@@ -47,14 +47,6 @@ public class ReservationService {
         return getReservationResponse(schedule, member);
     }
 
-    private ReservationResponse getReservationResponse(Schedule schedule, final Member member) {
-        validateDuplicateReservation(schedule);
-        validatePast(schedule);
-        final Reservation notSavedReservation = new Reservation(member, schedule);
-        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
-        return ReservationResponse.from(savedReservation);
-    }
-
     public List<ReservationResponse> readAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
@@ -68,6 +60,32 @@ public class ReservationService {
                 ).stream()
                 .map(ReservationResponse::from)
                 .toList();
+    }
+    
+    public List<Reservation> findAllByEmail(final String email) {
+        Member member = getMemberByEmail(email);
+        return reservationRepository.findAllByMember(member);
+    }
+
+    public void deleteById(final Long id) {
+        reservationRepository.deleteById(id);
+    }
+
+    public void save(final Reservation reservation) {
+        reservationRepository.save(reservation);
+    }
+
+    public Reservation findById(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    private ReservationResponse getReservationResponse(Schedule schedule, final Member member) {
+        validateDuplicateReservation(schedule);
+        validatePast(schedule);
+        final Reservation notSavedReservation = new Reservation(member, schedule);
+        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
+        return ReservationResponse.from(savedReservation);
     }
 
     private void validatePast(final Schedule schedule) {
@@ -95,23 +113,5 @@ public class ReservationService {
     private Member getMemberByEmail(final String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(ReservationNotExistsMemberException::new);
-    }
-
-    public List<Reservation> findAllByEmail(final String email) {
-        Member member = getMemberByEmail(email);
-        return reservationRepository.findAllByMember(member);
-    }
-
-    public void deleteById(final Long id) {
-        reservationRepository.deleteById(id);
-    }
-
-    public void save(final Reservation reservation) {
-        reservationRepository.save(reservation);
-    }
-
-    public Reservation findById(final Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
     }
 }
