@@ -55,7 +55,7 @@ public class ReservationModuleService {
     }
 
     public boolean isReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationRepository.existsByInfoDateAndInfoTimeIdAndInfoThemeId(date, timeId, themeId)) {
             return true;
         }
         return false;

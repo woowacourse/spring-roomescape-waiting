@@ -46,7 +46,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
                 WHERE (r.info.date, r.info.time.id, r.info.theme.id) = (:date, :timeId, :themeId)
             )
             """)
-    boolean existsByDateAndTimeIdAndThemeId(
+    boolean existsByInfoDateAndInfoTimeIdAndInfoThemeId(
             @Param("date") LocalDate date,
             @Param("timeId") Long timeId,
             @Param("themeId") Long themeId

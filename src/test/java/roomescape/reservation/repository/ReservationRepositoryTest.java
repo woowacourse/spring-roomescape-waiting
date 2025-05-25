@@ -92,7 +92,7 @@ class ReservationRepositoryTest {
 
     @Test
     void existsByDateAndTimeIdAndThemeId() {
-        boolean existsByDateAndTimeIdAndThemeId = reservationRepository.existsByDateAndTimeIdAndThemeId(futureDate,
+        boolean existsByDateAndTimeIdAndThemeId = reservationRepository.existsByInfoDateAndInfoTimeIdAndInfoThemeId(futureDate,
                 reservationTime.getId(),
                 theme.getId())
                 ;
