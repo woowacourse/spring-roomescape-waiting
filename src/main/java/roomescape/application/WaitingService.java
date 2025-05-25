@@ -23,6 +23,7 @@ public class WaitingService {
         this.memberService = memberService;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationDto> getAllWaitings() {
         List<Reservation> waitings = reservationRepository.findByWaitingStatus(ReservationStatus.WAITING);
         return ReservationDto.from(waitings);
