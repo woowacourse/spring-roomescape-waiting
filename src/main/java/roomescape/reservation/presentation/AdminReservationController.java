@@ -27,7 +27,7 @@ public class AdminReservationController {
         this.reservationApplicationService = reservationApplicationService;
     }
 
-    @PostMapping("/reservations")
+    @PostMapping("/reservation")
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody AdminReservationRequest request) {
         ReservationResponse response = reservationApplicationService.createReservation(
             new ReservationRequest(
@@ -45,14 +45,14 @@ public class AdminReservationController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/user-reservation")
+    @GetMapping("/user-reservations")
     public ResponseEntity<List<ReservationResponse>> searchReservationWithCondition(@ModelAttribute SearchCondition condition) {
         List<ReservationResponse> responses = reservationApplicationService.searchReservationWithCondition(condition);
 
         return ResponseEntity.ok().body(responses);
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/reservation/{id}")
     public ResponseEntity<Void> deleteReservationById(@PathVariable("id") final Long id) {
         reservationApplicationService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
