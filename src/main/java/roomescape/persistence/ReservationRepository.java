@@ -1,12 +1,12 @@
 package roomescape.persistence;
 
+import java.time.LocalDate;
+import java.util.List;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.domain.Reservation;
-
-import java.time.LocalDate;
-import java.util.List;
 import roomescape.domain.ReservationStatus;
 
 
@@ -25,6 +25,12 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
     List<Reservation> findByThemeIdAndDate(Long themeId, LocalDate date);
 
     List<Reservation> findByMemberId(Long memberId);
+
+    List<Reservation> findByStatus(ReservationStatus status);
+
+    @Modifying
+    @Query("UPDATE Reservation r SET r.status = :status WHERE r.id = :id")
+    int updateStatusById(Long id, ReservationStatus status);
 
     @Query("""
         SELECT r

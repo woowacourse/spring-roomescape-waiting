@@ -3,9 +3,14 @@ package roomescape.service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.response.ReservationWithRank;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -44,7 +49,8 @@ public class ReservationService {
     @Transactional
     public Long create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
         ReservationTime reservationTime = reservationTImeRepository.findById(createReservationParam.timeId())
-                .orElseThrow(() -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
+                .orElseThrow(() -> new NotFoundReservationTimeException(
+                        createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
         Theme theme = themeRepository.findById(createReservationParam.themeId())
                 .orElseThrow(() -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
         Member member = memberRepository.findById(createReservationParam.memberId())
@@ -74,6 +80,31 @@ public class ReservationService {
     @Transactional
     public void deleteById(Long reservationId) {
         reservationRepository.deleteById(reservationId);
+    }
+
+    @Transactional
+    public void changeWaitingReservation(Long reservationId, ReservationStatus status) {
+        reservationRepository.updateStatusById(reservationId, status);
+    }
+
+    public List<ReservationWithRank> findAllWaitingsWithRank() {
+        List<Reservation> waitings = reservationRepository.findByStatus(ReservationStatus.WAITING);
+
+        Map<String, List<Reservation>> grouped = waitings.stream()
+                .collect(Collectors.groupingBy(r ->
+                        r.getTheme().getId() + "-" + r.getTime().getId() + "-" + r.getDate()
+                ));
+
+        List<ReservationWithRank> result = new ArrayList<>();
+        for (List<Reservation> group : grouped.values()) {
+            group.sort(Comparator.comparing(Reservation::getCreatedAt));
+            for (int i = 0; i < group.size(); i++) {
+                Reservation ordered = group.get(i);
+                int rank = i + 1;
+                result.add(ReservationWithRank.from(ordered, rank));
+            }
+        }
+        return result;
     }
 
     public List<ReservationResult> findAll() {
