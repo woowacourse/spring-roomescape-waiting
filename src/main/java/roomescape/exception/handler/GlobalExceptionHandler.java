@@ -1,10 +1,10 @@
-package roomescape.controller;
+package roomescape.exception.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.dto.ErrorResponse;
+import roomescape.exception.dto.ErrorResponse;
 import roomescape.exception.AccessDeniedException;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;

@@ -45,16 +45,16 @@ public class ReservationCommandService {
 
     public ReservationResponseDto bookReservation(ReservationCreateDto request) {
         ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
+                .orElseThrow(() -> new NotFoundException("예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
 
         validateDuplicate(request.date(), request.timeId(), request.themeId());
         Reservation.validateReservableTime(request.date(), reservationTime.getStartAt(), LocalDateTime.now());
 
         Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + request.themeId()));
+                .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. id : " + request.themeId()));
 
         Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + request.memberId()));
+                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. id : " + request.memberId()));
 
         Reservation requestReservation = Reservation.createWithoutId(member, request.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
@@ -65,7 +65,7 @@ public class ReservationCommandService {
     public void cancelReservationBy(Long id) {
         Optional<Reservation> reservation = reservationRepository.findById(id);
         if (reservation.isEmpty()) {
-            throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+            throw new NotFoundException("등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
         reservationRepository.deleteById(id);
 
@@ -76,7 +76,7 @@ public class ReservationCommandService {
         List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeIdAndStatus(
                 date, timeId, themeId, ReservationStatus.RESERVED);
         if (!reservations.isEmpty()) {
-            throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 예약 대기 기능을 사용해주세요.");
+            throw new DuplicateContentException("이미 예약이 존재합니다. 예약 대기 기능을 사용해주세요.");
         }
     }
 

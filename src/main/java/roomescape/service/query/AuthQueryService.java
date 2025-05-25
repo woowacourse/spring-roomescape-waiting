@@ -25,7 +25,7 @@ public class AuthQueryService {
         String password = loginRequestDto.password();
 
         Member member = memberRepository.findByEmailAndPassword(email, password).orElseThrow(
-                () -> new NotFoundException("[ERROR] 이메일이나 비밀번호가 올바르지 않습니다."));
+                () -> new NotFoundException("이메일이나 비밀번호가 올바르지 않습니다."));
         return jwtTokenProvider.createToken(member);
     }
 }

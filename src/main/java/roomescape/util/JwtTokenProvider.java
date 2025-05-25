@@ -47,7 +47,7 @@ public class JwtTokenProvider {
             String stringId = parseClaims(token).getSubject();
             return Long.parseLong(stringId);
         } catch (NumberFormatException e) {
-            throw new UnauthorizationException("[ERROR] 잘못된 사용자 ID 형식입니다.");
+            throw new UnauthorizationException("잘못된 사용자 ID 형식입니다.");
         }
     }
 
@@ -64,11 +64,11 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token);
             Claims claims = jws.getPayload();
             if (claims.getExpiration().before(new Date())) {
-                throw new UnauthorizationException("[ERROR] 토큰이 만료되었습니다.");
+                throw new UnauthorizationException("토큰이 만료되었습니다.");
             }
             return claims;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new UnauthorizationException("[ERROR] 유효하지 않은 토큰입니다.");
+            throw new UnauthorizationException("유효하지 않은 토큰입니다.");
         }
     }
 }

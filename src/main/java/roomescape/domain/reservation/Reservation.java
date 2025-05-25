@@ -85,25 +85,25 @@ public class Reservation {
     public static void validateReservableTime(final LocalDate date, final LocalTime startAt, final LocalDateTime now){
        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
         if (dateTime.isBefore(now)) {
-            throw new InvalidRequestException("[ERROR] 현 시점 이후의 날짜와 시간을 선택해주세요.");
+            throw new InvalidRequestException("현 시점 이후의 날짜와 시간을 선택해주세요.");
         }
     }
 
     private void validateDate(final LocalDate date) {
         if (date == null) {
-            throw new IllegalArgumentException("[ERROR] 예약 날짜는 반드시 입력해야 합니다. 예시) YYYY-MM-DD");
+            throw new IllegalArgumentException("예약 날짜는 반드시 입력해야 합니다. 예시) YYYY-MM-DD");
         }
     }
 
     private void validateReservationTime(ReservationTime reservationTime) {
         if (reservationTime == null) {
-            throw new IllegalArgumentException("[ERROR] 예약 시간을 반드시 입력해야 합니다.");
+            throw new IllegalArgumentException("예약 시간을 반드시 입력해야 합니다.");
         }
     }
 
     private void validateTheme(final Theme theme) {
         if (theme == null) {
-            throw new IllegalArgumentException("[ERROR] 테마는 반드시 입력해야 합니다.");
+            throw new IllegalArgumentException("테마는 반드시 입력해야 합니다.");
         }
     }
 

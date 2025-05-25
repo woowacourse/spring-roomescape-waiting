@@ -36,19 +36,19 @@ public class Theme {
 
     private void validateName(String name) {
         if (name == null || name.isBlank() || name.isEmpty()) {
-            throw new IllegalArgumentException("[ERROR] 테마의 이름은 1글자 이상으로 이루어져야 합니다.");
+            throw new IllegalArgumentException("테마의 이름은 1글자 이상으로 이루어져야 합니다.");
         }
     }
 
     private void validateDescription(String description) {
         if (description == null) {
-            throw new IllegalArgumentException("[ERROR] 테마 설명이 없습니다.");
+            throw new IllegalArgumentException("테마 설명이 없습니다.");
         }
     }
 
     private void validateThumbnail(String thumbnail) {
         if (thumbnail == null) {
-            throw new IllegalArgumentException("[ERROR] 테마 이미지가 없습니다.");
+            throw new IllegalArgumentException("테마 이미지가 없습니다.");
         }
     }
 

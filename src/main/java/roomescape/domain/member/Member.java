@@ -48,37 +48,37 @@ public class Member {
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("[ERROR] 이름은 1글자 이상으로 이루어져야 합니다. ");
+            throw new IllegalArgumentException("이름은 1글자 이상으로 이루어져야 합니다. ");
         }
 
         if (name.length() > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("[ERROR] 이름은 255자를 초과할 수 없습니다. 이름 길이 : " + name.length());
+            throw new IllegalArgumentException("이름은 255자를 초과할 수 없습니다. 이름 길이 : " + name.length());
         }
     }
 
     private void validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("[ERROR] 이메일은 1글자 이상으로 이루어져야 합니다. ");
+            throw new IllegalArgumentException("이메일은 1글자 이상으로 이루어져야 합니다. ");
         }
 
         if (email.length() > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("[ERROR] 이메일은 255자를 초과할 수 없습니다. 이메일 길이 : " + email.length());
+            throw new IllegalArgumentException("이메일은 255자를 초과할 수 없습니다. 이메일 길이 : " + email.length());
         }
     }
 
     private void validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("[ERROR] 비밀번호는 1글자 이상으로 이루어져야 합니다. ");
+            throw new IllegalArgumentException("비밀번호는 1글자 이상으로 이루어져야 합니다. ");
         }
 
         if (password.length() > MAX_NAME_LENGTH) {
-            throw new IllegalArgumentException("[ERROR] 비밀번호는 255자를 초과할 수 없습니다. 비밀번호 길이 : " + password.length());
+            throw new IllegalArgumentException("비밀번호는 255자를 초과할 수 없습니다. 비밀번호 길이 : " + password.length());
         }
     }
 
     private void validateRole(Role role) {
         if (role == null) {
-            throw new IllegalArgumentException("[ERROR] 역할이 존재해야 합니다. ");
+            throw new IllegalArgumentException("역할이 존재해야 합니다. ");
         }
     }
 

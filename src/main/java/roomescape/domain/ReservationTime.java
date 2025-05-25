@@ -25,7 +25,7 @@ public class ReservationTime {
 
     void validateStartAt(LocalTime startAt) {
         if (startAt == null) {
-            throw new IllegalArgumentException("[ERROR] 시작 시간을 반드시 입력해야 합니다. 예시) HH:MM");
+            throw new IllegalArgumentException("시작 시간을 반드시 입력해야 합니다. 예시) HH:MM");
         }
     }
 

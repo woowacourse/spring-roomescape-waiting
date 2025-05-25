@@ -20,7 +20,7 @@ public class MemberQueryService {
 
     public Member findMemberById(long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new UnauthorizationException("[ERROR] 유저를 찾을 수 없습니다. ID : " + id));
+                .orElseThrow(() -> new UnauthorizationException("유저를 찾을 수 없습니다. ID : " + id));
     }
 
     public List<MemberResponseDto> findAllMembers() {

@@ -50,15 +50,15 @@ public class ReservationWaitingCommandService {
         //todo 같은 멤버 검증
         // 1. 요청한 시간, 테마, 멤버 반환
         ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
+                .orElseThrow(() -> new NotFoundException("예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
 
         Reservation.validateReservableTime(request.date(), reservationTime.getStartAt(), LocalDateTime.now(clock));
 
         Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + request.themeId()));
+                .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. id : " + request.themeId()));
 
         Member member = memberRepository.findById(request.memberId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + request.memberId()));
+                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. id : " + request.memberId()));
 
         // 2. 예약 대기 등록
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
@@ -66,7 +66,7 @@ public class ReservationWaitingCommandService {
                 request.timeId(),
                 request.themeId())
         ) {
-            throw new IllegalArgumentException("[ERROR] 현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
+            throw new IllegalArgumentException("현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
         }
 
         Reservation requestReservation = Reservation.createWaitingWithoutId(member, request.date(), reservationTime, theme);
