@@ -30,7 +30,9 @@ public class ReservationCreateService {
             throw new PastScheduleException();
         }
         final Member member = memberService.findByEmail(loginMember.email());
-        return getReservationResponse(schedule, member);
+
+        final Reservation savedReservation = saveReservation(schedule, member);
+        return ReservationResponse.from(savedReservation);
     }
 
     @Transactional
@@ -40,15 +42,17 @@ public class ReservationCreateService {
             throw new PastScheduleException();
         }
         final Member member = memberService.findById(request.memberId());
-        return getReservationResponse(schedule, member);
+
+        final Reservation savedReservation = saveReservation(schedule, member);
+        return ReservationResponse.from(savedReservation);
     }
 
-    private ReservationResponse getReservationResponse(Schedule schedule, final Member member) {
+    private Reservation saveReservation(final Schedule schedule, final Member member) {
         validateDuplicateReservation(schedule);
         validatePast(schedule);
+
         final Reservation notSavedReservation = new Reservation(member, schedule);
-        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
-        return ReservationResponse.from(savedReservation);
+        return reservationRepository.save(notSavedReservation);
     }
 
     private void validatePast(final Schedule schedule) {
