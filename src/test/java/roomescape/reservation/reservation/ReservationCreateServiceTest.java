@@ -5,6 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.Reservation;
@@ -28,28 +30,19 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationCreateServiceTest {
 
-    private ReservationCreateService reservationCreateService;
+    @Mock
     private ReservationRepository reservationRepository;
+    @Mock
     private ScheduleService scheduleService;
+    @Mock
     private MemberService memberService;
-
-    @BeforeEach
-    void setup() {
-        reservationRepository = mock(ReservationRepository.class);
-        scheduleService = mock(ScheduleService.class);
-        memberService = mock(MemberService.class);
-        reservationCreateService = new ReservationCreateService(
-                reservationRepository,
-                scheduleService,
-                memberService
-        );
-    }
+    @InjectMocks
+    private ReservationCreateService reservationCreateService;
 
     @Nested
     @DisplayName("예약 생성")

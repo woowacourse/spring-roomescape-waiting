@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.BookingService;
 import roomescape.booking.reservation.Reservation;
@@ -21,25 +23,23 @@ import java.time.LocalTime;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
 
-    private BookingService bookingService;
+    @Mock
     private ReservationService reservationService;
+    @Mock
     private WaitingService waitingService;
+    @InjectMocks
+    private BookingService bookingService;
 
     private Member member;
     private Schedule schedule;
 
     @BeforeEach
     void setUp() {
-        reservationService = mock(ReservationService.class);
-        waitingService = mock(WaitingService.class);
-        bookingService = new BookingService(reservationService, waitingService);
-
         ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
         Theme theme = themeWithId(1L, new Theme("테마명", "테마 설명", "썸네일 URL"));
         schedule = scheduleWithId(1L, new Schedule(LocalDate.now().plusDays(1), reservationTime, theme));

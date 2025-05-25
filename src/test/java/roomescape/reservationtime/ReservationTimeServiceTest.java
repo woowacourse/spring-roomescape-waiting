@@ -1,10 +1,11 @@
 package roomescape.reservationtime;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.reservation.Reservation;
 import roomescape.booking.reservation.ReservationService;
@@ -27,25 +28,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.reservationTimeWithId;
 import static roomescape.util.TestFactory.themeWithId;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
 
-    private ReservationTimeService reservationTimeService;
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
+    @Mock
     private ThemeService themeService;
+    @Mock
     private ReservationService reservationService;
-
-    @BeforeEach
-    void setUp() {
-        reservationTimeRepository = mock(ReservationTimeRepository.class);
-        reservationService = mock(ReservationService.class);
-        themeService = mock(ThemeService.class);
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationService, themeService);
-    }
+    @InjectMocks
+    private ReservationTimeService reservationTimeService;
 
     @Nested
     @DisplayName("예약 시간 생성")

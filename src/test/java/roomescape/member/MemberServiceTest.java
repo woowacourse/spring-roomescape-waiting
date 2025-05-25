@@ -1,9 +1,10 @@
 package roomescape.member;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.member.dto.MemberRequest;
@@ -16,19 +17,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
 
-    private MemberService memberService;
+    @Mock
     private MemberRepository memberRepository;
-
-    @BeforeEach
-    void setUp() {
-        memberRepository = mock(MemberRepository.class);
-        memberService = new MemberService(memberRepository);
-    }
+    @InjectMocks
+    private MemberService memberService;
 
     @DisplayName("member를 생성하여 저장한다.")
     @Test

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.schedule.Schedule;
 import roomescape.booking.schedule.ScheduleRepository;
@@ -21,16 +23,19 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ScheduleServiceTest {
 
-    private ScheduleService scheduleService;
+    @Mock
     private ScheduleRepository scheduleRepository;
+    @Mock
     private ReservationTimeService reservationTimeService;
+    @Mock
     private ThemeService themeService;
+    @InjectMocks
+    private ScheduleService scheduleService;
 
     private ScheduleRequest request;
     private ReservationTime reservationTime;
@@ -41,11 +46,6 @@ public class ScheduleServiceTest {
         request = new ScheduleRequest(LocalDate.now().plusDays(1), 1L, 1L);
         reservationTime = reservationTimeWithId(request.reservationTimeId(), new ReservationTime(LocalTime.of(12, 40)));
         theme = themeWithId(request.themeId(), new Theme("테마명", "테마 설명", "썸네일 URL"));
-
-        scheduleRepository = mock(ScheduleRepository.class);
-        reservationTimeService = mock(ReservationTimeService.class);
-        themeService = mock(ThemeService.class);
-        scheduleService = new ScheduleService(scheduleRepository, reservationTimeService, themeService);
     }
 
     @Test

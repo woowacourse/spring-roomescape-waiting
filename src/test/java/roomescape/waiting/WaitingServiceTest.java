@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.ReservationService;
@@ -32,17 +34,21 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
 
-    private WaitingService waitingService;
+    @Mock
     private WaitingRepository waitingRepository;
+    @Mock
     private ReservationService reservationService;
+    @Mock
     private ScheduleService scheduleService;
+    @Mock
     private MemberService memberService;
+    @InjectMocks
+    private WaitingService waitingService;
 
     private WaitingRequest request;
     private LoginMember loginMember;
@@ -57,12 +63,6 @@ class WaitingServiceTest {
         Theme theme = themeWithId(request.themeId(), new Theme("야당", "야당당", "123"));
         schedule = scheduleWithId(1L, new Schedule(request.date(), reservationTime, theme));
         member = memberWithId(1L, new Member(loginMember.email(), "password", "boogie", MemberRole.MEMBER));
-
-        waitingRepository = mock(WaitingRepository.class);
-        reservationService = mock(ReservationService.class);
-        scheduleService = mock(ScheduleService.class);
-        memberService = mock(MemberService.class);
-        waitingService = new WaitingService(waitingRepository, reservationService, scheduleService, memberService);
     }
 
     @Test

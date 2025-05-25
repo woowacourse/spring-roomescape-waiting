@@ -1,10 +1,11 @@
 package roomescape.theme;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.reservation.ReservationService;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
@@ -18,22 +19,17 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.themeWithId;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
-    private ThemeRepository themeRepository;
-    private ThemeService themeService;
+    @Mock
     private ReservationService reservationService;
-
-    @BeforeEach
-    void setUp() {
-        themeRepository = mock(ThemeRepository.class);
-        reservationService = mock(ReservationService.class);
-        themeService = new ThemeService(themeRepository, reservationService);
-    }
+    @Mock
+    private ThemeRepository themeRepository;
+    @InjectMocks
+    private ThemeService themeService;
 
     @Nested
     @DisplayName("테마 생성")
