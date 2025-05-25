@@ -38,7 +38,7 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member) {
+    public boolean existsByReservationSlotAndMember(final ReservationSlot reservationSlot, final Member member) {
         return jpaWaitingRepository.existsByReservationSlotAndMember(reservationSlot, member);
     }
 
