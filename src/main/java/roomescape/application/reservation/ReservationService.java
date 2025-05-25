@@ -21,16 +21,16 @@ import roomescape.domain.reservation.ReservationSlot;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationSlotReader reservationSlotReader;
+    private final ReservationSlotCreator reservationSlotCreator;
     private final MemberRepository memberRepository;
     private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationSlotReader reservationSlotReader,
+                              ReservationSlotCreator reservationSlotCreator,
                               MemberRepository memberRepository,
                               Clock clock) {
         this.reservationRepository = reservationRepository;
-        this.reservationSlotReader = reservationSlotReader;
+        this.reservationSlotCreator = reservationSlotCreator;
         this.memberRepository = memberRepository;
         this.clock = clock;
     }
@@ -38,10 +38,10 @@ public class ReservationService {
     @Transactional
     public Long create(CreateReservationParam createReservationParam) {
         Member member = getMemberById(createReservationParam.memberId());
-        ReservationSlot reservationSlot = reservationSlotReader.getThemeSchedule(
+        ReservationSlot reservationSlot = reservationSlotCreator.create(
                 createReservationParam.date(),
-                createReservationParam.themeId(),
-                createReservationParam.timeId()
+                createReservationParam.timeId(),
+                createReservationParam.themeId()
         );
         if (isAlreadyReservedAt(reservationSlot)) {
             throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
