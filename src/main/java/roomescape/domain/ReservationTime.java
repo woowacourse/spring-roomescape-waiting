@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,7 +19,7 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    @OneToMany(mappedBy = "time")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "time")
     private List<Reservation> reservations = new ArrayList<>();
 
     private ReservationTime(Long id, LocalTime startAt) {
