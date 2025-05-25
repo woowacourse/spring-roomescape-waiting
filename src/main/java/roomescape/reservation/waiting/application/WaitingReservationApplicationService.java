@@ -22,7 +22,7 @@ import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 
 @Service
-public class WaitingReservationFacadeService {
+public class WaitingReservationApplicationService {
 
     private final ReservationQueryService reservationQueryService;
     private final WaitingReservationCommandService waitingReservationCommandService;
@@ -32,13 +32,13 @@ public class WaitingReservationFacadeService {
     private final MemberQueryService memberQueryService;
     private final ReservationCommandService reservationCommandService;
 
-    public WaitingReservationFacadeService(final ReservationQueryService reservationQueryService,
-                                           final ReservationCommandService reservationCommandService,
-                                           final WaitingReservationCommandService waitingReservationCommandService,
-                                           final WaitingReservationQueryService waitingReservationQueryService,
-                                           final ReservationTimeQueryService reservationTimeQueryService,
-                                           final ThemeQueryService themeQueryService,
-                                           final MemberQueryService memberQueryService) {
+    public WaitingReservationApplicationService(final ReservationQueryService reservationQueryService,
+                                                final ReservationCommandService reservationCommandService,
+                                                final WaitingReservationCommandService waitingReservationCommandService,
+                                                final WaitingReservationQueryService waitingReservationQueryService,
+                                                final ReservationTimeQueryService reservationTimeQueryService,
+                                                final ThemeQueryService themeQueryService,
+                                                final MemberQueryService memberQueryService) {
         this.reservationQueryService = reservationQueryService;
         this.reservationCommandService = reservationCommandService;
         this.waitingReservationCommandService = waitingReservationCommandService;

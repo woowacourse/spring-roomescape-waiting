@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
-import roomescape.reservation.application.ReservationFacadeService;
+import roomescape.reservation.application.ReservationApplicationService;
 import roomescape.reservation.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -21,9 +21,9 @@ import roomescape.reservation.presentation.dto.ReservationResponse;
 @RestController
 public class MemberReservationController {
 
-    private final ReservationFacadeService reservationService;
+    private final ReservationApplicationService reservationService;
 
-    public MemberReservationController(ReservationFacadeService reservationService) {
+    public MemberReservationController(ReservationApplicationService reservationService) {
         this.reservationService = reservationService;
     }
 

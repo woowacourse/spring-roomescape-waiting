@@ -22,7 +22,7 @@ import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
-import roomescape.theme.application.ThemeServiceTest.ThemeConfig;
+import roomescape.theme.application.ThemeApplicationServiceTest.ThemeConfig;
 import roomescape.theme.application.service.ThemeCommandService;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
@@ -33,10 +33,10 @@ import roomescape.theme.presentation.dto.PopularThemeResponse;
 
 @DataJpaTest
 @Import(ThemeConfig.class)
-class ThemeServiceTest {
+class ThemeApplicationServiceTest {
 
     @Autowired
-    private ThemeFacadeService themeService;
+    private ThemeApplicationService themeService;
 
     @Autowired
     private JpaReservationRepository jpaReservationRepository;
@@ -117,9 +117,9 @@ class ThemeServiceTest {
         }
 
         @Bean
-        public ThemeFacadeService themeService(ThemeQueryService themeQueryService,
-                                               ThemeCommandService themeCommandService) {
-            return new ThemeFacadeService(themeQueryService, themeCommandService);
+        public ThemeApplicationService themeService(ThemeQueryService themeQueryService,
+                                                    ThemeCommandService themeCommandService) {
+            return new ThemeApplicationService(themeQueryService, themeCommandService);
         }
     }
 }

@@ -30,7 +30,7 @@ import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeRepository;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepositoryAdaptor;
-import roomescape.reservation.waiting.application.WaitingReservationFacadeServiceTest.WaitingReservationConfig;
+import roomescape.reservation.waiting.application.WaitingReservationApplicationServiceTest.WaitingReservationConfig;
 import roomescape.reservation.waiting.application.service.WaitingReservationCommandService;
 import roomescape.reservation.waiting.application.service.WaitingReservationQueryService;
 import roomescape.reservation.waiting.domain.WaitingReservation;
@@ -46,10 +46,10 @@ import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
 
 @DataJpaTest
 @Import(WaitingReservationConfig.class)
-class WaitingReservationFacadeServiceTest {
+class WaitingReservationApplicationServiceTest {
 
     @Autowired
-    private WaitingReservationFacadeService waitingReservationFacadeService;
+    private WaitingReservationApplicationService waitingReservationApplicationService;
 
     @Autowired
     private WaitingReservationRepository waitingReservationRepository;
@@ -78,7 +78,7 @@ class WaitingReservationFacadeServiceTest {
             reservationTime.getId(), theme.getId());
 
         // when
-        WaitingReservationResponse waitingReservation = waitingReservationFacadeService.createWaitingReservation(
+        WaitingReservationResponse waitingReservation = waitingReservationApplicationService.createWaitingReservation(
             reservationRequest, member.getId());
 
         // then
@@ -98,10 +98,10 @@ class WaitingReservationFacadeServiceTest {
             reservationTime.getId(), theme.getId());
 
         // when
-        waitingReservationFacadeService.createWaitingReservation(reservationRequest, member.getId());
+        waitingReservationApplicationService.createWaitingReservation(reservationRequest, member.getId());
 
         // then
-        Assertions.assertThatThrownBy(() -> waitingReservationFacadeService.createWaitingReservation(reservationRequest, member.getId()))
+        Assertions.assertThatThrownBy(() -> waitingReservationApplicationService.createWaitingReservation(reservationRequest, member.getId()))
             .isInstanceOf(BusinessException.class);
     }
 
@@ -116,7 +116,7 @@ class WaitingReservationFacadeServiceTest {
             reservationTime.getId(), theme.getId());
 
         // when-then
-        Assertions.assertThatThrownBy(() -> waitingReservationFacadeService.createWaitingReservation(reservationRequest, member.getId()))
+        Assertions.assertThatThrownBy(() -> waitingReservationApplicationService.createWaitingReservation(reservationRequest, member.getId()))
             .isInstanceOf(BusinessException.class);
     }
 
@@ -131,7 +131,7 @@ class WaitingReservationFacadeServiceTest {
             new WaitingReservation(LocalDate.now().plusDays(1), reservationTime, theme, member));
 
         // when
-        waitingReservationFacadeService.acceptWaiting(waitingReservation.getId());
+        waitingReservationApplicationService.acceptWaiting(waitingReservation.getId());
 
         // then
         Assertions.assertThat(waitingReservationRepository.existsById(waitingReservation.getId()))
@@ -151,7 +151,7 @@ class WaitingReservationFacadeServiceTest {
             new WaitingReservation(LocalDate.now().plusDays(1), reservationTime, theme, member));
 
         // when
-        waitingReservationFacadeService.denyWaiting(waitingReservation.getId());
+        waitingReservationApplicationService.denyWaiting(waitingReservation.getId());
 
         // then
         Assertions.assertThat(waitingReservationRepository.existsById(waitingReservation.getId()))
@@ -223,14 +223,14 @@ class WaitingReservationFacadeServiceTest {
         }
 
         @Bean
-        public WaitingReservationFacadeService waitingReservationFacadeService(ReservationQueryService reservationQueryService,
-                                                                               ReservationCommandService reservationCommandService,
-                                                                               WaitingReservationCommandService waitingReservationCommandService,
-                                                                               WaitingReservationQueryService waitingReservationQueryService,
-                                                                               ReservationTimeQueryService timeQueryService,
-                                                                               ThemeQueryService themeQueryService,
-                                                                               MemberQueryService memberQueryService) {
-            return new WaitingReservationFacadeService(
+        public WaitingReservationApplicationService waitingReservationFacadeService(ReservationQueryService reservationQueryService,
+                                                                                    ReservationCommandService reservationCommandService,
+                                                                                    WaitingReservationCommandService waitingReservationCommandService,
+                                                                                    WaitingReservationQueryService waitingReservationQueryService,
+                                                                                    ReservationTimeQueryService timeQueryService,
+                                                                                    ThemeQueryService themeQueryService,
+                                                                                    MemberQueryService memberQueryService) {
+            return new WaitingReservationApplicationService(
                 reservationQueryService,
                 reservationCommandService,
                 waitingReservationCommandService,

@@ -10,28 +10,28 @@ import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.waiting.presentation.dto.WaitingReservationResponse;
-import roomescape.reservation.waiting.application.WaitingReservationFacadeService;
+import roomescape.reservation.waiting.application.WaitingReservationApplicationService;
 
 @RestController
 public class MemberWaitingController {
 
-    private final WaitingReservationFacadeService waitingReservationFacadeService;
+    private final WaitingReservationApplicationService waitingReservationApplicationService;
 
-    public MemberWaitingController(WaitingReservationFacadeService waitingReservationFacadeService) {
-        this.waitingReservationFacadeService = waitingReservationFacadeService;
+    public MemberWaitingController(WaitingReservationApplicationService waitingReservationApplicationService) {
+        this.waitingReservationApplicationService = waitingReservationApplicationService;
     }
 
     @PostMapping("/reservation-waiting")
     public ResponseEntity<WaitingReservationResponse> createWaitingReservation(@RequestBody final ReservationRequest request,
                                                                                @LoginMember final LoginMemberInfo memberInfo) {
-        WaitingReservationResponse response = waitingReservationFacadeService.createWaitingReservation(request, memberInfo.id());
+        WaitingReservationResponse response = waitingReservationApplicationService.createWaitingReservation(request, memberInfo.id());
         return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteWaitingReservation(@LoginMember LoginMemberInfo loginMemberInfo,
                                                          @PathVariable("id") Long reservationId) {
-        waitingReservationFacadeService.deleteByIdWithMemberId(loginMemberInfo.id(), reservationId);
+        waitingReservationApplicationService.deleteByIdWithMemberId(loginMemberInfo.id(), reservationId);
         return ResponseEntity.noContent().build();
     }
 }

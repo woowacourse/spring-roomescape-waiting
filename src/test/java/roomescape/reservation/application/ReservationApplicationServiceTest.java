@@ -26,7 +26,7 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
-import roomescape.reservation.application.ReservationServiceTest.ReservationConfig;
+import roomescape.reservation.application.ReservationApplicationServiceTest.ReservationConfig;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
@@ -52,10 +52,10 @@ import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
 
 @DataJpaTest
 @Import(ReservationConfig.class)
-class ReservationServiceTest {
+class ReservationApplicationServiceTest {
 
     @Autowired
-    private ReservationFacadeService reservationFacadeService;
+    private ReservationApplicationService reservationApplicationService;
 
     @Autowired
     private JpaMemberRepository jpaMemberRepository;
@@ -89,7 +89,7 @@ class ReservationServiceTest {
         );
 
         // when
-        List<MyReservationResponse> result = reservationFacadeService.getMemberReservations(
+        List<MyReservationResponse> result = reservationApplicationService.getMemberReservations(
             new LoginMemberInfo(member.getId())
         );
 
@@ -107,7 +107,7 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.now().minusDays(days);
 
         Assertions.assertThatThrownBy(
-                        () -> reservationFacadeService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
+                        () -> reservationApplicationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
                 .isInstanceOf(BusinessException.class);
     }
 
@@ -123,7 +123,7 @@ class ReservationServiceTest {
     @DisplayName("중복 예약이 불가하다.")
     @Test
     void cant_not_reserve_duplicate() {
-        Assertions.assertThatThrownBy(() -> reservationFacadeService.createReservation(
+        Assertions.assertThatThrownBy(() -> reservationApplicationService.createReservation(
                         new ReservationRequest(LocalDate.of(2024, 10, 6), 1L, 1L), 1L))
                 .isInstanceOf(BusinessException.class);
     }
@@ -186,7 +186,7 @@ class ReservationServiceTest {
         }
 
         @Bean
-        public ReservationFacadeService reservationFacadeService(
+        public ReservationApplicationService reservationFacadeService(
             ReservationQueryService reservationQueryService,
             ReservationCommandService reservationCommandService,
             WaitingReservationQueryService waitingReservationQueryService,
@@ -194,7 +194,7 @@ class ReservationServiceTest {
             ThemeQueryService themeQueryService,
             MemberQueryService memberQueryService
         ) {
-            return new ReservationFacadeService(
+            return new ReservationApplicationService(
                 reservationQueryService,
                 reservationCommandService,
                 waitingReservationQueryService,

@@ -12,25 +12,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.login.presentation.dto.SearchCondition;
-import roomescape.reservation.application.ReservationFacadeService;
+import roomescape.reservation.application.ReservationApplicationService;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
-import roomescape.reservation.waiting.application.WaitingReservationFacadeService;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminReservationController {
 
-    private final ReservationFacadeService reservationFacadeService;
+    private final ReservationApplicationService reservationApplicationService;
 
-    public AdminReservationController(ReservationFacadeService reservationFacadeService) {
-        this.reservationFacadeService = reservationFacadeService;
+    public AdminReservationController(ReservationApplicationService reservationApplicationService) {
+        this.reservationApplicationService = reservationApplicationService;
     }
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody AdminReservationRequest request) {
-        ReservationResponse response = reservationFacadeService.createReservation(
+        ReservationResponse response = reservationApplicationService.createReservation(
             new ReservationRequest(
                 request.date(),
                 request.timeId(),
@@ -42,20 +41,20 @@ public class AdminReservationController {
 
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<ReservationResponse> response = reservationFacadeService.getReservations();
+        List<ReservationResponse> response = reservationApplicationService.getReservations();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/user-reservation")
     public ResponseEntity<List<ReservationResponse>> searchReservationWithCondition(@ModelAttribute SearchCondition condition) {
-        List<ReservationResponse> responses = reservationFacadeService.searchReservationWithCondition(condition);
+        List<ReservationResponse> responses = reservationApplicationService.searchReservationWithCondition(condition);
 
         return ResponseEntity.ok().body(responses);
     }
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> deleteReservationById(@PathVariable("id") final Long id) {
-        reservationFacadeService.deleteReservationById(id);
+        reservationApplicationService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
     }
 }

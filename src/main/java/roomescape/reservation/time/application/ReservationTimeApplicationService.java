@@ -13,15 +13,15 @@ import roomescape.reservation.time.presentation.dto.TimeConditionRequest;
 import roomescape.reservation.time.presentation.dto.TimeConditionResponse;
 
 @Service
-public class ReservationTimeFacadeService {
+public class ReservationTimeApplicationService {
 
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ReservationTimeCommandService reservationTimeCommandService;
     private final ReservationQueryService reservationQueryService;
 
-    public ReservationTimeFacadeService(ReservationTimeQueryService reservationTimeQueryService,
-                                        ReservationTimeCommandService reservationTimeCommandService,
-                                        ReservationQueryService reservationQueryService) {
+    public ReservationTimeApplicationService(ReservationTimeQueryService reservationTimeQueryService,
+                                             ReservationTimeCommandService reservationTimeCommandService,
+                                             ReservationQueryService reservationQueryService) {
         this.reservationTimeQueryService = reservationTimeQueryService;
         this.reservationTimeCommandService = reservationTimeCommandService;
         this.reservationQueryService = reservationQueryService;

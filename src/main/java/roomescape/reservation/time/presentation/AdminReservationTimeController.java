@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
 import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.time.presentation.dto.ReservationTimeResponse;
-import roomescape.reservation.time.application.ReservationTimeFacadeService;
+import roomescape.reservation.time.application.ReservationTimeApplicationService;
 
 @RestController
 @RequestMapping("/admin/times")
@@ -24,9 +24,9 @@ public class AdminReservationTimeController {
 
     public static final String GET_ADMIN_TIME = "/admin/time";
 
-    private final ReservationTimeFacadeService reservationTimeService;
+    private final ReservationTimeApplicationService reservationTimeService;
 
-    public AdminReservationTimeController(final ReservationTimeFacadeService reservationTimeService) {
+    public AdminReservationTimeController(final ReservationTimeApplicationService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
     }
 

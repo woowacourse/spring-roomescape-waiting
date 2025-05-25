@@ -25,7 +25,7 @@ import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 
 @Service
-public class ReservationFacadeService {
+public class ReservationApplicationService {
 
     private final ReservationQueryService reservationQueryService;
     private final ReservationCommandService reservationCommandService;
@@ -34,12 +34,12 @@ public class ReservationFacadeService {
     private final ThemeQueryService themeQueryService;
     private final MemberQueryService memberQueryService;
 
-    public ReservationFacadeService(ReservationQueryService reservationQueryService,
-                                    ReservationCommandService reservationCommandService,
-                                    WaitingReservationQueryService waitingReservationQueryService,
-                                    ReservationTimeQueryService reservationTimeQueryService,
-                                    ThemeQueryService themeQueryService,
-                                    MemberQueryService memberQueryService) {
+    public ReservationApplicationService(ReservationQueryService reservationQueryService,
+                                         ReservationCommandService reservationCommandService,
+                                         WaitingReservationQueryService waitingReservationQueryService,
+                                         ReservationTimeQueryService reservationTimeQueryService,
+                                         ThemeQueryService themeQueryService,
+                                         MemberQueryService memberQueryService) {
         this.reservationQueryService = reservationQueryService;
         this.reservationCommandService = reservationCommandService;
         this.waitingReservationQueryService = waitingReservationQueryService;

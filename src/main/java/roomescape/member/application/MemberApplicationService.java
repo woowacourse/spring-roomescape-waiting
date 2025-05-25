@@ -11,12 +11,12 @@ import roomescape.member.presentation.dto.MemberRequest;
 import roomescape.member.presentation.dto.MemberResponse;
 
 @Service
-public class MemberFacadeService {
+public class MemberApplicationService {
 
     private final MemberQueryService memberQueryService;
     private final MemberCommandService memberCommandService;
 
-    public MemberFacadeService(final MemberQueryService memberQueryService, final MemberCommandService memberCommandService) {
+    public MemberApplicationService(final MemberQueryService memberQueryService, final MemberCommandService memberCommandService) {
         this.memberQueryService = memberQueryService;
         this.memberCommandService = memberCommandService;
     }

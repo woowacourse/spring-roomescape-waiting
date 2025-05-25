@@ -10,12 +10,12 @@ import roomescape.theme.presentation.dto.ThemeRequest;
 import roomescape.theme.presentation.dto.ThemeResponse;
 
 @Service
-public class ThemeFacadeService {
+public class ThemeApplicationService {
 
     private final ThemeQueryService themeQueryService;
     private final ThemeCommandService themeCommandService;
 
-    public ThemeFacadeService(final ThemeQueryService themeQueryService, final ThemeCommandService themeCommandService) {
+    public ThemeApplicationService(final ThemeQueryService themeQueryService, final ThemeCommandService themeCommandService) {
         this.themeQueryService = themeQueryService;
         this.themeCommandService = themeCommandService;
     }

@@ -21,7 +21,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
-import roomescape.reservation.time.application.ReservationTimeFacadeService;
+import roomescape.reservation.time.application.ReservationTimeApplicationService;
 import roomescape.reservation.time.application.service.ReservationTimeCommandService;
 import roomescape.reservation.time.application.service.ReservationTimeQueryService;
 import roomescape.reservation.time.domain.ReservationTime;
@@ -30,16 +30,16 @@ import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepositoryAdaptor;
 import roomescape.reservation.time.presentation.dto.TimeConditionRequest;
 import roomescape.reservation.time.presentation.dto.TimeConditionResponse;
-import roomescape.reservationTime.application.ReservationTimeFacadeServiceTest.ReservationTimeConfig;
+import roomescape.reservationTime.application.ReservationTimeApplicationServiceTest.ReservationTimeConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 
 @DataJpaTest
 @Import(ReservationTimeConfig.class)
-class ReservationTimeFacadeServiceTest {
+class ReservationTimeApplicationServiceTest {
 
     @Autowired
-    private ReservationTimeFacadeService reservationTimeFacadeService;
+    private ReservationTimeApplicationService reservationTimeApplicationService;
 
     @Autowired
     private JpaThemeRepository jpaThemeRepository;
@@ -57,7 +57,7 @@ class ReservationTimeFacadeServiceTest {
     @DisplayName("이미 존재하는 예약이 있는 경우 예약 시간을 삭제할 수 없다.")
     @Test
     void can_not_delete_when_reservation_exists() {
-        Assertions.assertThatThrownBy(() -> reservationTimeFacadeService.deleteReservationTimeById(1L))
+        Assertions.assertThatThrownBy(() -> reservationTimeApplicationService.deleteReservationTimeById(1L))
             .isInstanceOf(BusinessException.class);
     }
 
@@ -80,7 +80,7 @@ class ReservationTimeFacadeServiceTest {
         jpaReservationRepository.save(new Reservation(now, time2, theme, member));
 
         // when
-        List<TimeConditionResponse> responses = reservationTimeFacadeService.getTimesWithCondition(
+        List<TimeConditionResponse> responses = reservationTimeApplicationService.getTimesWithCondition(
             new TimeConditionRequest(now, theme.getId()));
 
         // then
@@ -119,10 +119,10 @@ class ReservationTimeFacadeServiceTest {
         }
 
         @Bean
-        public ReservationTimeFacadeService reservationTimeService(ReservationTimeQueryService reservationTimeQueryService,
-                                                                   ReservationTimeCommandService reservationTimeCommandService,
-                                                                   ReservationQueryService reservationQueryService) {
-            return new ReservationTimeFacadeService(
+        public ReservationTimeApplicationService reservationTimeService(ReservationTimeQueryService reservationTimeQueryService,
+                                                                        ReservationTimeCommandService reservationTimeCommandService,
+                                                                        ReservationQueryService reservationQueryService) {
+            return new ReservationTimeApplicationService(
                 reservationTimeQueryService,
                 reservationTimeCommandService,
                 reservationQueryService
