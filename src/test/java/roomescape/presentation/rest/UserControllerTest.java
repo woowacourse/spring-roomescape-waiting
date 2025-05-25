@@ -18,8 +18,8 @@ class UserControllerTest {
 
     private static final Map<String, String> MEMBER_BODY = Map.of(
             "email", "razel@email.com",
-            "password", "razelpassword",
-            "name", "razel"
+            "password", "razel1234",
+            "name", "라젤"
     );
 
     @Test
@@ -31,7 +31,7 @@ class UserControllerTest {
                 .when().post("/users")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("name", Matchers.equalTo("razel"));
+                .body("name", Matchers.equalTo("라젤"));
     }
 
     @Test
@@ -39,7 +39,7 @@ class UserControllerTest {
     void readAllReservationsByUser() {
         var token = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("email", "popo@email.com", "password", "password"))
+                .body(Map.of("email", "user1@email.com", "password", "password1"))
                 .when().post("/login")
                 .then().statusCode(200)
                 .extract().response().getDetailedCookies().getValue("token");

@@ -29,7 +29,7 @@ class TimeSlotControllerTest {
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("id", Matchers.equalTo(7))
+                .body("id", Matchers.equalTo(4))
                 .body("startAt", Matchers.equalTo("13:00:00"));
     }
 
@@ -40,7 +40,7 @@ class TimeSlotControllerTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .body("size()", Matchers.is(6));
+                .body("size()", Matchers.is(3));
     }
 
     @Test
@@ -56,8 +56,8 @@ class TimeSlotControllerTest {
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 사용 중이라면 CONFLICT를 응답한다.")
     void removeReservationTimeTest() {
         RestAssured.given().log().all()
-            .when().delete("/times/3")
-            .then().log().all()
-            .statusCode(HttpStatus.CONFLICT.value());
+                .when().delete("/times/1")
+                .then().log().all()
+                .statusCode(HttpStatus.CONFLICT.value());
     }
 }

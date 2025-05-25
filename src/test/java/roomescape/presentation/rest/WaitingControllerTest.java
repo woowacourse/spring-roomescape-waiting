@@ -27,7 +27,7 @@ class WaitingControllerTest {
     void createWaiting() {
         var token = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("email", "popo@email.com", "password", "password"))
+                .body(Map.of("email", "admin@email.com", "password", "password"))
                 .when().post("/login")
                 .then().statusCode(200)
                 .extract().response().getDetailedCookies().getValue("token");
@@ -48,7 +48,7 @@ class WaitingControllerTest {
     void deleteWaitingById() {
         var token = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("email", "popo@email.com", "password", "password"))
+                .body(Map.of("email", "admin@email.com", "password", "password"))
                 .when().post("/login")
                 .then().statusCode(200)
                 .extract().response().getDetailedCookies().getValue("token");
@@ -61,7 +61,7 @@ class WaitingControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("date", Matchers.equalTo("3000-03-17"));
-        
+
         RestAssured.given().log().all()
                 .when().delete("/waitings/1")
                 .then().log().all()
