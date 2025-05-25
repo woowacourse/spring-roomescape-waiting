@@ -111,7 +111,7 @@ public class ReservationService {
             LocalDate dateTo
     ) {
         List<Reservation> reservations = reservationRepository
-                .findByMemberAndGameScheduleAndDateRange(
+                .findByMemberAndThemeAndDateRange(
                         memberId,
                         themeId,
                         dateFrom,

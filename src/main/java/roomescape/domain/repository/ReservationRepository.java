@@ -32,7 +32,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (:dateFrom IS NULL OR gs.date >= :dateFrom)
                 AND (:dateTo IS NULL OR gs.date <= :dateTo)
             """)
-    List<Reservation> findByMemberAndGameScheduleAndDateRange(
+    List<Reservation> findByMemberAndThemeAndDateRange(
             @Param("memberId") Long member,
             @Param("themeId") Long theme,
             @Param("dateFrom") LocalDate dateFrom,

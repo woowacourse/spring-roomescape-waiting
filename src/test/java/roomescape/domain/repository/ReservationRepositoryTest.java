@@ -75,7 +75,7 @@ class ReservationRepositoryTest {
 
     @DisplayName("테마 ID, 회원 ID, 날짜 범위로 예약 목록을 조회한다.")
     @Test
-    void findByMemberAndGameScheduleAndDateRange() {
+    void findByMemberAndThemeAndDateRange() {
         // given
         Member member1 = Member.withoutId("member1", "member1@email.com", "password", Role.USER);
         Member member2 = Member.withoutId("member2", "member2@email.com", "password", Role.USER);
@@ -111,7 +111,7 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation3);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByMemberAndGameScheduleAndDateRange(
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
                 member1.getId(),
                 theme1.getId(),
                 yesterday,
@@ -165,7 +165,7 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation3);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByMemberAndGameScheduleAndDateRange(
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
                 null,
                 theme1.getId(),
                 null,
@@ -216,7 +216,7 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation3);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByMemberAndGameScheduleAndDateRange(
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
                 member1.getId(),
                 null,
                 null,
@@ -266,7 +266,7 @@ class ReservationRepositoryTest {
         entityManager.persist(reservation3);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByMemberAndGameScheduleAndDateRange(
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
                 null,
                 null,
                 yesterday,

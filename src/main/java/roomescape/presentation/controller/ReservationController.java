@@ -37,8 +37,8 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public List<ReservationStatusResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
-        List<ReservationStatusServiceResponse> reservationStatuses = service.getReservationsByMember(memberIdDto.id());
-        return reservationStatuses.stream()
+        List<ReservationStatusServiceResponse> reservationsWithStatus = service.getReservationsByMember(memberIdDto.id());
+        return reservationsWithStatus.stream()
                 .map(ReservationStatusResponse::from)
                 .toList();
     }
