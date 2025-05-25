@@ -37,9 +37,4 @@ public class ReservationTimeRepositoryAdapter implements ReservationTimeReposito
     public Optional<ReservationTime> findById(Long id) {
         return reservationTimeJpaRepository.findById(id);
     }
-
-    @Override
-    public boolean existsById(Long id) {
-        return reservationTimeJpaRepository.existsById(id);
-    }
 }
