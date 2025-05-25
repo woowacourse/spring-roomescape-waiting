@@ -3,25 +3,25 @@ package roomescape.business.dto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
+import roomescape.business.model.vo.StartTime;
+import roomescape.business.model.vo.ThemeName;
 
 import java.util.List;
 import java.util.Map;
 
 public record MyReservationDto(
         Id id,
-        UserDto user,
+        ThemeName themeName,
         ReservationDate date,
-        ReservationTimeDto time,
-        ThemeDto theme,
+        StartTime time,
         int waitNumber
 ) {
     public static MyReservationDto fromEntry(final Reservation reservation, final int waitNumber) {
         return new MyReservationDto(
                 reservation.getId(),
-                UserDto.fromEntity(reservation.getUser()),
+                reservation.getSlot().getTheme().getName(),
                 reservation.getSlot().getDate(),
-                ReservationTimeDto.fromEntity(reservation.getSlot().getTime()),
-                ThemeDto.fromEntity(reservation.getSlot().getTheme()),
+                reservation.getSlot().getTime().getStartTime(),
                 waitNumber
         );
     }

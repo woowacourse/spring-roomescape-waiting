@@ -15,7 +15,7 @@ public record WaitingResponse(
 ) {
     public static WaitingResponse from(final WaitingDto dto) {
         return new WaitingResponse(
-                dto.reservationId().value(),
+                dto.id().value(),
                 dto.userName().value(),
                 dto.themeName().value(),
                 dto.date().value(),

@@ -3,23 +3,26 @@ package roomescape.business.dto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
+import roomescape.business.model.vo.StartTime;
+import roomescape.business.model.vo.ThemeName;
+import roomescape.business.model.vo.UserName;
 
 import java.util.List;
 
 public record ReservationDto(
         Id id,
-        UserDto user,
+        UserName userName,
+        ThemeName themeName,
         ReservationDate date,
-        ReservationTimeDto time,
-        ThemeDto theme
+        StartTime time
 ) {
     public static ReservationDto fromEntity(final Reservation reservation) {
         return new ReservationDto(
                 reservation.getId(),
-                UserDto.fromEntity(reservation.getUser()),
+                reservation.getUser().getName(),
+                reservation.getSlot().getTheme().getName(),
                 reservation.getSlot().getDate(),
-                ReservationTimeDto.fromEntity(reservation.getSlot().getTime()),
-                ThemeDto.fromEntity(reservation.getSlot().getTheme())
+                reservation.getSlot().getTime().getStartTime()
         );
     }
 

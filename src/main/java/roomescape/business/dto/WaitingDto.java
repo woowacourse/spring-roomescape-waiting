@@ -10,13 +10,12 @@ import roomescape.business.model.vo.UserName;
 import java.util.List;
 
 public record WaitingDto(
-        Id reservationId,
+        Id id,
         UserName userName,
         ThemeName themeName,
         ReservationDate date,
         StartTime time
 ) {
-
     public static WaitingDto fromEntity(final Reservation reservation) {
         return new WaitingDto(
                 reservation.getId(),

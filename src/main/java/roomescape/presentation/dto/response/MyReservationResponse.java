@@ -18,9 +18,9 @@ public record MyReservationResponse(
 
         return new MyReservationResponse(
                 myReservations.id().value(),
-                myReservations.theme().name().value(),
+                myReservations.themeName().value(),
                 myReservations.date().value(),
-                myReservations.time().startTime().value(),
+                myReservations.time().value(),
                 parseStatus(myReservations.waitNumber())
         );
     }
