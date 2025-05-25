@@ -24,10 +24,8 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
 import roomescape.member.presentation.dto.MyReservationResponse;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.WaitingRepository;
-import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
@@ -40,12 +38,9 @@ import roomescape.reservation.service.ReservationServiceTest.ReservationConfig;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.JpaReservationTimeRepositoryAdaptor;
-import roomescape.reservationTime.presentation.dto.ReservationTimeResponse;
-import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
-import roomescape.theme.presentation.dto.ThemeResponse;
 
 @DataJpaTest
 @Import(ReservationConfig.class)

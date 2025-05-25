@@ -4,16 +4,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.SearchCondition;
-import roomescape.common.exception.BusinessException;
 import roomescape.common.util.time.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.infrastructure.dto.WaitingWithRank;
 import roomescape.member.exception.MemberNotFound;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.MyReservationResponse;

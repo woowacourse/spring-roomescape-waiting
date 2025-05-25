@@ -3,8 +3,7 @@ package roomescape.member.presentation.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.infrastructure.dto.WaitingWithRank;
 import roomescape.reservation.domain.Reservation;
 
 public record MyReservationResponse(Long reservationId, String theme, LocalDate date, LocalTime time, String status) {

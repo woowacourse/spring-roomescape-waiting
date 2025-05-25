@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.infrastructure.dto.WaitingWithRank;
 
 import java.util.List;
 
