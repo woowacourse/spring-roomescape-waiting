@@ -1,11 +1,13 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
+import roomescape.service.dto.AvailableReservationTimeResponse;
 import roomescape.service.dto.ReservationTimeRequest;
 import roomescape.service.dto.ReservationTimeResponse;
 import roomescape.repository.ReservationTimeRepository;
@@ -13,7 +15,6 @@ import roomescape.repository.ReservationTimeRepository;
 @Service
 public class ReservationTimeService {
 
-    public static final int DELETE_FAILED_COUNT = 0;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
@@ -63,5 +64,17 @@ public class ReservationTimeService {
         if (!reservationTimeRepository.existsById(id)) {
             throw new NoSuchElementException("[ERROR] 존재하지 않는 시간 입니다.");
         }
+    }
+
+    public List<AvailableReservationTimeResponse> getAvailableTimes(final LocalDate date, final long themeId) {
+        final List<ReservationTime> bookedReservationTimes = reservationTimeRepository.findAvailableTimesByDateAndThemeId(
+                date, themeId);
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        return reservationTimes.stream()
+                .map(reservationTime -> AvailableReservationTimeResponse.of(
+                        reservationTime,
+                        !bookedReservationTimes.contains(reservationTime)
+                ))
+                .toList();
     }
 }
