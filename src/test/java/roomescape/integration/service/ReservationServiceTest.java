@@ -155,29 +155,6 @@ class ReservationServiceTest extends ServiceTestBase {
     }
 
     @Test
-    void 내_예약_조회() {
-        // given
-        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
-        var reservationTime = reservationTimeDbFixture.예약시간_10시();
-        var theme = themeDbFixture.공포();
-        var reservation = reservationDbFixture.예약_25_4_22(reservationTime, theme, member);
-
-        // when
-        var all = service.findAllMyReservation(member.getId());
-
-        // then
-        assertSoftly(softly -> {
-            softly.assertThat(all).hasSize(1);
-            var response = all.get(0);
-            softly.assertThat(response.reservationId()).isEqualTo(reservation.getId());
-            softly.assertThat(response.theme()).isEqualTo(reservation.getTheme().getName().name());
-            softly.assertThat(response.date()).isEqualTo(reservation.getDate());
-            softly.assertThat(response.time()).isEqualTo(reservation.getStartAt());
-            softly.assertThat(response.status()).isEqualTo("예약");
-        });
-    }
-
-    @Test
     void 멤버로_예약을_조회할_수_있다() {
         // given
         var member1 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
@@ -246,5 +223,28 @@ class ReservationServiceTest extends ServiceTestBase {
 
         // then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void 내_예약_조회() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        var reservation = reservationDbFixture.예약_25_4_22(reservationTime, theme, member);
+
+        // when
+        var all = service.findAllMyReservation(member.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(all).hasSize(1);
+            var response = all.get(0);
+            softly.assertThat(response.reservationId()).isEqualTo(reservation.getId());
+            softly.assertThat(response.theme()).isEqualTo(reservation.getTheme().getName().name());
+            softly.assertThat(response.date()).isEqualTo(reservation.getDate());
+            softly.assertThat(response.time()).isEqualTo(reservation.getStartAt());
+            softly.assertThat(response.status()).isEqualTo("예약");
+        });
     }
 }

@@ -19,6 +19,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.request.WaitingCreateRequest;
+import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.WaitingResponse;
 
 @Service
@@ -115,5 +116,11 @@ public class WaitingService {
         if (!(isOwner || isAdmin)) {
             throw new IllegalStateException("해당 대기를 삭제할 권한이 없습니다.");
         }
+    }
+
+    public List<MyReservationResponse> findAllMyWaiting(final Long memberId) {
+        return waitingRepository.findWaitingsWithRankByMemberId(memberId).stream()
+                .map(MyReservationResponse::fromWaiting)
+                .toList();
     }
 }

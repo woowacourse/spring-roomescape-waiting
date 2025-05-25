@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import roomescape.domain.member.Member;
@@ -19,7 +18,6 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationSpecifications;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.WaitingRepository;
 import roomescape.service.request.AdminCreateReservationRequest;
 import roomescape.service.request.ReservationCreateRequest;
 import roomescape.service.response.MyReservationResponse;
@@ -33,22 +31,19 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final Clock clock;
-    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final MemberRepository memberRepository,
-            final Clock clock,
-            final WaitingRepository waitingRepository
+            final Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.clock = clock;
-        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> findAllReservations() {
@@ -127,21 +122,8 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> findAllMyReservation(final Long memberId) {
-        return Stream.concat(
-                findReservedResponses(memberId).stream(),
-                findWaitingResponses(memberId).stream()
-        ).toList();
-    }
-
-    private List<MyReservationResponse> findReservedResponses(final Long memberId) {
         return reservationRepository.findByMemberId(memberId).stream()
                 .map(MyReservationResponse::from)
-                .toList();
-    }
-
-    private List<MyReservationResponse> findWaitingResponses(final Long memberId) {
-        return waitingRepository.findWaitingsWithRankByMemberId(memberId).stream()
-                .map(MyReservationResponse::fromWaiting)
                 .toList();
     }
 }

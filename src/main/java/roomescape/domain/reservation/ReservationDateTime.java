@@ -26,11 +26,11 @@ public class ReservationDateTime {
             final ReservationTime reservationTime,
             final Clock clock
     ) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(
+        final LocalDateTime reservationDateTime = LocalDateTime.of(
                 reservationDate.date(),
                 reservationTime.getStartAt()
         );
-        LocalDateTime now = LocalDateTime.now(clock);
+        final LocalDateTime now = LocalDateTime.now(clock);
 
         if (reservationDateTime.isBefore(now)) {
             throw new IllegalStateException("현재 시간 이후로만 예약할 수 있습니다.");

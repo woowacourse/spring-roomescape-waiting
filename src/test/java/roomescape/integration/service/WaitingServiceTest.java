@@ -134,4 +134,27 @@ class WaitingServiceTest extends ServiceTestBase {
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("해당 대기를 삭제할 권한이 없습니다.");
     }
+
+    @Test
+    void 내_대기_조회() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        var waiting = waitingDbFixture.대기_25_4_22(reservationTime, theme, member);
+
+        // when
+        var all = waitingService.findAllMyWaiting(member.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(all).hasSize(1);
+            var response = all.get(0);
+            softly.assertThat(response.reservationId()).isEqualTo(waiting.getId());
+            softly.assertThat(response.theme()).isEqualTo(waiting.getTheme().getName().name());
+            softly.assertThat(response.date()).isEqualTo(waiting.getDate());
+            softly.assertThat(response.time()).isEqualTo(waiting.getStartAt());
+            softly.assertThat(response.status()).isEqualTo("1번째 예약 대기");
+        });
+    }
 } 
