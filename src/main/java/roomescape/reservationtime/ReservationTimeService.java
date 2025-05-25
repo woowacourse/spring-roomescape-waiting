@@ -43,6 +43,12 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
+    public ReservationTime findById(final Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(ReservationTimeNotFoundException::new);
+    }
+
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
         final Theme theme = themeService.findById(themeId);

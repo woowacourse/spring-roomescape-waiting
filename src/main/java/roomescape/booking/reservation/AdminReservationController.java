@@ -17,12 +17,13 @@ import java.util.List;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationCreateService reservationCreateService;
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
             @RequestBody @Valid final AdminReservationRequest request
     ) {
-        final ReservationResponse response = reservationService.createForAdmin(request);
+        final ReservationResponse response = reservationCreateService.createForAdmin(request);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 

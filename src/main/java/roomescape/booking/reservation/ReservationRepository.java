@@ -21,4 +21,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Boolean existsBySchedule_Theme(Theme theme);
 
     Boolean existsBySchedule(Schedule schedule);
+
+    List<Reservation> findAllByMember_Email(String email);
 }

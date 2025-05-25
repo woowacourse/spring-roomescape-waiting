@@ -10,19 +10,15 @@ import roomescape.booking.schedule.ScheduleRepository;
 import roomescape.booking.schedule.ScheduleService;
 import roomescape.booking.schedule.dto.ScheduleRequest;
 import roomescape.booking.schedule.dto.ScheduleResponse;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepository;
+import roomescape.reservationtime.ReservationTimeService;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.theme.ThemeService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -33,35 +29,35 @@ public class ScheduleServiceTest {
 
     private ScheduleService scheduleService;
     private ScheduleRepository scheduleRepository;
-    private ReservationTimeRepository reservationTimeRepository;
-    private ThemeRepository themeRepository;
+    private ReservationTimeService reservationTimeService;
+    private ThemeService themeService;
 
     private ScheduleRequest REQUEST;
-    private Optional<ReservationTime> RESERVATION_TIME;
-    private Optional<Theme> THEME;
+    private ReservationTime RESERVATION_TIME;
+    private Theme THEME;
 
     @BeforeEach
     void setUp() {
         REQUEST = new ScheduleRequest(LocalDate.now().plusDays(1), 1L, 1L);
-        RESERVATION_TIME = Optional.of(reservationTimeWithId(REQUEST.reservationTimeId(), new ReservationTime(LocalTime.of(12, 40))));
-        THEME = Optional.of(themeWithId(REQUEST.themeId(), new Theme("테마명", "테마 설명", "썸네일 URL")));
+        RESERVATION_TIME = reservationTimeWithId(REQUEST.reservationTimeId(), new ReservationTime(LocalTime.of(12, 40)));
+        THEME = themeWithId(REQUEST.themeId(), new Theme("테마명", "테마 설명", "썸네일 URL"));
 
         scheduleRepository = mock(ScheduleRepository.class);
-        reservationTimeRepository = mock(ReservationTimeRepository.class);
-        themeRepository = mock(ThemeRepository.class);
-        scheduleService = new ScheduleService(scheduleRepository, reservationTimeRepository, themeRepository);
+        reservationTimeService = mock(ReservationTimeService.class);
+        themeService = mock(ThemeService.class);
+        scheduleService = new ScheduleService(scheduleRepository, reservationTimeService, themeService);
     }
 
     @Test
     @DisplayName("스케줄을 생성할 수 있다.")
     void create() {
         // given
-        given(reservationTimeRepository.findById(REQUEST.reservationTimeId()))
+        given(reservationTimeService.findById(REQUEST.reservationTimeId()))
                 .willReturn(RESERVATION_TIME);
-        given(themeRepository.findById(REQUEST.themeId()))
+        given(themeService.findById(REQUEST.themeId()))
                 .willReturn(THEME);
 
-        Schedule schedule = new Schedule(REQUEST.date(), RESERVATION_TIME.get(), THEME.get());
+        Schedule schedule = new Schedule(REQUEST.date(), RESERVATION_TIME, THEME);
         Schedule savedSchedule = scheduleWithId(1L, schedule);
         given(scheduleRepository.save(any(Schedule.class)))
                 .willReturn(savedSchedule);
@@ -71,31 +67,5 @@ public class ScheduleServiceTest {
 
         // then
         assertThat(response.id()).isEqualTo(savedSchedule.getId());
-    }
-
-    @Test
-    @DisplayName("시간이 존재하지 않으면 예외가 발생한다.")
-    void createWithNonExistentTime() {
-        // given
-        given(reservationTimeRepository.findById(REQUEST.reservationTimeId()))
-                .willReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> scheduleService.create(REQUEST))
-                .isInstanceOf(ReservationNotExistsTimeException.class);
-    }
-
-    @Test
-    @DisplayName("테마가 존재하지 않으면 예외가 발생한다.")
-    void createWithNonExistentTheme() {
-        // given
-        given(reservationTimeRepository.findById(REQUEST.reservationTimeId()))
-                .willReturn(RESERVATION_TIME);
-        given(themeRepository.findById(REQUEST.themeId()))
-                .willReturn(Optional.empty());
-
-        // when & then
-        assertThatThrownBy(() -> scheduleService.create(REQUEST))
-                .isInstanceOf(ReservationNotExistsThemeException.class);
     }
 }

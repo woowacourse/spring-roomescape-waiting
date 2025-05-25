@@ -19,6 +19,7 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationCreateService reservationCreateService;
     private final BookingService bookingService;
 
     @PostMapping
@@ -26,7 +27,7 @@ public class ReservationController {
             @RequestBody @Valid final ReservationRequest request,
             @AuthenticationPrincipal final LoginMember member
     ) {
-        final ReservationResponse response = reservationService.create(request, member);
+        final ReservationResponse response = reservationCreateService.create(request, member);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

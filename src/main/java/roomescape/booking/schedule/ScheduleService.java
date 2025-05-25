@@ -5,13 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.booking.schedule.dto.ScheduleRequest;
 import roomescape.booking.schedule.dto.ScheduleResponse;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsTimeException;
 import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
 import roomescape.reservationtime.ReservationTime;
-import roomescape.reservationtime.ReservationTimeRepository;
+import roomescape.reservationtime.ReservationTimeService;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.theme.ThemeService;
 
 import java.time.LocalDate;
 
@@ -20,13 +18,13 @@ import java.time.LocalDate;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
 
     @Transactional
     public ScheduleResponse create(ScheduleRequest request) {
-        ReservationTime reservationTime = getReservationTimeById(request.reservationTimeId());
-        Theme theme = getThemeById(request.themeId());
+        ReservationTime reservationTime = reservationTimeService.findById(request.reservationTimeId());
+        Theme theme = themeService.findById(request.themeId());
         Schedule schedule = new Schedule(request.date(), reservationTime, theme);
         Schedule savedSchedule = scheduleRepository.save(schedule);
         return ScheduleResponse.of(savedSchedule);
@@ -36,15 +34,5 @@ public class ScheduleService {
     public Schedule findByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
         return scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(date, timeId, themeId)
                 .orElseThrow(ScheduleNotExistException::new);
-    }
-
-    private Theme getThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(ReservationNotExistsThemeException::new);
-    }
-
-    private ReservationTime getReservationTimeById(final Long reservationTimeId) {
-        return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(ReservationNotExistsTimeException::new);
     }
 }
