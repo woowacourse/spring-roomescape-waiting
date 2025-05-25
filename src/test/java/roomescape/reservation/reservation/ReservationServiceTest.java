@@ -15,12 +15,11 @@ import roomescape.booking.reservation.dto.AdminReservationRequest;
 import roomescape.booking.reservation.dto.ReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
 import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleRepository;
+import roomescape.booking.schedule.ScheduleService;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
+import roomescape.member.MemberService;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
@@ -40,18 +39,18 @@ public class ReservationServiceTest {
 
     private ReservationService reservationService;
     private ReservationRepository reservationRepository;
-    private ScheduleRepository scheduleRepository;
-    private MemberRepository memberRepository;
+    private ScheduleService scheduleService;
+    private MemberService memberService;
 
     @BeforeEach
     void setup() {
         reservationRepository = mock(ReservationRepository.class);
-        scheduleRepository = mock(ScheduleRepository.class);
-        memberRepository = mock(MemberRepository.class);
+        scheduleService = mock(ScheduleService.class);
+        memberService = mock(MemberService.class);
         reservationService = new ReservationService(
                 reservationRepository,
-                scheduleRepository,
-                memberRepository
+                scheduleService,
+                memberService
         );
     }
 
@@ -81,10 +80,10 @@ public class ReservationServiceTest {
         void create() {
             // given
             Schedule schedule = SCHEDULE.get();
-            given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
-                    .willReturn(SCHEDULE);
-            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
-                    .willReturn(MEMBER);
+            given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
+                    .willReturn(schedule);
+            given(memberService.findByEmail(LOGIN_MEMBER.email()))
+                    .willReturn(MEMBER.get());
             given(reservationRepository.existsBySchedule(schedule))
                     .willReturn(false);
             given(reservationRepository.save(
@@ -98,29 +97,14 @@ public class ReservationServiceTest {
             assertThat(response).isEqualTo(ReservationResponse.from(RESERVATION));
         }
 
-        @DisplayName("멤버가 존재하지 않으면 예외가 발생한다.")
-        @Test
-        void create6() {
-            // given
-            given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
-                    .willReturn(SCHEDULE);
-            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
-                    .willReturn(Optional.empty());
-
-            // when & then
-            assertThatThrownBy(() -> {
-                reservationService.create(REQUEST, LOGIN_MEMBER);
-            }).isInstanceOf(ReservationNotExistsMemberException.class);
-        }
-
         @DisplayName("이미 해당 시간, 날짜에 예약이 존재한다면 예외가 발생한다.")
         @Test
         void create3() {
             // given
-            given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
-                    .willReturn(SCHEDULE);
-            given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
-                    .willReturn(MEMBER);
+            given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
+                    .willReturn(SCHEDULE.get());
+            given(memberService.findByEmail(LOGIN_MEMBER.email()))
+                    .willReturn(MEMBER.get());
             given(reservationRepository.existsBySchedule(SCHEDULE.get()))
                     .willReturn(true);
 
@@ -154,10 +138,10 @@ public class ReservationServiceTest {
         @Test
         void create() {
             // given
-            given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
-                    .willReturn(SCHEDULE);
-            given(memberRepository.findById(REQUEST.memberId()))
-                    .willReturn(MEMBER);
+            given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
+                    .willReturn(SCHEDULE.get());
+            given(memberService.findById(REQUEST.memberId()))
+                    .willReturn(MEMBER.get());
             given(reservationRepository.existsBySchedule(SCHEDULE.get()))
                     .willReturn(false);
             given(reservationRepository.save(
@@ -171,29 +155,14 @@ public class ReservationServiceTest {
             assertThat(response).isEqualTo(ReservationResponse.from(RESERVATION));
         }
 
-        @DisplayName("멤버가 존재하지 않으면 예외가 발생한다.")
-        @Test
-        void create6() {
-            // given
-            given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
-                    .willReturn(SCHEDULE);
-            given(memberRepository.findById(REQUEST.memberId()))
-                    .willReturn(Optional.empty());
-
-            // when & then
-            assertThatThrownBy(() -> {
-                reservationService.createForAdmin(REQUEST);
-            }).isInstanceOf(ReservationNotExistsMemberException.class);
-        }
-
         @DisplayName("이미 해당 시간, 날짜, 테마에 예약이 존재한다면 예외가 발생한다.")
         @Test
         void create3() {
             // given
-            given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
-                    .willReturn(SCHEDULE);
-            given(memberRepository.findById(MEMBER.get().getId()))
-                    .willReturn(MEMBER);
+            given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), SCHEDULE.get().getReservationTime().getId(), SCHEDULE.get().getTheme().getId()))
+                    .willReturn(SCHEDULE.get());
+            given(memberService.findById(MEMBER.get().getId()))
+                    .willReturn(MEMBER.get());
             given(reservationRepository.existsBySchedule(SCHEDULE.get()))
                     .willReturn(true);
 

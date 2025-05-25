@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
+import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.member.dto.MemberRequest;
 import roomescape.member.dto.MemberResponse;
 
@@ -28,6 +29,18 @@ public class MemberService {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Member findByEmail(final String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(MemberNotFoundException::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Member findById(final Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(MemberNotFoundException::new);
     }
 
     private void validateDuplicationEmail(final MemberRequest request) {

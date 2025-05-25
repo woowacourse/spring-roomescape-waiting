@@ -9,17 +9,14 @@ import roomescape.booking.reservation.dto.AdminReservationRequest;
 import roomescape.booking.reservation.dto.ReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
 import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleRepository;
+import roomescape.booking.schedule.ScheduleService;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
 import roomescape.exception.custom.reason.schedule.PastScheduleException;
-import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepository;
+import roomescape.member.MemberService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -27,26 +24,26 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ScheduleRepository scheduleRepository;
-    private final MemberRepository memberRepository;
+    private final ScheduleService scheduleService;
+    private final MemberService memberService;
 
     @Transactional
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
-        final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
+        final Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         if (schedule.isPast()) {
             throw new PastScheduleException();
         }
-        final Member member = getMemberByEmail(loginMember.email());
+        final Member member = memberService.findByEmail(loginMember.email());
         return getReservationResponse(schedule, member);
     }
 
     @Transactional
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
-        final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
+        final Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         if (schedule.isPast()) {
             throw new PastScheduleException();
         }
-        final Member member = getMemberById(request.memberId());
+        final Member member = memberService.findById(request.memberId());
         return getReservationResponse(schedule, member);
     }
 
@@ -69,7 +66,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllByEmail(final String email) {
-        Member member = getMemberByEmail(email);
+        Member member = memberService.findByEmail(email);
         return reservationRepository.findAllByMember(member);
     }
 
@@ -107,20 +104,5 @@ public class ReservationService {
         if (reservationRepository.existsBySchedule(schedule)) {
             throw new ReservationConflictException();
         }
-    }
-
-    private Schedule getSchedule(final LocalDate date, final Long timeId, final Long themeId) {
-        return scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(date, timeId, themeId)
-                .orElseThrow(ScheduleNotExistException::new);
-    }
-
-    private Member getMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(ReservationNotExistsMemberException::new);
-    }
-
-    private Member getMemberByEmail(final String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(ReservationNotExistsMemberException::new);
     }
 }
