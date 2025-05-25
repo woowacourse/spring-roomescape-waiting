@@ -1,13 +1,13 @@
 package roomescape.reservation.domain;
 
-public enum ReservationLogStatus {
+public enum ReservationStatus {
 
     RESERVED("예약"),
-    WAITING("예약대기");
+    EXPIRED("만료");
 
     private final String label;
 
-    ReservationLogStatus(String label) {
+    ReservationStatus(String label) {
         this.label = label;
     }
 

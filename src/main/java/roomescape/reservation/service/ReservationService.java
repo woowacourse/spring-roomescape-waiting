@@ -2,14 +2,15 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ExceptionCause;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.AdminReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -22,43 +23,38 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              MemberRepository memberRepository, WaitingRepository waitingRepository) {
+                              ReservationTimeRepository reservationTimeRepository,
+                              ThemeRepository themeRepository,
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
         this.waitingRepository = waitingRepository;
     }
 
-    public ReservationResponse createUserReservation(UserReservationCreateRequest dto, Member member) {
-        Reservation reservation = getReservation(dto.date(), dto.themeId(), dto.timeId(), member.getId());
-        if (reservationRepository.existsByMemberAndDateAndTime(reservation.getMember(), reservation.getDate(),
-                reservation.getTime())) {
-            throw new BadRequestException(ExceptionCause.RESERVATION_TIME_AND_DATE_DUPLICATE);
-        }
-        if (waitingRepository.existsByMemberAndDateAndTime(reservation.getMember(), reservation.getDate(),
-                reservation.getTime())) {
-            throw new BadRequestException(ExceptionCause.WAITING_TIME_AND_DATE_DUPLICATE);
-        }
-        return createReservation(reservation);
+    @Transactional
+    public ReservationResponse createUserReservation(UserReservationCreateRequest request, Member member) {
+        Reservation reservation = buildReservation(request.date(), request.themeId(), request.timeId(), member);
+        validateUserReservation(reservation);
+        return saveAndConvertToResponse(reservation);
     }
 
-    public ReservationResponse createAdminReservation(AdminReservationCreateRequest dto) {
-        Reservation reservation = getReservation(dto.date(), dto.themeId(), dto.timeId(), dto.memberId());
-        return createReservation(reservation);
+    @Transactional
+    public ReservationResponse createAdminReservation(AdminReservationCreateRequest request, Member member) {
+        Reservation reservation = buildReservation(request.date(), request.themeId(), request.timeId(), member);
+        return saveAndConvertToResponse(reservation);
     }
 
-    public List<ReservationResponse> findAllReservationResponses() {
+    public List<ReservationResponse> findAllReservations() {
         List<Reservation> allReservations = reservationRepository.findAll();
 
         return allReservations.stream()
@@ -77,6 +73,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         if (reservationRepository.findById(id).isEmpty()) {
             throw new NotFoundException(ExceptionCause.RESERVATION_NOTFOUND);
@@ -85,30 +82,60 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    private ReservationResponse createReservation(Reservation reservation) {
+    private Reservation buildReservation(LocalDate date, Long themeId, Long timeId, Member member) {
+        Theme theme = findThemeById(themeId);
+        ReservationTime time = findTimeById(timeId);
+        validateFutureDateTime(date, time.getStartAt());
+        return new Reservation(member, date, time, theme);
+    }
+
+    private ReservationTime findTimeById(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.RESERVATION_TIME_NOTFOUND));
+    }
+
+    private Theme findThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.THEME_NOTFOUND));
+    }
+
+    private void validateFutureDateTime(LocalDate date, LocalTime time) {
+        LocalDateTime requestDateTime = LocalDateTime.of(date, time);
+        LocalDateTime now = LocalDateTime.now();
+        if (!requestDateTime.isAfter(now)) {
+            throw new BadRequestException(ExceptionCause.RESERVATION_INVALID_FOR_PAST);
+        }
+    }
+
+    private void validateUserReservation(Reservation reservation) {
+        validateNoDuplicateReservation(reservation);
+        validateNoDuplicateWaiting(reservation);
+        validateSlotAvailable(reservation);
+    }
+
+    private void validateSlotAvailable(Reservation reservation) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId())) {
             throw new ConflictException(ExceptionCause.RESERVATION_ALREADY_BOOKED);
         }
+    }
+
+    private void validateNoDuplicateWaiting(Reservation reservation) {
+        if (waitingRepository.existsByMemberAndDateAndTime(reservation.getMember(), reservation.getDate(),
+                reservation.getTime())) {
+            throw new BadRequestException(ExceptionCause.WAITING_TIME_AND_DATE_DUPLICATE);
+        }
+    }
+
+    private void validateNoDuplicateReservation(Reservation reservation) {
+        if (reservationRepository.existsByMemberAndDateAndTime(reservation.getMember(), reservation.getDate(),
+                reservation.getTime())) {
+            throw new BadRequestException(ExceptionCause.RESERVATION_TIME_AND_DATE_DUPLICATE);
+        }
+    }
+
+    private ReservationResponse saveAndConvertToResponse(Reservation reservation) {
         Reservation newReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(newReservation, newReservation.getTime(), newReservation.getTheme());
-    }
-
-    private Reservation getReservation(LocalDate date, Long themeId, Long timeId, Long memberId) {
-        Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCause.THEME_NOTFOUND));
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCause.MEMBER_NOTFOUND));
-        ReservationTime time = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException(ExceptionCause.RESERVATION_TIME_NOTFOUND));
-        validateRequestDateTime(LocalDateTime.of(date, time.getStartAt()));
-        return new Reservation(member, date, time, theme);
-    }
-
-    private void validateRequestDateTime(LocalDateTime requestDateTime) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        if (requestDateTime.isBefore(currentDateTime) || requestDateTime.equals(currentDateTime)) {
-            throw new BadRequestException(ExceptionCause.RESERVATION_INVALID_FOR_PAST);
-        }
     }
 }

@@ -12,6 +12,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ExceptionCause;
@@ -72,6 +73,15 @@ public class Reservation {
         this.theme = theme;
     }
 
+
+    public ReservationStatus getStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime reservationDateTime = LocalDateTime.of(this.date, this.time.getStartAt());
+        if(reservationDateTime.isBefore(now)) {
+            return ReservationStatus.EXPIRED;
+        }
+        return ReservationStatus.RESERVED;
+    }
 
     private void validateMember(Member member) {
         if (member == null) {
