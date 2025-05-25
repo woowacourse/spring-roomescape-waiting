@@ -38,4 +38,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("dateFrom") LocalDate dateFrom,
             @Param("dateTo") LocalDate dateTo
     );
+
+    boolean existsByGameScheduleId(Long id);
 }

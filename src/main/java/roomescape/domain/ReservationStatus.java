@@ -1,7 +1,7 @@
 package roomescape.domain;
 
 public enum ReservationStatus {
-    RESERVED;
+    RESERVED, WAITING;
 
     public static String name(ReservationStatus status) {
         if (status == RESERVED) {
