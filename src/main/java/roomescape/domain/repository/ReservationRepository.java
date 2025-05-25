@@ -14,14 +14,19 @@ import roomescape.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
+            LocalDate date,
+            Long timeId,
+            Long themeId,
+            ReservationStatus status
+    );
 
     List<Reservation> findByMember(Member member);
 
     List<Reservation> findByWaitingStatus(ReservationStatus reservationStatus);
 
     @Query("""
-            SELECT r 
+            SELECT r
             FROM Reservation r 
             WHERE (:themeId IS NULL OR r.theme.id = :themeId) 
                 AND (:memberId IS NULL OR r.member.id = :memberId) 

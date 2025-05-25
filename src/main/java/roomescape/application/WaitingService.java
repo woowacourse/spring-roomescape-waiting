@@ -41,6 +41,27 @@ public class WaitingService {
         );
     }
 
+    public void acceptReserve(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + reservationId));
+        if (!reservation.isWaiting()) {
+            throw new IllegalArgumentException("해당 예약은 대기 상태가 아닙니다.");
+        }
+        if (isDateTimeAlreadyReserved(reservation)) {
+            throw new IllegalArgumentException("해당 일시의 예약이 이미 존재합니다.");
+        }
+        reservation.reserve();
+    }
+
+    private boolean isDateTimeAlreadyReserved(Reservation reservation) {
+        return reservationRepository.existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                ReservationStatus.RESERVED
+        );
+    }
+
     public void deleteWaiting(Long reservationId, Long memberId) {
         Member member = memberService.getMemberEntityById(memberId);
         Reservation reservation = reservationRepository.findById(reservationId)

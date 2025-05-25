@@ -2,7 +2,6 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateDto;
@@ -68,10 +67,11 @@ public class ReservationCommandService {
     }
 
     private boolean isDuplicated(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(
+        return reservationRepository.existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
                 date,
                 timeId,
-                themeId
+                themeId,
+                ReservationStatus.RESERVED
         );
     }
 
