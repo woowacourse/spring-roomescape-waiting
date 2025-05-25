@@ -50,7 +50,7 @@ public class ReservationCommandService {
         Theme theme = themeService.getThemeById(request.themeId());
         ReservationTime reservationTime = timeService.getTimeEntityById(request.timeId());
         Member member = memberService.getMemberEntityById(request.memberId());
-        Waiting waiting = new Waiting(ReservationStatus.RESERVED);
+        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
         Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, waiting);
         return ReservationDto.from(reservation);
     }
@@ -102,7 +102,7 @@ public class ReservationCommandService {
         Theme theme = themeService.getThemeById(request.theme());
         ReservationTime reservationTime = timeService.getTimeEntityById(request.time());
         Member member = memberService.getMemberEntityById(memberId);
-        Waiting waiting = new Waiting(ReservationStatus.WAITING);
+        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.WAITING);
         Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, waiting);
         return ReservationDto.from(reservation);
     }

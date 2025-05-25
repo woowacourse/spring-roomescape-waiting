@@ -41,16 +41,12 @@ public class MissionStepTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private ReservationRepository reservationRepository;
-
     @Autowired
     private TimeRepository timeRepository;
-
     @Autowired
     private ReservationController reservationController;
-
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
@@ -60,6 +56,11 @@ public class MissionStepTest {
     void cleanDatabase() {
         RestAssured.port = port;
 
+        jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM waiting");
+        jdbcTemplate.update("DELETE FROM reservation_time");
+        jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("DELETE FROM member");
         resetH2TableIds(jdbcTemplate);
         tokenForAdmin = jwtTokenProvider.createToken(new MemberIdDto(MEMBER1_ADMIN.getId()));
     }
@@ -139,14 +140,19 @@ public class MissionStepTest {
     @Test
     void requestDeleteReservation() {
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES ('테마1', '테마 1입니다.', '썸네일입니다.')");
+        jdbcTemplate.update(
+                "INSERT INTO theme (id, name, description, thumbnail) VALUES (1L, '테마1', '테마 1입니다.', '썸네일입니다.')");
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)",
                 1L, "10:00");
-
-        jdbcTemplate.update("INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                1L, "2023-08-05", 1L, 1L
+        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)",
+                1L, LocalDateTime.now(), "RESERVED");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (member_id, date, time_id, theme_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+                1L, "2023-08-05", 1L, 1L, 1L
         );
         RestAssured.given().log().all()
+                .cookie("token", tokenForAdmin)
+                .contentType(ContentType.JSON)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
@@ -168,12 +174,15 @@ public class MissionStepTest {
     @Test
     void postAndGetReservation() {
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES ('테마1', '테마 1입니다.', '썸네일입니다.')");
+        jdbcTemplate.update(
+                "INSERT INTO theme (id, name, description, thumbnail) VALUES (1L, '테마1', '테마 1입니다.', '썸네일입니다.')");
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)",
                 1L, "10:00");
-
-        jdbcTemplate.update("INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                1L, "2023-08-05", 1L, 1L
+        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)",
+                1L, LocalDateTime.now(), "RESERVED");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (member_id, date, time_id, theme_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+                1L, "2023-08-05", 1L, 1L, 1L
         );
 
         List<ReservationDto> reservations = RestAssured.given().log().all()
@@ -210,12 +219,15 @@ public class MissionStepTest {
         assertThat(count).isEqualTo(beforeCount + 1);
 
         RestAssured.given().log().all()
+                .cookie("token", tokenForAdmin)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(204);
 
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-        assertThat(countAfterDelete).isEqualTo(beforeCount);
+        String status = jdbcTemplate.queryForObject(
+                "SELECT status FROM waiting WHERE id = (SELECT waiting_id FROM reservation WHERE id = ?)",
+                String.class, 1L);
+        assertThat(status).isEqualTo("CANCELED");
     }
 
     @DisplayName("7단계 - 예약 시간 추가 및 삭제 성공")

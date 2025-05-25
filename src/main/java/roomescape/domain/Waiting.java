@@ -29,20 +29,29 @@ public class Waiting {
     @OneToOne(mappedBy = "waiting")
     private Reservation reservation;
 
-    protected Waiting() {
-    }
-
-    public Waiting(ReservationStatus status) {
-        this.status = status;
-    }
-
-    private Waiting(LocalDateTime savedDateTime, ReservationStatus status) {
+    private Waiting(Long id, LocalDateTime savedDateTime, ReservationStatus status) {
+        this.id = id;
         this.savedDateTime = savedDateTime;
         this.status = status;
     }
 
-    public static Waiting waitingWithoutId(LocalDateTime savedDateTime, ReservationStatus status) {
-        return new Waiting(savedDateTime, status);
+    protected Waiting() {
+    }
+
+    private Waiting(ReservationStatus status) {
+        this(null, null, status);
+    }
+
+    private Waiting(LocalDateTime savedDateTime, ReservationStatus status) {
+        this(null, savedDateTime, status);
+    }
+
+    public static Waiting waitingWithoutId(ReservationStatus status) {
+        return new Waiting(status);
+    }
+
+    public static Waiting waitingWithoutId(LocalDateTime dateTime, ReservationStatus status) {
+        return new Waiting(dateTime, status);
     }
 
     public Long getId() {

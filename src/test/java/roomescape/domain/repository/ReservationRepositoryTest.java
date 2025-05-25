@@ -10,6 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.config.JpaAuditingConfiguration;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -17,34 +20,34 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.testFixture.JdbcHelper;
+
 
 @DataJpaTest
+@Import(JpaAuditingConfiguration.class)
 class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-
     @Autowired
     private MemberRepository memberRepository;
-
     @Autowired
     private ThemeRepository themeRepository;
-
     @Autowired
     private TimeRepository timeRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private Member member;
     private Theme theme;
     private ReservationTime time;
     private LocalDate date;
-    @Autowired
-    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setup() {
-        reservationRepository.deleteAll();
-        waitingRepository.deleteAll();
-
+        JdbcHelper.truncateAll(jdbcTemplate);
         member = memberRepository.save(Member.withoutId("user", "user@email.com", "password", Role.USER));
         theme = themeRepository.save(Theme.withoutId("테마", "설명", "썸네일"));
         time = timeRepository.save(ReservationTime.withoutId(LocalTime.of(10, 0)));
@@ -55,8 +58,12 @@ class ReservationRepositoryTest {
     @Test
     void existsByDateAndTimeIdAndThemeIdAndWaitingStatus() {
         // given
-        reservationRepository.save(Reservation.withoutId(member, theme, date, time,
-                Waiting.waitingWithoutId(LocalDateTime.now(), ReservationStatus.RESERVED)));
+        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
+        waitingRepository.saveAndFlush(waiting);
+
+        reservationRepository.save(
+                Reservation.withoutId(member, theme, date, time, waiting)
+        );
 
         // when
         boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
@@ -71,8 +78,10 @@ class ReservationRepositoryTest {
     @Test
     void findByMemberAndThemeAndDateRange() {
         // given
-        reservationRepository.save(Reservation.withoutId(member, theme, date, time,
-                Waiting.waitingWithoutId(LocalDateTime.now(), ReservationStatus.RESERVED)));
+        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
+        waitingRepository.saveAndFlush(waiting);
+
+        reservationRepository.save(Reservation.withoutId(member, theme, date, time, waiting));
 
         // when
         List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
@@ -90,17 +99,22 @@ class ReservationRepositoryTest {
     @Test
     void countByReservationWaitingOrderByCreatedAt() {
         // given
-        LocalDateTime now = LocalDateTime.of(2025, 5, 10, 10, 0);
-        reservationRepository.save(Reservation.withoutId(member, theme, date, time,
-                Waiting.waitingWithoutId(now, ReservationStatus.WAITING)));
-        reservationRepository.save(Reservation.withoutId(member, theme, date, time,
-                Waiting.waitingWithoutId(now, ReservationStatus.WAITING)));
-        reservationRepository.save(Reservation.withoutId(member, theme, date, time,
-                Waiting.waitingWithoutId(now, ReservationStatus.WAITING)));
+        LocalDateTime now = LocalDateTime.now();
+        Waiting waiting1 = waitingRepository.saveAndFlush(
+                Waiting.waitingWithoutId(now, ReservationStatus.WAITING));
+        Waiting waiting2 = waitingRepository.saveAndFlush(
+                Waiting.waitingWithoutId(now, ReservationStatus.WAITING));
+        Waiting waiting3 = waitingRepository.saveAndFlush(
+                Waiting.waitingWithoutId(now, ReservationStatus.WAITING));
+
+        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, waiting1));
+        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, waiting2));
+        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, waiting3));
 
         // when
-        long order = reservationRepository.countByReservationWaitingOrderByCreatedAt(theme, date, time,
-                now.plusMinutes(10));
+        long order = reservationRepository.countByReservationWaitingOrderByCreatedAt(
+                theme, date, time, now.plusMinutes(10)
+        );
 
         // then
         Assertions.assertThat(order).isEqualTo(4);

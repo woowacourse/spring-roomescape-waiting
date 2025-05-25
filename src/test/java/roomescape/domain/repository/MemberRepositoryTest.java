@@ -3,18 +3,28 @@ package roomescape.domain.repository;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
 import roomescape.domain.Role;
+import roomescape.testFixture.JdbcHelper;
 
 @DataJpaTest
 class MemberRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void setUp() {
+        JdbcHelper.truncateAll(jdbcTemplate);
+    }
 
     @Test
     @DisplayName("이메일로 회원을 조회할 수 있다")

@@ -43,4 +43,21 @@ public class JdbcHelper {
                 reservation.getTheme().getId()
         );
     }
+
+    public static void truncateAll(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.execute("DELETE FROM reservation");
+        jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+
+        jdbcTemplate.execute("DELETE FROM waiting");
+        jdbcTemplate.execute("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1");
+
+        jdbcTemplate.execute("DELETE FROM theme");
+        jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
+
+        jdbcTemplate.execute("DELETE FROM reservation_time");
+        jdbcTemplate.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
+
+        jdbcTemplate.execute("DELETE FROM member");
+        jdbcTemplate.execute("ALTER TABLE member ALTER COLUMN id RESTART WITH 1");
+    }
 }

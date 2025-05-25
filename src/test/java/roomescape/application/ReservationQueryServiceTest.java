@@ -47,7 +47,7 @@ public class ReservationQueryServiceTest {
 
         Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Waiting waiting = new Waiting(ReservationStatus.RESERVED);
+        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
 
         Reservation reservation1 = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, waiting);
         Reservation reservation2 = Reservation.of(2L, member, theme, LocalDate.now().plusDays(1), time, waiting);

@@ -29,7 +29,7 @@ public class Fixture {
             THEME_1,
             LocalDate.now().plusDays(1),
             RESERVATION_TIME_1,
-            new Waiting(ReservationStatus.RESERVED)
+            Waiting.waitingWithoutId(ReservationStatus.RESERVED)
     );
 
     public static final UserReservationCreateDto RESERVATION_BODY = createUserReservationBody();
