@@ -28,7 +28,7 @@ public class BookingService {
 
         return Stream.concat(
                 reservations.stream().map(BookingResponse::of),
-                waitings.stream().map(BookingResponse::of)
+                waitings.stream().map((waiting) -> BookingResponse.of(waiting, waitingService.getRank(waiting) + 1))
         ).toList();
     }
 
@@ -43,7 +43,6 @@ public class BookingService {
         }
 
         Waiting firstWaiting = waitingService.findFirstWaitingOfSchedule(schedule);
-        waitingService.decreaseRankOfSchedule(schedule);
         changeFirstWaitingToReservation(firstWaiting);
     }
 

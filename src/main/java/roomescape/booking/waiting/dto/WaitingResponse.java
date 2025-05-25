@@ -4,11 +4,13 @@ import roomescape.booking.schedule.dto.ScheduleResponse;
 import roomescape.booking.waiting.Waiting;
 import roomescape.member.dto.MemberResponse;
 
+import java.time.LocalDateTime;
+
 public record WaitingResponse(
         Long id,
         ScheduleResponse schedule,
         MemberResponse member,
-        Long rank
+        LocalDateTime createdAt
 ) {
 
     public static WaitingResponse of(Waiting waiting) {
@@ -16,6 +18,6 @@ public record WaitingResponse(
                 waiting.getId(),
                 ScheduleResponse.of(waiting.getSchedule()),
                 MemberResponse.from(waiting.getMember()),
-                waiting.getRank());
+                waiting.getCreatedAt());
     }
 }

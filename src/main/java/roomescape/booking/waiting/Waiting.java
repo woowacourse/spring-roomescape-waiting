@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import roomescape.booking.schedule.Schedule;
 import roomescape.member.Member;
 
+import java.time.LocalDateTime;
+
 @Entity
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,15 +27,11 @@ public class Waiting {
     @ManyToOne
     private Schedule schedule;
 
-    private Long rank;
+    private LocalDateTime createdAt;
 
-    public Waiting(final Schedule schedule, final Member member, final Long rank) {
+    public Waiting(final Schedule schedule, final Member member, final LocalDateTime createdAt) {
         this.schedule = schedule;
         this.member = member;
-        this.rank = rank;
-    }
-
-    public void decrementRank() {
-        rank = rank - 1;
+        this.createdAt = createdAt;
     }
 }

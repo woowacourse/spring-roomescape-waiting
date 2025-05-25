@@ -225,10 +225,10 @@ VALUES (1, 1),
 --        ('2025-05-12', 9, 9, 10, 'CONFIRMED'),
 --        ('2025-05-12', 10, 10, 1, 'CONFIRMED');
 
-INSERT INTO waiting (member_id, schedule_id, rank)
-VALUES (1, 1, 1),
-       (2, 1, 2),
-       (3, 1, 3);
+INSERT INTO waiting (member_id, schedule_id, created_at)
+VALUES (1, 1, '2025-05-12 11:12:00'),
+       (2, 1, '2025-05-12 11:13:00'),
+       (3, 1, '2025-05-12 11:14:00');
 
 INSERT INTO member(email, password, name, role)
 VALUES ('asd@naver.com', '1234', '어드민', 'ADMIN');

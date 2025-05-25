@@ -16,6 +16,7 @@ import roomescape.exception.custom.reason.waiting.WaitingNotFoundException;
 import roomescape.member.Member;
 import roomescape.member.MemberService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -47,29 +48,19 @@ public class WaitingService {
     @Transactional
     public void deleteById(final Long id, LoginMember member) {
         Waiting waiting = getWaitingById(id);
-
         validateAuthorization(member, waiting);
-
         waitingRepository.delete(waiting);
-        decreaseRankOfFollowingWaitings(waiting);
     }
 
     @Transactional
     public void deleteByIdForAdmin(final Long id) {
         Waiting waiting = getWaitingById(id);
         waitingRepository.delete(waiting);
-        decreaseRankOfFollowingWaitings(waiting);
     }
 
     @Transactional(readOnly = true)
     public Waiting findFirstWaitingOfSchedule(final Schedule schedule) {
-        return waitingRepository.findFirstByScheduleOrderByRankAsc(schedule);
-    }
-
-    @Transactional
-    public void decreaseRankOfSchedule(final Schedule schedule) {
-        List<Waiting> waitings = waitingRepository.findWaitingGreaterThanRank(schedule, 0L);
-        waitings.forEach(Waiting::decrementRank);
+        return waitingRepository.findFirstByScheduleOrderByCreatedAtAsc(schedule);
     }
 
     @Transactional(readOnly = true)
@@ -88,10 +79,14 @@ public class WaitingService {
         return waitingRepository.existsBySchedule(schedule);
     }
 
+    @Transactional(readOnly = true)
+    public Long getRank(final Waiting waiting) {
+        return waitingRepository.countByScheduleAndCreatedAtLessThan(waiting.getSchedule(), waiting.getCreatedAt());
+    }
+
     private Waiting saveWaiting(final LoginMember loginMember, final Schedule schedule) {
         final Member member = memberService.findByEmail(loginMember.email());
-        final Long rank = getWaitingRank(schedule);
-        final Waiting waiting = new Waiting(schedule, member, rank);
+        final Waiting waiting = new Waiting(schedule, member, LocalDateTime.now());
         return waitingRepository.save(waiting);
     }
 
@@ -113,17 +108,6 @@ public class WaitingService {
         if (!isAuthorized) {
             throw new AuthorizationException();
         }
-    }
-
-    private Long getWaitingRank(final Schedule schedule) {
-        final List<Waiting> waitings = waitingRepository.findAllBySchedule(schedule);
-        return (long) waitings.size() + 1;
-    }
-
-    private void decreaseRankOfFollowingWaitings(final Waiting waiting) {
-        Long rank = waiting.getRank();
-        List<Waiting> waitingsAfterRank = waitingRepository.findWaitingGreaterThanRank(waiting.getSchedule(), rank);
-        waitingsAfterRank.forEach(Waiting::decrementRank);
     }
 
     private Waiting getWaitingById(final Long id) {

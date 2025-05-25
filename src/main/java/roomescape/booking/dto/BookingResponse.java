@@ -14,7 +14,7 @@ public record BookingResponse(
         return new BookingResponse(reservation.getId(), ScheduleResponse.of(reservation.getSchedule()), "예약");
     }
 
-    public static BookingResponse of(Waiting waiting) {
-        return new BookingResponse(waiting.getId(), ScheduleResponse.of(waiting.getSchedule()), waiting.getRank() + "번째 예약대기");
+    public static BookingResponse of(Waiting waiting, Long rank) {
+        return new BookingResponse(waiting.getId(), ScheduleResponse.of(waiting.getSchedule()), rank + "번째 예약대기");
     }
 }

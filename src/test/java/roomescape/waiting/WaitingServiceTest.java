@@ -25,8 +25,8 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,14 +76,7 @@ class WaitingServiceTest {
         given(memberService.findByEmail(loginMember.email()))
                 .willReturn(member);
 
-        Waiting waiting1 = new Waiting(schedule, member, 1L);
-        Waiting waiting2 = new Waiting(schedule, member, 2L);
-        Waiting waiting3 = new Waiting(schedule, member, 3L);
-        List<Waiting> waitings = List.of(waiting1, waiting2, waiting3);
-        given(waitingRepository.findAllBySchedule(schedule))
-                .willReturn(waitings);
-
-        Waiting waiting = new Waiting(schedule, member, (long) waitings.size() + 1);
+        Waiting waiting = new Waiting(schedule, member, LocalDateTime.now().minusDays(1));
         Waiting createdWaiting = waitingWithId(1L, waiting);
         given(waitingRepository.save(any()))
                 .willReturn(createdWaiting);
@@ -116,7 +109,7 @@ class WaitingServiceTest {
         // given
         loginMember = new LoginMember("may", "may@email.com", MemberRole.MEMBER);
         Long waitingId = 1L;
-        Waiting waiting = waitingWithId(waitingId, new Waiting(schedule, member, 1L));
+        Waiting waiting = waitingWithId(waitingId, new Waiting(schedule, member, LocalDateTime.now()));
 
         given(waitingRepository.findById(waitingId))
                 .willReturn(Optional.of(waiting));
@@ -132,7 +125,7 @@ class WaitingServiceTest {
         // given
         loginMember = new LoginMember("may", loginMember.email(), MemberRole.MEMBER);
         Long waitingId = 1L;
-        Waiting waiting = waitingWithId(waitingId, new Waiting(schedule, member, 1L));
+        Waiting waiting = waitingWithId(waitingId, new Waiting(schedule, member, LocalDateTime.now()));
 
         given(waitingRepository.findById(waitingId))
                 .willReturn(Optional.of(waiting));

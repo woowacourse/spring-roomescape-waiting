@@ -19,6 +19,7 @@ import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.mockito.BDDMockito.given;
@@ -50,7 +51,7 @@ class BookingServiceTest {
     @DisplayName("예약 삭제 시, 그 스케줄의 첫 번째 웨이팅을 예약으로 변경한다")
     void changeFirstWaitingToReservation() {
         // given
-        Waiting firstWaiting = waitingWithId(1L, new Waiting(schedule, member, 1L));
+        Waiting firstWaiting = waitingWithId(1L, new Waiting(schedule, member, LocalDateTime.now()));
         Reservation reservation = reservationWithId(1L, new Reservation(member, schedule));
         given(reservationService.findById(1L)).willReturn(reservation);
         given(waitingService.existsBySchedule(schedule)).willReturn(true);
@@ -61,23 +62,5 @@ class BookingServiceTest {
 
         // then
         then(reservationService).should().save(new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule()));
-    }
-
-    @Test
-    @DisplayName("예약 삭제 시, 그 스케줄의 웨이팅들 대기 순번이 감소한다.")
-    void changeRanksOfWaitings() {
-        // given
-        Waiting firstWaiting = waitingWithId(1L, new Waiting(schedule, member, 1L));
-
-        Reservation reservation = reservationWithId(1L, new Reservation(member, schedule));
-        given(reservationService.findById(1L)).willReturn(reservation);
-        given(waitingService.existsBySchedule(schedule)).willReturn(true);
-        given(waitingService.findFirstWaitingOfSchedule(schedule)).willReturn(firstWaiting);
-
-        // when
-        bookingService.deleteReservationById(1L);
-
-        // then
-        then(waitingService).should().decreaseRankOfSchedule(schedule);
     }
 }
