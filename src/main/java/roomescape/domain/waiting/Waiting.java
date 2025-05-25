@@ -35,7 +35,7 @@ public class Waiting {
     @JoinColumn(nullable = false)
     private Member member;
 
-    public Waiting() {
+    protected Waiting() {
 
     }
 
