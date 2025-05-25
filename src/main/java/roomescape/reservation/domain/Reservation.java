@@ -70,6 +70,10 @@ public class Reservation {
         return new Reservation(null, reserver, reservationDateTime, theme, ReservationStatus.RESERVED);
     }
 
+    public void reserve() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
     public static Reservation wait(
             Member reserver,
             ReservationDateTime reservationDateTime,
@@ -109,8 +113,5 @@ public class Reservation {
     public String getThemeName() {
         return theme.getName();
     }
-
-    public void toReservedStatus() {
-        this.status = ReservationStatus.RESERVED;
-    }
+    
 }

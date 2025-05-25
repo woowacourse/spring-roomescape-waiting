@@ -46,14 +46,11 @@ public class ReservationService {
         Theme theme = themeService.getTheme(themeId);
         Member reserver = memberQueryService.getMember(reserveCommand.memberId());
 
-        if (isAlreadyReserved(date, timeId, themeId)) {
-            Reservation waited = Reservation.wait(reserver, reservationDateTime, theme);
-            Reservation saved = reservationRepository.save(waited);
-            return ReservationResponse.from(saved);
-        }
+        Reservation reservation = isAlreadyReserved(date, timeId, themeId)
+                ? Reservation.wait(reserver, reservationDateTime, theme)
+                : Reservation.reserve(reserver, reservationDateTime, theme);
 
-        Reservation reserved = Reservation.reserve(reserver, reservationDateTime, theme);
-        Reservation saved = reservationRepository.save(reserved);
+        Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);
     }
 
@@ -79,7 +76,7 @@ public class ReservationService {
         );
 
         if (reservationSlot.isFirst(reservation) && reservationSlot.hasWaiting()) {
-            reservationSlot.getNext(reservation).toReservedStatus();
+            reservationSlot.getNext(reservation).reserve();
         }
         reservationRepository.deleteById(id);
     }
@@ -116,7 +113,6 @@ public class ReservationService {
         List<Reservation> myReservations = reservationRepository.findByMemberId(memberId);
 
         List<MyReservationResponse> responses = new ArrayList<>();
-
         for (Reservation myReservation : myReservations) {
             ReservationSlot reservationSlot = new ReservationSlot(
                     reservationRepository.findByDateAndTimeIdAndThemeId(
@@ -125,11 +121,10 @@ public class ReservationService {
                             myReservation.getTheme()
                     )
             );
-
-            MyReservationResponse response = MyReservationResponse.from(myReservation, reservationSlot);
+            MyReservationResponse response = MyReservationResponse.from(
+                    myReservation, reservationSlot.getOrder(myReservation));
             responses.add(response);
         }
-
         return responses;
     }
 

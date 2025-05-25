@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
 
 public record MyReservationResponse(
         Long id,
@@ -14,13 +13,13 @@ public record MyReservationResponse(
         String status
 ) {
 
-    public static MyReservationResponse from(Reservation reservation, ReservationSlot reservationSlot) {
+    public static MyReservationResponse from(Reservation reservation, int order) {
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                reservationSlot.getStatusDescription(reservation)
+                reservation.isReserved() ? "예약" : order + "번째 예약 대기"
         );
     }
 }
