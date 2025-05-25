@@ -29,4 +29,7 @@ public interface WaitingRepository {
                                                                     Member member);
 
     List<WaitingWithRank> findByMemberIdSortedByCreateAt(Long memberId);
+
+    List<WaitingWithRank> findByDateAndReservationTimeAndThemeSortedByCreateAt(LocalDate date, Long timeId,
+                                                                               Long themeId);
 }

@@ -32,10 +32,28 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
              FROM Waiting w2 
              WHERE w2.theme = w.theme 
              AND w2.date = w.date 
-             AND w2.reservationTime= w.reservationTime 
+             AND w2.reservationTime = w.reservationTime 
              AND w2.createAt < w.createAt)) 
              FROM Waiting w 
              WHERE w.member.id = :memberId
             """)
     List<WaitingWithRank> findByMemberIdSortedByCreateAt(@Param("memberId") Long memberId);
+
+    @Query("""
+             SELECT new roomescape.domain.WaitingWithRank(
+             w,
+             (SELECT COUNT(w2) * 1L + 1
+             FROM Waiting w2 
+             WHERE w2.theme = w.theme 
+             AND w2.date = w.date 
+             AND w2.reservationTime = w.reservationTime 
+             AND w2.createAt < w.createAt)) 
+             FROM Waiting w 
+             WHERE w.date = :date
+             AND w.reservationTime.id = :timeId
+             AND w.theme.id = :themeId 
+            """)
+    List<WaitingWithRank> findByDateAndReservationTimeAndThemeSortedByCreateAt(@Param("date") LocalDate date,
+                                                                               @Param("timeId") Long timeId,
+                                                                               @Param("themeId") Long themeId);
 }

@@ -84,6 +84,10 @@ public class Waiting {
         }
     }
 
+    public Reservation promoteToReservation() {
+        return Reservation.createWithoutId(member, date, reservationTime, theme);
+    }
+
     public Long getId() {
         return id;
     }

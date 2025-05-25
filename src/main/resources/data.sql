@@ -52,12 +52,10 @@ insert into reservation (theme_id, member_id, date, reservation_time_id)
 values (5, 2, '2025-05-25', 2);
 
 insert into waiting (theme_id, member_id, date, reservation_time_id, create_at)
-values (1, 3, '2025-05-25', 2, '2025-05-24T20:00:00');
+values (1, 2, '2025-05-25', 1, '2025-05-24T20:00:00');
 insert into waiting (theme_id, member_id, date, reservation_time_id, create_at)
-values (1, 4, '2025-05-25', 2, '2025-05-24T20:01:00');
+values (1, 3, '2025-05-25', 1, '2025-05-24T20:01:00');
 insert into waiting (theme_id, member_id, date, reservation_time_id, create_at)
-values (1, 5, '2025-05-25', 2, '2025-05-24T20:02:00');
+values (1, 4, '2025-05-25', 1, '2025-05-24T20:02:00');
 insert into waiting (theme_id, member_id, date, reservation_time_id, create_at)
-values (1, 2, '2025-05-25', 2, '2025-05-24T20:03:00');
-insert into waiting (theme_id, member_id, date, reservation_time_id, create_at)
-values (2, 2, '2025-05-25', 2, '2025-05-24T20:04:00');
+values (1, 5, '2025-05-25', 1, '2025-05-24T20:03:00');

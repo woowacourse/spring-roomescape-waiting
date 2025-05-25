@@ -64,6 +64,13 @@ public class WaitingRepositoryAdaptor implements WaitingRepository {
     }
 
     @Override
+    public List<WaitingWithRank> findByDateAndReservationTimeAndThemeSortedByCreateAt(final LocalDate date,
+                                                                                      final Long timeId,
+                                                                                      final Long themeId) {
+        return jpaWaitingRepository.findByDateAndReservationTimeAndThemeSortedByCreateAt(date, timeId, themeId);
+    }
+
+    @Override
     public void deleteById(final Long id) {
         jpaWaitingRepository.deleteById(id);
     }

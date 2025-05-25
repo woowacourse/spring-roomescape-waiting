@@ -11,6 +11,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
@@ -130,8 +131,22 @@ public class ReservationService {
     }
 
     public void deleteReservationById(Long id) {
-        reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
+        Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.deleteById(id);
+
+        List<WaitingWithRank> waitings = waitingRepository.findByDateAndReservationTimeAndThemeSortedByCreateAt(
+                reservation.getDate(),
+                reservation.getReservationTime().getId(),
+                reservation.getTheme().getId());
+
+        System.out.println(waitings);
+
+        if (!waitings.isEmpty()) {
+            Waiting firstWaiting = waitings.getFirst().waiting();
+            waitingRepository.deleteById(firstWaiting.getId());
+            Reservation promotedReservation = firstWaiting.promoteToReservation();
+            reservationRepository.save(promotedReservation);
+        }
     }
 
     public void deleteWaitingById(Long id) {
