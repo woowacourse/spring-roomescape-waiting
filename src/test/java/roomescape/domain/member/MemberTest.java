@@ -1,5 +1,7 @@
 package roomescape.domain.member;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,28 +25,28 @@ class MemberTest {
     @ParameterizedTest
     @MethodSource("invalidNames")
     void invalidReservationNameTest(String reservationName) {
-        Assertions.assertThatThrownBy(() -> new Member(1L, reservationName, "hello@woowa.com", Role.USER, "password"))
+        assertThatThrownBy(() -> new Member(1L, reservationName, "hello@woowa.com", Role.USER, "password"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("email 이 존재하지 않으면 생성 불가능하다")
     @Test
     void invalidEmailTest() {
-        Assertions.assertThatThrownBy(() -> new Member(1L, "가이온", null, Role.USER, "password"))
+        assertThatThrownBy(() -> new Member(1L, "가이온", null, Role.USER, "password"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("역할이 존재하지 않으면 생성 불가능하다")
     @Test
     void invalidRoleTest() {
-        Assertions.assertThatThrownBy(() -> new Member(1L, "가이온", "hello@woowa.com", null, "password"))
+        assertThatThrownBy(() -> new Member(1L, "가이온", "hello@woowa.com", null, "password"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("비밀번호가 존재하지 않으면 생성 불가능하다")
     @Test
     void invalidPasswordTest() {
-        Assertions.assertThatThrownBy(() -> new Member(1L, "가이온", "hello@woowa.com", Role.USER, null))
+        assertThatThrownBy(() -> new Member(1L, "가이온", "hello@woowa.com", Role.USER, null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

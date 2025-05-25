@@ -24,9 +24,8 @@ import roomescape.util.JwtTokenProvider;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS) // todo 딱 1회만?
-@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS) //todo 모든 class마다?
-@Transactional //todo 다른해결방법 찾기 (현재 : 클래스로 분리하여 해결)
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationControllerTest {
 
     String loginToken;
