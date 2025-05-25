@@ -138,6 +138,10 @@ public class ReservationService {
         }
     }
 
+    public void deleteWaiting(Long id) {
+        waitingCommandUseCase.delete(id);
+    }
+
     public List<ReservationWebResponse> search(ReservationSearchWebRequest reservationSearchWebRequest) {
         return reservationQueryUseCase.search(
                         reservationSearchWebRequest.memberId(),

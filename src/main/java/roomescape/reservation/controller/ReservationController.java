@@ -94,4 +94,11 @@ public class ReservationController {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @RoleRequired(value = Role.ADMIN)
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable final Long id) {
+        reservationService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
+    }
 }
