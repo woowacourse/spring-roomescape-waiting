@@ -18,6 +18,7 @@ import roomescape.reservation.infrastructure.ThemeRepository;
 import roomescape.reservation.infrastructure.TimeSlotRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;

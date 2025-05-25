@@ -25,6 +25,7 @@ import roomescape.reservation.infrastructure.TimeSlotRepository;
 import roomescape.reservation.infrastructure.WaitingRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;

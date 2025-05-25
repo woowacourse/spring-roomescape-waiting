@@ -18,6 +18,7 @@ import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.ThemeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private static final int TOP_THEMES_COUNT = 10;
