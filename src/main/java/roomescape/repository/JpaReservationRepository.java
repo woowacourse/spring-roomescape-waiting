@@ -15,10 +15,13 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     List<Reservation> findReservationsByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findReservationsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    List<Reservation> findReservationsByDateAndTimeIdAndThemeIdAndStatus(LocalDate date, long timeId, long themeId,
+                                                                         ReservationStatus status);
 
-    List<Reservation> findReservationsByDateBetweenAndThemeIdAndMemberId(LocalDate dateBefore, LocalDate dateAfter,
-                                                                         long themeId, long memberId);
+    List<Reservation> findReservationsByDateBetweenAndThemeIdAndMemberIdAndStatus(LocalDate dateBefore,
+                                                                                  LocalDate dateAfter,
+                                                                                  long themeId, long memberId,
+                                                                                  ReservationStatus status);
 
     List<Reservation> findReservationsByMemberId(long id);
 

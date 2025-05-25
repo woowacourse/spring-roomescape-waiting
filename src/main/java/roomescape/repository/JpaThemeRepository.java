@@ -12,7 +12,11 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
     @Query(value = """
             SELECT th.*
             FROM theme th
-            LEFT JOIN reservation r ON r.theme_id = th.id AND r.date >= :from AND r.date <= :to
+            LEFT JOIN reservation r 
+                ON r.status = 'RESERVED' 
+                    AND r.theme_id = th.id
+                    AND r.date >= :from 
+                    AND r.date <= :to
             GROUP BY th.id
             ORDER BY COUNT(r.id) DESC
             """, nativeQuery = true)

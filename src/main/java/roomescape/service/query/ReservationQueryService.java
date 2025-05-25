@@ -38,8 +38,8 @@ public class ReservationQueryService {
     public List<ReservationResponseDto> searchReservationsBy(
             long themeId, long memberId, LocalDate from, LocalDate to
     ) {
-        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberId(
-                from, to, themeId, memberId);
+        List<Reservation> reservationsByPeriodAndMemberAndTheme = reservationRepository.findReservationsByDateBetweenAndThemeIdAndMemberIdAndStatus(
+                from, to, themeId, memberId, ReservationStatus.RESERVED);
         return reservationsByPeriodAndMemberAndTheme.stream()
                 .map(ReservationResponseDto::of)
                 .toList();

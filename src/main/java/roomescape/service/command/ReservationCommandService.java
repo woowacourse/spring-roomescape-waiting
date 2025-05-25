@@ -1,6 +1,5 @@
 package roomescape.service.command;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -74,18 +73,19 @@ public class ReservationCommandService {
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId) {
-        List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId,
-                themeId);
+        List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeIdAndStatus(
+                date, timeId, themeId, ReservationStatus.RESERVED);
         if (!reservations.isEmpty()) {
             throw new DuplicateContentException("[ERROR] 이미 예약이 존재합니다. 예약 대기 기능을 사용해주세요.");
         }
     }
 
     private void updateReservationWaitingToReservation(Reservation deletedReservation) {
-        List<Reservation> reservationWaitings = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
+        List<Reservation> reservationWaitings = reservationRepository.findReservationsByDateAndTimeIdAndThemeIdAndStatus(
                 deletedReservation.getDate(),
                 deletedReservation.getTime().getId(),
-                deletedReservation.getTheme().getId()
+                deletedReservation.getTheme().getId(),
+                ReservationStatus.WAITING
         );
 
         if (reservationWaitings.isEmpty()) {

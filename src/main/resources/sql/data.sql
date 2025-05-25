@@ -20,17 +20,18 @@ VALUES ('가이온', 'jumdo12', 'jumdo12', 'ADMIN'),
        ;
 
 INSERT INTO reservation (date, time_id, theme_id, member_id, status)
-VALUES ('2025-05-25', 2, 4, 3, 'RESERVED'),
+VALUES ('2025-05-24', 2, 4, 3, 'RESERVED'),
+       ('2025-05-24', 2, 3, 2, 'RESERVED'),
+       ('2025-05-24', 4, 3, 2, 'RESERVED'),
        ('2025-05-25', 2, 3, 2, 'RESERVED'),
-       ('2025-05-26', 2, 3, 2, 'RESERVED'),
-       ('2025-05-27', 1, 3, 2, 'RESERVED'),
-       ('2025-05-25', 2, 4, 1, 'WAITING'),
-       ('2025-05-25', 2, 4, 2, 'WAITING'),
-       ('2025-05-27', 1, 3, 2, 'WAITING')
+       ('2025-05-26', 1, 3, 2, 'RESERVED'),
+       ('2025-05-24', 2, 4, 2, 'WAITING'),
+       ('2025-05-24', 2, 4, 1, 'WAITING'),
+       ('2025-05-26', 1, 3, 2, 'WAITING')
        ;
 
 INSERT INTO reservation_waiting_ticket (reservation_id, created_at)
-VALUES (5, '2025-05-20 21:40:03.000000'),
-       (6, '2025-05-20 10:40:03.000000'),
-       (7, '2025-05-21 10:10:10.000000')
+VALUES (6, '2025-05-20 21:40:03.000000'),
+       (7, '2025-05-20 10:40:03.000000'),
+       (8, '2025-05-21 10:10:10.000000')
        ;
