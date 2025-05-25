@@ -3,6 +3,7 @@ package roomescape.application;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.entity.GameSchedule;
@@ -32,7 +33,7 @@ public class GameScheduleService {
     @Transactional
     public GameSchedule createGameSchedule(LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
         ReservationTime time = timeService.getTimeEntityById(timeId);
-        validateNotPast(date, time.getStartAt(), now);
+        validateNotPast(date, time.getStartAt(), LocalDateTime.now(ZoneId.of("Asia/Seoul")));
         Theme theme = themeService.getThemeEntityById(themeId);
 
         GameSchedule gameSchedule = GameSchedule.withoutId(date, time, theme);
@@ -51,8 +52,8 @@ public class GameScheduleService {
                 .orElseThrow(() -> new NotFoundException("삭제하려는 게임 일정 id가 존재하지 않습니다. id: " + id));
     }
 
-    public GameSchedule getGameScheduleEntityBy(LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
+    public GameSchedule getGameScheduleEntityBy(LocalDate date, Long timeId, Long themeId) {
         return gameScheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
-                .orElseGet(() -> createGameSchedule(date, timeId, themeId, now));
+                .orElseThrow(() -> new NotFoundException("해당하는 게임 일정이 존재하지 않습니다."));
     }
 }
