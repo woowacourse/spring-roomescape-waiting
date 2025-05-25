@@ -71,16 +71,4 @@ public class JwtTokenProvider {
             throw new UnauthorizationException("[ERROR] 유효하지 않은 토큰입니다.");
         }
     }
-
-    public String extractTokenFromCookie(Cookie[] cookies) {
-        if (cookies == null) {
-            throw new UnauthorizationException("[ERROR] 쿠키가 존재하지 않습니다.");
-        }
-        for (Cookie cookie : cookies) {
-            if (Objects.equals(cookie.getName(), "token")) {
-                return cookie.getValue();
-            }
-        }
-        throw new UnauthorizationException("[ERROR] 접근 권한이 없습니다.");
-    }
 }

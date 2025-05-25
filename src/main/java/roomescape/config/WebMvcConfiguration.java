@@ -13,22 +13,22 @@ import roomescape.util.JwtTokenProvider;
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private final MemberQueryService memberQueryService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthArgumentResolver authArgumentResolver;
+    private final AuthAdminInterceptor authAdminInterceptor;
 
-    public WebMvcConfiguration(MemberQueryService memberQueryService, JwtTokenProvider jwtTokenProvider) {
-        this.memberQueryService = memberQueryService;
-        this.jwtTokenProvider = jwtTokenProvider;
+    public WebMvcConfiguration(AuthArgumentResolver authArgumentResolver, AuthAdminInterceptor authAdminInterceptor) {
+        this.authArgumentResolver = authArgumentResolver;
+        this.authAdminInterceptor = authAdminInterceptor;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new AuthAdminInterceptor(jwtTokenProvider))
+        registry.addInterceptor(authAdminInterceptor)
                 .addPathPatterns("/admin/**");
     }
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthArgumentResolver(memberQueryService, jwtTokenProvider));
+        resolvers.add(authArgumentResolver);
     }
 }
