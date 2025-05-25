@@ -3,7 +3,7 @@ package roomescape.reservation.application.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.common.time.CurrentDateTime;
+import roomescape.common.datetime.CurrentDateTime;
 import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
 import roomescape.reservation.domain.reservation.ReservationRepository;

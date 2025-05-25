@@ -1,4 +1,4 @@
-package roomescape.reservation.domain.reservation;
+package roomescape.reservation.domain.waiting;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -22,7 +23,8 @@ import roomescape.reservation.domain.timeslot.TimeSlot;
 @NoArgsConstructor
 @Accessors(fluent = true)
 @EqualsAndHashCode(of = "id")
-public class Reservation {
+@Table(name = "RESERVATION_WAITING")
+public class Waiting {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,32 +32,15 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     private TimeSlot time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    public Reservation(final LocalDate date, final Member member, final TimeSlot time, final Theme theme) {
-        this(null, date, member, time, theme);
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
-    public boolean isSameTime(final TimeSlot time) {
-        return this.time.equals(time);
-    }
-
-    public boolean isMemberSameId(final long id) {
-        return member.isSameId(id);
-    }
-
-    public boolean isThemeSameId(final long id) {
-        return theme.isSameId(id);
-    }
-
-    public boolean isDateBetween(final LocalDate from, final LocalDate to) {
-        return (date.isEqual(from) || date.isAfter(from)) &&
-                (date.isEqual(to) || date.isBefore(to));
+    public Waiting(final LocalDate date, final TimeSlot time, final Theme theme, Member member) {
+        this(null, date, time, theme, member);
     }
 }

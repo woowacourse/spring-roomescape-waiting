@@ -6,22 +6,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
-import roomescape.common.time.CurrentDateTime;
+import roomescape.common.datetime.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
 import roomescape.reservation.application.reservation.dto.ReservationMineInfo;
 import roomescape.reservation.application.reservation.dto.ReservationSearchCondition;
-import roomescape.reservation.application.waiting.dto.ReservationWaitingInfo;
+import roomescape.reservation.application.waiting.dto.WaitingInfo;
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
 import roomescape.reservation.domain.theme.Theme;
 import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.time.ReservationTime;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
-import roomescape.reservation.domain.waiting.ReservationWaiting;
-import roomescape.reservation.domain.waiting.ReservationWaitingRepository;
+import roomescape.reservation.domain.timeslot.TimeSlot;
+import roomescape.reservation.domain.timeslot.TimeSlotRepository;
+import roomescape.reservation.domain.waiting.Waiting;
+import roomescape.reservation.domain.waiting.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -30,20 +30,20 @@ public class ReservationService {
     private static final LocalDate MAXIMUM_SEARCH_DATE = LocalDate.of(2999, 12, 31);
 
     private final ReservationRepository reservationRepository;
-    private final ReservationWaitingRepository reservationWaitingRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
+    private final WaitingRepository waitingRepository;
+    private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final CurrentDateTime currentDateTime;
 
     public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationWaitingRepository reservationWaitingRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
+                              final WaitingRepository waitingRepository,
+                              final TimeSlotRepository timeSlotRepository,
                               final ThemeRepository themeRepository, final MemberRepository memberRepository,
                               final CurrentDateTime dateTimeGenerator) {
         this.reservationRepository = reservationRepository;
-        this.reservationWaitingRepository = reservationWaitingRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
+        this.waitingRepository = waitingRepository;
+        this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.currentDateTime = dateTimeGenerator;
@@ -56,18 +56,18 @@ public class ReservationService {
     }
 
     private Reservation makeReservation(final ReservationCreateCommand command) {
-        final ReservationTime reservationTime = findReservationTime(command.timeId());
-        validatePastDateTime(command.date(), reservationTime);
+        final TimeSlot timeSlot = findTimeSlot(command.timeId());
+        validatePastDateTime(command.date(), timeSlot);
         validateDuplicateReservation(command);
         final Member member = findMember(command.memberId());
         final Theme theme = findTheme(command.themeId());
-        return command.convertToEntity(member, reservationTime, theme);
+        return command.convertToEntity(member, timeSlot, theme);
     }
 
-    private void validatePastDateTime(final LocalDate date, final ReservationTime reservationTime) {
+    private void validatePastDateTime(final LocalDate date, final TimeSlot timeSlot) {
         final boolean isBefore = date.isBefore(currentDateTime.getDate()) ||
                 date.isEqual(currentDateTime.getDate()) &&
-                        reservationTime.isBefore(currentDateTime.getTime());
+                        timeSlot.isBefore(currentDateTime.getTime());
         if (isBefore) {
             throw new IllegalArgumentException("지나간 날짜와 시간은 예약 불가합니다.");
         }
@@ -100,25 +100,25 @@ public class ReservationService {
                 .stream()
                 .map(ReservationInfo::new)
                 .toList();
-        final List<ReservationWaitingInfo> reservationWaitingInfos = reservationWaitingRepository.findAllWithRankByMemberId(memberId)
+        final List<WaitingInfo> waitingInfos = waitingRepository.findAllWithRankByMemberId(memberId)
                 .stream()
-                .map(ReservationWaitingInfo::new)
+                .map(WaitingInfo::new)
                 .toList();
 
         return Stream.concat(
                 reservationInfos.stream().map(ReservationMineInfo::new),
-                reservationWaitingInfos.stream().map(ReservationMineInfo::new)
+                waitingInfos.stream().map(ReservationMineInfo::new)
         ).sorted(Comparator.comparing(ReservationMineInfo::date)).toList();
     }
 
     public void cancelReservationById(final long id) {
         final Reservation reservation = findReservation(id);
-        if (reservationWaitingRepository.existsByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())) {
-            final ReservationWaiting waiting = reservationWaitingRepository.findTopByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())
+        if (waitingRepository.existsByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())) {
+            final Waiting waiting = waitingRepository.findTopByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())
                     .orElseThrow(() -> new IllegalArgumentException("예약 대기가 존재하지 않습니다."));
             final Reservation promotedReservation = new Reservation(waiting.date(), waiting.member(), waiting.time(), waiting.theme());
             reservationRepository.save(promotedReservation);
-            reservationWaitingRepository.deleteById(waiting.id());
+            waitingRepository.deleteById(waiting.id());
         }
         reservationRepository.deleteById(id);
     }
@@ -128,8 +128,8 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
     }
 
-    private ReservationTime findReservationTime(final long timeId) {
-        return reservationTimeRepository.findById(timeId)
+    private TimeSlot findTimeSlot(final long timeId) {
+        return timeSlotRepository.findById(timeId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
     }
 

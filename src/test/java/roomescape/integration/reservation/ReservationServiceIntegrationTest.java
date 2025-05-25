@@ -25,8 +25,8 @@ import roomescape.reservation.application.reservation.service.ReservationService
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
 import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
-import roomescape.reservation.domain.waiting.ReservationWaitingRepository;
+import roomescape.reservation.domain.timeslot.TimeSlotRepository;
+import roomescape.reservation.domain.waiting.WaitingRepository;
 import roomescape.support.util.TestCurrentDateTime;
 
 @SpringBootTest
@@ -39,13 +39,13 @@ public class ReservationServiceIntegrationTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationWaitingRepository reservationWaitingRepository;
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -57,8 +57,8 @@ public class ReservationServiceIntegrationTest {
     void init() {
         final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
         currentDateTime = new TestCurrentDateTime(now);
-        reservationService = new ReservationService(reservationRepository, reservationWaitingRepository,
-                reservationTimeRepository,
+        reservationService = new ReservationService(reservationRepository, waitingRepository,
+                timeSlotRepository,
                 themeRepository,
                 memberRepository,
                 currentDateTime);

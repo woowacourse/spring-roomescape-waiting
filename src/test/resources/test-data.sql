@@ -4,7 +4,7 @@ VALUES
     ('유저1', 'user1@email.com', 'qwer!', 'USER'),
     ('유저2', 'user2@email.com', 'qwer!', 'USER');
 
-INSERT INTO RESERVATION_TIME (START_AT)
+INSERT INTO TIME_SLOT (START_AT)
 VALUES
     ('10:00'),
     ('15:00'),

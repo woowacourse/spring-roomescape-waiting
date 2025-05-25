@@ -241,7 +241,7 @@ public class MissionStepTest {
 
     private void insertDummyDataExceptReservation() {
         insertDummyData(SqlFixture.INSERT_MEMBERS);
-        insertDummyData(SqlFixture.INSERT_RESERVATION_TIMES);
+        insertDummyData(SqlFixture.INSERT_TIME_SLOTS);
         insertDummyData(SqlFixture.INSERT_THEMES);
     }
 

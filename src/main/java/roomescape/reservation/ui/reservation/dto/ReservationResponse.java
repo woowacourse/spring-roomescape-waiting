@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
 import roomescape.reservation.ui.theme.dto.ThemeResponse;
-import roomescape.reservation.ui.time.dto.ReservationTimeResponse;
+import roomescape.reservation.ui.timeslot.dto.TimeSlotResponse;
 
 public record ReservationResponse(
         long id,
         MemberResponse member,
         LocalDate date,
-        ReservationTimeResponse time,
+        TimeSlotResponse time,
         ThemeResponse theme
 ) {
 
@@ -18,7 +18,7 @@ public record ReservationResponse(
         this(reservationInfo.id(),
                 new MemberResponse(reservationInfo.member()),
                 reservationInfo.date(),
-                new ReservationTimeResponse(reservationInfo.time()),
+                new TimeSlotResponse(reservationInfo.time()),
                 new ThemeResponse(reservationInfo.theme())
         );
     }

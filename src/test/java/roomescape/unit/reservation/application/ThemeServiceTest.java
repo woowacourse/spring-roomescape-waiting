@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.common.time.CurrentDateTime;
+import roomescape.common.datetime.CurrentDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
@@ -25,10 +25,10 @@ import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
 import roomescape.reservation.domain.theme.Theme;
 import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.time.ReservationTime;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.domain.timeslot.TimeSlot;
+import roomescape.reservation.domain.timeslot.TimeSlotRepository;
 import roomescape.support.fake.FakeReservationRepository;
-import roomescape.support.fake.FakeReservationTimeRepository;
+import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.util.TestCurrentDateTime;
 
@@ -38,7 +38,7 @@ class ThemeServiceTest {
     private final CurrentDateTime currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 4, 30, 10, 0));
     private final ThemeRepository fakeThemeRepository = new FakeThemeRepository();
     private final ReservationRepository fakeReservationRepository = new FakeReservationRepository();
-    private final ReservationTimeRepository fakeReservationTimeRepository = new FakeReservationTimeRepository();
+    private final TimeSlotRepository fakeTimeSlotRepository = new FakeTimeSlotRepository();
     private final ThemeService themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository,
             currentDateTime);
 
@@ -93,8 +93,8 @@ class ThemeServiceTest {
     @Test
     void illegalDelete() {
         // given
-        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(11, 0));
-        final ReservationTime saveTime = fakeReservationTimeRepository.save(reservationTime);
+        final TimeSlot timeSlot = new TimeSlot(LocalTime.of(11, 0));
+        final TimeSlot saveTime = fakeTimeSlotRepository.save(timeSlot);
         final Member member = new Member("멤버", "member@email.com", "memberpw", MemberRole.ADMIN);
 
         final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");

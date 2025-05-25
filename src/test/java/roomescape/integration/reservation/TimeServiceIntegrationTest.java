@@ -15,12 +15,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.application.time.dto.ReservationTimeAvailabilityInfo;
-import roomescape.reservation.application.time.dto.ReservationTimeCreateCommand;
-import roomescape.reservation.application.time.dto.ReservationTimeInfo;
-import roomescape.reservation.application.time.service.ReservationTimeService;
-import roomescape.reservation.domain.time.ReservationTime;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.application.timeslot.dto.TimeSlotAvailabilityInfo;
+import roomescape.reservation.application.timeslot.dto.TimeSlotCreateCommand;
+import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
+import roomescape.reservation.application.timeslot.service.TimeSlotService;
+import roomescape.reservation.domain.timeslot.TimeSlot;
+import roomescape.reservation.domain.timeslot.TimeSlotRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -29,32 +29,32 @@ import roomescape.reservation.domain.time.ReservationTimeRepository;
 public class TimeServiceIntegrationTest {
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
-    private ReservationTimeService reservationTimeService;
+    private TimeSlotService timeSlotService;
 
     @DisplayName("이미 존재하는 예약시간을 추가하면 예외가 발생한다")
     @Test
     void should_ThrowException_WhenCreateDuplicatedTime() {
         // given
-        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(LocalTime.of(10, 0));
+        final TimeSlotCreateCommand request = new TimeSlotCreateCommand(LocalTime.of(10, 0));
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.createReservationTime(request))
+        assertThatThrownBy(() -> timeSlotService.createTimeSlot(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 존재하는 시간입니다.");
     }
 
     @DisplayName("예약 시간을 추가할 수 있다")
     @Test
-    void createReservationTime() {
+    void createTimeSlot() {
         // given
         final LocalTime time = LocalTime.of(17, 0);
-        final ReservationTimeCreateCommand request = new ReservationTimeCreateCommand(time);
+        final TimeSlotCreateCommand request = new TimeSlotCreateCommand(time);
         // when
-        final ReservationTimeInfo result = reservationTimeService.createReservationTime(request);
+        final TimeSlotInfo result = timeSlotService.createTimeSlot(request);
         // then
-        final ReservationTime savedTime = reservationTimeRepository.findById(result.id()).get();
+        final TimeSlot savedTime = timeSlotRepository.findById(result.id()).get();
         assertAll(
                 () -> assertThat(result.id()).isEqualTo(4L),
                 () -> assertThat(result.startAt()).isEqualTo(time),
@@ -65,9 +65,9 @@ public class TimeServiceIntegrationTest {
 
     @DisplayName("모든 예약 시간을 조회할 수 있다")
     @Test
-    void getReservationTimes() {
+    void getTimeSlots() {
         // when
-        final List<ReservationTimeInfo> result = reservationTimeService.getReservationTimes();
+        final List<TimeSlotInfo> result = timeSlotService.getTimeSlots();
         // then
         assertThat(result).hasSize(3);
     }
@@ -76,18 +76,18 @@ public class TimeServiceIntegrationTest {
     @Test
     void should_ThrowException_WhenDeleteTimeWithinReservation() {
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(1L))
+        assertThatThrownBy(() -> timeSlotService.deleteTimeSlotById(1L))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
 
     @DisplayName("id를 기반으로 예약 시간을 삭제할 수 있다")
     @Test
-    void deleteReservationTimeById() {
+    void deleteTimeSlotById() {
         // when
-        reservationTimeService.deleteReservationTimeById(3L);
+        timeSlotService.deleteTimeSlotById(3L);
         // then
-        final List<ReservationTime> times = reservationTimeRepository.findAll();
+        final List<TimeSlot> times = timeSlotRepository.findAll();
         assertThat(times).hasSize(2);
     }
 
@@ -96,14 +96,14 @@ public class TimeServiceIntegrationTest {
     void findAvailableTimes() {
         // when
         final LocalDate date = LocalDate.of(2025, 4, 24);
-        final List<ReservationTimeAvailabilityInfo> result = reservationTimeService.findAvailableTimes(date, 7L);
+        final List<TimeSlotAvailabilityInfo> result = timeSlotService.findAvailableTimes(date, 7L);
         // then
         assertAll(
                 () -> assertThat(result).hasSize(3),
                 () -> assertThat(result).contains(
-                        new ReservationTimeAvailabilityInfo(1L, LocalTime.of(10, 0), true),
-                        new ReservationTimeAvailabilityInfo(2L, LocalTime.of(15, 0), false),
-                        new ReservationTimeAvailabilityInfo(3L, LocalTime.of(16, 0), false)
+                        new TimeSlotAvailabilityInfo(1L, LocalTime.of(10, 0), true),
+                        new TimeSlotAvailabilityInfo(2L, LocalTime.of(15, 0), false),
+                        new TimeSlotAvailabilityInfo(3L, LocalTime.of(16, 0), false)
                 )
         );
     }

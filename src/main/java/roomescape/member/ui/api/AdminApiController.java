@@ -13,21 +13,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
 import roomescape.reservation.application.reservation.service.ReservationService;
-import roomescape.reservation.application.waiting.service.ReservationWaitingService;
+import roomescape.reservation.application.waiting.service.WaitingService;
 import roomescape.reservation.ui.reservation.dto.AdminReservationCreateRequest;
 import roomescape.reservation.ui.reservation.dto.ReservationResponse;
-import roomescape.reservation.ui.waiting.dto.ReservationWaitingResponse;
+import roomescape.reservation.ui.waiting.dto.WaitingResponse;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminApiController {
 
     private final ReservationService reservationService;
-    private final ReservationWaitingService reservationWaitingService;
+    private final WaitingService waitingService;
 
-    public AdminApiController(final ReservationService reservationService, ReservationWaitingService reservationWaitingService) {
+    public AdminApiController(final ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
-        this.reservationWaitingService = reservationWaitingService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping("/reservations")
@@ -39,17 +39,17 @@ public class AdminApiController {
     }
 
     @GetMapping("/waitings")
-    public ResponseEntity<List<ReservationWaitingResponse>> getWaitings() {
-        final List<ReservationWaitingResponse> responses = reservationWaitingService.findAll()
+    public ResponseEntity<List<WaitingResponse>> getWaitings() {
+        final List<WaitingResponse> responses = waitingService.findAll()
                 .stream()
-                .map(ReservationWaitingResponse::new)
+                .map(WaitingResponse::new)
                 .toList();
         return ResponseEntity.ok().body(responses);
     }
 
     @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
-        reservationWaitingService.cancelReservationWaitingById(id);
+        waitingService.cancelWaitingById(id);
         return ResponseEntity.noContent().build();
     }
 }

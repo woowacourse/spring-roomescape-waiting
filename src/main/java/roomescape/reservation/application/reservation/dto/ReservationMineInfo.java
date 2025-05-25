@@ -2,13 +2,13 @@ package roomescape.reservation.application.reservation.dto;
 
 import java.time.LocalDate;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
-import roomescape.reservation.application.time.dto.ReservationTimeInfo;
-import roomescape.reservation.application.waiting.dto.ReservationWaitingInfo;
+import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
+import roomescape.reservation.application.waiting.dto.WaitingInfo;
 
 public record ReservationMineInfo(
         long id,
         LocalDate date,
-        ReservationTimeInfo timeInfo,
+        TimeSlotInfo timeInfo,
         ThemeInfo themeInfo,
         String status
 ) {
@@ -23,12 +23,12 @@ public record ReservationMineInfo(
         );
     }
 
-    public ReservationMineInfo(final ReservationWaitingInfo reservationWaitingInfo) {
+    public ReservationMineInfo(final WaitingInfo waitingInfo) {
         this(
-                reservationWaitingInfo.id(),
-                reservationWaitingInfo.date(),
-                reservationWaitingInfo.time(),
-                reservationWaitingInfo.theme(),
-                reservationWaitingInfo.status()
+                waitingInfo.id(),
+                waitingInfo.date(),
+                waitingInfo.time(),
+                waitingInfo.theme(),
+                waitingInfo.status()
         );    }
 }

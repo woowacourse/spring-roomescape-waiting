@@ -13,8 +13,8 @@ public class SqlFixture {
             ('유저2', 'user2email.com', 'userpw2', 'USER');
     """;
 
-    public static final String INSERT_RESERVATION_TIMES = """
-        INSERT INTO RESERVATION_TIME (START_AT)
+    public static final String INSERT_TIME_SLOTS = """
+        INSERT INTO TIME_SLOT (START_AT)
         VALUES
             ('10:00'),
             ('12:00'),
@@ -49,7 +49,7 @@ public class SqlFixture {
 
     public static final List<String> INSERT_ALL = List.of(
             INSERT_MEMBERS,
-            INSERT_RESERVATION_TIMES,
+            INSERT_TIME_SLOTS,
             INSERT_THEMES,
             INSERT_RESERVATIONS
     );

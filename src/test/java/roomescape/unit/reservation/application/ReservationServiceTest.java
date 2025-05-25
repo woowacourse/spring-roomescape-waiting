@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import roomescape.common.time.CurrentDateTime;
+import roomescape.common.datetime.CurrentDateTime;
 import roomescape.member.application.dto.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -27,16 +27,16 @@ import roomescape.reservation.application.reservation.dto.ReservationMineInfo;
 import roomescape.reservation.application.reservation.dto.ReservationSearchCondition;
 import roomescape.reservation.application.reservation.service.ReservationService;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
-import roomescape.reservation.application.time.dto.ReservationTimeInfo;
+import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.theme.Theme;
 import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.time.ReservationTime;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.domain.timeslot.TimeSlot;
+import roomescape.reservation.domain.timeslot.TimeSlotRepository;
 import roomescape.support.fake.FakeMemberRepository;
 import roomescape.support.fake.FakeReservationRepository;
-import roomescape.support.fake.FakeReservationTimeRepository;
-import roomescape.support.fake.FakeReservationWaitingRepository;
+import roomescape.support.fake.FakeTimeSlotRepository;
+import roomescape.support.fake.FakeWaitingRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.util.TestCurrentDateTime;
 
@@ -49,15 +49,15 @@ class ReservationServiceTest {
     private final LocalDate tomorrow = today.plusDays(1);
 
     private final FakeReservationRepository reservationRepository = new FakeReservationRepository();
-    private final FakeReservationWaitingRepository reservationWaitingRepository = new FakeReservationWaitingRepository();
-    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    private final FakeWaitingRepository waitingRepository = new FakeWaitingRepository();
+    private final TimeSlotRepository timeSlotRepository = new FakeTimeSlotRepository();
     private final ThemeRepository themeRepository = new FakeThemeRepository();
     private final MemberRepository memberRepository = new FakeMemberRepository();
-    private final ReservationService reservationService = new ReservationService(reservationRepository, reservationWaitingRepository,
-            reservationTimeRepository, themeRepository, memberRepository, currentDateTime);
+    private final ReservationService reservationService = new ReservationService(reservationRepository, waitingRepository,
+            timeSlotRepository, themeRepository, memberRepository, currentDateTime);
 
     private Member member1, member2;
-    private ReservationTime time1, time2;
+    private TimeSlot time1, time2;
     private Theme theme1, theme2;
 
     @BeforeEach
@@ -65,8 +65,8 @@ class ReservationServiceTest {
         member1 = memberRepository.save(new Member("리버1", "river1@gmail.com", "riverpw1", MemberRole.ADMIN));
         member2 = memberRepository.save(new Member("리버2", "river2@gmail.com", "riverpw2", MemberRole.ADMIN));
 
-        time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-        time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        time1 = timeSlotRepository.save(new TimeSlot(LocalTime.of(11, 0)));
+        time2 = timeSlotRepository.save(new TimeSlot(LocalTime.of(12, 0)));
 
         theme1 = themeRepository.save(new Theme("우테코탈출1", "우테코탈출1 설명, ", "우테코탈출1 썸네일.jpg"));
         theme2 = themeRepository.save(new Theme("우테코탈출2", "우테코탈출2 설명, ", "우테코탈출2 썸네일.jpg"));
@@ -147,7 +147,7 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(result.date()).isEqualTo(response.date()),
                 () -> assertThat(new MemberInfo(result.member())).isEqualTo(response.member()),
-                () -> assertThat(new ReservationTimeInfo(result.time())).isEqualTo(response.time()),
+                () -> assertThat(new TimeSlotInfo(result.time())).isEqualTo(response.time()),
                 () -> assertThat(new ThemeInfo(result.theme())).isEqualTo(response.theme())
         );
     }
