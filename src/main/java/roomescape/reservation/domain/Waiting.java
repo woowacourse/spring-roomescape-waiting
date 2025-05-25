@@ -25,7 +25,7 @@ public class Waiting {
     @Embedded
     private ReservationDetails details;
 
-    public Waiting() {
+    private Waiting() {
     }
 
     public Waiting(Long id, Member member, ReservationDetails details) {

@@ -22,7 +22,7 @@ public class Theme {
 
     private String thumbnail;
 
-    public Theme() {
+    private Theme() {
     }
 
     public Theme(String name, String description, String thumbnail) {

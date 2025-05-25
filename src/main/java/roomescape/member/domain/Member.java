@@ -29,7 +29,7 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member() {
+    private Member() {
     }
 
     public Member(Long id, String name, String email, String password, Role role) {

@@ -25,7 +25,7 @@ public class Reservation {
     @Embedded
     private ReservationDetails details;
 
-    public Reservation() {
+    private Reservation() {
     }
 
     public Reservation(Long id, Member member, ReservationDetails details) {
