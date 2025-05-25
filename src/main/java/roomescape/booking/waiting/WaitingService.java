@@ -4,21 +4,18 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleRepository;
+import roomescape.booking.schedule.ScheduleService;
 import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsScheduleException;
 import roomescape.exception.custom.reason.schedule.PastScheduleException;
-import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
 import roomescape.exception.custom.reason.waiting.WaitingNotFoundException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepository;
+import roomescape.member.MemberService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -26,13 +23,13 @@ import java.util.List;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
-    private final ReservationRepository reservationRepository;
-    private final ScheduleRepository scheduleRepository;
-    private final MemberRepository memberRepository;
+    private final ReservationService reservationService;
+    private final ScheduleService scheduleService;
+    private final MemberService memberService;
 
     @Transactional
     public WaitingResponse create(final WaitingRequest request, final LoginMember loginMember) {
-        final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
+        final Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         validatePast(schedule);
         validateExistsReservationAboutSchedule(schedule);
 
@@ -77,7 +74,7 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public List<Waiting> findAllByEmail(final String email) {
-        Member member = getMemberByEmail(email);
+        Member member = memberService.findByEmail(email);
         return waitingRepository.findAllByMember(member);
     }
 
@@ -91,13 +88,8 @@ public class WaitingService {
         return waitingRepository.existsBySchedule(schedule);
     }
 
-    private Schedule getSchedule(final LocalDate date, final Long timeId, final Long themeId) {
-        return scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(date, timeId, themeId)
-                .orElseThrow(ScheduleNotExistException::new);
-    }
-
     private Waiting saveWaiting(final LoginMember loginMember, final Schedule schedule) {
-        final Member member = getMemberByEmail(loginMember.email());
+        final Member member = memberService.findByEmail(loginMember.email());
         final Long rank = getWaitingRank(schedule);
         final Waiting waiting = new Waiting(schedule, member, rank);
         return waitingRepository.save(waiting);
@@ -110,7 +102,7 @@ public class WaitingService {
     }
 
     private void validateExistsReservationAboutSchedule(final Schedule schedule) {
-        boolean isReservationExist = reservationRepository.existsBySchedule(schedule);
+        boolean isReservationExist = reservationService.existsBySchedule(schedule);
         if (!isReservationExist) {
             throw new ReservationNotExistsScheduleException();
         }
@@ -132,11 +124,6 @@ public class WaitingService {
         Long rank = waiting.getRank();
         List<Waiting> waitingsAfterRank = waitingRepository.findWaitingGreaterThanRank(waiting.getSchedule(), rank);
         waitingsAfterRank.forEach(Waiting::decrementRank);
-    }
-
-    private Member getMemberByEmail(final String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(ReservationNotExistsMemberException::new);
     }
 
     private Waiting getWaitingById(final Long id) {

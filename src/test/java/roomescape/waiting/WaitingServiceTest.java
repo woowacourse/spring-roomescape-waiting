@@ -6,10 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.reservation.Reservation;
-import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleRepository;
+import roomescape.booking.schedule.ScheduleService;
 import roomescape.booking.waiting.Waiting;
 import roomescape.booking.waiting.WaitingRepository;
 import roomescape.booking.waiting.WaitingService;
@@ -18,8 +17,8 @@ import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsScheduleException;
 import roomescape.member.Member;
-import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
+import roomescape.member.MemberService;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
@@ -41,15 +40,14 @@ class WaitingServiceTest {
 
     private WaitingService waitingService;
     private WaitingRepository waitingRepository;
-    private ReservationRepository reservationRepository;
-    private ScheduleRepository scheduleRepository;
-    private MemberRepository memberRepository;
+    private ReservationService reservationService;
+    private ScheduleService scheduleService;
+    private MemberService memberService;
 
     private WaitingRequest REQUEST;
     private LoginMember LOGIN_MEMBER;
-    private Optional<Schedule> SCHEDULE;
-    private Optional<Member> MEMBER;
-    private Reservation RESERVATION;
+    private Schedule SCHEDULE;
+    private Member MEMBER;
 
     @BeforeEach
     void setUp() {
@@ -57,37 +55,35 @@ class WaitingServiceTest {
         LOGIN_MEMBER = new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
         ReservationTime reservationTime = reservationTimeWithId(REQUEST.timeId(), new ReservationTime(LocalTime.of(12, 40)));
         Theme theme = themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123"));
-        SCHEDULE = Optional.of(scheduleWithId(1L, new Schedule(REQUEST.date(), reservationTime, theme)));
-
-        MEMBER = Optional.of(memberWithId(1L, new Member(LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER)));
-        RESERVATION = reservationWithId(1L, new Reservation(MEMBER.get(), SCHEDULE.get()));
+        SCHEDULE = scheduleWithId(1L, new Schedule(REQUEST.date(), reservationTime, theme));
+        MEMBER = memberWithId(1L, new Member(LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER));
 
         waitingRepository = mock(WaitingRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        scheduleRepository = mock(ScheduleRepository.class);
-        memberRepository = mock(MemberRepository.class);
-        waitingService = new WaitingService(waitingRepository, reservationRepository, scheduleRepository, memberRepository);
+        reservationService = mock(ReservationService.class);
+        scheduleService = mock(ScheduleService.class);
+        memberService = mock(MemberService.class);
+        waitingService = new WaitingService(waitingRepository, reservationService, scheduleService, memberService);
     }
 
     @Test
     @DisplayName("웨이팅을 할 수 있다.")
     void createWaiting() {
         // given
-        given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), REQUEST.timeId(), REQUEST.themeId()))
+        given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), REQUEST.timeId(), REQUEST.themeId()))
                 .willReturn(SCHEDULE);
-        given(reservationRepository.existsBySchedule(SCHEDULE.get()))
+        given(reservationService.existsBySchedule(SCHEDULE))
                 .willReturn(true);
-        given(memberRepository.findByEmail(LOGIN_MEMBER.email()))
+        given(memberService.findByEmail(LOGIN_MEMBER.email()))
                 .willReturn(MEMBER);
 
-        Waiting waiting1 = new Waiting(SCHEDULE.get(), MEMBER.get(), 1L);
-        Waiting waiting2 = new Waiting(SCHEDULE.get(), MEMBER.get(), 2L);
-        Waiting waiting3 = new Waiting(SCHEDULE.get(), MEMBER.get(), 3L);
+        Waiting waiting1 = new Waiting(SCHEDULE, MEMBER, 1L);
+        Waiting waiting2 = new Waiting(SCHEDULE, MEMBER, 2L);
+        Waiting waiting3 = new Waiting(SCHEDULE, MEMBER, 3L);
         List<Waiting> waitings = List.of(waiting1, waiting2, waiting3);
-        given(waitingRepository.findAllBySchedule(SCHEDULE.get()))
+        given(waitingRepository.findAllBySchedule(SCHEDULE))
                 .willReturn(waitings);
 
-        Waiting waiting = new Waiting(SCHEDULE.get(), MEMBER.get(), (long) waitings.size() + 1);
+        Waiting waiting = new Waiting(SCHEDULE, MEMBER, (long) waitings.size() + 1);
         Waiting createdWaiting = waitingWithId(1L, waiting);
         given(waitingRepository.save(any()))
                 .willReturn(createdWaiting);
@@ -104,9 +100,9 @@ class WaitingServiceTest {
     @DisplayName("스케줄에 대한 예약이 없는 경우, 웨이팅을 할 수 없다")
     void createWaiting2() {
         // given
-        given(scheduleRepository.findByDateAndReservationTime_IdAndTheme_Id(REQUEST.date(), REQUEST.timeId(), REQUEST.themeId()))
+        given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), REQUEST.timeId(), REQUEST.themeId()))
                 .willReturn(SCHEDULE);
-        given(reservationRepository.existsBySchedule(SCHEDULE.get()))
+        given(reservationService.existsBySchedule(SCHEDULE))
                 .willReturn(false);
 
         // when & then
@@ -120,7 +116,7 @@ class WaitingServiceTest {
         // given
         LOGIN_MEMBER = new LoginMember("may", "may@email.com", MemberRole.MEMBER);
         Long waitingId = 1L;
-        Waiting waiting = waitingWithId(waitingId, new Waiting(SCHEDULE.get(), MEMBER.get(), 1L));
+        Waiting waiting = waitingWithId(waitingId, new Waiting(SCHEDULE, MEMBER, 1L));
 
         given(waitingRepository.findById(waitingId))
                 .willReturn(Optional.of(waiting));
@@ -136,7 +132,7 @@ class WaitingServiceTest {
         // given
         LOGIN_MEMBER = new LoginMember("may", LOGIN_MEMBER.email(), MemberRole.MEMBER);
         Long waitingId = 1L;
-        Waiting waiting = waitingWithId(waitingId, new Waiting(SCHEDULE.get(), MEMBER.get(), 1L));
+        Waiting waiting = waitingWithId(waitingId, new Waiting(SCHEDULE, MEMBER, 1L));
 
         given(waitingRepository.findById(waitingId))
                 .willReturn(Optional.of(waiting));

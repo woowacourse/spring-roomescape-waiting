@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.booking.reservation.dto.AdminFilterReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
+import roomescape.booking.schedule.Schedule;
 import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
@@ -69,5 +70,10 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public boolean existsByReservationTime(final ReservationTime reservationTime) {
         return reservationRepository.existsBySchedule_ReservationTime(reservationTime);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsBySchedule(final Schedule schedule) {
+        return reservationRepository.existsBySchedule(schedule);
     }
 }
