@@ -26,8 +26,4 @@ public record MemberDto(
                 .map(MemberDto::from)
                 .toList();
     }
-
-    public Member toEntity() {
-        return Member.of(id, name, email, password, role);
-    }
 }
