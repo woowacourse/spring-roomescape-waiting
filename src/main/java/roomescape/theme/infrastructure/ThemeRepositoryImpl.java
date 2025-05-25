@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -31,19 +30,16 @@ public class ThemeRepositoryImpl implements ThemeRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Theme> findById(final Long id) {
         return jpaThemeRepository.findById(id);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Theme> findAll() {
         return jpaThemeRepository.findAll();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Theme> findTopNThemesByReservationCountInDateRange(
             final LocalDate dateFrom,
             final LocalDate dateTo,

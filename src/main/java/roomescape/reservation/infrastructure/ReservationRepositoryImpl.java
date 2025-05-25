@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
@@ -40,7 +39,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Reservation> findById(final Long id) {
         return jpaReservationRepository.findById(id);
     }
