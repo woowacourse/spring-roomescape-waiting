@@ -22,7 +22,6 @@ import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingWithRank;
 import roomescape.waiting.infrastructure.WaitingRepositoryAdapter;
 
 @ActiveProfiles("test")
@@ -116,72 +115,6 @@ class WaitingRepositoryTest {
 
         // then
         assertThat(waitings).hasSize(2);
-    }
-
-    @DisplayName("멤버 ID로 예약 대기와 순서를 조회한다")
-    @Test
-    void findWithRankByMemberId() {
-        // given
-        Member member1 = MemberFixture.createMember("에드", "test1@test.com", "1234");
-        entityManager.persist(member1);
-
-        Member member2 = MemberFixture.createMember("김진우", "test2@test.com", "1234");
-        entityManager.persist(member2);
-
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
-        entityManager.persist(reservationTime);
-
-        Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
-        entityManager.persist(theme);
-
-        ReservationSpec spec1 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
-        Waiting waiting1 = new Waiting(member1, spec1);
-        waitingRepository.save(waiting1);
-
-        ReservationSpec spec2 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
-        Waiting waiting2 = new Waiting(member2, spec2);
-        waitingRepository.save(waiting2);
-
-        // when
-        List<WaitingWithRank> waitingsWithRank = waitingRepository.findWithRankByMemberId(member2.getId());
-
-        // then
-        assertThat(waitingsWithRank).hasSize(1);
-        assertThat(waitingsWithRank.getFirst().getWaiting().getMember().getId()).isEqualTo(member2.getId());
-        assertThat(waitingsWithRank.getFirst().getRank()).isEqualTo(2);
-    }
-
-    @DisplayName("ID로 예약 대기와 순위를 조회한다")
-    @Test
-    void findWithRankById() {
-        // given
-        Member member1 = MemberFixture.createMember("에드", "test1@test.com", "1234");
-        entityManager.persist(member1);
-
-        Member member2 = MemberFixture.createMember("김진우", "test2@test.com", "1234");
-        entityManager.persist(member2);
-
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
-        entityManager.persist(reservationTime);
-
-        Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
-        entityManager.persist(theme);
-
-        ReservationSpec spec1 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
-        Waiting waiting1 = new Waiting(member1, spec1);
-        waitingRepository.save(waiting1);
-
-        ReservationSpec spec2 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
-        Waiting waiting2 = new Waiting(member2, spec2);
-        Waiting savedWaiting2 = waitingRepository.save(waiting2);
-
-        // when
-        Optional<WaitingWithRank> waitingWithRank = waitingRepository.findWithRankById(savedWaiting2.getId());
-
-        // then
-        assertThat(waitingWithRank).isPresent();
-        assertThat(waitingWithRank.get().getWaiting().getId()).isEqualTo(savedWaiting2.getId());
-        assertThat(waitingWithRank.get().getRank()).isEqualTo(2);
     }
 
     @DisplayName("ID로 예약 대기를 조회한다")

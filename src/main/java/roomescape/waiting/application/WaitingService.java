@@ -24,7 +24,7 @@ import roomescape.waiting.application.dto.WaitingRequest;
 import roomescape.waiting.application.dto.WaitingResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingWithRank;
+import roomescape.waiting.domain.Waitings;
 import roomescape.waiting.exception.NotFirstWaitingException;
 import roomescape.waiting.exception.SlotNotReservedException;
 import roomescape.waiting.exception.WaitingNotFoundException;
@@ -96,11 +96,11 @@ public class WaitingService {
     }
 
     public void approve(Long id) {
-        WaitingWithRank waitingWithRank = waitingRepository.findWithRankById(id)
-                .orElseThrow(WaitingNotFoundException::new);
-        validateIsFirst(waitingWithRank);
+        Waitings waitings = new Waitings(waitingRepository.findAll());
+        Waiting waiting = waitings.pollHighestPriority();
+        validateWaitingExists(waiting);
+        validateIsFirst(waiting, id);
 
-        Waiting waiting = waitingWithRank.getWaiting();
         validateReservationExists(waiting);
 
         Reservation reservation = new Reservation(waiting.getMember(), waiting.getSpec());
@@ -108,8 +108,14 @@ public class WaitingService {
         reservationRepository.save(reservation);
     }
 
-    private void validateIsFirst(WaitingWithRank waitingWithRank) {
-        if (waitingWithRank.getRank() != FIRST_WAITING) {
+    private void validateWaitingExists(Waiting waiting) {
+        if (waiting == null) {
+            throw new WaitingNotFoundException();
+        }
+    }
+
+    private void validateIsFirst(Waiting waiting, Long id) {
+        if (!waiting.getId().equals(id)) {
             throw new NotFirstWaitingException();
         }
     }

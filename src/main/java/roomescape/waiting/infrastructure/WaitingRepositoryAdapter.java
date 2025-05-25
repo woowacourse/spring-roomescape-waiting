@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingWithRank;
 
 @Repository
 @AllArgsConstructor
@@ -26,16 +25,6 @@ public class WaitingRepositoryAdapter implements WaitingRepository {
     @Override
     public List<Waiting> findAll() {
         return waitingJpaRepository.findAllWithEagerLoading();
-    }
-
-    @Override
-    public List<WaitingWithRank> findWithRankByMemberId(Long memberId) {
-        return waitingJpaRepository.findWithRankByMemberId(memberId);
-    }
-
-    @Override
-    public Optional<WaitingWithRank> findWithRankById(Long id) {
-        return waitingJpaRepository.findWithRankById(id);
     }
 
     @Override
