@@ -101,9 +101,9 @@ class ReservationRepositoryTest {
         // given
         LocalDateTime now = LocalDateTime.now();
         Waiting waiting1 = waitingRepository.saveAndFlush(
-                Waiting.waitingWithoutId(now, ReservationStatus.WAITING));
+                Waiting.waitingWithoutId(now.minusMinutes(2), ReservationStatus.WAITING));
         Waiting waiting2 = waitingRepository.saveAndFlush(
-                Waiting.waitingWithoutId(now, ReservationStatus.WAITING));
+                Waiting.waitingWithoutId(now.minusMinutes(1), ReservationStatus.WAITING));
         Waiting waiting3 = waitingRepository.saveAndFlush(
                 Waiting.waitingWithoutId(now, ReservationStatus.WAITING));
 
