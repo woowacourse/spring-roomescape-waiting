@@ -6,12 +6,12 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.QMember;
-import roomescape.domain.QReservation;
-import roomescape.domain.QReservationItem;
-import roomescape.domain.QReservationTheme;
-import roomescape.domain.QReservationTime;
+import roomescape.domain.member.QMember;
+import roomescape.domain.reservation.QReservation;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationitem.QReservationItem;
+import roomescape.domain.reservationitem.QReservationTheme;
+import roomescape.domain.reservationitem.QReservationTime;
 
 @RequiredArgsConstructor
 @Repository
