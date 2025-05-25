@@ -21,6 +21,7 @@ import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.request.ReservationTimeRequest;
+import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 
 @SpringBootTest
@@ -462,5 +463,175 @@ class ReservationServiceTest {
         );
         ReservationResponse newReservation = reservationService.addReservation(newRequest);
         assertThat(newReservation.status()).isEqualTo(ReservationStatus.ACCEPTED.description);
+    }
+
+    @Test
+    @DisplayName("확정 예약의 priority는 0이다.")
+    void acceptedReservationHasPriorityZero() {
+        // given
+        CreateReservationRequest acceptedRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(8), themeId1, timeId
+        );
+
+        // when
+        ReservationResponse acceptedReservation = reservationService.addReservation(acceptedRequest);
+        List<MyPageReservationResponse> myReservations =
+                reservationService.getReservationsByMemberId(memberId1);
+
+        // then
+        assertThat(myReservations)
+                .anyMatch(reservation ->
+                        reservation.reservationId().equals(acceptedReservation.id()) &&
+                                reservation.priority() == 0
+                );
+    }
+
+    @Test
+    @DisplayName("대기 예약의 priority는 앞선 예약 수에 따라 결정된다.")
+    void pendingReservationPriorityTest() {
+        // given
+        LocalDate testDate = LocalDate.now().plusDays(9);
+
+        ReservationResponse accepted = reservationService.addReservation(
+                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+        );
+        ReservationResponse pending = reservationService.addReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+        );
+        ReservationResponse pending2 = reservationService.addReservation(
+                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+        );
+
+        // when
+        List<MyPageReservationResponse> member1Reservations =
+                reservationService.getReservationsByMemberId(memberId1);
+        List<MyPageReservationResponse> member2Reservations =
+                reservationService.getReservationsByMemberId(memberId2);
+
+        // then
+        assertThat(member1Reservations)
+                .anyMatch(reservation ->
+                        reservation.reservationId().equals(accepted.id()) &&
+                                reservation.priority() == 0
+                );
+        assertThat(member2Reservations)
+                .anyMatch(reservation ->
+                        reservation.reservationId().equals(pending.id()) &&
+                                reservation.priority() == 1
+                );
+        assertThat(member1Reservations)
+                .anyMatch(reservation ->
+                        reservation.reservationId().equals(pending2.id()) &&
+                                reservation.priority() == 2
+                );
+    }
+
+    @Test
+    @DisplayName("서로 다른 예약 아이템의 예약들은 독립적으로 priority가 계산된다.")
+    void differentReservationItemsHaveIndependentPriorities() {
+        // given
+        LocalDate testDate = LocalDate.now().plusDays(10);
+
+        ReservationResponse acceptedTheme1Reservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+        );
+        ReservationResponse acceptedTheme2Reservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId1, testDate, themeId2, timeId)
+        );
+        ReservationResponse pendingTheme1Reservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+        );
+        ReservationResponse pendingTheme2Reservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId2, timeId)
+        );
+
+        // when
+        List<MyPageReservationResponse> member1Reservations =
+                reservationService.getReservationsByMemberId(memberId1);
+        List<MyPageReservationResponse> member2Reservations =
+                reservationService.getReservationsByMemberId(memberId2);
+
+        // then
+        assertThat(member1Reservations)
+                .filteredOn(reservation ->
+                        reservation.reservationId().equals(acceptedTheme1Reservation.id()) ||
+                                reservation.reservationId().equals(acceptedTheme2Reservation.id())
+                )
+                .allMatch(reservation -> reservation.priority() == 0);
+
+        assertThat(member2Reservations)
+                .filteredOn(reservation ->
+                        reservation.reservationId().equals(pendingTheme1Reservation.id()) ||
+                                reservation.reservationId().equals(pendingTheme2Reservation.id())
+                )
+                .allMatch(reservation -> reservation.priority() == 1);
+    }
+
+    @Test
+    @DisplayName("확정 예약 삭제 후 다음 대기 예약이 확정되면 priority가 0으로 변경된다.")
+    void priorityChangesAfterReservationDeletion() {
+        // given
+        LocalDate testDate = LocalDate.now().plusDays(11);
+
+        ReservationResponse acceptedReservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+        );
+
+        ReservationResponse pendingReservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+        );
+
+        List<MyPageReservationResponse> beforeDelete = reservationService.getReservationsByMemberId(memberId2);
+        assertThat(beforeDelete).anyMatch(
+                reservation ->
+                        reservation.reservationId().equals(pendingReservation.id()) && reservation.priority() == 1
+                );
+
+        // when
+        reservationService.removeReservation(acceptedReservation.id());
+
+        // then
+        List<MyPageReservationResponse> afterDeletion =
+                reservationService.getReservationsByMemberId(memberId2);
+        assertThat(afterDeletion).anyMatch(reservation ->
+                reservation.reservationId().equals(pendingReservation.id()) &&
+                        reservation.priority() == 0 &&
+                        reservation.status().equals(ReservationStatus.ACCEPTED.description)
+        );
+    }
+
+    @Test
+    @DisplayName("여러 대기 예약 중 하나가 삭제되면 뒤의 예약들의 priority가 앞당겨진다.")
+    void priorityUpdatesAfterMiddlePendingReservationDeletion() {
+        // given
+        LocalDate testDate = LocalDate.now().plusDays(12);
+
+        reservationService.addReservation(new CreateReservationRequest(memberId1, testDate, themeId1, timeId));
+
+        ReservationResponse pending1Reservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+        );
+        ReservationResponse pending2Reservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+        );
+        ReservationResponse pending3Reservation = reservationService.addReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+        );
+
+        // when
+        reservationService.removeReservation(pending1Reservation.id());
+
+        // then
+        List<MyPageReservationResponse> member1Reservations =
+                reservationService.getReservationsByMemberId(memberId1);
+        List<MyPageReservationResponse> member2Reservations =
+                reservationService.getReservationsByMemberId(memberId2);
+
+        assertThat(member1Reservations).anyMatch(reservation ->
+                        reservation.reservationId().equals(pending2Reservation.id()) && reservation.priority() == 1
+                );
+        assertThat(member2Reservations).anyMatch(reservation ->
+                        reservation.reservationId().equals(pending3Reservation.id()) && reservation.priority() == 2
+                );
     }
 }

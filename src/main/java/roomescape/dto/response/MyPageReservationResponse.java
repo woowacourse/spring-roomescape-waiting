@@ -9,16 +9,18 @@ public record MyPageReservationResponse(
         String theme,
         LocalDate date,
         LocalTime time,
-        String status
+        String status,
+        int priority
 ) {
 
-    public static MyPageReservationResponse from(Reservation reservation) {
+    public static MyPageReservationResponse from(Reservation reservation, int priority) {
         return new MyPageReservationResponse(
                 reservation.getId(),
                 reservation.getReservationItem().getTheme().getName(),
                 reservation.getReservationItem().getDate(),
                 reservation.getReservationItem().getTime().getStartAt(),
-                "예약"
+                reservation.getReservationStatus().description,
+                priority
         );
     }
 }

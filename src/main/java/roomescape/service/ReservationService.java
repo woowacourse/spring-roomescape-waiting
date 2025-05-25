@@ -87,8 +87,21 @@ public class ReservationService {
         final Member member = memberService.getMemberById(memberId);
         List<Reservation> myReservations = reservationRepository.findByMemberId(member.getId());
         return myReservations.stream()
-                .map(MyPageReservationResponse::from)
+                .map(reservation -> {
+                            final int priority = calculatePriority(reservation);
+                            return MyPageReservationResponse.from(reservation, priority);
+                        }
+                )
                 .toList();
+    }
+
+    private int calculatePriority(Reservation reservation) {
+        Long reservationItemId = reservation.getReservationItem().getId();
+        Long currentReservationId = reservation.getId();
+
+        return (int) reservationRepository.countByReservationItemIdAndIdLessThan(
+                reservationItemId, currentReservationId
+        );
     }
 
     @Transactional

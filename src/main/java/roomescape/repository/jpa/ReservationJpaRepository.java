@@ -14,6 +14,7 @@ import roomescape.repository.querydsl.ReservationRepositoryCustom;
 
 @Repository
 public interface ReservationJpaRepository extends JpaRepository<Reservation, Long>, ReservationRepositoryCustom {
+
     @Query(value = """
     SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END
     FROM reservation r
@@ -26,6 +27,17 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("date") LocalDate date,
             @Param("timeId") long timeId,
             @Param("themeId") long themeId
+    );
+
+    @Query("""
+        SELECT COUNT(r)
+        FROM Reservation r
+        WHERE r.reservationItem.id = :reservationItemId
+        AND r.id < :currentReservationId
+        """)
+    long countByReservationItemIdAndIdLessThan(
+            @Param("reservationItemId") Long reservationItemId,
+            @Param("currentReservationId") Long currentReservationId
     );
 
     Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem, ReservationStatus reservationStatus);

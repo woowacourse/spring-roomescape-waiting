@@ -3,6 +3,7 @@ package roomescape.domain;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.query.Param;
 
 public interface ReservationRepository {
 
@@ -25,6 +26,11 @@ public interface ReservationRepository {
 
     Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem,
                                                                                      ReservationStatus reservationStatus);
+
+    long countByReservationItemIdAndIdLessThan(
+            @Param("reservationItemId") Long reservationItemId,
+            @Param("currentReservationId") Long currentReservationId
+    );
 
     List<Reservation> findByMemberId(Long memberId);
 }

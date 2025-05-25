@@ -51,6 +51,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
+    public long countByReservationItemIdAndIdLessThan(Long reservationItemId, Long currentReservationId) {
+        return reservationJpaRepository.countByReservationItemIdAndIdLessThan(reservationItemId, currentReservationId);
+    }
+
+    @Override
     public List<Reservation> findByMemberId(Long memberId) {
         return reservationJpaRepository.findByMemberId(memberId);
     }
