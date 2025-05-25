@@ -1,7 +1,6 @@
 package roomescape.persistence;
 
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -10,6 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationTicketJpaRepository;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
@@ -23,53 +25,53 @@ class ThemeJpaRepositoryTest {
 
     @Autowired
     ThemeJpaRepository themeJpaRepository;
-
     @Autowired
-    EntityManager entityManager;
+    private ReservationTimeJpaRepository reservationTimeJpaRepository;
+    @Autowired
+    private MemberJpaRepository memberJpaRepository;
+    @Autowired
+    private ReservationTicketJpaRepository reservationTicketJpaRepository;
 
     @DisplayName("인기 테마를 조회한다")
     @Test
     void test1() {
         //given
         Theme theme = new Theme("테마", "테마 설명", "섬네일");
-        entityManager.persist(theme);
+        themeJpaRepository.save(theme);
 
         Theme theme1 = new Theme("테마1", "테마 설명", "섬네일");
-        entityManager.persist(theme1);
+        themeJpaRepository.save(theme1);
 
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 0));
-        entityManager.persist(reservationTime);
+        reservationTimeJpaRepository.save(reservationTime);
 
         ReservationTime reservationTime1 = new ReservationTime(LocalTime.of(13, 0));
-        entityManager.persist(reservationTime1);
+        reservationTimeJpaRepository.save(reservationTime1);
 
         Member member = new Member("도기", "ff@gmail.com", "password", Role.ADMIN);
-        entityManager.persist(member);
+        memberJpaRepository.save(member);
 
         ReservationTicket reservationTicket = new ReservationTicket(
                 new Reservation(LocalDate.now().minusDays(1), reservationTime, theme, member,
                         LocalDate.now().minusDays(3
                         )));
-        entityManager.persist(reservationTicket);
+        reservationTicketJpaRepository.save(reservationTicket);
 
         ReservationTicket reservationTicket1 = new ReservationTicket(
                 new Reservation(LocalDate.now().minusDays(2), reservationTime, theme, member,
                         LocalDate.now().minusDays(3
                         )));
-        entityManager.persist(reservationTicket1);
+        reservationTicketJpaRepository.save(reservationTicket1);
 
         ReservationTicket reservationTicket2 = new ReservationTicket(
                 new Reservation(LocalDate.now().minusDays(2), reservationTime, theme1, member,
                         LocalDate.now().minusDays(3)));
-        entityManager.persist(reservationTicket2);
+        reservationTicketJpaRepository.save(reservationTicket2);
 
         ReservationTicket reservationTicket3 = new ReservationTicket(
                 new Reservation(LocalDate.now().minusDays(2), reservationTime1, theme, member,
                         LocalDate.now().minusDays(3)));
-        entityManager.persist(reservationTicket3);
-
-        entityManager.flush();
-        entityManager.clear();
+        reservationTicketJpaRepository.save(reservationTicket3);
 
         //when
         List<String> actual = themeJpaRepository.findTopReservedThemesSince(
