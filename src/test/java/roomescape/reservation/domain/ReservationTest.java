@@ -13,29 +13,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReservationTest {
 
-    @DisplayName("Date 이 존재하지 않으면 생성 불가능하다")
+    @DisplayName("ReservationDetails가 존재하지 않으면 생성 불가능하다")
     @Test
-    void invalidReservationDateTest() {
+    void invalidReservationDetailsTest() {
         // given
         Member member = new Member(1L, "가이온", "user@gmail.com", "wooteco7", Role.USER);
-        ReservationTime time = new ReservationTime(1L, LocalTime.now());
-        Theme theme = new Theme(1L, "우테코", "방탈출", "https://");
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(1L, member, null, time, theme))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @DisplayName("ReservationTime이 존재하지 않으면 생성 불가능하다")
-    @Test
-    void invalidReservationTimeTest() {
-        // given
-        Member member = new Member(1L, "가이온", "user@gmail.com", "wooteco7", Role.USER);
-        LocalDate date = LocalDate.now();
-        Theme theme = new Theme(1L, "우테코", "방탈출", "https://");
-
-        // when & then
-        assertThatThrownBy(() -> new Reservation(1L, member, date, null, theme))
+        assertThatThrownBy(() -> new Reservation(1L, member, null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -43,12 +28,11 @@ class ReservationTest {
     @Test
     void invalidReservationNameTest() {
         // given
-        LocalDate date = LocalDate.now();
-        ReservationTime time = new ReservationTime(1L, LocalTime.now());
         Theme theme = new Theme(1L, "우테코", "방탈출", "https://");
+        ReservationDetails details = new ReservationDetails(LocalDate.now(), new ReservationTime(1L, LocalTime.now()), theme);
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(1L, null, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(1L, null, details))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
