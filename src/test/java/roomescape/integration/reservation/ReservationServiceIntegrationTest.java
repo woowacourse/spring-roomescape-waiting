@@ -117,7 +117,7 @@ public class ReservationServiceIntegrationTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining("지나간 날짜와 시간은 예약 불가합니다.");
+                .hasMessageContaining("지나간 날짜와 시간은 예약할 수 없습니다.");
     }
 
     @DisplayName("모든 예약을 조회할 수 있다")
@@ -133,9 +133,10 @@ public class ReservationServiceIntegrationTest {
     @Test
     void cancelReservationById() {
         // when
+        final List<Reservation> cancelBeforeReservations = reservationRepository.findAll();
         reservationService.cancelReservationById(1L);
         // then
-        final List<Reservation> reservations = reservationRepository.findAll();
-        assertThat(reservations).hasSize(12);
+        final List<Reservation> cancelAfterReservations = reservationRepository.findAll();
+        assertThat(cancelAfterReservations).hasSize(cancelBeforeReservations.size() - 1);
     }
 }

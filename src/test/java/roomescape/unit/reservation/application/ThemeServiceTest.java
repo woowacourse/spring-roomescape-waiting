@@ -29,8 +29,8 @@ import roomescape.reservation.domain.theme.ThemeRepository;
 import roomescape.reservation.domain.timeslot.TimeSlot;
 import roomescape.reservation.domain.timeslot.TimeSlotRepository;
 import roomescape.support.fake.FakeReservationRepository;
-import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.fake.FakeThemeRepository;
+import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.util.TestCurrentDateTime;
 
 @ExtendWith(MockitoExtension.class)

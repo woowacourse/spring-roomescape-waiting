@@ -1,6 +1,7 @@
 package roomescape.reservation.application.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -66,11 +67,14 @@ public class ReservationService {
     }
 
     private void validatePastDateTime(final LocalDate date, final TimeSlot timeSlot) {
-        final boolean isBefore = date.isBefore(currentDateTime.getDate()) ||
-                date.isEqual(currentDateTime.getDate()) &&
-                        timeSlot.isBefore(currentDateTime.getTime());
-        if (isBefore) {
-            throw new RoomescapeException("지나간 날짜와 시간은 예약 불가합니다.");
+        final LocalDate currentDate = currentDateTime.getDate();
+        final LocalTime currentTime = currentDateTime.getTime();
+
+        final boolean isPastDate = date.isBefore(currentDate);
+        final boolean isSameDateButPastTime = date.isEqual(currentDate) && timeSlot.isBefore(currentTime);
+
+        if (isPastDate || isSameDateButPastTime) {
+            throw new RoomescapeException("지나간 날짜와 시간은 예약할 수 없습니다.");
         }
     }
 

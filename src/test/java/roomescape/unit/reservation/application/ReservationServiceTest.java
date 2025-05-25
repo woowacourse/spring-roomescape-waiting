@@ -36,11 +36,10 @@ import roomescape.reservation.domain.timeslot.TimeSlot;
 import roomescape.reservation.domain.timeslot.TimeSlotRepository;
 import roomescape.support.fake.FakeMemberRepository;
 import roomescape.support.fake.FakeReservationRepository;
+import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.fake.FakeWaitingRepository;
-import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.util.TestCurrentDateTime;
-
 
 class ReservationServiceTest {
 
@@ -86,7 +85,7 @@ class ReservationServiceTest {
                 .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
 
-    @DisplayName("날짜와 시간이 같아도 테마가 다르면 예외가 발생하지 않는다")
+    @DisplayName("날짜와 시간이 같아도 테마가 다르면 예약을 할 경우 예외가 발생하지 않는다")
     @Test
     void shouldNot_ThrowException_WhenThemeIsDifferent() {
         // given
@@ -131,7 +130,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining("지나간 날짜와 시간은 예약 불가합니다.");
+                .hasMessageContaining("지나간 날짜와 시간은 예약할 수 없습니다.");
     }
 
     @DisplayName("예약을 생성할 수 있다")
