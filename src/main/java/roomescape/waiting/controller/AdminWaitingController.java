@@ -1,9 +1,7 @@
 package roomescape.waiting.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import roomescape.waiting.dto.response.AdminWaitingResponse;
 import roomescape.waiting.service.WaitingServiceFacade;
 
@@ -23,5 +21,11 @@ public class AdminWaitingController {
     public ResponseEntity<List<AdminWaitingResponse>> read() {
         List<AdminWaitingResponse> adminWaitingResponses = waitingService.getAdminWaitingResponses();
         return ResponseEntity.ok(adminWaitingResponses);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> reject(@PathVariable Long id) {
+        waitingService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 }
