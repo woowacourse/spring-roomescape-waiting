@@ -19,7 +19,7 @@ public class AdminViewController {
     @RequiredAdmin
     @GetMapping("/reservation")
     public String adminReservationDashboard() {
-        return "/admin/reservation-new";
+        return "admin/reservation-new";
     }
 
     @RequiredAdmin
