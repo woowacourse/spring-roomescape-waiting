@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.NotFoundException;
 import roomescape.infrastructure.db.ReservationJpaRepository;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
@@ -53,5 +54,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public void deleteById(Long id) {
         reservationJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public Reservation findById(Long id) {
+        return reservationJpaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당 예약 내역을 찾을 수 없습니다."));
     }
 }

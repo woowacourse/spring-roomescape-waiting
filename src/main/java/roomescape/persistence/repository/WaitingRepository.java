@@ -1,6 +1,10 @@
 package roomescape.persistence.repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import roomescape.model.ReservationTime;
+import roomescape.model.Theme;
 import roomescape.model.Waiting;
 
 public interface WaitingRepository {
@@ -18,4 +22,6 @@ public interface WaitingRepository {
     List<Waiting> findAll();
 
     void rejectById(Long id);
+
+    Optional<Waiting> findNextWaiting(LocalDate date, ReservationTime reservationTime, Theme theme);
 }

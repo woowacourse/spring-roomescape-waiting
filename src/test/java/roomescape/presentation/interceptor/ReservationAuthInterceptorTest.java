@@ -52,7 +52,7 @@ class ReservationAuthInterceptorTest {
     void test2() throws Exception {
         // given
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-        servletRequest.setCookies(new Cookie("invalidValue", "temp"));
+        servletRequest.setCookies(new Cookie("invalidValue", "findNextWaiting"));
         NativeWebRequest webRequest = new ServletWebRequest(servletRequest);
 
         MockHttpServletResponse servletResponse = new MockHttpServletResponse();

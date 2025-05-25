@@ -3,6 +3,7 @@ package roomescape.infrastructure.db;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,5 +29,15 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
             @Param("reservationTime") ReservationTime reservationTime
     );
 
+
+    @Query("""
+            SELECT w FROM Waiting w
+                    WHERE  w.pendingReservation.date = :date AND
+                    w.pendingReservation.reservationTime = :reservationTime AND
+                    w.pendingReservation.theme = :theme
+            ORDER BY w.registeredAt ASC
+            LIMIT 1
+            """)
+    Optional<Waiting> findEarliestWaitingBy(LocalDate date, ReservationTime reservationTime, Theme theme);
 }
 

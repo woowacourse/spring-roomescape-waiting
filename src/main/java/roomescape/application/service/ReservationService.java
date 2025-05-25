@@ -2,6 +2,7 @@ package roomescape.application.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
@@ -14,10 +15,12 @@ import roomescape.model.Member;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
+import roomescape.model.Waiting;
 import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.persistence.repository.WaitingRepository;
 import roomescape.persistence.vo.Period;
 
 @Service
@@ -28,6 +31,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
                                                   LoginMember loginMember) {
@@ -60,7 +64,32 @@ public class ReservationService {
     }
 
     public void cancelReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id);
         reservationRepository.deleteById(id);
+
+        promoteNextWaitingToReservation(reservation);
+    }
+
+    private void promoteNextWaitingToReservation(Reservation reservation) {
+        Optional<Waiting> optionalNextWaiting = waitingRepository.findNextWaiting(
+                reservation.getDate(),
+                reservation.getReservationTime(),
+                reservation.getTheme()
+        );
+
+        if (optionalNextWaiting.isEmpty()) {
+            return;
+        }
+
+        Waiting nextWaiting = optionalNextWaiting.get();
+
+        promoteToReservation(nextWaiting);
+        waitingRepository.delete(nextWaiting);
+    }
+
+    private void promoteToReservation(Waiting nextWaiting) {
+        Reservation convertedReservation = convertToReservation(nextWaiting);
+        reservationRepository.save(convertedReservation);
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
@@ -84,5 +113,15 @@ public class ReservationService {
                 reservation.getReservationTime())) {
             throw new DuplicatedException("이미 예약이 존재합니다.");
         }
+    }
+
+    private Reservation convertToReservation(Waiting nextWaiting) {
+        return new Reservation(
+                nextWaiting.getReservationDate(),
+                nextWaiting.getReservationTime(),
+                nextWaiting.getTheme(),
+                nextWaiting.getPendingReservation().getMember(),
+                nextWaiting.getRegisteredAt().toLocalDate()
+        );
     }
 }

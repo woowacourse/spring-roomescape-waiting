@@ -1,10 +1,14 @@
 package roomescape.persistence.repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.common.exception.NotFoundException;
 import roomescape.infrastructure.db.WaitingJpaRepository;
+import roomescape.model.ReservationTime;
+import roomescape.model.Theme;
 import roomescape.model.Waiting;
 
 @Repository
@@ -52,5 +56,10 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     @Override
     public void rejectById(Long id) {
         waitingJpaRepository.deleteById(id);
+    }
+
+    @Override
+    public Optional<Waiting> findNextWaiting(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        return waitingJpaRepository.findEarliestWaitingBy(date, reservationTime, theme);
     }
 }
