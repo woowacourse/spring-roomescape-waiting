@@ -19,7 +19,6 @@ import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.reservation.service.dto.AvailableTimeInfo;
 import roomescape.reservation.service.dto.ReservationTimeCreateCommand;
@@ -27,7 +26,6 @@ import roomescape.reservation.service.dto.ReservationTimeInfo;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@Import(value = ReservationRepositoryImpl.class)
 @Sql(value = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class TimeServiceSliceTest {
 

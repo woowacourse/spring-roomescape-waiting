@@ -25,7 +25,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
-import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
@@ -33,7 +32,6 @@ import roomescape.reservation.service.dto.ReservationSearchCondition;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@Import(ReservationRepositoryImpl.class)
 @Sql(value = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ReservationServiceSliceTest {
 
