@@ -22,10 +22,10 @@ import roomescape.service.ReservationService;
 @RequestMapping("/waiting")
 public class WaitingController {
 
-    private final ReservationService waitingService;
+    private final ReservationService reservationService;
 
-    public WaitingController(ReservationService waitingService) {
-        this.waitingService = waitingService;
+    public WaitingController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @PostMapping
@@ -34,7 +34,7 @@ public class WaitingController {
             @RequestBody @Valid CreateWaitingRequest request,
             LoginMemberRequest loginMemberRequest
     ) {
-        WaitingReservation waitingReservation = waitingService.addWaiting(request, loginMemberRequest);
+        WaitingReservation waitingReservation = reservationService.addWaiting(request, loginMemberRequest);
         WaitingResponse response = WaitingResponse.from(waitingReservation);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -48,7 +48,7 @@ public class WaitingController {
     @DeleteMapping("/{id}")
     @CheckRole(value = {Role.ADMIN, Role.USER})
     public ResponseEntity<Void> deleteWaiting(@PathVariable("id") Long id) {
-        waitingService.deleteWaiting(id);
+        reservationService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
 
     }
