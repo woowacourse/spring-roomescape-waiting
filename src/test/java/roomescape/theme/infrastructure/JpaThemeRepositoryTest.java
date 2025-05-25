@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
@@ -49,9 +51,9 @@ class JpaThemeRepositoryTest {
 
         LocalDate start = LocalDate.now().minusDays(4);
         LocalDate end = LocalDate.now();
-        int limit = 1;
+        Pageable pageable = PageRequest.of(0, 1);
 
-        List<Theme> popularThemes = jpaThemeRepository.findPopularThemes(start, end, limit);
+        List<Theme> popularThemes = jpaThemeRepository.findPopularThemes(start, end, pageable);
 
         System.out.println(theme.getId());
         Assertions.assertThat(popularThemes).containsExactly(theme);

@@ -3,6 +3,8 @@ package roomescape.theme.infrastructure;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
@@ -38,7 +40,8 @@ public class JpaThemeRepositoryAdaptor implements ThemeRepository {
 
     @Override
     public List<Theme> findPopularThemes(LocalDate start, LocalDate end, int limit) {
-        return jpaThemeRepository.findPopularThemes(start, end, limit);
+        Pageable pageable = PageRequest.of(0, limit);
+        return jpaThemeRepository.findPopularThemes(start, end, pageable);
     }
 
     @Override
