@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -16,6 +19,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.member
             """)
     List<Reservation> findAllWithAssociations();
+
+    @Query("""
+            SELECT r FROM Reservation r
+            JOIN FETCH r.time
+            JOIN FETCH r.theme
+            JOIN FETCH r.member
+            WHERE r.member.id = :memberId
+            """)
+    List<Reservation> findByMemberIdWithAssociations(@Param("memberId") Long memberId);
 
     @Query("""
             SELECT r FROM Reservation r
@@ -44,15 +56,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("to") LocalDate to
     );
 
-    @Query("""
-            SELECT r FROM Reservation r
-            JOIN FETCH r.theme
-            JOIN FETCH r.time
-            WHERE r.member.id = :memberId
-            """)
-    List<Reservation> findByMemberIdWithAssociations(@Param("memberId") Long memberId);
-
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
+
+    boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
+
+    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 }

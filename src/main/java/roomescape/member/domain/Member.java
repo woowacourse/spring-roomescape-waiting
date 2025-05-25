@@ -7,9 +7,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(of = "id")
 public class Member {
 
     @Id
@@ -28,10 +34,6 @@ public class Member {
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    protected Member() {
-
-    }
-
     public Member(final Long id, final MemberName name, final Email email, final Password password, final Role role) {
         this.id = id;
         this.name = name;
@@ -44,41 +46,7 @@ public class Member {
         return new Member(null, new MemberName(name), new Email(email), new Password(password), Role.MEMBER);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public MemberName getName() {
-        return name;
-    }
-
     public String getNameValue() {
         return name.getValue();
-    }
-
-    public Email getEmail() {
-        return email;
-    }
-
-    public Password getPassword() {
-        return password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final Member member = (Member) o;
-        return Objects.equals(id, member.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }

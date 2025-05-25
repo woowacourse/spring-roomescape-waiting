@@ -70,17 +70,47 @@ class AdminReservationApiTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(6));
+                .body("size()", is(8));
     }
 
     @Test
     void 존재하지_않는_예약을_삭제할_경우_NOT_FOUND_반환() {
         RestAssured.given().log().all()
                 .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
-                .when().delete("/admin/reservations/7")
+                .when().delete("/admin/reservations/20")
                 .then().log().all()
                 .statusCode(404);
     }
 
+    @Test
+    void 예약을_성공적으로_삭제한다() {
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+    }
 
+    @Test
+    void 인증되지_않은_사용자가_관리자_예약_페이지_접근시_401_반환() {
+        RestAssured.given().log().all()
+                .when().get("/admin/reservations")
+                .then().log().all()
+                .statusCode(401);
+    }
+
+    @Test
+    void PENDING_예약을_ACCEPTED로_변경한다() {
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().delete("/admin/reservations/7")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .cookie(TokenCookieService.COOKIE_TOKEN_KEY, token)
+                .when().put("/admin/waitings/accept/1")
+                .then().log().all()
+                .statusCode(200);
+    }
 }

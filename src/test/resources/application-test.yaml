@@ -10,7 +10,7 @@ spring:
       data-locations: classpath:test.sql
 
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: create-drop
     properties:

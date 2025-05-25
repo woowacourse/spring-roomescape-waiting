@@ -1,26 +1,29 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberName;
 import roomescape.theme.domain.Theme;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(of = "id")
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +40,11 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public Reservation(
+    @Enumerated(EnumType.STRING)
+    private WaitingStatus waitingStatus;
+    private LocalDateTime createdAt;
+
+    public Waiting(
             final Long id,
             final LocalDate date,
             final ReservationTime time,
@@ -49,9 +56,10 @@ public class Reservation {
         this.time = time;
         this.theme = theme;
         this.member = member;
+        this.waitingStatus = WaitingStatus.PENDING;
     }
 
-    public Reservation(
+    public Waiting(
             final LocalDate date,
             final ReservationTime time,
             final Theme theme,
@@ -60,14 +68,25 @@ public class Reservation {
         this(null, date, time, theme, member);
     }
 
-    public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
-        final LocalTime startAt = time.getStartAt();
-        return this.theme.equals(theme) &&
-                reservationTime.hasConflict(theme.getDuration(), startAt);
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
-    public MemberName getName() {
-        return member.getName();
+    public void cancel() {
+        this.waitingStatus = WaitingStatus.CANCELLED;
+    }
+
+    public void reject() {
+        this.waitingStatus = WaitingStatus.REJECTED;
+    }
+
+    public void accept() {
+        this.waitingStatus = WaitingStatus.ACCEPTED;
+    }
+
+    public boolean isOwner(final Long memberId) {
+        return member.getId().equals(memberId);
     }
 
     public String getThemeName() {

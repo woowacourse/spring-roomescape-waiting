@@ -1,4 +1,4 @@
-package roomescape.common.ui;
+package roomescape.view.ui;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,5 +26,10 @@ public class AdminPageController {
     @GetMapping("/theme")
     public String adminThemeDashboard() {
         return "admin/theme";
+    }
+
+    @GetMapping("/waiting")
+    public String adminReservationWaitingDashboard() {
+        return "admin/waiting";
     }
 }
