@@ -2,6 +2,7 @@ package roomescape.reservation.domain;
 
 import java.util.Comparator;
 import java.util.List;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.reservation.domain.exception.NotSameSlotException;
 
 public class ReservationSlot {
@@ -41,6 +42,9 @@ public class ReservationSlot {
     }
 
     public Reservation getNext(Reservation reservation) {
+        if (!hasWaiting()) {
+            throw new InvalidArgumentException("대기 중인 예약이 없습니다.");
+        }
         int order = getOrder(reservation);
         return reservations.get(order + 1);
     }

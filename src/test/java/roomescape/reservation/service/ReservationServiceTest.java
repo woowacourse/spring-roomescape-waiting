@@ -22,11 +22,13 @@ import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
+import roomescape.reservation.controller.response.WaitingReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
+import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
@@ -68,14 +70,13 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 reserver.getId()
         );
-
-        // when
         ReservationResponse response = reservationService.reserve(command);
 
         assertThat(response.id()).isNotNull();
         assertThat(response.member().name()).isEqualTo(reserver.getName());
         assertThat(response.date()).isEqualTo(date);
         assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(reservationTime));
+        assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
     }
 
     @Test
@@ -94,13 +95,13 @@ class ReservationServiceTest {
                 reservation.getReservationTime().getId(),
                 reservation.getReserver().getId()
         );
-
         ReservationResponse response = reservationService.reserve(command);
 
         assertThat(response.id()).isNotNull();
         assertThat(response.member().name()).isEqualTo(reserver.getName());
         assertThat(response.date()).isEqualTo(reservationDateTime.reservationDate().date());
         assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(reservationDateTime.reservationTime()));
+        assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
     }
 
     @Test
@@ -222,7 +223,61 @@ class ReservationServiceTest {
             softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
             softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
             softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());
-            softly.assertThat(myReservations.get(0).status()).isEqualTo(reservation1.getStatus().getMessage());
+            softly.assertThat(myReservations.get(0).status()).isEqualTo("예약");
         });
+    }
+
+    @Test
+    void 대기중인_예약을_조회한다() {
+        Member reserver = memberDbFixture.유저1_생성();
+        Member reserver2 = memberDbFixture.유저2_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+        reservationRepository.save(
+                Reservation.reserve(
+                        reserver,
+                        reservationDateTime,
+                        theme,
+                        LocalDateTime.now()
+                )
+        );
+        reservationRepository.save(
+                Reservation.wait(
+                        reserver2,
+                        reservationDateTime,
+                        theme,
+                        LocalDateTime.now()
+                )
+        );
+
+        List<WaitingReservationResponse> responses = reservationService.getWaitingReservations();
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(responses).hasSize(1);
+            softly.assertThat(responses.get(0).waitingId()).isNotNull();
+            softly.assertThat(responses.get(0).reserverName()).isEqualTo(reserver2.getName());
+            softly.assertThat(responses.get(0).themeName()).isEqualTo(theme.getName());
+            softly.assertThat(responses.get(0).date()).isEqualTo(reservationDateTime.reservationDate().date());
+            softly.assertThat(responses.get(0).time()).isEqualTo(reservationDateTime.reservationTime().getStartAt());
+        });
+    }
+
+    @Test
+    void 사용자가_예약을_취소하면_다음으로_대기중인_예약이_예약된다() {
+        Member reserver = memberDbFixture.유저1_생성();
+        Member reserver2 = memberDbFixture.유저2_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+        Reservation reservation = reservationRepository.save(
+                Reservation.reserve(reserver, reservationDateTime, theme, LocalDateTime.now())
+        );
+        Reservation waiting = reservationRepository.save(
+                Reservation.wait(reserver2, reservationDateTime, theme, LocalDateTime.now().plusMinutes(10))
+        );
+
+        reservationService.cancel(reservation.getId());
+
+        Reservation updated = reservationRepository.findById(waiting.getId()).orElseThrow();
+        assertThat(updated.isReserved()).isTrue();
     }
 }

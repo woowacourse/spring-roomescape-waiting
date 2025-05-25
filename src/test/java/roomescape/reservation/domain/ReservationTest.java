@@ -49,10 +49,7 @@ class ReservationTest {
         LocalDateTime reservedAt = LocalDateTime.now();
 
         Reservation reservation = Reservation.reserve(
-                createMember(),
-                createReservationDateTime(),
-                createTheme(),
-                LocalDateTime.now()
+                reserver, reservationDateTime, theme, reservedAt
         );
 
         assertSoftly(softly -> {

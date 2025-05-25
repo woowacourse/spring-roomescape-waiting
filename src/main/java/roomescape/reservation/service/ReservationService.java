@@ -77,7 +77,7 @@ public class ReservationService {
                 )
         );
 
-        if (reservationSlot.isFirst(reservation) && reservationSlot.hasWaiting()) {
+        if (reservation.isReserved() && reservationSlot.hasWaiting()) {
             reservationSlot.getNext(reservation).reserve();
         }
         reservationRepository.deleteById(id);
