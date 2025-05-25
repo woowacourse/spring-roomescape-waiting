@@ -17,14 +17,18 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.JpaConfig;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationItem;
+import roomescape.domain.ReservationItemRepository;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationThemeRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
+import roomescape.repository.impl.ReservationItemRepositoryImpl;
 import roomescape.repository.impl.ReservationRepositoryImpl;
 import roomescape.repository.impl.ReservationThemeRepositoryImpl;
 import roomescape.repository.impl.ReservationTimeRepositoryImpl;
+import roomescape.repository.jpa.ReservationItemJpaRepository;
 import roomescape.repository.jpa.ReservationJpaRepository;
 import roomescape.repository.jpa.ReservationThemeJpaRepository;
 import roomescape.repository.jpa.ReservationTimeJpaRepository;
@@ -45,6 +49,8 @@ class ReservationThemeRepositoryImplTest {
     private ReservationJpaRepository reservationJpaRepository;
     @Autowired
     private ReservationTimeJpaRepository reservationTimeJpaRepository;
+    @Autowired
+    private ReservationItemJpaRepository reservationItemJpaRepository;
 
     private ReservationTheme savedTheme1;
     private ReservationTheme savedTheme2;
@@ -104,8 +110,8 @@ class ReservationThemeRepositoryImplTest {
         // when
         final List<ReservationTheme> weeklyThemeOrderByCountDesc = repository.findWeeklyThemeOrderByCountDesc(
                 2,
-                LocalDate.now(),
-                LocalDate.now().plusDays(1)
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(2)
         );
 
         // then
@@ -166,20 +172,30 @@ class ReservationThemeRepositoryImplTest {
     private void saveDummyReservation() {
         ReservationTimeRepository reservationTimeRepository = new ReservationTimeRepositoryImpl(reservationTimeJpaRepository);
         ReservationRepository reservationRepository = new ReservationRepositoryImpl(reservationJpaRepository);
+        ReservationItemRepository reservationItemRepository = new ReservationItemRepositoryImpl(reservationItemJpaRepository);
 
         final ReservationTime reservationTime1 = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(1)));
         final ReservationTime reservationTime2 = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(2)));
         final ReservationTime reservationTime3 = reservationTimeRepository.save(new ReservationTime(LocalTime.now().plusHours(3)));
 
-        reservationRepository.save(new Reservation(null, LocalDate.now(), reservationTime1, savedTheme1));
-        reservationRepository.save(new Reservation(null, LocalDate.now(), reservationTime2, savedTheme1));
-        reservationRepository.save(new Reservation(null, LocalDate.now(), reservationTime3, savedTheme1));
+        final ReservationItem reservationItem1 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(1), reservationTime1, savedTheme1));
+        final ReservationItem reservationItem2 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(1), reservationTime2, savedTheme1));
+        final ReservationItem reservationItem3 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(1), reservationTime3, savedTheme1));
+        final ReservationItem reservationItem4 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(2), reservationTime1, savedTheme2));
+        final ReservationItem reservationItem5 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(2), reservationTime2, savedTheme2));
+        final ReservationItem reservationItem6 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(3), reservationTime1, savedTheme3));
+        final ReservationItem reservationItem7 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(3), reservationTime2, savedTheme3));
+        final ReservationItem reservationItem8 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(3), reservationTime3, savedTheme3));
 
-        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), reservationTime1, savedTheme2));
-        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), reservationTime2, savedTheme2));
+        reservationRepository.save(new Reservation(null, reservationItem1));
+        reservationRepository.save(new Reservation(null, reservationItem2));
+        reservationRepository.save(new Reservation(null, reservationItem3));
 
-        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(2), reservationTime1, savedTheme3));
-        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(2), reservationTime2, savedTheme3));
-        reservationRepository.save(new Reservation(null, LocalDate.now().plusDays(2), reservationTime3, savedTheme3));
+        reservationRepository.save(new Reservation(null, reservationItem4));
+        reservationRepository.save(new Reservation(null, reservationItem5));
+
+        reservationRepository.save(new Reservation(null, reservationItem6));
+        reservationRepository.save(new Reservation(null, reservationItem7));
+        reservationRepository.save(new Reservation(null, reservationItem8));
     }
 }

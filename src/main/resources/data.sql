@@ -22,9 +22,16 @@ VALUES ('admin@email.com', 'MTIzNA==', '어드민', 'ADMIN', NULL),
        ('phk1148@naver.com', 'MTIzNA==', '호떡', 'USER', NULL),
        ('phk1158@naver.com', 'MTIzNA==', '한스', 'USER', NULL);
 
-INSERT INTO reservation (member_id, date, time_id, theme_id)
-VALUES (2, '2025-05-07', 1, 8),
-        (3, '2025-05-06', 3, 6),
-        (4, '2025-05-05', 1, 7),
-        (1, '2025-05-01', 2, 7)
+INSERT INTO reservation_item (date, time_id, theme_id)
+VALUES ('2025-05-07', 1, 8),
+       ('2025-05-06', 3, 6),
+       ('2025-05-05', 1, 7),
+       ('2025-05-01', 2, 7)
+;
+
+INSERT INTO reservation (member_id, reservation_item_id)
+VALUES (2, 1),
+        (3, 2),
+        (4, 3),
+        (1, 4)
 ;

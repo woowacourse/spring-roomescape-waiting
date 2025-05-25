@@ -26,7 +26,7 @@ import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",
         "spring.jpa.hibernate.ddl-auto=create-drop"

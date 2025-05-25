@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.QMember;
 import roomescape.domain.QReservation;
+import roomescape.domain.QReservationItem;
 import roomescape.domain.QReservationTheme;
 import roomescape.domain.QReservationTime;
 import roomescape.domain.Reservation;
@@ -23,14 +24,16 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
                                                                           LocalDate dateFrom, LocalDate dateTo) {
         QReservation reservation = QReservation.reservation;
         QMember member = QMember.member;
+        QReservationItem reservationItem = QReservationItem.reservationItem;
         QReservationTime time = QReservationTime.reservationTime;
         QReservationTheme theme = QReservationTheme.reservationTheme;
 
         return queryFactory
                 .selectFrom(reservation)
                 .innerJoin(reservation.member, member).fetchJoin()
-                .innerJoin(reservation.time, time).fetchJoin()
-                .innerJoin(reservation.theme, theme).fetchJoin()
+                .innerJoin(reservation.reservationItem, reservationItem).fetchJoin()
+                .innerJoin(reservation.reservationItem.time, time).fetchJoin()
+                .innerJoin(reservation.reservationItem.theme, theme).fetchJoin()
                 .where(
                         memberIdEq(memberId),
                         themeIdEq(themeId),
@@ -44,14 +47,14 @@ public class ReservationRepositoryCustomImpl implements ReservationRepositoryCus
     }
 
     private BooleanExpression themeIdEq(Long themeId) {
-        return themeId != null ? QReservation.reservation.theme.id.eq(themeId) : null;
+        return themeId != null ? QReservation.reservation.reservationItem.theme.id.eq(themeId) : null;
     }
 
     private BooleanExpression dateFromGoe(LocalDate dateFrom) {
-        return dateFrom != null ? QReservation.reservation.date.goe(dateFrom) : null;
+        return dateFrom != null ? QReservation.reservation.reservationItem.date.goe(dateFrom) : null;
     }
 
     private BooleanExpression dateToLoe(LocalDate dateTo) {
-        return dateTo != null ? QReservation.reservation.date.loe(dateTo) : null;
+        return dateTo != null ? QReservation.reservation.reservationItem.date.loe(dateTo) : null;
     }
 }

@@ -18,16 +18,20 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationItem;
+import roomescape.domain.ReservationItemRepository;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationThemeRepository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationTimeRepository;
 import roomescape.repository.impl.MemberRepositoryImpl;
+import roomescape.repository.impl.ReservationItemRepositoryImpl;
 import roomescape.repository.impl.ReservationRepositoryImpl;
 import roomescape.repository.impl.ReservationThemeRepositoryImpl;
 import roomescape.repository.impl.ReservationTimeRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
+import roomescape.repository.jpa.ReservationItemJpaRepository;
 import roomescape.repository.jpa.ReservationJpaRepository;
 import roomescape.repository.jpa.ReservationThemeJpaRepository;
 import roomescape.repository.jpa.ReservationTimeJpaRepository;
@@ -45,6 +49,7 @@ public class ReservationRepositoryTest {
     private MemberRepository memberRepository;
     private ReservationThemeRepository reservationThemeRepository;
     private ReservationTimeRepository reservationTimeRepository;
+    private ReservationItemRepository reservationItemRepository;
 
     @Autowired
     private ReservationJpaRepository reservationJpaRepository;
@@ -54,10 +59,13 @@ public class ReservationRepositoryTest {
     private ReservationThemeJpaRepository reservationThemeJpaRepository;
     @Autowired
     private ReservationTimeJpaRepository reservationTimeJpaRepository;
+    @Autowired
+    private ReservationItemJpaRepository reservationItemJpaRepository;
 
     private Member member;
     private ReservationTime time;
     private ReservationTheme theme;
+    private ReservationItem reservationItem;
     private Reservation reservation;
 
     @BeforeEach
@@ -66,6 +74,7 @@ public class ReservationRepositoryTest {
         memberRepository = new MemberRepositoryImpl(memberJpaRepository);
         reservationThemeRepository = new ReservationThemeRepositoryImpl(reservationThemeJpaRepository);
         reservationTimeRepository = new ReservationTimeRepositoryImpl(reservationTimeJpaRepository);
+        reservationItemRepository = new ReservationItemRepositoryImpl(reservationItemJpaRepository);
 
         member = memberRepository.save(
                 new Member("test@example.com", "testPassword", "test", MemberRole.USER)
@@ -76,8 +85,9 @@ public class ReservationRepositoryTest {
         theme = reservationThemeRepository.save(
                 new ReservationTheme("Theme", "Description", "Thumbnail")
         );
+        reservationItem = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(1), time, theme));
         reservation = reservationRepository.save(
-                new Reservation(member, LocalDate.now().plusDays(1), time, theme)
+                new Reservation(member, reservationItem)
         );
     }
 
@@ -91,13 +101,13 @@ public class ReservationRepositoryTest {
 
         // when
         final boolean exist = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getDate(), time.getId(), theme.getId()
+                reservation.getReservationItem().getDate(), time.getId(), theme.getId()
         );
         final boolean nonExist1 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getDate(), nonExistTimeId, theme.getId()
+                reservation.getReservationItem().getDate(), nonExistTimeId, theme.getId()
         );
         final boolean nonExist2 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getDate(), time.getId(), nonExistThemeId
+                reservation.getReservationItem().getDate(), time.getId(), nonExistThemeId
         );
         final boolean nonExist3 = reservationRepository.existByDateAndTimeIdAndThemeId(
                 nonExistDate, time.getId(), theme.getId()
@@ -124,8 +134,8 @@ public class ReservationRepositoryTest {
         // then
         assertAll(
                 () -> assertThat(reservations).hasSize(1),
-                () -> assertThat(reservations.getFirst().getTime().getId()).isEqualTo(time.getId()),
-                () -> assertThat(reservations.getFirst().getTheme().getId()).isEqualTo(theme.getId())
+                () -> assertThat(reservations.getFirst().getReservationItem().getTime().getId()).isEqualTo(time.getId()),
+                () -> assertThat(reservations.getFirst().getReservationItem().getTheme().getId()).isEqualTo(theme.getId())
         );
     }
 }

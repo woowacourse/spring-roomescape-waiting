@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationItem;
+import roomescape.domain.ReservationItemRepository;
 import roomescape.domain.ReservationRepository;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
@@ -19,6 +21,7 @@ import roomescape.dto.response.ReservationResponse;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationItemRepository reservationItemRepository;
     private final MemberService memberService;
     private final ReservationThemeService reservationThemeService;
     private final ReservationTimeService reservationTimeService;
@@ -33,11 +36,16 @@ public class ReservationService {
         final ReservationTheme theme = reservationThemeService.getThemeById(themeId);
 
         validateDuplicateReservation(date, timeId, themeId);
-        final Reservation reservation = Reservation.builder()
-                .member(member)
+        final ReservationItem reservationItem = reservationItemRepository.save(
+                ReservationItem.builder()
                 .date(date)
                 .time(time)
                 .theme(theme)
+                .build()
+        );
+        final Reservation reservation = Reservation.builder()
+                .member(member)
+                .reservationItem(reservationItem)
                 .build();
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);

@@ -13,16 +13,17 @@ public interface ReservationThemeJpaRepository extends JpaRepository<Reservation
     boolean existsByName(final String name);
 
     @Query(value = """
-            SELECT id, name, description, thumbnail
-                        FROM (
-                            SELECT t.id, t.name, t.description, t.thumbnail,
-                                   RANK() OVER (ORDER BY COUNT(r.THEME_ID) DESC, r.THEME_ID ASC) as theme_rank
-                            FROM RESERVATION_THEME t
-                            LEFT JOIN RESERVATION r ON t.ID = r.THEME_ID
-                            WHERE r.date BETWEEN :startAt AND :endAt
-                            GROUP BY t.id, t.name, t.description, t.thumbnail
-                        ) ranked
-                        WHERE theme_rank <= :rank
-            """, nativeQuery = true)
+        SELECT id, name, description, thumbnail
+        FROM (
+            SELECT t.id, t.name, t.description, t.thumbnail,
+                   RANK() OVER (ORDER BY COUNT(r.id) DESC, t.id ASC) as theme_rank
+            FROM reservation_theme t
+            LEFT JOIN reservation_item ri ON t.id = ri.theme_id
+            LEFT JOIN reservation r ON ri.id = r.reservation_item_id
+            WHERE ri.date BETWEEN :startAt AND :endAt
+            GROUP BY t.id, t.name, t.description, t.thumbnail
+        ) ranked
+        WHERE theme_rank <= :rank
+        """, nativeQuery = true)
     List<ReservationTheme> findPopularThemesByRankAndDuration(int rank, LocalDate startAt, LocalDate endAt);
 }
