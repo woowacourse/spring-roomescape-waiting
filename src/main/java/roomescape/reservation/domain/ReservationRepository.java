@@ -1,9 +1,8 @@
 package roomescape.reservation.domain;
 
+import roomescape.reservation.application.dto.ReservationIdWithSequenceResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.timeslot.domain.TimeSlotId;
-import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
 import java.time.LocalDateTime;
@@ -15,6 +14,10 @@ public interface ReservationRepository {
 
     boolean existsByParams(ReservationId id);
 
+    boolean existsBySlot(ReservationSlot slot);
+
+    boolean existsBySlotAndUserId(ReservationSlot slot, UserId userId);
+
     Optional<Reservation> findById(ReservationId id);
 
     List<Reservation> findAll();
@@ -25,7 +28,11 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByParams(UserId userId, ThemeId themeId, ReservationDate reservationDate, ReservationDate reservationDate1);
 
+    List<Reservation> findAllBySlot(ReservationSlot slot);
+
     List<Reservation> findAllBySlotAndCreatedAt(ReservationSlot slot, LocalDateTime createdAt);
+
+    List<ReservationIdWithSequenceResponse> findAllReservationSequencesByIds(final List<ReservationId> ids);
 
     Reservation save(Reservation reservation);
 

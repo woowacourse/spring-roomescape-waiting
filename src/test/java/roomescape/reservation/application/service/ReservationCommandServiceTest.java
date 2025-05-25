@@ -1,5 +1,6 @@
 package roomescape.reservation.application.service;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
-import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
-import roomescape.reservation.application.dto.CreateReservationRequest;
+import roomescape.reservation.domain.BookedStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
@@ -22,9 +22,9 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.TimeSlotRepository;
-import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -65,10 +65,6 @@ class ReservationCommandServiceTest {
     @DisplayName("예약을 생성할 수 있다")
     void createAndFindReservation() {
         // given
-        final TimeSlot timeSlot = timeSlotRepository.save(
-                TimeSlot.withoutId(
-                        ReservationTime.from(LocalTime.of(10, 0))));
-
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
                         ThemeName.from("공포"),
@@ -82,14 +78,14 @@ class ReservationCommandServiceTest {
                         Password.fromEncoded("1234"),
                         UserRole.NORMAL));
 
-        final CreateReservationRequest requestDto = new CreateReservationRequest(
-                user.getId(),
-                ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                timeSlot.getId(),
-                theme.getId());
-
         // when
-        final Reservation reservation = reservationCommandService.create(requestDto);
+        final Reservation reservation = reservationCommandService.create(
+                Reservation.withoutId(
+                        user.getId(),
+                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
+                        ReservationTime.from(LocalTime.of(10, 0)),
+                        theme
+                ));
 
         // then
         final Reservation found = reservationRepository.findById(reservation.getId())
@@ -104,13 +100,9 @@ class ReservationCommandServiceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약을 생성할 수 없다.")
+    @DisplayName("슬롯의 첫 번쨰 예약은 곧바로 승인된다.")
     void existsReservation() {
         // given
-        final TimeSlot timeSlot = timeSlotRepository.save(
-                TimeSlot.withoutId(
-                        ReservationTime.from(LocalTime.of(10, 0))));
-
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
                         ThemeName.from("공포"),
@@ -124,29 +116,37 @@ class ReservationCommandServiceTest {
                         Password.fromEncoded("1234"),
                         UserRole.NORMAL));
 
-        reservationCommandService.create(
-                new CreateReservationRequest(
-                        user.getId(),
-                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        timeSlot.getId(),
-                        theme.getId()
-                ));
+        final User somebody = userRepository.save(
+                User.withoutId(
+                        UserName.from("다른사람"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("1234"),
+                        UserRole.NORMAL));
+
+        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+
+        final Reservation reservation1 = Reservation.withoutId(
+                user.getId(),
+                date,
+                time,
+                theme
+        );
+
+        final Reservation reservation2 = Reservation.withoutId(
+                somebody.getId(),
+                date,
+                time,
+                theme
+        );
+
+        reservationCommandService.create(reservation1);
+        reservationCommandService.create(reservation2);
 
         // when
         // then
-        assertThatThrownBy(() -> reservationCommandService.create(
-                new CreateReservationRequest(
-                        user.getId(),
-                        ReservationDate.from(LocalDate.of(2025, 8, 5)),
-                        timeSlot.getId(),
-                        theme.getId())))
-                .isInstanceOf(DuplicateException.class)
-                .hasMessageContainingAll(
-                        "RESERVATION already exists.",
-                        "ReservationDate",
-                        "ReservationTime",
-                        "ThemeId"
-                );
+        assertThat(reservation1.getStatus() == BookedStatus.APPROVED).isTrue();
+        assertThat(reservation2.getStatus() == BookedStatus.WAITING).isTrue();
     }
 
     @Test
@@ -210,20 +210,20 @@ class ReservationCommandServiceTest {
                         ThemeDescription.from("지구별 방탈출 최고"),
                         ThemeThumbnail.from("www.making.com")));
 
-        final CreateReservationRequest pastDateReservationRequest =
-                new CreateReservationRequest(
+        final Reservation pastDateReservationRequest =
+                Reservation.withoutId(
                         user.getId(),
                         ReservationDate.from(now.toLocalDate().minusDays(1)),
-                        validTimeSlot.getId(),
-                        theme.getId()
+                        validTimeSlot.getStartAt(),
+                        theme
                 );
 
-        final CreateReservationRequest pastTimeReservationRequest =
-                new CreateReservationRequest(
+        final Reservation pastTimeReservationRequest =
+                Reservation.withoutId(
                         user.getId(),
                         ReservationDate.from(now.toLocalDate()),
-                        pastTimeSlot.getId(),
-                        theme.getId()
+                        pastTimeSlot.getStartAt(),
+                        theme
                 );
 
         // when

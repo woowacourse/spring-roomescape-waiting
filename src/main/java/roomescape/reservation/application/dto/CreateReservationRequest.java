@@ -8,7 +8,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeId;
-import roomescape.timeslot.domain.ReservationTime;
 import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.TimeSlotId;
 import roomescape.user.domain.UserId;

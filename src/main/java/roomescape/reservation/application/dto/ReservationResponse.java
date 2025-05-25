@@ -22,11 +22,11 @@ public record ReservationResponse(Long reservationId,
                                   UserResponse user,
                                   LocalDate date,
                                   LocalTime time,
-                                  int sequence,
+                                  String status,
                                   ThemeResponse theme) {
 
     public ReservationResponse {
-        validate(reservationId, user, date, time, theme);
+        validate(reservationId, user, date, time, status, theme);
     }
 
     public static ReservationResponse from(final Reservation domain, final User user) {
@@ -35,7 +35,7 @@ public record ReservationResponse(Long reservationId,
                 UserResponse.from(user),
                 domain.getDate().getValue(),
                 domain.getTime().getValue(),
-                domain.getStatus().getSequence(),
+                domain.getStatus().getDescription(),
                 ThemeResponse.from(domain.getTheme()));
     }
 
@@ -62,6 +62,7 @@ public record ReservationResponse(Long reservationId,
                           final UserResponse user,
                           final LocalDate date,
                           final LocalTime time,
+                          final String status,
                           final ThemeResponse theme
     ) {
         Validator.of(ReservationResponse.class)
@@ -69,6 +70,7 @@ public record ReservationResponse(Long reservationId,
                 .validateNotNull(Fields.user, user, DomainTerm.USER.label())
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
                 .validateNotNull(Fields.time, time, DomainTerm.RESERVATION_TIME.label())
+                .validateNotNull(Fields.status, status, DomainTerm.BOOKED_STATUS.label())
                 .validateNotNull(Fields.theme, theme, DomainTerm.THEME_ID.label());
     }
 }

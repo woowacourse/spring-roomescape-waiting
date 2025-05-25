@@ -1,7 +1,10 @@
 package roomescape.reservation.infrastructure;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.application.dto.ReservationIdWithSequenceResponse;
+import roomescape.reservation.domain.QReservation;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
@@ -22,10 +25,40 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     private final JdbcTemplateReservationRepository jdbcTemplateReservationRepository;
     private final JpaReservationRepository jpaReservationRepository;
+    private final JPAQueryFactory queryFactory;
+
+    private final QReservation reservation = QReservation.reservation;
 
     @Override
     public boolean existsByParams(final ReservationId id) {
         return jpaReservationRepository.existsById(id.getValue());
+    }
+
+    @Override
+    public boolean existsBySlot(final ReservationSlot slot) {
+        return queryFactory
+                       .selectOne()
+                       .from(reservation)
+                       .where(
+                               reservation.date.eq(slot.getDate()),
+                               reservation.time.eq(slot.getTime()),
+                               reservation.theme.eq(slot.getTheme())
+                       )
+                       .fetchFirst() != null;
+    }
+
+    @Override
+    public boolean existsBySlotAndUserId(final ReservationSlot slot, final UserId userId) {
+        return queryFactory
+                       .selectOne()
+                       .from(reservation)
+                       .where(
+                               reservation.date.eq(slot.getDate()),
+                               reservation.time.eq(slot.getTime()),
+                               reservation.theme.eq(slot.getTheme()),
+                               reservation.userId.eq(userId)
+                       )
+                       .fetchFirst() != null;
     }
 
     @Override
@@ -54,8 +87,38 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findAllBySlot(final ReservationSlot slot) {
+        return queryFactory
+                .selectFrom(reservation)
+                .where(
+                        reservation.date.eq(slot.getDate()),
+                        reservation.time.eq(slot.getTime()),
+                        reservation.theme.eq(slot.getTheme())
+                )
+                .fetch();
+    }
+
+    @Override
     public List<Reservation> findAllBySlotAndCreatedAt(final ReservationSlot slot, final LocalDateTime createdAt) {
-        return jpaReservationRepository.findAllBySlotAndCreatedAtJpql(slot, createdAt);
+        return queryFactory
+                .selectFrom(reservation)
+                .where(
+                        reservation.date.eq(slot.getDate()),
+                        reservation.time.eq(slot.getTime()),
+                        reservation.theme.eq(slot.getTheme()),
+                        reservation.createdAt.lt(createdAt)
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<ReservationIdWithSequenceResponse> findAllReservationSequencesByIds(final List<ReservationId> ids) {
+        return jpaReservationRepository.findSequenceOfSlotByIds(
+                        ids.stream().map(ReservationId::getValue).toList()).stream()
+                .map(projection -> new ReservationIdWithSequenceResponse(
+                        ReservationId.from(projection.getReservationId()), projection.getSlotRank()
+                ))
+                .toList();
     }
 
     @Override
@@ -69,7 +132,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public void delete(final Reservation target) {
-        jpaReservationRepository.delete(target);
+    public void delete(final Reservation reservation) {
+        jpaReservationRepository.delete(reservation);
     }
 }

@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
-import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.ReservationTime;
+import roomescape.timeslot.domain.TimeSlot;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public record CreateTimeSlotRequest(ReservationTime startAt) {

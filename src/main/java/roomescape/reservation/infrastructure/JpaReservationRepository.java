@@ -2,35 +2,34 @@ package roomescape.reservation.infrastructure;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.infrastructure.projection.TimeValueProjection;
-import roomescape.timeslot.domain.ReservationTime;
+import roomescape.reservation.infrastructure.projection.ReservationSequenceProjection;
 import roomescape.user.domain.UserId;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
-
-    boolean existsByDateAndTimeAndThemeId(ReservationDate date, ReservationTime time, Long ThemeId);
+public interface JpaReservationRepository
+        extends JpaRepository<Reservation, Long>,
+        QuerydslPredicateExecutor<Reservation> {
 
     List<Reservation> findAllByUserId(UserId userId);
 
-    List<Reservation> findAllByDateAndThemeId(ReservationDate date, Long themeId);
-
-    List<TimeValueProjection> findTimeByDateAndThemeId(ReservationDate date, Long themeId);
-
-    @Query("""
-    select r
-      from Reservation r
-     where r.date = :#{#slot.date}
-       and r.time = :#{#slot.time}
-       and r.theme.id = :#{#slot.themeId}
-       and r.createdAt <= #{createdAt}
-    """)
-    List<Reservation> findAllBySlotAndCreatedAtJpql(ReservationSlot slot, LocalDateTime createdAt);
+    @Query(value = """
+            SELECT 
+                ranked.id AS reservation_id,
+                ranked.slot_rank AS slot_rank
+            FROM (
+                SELECT 
+                    r.id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY r.date, r.time, r.theme_id
+                        ORDER BY r.created_at, r.id
+                    ) AS slot_rank
+                FROM reservations r
+            ) AS ranked
+            WHERE ranked.id IN (:ids)
+            """, nativeQuery = true)
+    List<ReservationSequenceProjection> findSequenceOfSlotByIds(@Param("ids") List<Long> ids);
 }
-

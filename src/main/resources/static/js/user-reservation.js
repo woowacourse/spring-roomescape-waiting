@@ -49,13 +49,13 @@ function createSlot(type, text, id, booked) {
     const div = document.createElement('div');
     div.className = type + '-slot cursor-pointer bg-light border rounded p-3 mb-2';
     div.textContent = text;
-    
+
     // 디버깅: ID 값 확인
     console.log(`Creating ${type} slot with id: ${id}, type: ${typeof id}`);
-    
+
     // id가 null이나 undefined인 경우 빈 문자열로 설정하여 'undefined' 문자열 방지
     id = id || '';
-    
+
     div.setAttribute('data-' + type + '-id', id);
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
@@ -123,17 +123,17 @@ function renderAvailableTimes(times) {
         timeSlots.innerHTML = '<div class="no-times">선택할 수 있는 시간이 없습니다.</div>';
         return;
     }
-    
+
     console.log("Available times:", times); // 디버깅: 서버에서 받은 시간 데이터 로깅
-    
+
     times.forEach(time => {
         // API 응답 구조 전체 확인
         console.log("Time object structure:", JSON.stringify(time));
-        
+
         // time 객체에서 필요한 속성을 추출
         // API가 다양한 형태로 응답할 수 있으므로 여러 속성을 확인
         const startAt = time.startAt;
-        
+
         // timeId 필드를 여러 가능한 위치에서 찾기
         let timeId;
         if (time.timeId !== undefined) {
@@ -146,11 +146,11 @@ function renderAvailableTimes(times) {
             console.error("Cannot find timeId in the time object:", time);
             timeId = null; // 혹은 다른 fallback 값
         }
-        
+
         const alreadyBooked = time.isBooked;
 
         console.log(`Time slot: startAt=${startAt}, id=${timeId}, booked=${alreadyBooked}`); // 디버깅 로깅
-        
+
         if (timeId) {
             const div = createSlot('time', startAt, timeId, alreadyBooked);
             timeSlots.appendChild(div);
@@ -189,46 +189,46 @@ function onReservationButtonClick() {
     const selectedDate = document.getElementById("datepicker").value;
     const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
     const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
-    
-    console.log("Selected values:", { date: selectedDate, themeId: selectedThemeId, timeId: selectedTimeId }); // 디버깅
+
+    console.log("Selected values:", {date: selectedDate, themeId: selectedThemeId, timeId: selectedTimeId}); // 디버깅
     console.log("Selected time element:", document.querySelector('.time-slot.active')); // 추가 디버깅
-    
+
     // time-slot 요소들 전체 확인
     const allTimeSlots = document.querySelectorAll('.time-slot');
     console.log("All time slots:", allTimeSlots);
     allTimeSlots.forEach((slot, index) => {
         console.log(`Slot ${index}:`, slot, `data-time-id: ${slot.getAttribute('data-time-id')}`);
     });
-    
+
     // 값 검증
     if (!selectedDate) {
         alert("날짜를 선택해주세요.");
         return;
     }
-    
+
     if (!selectedThemeId) {
         alert("테마를 선택해주세요.");
         return;
     }
-    
+
     if (!selectedTimeId || selectedTimeId === "undefined" || selectedTimeId === "null") {
         alert("시간을 선택해주세요.");
         return;
     }
-    
+
     // 숫자 문자열을 숫자로 변환 (API 요구사항에 맞게)
     const timeIdNumber = parseInt(selectedTimeId, 10);
     const themeIdNumber = parseInt(selectedThemeId, 10);
-    
+
     // 모든 값이 유효한 경우
     const reservationData = {
         date: selectedDate,
         themeId: isNaN(themeIdNumber) ? selectedThemeId : themeIdNumber,
         timeId: isNaN(timeIdNumber) ? selectedTimeId : timeIdNumber
     };
-    
+
     console.log("Sending reservation data:", reservationData); // 디버깅
-    
+
     fetch('/reservations', {
         method: 'POST',
         headers: {

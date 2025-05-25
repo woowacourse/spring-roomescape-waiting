@@ -42,7 +42,7 @@ public class AdminReservationController {
     public ResponseEntity<List<ReservationResponse>> searchReservations(
             @ModelAttribute final ReservationSearchWebRequest request) {
         return ResponseEntity.ok(
-                reservationFacade.getByParams(request.toServiceRequest()));
+                reservationFacade.getAllBySearchFilter(request.toServiceRequest()));
     }
 
     @PostMapping

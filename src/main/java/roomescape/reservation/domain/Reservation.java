@@ -134,4 +134,8 @@ public class Reservation extends BaseEntity {
     public ReservationId getId() {
         return ReservationId.from(id);
     }
+
+    public ReservationSlot getSlot() {
+        return ReservationSlot.of(date, time, theme);
+    }
 }

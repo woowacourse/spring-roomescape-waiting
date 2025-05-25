@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.domain.DomainTerm;
+import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.domain.SortedReservationsOfSlot;
+import roomescape.user.domain.UserId;
 
 @Service
 @RequiredArgsConstructor
@@ -21,23 +22,22 @@ public class ReservationCommandService {
     private final ReservationQueryService reservationQueryService;
     private final TimeProvider timeProvider;
 
-    public Reservation create(Reservation reservation) {
+    public Reservation create(final Reservation reservation) {
         reservation.validatePast(timeProvider.now());
 
-        reservation = reservationRepository.save(reservation);
+        final ReservationSlot slot = reservation.getSlot();
+        final UserId userId = reservation.getUserId();
 
-        final ReservationSlot slot = ReservationSlot.from(reservation);
-        final SortedReservationsOfSlot reservations = SortedReservationsOfSlot.of(
-                slot,
-                reservationQueryService.getByReservationSlotAndCreatedAt(
-                        slot,
-                        reservation.getCreatedAt()));
+        // TODO 중복 검증 해결
+        if (reservationQueryService.existsBySlotAndUserId(slot, userId)) {
+            throw new DuplicateException(DomainTerm.RESERVATION, slot, userId);
+        }
 
-        if (reservations.isEmpty()) {
+        if (!reservationQueryService.existsBySlot(slot)) {
             reservation.approved();
         }
 
-        return reservation;
+        return reservationRepository.save(reservation);
     }
 
     public void delete(final ReservationId id) {

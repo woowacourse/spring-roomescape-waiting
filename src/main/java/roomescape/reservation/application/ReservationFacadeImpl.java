@@ -2,12 +2,12 @@ package roomescape.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.aop.ForbiddenException;
 import roomescape.auth.session.UserSession;
 import roomescape.reservation.application.dto.CreateReservationRequest;
 import roomescape.reservation.application.dto.ReservationResponse;
-import roomescape.reservation.application.dto.ReservationSearchRequest;
+import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
+import roomescape.reservation.application.dto.SlotSequenceResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
@@ -24,7 +24,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class ReservationFacadeImpl implements ReservationFacade {
 
     private final ReservationQueryService reservationQueryService;
@@ -45,22 +44,19 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public List<ReservationResponse> getByParams(final ReservationSearchRequest request) {
-        final List<Reservation> reservations = reservationQueryService.getByParams(request);
+    public List<ReservationResponse> getAllBySearchFilter(final ReservationSearchFilterRequest request) {
+        final List<Reservation> reservations = reservationQueryService.getAllBySearchFilter(request);
         final List<UserId> userIds = reservations.stream()
                 .map(Reservation::getUserId)
                 .toList();
 
         final List<User> users = userQueryService.getAllByIds(userIds);
-
         return ReservationResponse.from(reservations, users);
     }
 
     @Override
-    public List<ReservationResponse> getAllByUserId(final UserId id) {
-        final User user = userQueryService.getById(id);
-        return ReservationResponse.from(
-                reservationQueryService.getAllByUserId(id), user);
+    public List<SlotSequenceResponse> getAllSlotSequenceByUserId(final UserId userId) {
+        return reservationQueryService.getAllSlotSequenceResponseByUserId(userId);
     }
 
     @Override

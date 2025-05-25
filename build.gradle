@@ -25,6 +25,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
 
+    implementation("io.github.openfeign.querydsl:querydsl-core:6.11")
+    implementation("io.github.openfeign.querydsl:querydsl-apt:6.11")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:6.11")
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:6.11:jpa'
+
     implementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 

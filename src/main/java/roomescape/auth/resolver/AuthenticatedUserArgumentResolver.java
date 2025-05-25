@@ -21,7 +21,7 @@ public class AuthenticatedUserArgumentResolver implements HandlerMethodArgumentR
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
         return parameter.hasParameterAnnotation(SignInUser.class)
-                && parameter.getParameterType().equals(UserSession.class);
+               && parameter.getParameterType().equals(UserSession.class);
     }
 
     @Override

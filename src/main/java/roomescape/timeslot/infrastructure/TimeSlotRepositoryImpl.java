@@ -2,10 +2,10 @@ package roomescape.timeslot.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.TimeSlotId;
 import roomescape.timeslot.domain.TimeSlotRepository;
-import roomescape.timeslot.domain.ReservationTime;
 
 import java.util.List;
 import java.util.Optional;

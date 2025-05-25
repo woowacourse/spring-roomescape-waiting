@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
-import roomescape.reservation.application.dto.ReservationSearchRequest;
+import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
@@ -178,7 +178,7 @@ class ReservationQueryServiceTest {
 
     @Test
     @DisplayName("테마 아이디, 유저 아이디, 시작/끝 날짜 조건으로 검색할 수 있다")
-    void getByParams() {
+    void getAllBySearchFilter() {
         // given
         final User user = userRepository.save(
                 User.withoutId(
@@ -208,8 +208,8 @@ class ReservationQueryServiceTest {
         );
 
         // when
-        final List<Reservation> foundByThemeIdAndUserIdAndDateToFrom = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeIdAndUserIdAndDateToFrom = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         user.getId(),
                         ReservationDate.from(LocalDate.now()),
@@ -217,8 +217,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> foundByThemeIdAndUserIdAndDateTo = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeIdAndUserIdAndDateTo = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         user.getId(),
                         ReservationDate.from(LocalDate.now()),
@@ -226,8 +226,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> foundByThemeIdAndUserId = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeIdAndUserId = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         user.getId(),
                         null,
@@ -235,8 +235,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> foundByThemeId = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeId = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         null,
                         null,
@@ -244,8 +244,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> noFilter = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> noFilter = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         null,
                         null,
                         null,
@@ -253,8 +253,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> wrongFilter = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> wrongFilter = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         null,
                         null,
                         ReservationDate.from(LocalDate.now().plusMonths(1)),

@@ -15,6 +15,7 @@ import roomescape.auth.session.UserSession;
 import roomescape.auth.session.annotation.SignInUser;
 import roomescape.reservation.application.ReservationFacade;
 import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.application.dto.SlotSequenceResponse;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.ui.dto.CreateReservationWebRequest;
 import roomescape.user.domain.UserRole;
@@ -31,9 +32,9 @@ public class ReservationController {
     private final ReservationFacade reservationFacade;
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getMine(@SignInUser final UserSession userSession) {
-        final List<ReservationResponse> reservations = reservationFacade.getAllByUserId(userSession.id());
-        return ResponseEntity.ok(reservations);
+    public ResponseEntity<List<SlotSequenceResponse>> getMine(@SignInUser final UserSession userSession) {
+        final List<SlotSequenceResponse> response = reservationFacade.getAllSlotSequenceByUserId(userSession.id());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
