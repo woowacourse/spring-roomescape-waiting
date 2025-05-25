@@ -3,11 +3,12 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.request.FilteringReservationRequest;
-import roomescape.reservation.service.dto.response.BookedReservationTimeResponse;
+import roomescape.reservation.service.dto.response.ReservationTimeWithBookedResponse;
 import roomescape.reservation.service.dto.response.MyReservationsResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.waiting.domain.Waiting;
@@ -43,7 +44,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationsResponse> getAllMemberReservations(LoginMember loginMember) {
+    public List<MyReservationsResponse> getAllLoginMemberReservations(LoginMember loginMember) {
         ArrayList<MyReservationsResponse> results = new ArrayList<>(
                 reservationRepository.findAllByMemberId(loginMember.id())
                         .stream()
@@ -96,10 +97,10 @@ public class ReservationService {
         }
     }
 
-    public List<BookedReservationTimeResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
+    public List<ReservationTimeWithBookedResponse> getReservationTimesWithBooked(final LocalDate date, final Long themeId) {
          return reservationTimeRepository.findAllWithBooked(date, themeId)
                  .stream()
-                 .map(BookedReservationTimeResponse::from)
+                 .map(ReservationTimeWithBookedResponse::from)
                  .toList();
     }
 }

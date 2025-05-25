@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
+import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
@@ -22,7 +23,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.service.dto.response.BookedReservationTimeResponse;
+import roomescape.reservation.service.dto.response.ReservationTimeWithBookedResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -120,11 +121,11 @@ class ReservationServiceTest {
         reservationRepository.save(new Reservation(savedMember, date, reservationTime1, savedTheme));
 
         // when
-        List<BookedReservationTimeResponse> responses = reservationService.getAvailableTimes(date, themeId);
+        List<ReservationTimeWithBookedResponse> responses = reservationService.getReservationTimesWithBooked(date, themeId);
 
         // then
         List<Boolean> booleans = responses.stream()
-                .map(BookedReservationTimeResponse::alreadyBooked)
+                .map(ReservationTimeWithBookedResponse::alreadyBooked)
                 .toList();
         assertThat(booleans).containsExactlyInAnyOrder(true, false);
     }

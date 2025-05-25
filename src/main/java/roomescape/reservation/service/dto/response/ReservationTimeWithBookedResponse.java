@@ -2,12 +2,12 @@ package roomescape.reservation.service.dto.response;
 
 import roomescape.reservation.repository.dto.ReservationTimeWithBooked;
 
-public record BookedReservationTimeResponse(
+public record ReservationTimeWithBookedResponse(
         ReservationTimeResponse timeResponse,
         boolean alreadyBooked
 ) {
-    public static BookedReservationTimeResponse from(ReservationTimeWithBooked dataResponse) {
-        return new BookedReservationTimeResponse(
+    public static ReservationTimeWithBookedResponse from(ReservationTimeWithBooked dataResponse) {
+        return new ReservationTimeWithBookedResponse(
                 ReservationTimeResponse.from(dataResponse.time()),
                 dataResponse.booked()
         );

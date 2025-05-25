@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import roomescape.auth.dto.LoginMember;
-import roomescape.reservation.service.dto.response.BookedReservationTimeResponse;
+import roomescape.reservation.service.dto.response.ReservationTimeWithBookedResponse;
 import roomescape.reservation.service.dto.request.FilteringReservationRequest;
 import roomescape.reservation.service.dto.response.MyReservationsResponse;
 import roomescape.reservation.service.dto.request.ReservationCreateRequest;
@@ -49,11 +49,11 @@ public class ReservationController {
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<BookedReservationTimeResponse>> readAvailableReservationTimes(
+    public ResponseEntity<List<ReservationTimeWithBookedResponse>> readAvailableReservationTimes(
             @RequestParam("date") final LocalDate date,
             @RequestParam("themeId") final Long themeId
     ) {
-        List<BookedReservationTimeResponse> responses = reservationService.getAvailableTimes(date, themeId);
+        List<ReservationTimeWithBookedResponse> responses = reservationService.getReservationTimesWithBooked(date, themeId);
 
         return ResponseEntity.ok(responses);
     }
@@ -89,7 +89,7 @@ public class ReservationController {
 
     @GetMapping("/my")
     public ResponseEntity<List<MyReservationsResponse>> getMyReservations(@Valid LoginMember loginMember) {
-        List<MyReservationsResponse> response = reservationService.getAllMemberReservations(loginMember);
+        List<MyReservationsResponse> response = reservationService.getAllLoginMemberReservations(loginMember);
         return ResponseEntity.ok(response);
     }
 }
