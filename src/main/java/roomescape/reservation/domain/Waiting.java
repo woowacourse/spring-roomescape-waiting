@@ -80,5 +80,8 @@ public class Waiting {
     public ReservationInfo getInfo() {
         return info;
     }
-    
+
+    public int getTurn() {
+        return turn;
+    }
 }
