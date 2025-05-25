@@ -14,7 +14,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-        "spring.sql.init.data-locations="
+    "spring.sql.init.mode=never"
 })
 class ReservationTimeRepositoryTest {
 

@@ -36,7 +36,7 @@ import roomescape.theme.repository.ThemeRepository;
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-        "spring.sql.init.data-locations="
+    "spring.sql.init.mode=never"
 })
 class ThemeServiceTest {
 
