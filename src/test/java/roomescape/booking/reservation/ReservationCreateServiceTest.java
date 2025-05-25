@@ -1,4 +1,4 @@
-package roomescape.reservation.reservation;
+package roomescape.booking.reservation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,9 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.reservation.Reservation;
-import roomescape.booking.reservation.ReservationCreateService;
-import roomescape.booking.reservation.ReservationRepository;
 import roomescape.booking.reservation.dto.AdminReservationRequest;
 import roomescape.booking.reservation.dto.ReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;

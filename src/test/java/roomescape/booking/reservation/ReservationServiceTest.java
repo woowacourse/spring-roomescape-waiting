@@ -1,4 +1,4 @@
-package roomescape.reservation.reservation;
+package roomescape.booking.reservation;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -7,9 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.booking.reservation.Reservation;
-import roomescape.booking.reservation.ReservationRepository;
-import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.reservation.dto.AdminFilterReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
 import roomescape.booking.schedule.Schedule;

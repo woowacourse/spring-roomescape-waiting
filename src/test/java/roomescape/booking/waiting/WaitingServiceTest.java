@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.booking.waiting;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,9 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.schedule.Schedule;
-import roomescape.booking.waiting.Waiting;
-import roomescape.booking.waiting.WaitingRepository;
-import roomescape.booking.waiting.WaitingService;
 import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
 import roomescape.member.Member;

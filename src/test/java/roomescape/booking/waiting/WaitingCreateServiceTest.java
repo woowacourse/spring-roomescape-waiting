@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.booking.waiting;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,9 +9,6 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.schedule.Schedule;
 import roomescape.booking.schedule.ScheduleService;
-import roomescape.booking.waiting.Waiting;
-import roomescape.booking.waiting.WaitingCreateService;
-import roomescape.booking.waiting.WaitingRepository;
 import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsScheduleException;
