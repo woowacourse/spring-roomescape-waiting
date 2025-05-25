@@ -6,25 +6,41 @@ import java.time.LocalTime;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
 import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.infrastructure.projection.WaitingWithRankProjection;
 import roomescape.theme.ui.dto.ThemeResponse;
 
 public record WaitingWithRankResponse(
         Long id,
-        IdName member,
         LocalDate date,
         ReservationTimeResponse time,
         ThemeResponse theme,
+        IdName member,
         String status
 ) {
 
     public static WaitingWithRankResponse from(final WaitingWithRank waitingWithRank) {
         return new WaitingWithRankResponse(
                 waitingWithRank.waiting().getId(),
-                MemberResponse.IdName.from(waitingWithRank.waiting().getMember()),
                 waitingWithRank.waiting().getReservationSlot().getDate(),
                 ReservationTimeResponse.from(waitingWithRank.waiting().getReservationSlot().getTime()),
                 ThemeResponse.from(waitingWithRank.waiting().getReservationSlot().getTheme()),
+                MemberResponse.IdName.from(waitingWithRank.waiting().getMember()),
                 waitingWithRank.rank() + "번째 예약 대기"
+        );
+    }
+
+    public static WaitingWithRankResponse from(final WaitingWithRankProjection projection) {
+        return new WaitingWithRankResponse(
+                projection.getId(),
+                projection.getDate(),
+                new ReservationTimeResponse(projection.getTimeId(), projection.getTimeStartAt()),
+                new ThemeResponse(
+                        projection.getThemeId(),
+                        projection.getThemeName(), projection.getThemeDescription(),
+                        projection.getThemeThumbnail()
+                ),
+                new MemberResponse.IdName(projection.getMemberId(), projection.getMemberName()),
+                projection.getRank() + "번째 예약 대기"
         );
     }
 

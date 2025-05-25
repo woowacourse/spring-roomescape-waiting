@@ -1,11 +1,9 @@
-package roomescape.reservation.domain.repository;
+package roomescape.reservation.domain;
 
 import java.util.List;
 import java.util.Optional;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.ReservationSlot;
-import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
+import roomescape.reservation.infrastructure.projection.WaitingWithRankProjection;
 
 public interface WaitingRepository {
 
@@ -23,7 +21,7 @@ public interface WaitingRepository {
 
     List<WaitingWithRank> findAllWaitingWithRankByMemberId(Long memberId);
 
-    List<WaitingWithRank> findAllWaitingWithRank();
+    List<WaitingWithRankProjection> findAllWaitingWithRankProjection();
 
     Optional<Waiting> findFirstByReservationSlotOrderByCreatedAt(ReservationSlot reservationSlot);
 }

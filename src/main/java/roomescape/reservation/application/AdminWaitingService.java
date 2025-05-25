@@ -15,9 +15,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
-import roomescape.reservation.domain.repository.WaitingRepository;
+import roomescape.reservation.infrastructure.projection.WaitingWithRankProjection;
 import roomescape.reservation.ui.dto.request.CreateWaitingRequest;
 import roomescape.reservation.ui.dto.response.WaitingResponse;
 import roomescape.reservation.ui.dto.response.WaitingWithRankResponse;
@@ -81,9 +82,10 @@ public class AdminWaitingService {
 
     @Transactional(readOnly = true)
     public List<WaitingWithRankResponse> findAllWaitingWithRank() {
-        return waitingRepository.findAllWaitingWithRank().stream()
-                .map(WaitingWithRankResponse::from)
-                .toList();
+        final List<WaitingWithRankProjection> projections = waitingRepository.findAllWaitingWithRankProjection();
+
+        return projections.stream()
+                .map(WaitingWithRankResponse::from).toList();
     }
 
     private ReservationTime getReservationTimeById(final Long timeId) {
