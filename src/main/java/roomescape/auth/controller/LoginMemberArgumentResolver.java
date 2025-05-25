@@ -8,7 +8,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import jakarta.servlet.http.HttpServletRequest;
-import roomescape.auth.dto.LoginMember;
+import roomescape.auth.service.dto.LoginMember;
 import roomescape.auth.service.AuthService;
 import roomescape.auth.service.JwtTokenHandler;
 import roomescape.common.AuthTokenCookieProvider;

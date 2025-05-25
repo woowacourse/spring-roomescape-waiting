@@ -1,7 +1,7 @@
 package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.auth.dto.LoginMember;
+import roomescape.auth.service.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;

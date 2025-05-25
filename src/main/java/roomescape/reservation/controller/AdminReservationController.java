@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.annotation.RequiredAdmin;
-import roomescape.auth.dto.LoginMember;
+import roomescape.auth.service.dto.LoginMember;
 import roomescape.auth.service.AuthService;
 import roomescape.reservation.service.dto.request.AdminReservationRequest;
 import roomescape.reservation.service.dto.request.ReservationCreateRequest;

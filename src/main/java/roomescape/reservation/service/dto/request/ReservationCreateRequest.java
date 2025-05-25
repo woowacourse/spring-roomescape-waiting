@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-import roomescape.auth.dto.LoginMember;
+import roomescape.auth.service.dto.LoginMember;
 
 public record ReservationCreateRequest(
         @FutureOrPresent @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
