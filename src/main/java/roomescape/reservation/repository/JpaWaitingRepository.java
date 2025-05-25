@@ -37,8 +37,8 @@ public class JpaWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return waitingListCrudRepository.findFirstWaitingByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public Optional<Waiting> findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(LocalDate date, Long timeId, Long themeId) {
+        return waitingListCrudRepository.findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(date, timeId, themeId);
     }
 
     @Override
@@ -47,8 +47,8 @@ public class JpaWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId) {
-        return waitingListCrudRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
+    public boolean existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId) {
+        return waitingListCrudRepository.existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(date, timeId, themeId, memberId);
     }
 
     @Override

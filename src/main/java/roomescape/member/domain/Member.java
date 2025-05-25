@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Entity
@@ -94,5 +95,16 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Member that)) return false;
+        return Objects.equals(email, that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(email);
     }
 }

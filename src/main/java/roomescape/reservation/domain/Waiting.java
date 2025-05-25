@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,54 +19,26 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate date;
-
     @ManyToOne
     private Member member;
 
-    @ManyToOne
-    private ReservationTime time;
-
-    @ManyToOne
-    private Theme theme;
+    @Embedded
+    private ReservationDetails details;
 
     public Waiting() {
     }
 
     public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         validateMember(member);
-        validateDate(date);
-        validateReservationTime(time);
-        validateTheme(theme);
 
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.details = new ReservationDetails(date, time, theme);
     }
 
     private void validateMember(Member member) {
         if (member == null) {
             throw new IllegalArgumentException("[ERROR] 회원 정보는 반드시 입력해야 합니다.");
-        }
-    }
-
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("[ERROR] 예약 날짜는 반드시 입력해야 합니다. 예시) YYYY-MM-DD");
-        }
-    }
-
-    private void validateReservationTime(ReservationTime reservationTime) {
-        if (reservationTime == null) {
-            throw new IllegalArgumentException("[ERROR] 예약 시간을 반드시 입력해야 합니다.");
-        }
-    }
-
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new IllegalArgumentException("[ERROR] 테마를 반드시 입력해야 합니다.");
         }
     }
 
@@ -77,26 +50,30 @@ public class Waiting {
         return member;
     }
 
+    public ReservationDetails getDetails() {
+        return details;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return details.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return details.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return details.getTheme();
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Waiting that)) return false;
-        return date.equals(that.date) && theme.equals(that.theme) && member.equals(that.member) && time.equals(that.time);
+        return Objects.equals(member, that.member) && Objects.equals(details, that.details);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(member, details);
     }
 }

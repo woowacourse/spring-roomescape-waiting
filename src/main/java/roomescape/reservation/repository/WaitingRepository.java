@@ -16,11 +16,11 @@ public interface WaitingRepository {
 
     Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
-    Optional<Waiting> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<Waiting> findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(LocalDate date, Long timeId, Long themeId);
 
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 
     void deleteById(Long id);
 }
