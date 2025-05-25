@@ -1,9 +1,9 @@
 package roomescape.domain.reservation;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.SequencedCollection;
 
 public class ReservationQueue {
 
@@ -11,13 +11,13 @@ public class ReservationQueue {
 
     private final List<Reservation> queue;
 
-    public ReservationQueue(final SequencedCollection<Reservation> reservations) {
+    public ReservationQueue(final Collection<Reservation> reservations) {
         this.queue = sorted(reservations);
     }
 
-    private List<Reservation> sorted(final SequencedCollection<Reservation> reservations) {
+    private List<Reservation> sorted(final Collection<Reservation> reservations) {
         return reservations.stream()
-            .sorted(Comparator.comparing(Reservation::id))
+            .sorted(Comparator.comparing(Reservation::createdAt))
             .toList();
     }
 
