@@ -32,15 +32,15 @@ public class ScheduleServiceTest {
     private ReservationTimeService reservationTimeService;
     private ThemeService themeService;
 
-    private ScheduleRequest REQUEST;
-    private ReservationTime RESERVATION_TIME;
-    private Theme THEME;
+    private ScheduleRequest request;
+    private ReservationTime reservationTime;
+    private Theme theme;
 
     @BeforeEach
     void setUp() {
-        REQUEST = new ScheduleRequest(LocalDate.now().plusDays(1), 1L, 1L);
-        RESERVATION_TIME = reservationTimeWithId(REQUEST.reservationTimeId(), new ReservationTime(LocalTime.of(12, 40)));
-        THEME = themeWithId(REQUEST.themeId(), new Theme("테마명", "테마 설명", "썸네일 URL"));
+        request = new ScheduleRequest(LocalDate.now().plusDays(1), 1L, 1L);
+        reservationTime = reservationTimeWithId(request.reservationTimeId(), new ReservationTime(LocalTime.of(12, 40)));
+        theme = themeWithId(request.themeId(), new Theme("테마명", "테마 설명", "썸네일 URL"));
 
         scheduleRepository = mock(ScheduleRepository.class);
         reservationTimeService = mock(ReservationTimeService.class);
@@ -52,18 +52,18 @@ public class ScheduleServiceTest {
     @DisplayName("스케줄을 생성할 수 있다.")
     void create() {
         // given
-        given(reservationTimeService.findById(REQUEST.reservationTimeId()))
-                .willReturn(RESERVATION_TIME);
-        given(themeService.findById(REQUEST.themeId()))
-                .willReturn(THEME);
+        given(reservationTimeService.findById(request.reservationTimeId()))
+                .willReturn(reservationTime);
+        given(themeService.findById(request.themeId()))
+                .willReturn(theme);
 
-        Schedule schedule = new Schedule(REQUEST.date(), RESERVATION_TIME, THEME);
+        Schedule schedule = new Schedule(request.date(), reservationTime, theme);
         Schedule savedSchedule = scheduleWithId(1L, schedule);
         given(scheduleRepository.save(any(Schedule.class)))
                 .willReturn(savedSchedule);
 
         // when
-        ScheduleResponse response = scheduleService.create(REQUEST);
+        ScheduleResponse response = scheduleService.create(request);
 
         // then
         assertThat(response.id()).isEqualTo(savedSchedule.getId());

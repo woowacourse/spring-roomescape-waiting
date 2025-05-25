@@ -203,9 +203,7 @@ public class ReservationTimeServiceTest {
             // then
             assertThat(allAvailableTimes.getFirst().alreadyBooked()).isFalse();
         }
-
     }
-
 
     @Nested
     @DisplayName("예약 시간 삭제")

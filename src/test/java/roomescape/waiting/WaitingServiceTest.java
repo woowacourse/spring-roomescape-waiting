@@ -44,19 +44,19 @@ class WaitingServiceTest {
     private ScheduleService scheduleService;
     private MemberService memberService;
 
-    private WaitingRequest REQUEST;
-    private LoginMember LOGIN_MEMBER;
-    private Schedule SCHEDULE;
-    private Member MEMBER;
+    private WaitingRequest request;
+    private LoginMember loginMember;
+    private Schedule schedule;
+    private Member member;
 
     @BeforeEach
     void setUp() {
-        REQUEST = new WaitingRequest(LocalDate.now().plusDays(1), 1L, 1L);
-        LOGIN_MEMBER = new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
-        ReservationTime reservationTime = reservationTimeWithId(REQUEST.timeId(), new ReservationTime(LocalTime.of(12, 40)));
-        Theme theme = themeWithId(REQUEST.themeId(), new Theme("야당", "야당당", "123"));
-        SCHEDULE = scheduleWithId(1L, new Schedule(REQUEST.date(), reservationTime, theme));
-        MEMBER = memberWithId(1L, new Member(LOGIN_MEMBER.email(), "password", "boogie", MemberRole.MEMBER));
+        request = new WaitingRequest(LocalDate.now().plusDays(1), 1L, 1L);
+        loginMember = new LoginMember("boogie", "asd@email.com", MemberRole.MEMBER);
+        ReservationTime reservationTime = reservationTimeWithId(request.timeId(), new ReservationTime(LocalTime.of(12, 40)));
+        Theme theme = themeWithId(request.themeId(), new Theme("야당", "야당당", "123"));
+        schedule = scheduleWithId(1L, new Schedule(request.date(), reservationTime, theme));
+        member = memberWithId(1L, new Member(loginMember.email(), "password", "boogie", MemberRole.MEMBER));
 
         waitingRepository = mock(WaitingRepository.class);
         reservationService = mock(ReservationService.class);
@@ -69,27 +69,27 @@ class WaitingServiceTest {
     @DisplayName("웨이팅을 할 수 있다.")
     void createWaiting() {
         // given
-        given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), REQUEST.timeId(), REQUEST.themeId()))
-                .willReturn(SCHEDULE);
-        given(reservationService.existsBySchedule(SCHEDULE))
+        given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationService.existsBySchedule(schedule))
                 .willReturn(true);
-        given(memberService.findByEmail(LOGIN_MEMBER.email()))
-                .willReturn(MEMBER);
+        given(memberService.findByEmail(loginMember.email()))
+                .willReturn(member);
 
-        Waiting waiting1 = new Waiting(SCHEDULE, MEMBER, 1L);
-        Waiting waiting2 = new Waiting(SCHEDULE, MEMBER, 2L);
-        Waiting waiting3 = new Waiting(SCHEDULE, MEMBER, 3L);
+        Waiting waiting1 = new Waiting(schedule, member, 1L);
+        Waiting waiting2 = new Waiting(schedule, member, 2L);
+        Waiting waiting3 = new Waiting(schedule, member, 3L);
         List<Waiting> waitings = List.of(waiting1, waiting2, waiting3);
-        given(waitingRepository.findAllBySchedule(SCHEDULE))
+        given(waitingRepository.findAllBySchedule(schedule))
                 .willReturn(waitings);
 
-        Waiting waiting = new Waiting(SCHEDULE, MEMBER, (long) waitings.size() + 1);
+        Waiting waiting = new Waiting(schedule, member, (long) waitings.size() + 1);
         Waiting createdWaiting = waitingWithId(1L, waiting);
         given(waitingRepository.save(any()))
                 .willReturn(createdWaiting);
 
         // when
-        WaitingResponse waitingResponse = waitingService.create(REQUEST, LOGIN_MEMBER);
+        WaitingResponse waitingResponse = waitingService.create(request, loginMember);
 
         // then
         assertThat(WaitingResponse.of(createdWaiting))
@@ -100,13 +100,13 @@ class WaitingServiceTest {
     @DisplayName("스케줄에 대한 예약이 없는 경우, 웨이팅을 할 수 없다")
     void createWaiting2() {
         // given
-        given(scheduleService.findByDateAndTimeIdAndThemeId(REQUEST.date(), REQUEST.timeId(), REQUEST.themeId()))
-                .willReturn(SCHEDULE);
-        given(reservationService.existsBySchedule(SCHEDULE))
+        given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+                .willReturn(schedule);
+        given(reservationService.existsBySchedule(schedule))
                 .willReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> waitingService.create(REQUEST, LOGIN_MEMBER))
+        assertThatThrownBy(() -> waitingService.create(request, loginMember))
                 .isInstanceOf(ReservationNotExistsScheduleException.class);
     }
 
@@ -114,15 +114,15 @@ class WaitingServiceTest {
     @DisplayName("권한이 없는 경우 웨이팅을 취소할 수 없다")
     void deleteWaiting2() {
         // given
-        LOGIN_MEMBER = new LoginMember("may", "may@email.com", MemberRole.MEMBER);
+        loginMember = new LoginMember("may", "may@email.com", MemberRole.MEMBER);
         Long waitingId = 1L;
-        Waiting waiting = waitingWithId(waitingId, new Waiting(SCHEDULE, MEMBER, 1L));
+        Waiting waiting = waitingWithId(waitingId, new Waiting(schedule, member, 1L));
 
         given(waitingRepository.findById(waitingId))
                 .willReturn(Optional.of(waiting));
 
         // when & then
-        assertThatThrownBy(() -> waitingService.deleteById(waitingId, LOGIN_MEMBER))
+        assertThatThrownBy(() -> waitingService.deleteById(waitingId, loginMember))
                 .isInstanceOf(AuthorizationException.class);
     }
 
@@ -130,14 +130,14 @@ class WaitingServiceTest {
     @DisplayName("고객은 본인의 예약 대기를 삭제할 수 있다")
     void deleteWaiting3() {
         // given
-        LOGIN_MEMBER = new LoginMember("may", LOGIN_MEMBER.email(), MemberRole.MEMBER);
+        loginMember = new LoginMember("may", loginMember.email(), MemberRole.MEMBER);
         Long waitingId = 1L;
-        Waiting waiting = waitingWithId(waitingId, new Waiting(SCHEDULE, MEMBER, 1L));
+        Waiting waiting = waitingWithId(waitingId, new Waiting(schedule, member, 1L));
 
         given(waitingRepository.findById(waitingId))
                 .willReturn(Optional.of(waiting));
 
         // when & then
-        assertDoesNotThrow(() -> waitingService.deleteById(waitingId, LOGIN_MEMBER));
+        assertDoesNotThrow(() -> waitingService.deleteById(waitingId, loginMember));
     }
 }
