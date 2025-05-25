@@ -26,7 +26,7 @@ public class WaitingAdminController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void rejectWaiting(@PathVariable Long id) {
         waitingAdminService.rejectWaiting(id);
     }

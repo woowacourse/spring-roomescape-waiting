@@ -87,4 +87,36 @@ class WaitingAdminServiceTest {
                 () -> assertThat(ids).contains(firstWaiting.getId(), secondWaiting.getId())
         );
     }
+
+    @Test
+    @DisplayName("대기를 거절할 수 있다")
+    void test2() {
+        String emailOfAdministrator = "email@gmail.com";
+        Member administrator = memberJpaRepository.save(new Member("이름", emailOfAdministrator, "password", Role.ADMIN));
+        Member user = memberJpaRepository.save(
+                new Member("사용자", "user@gmail.com", "password", Role.USER));
+
+        Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
+        ReservationTime reservationTime = reservationTimeJpaRepository.save(
+                new ReservationTime(LocalTime.of(12, 30)));
+
+        Waiting waiting = waitingJpaRepository.save(new Waiting(
+                LocalDateTime.now(),
+                new PendingReservation(
+                        LocalDate.now().plusDays(1),
+                        reservationTime,
+                        theme,
+                        user,
+                        LocalDate.now()
+                )
+        ));
+
+        // when
+        waitingAdminService.rejectWaiting(waiting.getId());
+
+        // then
+        List<Waiting> waitings = waitingJpaRepository.findAll();
+
+        assertThat(waitings).doesNotContain(waiting);
+    }
 }
