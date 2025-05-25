@@ -10,9 +10,9 @@ public interface WaitingRepository {
 
     List<Waiting> findByWaitingMemberId(Long id);
 
-    void deleteByReservationId(Long reservationId, Long memberId);
+    void deleteByBookingSlotIdAndMemberId(Long reservationId, Long memberId);
 
-    boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
+    boolean existsByBookingSlotIdAndMemberId(Long reservationId, Long memberId);
 
     List<Waiting> findAllByWaitingStatus(WaitingStatus waitingStatus);
 

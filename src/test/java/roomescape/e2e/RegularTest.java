@@ -28,9 +28,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.common.security.dto.request.LoginRequest;
 import roomescape.common.security.dto.response.CheckLoginResponse;
-import roomescape.fixture.IntegrationFixture;
-import roomescape.reservation.presentation.dto.response.MyReservationResponse;
-import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
+import roomescape.bookingslot.presentation.dto.response.MyReservationResponse;
+import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
 import roomescape.waiting.domain.WaitingStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)

@@ -21,8 +21,8 @@ import roomescape.member.presentation.dto.response.SignUpResponse;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.application.MemberApplicationService;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.bookingslot.domain.repository.BookingSlotRepository;
+import roomescape.bookingslot.domain.service.ReservationDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
@@ -43,7 +43,7 @@ class ThemeApplicationServiceTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private BookingSlotRepository bookingSlotRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -62,8 +62,9 @@ class ThemeApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationDomainService reservationDomainService = new ReservationDomainService(reservationRepository);
-        themeApplicationService = new ThemeApplicationService(new ThemeDomainService(themeRepository, reservationRepository),
+        ReservationDomainService reservationDomainService = new ReservationDomainService(bookingSlotRepository);
+        themeApplicationService = new ThemeApplicationService(new ThemeDomainService(themeRepository,
+                bookingSlotRepository),
                 reservationDomainService);
         MemberDomainService memberDomainService = new MemberDomainService(memberRepository);
         memberApplicationService = new MemberApplicationService(memberDomainService, myPasswordEncoder);
@@ -132,39 +133,39 @@ class ThemeApplicationServiceTest {
                 new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
 
         LocalDate nowDate = LocalDate.now();
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(1), makeReservationTime(reservationTime1), member,
                         makeTheme(themeResponse1)));
 
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(2), makeReservationTime(reservationTime1), member,
                         makeTheme(themeResponse2)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(2), makeReservationTime(reservationTime2), member,
                         makeTheme(themeResponse2)));
 
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(3), makeReservationTime(reservationTime1), member,
                         makeTheme(themeResponse4)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(3), makeReservationTime(reservationTime2), member,
                         makeTheme(themeResponse5)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(4), makeReservationTime(reservationTime1), member,
                         makeTheme(themeResponse6)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(4), makeReservationTime(reservationTime2), member,
                         makeTheme(themeResponse7)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(5), makeReservationTime(reservationTime1), member,
                         makeTheme(themeResponse8)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(5), makeReservationTime(reservationTime2), member,
                         makeTheme(themeResponse9)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(6), makeReservationTime(reservationTime1), member,
                         makeTheme(themeResponse10)));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(nowDate.minusDays(6), makeReservationTime(reservationTime2), member,
                         makeTheme(themeResponse11)));
 

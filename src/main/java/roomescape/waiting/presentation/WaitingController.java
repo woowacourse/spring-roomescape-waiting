@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.presentation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
+import roomescape.bookingslot.presentation.dto.request.ReservationCreateRequest;
+import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
 import roomescape.waiting.application.WaitingApplicationService;
 import roomescape.waiting.presentation.dto.WaitingResponse;
 

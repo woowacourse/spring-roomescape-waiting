@@ -2,13 +2,13 @@ package roomescape.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import roomescape.bookingslot.domain.repository.BookingSlotRepository;
+import roomescape.bookingslot.infrastructure.JpaBookingSlotRepository;
+import roomescape.bookingslot.infrastructure.JpaBookingSlotRepositoryAdapter;
 import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
-import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationtime.infrastructure.JpaReservationTimeRepositoryAdapter;
@@ -33,8 +33,8 @@ public class TestConfig {
     }
 
     @Bean
-    public ReservationRepository reservationRepository(final JpaReservationRepository jpaReservationRepository) {
-        return new JpaReservationRepositoryAdapter(jpaReservationRepository);
+    public BookingSlotRepository bookingSlotRepository(final JpaBookingSlotRepository jpaBookingSlotRepository) {
+        return new JpaBookingSlotRepositoryAdapter(jpaBookingSlotRepository);
     }
 
     @Bean

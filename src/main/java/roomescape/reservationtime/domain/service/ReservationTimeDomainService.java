@@ -2,8 +2,8 @@ package roomescape.reservationtime.domain.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.bookingslot.exception.ReservationNotFoundException;
+import roomescape.bookingslot.domain.service.ReservationDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;

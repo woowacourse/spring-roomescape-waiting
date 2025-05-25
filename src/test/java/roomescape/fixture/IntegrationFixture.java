@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.MediaType;
 import roomescape.common.security.dto.request.LoginRequest;
-import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
+import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
 
 public class IntegrationFixture {
 

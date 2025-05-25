@@ -23,7 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.fixture.TestFixture;
 import roomescape.member.presentation.dto.request.SignupRequest;
 import roomescape.member.presentation.dto.response.MemberResponse;
-import roomescape.reservation.presentation.dto.response.ReservationResponse;
+import roomescape.bookingslot.presentation.dto.response.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

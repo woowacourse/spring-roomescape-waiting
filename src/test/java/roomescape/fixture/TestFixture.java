@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.domain.Reservation;
+import roomescape.bookingslot.domain.BookingSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -23,9 +23,9 @@ public class TestFixture {
         return LocalDateTime.now().plusHours(1);
     }
 
-    public static Reservation makeReservation(final LocalDate date, final ReservationTime reservationTime,
+    public static BookingSlot makeReservation(final LocalDate date, final ReservationTime reservationTime,
                                               final Member member, final Theme theme) {
-        return new Reservation(member, date, reservationTime, theme);
+        return new BookingSlot(member, date, reservationTime, theme);
     }
 
     public static ReservationTime makeReservationTime() {

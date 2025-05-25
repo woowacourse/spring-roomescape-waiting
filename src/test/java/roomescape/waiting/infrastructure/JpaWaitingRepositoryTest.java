@@ -15,8 +15,8 @@ import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.bookingslot.domain.BookingSlot;
+import roomescape.bookingslot.domain.repository.BookingSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -35,7 +35,7 @@ class JpaWaitingRepositoryTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private BookingSlotRepository bookingSlotRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -54,8 +54,8 @@ class JpaWaitingRepositoryTest {
         member = memberRepository.save(TestFixture.makeMember());
         reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme());
-        reservationRepository.save(
-                Reservation.createUpcomingReservation(member, FUTURE_DATE, reservationTime, theme, NOW_DATETIME));
+        bookingSlotRepository.save(
+                BookingSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime, theme, NOW_DATETIME));
     }
 
     @Test

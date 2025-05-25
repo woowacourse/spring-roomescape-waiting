@@ -26,13 +26,13 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
     }
 
     @Override
-    public void deleteByReservationId(final Long reservationId, final Long memberId) {
-        jpaWaitingRepository.deleteByReservationIdAndMemberId(reservationId, memberId);
+    public void deleteByBookingSlotIdAndMemberId(final Long reservationId, final Long memberId) {
+        jpaWaitingRepository.deleteByBookingSlotIdAndMemberId(reservationId, memberId);
     }
 
     @Override
-    public boolean existsByReservationIdAndMemberId(final Long reservationId, final Long memberId) {
-        return jpaWaitingRepository.existsByReservationIdAndMemberId(reservationId, memberId);
+    public boolean existsByBookingSlotIdAndMemberId(final Long reservationId, final Long memberId) {
+        return jpaWaitingRepository.existsByBookingSlotIdAndMemberId(reservationId, memberId);
     }
 
     @Override

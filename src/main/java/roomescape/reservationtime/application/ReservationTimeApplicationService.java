@@ -3,7 +3,7 @@ package roomescape.reservationtime.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.bookingslot.domain.service.ReservationDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;

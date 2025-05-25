@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.service.ReservationDomainService;
-import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
+import roomescape.bookingslot.domain.BookingSlot;
+import roomescape.bookingslot.domain.service.ReservationDomainService;
+import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.service.WaitingDomainService;
 import roomescape.waiting.presentation.dto.WaitingResponse;
@@ -29,16 +29,16 @@ public class WaitingApplicationService {
 
     public WaitingReservationResponse addWaiting(final LocalDate date, final Long timeId, final Long themeId,
                                                  final Long memberId) {
-        Reservation reservation = reservationDomainService.getReservationByDateAndTimeAndTheme(date, timeId, themeId);
+        BookingSlot bookingSlot = reservationDomainService.getReservationByDateAndTimeAndTheme(date, timeId, themeId);
         Member member = memberDomainService.getMember(memberId);
-        Waiting waiting = reservation.addMemberToWaiting(member);
+        Waiting waiting = bookingSlot.addMemberToWaiting(member);
         waitingDomainService.save(waiting);
 
         return WaitingReservationResponse.from(waiting);
     }
 
     public void removeWaiting(final Long reservationId, final Long memberId) {
-        waitingDomainService.deleteByReservationIdAndMemberId(reservationId, memberId);
+        waitingDomainService.deleteByBookingSlotIdAndMemberId(reservationId, memberId);
     }
 
     public List<WaitingResponse> findAllWaitingReservations() {

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.reservation.presentation.dto.response.WaitingReservationResponse;
+import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
 import roomescape.waiting.presentation.dto.WaitingResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)

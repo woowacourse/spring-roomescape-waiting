@@ -12,7 +12,7 @@ public interface JpaWaitingRepository extends ListCrudRepository<Waiting, Long> 
     @Query("""
             SELECT w 
             FROM Waiting w 
-            JOIN FETCH w.reservation r            
+            JOIN FETCH w.bookingSlot r            
             JOIN FETCH r.time t 
             JOIN FETCH r.theme th                   
             WHERE w.member.id = :memberId
@@ -22,17 +22,17 @@ public interface JpaWaitingRepository extends ListCrudRepository<Waiting, Long> 
     @Modifying
     @Query("""
             DELETE FROM Waiting w 
-            WHERE w.reservation.id = :reservationId
+            WHERE w.bookingSlot.id = :reservationId
             AND w.member.id = :memberId
             """)
-    void deleteByReservationIdAndMemberId(Long reservationId, Long memberId);
+    void deleteByBookingSlotIdAndMemberId(Long reservationId, Long memberId);
 
-    boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
+    boolean existsByBookingSlotIdAndMemberId(Long reservationId, Long memberId);
 
     @Query("""
             SELECT w 
             FROM Waiting w 
-            JOIN FETCH w.reservation r            
+            JOIN FETCH w.bookingSlot r            
             JOIN FETCH r.time t 
             JOIN FETCH r.theme th                   
             WHERE w.waitingStatus = :waitingStatus

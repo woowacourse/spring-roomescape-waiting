@@ -3,7 +3,7 @@ package roomescape.theme.application;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.bookingslot.domain.service.ReservationDomainService;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.service.ThemeDomainService;

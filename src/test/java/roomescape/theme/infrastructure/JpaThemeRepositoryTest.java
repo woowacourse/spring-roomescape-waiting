@@ -15,7 +15,7 @@ import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.bookingslot.domain.repository.BookingSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -32,7 +32,7 @@ class JpaThemeRepositoryTest {
     private ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private BookingSlotRepository bookingSlotRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -80,29 +80,29 @@ class JpaThemeRepositoryTest {
         reservationTimeRepository.save(reservationTime2);
 
         LocalDate futureDate = LocalDate.now();
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(1), reservationTime, member, theme1));
 
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(2), reservationTime, member, theme2));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(2), reservationTime2, member, theme2));
 
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(3), reservationTime, member, theme4));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(3), reservationTime2, member, theme5));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(4), reservationTime, member, theme6));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(4), reservationTime2, member, theme7));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(5), reservationTime, member, theme8));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(5), reservationTime2, member, theme9));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(6), reservationTime, member, theme10));
-        reservationRepository.save(
+        bookingSlotRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(6), reservationTime2, member, theme11));
 
         List<Theme> themes = themeRepository.findPopularThemes(futureDate.minusDays(7), futureDate.minusDays(1),
