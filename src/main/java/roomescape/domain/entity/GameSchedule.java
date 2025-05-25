@@ -77,6 +77,6 @@ public class GameSchedule {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(date, time, theme);
     }
 }
