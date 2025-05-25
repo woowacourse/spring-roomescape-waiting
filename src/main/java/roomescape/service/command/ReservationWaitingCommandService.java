@@ -2,6 +2,7 @@ package roomescape.service.command;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,27 +47,24 @@ public class ReservationWaitingCommandService {
         this.clock = clock;
     }
 
-
     public ReservationResponseDto createReservationWaiting(ReservationCreateDto request) {
-        //todo 같은 멤버 검증
-        // 1. 요청한 시간, 테마, 멤버 반환
         ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NotFoundException("예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
-
-
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. id : " + request.themeId()));
-
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. id : " + request.memberId()));
 
-        // 2. 예약 대기 등록
-        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
+        List<Reservation> duplicatedReservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
                 request.date(),
                 request.timeId(),
-                request.themeId())
-        ) {
+                request.themeId());
+        if (duplicatedReservations.isEmpty()) {
             throw new IllegalArgumentException("현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
+        }
+        if (duplicatedReservations.stream()
+                .anyMatch(reservation -> reservation.getMember().equals(member))) {
+            throw new IllegalArgumentException("이미 예약한 이력이 있습니다.");
         }
 
         Reservation requestReservation = new Reservation(member, request.date(), reservationTime, theme, ReservationStatus.WAITING);
@@ -84,7 +82,6 @@ public class ReservationWaitingCommandService {
             throw new UnauthorizationException("예약자만 예약 대기 취소가 가능합니다.");
         }
 
-        //todo cascade delete 개선
         reservationWaitingTicketRepository.delete(reservationWaitingTicketRepository.findByReservationId(id).get());
         reservationRepository.delete(reservationWaiting);
     }
