@@ -14,32 +14,37 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.reservation.AdminReservationCreateRequestDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.service.ReservationService;
+import roomescape.service.command.ReservationCommandService;
+import roomescape.service.query.ReservationQueryService;
 import roomescape.service.dto.ReservationCreateDto;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationQueryService reservationQueryService;
+    private final ReservationCommandService reservationCommandService;
 
-    public AdminReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(ReservationQueryService reservationQueryService,
+                                      ReservationCommandService reservationCommandService) {
+        this.reservationQueryService = reservationQueryService;
+        this.reservationCommandService = reservationCommandService;
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationResponseDto> readReservedReservations() {
-        return reservationService.findAllReservedReservations();
+        return reservationQueryService.findReservedReservations();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ReservationResponseDto addReservation(
-            @RequestBody AdminReservationCreateRequestDto requestDto) {
+    public ReservationResponseDto addReservationByAdmin(
+            @RequestBody AdminReservationCreateRequestDto requestDto
+    ) {
         ReservationCreateDto createDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
                 requestDto.themeId(), requestDto.memberId());
-        return reservationService.createReservation(createDto);
+        return reservationCommandService.bookReservation(createDto);
     }
 
     @GetMapping("/search")
@@ -49,7 +54,7 @@ public class AdminReservationController {
             @RequestParam("memberId") long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
             @RequestParam("dateTo") LocalDate dateTo) {
-        return reservationService.findReservationBetween(themeId, memberId, dateFrom, dateTo);
+        return reservationQueryService.searchReservationsBy(themeId, memberId, dateFrom, dateTo);
     }
 
     @DeleteMapping("/{id}")
@@ -57,6 +62,6 @@ public class AdminReservationController {
     public void deleteReservation(
             @PathVariable("id") final Long id
     ) {
-        reservationService.deleteReservation(id);
+        reservationCommandService.cancelReservationBy(id);
     }
 }

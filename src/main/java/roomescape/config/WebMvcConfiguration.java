@@ -7,17 +7,17 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.controller.AuthAdminInterceptor;
 import roomescape.controller.AuthArgumentResolver;
-import roomescape.service.MemberService;
+import roomescape.service.query.MemberQueryService;
 import roomescape.util.JwtTokenProvider;
 
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
-    private final MemberService memberService;
+    private final MemberQueryService memberQueryService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public WebMvcConfiguration(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
-        this.memberService = memberService;
+    public WebMvcConfiguration(MemberQueryService memberQueryService, JwtTokenProvider jwtTokenProvider) {
+        this.memberQueryService = memberQueryService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -29,6 +29,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthArgumentResolver(memberService, jwtTokenProvider));
+        resolvers.add(new AuthArgumentResolver(memberQueryService, jwtTokenProvider));
     }
 }

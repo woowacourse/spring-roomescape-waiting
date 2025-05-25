@@ -20,7 +20,7 @@ public record ReservationResponseDto(
 
     public static ReservationResponseDto of(Reservation reservation) {
         MemberNameResponseDto memberResponseDto = new MemberNameResponseDto(reservation.getMember().getName());
-        ReservationTimeResponseDto timeResponseDto = ReservationTimeResponseDto.from(reservation.getTime());
+        ReservationTimeResponseDto timeResponseDto = new ReservationTimeResponseDto(reservation.getTime());
         ThemeResponseDto themeResponseDto = ThemeResponseDto.from(reservation.getTheme());
 
         return new ReservationResponseDto(

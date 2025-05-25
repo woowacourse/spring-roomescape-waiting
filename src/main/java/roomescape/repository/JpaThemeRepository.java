@@ -15,5 +15,5 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
             GROUP BY th.id
             ORDER BY COUNT(r.id) DESC
             """, nativeQuery = true)
-    List<Theme> findMostReservedThemesBetween(LocalDate start, LocalDate end);
+    List<Theme> findMostReservedThemesBetweenDate(LocalDate start, LocalDate end);
 }

@@ -1,9 +1,7 @@
 package roomescape.controller.api;
 
-import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,23 +14,27 @@ import roomescape.dto.auth.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MemberReservationCreateRequestDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.service.ReservationWaitingService;
+import roomescape.service.command.ReservationWaitingCommandService;
 import roomescape.service.dto.ReservationCreateDto;
+import roomescape.service.query.ReservationQueryService;
 
 @RestController
 @RequestMapping("/reservations/waiting")
 public class ReservationWaitingController {
 
-    private final ReservationWaitingService reservationWaitingService;
+    private final ReservationWaitingCommandService reservationWaitingCommandService;
+    private final ReservationQueryService reservationQueryService;
 
-    public ReservationWaitingController(ReservationWaitingService reservationWaitingService) {
-        this.reservationWaitingService = reservationWaitingService;
+    public ReservationWaitingController(ReservationWaitingCommandService reservationWaitingCommandService,
+                                        ReservationQueryService reservationQueryService) {
+        this.reservationWaitingCommandService = reservationWaitingCommandService;
+        this.reservationQueryService = reservationQueryService;
     }
 
     @GetMapping("/waiting")
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationResponseDto> getReservationWaitings() {
-        return reservationWaitingService.findAllReservationWaitings();
+        return reservationQueryService.findAllReservationWaitings();
     }
 
     @PostMapping("/waiting")
@@ -43,7 +45,7 @@ public class ReservationWaitingController {
     ) {
         ReservationCreateDto reservationCreateDto = new ReservationCreateDto(request.date(), request.timeId(),
                 request.themeId(), loginInfo.id());
-        return reservationWaitingService.createReservationWaiting(reservationCreateDto);
+        return reservationWaitingCommandService.createReservationWaiting(reservationCreateDto);
     }
 
     @DeleteMapping("/waiting/{id}")
@@ -51,6 +53,6 @@ public class ReservationWaitingController {
     public void deleteWaitingReservation(
             @PathVariable("id") final Long id
     ) {
-        reservationWaitingService.deleteReservationWaiting(id);
+        reservationWaitingCommandService.deleteReservationWaiting(id);
     }
 }

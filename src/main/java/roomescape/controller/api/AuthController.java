@@ -2,9 +2,7 @@ package roomescape.controller.api;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import java.net.CookieManager;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,18 +13,18 @@ import roomescape.dto.auth.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.auth.LoginRequestDto;
 import roomescape.dto.member.MemberNameResponseDto;
-import roomescape.service.AuthService;
+import roomescape.service.query.AuthQueryService;
 
 @RestController
 public class AuthController {
 
     private static final String TOKEN_COOKIE_NAME = "token";
 
-    private final AuthService authService;
+    private final AuthQueryService authQueryService;
     private final CookieHandler cookieHandler;
 
-    public AuthController(AuthService authService, CookieHandler cookieHandler) {
-        this.authService = authService;
+    public AuthController(AuthQueryService authQueryService, CookieHandler cookieHandler) {
+        this.authQueryService = authQueryService;
         this.cookieHandler = cookieHandler;
     }
 
@@ -36,7 +34,7 @@ public class AuthController {
             @RequestBody LoginRequestDto loginRequestDto,
             HttpServletResponse response
     ) {
-        String token = authService.publishLoginToken(loginRequestDto);
+        String token = authQueryService.publishLoginToken(loginRequestDto);
         Cookie cookie = cookieHandler.createCookie(TOKEN_COOKIE_NAME, token);
         response.addCookie(cookie);
     }

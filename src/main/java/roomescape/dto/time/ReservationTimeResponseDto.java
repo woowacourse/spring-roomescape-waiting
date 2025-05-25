@@ -9,7 +9,10 @@ public record ReservationTimeResponseDto(
         @JsonFormat(pattern = "HH:mm") LocalTime startAt
 ) {
 
-    public static ReservationTimeResponseDto from(ReservationTime reservationTime) {
-        return new ReservationTimeResponseDto(reservationTime.getId(), reservationTime.getStartAt());
+    public ReservationTimeResponseDto (ReservationTime reservationTime) {
+        this(
+                reservationTime.getId(),
+                reservationTime.getStartAt()
+        );
     }
 }

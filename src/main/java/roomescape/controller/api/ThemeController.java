@@ -1,9 +1,7 @@
 package roomescape.controller.api;
 
-import java.net.URI;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,22 +12,31 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
-import roomescape.service.ThemeService;
+import roomescape.service.query.ThemeQueryService;
+import roomescape.service.command.ThemeCommandService;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeService themeService;
+    private final ThemeQueryService themeQueryService;
+    private final ThemeCommandService themeCommandService;
 
-    public ThemeController(ThemeService themeService) {
-        this.themeService = themeService;
+    public ThemeController(ThemeQueryService themeQueryService, ThemeCommandService themeCommandService) {
+        this.themeQueryService = themeQueryService;
+        this.themeCommandService = themeCommandService;
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ThemeResponseDto> getAllThemes() {
-        return themeService.findAllThemes();
+        return themeQueryService.findAllThemes();
+    }
+
+    @GetMapping("/popular")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ThemeResponseDto> getPopularThemes() {
+        return themeQueryService.findPopularThemes();
     }
 
     @PostMapping
@@ -37,18 +44,12 @@ public class ThemeController {
     public ThemeResponseDto postTheme(
             @RequestBody final ThemeCreateRequestDto requestDto
     ) {
-        return themeService.createTheme(requestDto);
-    }
-
-    @GetMapping("/popular")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ThemeResponseDto> getPopularThemes() {
-        return themeService.findPopularThemes();
+        return themeCommandService.createTheme(requestDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTheme(@PathVariable("id") final Long id) {
-        themeService.deleteThemeById(id);
+        themeCommandService.deleteThemeById(id);
     }
 }

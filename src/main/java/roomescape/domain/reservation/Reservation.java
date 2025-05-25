@@ -82,9 +82,9 @@ public class Reservation {
         return status == ReservationStatus.WAITING;
     }
 
-    public static void validateReservableTime(final LocalDate date, final LocalTime startAt) {
+    public static void validateReservableTime(final LocalDate date, final LocalTime startAt, final LocalDateTime now){
        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
-        if (dateTime.isBefore(LocalDateTime.now())) {
+        if (dateTime.isBefore(now)) {
             throw new InvalidRequestException("[ERROR] 현 시점 이후의 날짜와 시간을 선택해주세요.");
         }
     }

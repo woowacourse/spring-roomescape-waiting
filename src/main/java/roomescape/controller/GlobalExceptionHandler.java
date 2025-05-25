@@ -23,6 +23,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException ex) {
         return new ErrorResponse(
                 ex.getMessage(),
@@ -31,6 +32,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleAuthorizationException(UnauthorizationException ex) {
         return new ErrorResponse(
                 ex.getMessage(),
@@ -39,6 +41,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleAccessDeniedException(AccessDeniedException ex) {
         return new ErrorResponse(
                 ex.getMessage(),
@@ -47,6 +50,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleDefault(Exception ex) {
         return new ErrorResponse(
                 ex.getMessage(),

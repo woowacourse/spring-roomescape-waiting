@@ -1,8 +1,5 @@
-package roomescape.service;
+package roomescape.service.command;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
@@ -15,49 +12,20 @@ import roomescape.repository.JpaThemeRepository;
 
 @Service
 @Transactional
-public class ThemeService {
-
-    private static final int POPULAR_THEMES_COUNT = 10;
+public class ThemeCommandService {
 
     private final JpaThemeRepository themeRepository;
     private final JpaReservationRepository reservationRepository;
-    private final Clock clock;
 
-    public ThemeService(final JpaThemeRepository themeRepository,
-                        final JpaReservationRepository reservationRepository,
-                        Clock clock
-    ) {
+    public ThemeCommandService(JpaThemeRepository themeRepository, JpaReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
-        this.clock = clock;
     }
 
     public ThemeResponseDto createTheme(final ThemeCreateRequestDto requestDto) {
         Theme requestTheme = requestDto.createWithoutId();
-        try {
-            Theme savedTheme = themeRepository.save(requestTheme);
-            return ThemeResponseDto.from(savedTheme);
-        } catch (IllegalStateException e) {
-            throw new DuplicateContentException(e.getMessage());
-        }
-    }
-
-    @Transactional(readOnly = true)
-    public List<ThemeResponseDto> findAllThemes() {
-        List<Theme> allTheme = themeRepository.findAll();
-        return allTheme.stream()
-                .map(ThemeResponseDto::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<ThemeResponseDto> findPopularThemes() {
-        LocalDate end = LocalDate.now(clock);
-        LocalDate start = end.minusDays(7);
-        return themeRepository.findMostReservedThemesBetween(start, end).stream()
-                .limit(POPULAR_THEMES_COUNT)
-                .map(ThemeResponseDto::from)
-                .toList();
+        Theme savedTheme = themeRepository.save(requestTheme);
+        return ThemeResponseDto.from(savedTheme);
     }
 
     public void deleteThemeById(final Long id) {

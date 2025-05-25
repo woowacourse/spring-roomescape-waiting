@@ -1,6 +1,7 @@
-package roomescape.service;
+package roomescape.service.command;
 
-import java.util.List;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,7 +9,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWaitingTicket;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.exception.NotFoundException;
@@ -21,60 +21,56 @@ import roomescape.service.dto.ReservationCreateDto;
 
 @Service
 @Transactional
-public class ReservationWaitingService {
+public class ReservationWaitingCommandService {
 
     private final JpaReservationWaitingTicketRepository reservationWaitingTicketRepository;
     private final JpaReservationRepository reservationRepository;
     private final JpaReservationTimeRepository reservationTimeRepository;
     private final JpaThemeRepository themeRepository;
     private final JpaMemberRepository memberRepository;
+    private final Clock clock;
 
-    public ReservationWaitingService(JpaReservationWaitingTicketRepository reservationWaitingTicketRepository,
-                                     JpaReservationRepository reservationRepository,
-                                     JpaReservationTimeRepository reservationTimeRepository,
-                                     JpaThemeRepository themeRepository, JpaMemberRepository memberRepository) {
+    public ReservationWaitingCommandService(JpaReservationWaitingTicketRepository reservationWaitingTicketRepository,
+                                            JpaReservationRepository reservationRepository,
+                                            JpaReservationTimeRepository reservationTimeRepository,
+                                            JpaThemeRepository themeRepository, JpaMemberRepository memberRepository,
+                                            Clock clock) {
         this.reservationWaitingTicketRepository = reservationWaitingTicketRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.clock = clock;
     }
 
 
-    public ReservationResponseDto createReservationWaiting(ReservationCreateDto createDto) {
+    public ReservationResponseDto createReservationWaiting(ReservationCreateDto request) {
         //todo 같은 멤버 검증
         // 1. 요청한 시간, 테마, 멤버 반환
-        ReservationTime reservationTime = reservationTimeRepository.findById(createDto.timeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + createDto.timeId()));
+        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
 
-        Reservation.validateReservableTime(createDto.date(), reservationTime.getStartAt());
+        Reservation.validateReservableTime(request.date(), reservationTime.getStartAt(), LocalDateTime.now(clock));
 
-        Theme theme = themeRepository.findById(createDto.themeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + createDto.themeId()));
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + request.themeId()));
 
-        Member member = memberRepository.findById(createDto.memberId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + createDto.memberId()));
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + request.memberId()));
 
         // 2. 예약 대기 등록
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                createDto.date(),
-                createDto.timeId(),
-                createDto.themeId())
+                request.date(),
+                request.timeId(),
+                request.themeId())
         ) {
             throw new IllegalArgumentException("[ERROR] 현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
         }
 
-        Reservation requestReservation = Reservation.createWaitingWithoutId(member, createDto.date(), reservationTime, theme);
+        Reservation requestReservation = Reservation.createWaitingWithoutId(member, request.date(), reservationTime, theme);
         Reservation newReservation = reservationRepository.save(requestReservation);
         reservationWaitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
         return ReservationResponseDto.of(newReservation);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationResponseDto> findAllReservationWaitings() {
-        return reservationRepository.findReservationsByStatus(ReservationStatus.WAITING).stream()
-                .map(ReservationResponseDto::of)
-                .toList();
     }
 
     public void deleteReservationWaiting(Long id) {
