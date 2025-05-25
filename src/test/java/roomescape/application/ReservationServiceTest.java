@@ -2,6 +2,7 @@ package roomescape.application;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.domain.ReservationStatus.RESERVED;
+import static roomescape.domain.ReservationStatus.WAITING;
 import static roomescape.domain.Role.USER;
 
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.entity.Theme;
+import roomescape.domain.entity.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +39,8 @@ public class ReservationServiceTest {
     private GameScheduleService gameScheduleService;
     @Mock
     private MemberService memberService;
+    @Mock
+    private WaitingService waitingService;
 
     @DisplayName("사용자 예약 목록 조회 성공")
     @Test
@@ -46,11 +50,11 @@ public class ReservationServiceTest {
         Member member = stubMember(memberId);
 
         Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
-        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        GameSchedule gameSchedule = GameSchedule.of(1L, LocalDate.now().plusDays(1), time, theme);
+        ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.of(10, 0));
+        GameSchedule reservationSchedule = GameSchedule.of(1L, LocalDate.now().plusDays(1), reservationTime, theme);
 
-        Reservation reservation1 = Reservation.of(1L, member, gameSchedule, RESERVED);
-        Reservation reservation2 = Reservation.of(2L, member, gameSchedule, RESERVED);
+        Reservation reservation1 = Reservation.of(1L, member, reservationSchedule, RESERVED);
+        Reservation reservation2 = Reservation.of(2L, member, reservationSchedule, RESERVED);
 
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
@@ -66,6 +70,50 @@ public class ReservationServiceTest {
                 () -> Assertions.assertThat(dtos).hasSize(2),
                 () -> Assertions.assertThat(dtos.get(0).reservationId()).isEqualTo(reservation1.getId()),
                 () -> Assertions.assertThat(dtos.get(1).reservationId()).isEqualTo(reservation2.getId())
+        );
+    }
+
+    @DisplayName("사용자 예약 목록에 예약 대기 목록도 포함하여 조회 성공")
+    @Test
+    void getReservationsAndWaitingsByMember() {
+        //given
+        Long memberId = 2L;
+        Member member = stubMember(memberId);
+
+        Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
+        ReservationTime time1 = ReservationTime.of(1L, LocalTime.of(10, 0));
+        ReservationTime time2 = ReservationTime.of(2L, LocalTime.of(11, 0));
+        GameSchedule reservationSchedule1 = GameSchedule.of(1L, LocalDate.now().plusDays(1), time1, theme);
+        GameSchedule reservationSchedule2 = GameSchedule.of(2L, LocalDate.now().plusDays(2), time1, theme);
+        GameSchedule waitingSchedule = GameSchedule.of(3L, LocalDate.now().plusDays(1), time2, theme);
+
+        Reservation reservation1 = Reservation.of(1L, member, reservationSchedule1, RESERVED);
+        Reservation reservation2 = Reservation.of(2L, member, reservationSchedule2, RESERVED);
+        Waiting waiting = Waiting.of(1L, member, waitingSchedule, WAITING);
+
+        List<Reservation> reservations = new ArrayList<>();
+        reservations.add(reservation1);
+        reservations.add(reservation2);
+        Mockito.doReturn(reservations).when(reservationRepository).findByMember(Mockito.any(Member.class));
+
+        ReservationStatusServiceResponse waitingDto = new ReservationStatusServiceResponse(
+                waiting.getId(),
+                waiting.getGameSchedule().getTheme().getName(),
+                waiting.getGameSchedule().getDate(),
+                waiting.getGameSchedule().getTime().getStartAt(),
+                waiting.getStatus().name()
+        );
+        Mockito.doReturn(List.of(waitingDto)).when(waitingService).getWaitingsByMember(memberId);
+
+        //when
+        List<ReservationStatusServiceResponse> dtos = reservationService.getReservationsByMember(memberId);
+
+        //then
+        assertAll(
+                () -> Assertions.assertThat(dtos).hasSize(3),
+                () -> Assertions.assertThat(dtos.get(0).reservationId()).isEqualTo(reservation1.getId()),
+                () -> Assertions.assertThat(dtos.get(1).reservationId()).isEqualTo(waiting.getId()),
+                () -> Assertions.assertThat(dtos.get(2).reservationId()).isEqualTo(reservation2.getId())
         );
     }
 

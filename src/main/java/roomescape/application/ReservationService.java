@@ -1,6 +1,8 @@
 package roomescape.application;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
@@ -22,15 +24,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final GameScheduleService gameScheduleService;
     private final MemberService memberService;
+    private final WaitingService waitingService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             GameScheduleService gameScheduleService,
-            MemberService memberService
+            MemberService memberService,
+            WaitingService waitingService
     ) {
         this.reservationRepository = reservationRepository;
         this.gameScheduleService = gameScheduleService;
         this.memberService = memberService;
+        this.waitingService = waitingService;
     }
 
     @Transactional
@@ -68,9 +73,19 @@ public class ReservationService {
     public List<ReservationStatusServiceResponse> getReservationsByMember(Long memberId) {
         Member member = memberService.getMemberEntityById(memberId);
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
-        return memberReservations.stream()
+        List<ReservationStatusServiceResponse> waitings = waitingService.getWaitingsByMember(memberId);
+        List<ReservationStatusServiceResponse> reservations = memberReservations.stream()
                 .map(ReservationService::createReservationStatusDto)
                 .toList();
+
+        List<ReservationStatusServiceResponse> total = new ArrayList<>();
+        total.addAll(reservations);
+        total.addAll(waitings);
+        total.sort(Comparator
+                .comparing(ReservationStatusServiceResponse::date)
+                .thenComparing(ReservationStatusServiceResponse::time)
+        );
+        return total;
     }
 
     private static ReservationStatusServiceResponse createReservationStatusDto(Reservation reservation) {

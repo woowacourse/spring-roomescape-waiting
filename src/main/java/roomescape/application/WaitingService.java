@@ -1,9 +1,11 @@
 package roomescape.application;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateServiceRequest;
+import roomescape.application.dto.ReservationStatusServiceResponse;
 import roomescape.application.dto.WaitingServiceResponse;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.entity.GameSchedule;
@@ -53,5 +55,23 @@ public class WaitingService {
         if (duplicated) {
             throw new IllegalArgumentException("예약대기는 한 번만 신청할 수 있습니다.");
         }
+    }
+
+    public List<ReservationStatusServiceResponse> getWaitingsByMember(Long memberId) {
+        List<Waiting> memberWaitings = waitingRepository.findByMemberId(memberId);
+        return memberWaitings.stream()
+                .map(WaitingService::createReservationStatusDto)
+                .toList();
+    }
+
+    private static ReservationStatusServiceResponse createReservationStatusDto(Waiting waiting) {
+        GameSchedule gameSchedule = waiting.getGameSchedule();
+        return new ReservationStatusServiceResponse(
+                waiting.getId(),
+                gameSchedule.getTheme().getName(),
+                gameSchedule.getDate(),
+                gameSchedule.getTime().getStartAt(),
+                ReservationStatus.name(waiting.getStatus())
+        );
     }
 }
