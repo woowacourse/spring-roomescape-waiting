@@ -11,7 +11,6 @@ import roomescape.booking.schedule.Schedule;
 import roomescape.booking.schedule.ScheduleService;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
-import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.member.Member;
 import roomescape.member.MemberService;
 
@@ -26,11 +25,10 @@ public class ReservationCreateService {
     @Transactional
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
         final Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
-        if (schedule.isPast()) {
-            throw new PastScheduleException();
-        }
-        final Member member = memberService.findByEmail(loginMember.email());
+        validatePast(schedule);
+        validateDuplicateReservation(schedule);
 
+        final Member member = memberService.findByEmail(loginMember.email());
         final Reservation savedReservation = saveReservation(schedule, member);
         return ReservationResponse.from(savedReservation);
     }
@@ -38,21 +36,18 @@ public class ReservationCreateService {
     @Transactional
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
         final Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
-        if (schedule.isPast()) {
-            throw new PastScheduleException();
-        }
-        final Member member = memberService.findById(request.memberId());
+        validatePast(schedule);
+        validateDuplicateReservation(schedule);
 
+        final Member member = memberService.findById(request.memberId());
         final Reservation savedReservation = saveReservation(schedule, member);
         return ReservationResponse.from(savedReservation);
     }
 
     private Reservation saveReservation(final Schedule schedule, final Member member) {
-        validateDuplicateReservation(schedule);
-        validatePast(schedule);
-
         final Reservation notSavedReservation = new Reservation(member, schedule);
-        return reservationRepository.save(notSavedReservation);
+        final Reservation savedReservation = reservationRepository.save(notSavedReservation);
+        return savedReservation;
     }
 
     private void validatePast(final Schedule schedule) {
