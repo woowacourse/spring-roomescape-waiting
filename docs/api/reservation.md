@@ -214,7 +214,7 @@ Content-Type: application/json
 ### Request
 
 ```
-DELETE /reservations/{id} HTTP/1.1
+DELETE /admin/reservations/{id} HTTP/1.1
 ```
 
 ### Response

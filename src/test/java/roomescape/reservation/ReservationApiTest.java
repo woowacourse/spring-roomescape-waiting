@@ -267,8 +267,8 @@ public class ReservationApiTest {
             // given
             // when
             RestAssured.given().log().all()
-                    .cookie(AUTH_COOKIE_NAME, MEMBER_1_TOKEN)
-                    .when().delete("/reservations/{id}", RESERVATION_ID_OF_MEMBER_1)
+                    .cookie(AUTH_COOKIE_NAME, ADMIN_TOKEN)
+                    .when().delete("/admin/reservations/{id}", RESERVATION_ID_OF_MEMBER_1)
                     .then().log().all()
                     .statusCode(204);
             // then

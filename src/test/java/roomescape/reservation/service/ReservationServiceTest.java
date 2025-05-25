@@ -31,8 +31,9 @@ class ReservationServiceTest {
     private final FakeReservationDao reservationDao = new FakeReservationDao();
     private final FakeThemeDao themeDao = new FakeThemeDao();
     private final FakeMemberDao fakeMemberDao = new FakeMemberDao();
-    private final ReservationService reservationService = new ReservationService(reservationDao, reservationTimeDao,
-            themeDao, fakeMemberDao, null);
+    private final ReservationQueryService reservationQueryService = new ReservationQueryService(reservationDao, null);
+    private final ReservationCommandService reservationCommandService = new ReservationCommandService(reservationDao,
+            reservationTimeDao, themeDao, fakeMemberDao, null);
 
     private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
 
@@ -45,8 +46,8 @@ class ReservationServiceTest {
                 TOMORROW, TIME.getId(), THEME.getId(), MEMBER.getId());
         CreateReservationWithMemberRequest request2 = new CreateReservationWithMemberRequest(TOMORROW.plusDays(1),
                 TIME.getId(), THEME.getId(), MEMBER.getId());
-        reservationService.createReservation(request1);
-        reservationService.createReservation(request2);
+        reservationCommandService.createReservation(request1);
+        reservationCommandService.createReservation(request2);
     }
 
     @DisplayName("예약 생성 테스트")
@@ -64,7 +65,7 @@ class ReservationServiceTest {
         @Test
         void testCreate() {
             // when
-            ReservationResponse result = reservationService.createReservation(REQUEST);
+            ReservationResponse result = reservationCommandService.createReservation(REQUEST);
             // then
             Reservation savedReservation = reservationDao.findById(3L).orElseThrow();
             assertAll(
@@ -95,10 +96,10 @@ class ReservationServiceTest {
         @Test
         void testValidateDuplication() {
             // given
-            reservationService.createReservation(REQUEST);
+            reservationCommandService.createReservation(REQUEST);
             // when
             // then
-            assertThatThrownBy(() -> reservationService.createReservation(REQUEST))
+            assertThatThrownBy(() -> reservationCommandService.createReservation(REQUEST))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("해당 시간에 이미 예약이 존재합니다.");
         }
@@ -111,7 +112,7 @@ class ReservationServiceTest {
                     THEME.getId(), MEMBER.getId());
             // when
             // then
-            assertThatThrownBy(() -> reservationService.createReservation(request))
+            assertThatThrownBy(() -> reservationCommandService.createReservation(request))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("예약 시간이 존재하지 않습니다.");
         }
@@ -124,7 +125,7 @@ class ReservationServiceTest {
                     2L, MEMBER.getId());
             // when
             // then
-            assertThatThrownBy(() -> reservationService.createReservation(request))
+            assertThatThrownBy(() -> reservationCommandService.createReservation(request))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("테마가 존재하지 않습니다.");
         }
@@ -138,7 +139,7 @@ class ReservationServiceTest {
                     THEME.getId(), MEMBER.getId());
             // when
             // then
-            assertThatThrownBy(() -> reservationService.createReservation(request))
+            assertThatThrownBy(() -> reservationCommandService.createReservation(request))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");
         }
@@ -149,7 +150,7 @@ class ReservationServiceTest {
     void testFindAll() {
         // given
         // when
-        List<ReservationResponse> reservations = reservationService.getReservations();
+        List<ReservationResponse> reservations = reservationQueryService.getReservations();
         // then
         assertThat(reservations).hasSize(2);
     }
@@ -160,9 +161,9 @@ class ReservationServiceTest {
     void testCancelById() {
         // given
         // when
-        reservationService.cancelReservationById(1L);
+        reservationCommandService.cancelReservationById(1L);
         // then
-        assertThat(reservationService.getReservations()).hasSize(1);
+        assertThat(reservationQueryService.getReservations()).hasSize(1);
     }
 
     @DisplayName("나의 예약 목록을 조회할 수 있다.")
@@ -174,7 +175,7 @@ class ReservationServiceTest {
                 MEMBER.getEmail().getValue(),
                 MEMBER.getRole().name());
         // when
-        List<MyReservationResponse> myReservations = reservationService.getMyReservations(loginMember);
+        List<MyReservationResponse> myReservations = reservationQueryService.getMyReservations(loginMember);
         // then
         assertThat(myReservations).hasSize(2);
     }
