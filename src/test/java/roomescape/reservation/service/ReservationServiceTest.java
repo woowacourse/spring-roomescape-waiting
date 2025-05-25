@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
@@ -74,7 +77,7 @@ class ReservationServiceTest {
         assertThat(result).isEmpty();
     }
 
-    @DisplayName("예약을 삭제한다")
+    @DisplayName("권한이 어드민인 경우 예약을 삭제한다")
     @Test
     void test7() {
         // given
@@ -94,6 +97,32 @@ class ReservationServiceTest {
         // then
         assertThatCode(() -> reservationService.delete(id, LoginMember.of(member)))
                 .doesNotThrowAnyException();
+    }
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @DisplayName("권한이 멤버인 경우 다른 사람의 예약을 삭제할 수 없다.")
+    @Test
+    void cannotDeleteOtherReservation() {
+        // given
+        Member me = new Member("me", "test@test.com", "12341234", Role.MEMBER);
+        Member other = new Member("other", "test@test.com", "12341234", Role.MEMBER);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        Theme theme = new Theme("theme", "desc", "thumbnail");
+
+        Reservation myReservation = new Reservation(me, LocalDate.now().plusDays(1), time, theme);
+
+        entityManager.persist(me);
+        entityManager.persist(other);
+        entityManager.persist(time);
+        entityManager.persist(theme);
+        entityManager.persist(myReservation);
+
+        // when & then
+        assertThatThrownBy(() -> {
+            reservationService.delete(myReservation.getId(), LoginMember.of(other));
+        }).isInstanceOf(ForbiddenException.class);
     }
 
     @DisplayName("예약이 존재하지 않으면 예외를 반환한다.")
