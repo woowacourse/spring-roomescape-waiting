@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 
-public interface JpaReservationRepository extends ListCrudRepository<Reservation, Long> {
+public interface JpaReservationRepository extends ListCrudRepository<Reservation, Long>, ReservationRepository {
 
     @Query("""
             SELECT r
@@ -79,5 +79,5 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             JOIN FETCH r.member m
             WHERE m.id = :memberId
             """)
-    List<Reservation> findAllByMemberId(@Param("memberId") Long memberId);
+    List<Reservation> findByMemberId(@Param("memberId") Long memberId);
 }

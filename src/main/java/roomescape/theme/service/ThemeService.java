@@ -49,7 +49,7 @@ public class ThemeService {
     public List<ThemeResponse> getPopularThemes() {
         final LocalDate date = LocalDate.now();
         Pageable pageable = PageRequest.of(0, DEFAULT_POPULAR_SIZE);
-        return themeRepository.findTop10PopularThemesWithinLastWeek(date.minusDays(POPULAR_START_DAYS),
+        return themeRepository.findPopularThemesWithinDateRange(date.minusDays(POPULAR_START_DAYS),
                         date.minusDays(POPULAR_END_DAYS), pageable)
                 .stream()
                 .map(ThemeResponse::from)

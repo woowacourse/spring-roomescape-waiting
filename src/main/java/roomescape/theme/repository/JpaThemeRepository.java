@@ -8,7 +8,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.theme.domain.Theme;
 
-public interface JpaThemeRepository extends ListCrudRepository<Theme, Long> {
+public interface JpaThemeRepository extends ListCrudRepository<Theme, Long>, ThemeRepository {
 
 
     @Query("""
