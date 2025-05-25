@@ -29,13 +29,13 @@ public class ReservationIntegrationTest {
         ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 날짜는 null 일 수 없습니다.", "/reservations");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(reservation)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
@@ -53,13 +53,13 @@ public class ReservationIntegrationTest {
         ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 요청 날짜 형식이 맞지 않습니다.", "/reservations");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(reservation)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
@@ -76,13 +76,13 @@ public class ReservationIntegrationTest {
         ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 요청 입력이 잘못되었습니다.", "/reservations");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(reservation)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
@@ -99,13 +99,13 @@ public class ReservationIntegrationTest {
         ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 예약 시간 번호는 null 일 수 없습니다.", "/reservations");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(reservation)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
@@ -126,8 +126,8 @@ public class ReservationIntegrationTest {
             .extract().cookie("token");
 
         RestAssured.given().log().all()
-            .when().header("Cookie", "token="+token)
-            .delete("/reservations/10")
+            .header("Cookie", "token=" + token)
+            .when().delete("/reservations/10")
             .then().log().all()
             .statusCode(400);
     }

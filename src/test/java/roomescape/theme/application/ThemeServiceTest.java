@@ -22,6 +22,7 @@ import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
+import roomescape.theme.application.ThemeServiceTest.ThemeConfig;
 import roomescape.theme.application.service.ThemeCommandService;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
@@ -29,7 +30,6 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
 import roomescape.theme.presentation.dto.PopularThemeResponse;
-import roomescape.theme.application.ThemeServiceTest.ThemeConfig;
 
 @DataJpaTest
 @Import(ThemeConfig.class)

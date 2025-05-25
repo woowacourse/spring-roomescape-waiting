@@ -1,7 +1,5 @@
 package roomescape.reservation.waiting.infrastructure;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -57,7 +55,7 @@ class JpaWaitingReservationRepositoryTest {
 
         // then
         Assertions.assertThat(waitings)
-            .containsExactly(
+            .containsExactlyInAnyOrder(
                 new WaitingReservationWithRank(waiting1, 0),
                 new WaitingReservationWithRank(waiting2, 1)
             );

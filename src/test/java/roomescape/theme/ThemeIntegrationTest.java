@@ -25,10 +25,10 @@ public class ThemeIntegrationTest {
     @Test
     void theme_view() {
         RestAssured.given().log().all()
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+            .when().get("/themes")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(0));
     }
 
     @DisplayName("테마를 추가 및 삭제 할 수 있다.")
@@ -40,22 +40,22 @@ public class ThemeIntegrationTest {
         params.put("thumbnail", "테스트3");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(201)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(201)
+            .extract()
+            .response();
 
         ThemeResponse expected = new ThemeResponse(1L, "테스트1", "테스트2", "테스트3");
         ThemeResponse actual = response.as(ThemeResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
 
         RestAssured.given().log().all()
-                .when().delete("/themes/1")
-                .then().log().all()
-                .statusCode(204);
+            .when().delete("/themes/1")
+            .then().log().all()
+            .statusCode(204);
     }
 
     @DisplayName("테마 이름이 null 또는 빈 상태로 생성 요청 시 400 응답을 준다.")
@@ -70,13 +70,13 @@ public class ThemeIntegrationTest {
         ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 테마 이름이 비어있을 수 없습니다.", "/themes");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
@@ -93,13 +93,13 @@ public class ThemeIntegrationTest {
         ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 테마 설명이 비어있을 수 없습니다.", "/themes");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
@@ -116,13 +116,13 @@ public class ThemeIntegrationTest {
         ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 테마 썸네일이 비어있을 수 없습니다.", "/themes");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/themes")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
