@@ -16,10 +16,10 @@ import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
-import roomescape.reservationslot.presentation.dto.request.AdminReservationCreateRequest;
-import roomescape.reservationslot.presentation.dto.request.ReservationCreateRequest;
-import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
-import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
+import roomescape.reservationslot.presentation.dto.request.AdminReservationSlotCreateRequest;
+import roomescape.reservationslot.presentation.dto.request.ReservationSlotCreateRequest;
+import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
+import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
 
 @RestController
 public class ReservationSlotController {
@@ -31,24 +31,24 @@ public class ReservationSlotController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<List<ReservationResponse>> findReservations(
+    public ResponseEntity<List<ReservationSlotResponse>> findReservations(
             @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        List<ReservationResponse> reservations = reservationSlotApplicationService.findReservations(themeId, memberId,
+        List<ReservationSlotResponse> reservations = reservationSlotApplicationService.findReservations(themeId, memberId,
                 dateFrom, dateTo);
         return ResponseEntity.ok(reservations);
     }
 
     @RequireRole(MemberRole.REGULAR)
     @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
-            @RequestBody ReservationCreateRequest request,
+    public ResponseEntity<ReservationSlotResponse> createReservation(
+            @RequestBody ReservationSlotCreateRequest request,
             MemberInfo memberInfo
     ) {
-        ReservationResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
+        ReservationSlotResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
                 request.themeId(),
                 memberInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -56,10 +56,10 @@ public class ReservationSlotController {
 
     @RequireRole(MemberRole.ADMIN)
     @PostMapping("/admin/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
-            @RequestBody AdminReservationCreateRequest request
+    public ResponseEntity<ReservationSlotResponse> createReservation(
+            @RequestBody AdminReservationSlotCreateRequest request
     ) {
-        ReservationResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
+        ReservationSlotResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
                 request.themeId(),
                 request.memberId(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -76,8 +76,8 @@ public class ReservationSlotController {
 
     @RequireRole(MemberRole.REGULAR)
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MyReservationResponse>> findMyReservations(MemberInfo memberInfo) {
-        List<MyReservationResponse> myReservations = reservationSlotApplicationService.findMyReservations(memberInfo);
+    public ResponseEntity<List<MyReservationSlotResponse>> findMyReservations(MemberInfo memberInfo) {
+        List<MyReservationSlotResponse> myReservations = reservationSlotApplicationService.findMyReservations(memberInfo);
         return ResponseEntity.ok().body(myReservations);
     }
 }

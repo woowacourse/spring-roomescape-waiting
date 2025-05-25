@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservationslot.presentation.dto.request.ReservationCreateRequest;
-import roomescape.reservationslot.presentation.dto.response.WaitingReservationResponse;
+import roomescape.reservationslot.presentation.dto.request.ReservationSlotCreateRequest;
+import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 import roomescape.reservation.application.ReservationApplicationService;
-import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @RestController
 public class ReservationController {
@@ -28,13 +27,13 @@ public class ReservationController {
 
     @RequireRole(MemberRole.REGULAR)
     @PostMapping("/waiting-reservations")
-    public ResponseEntity<WaitingReservationResponse> addWaitingReservations(
-            @RequestBody ReservationCreateRequest request,
+    public ResponseEntity<ReservationResponse> addWaitingReservations(
+            @RequestBody ReservationSlotCreateRequest request,
             MemberInfo memberInfo
     ) {
-        WaitingReservationResponse waitingReservationResponse = reservationApplicationService.addWaiting(
+        ReservationResponse reservationResponse = reservationApplicationService.addWaiting(
                 request.date(), request.timeId(), request.themeId(), memberInfo.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(waitingReservationResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponse);
     }
 
     @RequireRole(MemberRole.REGULAR)
@@ -49,9 +48,9 @@ public class ReservationController {
 
     @RequireRole(MemberRole.ADMIN)
     @GetMapping("/admin/waiting-reservations")
-    public ResponseEntity<List<ReservationResponse>> findAllWaitingReservations(
+    public ResponseEntity<List<roomescape.reservation.presentation.dto.ReservationResponse>> findAllWaitingReservations(
     ) {
-        List<ReservationResponse> responses = reservationApplicationService.findAllWaitingReservations();
+        List<roomescape.reservation.presentation.dto.ReservationResponse> responses = reservationApplicationService.findAllWaitingReservations();
         return ResponseEntity.ok(responses);
     }
 

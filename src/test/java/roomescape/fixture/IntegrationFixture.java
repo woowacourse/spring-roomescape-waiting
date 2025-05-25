@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.MediaType;
 import roomescape.common.security.dto.request.LoginRequest;
-import roomescape.reservationslot.presentation.dto.response.WaitingReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 
 public class IntegrationFixture {
 
@@ -87,7 +87,7 @@ public class IntegrationFixture {
                 .body("size()", is(size));
     }
 
-    public static WaitingReservationResponse makeWaitingReservations() {
+    public static ReservationResponse makeWaitingReservations() {
         createReservationTime();
         createTheme("추리");
         createRegularReservation(1L);
@@ -98,7 +98,7 @@ public class IntegrationFixture {
         reservation.put("timeId", 1L);
         reservation.put("themeId", 1L);
 
-        WaitingReservationResponse waitingReservationResponse = RestAssured.given().log().all()
+        ReservationResponse reservationResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, user2Token)
                 .body(reservation)
@@ -106,7 +106,7 @@ public class IntegrationFixture {
                 .then().log().all()
                 .statusCode(201)
                 .extract()
-                .as(WaitingReservationResponse.class);
-        return waitingReservationResponse;
+                .as(ReservationResponse.class);
+        return reservationResponse;
     }
 }

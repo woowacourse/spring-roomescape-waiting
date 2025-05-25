@@ -19,14 +19,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import roomescape.member.domain.Member;
-import roomescape.reservationslot.exception.InvalidReservationException;
-import roomescape.reservationslot.exception.ReservationAlreadyExistsException;
-import roomescape.reservationslot.exception.ReservationNotFoundException;
+import roomescape.reservationslot.exception.InvalidReservationSlotException;
+import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.exception.SlotReservationNotFoundException;
+import roomescape.reservation.exception.ReservationNotFoundException;
 
 @Entity
 @Table(name = "reservation_slots")
@@ -73,7 +73,7 @@ public class ReservationSlot {
 
     private static void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {
         if (LocalDateTime.of(date, time).isBefore(now)) {
-            throw new InvalidReservationException("예약 시간이 현재 시간보다 이전일 수 없습니다.");
+            throw new InvalidReservationSlotException("예약 시간이 현재 시간보다 이전일 수 없습니다.");
         }
     }
 
@@ -81,7 +81,7 @@ public class ReservationSlot {
         boolean alreadyWaiting = this.reservations.stream()
                 .anyMatch(waiting -> waiting.getMember().getId().equals(member.getId()));
         if (alreadyWaiting) {
-            throw new ReservationAlreadyExistsException("이미 예약 대기중입니다.");
+            throw new ReservationSlotAlreadyExistsException("이미 예약 대기중입니다.");
         }
         Reservation reservation = new Reservation(ReservationStatus.WAITING, member, this);
         this.reservations.add(reservation);
@@ -93,12 +93,12 @@ public class ReservationSlot {
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .map(Reservation::getMember)
                 .findFirst()
-                .orElseThrow(() -> new ReservationNotFoundException("현재 예약한 멤버가 없습니다."));
+                .orElseThrow(() -> new ReservationSlotNotFoundException("현재 예약한 멤버가 없습니다."));
     }
 
     public long findRank(final Reservation givenReservation) {
         if (!reservations.contains(givenReservation)) {
-            throw new SlotReservationNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
+            throw new ReservationNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
         }
         List<Reservation> sortedReservations = new ArrayList<>(reservations)
                 .stream()

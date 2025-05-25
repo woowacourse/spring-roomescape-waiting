@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import roomescape.reservationslot.exception.ReservationNotFoundException;
+import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
@@ -43,7 +43,7 @@ public class ThemeDomainService {
 
     public Theme findTheme(final Long request) {
         return themeRepository.findById(request)
-                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
+                .orElseThrow(() -> new ReservationSlotNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
     }
 
     public void deleteById(final Long id) {
@@ -62,6 +62,6 @@ public class ThemeDomainService {
 
     public Theme findById(final Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
+                .orElseThrow(() -> new ReservationSlotNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
     }
 }

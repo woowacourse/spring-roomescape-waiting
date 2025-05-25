@@ -19,9 +19,9 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.service.MemberDomainService;
 import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
-import roomescape.reservationslot.exception.ReservationAlreadyExistsException;
-import roomescape.reservationslot.exception.ReservationNotFoundException;
-import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
+import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
+import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
+import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
@@ -77,7 +77,7 @@ class ReservationSlotDomainServiceTest {
 
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
-        ReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
+        ReservationSlotResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
                 afterOneHour);
 
         Assertions.assertAll(
@@ -93,17 +93,17 @@ class ReservationSlotDomainServiceTest {
         reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
         reservationSlotApplicationService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
 
-        List<ReservationResponse> result = reservationSlotApplicationService.findReservations(null, null, null, null);
+        List<ReservationSlotResponse> result = reservationSlotApplicationService.findReservations(null, null, null, null);
         assertThat(result).hasSize(2);
     }
 
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
-        ReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
+        ReservationSlotResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
                 afterOneHour);
         reservationSlotApplicationService.delete(response.id());
 
-        List<ReservationResponse> result = reservationSlotApplicationService.findReservations(themeId, memberId, futureDate,
+        List<ReservationSlotResponse> result = reservationSlotApplicationService.findReservations(themeId, memberId, futureDate,
                 futureDate.plusDays(1));
         assertThat(result).isEmpty();
     }
@@ -115,7 +115,7 @@ class ReservationSlotDomainServiceTest {
 
         assertThatThrownBy(
                 () -> reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour))
-                .isInstanceOf(ReservationAlreadyExistsException.class)
+                .isInstanceOf(ReservationSlotAlreadyExistsException.class)
                 .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
 
@@ -123,7 +123,7 @@ class ReservationSlotDomainServiceTest {
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(
                 () -> reservationSlotApplicationService.create(futureDate, 999L, themeId, memberId, afterOneHour))
-                .isInstanceOf(ReservationNotFoundException.class)
+                .isInstanceOf(ReservationSlotNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
 }

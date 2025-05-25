@@ -4,11 +4,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
-import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.exception.SlotReservationOwnerException;
+import roomescape.reservation.exception.ReservationOwnerException;
 
 @Service
 public class ReservationDomainService {
@@ -23,10 +23,10 @@ public class ReservationDomainService {
         return reservationRepository.save(reservation);
     }
 
-    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
+    public List<MyReservationSlotResponse> findMyReservations(final MemberInfo memberInfo) {
         return reservationRepository.findByReservationMemberId(memberInfo.id())
                 .stream()
-                .map(MyReservationResponse::from)
+                .map(MyReservationSlotResponse::from)
                 .toList();
     }
 
@@ -39,7 +39,7 @@ public class ReservationDomainService {
     public void validateWaitingOwner(final Long reservationId, final Long memberId) {
         boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationId, memberId);
         if (!doesExists) {
-            throw new SlotReservationOwnerException("자신의 예약 대기가 아닙니다.");
+            throw new ReservationOwnerException("자신의 예약 대기가 아닙니다.");
         }
     }
 

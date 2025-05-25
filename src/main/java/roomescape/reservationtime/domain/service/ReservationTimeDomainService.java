@@ -2,7 +2,7 @@ package roomescape.reservationtime.domain.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservationslot.exception.ReservationNotFoundException;
+import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
@@ -40,7 +40,7 @@ public class ReservationTimeDomainService {
 
     public ReservationTime findReservationTime(final Long reservationTimeId) {
         return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
+                .orElseThrow(() -> new ReservationSlotNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
     }
 
     public ReservationTime save(final ReservationTime reservationTime) {

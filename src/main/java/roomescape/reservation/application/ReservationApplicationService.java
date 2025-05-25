@@ -7,10 +7,9 @@ import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservationslot.presentation.dto.response.WaitingReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.service.ReservationDomainService;
-import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @Service
 public class ReservationApplicationService {
@@ -27,24 +26,24 @@ public class ReservationApplicationService {
         this.reservationDomainService = reservationDomainService;
     }
 
-    public WaitingReservationResponse addWaiting(final LocalDate date, final Long timeId, final Long themeId,
-                                                 final Long memberId) {
+    public ReservationResponse addWaiting(final LocalDate date, final Long timeId, final Long themeId,
+                                          final Long memberId) {
         ReservationSlot reservationSlot = reservationSlotDomainService.getReservationByDateAndTimeAndTheme(date, timeId, themeId);
         Member member = memberDomainService.getMember(memberId);
         Reservation reservation = reservationSlot.addMemberToWaiting(member);
         reservationDomainService.save(reservation);
 
-        return WaitingReservationResponse.from(reservation);
+        return ReservationResponse.from(reservation);
     }
 
     public void removeWaiting(final Long reservationId, final Long memberId) {
         reservationDomainService.deleteByReservationSlotIdAndMemberId(reservationId, memberId);
     }
 
-    public List<ReservationResponse> findAllWaitingReservations() {
+    public List<roomescape.reservation.presentation.dto.ReservationResponse> findAllWaitingReservations() {
         List<Reservation> reservations = reservationDomainService.findAllWaitingReservations();
         return reservations.stream()
-                .map(ReservationResponse::from)
+                .map(roomescape.reservation.presentation.dto.ReservationResponse::from)
                 .toList();
     }
 

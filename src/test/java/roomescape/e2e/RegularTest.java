@@ -28,8 +28,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.common.security.dto.request.LoginRequest;
 import roomescape.common.security.dto.response.CheckLoginResponse;
-import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
-import roomescape.reservationslot.presentation.dto.response.WaitingReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
+import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 import roomescape.reservation.domain.ReservationStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -117,9 +117,9 @@ public class RegularTest {
 
     @Test
     void createWaitingReservations() {
-        WaitingReservationResponse waitingReservationResponse = makeWaitingReservations();
+        ReservationResponse reservationResponse = makeWaitingReservations();
 
-        assertThat(waitingReservationResponse.reservationStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(reservationResponse.reservationStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class RegularTest {
         createWaitingReservations();
         String user2Token = loginAndGetAuthToken(REGULAR2_EMAIL, PASSWORD);
 
-        List<MyReservationResponse> responses = RestAssured.given().log().all()
+        List<MyReservationSlotResponse> responses = RestAssured.given().log().all()
                 .cookie(TOKEN, user2Token)
                 .when().get("/reservations-mine")
                 .then().log().all()
@@ -154,7 +154,7 @@ public class RegularTest {
         reservation.put("timeId", 1L);
         reservation.put("themeId", 1L);
 
-        WaitingReservationResponse waitingReservationResponse = RestAssured.given().log().all()
+        ReservationResponse reservationResponse = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, user2Token)
                 .body(reservation)
@@ -162,9 +162,9 @@ public class RegularTest {
                 .then().log().all()
                 .statusCode(201)
                 .extract()
-                .as(WaitingReservationResponse.class);
+                .as(ReservationResponse.class);
 
-        Long reservationId = waitingReservationResponse.reservationId();
+        Long reservationId = reservationResponse.reservationId();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -174,7 +174,7 @@ public class RegularTest {
                 .then().log().all()
                 .statusCode(204);
 
-        List<MyReservationResponse> responses = RestAssured.given().log().all()
+        List<MyReservationSlotResponse> responses = RestAssured.given().log().all()
                 .cookie(TOKEN, user2Token)
                 .when().get("/reservations-mine")
                 .then().log().all()

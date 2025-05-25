@@ -23,7 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.fixture.TestFixture;
 import roomescape.member.presentation.dto.request.SignupRequest;
 import roomescape.member.presentation.dto.response.MemberResponse;
-import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -115,7 +115,7 @@ public class GuestTest {
         createRegularReservation(1L);
         createRegularReservation(2L);
 
-        List<ReservationResponse> reservationsFilteredByThemeId = RestAssured.given().log().all()
+        List<ReservationSlotResponse> reservationsFilteredByThemeId = RestAssured.given().log().all()
                 .when().queryParams("themeId", 1L, "memberId", 2L, "dateFrom", FUTURE_DATE,
                         "dateTo", TestFixture.makeFutureDate().plusDays(1).toString())
                 .get("/reservations")

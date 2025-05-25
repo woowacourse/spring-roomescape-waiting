@@ -9,8 +9,8 @@ import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
-import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
+import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
+import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.theme.domain.Theme;
@@ -38,9 +38,9 @@ public class ReservationSlotApplicationService {
         this.reservationDomainService = slotReservationDomainService;
     }
 
-    public List<ReservationResponse> findReservations(final Long themeId, final Long memberId,
-                                                      final LocalDate startDate,
-                                                      final LocalDate endDate) {
+    public List<ReservationSlotResponse> findReservations(final Long themeId, final Long memberId,
+                                                          final LocalDate startDate,
+                                                          final LocalDate endDate) {
         List<ReservationSlot> filteredReservations = reservationSlotDomainService.findFilteredReservations(themeId, memberId,
                 startDate, endDate);
         return filteredReservations
@@ -49,7 +49,7 @@ public class ReservationSlotApplicationService {
                     ReservationTime time = reservation.getTime();
                     Theme theme = reservation.getTheme();
                     Member member = reservation.findReservedMember();
-                    return ReservationResponse.of(reservation, time, theme, member);
+                    return ReservationSlotResponse.of(reservation, time, theme, member);
                 })
                 .toList();
     }
@@ -58,18 +58,18 @@ public class ReservationSlotApplicationService {
         reservationSlotDomainService.delete(id);
     }
 
-    public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
-                                      final LocalDateTime now) {
+    public ReservationSlotResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
+                                          final LocalDateTime now) {
         reservationSlotDomainService.checkIfReservationDoesNotExists(date, timeId, themeId);
         ReservationTime time = reservationTimeDomainService.findReservationTime(timeId);
         Theme theme = themeDomainService.findTheme(themeId);
         Member member = memberDomainService.getMember(memberId);
 
         ReservationSlot newReservationSlot = reservationSlotDomainService.save(member, date, time, theme, now);
-        return ReservationResponse.of(newReservationSlot, time, theme, member);
+        return ReservationSlotResponse.of(newReservationSlot, time, theme, member);
     }
 
-    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
+    public List<MyReservationSlotResponse> findMyReservations(final MemberInfo memberInfo) {
         return reservationDomainService.findMyReservations(memberInfo);
     }
 }
