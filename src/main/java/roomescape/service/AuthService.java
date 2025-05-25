@@ -4,9 +4,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
+import roomescape.domain.LoginMember;
 import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequestDto;
-import roomescape.dto.response.MemberResponseDto;
 import roomescape.dto.response.TokenResponseDto;
 import roomescape.repository.MemberRepository;
 
@@ -37,11 +37,11 @@ public class AuthService {
         return new TokenResponseDto(token);
     }
 
-    public MemberResponseDto getMemberByToken(String tokenFromCookie) {
+    public LoginMember getMemberByToken(String tokenFromCookie) {
         String payload = jwtProvider.getPayload(tokenFromCookie);
         Member member = findMemberByEmail(payload);
 
-        return new MemberResponseDto(member);
+        return LoginMember.from(member);
     }
 
     public Member getAuthenticatedMember(String tokenFromCookie) {

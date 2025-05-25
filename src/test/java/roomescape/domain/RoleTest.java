@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,5 +26,18 @@ class RoleTest {
 
         // then
         assertThat(role).isEqualTo(expected);
+    }
+
+    @DisplayName("roel 이 ADMIN이라면 true를 반환한다.")
+    @Test
+    void isAdmin() {
+        //given
+        Role role = Role.ADMIN;
+
+        //when
+        boolean actual = Role.isAdmin(role);
+
+        //then
+        assertThat(actual).isTrue();
     }
 }

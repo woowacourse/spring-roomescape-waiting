@@ -72,8 +72,8 @@ public class ReservationService {
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.id());
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.getId());
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.getId());
 
         return getMemberReservationResponseDtos(reservations, waitingWithRanks);
     }
@@ -95,7 +95,7 @@ public class ReservationService {
     private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
         ReservationTime time = findTimeById(reservationRegisterDto.timeId());
         Theme theme = findThemeById(reservationRegisterDto.themeId());
-        Member member = findMemberById(loginMember.id());
+        Member member = findMemberById(loginMember.getId());
 
         return reservationRegisterDto.convertToReservation(time, theme, member);
     }

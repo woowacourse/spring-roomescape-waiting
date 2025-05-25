@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.LoginMember;
 import roomescape.domain.Role;
-import roomescape.dto.response.MemberResponseDto;
 import roomescape.service.JwtProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -38,15 +38,15 @@ public class AuthAcceptanceTest {
                 , name, email, "password", Role.ADMIN.getValue());
 
         // when
-        MemberResponseDto memberResponseDto = RestAssured.given().log().all()
+        LoginMember loginMember = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(200)
-                .extract().as(MemberResponseDto.class);
+                .extract().as(LoginMember.class);
 
         // then
-        assertThat(memberResponseDto.name()).isEqualTo(name);
+        assertThat(loginMember.getEmail()).isEqualTo(email);
     }
 }

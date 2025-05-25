@@ -78,7 +78,7 @@ class WaitingServiceTest {
                 reservation.getReservationTime().getId()
         );
 
-        LoginMember loginMember = new LoginMember(reservation.getMember());
+        LoginMember loginMember = LoginMember.from(reservation.getMember());
 
         //when
         Long actual = waitingService.register(request, loginMember);
@@ -93,7 +93,7 @@ class WaitingServiceTest {
         //given
         Reservation reservation = createReservation();
 
-        LoginMember loginMember = new LoginMember(reservation.getMember());
+        LoginMember loginMember = LoginMember.from(reservation.getMember());
 
         WaitingRequestDto request = new WaitingRequestDto(
                 reservation.getDate(),
@@ -145,7 +145,7 @@ class WaitingServiceTest {
         Member savedOtherMember = memberRepository.save(
                 new Member("test2", "test2", "test2", Role.USER));
 
-        LoginMember loginMember = new LoginMember(savedOtherMember);
+        LoginMember loginMember = LoginMember.from(savedOtherMember);
 
         //when
         Long actual = waitingService.register(request, loginMember);
@@ -166,7 +166,7 @@ class WaitingServiceTest {
                 reservation.getReservationTime().getId()
         );
 
-        LoginMember loginMember = new LoginMember(reservation.getMember());
+        LoginMember loginMember = LoginMember.from(reservation.getMember());
 
         Long savedId = waitingService.register(request, loginMember);
 

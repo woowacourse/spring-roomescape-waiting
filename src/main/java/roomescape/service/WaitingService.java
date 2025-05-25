@@ -45,7 +45,7 @@ public class WaitingService {
                 waitingRequestDto.theme(),
                 waitingRequestDto.time()
         );
-        final Member member = findMember(loginMember.id());
+        final Member member = findMember(loginMember.getId());
         final LocalDateTime currentDateTime = timeProvider.getCurrentDateTime();
         final Waiting waiting = createWaiting(reservation, member, currentDateTime);
 

@@ -22,4 +22,8 @@ public enum Role {
                 .orElseThrow(() -> new IllegalArgumentException("조건에 알맞는 Role 이 존재하지 않습니다."));
     }
 
+    public static boolean isAdmin(final Role role) {
+        return ADMIN.equals(role);
+    }
+
 }

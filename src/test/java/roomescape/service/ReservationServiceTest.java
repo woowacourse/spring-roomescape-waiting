@@ -143,7 +143,7 @@ class ReservationServiceTest {
     void test6() {
         //given
         Reservation savedReservation = createSaveReservation();
-        LoginMember loginMember = new LoginMember(savedReservation.getMember());
+        LoginMember loginMember = LoginMember.from(savedReservation.getMember());
 
         Waiting savedWaiting = createSaveWaiting(savedReservation);
         WaitingWithRank waitingWithRank = new WaitingWithRank(savedWaiting, 0L);
@@ -196,7 +196,7 @@ class ReservationServiceTest {
     private LoginMember getLoginMember() {
         Member member = new Member("도기", "test", "test", Role.ADMIN);
         memberRepository.save(member);
-        return new LoginMember(member);
+        return LoginMember.from(member);
     }
 
 

@@ -65,7 +65,7 @@ class LoginMemberArgumentResolverTest {
         // then
         assertAll(
                 () -> assertThat(result).isInstanceOf(LoginMember.class),
-                () -> assertThat(loginMember.email()).isEqualTo(email)
+                () -> assertThat(loginMember.getEmail()).isEqualTo(email)
         );
     }
 }

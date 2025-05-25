@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.domain.LoginMember;
 import roomescape.domain.Role;
-import roomescape.dto.response.MemberResponseDto;
 import roomescape.presentation.support.CookieUtils;
 import roomescape.service.AuthService;
 
@@ -31,12 +31,11 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
 
         String token = cookieUtils.getToken(request);
 
-        MemberResponseDto memberResponseDto = authService.getMemberByToken(token);
-        if (!memberResponseDto.role().equals(Role.ADMIN)) {
-            response.setStatus(401);
-            return false;
+        LoginMember loginMember = authService.getMemberByToken(token);
+        if (Role.isAdmin(loginMember.getRole())) {
+            return true;
         }
-
-        return true;
+        response.setStatus(401);
+        return false;
     }
 }
