@@ -28,7 +28,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             WHERE w.member.id = :memberId
             ORDER BY w.createdDate ASC
             """)
-    List<WaitingWithRank> findWithRankingByMember(long memberId);
+    List<WaitingWithRank> findWithRankingByMember(@Param("memberId") long memberId);
 
     @Query("""
             SELECT EXISTS(

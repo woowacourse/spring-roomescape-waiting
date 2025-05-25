@@ -32,31 +32,36 @@ class WaitingRepositoryTest {
     @Test
     void findWithRankingByMember() {
         // given
-        Member targetMember = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원1", "member1@test.com", "qwer1234!"));
-        Member otherMember = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원2", "member2@test.com", "qwer1234!"));
-
         ReservationTime time = entityManager.persist(
                 ReservationTime.createWithoutId(LocalTime.of(10, 0)));
         Theme theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
 
-        Waiting waitingWithOtherMember = entityManager.persist(
+        Member otherMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원2", "member2@test.com", "qwer1234!"));
+        Member targetMember = entityManager.persist(
+                Member.createWithoutId(Role.GENERAL, "회원1", "member1@test.com", "qwer1234!"));
+
+        Waiting otherMemberWaiting = entityManager.persist(
                 Waiting.createWithoutId(NEXT_DAY, theme, time, otherMember));
-        Waiting waitingWithTargetMember = entityManager.persist(
+        Waiting targetMemberWaiting = entityManager.persist(
                 Waiting.createWithoutId(NEXT_DAY, theme, time, targetMember));
 
         entityManager.flush();
 
         // when
-        List<WaitingWithRank> waitingWithRankings = waitingRepository.findWithRankingByMember(targetMember.getId());
+        List<WaitingWithRank> waitingWithRankings =
+                waitingRepository.findWithRankingByMember(targetMemberWaiting.getId());
 
         // then
         assertAll(
                 () -> assertThat(waitingWithRankings).hasSize(1),
-                () -> assertThat(waitingWithRankings.getFirst().id()).isEqualTo(waitingWithTargetMember.getId()),
-                () -> assertThat(waitingWithRankings.getFirst().rank()).isEqualTo(2)
+                () -> assertThat(waitingWithRankings)
+                        .extracting(WaitingWithRank::id)
+                        .containsExactly(targetMemberWaiting.getId()),
+                () -> assertThat(waitingWithRankings)
+                        .extracting(WaitingWithRank::rank)
+                        .containsExactly(2L)
         );
     }
 
