@@ -6,10 +6,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
 import roomescape.application.reservation.dto.CreateWaitingParam;
+import roomescape.application.reservation.dto.WaitingWitStatusResult;
 import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
@@ -148,5 +150,57 @@ class WaitingServiceTest extends AbstractServiceIntegrationTest {
         assertThatThrownBy(() -> waitingService.create(createWaitingParam))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessage("이미 예약 대기 중입니다.");
+    }
+
+    @Test
+    void 사용자의_예약_대기를_랭킹과_함께_조회할_수_있다() {
+        //given
+        Member member1 = memberRepository.save(Member.create("벨로", new Email("test1@email.com"), "pw", Role.NORMAL));
+        Member member2 = memberRepository.save(Member.create("서프", new Email("test2@email.com"), "pw", Role.NORMAL));
+        Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
+        ReservationTime time1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
+        ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(14, 0)));
+        waitingRepository.save(Waiting.create(
+                LocalDateTime.now(clock).minusDays(2),
+                new ReservationSlot(LocalDate.now(clock), time1, theme),
+                member1
+        ));
+        waitingRepository.save(Waiting.create(
+                LocalDateTime.now(clock).minusDays(1),
+                new ReservationSlot(LocalDate.now(clock), time1, theme),
+                member2
+        ));
+        waitingRepository.save(Waiting.create(
+                LocalDateTime.now(clock).minusDays(1),
+                new ReservationSlot(LocalDate.now(clock), time2, theme),
+                member1
+        ));
+        waitingRepository.save(Waiting.create(
+                LocalDateTime.now(clock).minusDays(2),
+                new ReservationSlot(LocalDate.now(clock), time2, theme),
+                member2
+        ));
+
+        //when
+        List<WaitingWitStatusResult> waitingRanks = waitingService.findWaitingRanks(member1.getId());
+
+        //then
+        assertThat(waitingRanks)
+                .isEqualTo(List.of(
+                        new WaitingWitStatusResult(
+                                1L,
+                                "테마",
+                                LocalDate.now(clock),
+                                LocalTime.of(13, 0),
+                                1
+                        ),
+                        new WaitingWitStatusResult(
+                                3L,
+                                "테마",
+                                LocalDate.now(clock),
+                                LocalTime.of(14, 0),
+                                2
+                        )
+                ));
     }
 }
