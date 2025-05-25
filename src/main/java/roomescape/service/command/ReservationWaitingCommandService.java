@@ -53,7 +53,6 @@ public class ReservationWaitingCommandService {
         ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NotFoundException("예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
 
-        Reservation.validateReservableTime(request.date(), reservationTime.getStartAt(), LocalDateTime.now(clock));
 
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. id : " + request.themeId()));
@@ -71,6 +70,7 @@ public class ReservationWaitingCommandService {
         }
 
         Reservation requestReservation = new Reservation(member, request.date(), reservationTime, theme, ReservationStatus.WAITING);
+        requestReservation.validateReservableTime(LocalDateTime.now(clock));
         Reservation newReservation = reservationRepository.save(requestReservation);
         reservationWaitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
         return ReservationResponseDto.of(newReservation);

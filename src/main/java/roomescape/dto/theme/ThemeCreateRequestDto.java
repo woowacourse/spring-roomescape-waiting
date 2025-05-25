@@ -9,6 +9,6 @@ public record ThemeCreateRequestDto
 ) {
 
     public Theme createWithoutId() {
-        return new Theme(null, name, description, thumbnail);
+        return new Theme(name, description, thumbnail);
     }
 }

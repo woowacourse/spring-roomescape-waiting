@@ -18,7 +18,6 @@ import roomescape.exception.InvalidRequestException;
 
 @Entity
 public class Reservation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,15 +44,12 @@ public class Reservation {
             final Theme theme,
             final ReservationStatus status
     ) {
-        validateDate(date);
-        validateReservationTime(time);
-        validateTheme(theme);
         this.id = id;
-        this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.status = status;
+        this.member = Objects.requireNonNull(member);
+        this.date = Objects.requireNonNull(date, "예약 날짜는 반드시 입력해야 합니다. 예시) YYYY-MM-DD");
+        this.time = Objects.requireNonNull(time);
+        this.theme = Objects.requireNonNull(theme);
+        this.status = Objects.requireNonNull(status);
     }
 
     public Reservation (Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
@@ -71,28 +67,10 @@ public class Reservation {
         return status == ReservationStatus.WAITING;
     }
 
-    public static void validateReservableTime(final LocalDate date, final LocalTime startAt, final LocalDateTime now){
-       LocalDateTime dateTime = LocalDateTime.of(date, startAt);
+    public void validateReservableTime(final LocalDateTime now){
+       LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
         if (dateTime.isBefore(now)) {
             throw new InvalidRequestException("현 시점 이후의 날짜와 시간을 선택해주세요.");
-        }
-    }
-
-    private void validateDate(final LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("예약 날짜는 반드시 입력해야 합니다. 예시) YYYY-MM-DD");
-        }
-    }
-
-    private void validateReservationTime(ReservationTime reservationTime) {
-        if (reservationTime == null) {
-            throw new IllegalArgumentException("예약 시간을 반드시 입력해야 합니다.");
-        }
-    }
-
-    private void validateTheme(final Theme theme) {
-        if (theme == null) {
-            throw new IllegalArgumentException("테마는 반드시 입력해야 합니다.");
         }
     }
 

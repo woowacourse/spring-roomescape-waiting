@@ -48,15 +48,13 @@ public class ReservationCommandService {
                 .orElseThrow(() -> new NotFoundException("예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
 
         validateDuplicate(request.date(), request.timeId(), request.themeId());
-        Reservation.validateReservableTime(request.date(), reservationTime.getStartAt(), LocalDateTime.now());
-
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. id : " + request.themeId()));
-
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. id : " + request.memberId()));
-
         Reservation requestReservation = new Reservation(member, request.date(), reservationTime, theme, ReservationStatus.RESERVED);
+        requestReservation.validateReservableTime(LocalDateTime.now());
+
         Reservation newReservation = reservationRepository.save(requestReservation);
 
         return ReservationResponseDto.of(newReservation);

@@ -9,6 +9,6 @@ public record ReservationTimeCreateRequestDto(
 ) {
 
     public ReservationTime createWithoutId() {
-        return new ReservationTime(null, startAt);
+        return new ReservationTime(startAt);
     }
 }

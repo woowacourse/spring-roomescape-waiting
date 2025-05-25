@@ -1,5 +1,7 @@
 package roomescape.dto.auth;
 
-public record LoginRequestDto(String email, String password) {
-
+public record LoginRequestDto(
+        String email,
+        String password
+) {
 }
