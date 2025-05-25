@@ -1,4 +1,4 @@
-INSERT INTO theme(name, description, thumbnail)
+INSERT INTO themes(name, description, thumbnail)
 VALUES ('추리', '셜록 with Danny', 'image/thumbnail.png'),
        ('공포', '어둠 속의 비명', 'image/thumbnail.png'),
        ('모험', '잃어버린 도시', 'image/thumbnail.png'),
@@ -12,14 +12,14 @@ VALUES ('추리', '셜록 with Danny', 'image/thumbnail.png'),
        ('로맨스', '잃어버린 편지', 'image/thumbnail.png'),
        ('논리', '퍼즐 마스터', 'image/thumbnail.png');
 
-INSERT INTO reservation_time(start_at)
+INSERT INTO reservation_times(start_at)
 VALUES ('08:00'),
        ('12:00'),
        ('14:00'),
        ('16:00'),
        ('18:00');
 
-INSERT INTO member (name, email, password, member_role)
+INSERT INTO members (name, email, password, member_role)
 VALUES ('Admin', 'admin@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'ADMIN'),
        ('Regular', 'user@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'REGULAR'),
        ('Alice', 'alice@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'REGULAR'),
@@ -51,7 +51,7 @@ VALUES ('Admin', 'admin@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5
        ('Daniel', 'daniel@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR');
 
 -- Reservation 테이블 데이터 (ReservationStatus 제거)
-INSERT INTO reservation(date, time_id, theme_id)
+INSERT INTO reservations(date, time_id, theme_id)
 VALUES
     -- theme_id = 12 (6회) - 2025-05-10
     ('2025-05-10', 1, 12),  -- ID: 1
@@ -105,7 +105,7 @@ VALUES
     ('2025-05-11', 2, 12);  -- ID: 27
 
 -- Waiting 테이블 데이터 (WaitingStatus enum 값 사용)
-INSERT INTO waiting(reservation_id, member_id, waiting_status, created_at)
+INSERT INTO waitings(reservation_id, member_id, waiting_status, created_at)
 VALUES
     -- Reservation ID 1 (테마12, 5/10, 시간1) - Alice, Bob, Carol이 대기
     (1, 3, 'CURRENT', '2025-05-09 10:00:00'),

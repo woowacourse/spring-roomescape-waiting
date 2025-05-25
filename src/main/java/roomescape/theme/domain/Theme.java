@@ -5,14 +5,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.util.Objects;
 import roomescape.theme.exception.InvalidThemeException;
 
 @Entity
+@Table(name = "themes")
 public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "theme_id")
     private Long id;
 
     @Column(nullable = false, unique = true)

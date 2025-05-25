@@ -18,13 +18,14 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 
 @Entity
-@Table(name = "waiting",
+@Table(name = "waitings",
         uniqueConstraints = @UniqueConstraint(columnNames = {"reservation_id", "member_id"})
 )
 public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "waiting_id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -39,7 +40,7 @@ public class Waiting {
     @JoinColumn(name = "reservation_id", nullable = false)
     private Reservation reservation;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Waiting(final WaitingStatus waitingStatus, final Member member, final Reservation reservation) {

@@ -10,18 +10,21 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import roomescape.member.exception.InvalidMemberException;
 import roomescape.waiting.domain.Waiting;
 
 @Entity
+@Table(name = "members")
 public class Member {
 
     private static final int MAX_NAME_LENGTH = 10;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
     @Column(nullable = false, unique = true)
