@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
 import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
+import roomescape.reservation.application.dto.SlotSequenceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
@@ -307,5 +308,56 @@ class ReservationQueryServiceTest {
 
         // then
         assertThat(found).containsExactlyInAnyOrder(r1, r2);
+    }
+
+    @Test
+    @DisplayName("유저가 예약한 예약들의 슬롯 내 순번을 확인할 수 있다")
+    void getAllSlotSequenceResponseByUserId() {
+        // given
+        final User user1 = userRepository.save(
+                User.withoutId(
+                        UserName.from("유저1"),
+                        Email.from("user1@email.com"),
+                        Password.fromEncoded("pw"),
+                        UserRole.NORMAL));
+        final User user2 = userRepository.save(
+                User.withoutId(
+                        UserName.from("유저2"),
+                        Email.from("user2@email.com"),
+                        Password.fromEncoded("pw"),
+                        UserRole.NORMAL));
+        final User user3 = userRepository.save(
+                User.withoutId(
+                        UserName.from("유저3"),
+                        Email.from("user3@email.com"),
+                        Password.fromEncoded("pw"),
+                        UserRole.NORMAL));
+
+        final Theme theme = themeRepository.save(
+                Theme.withoutId(
+                        ThemeName.from("테마1"),
+                        ThemeDescription.from("desc"),
+                        ThemeThumbnail.from("thumb")));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+        final ReservationDate date1 = ReservationDate.from(LocalDate.of(2025, 6, 1));
+        final ReservationDate date2 = ReservationDate.from(LocalDate.of(2025, 6, 2));
+
+        final Reservation r1_1 = reservationRepository.save(Reservation.withoutId(user1.getId(), date1, time, theme));
+        final Reservation r1_2 = reservationRepository.save(Reservation.withoutId(user2.getId(), date1, time, theme));
+        final Reservation r1_3 = reservationRepository.save(Reservation.withoutId(user3.getId(), date1, time, theme));
+
+        final Reservation r2_1 = reservationRepository.save(Reservation.withoutId(user3.getId(), date2, time, theme));
+        final Reservation r2_2 = reservationRepository.save(Reservation.withoutId(user2.getId(), date2, time, theme));
+        final Reservation r2_3 = reservationRepository.save(Reservation.withoutId(user1.getId(), date2, time, theme));
+
+        // when
+        final List<SlotSequenceResponse> allSlotSequenceResponseByUser1 =
+                reservationQueryService.getAllSlotSequenceResponseByUserId(user1.getId());
+
+        // then
+        assertThat(allSlotSequenceResponseByUser1).hasSize(2);
+        assertThat(allSlotSequenceResponseByUser1.contains(new SlotSequenceResponse(r1_1.getId(), r1_1.getSlot(), 1))).isTrue();
+        assertThat(allSlotSequenceResponseByUser1.contains(new SlotSequenceResponse(r2_3.getId(), r2_3.getSlot(), 3))).isTrue();
+
     }
 }
