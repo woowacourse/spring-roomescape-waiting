@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.application.exception.DuplicateReservationException;
 import roomescape.common.BaseTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -153,7 +154,7 @@ class ReservationServiceTest extends BaseTest {
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
         assertThatThrownBy(() -> reservationService.createReservation(request, loginMember))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(DuplicateReservationException.class);
     }
 
     @Test
@@ -163,7 +164,7 @@ class ReservationServiceTest extends BaseTest {
         Member member = memberDbFixture.한스_사용자();
         Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
 
-        reservationService.deleteReservationById(reservation.getId());
+        reservationService.deleteReservationById(reservation.getId(), member.getId());
 
         List<ReservationResponse> responses = reservationService.getReservations();
         assertThat(responses).hasSize(0);
@@ -171,7 +172,7 @@ class ReservationServiceTest extends BaseTest {
 
     @Test
     void 존재하지_않는_예약을_삭제하면_예외가_발생한다() {
-        assertThatThrownBy(() -> reservationService.deleteReservationById(3L))
+        assertThatThrownBy(() -> reservationService.deleteReservationById(3L, 1L))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -210,7 +211,7 @@ class ReservationServiceTest extends BaseTest {
 
         assertAll(
                 () -> assertThat(myReservations).hasSize(1),
-                () -> assertThat(myReservations.getFirst().reservationId()).isEqualTo(reservation.getId())
+                () -> assertThat(myReservations.getFirst().id()).isEqualTo(reservation.getId())
         );
     }
 }

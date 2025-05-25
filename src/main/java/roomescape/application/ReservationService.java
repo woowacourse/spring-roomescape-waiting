@@ -2,7 +2,8 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.application.exception.DuplicateWaitingException;
+import roomescape.application.exception.AuthorizationException;
+import roomescape.application.exception.DuplicateReservationException;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
@@ -10,8 +11,8 @@ import roomescape.domain.ReservationDateTime;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.infrastructure.repository.ReservationRepository;
-import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
+import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
@@ -19,6 +20,7 @@ import roomescape.presentation.dto.response.ReservationResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 @Transactional(readOnly = true)
@@ -97,8 +99,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservationById(Long id) {
+    public void deleteReservationById(Long id, Long memberId) {
         Reservation reservation = findReservationById(id);
+        if (!Objects.equals(reservation.getMember().getId(), memberId)) {
+            throw new AuthorizationException("[ERROR] 본인 예약만 삭제할 수 있습니다.");
+        }
         reservationRepository.delete(reservation);
     }
 
@@ -127,7 +132,7 @@ public class ReservationService {
     private void validateDuplicateReservation(LocalDate date, Long themeId, Long timeId, Long memberId) {
         boolean isAlreadyReserved = reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(date, themeId, timeId, memberId);
         if (isAlreadyReserved) {
-            throw new DuplicateWaitingException("[ERROR] 이미 예약을 요청한 상태입니다.");
+            throw new DuplicateReservationException("[ERROR] 이미 예약을 요청한 상태입니다.");
         }
     }
 }
