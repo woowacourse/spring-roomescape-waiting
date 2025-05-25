@@ -35,4 +35,8 @@ public class MemberFixture {
     public static Member notSavedMember2() {
         return Member.of("머피", "mu@ffy.com", "비밀번호", AuthRole.MEMBER);
     }
+
+    public static Member notSavedMember3() {
+        return Member.of("우가", "woo@ga.com", "비밀번호", AuthRole.MEMBER);
+    }
 }
