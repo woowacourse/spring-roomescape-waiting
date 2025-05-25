@@ -40,7 +40,7 @@ public class Waiting {
     }
 
     public Reservation toReservation() {
-        return Reservation.create(member, reservationSlot);
+        return Reservation.create(startedAt, member, reservationSlot);
     }
 
     public Long getId() {

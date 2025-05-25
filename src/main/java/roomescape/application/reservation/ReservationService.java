@@ -46,8 +46,7 @@ public class ReservationService {
         if (isAlreadyReservedAt(reservationSlot)) {
             throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
         }
-        Reservation reservation = Reservation.create(member, reservationSlot);
-        reservation.validateReservable(LocalDateTime.now(clock));
+        Reservation reservation = Reservation.create(LocalDateTime.now(clock), member, reservationSlot);
         return reservationRepository.save(reservation).getId();
     }
 

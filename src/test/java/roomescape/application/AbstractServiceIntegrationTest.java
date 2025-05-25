@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +30,14 @@ public abstract class AbstractServiceIntegrationTest {
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1;");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1;");
+        jdbcTemplate.update("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1;");
     }
 
     @TestConfiguration
     public static class TestContextConfiguration {
 
         @Bean
+        @Primary
         public Clock clock() {
             return Clock.fixed(Instant.parse("2025-05-08T13:00:00Z"), ZoneId.of("Asia/Seoul"));
         }

@@ -3,8 +3,8 @@ package roomescape.application.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -121,7 +121,8 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
-        reservationRepository.save(Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time, theme)));
+        reservationRepository.save(Reservation.create(
+                LocalDateTime.now(clock).minusDays(1), member, new ReservationSlot(LocalDate.now(clock), time, theme)));
         CreateReservationParam param = new CreateReservationParam(
                 LocalDate.now(clock),
                 time.getId(),
@@ -143,8 +144,14 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(14, 0)));
-        reservationRepository.save(Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time1, theme)));
-        reservationRepository.save(Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time2, theme)));
+        reservationRepository.save(Reservation.create(
+                LocalDateTime.now(clock).minusDays(1),
+                member,
+                new ReservationSlot(LocalDate.now(clock), time1, theme)));
+        reservationRepository.save(Reservation.create(
+                LocalDateTime.now(clock).minusDays(1),
+                member,
+                new ReservationSlot(LocalDate.now(clock), time2, theme)));
 
         // when
         List<ReservationResult> reservationResults = reservationService.findAll();
@@ -170,9 +177,6 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
                 );
     }
 
-    @Autowired
-    private EntityManager entityManager;
-
     @Test
     void 예약을_id로_조회할_수_있다() {
         // given
@@ -180,15 +184,16 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         Reservation reservation = reservationRepository.save(
-                Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time, theme)));
-        entityManager.flush();
-        entityManager.clear();
+                Reservation.create(
+                        LocalDateTime.now(clock),
+                        member,
+                        new ReservationSlot(LocalDate.now(clock).plusDays(1), time, theme)));
 
         // when
         ReservationResult result = reservationService.findById(reservation.getId());
 
         // then
-//        assertThat(result.memberResult().name()).isEqualTo("벨로");
+        assertThat(result.memberResult().name()).isEqualTo("벨로");
     }
 
     @Test
@@ -198,9 +203,13 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(14, 0)));
-        reservationRepository.save(Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time1, theme)));
+        reservationRepository.save(Reservation.create(
+                LocalDateTime.now(clock).minusDays(1),
+                member,
+                new ReservationSlot(LocalDate.now(clock), time1, theme)));
         reservationRepository.save(
-                Reservation.create(member, new ReservationSlot(LocalDate.now(clock).plusDays(1), time2, theme)));
+                Reservation.create(LocalDateTime.now(clock), member,
+                        new ReservationSlot(LocalDate.now(clock).plusDays(1), time2, theme)));
         ReservationSearchParam reservationSearchParam = new ReservationSearchParam(
                 theme.getId(),
                 member.getId(),
@@ -232,9 +241,15 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         ReservationTime time2 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(14, 0)));
-        reservationRepository.save(Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time1, theme)));
+        reservationRepository.save(Reservation.create(
+                LocalDateTime.now(clock).minusDays(1),
+                member,
+                new ReservationSlot(LocalDate.now(clock), time1, theme)));
         reservationRepository.save(
-                Reservation.create(member, new ReservationSlot(LocalDate.now(clock).plusDays(1), time2, theme)));
+                Reservation.create(
+                        LocalDateTime.now(clock).minusDays(1),
+                        member,
+                        new ReservationSlot(LocalDate.now(clock).plusDays(1), time2, theme)));
 
         // when
         List<ReservationWithStatusResult> reservationsWithStatus = reservationService.findReservationsWithStatus(

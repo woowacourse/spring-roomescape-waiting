@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,7 +149,10 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("test", "test", "test"));
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
         reservationRepository.save(
-                Reservation.create(member, new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme)));
+                Reservation.create(
+                        LocalDateTime.now(clock),
+                        member,
+                        new ReservationSlot(LocalDate.now(clock).plusDays(1), reservationTime, theme)));
 
         // when
         // then
@@ -165,7 +169,10 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         ReservationTime reservationTime1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
         reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         reservationRepository.save(
-                Reservation.create(member, new ReservationSlot(LocalDate.now().plusDays(1), reservationTime1, theme)));
+                Reservation.create(
+                        LocalDateTime.now(clock),
+                        member,
+                        new ReservationSlot(LocalDate.now(clock).plusDays(1), reservationTime1, theme)));
 
         // when
         List<AvailableReservationTimeResult> availableTimesByThemeIdAndDate = reservationTimeService.findAvailableTimesByThemeIdAndDate(

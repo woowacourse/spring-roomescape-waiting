@@ -50,7 +50,10 @@ class ReservationCancelServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         Reservation reservation = reservationRepository.save(
-                Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time, theme)));
+                Reservation.create(
+                        LocalDateTime.now(clock).minusDays(1),
+                        member,
+                        new ReservationSlot(LocalDate.now(clock), time, theme)));
 
         // when
         reservationCancelService.cancel(reservation.getId());
@@ -69,7 +72,8 @@ class ReservationCancelServiceTest extends AbstractServiceIntegrationTest {
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
 
         ReservationSlot reservationSlot = new ReservationSlot(LocalDate.now(clock), time, theme);
-        Reservation reservation = reservationRepository.save(Reservation.create(member1, reservationSlot));
+        Reservation reservation = reservationRepository.save(
+                Reservation.create(LocalDateTime.now(clock).minusDays(1), member1, reservationSlot));
         LocalDateTime waitingStartedAt = LocalDateTime.now(clock).minusDays(1);
         Waiting waiting = waitingRepository.save(Waiting.create(waitingStartedAt, reservationSlot, member2));
         waitingRepository.save(Waiting.create(waitingStartedAt.plusHours(1), reservationSlot, member3));

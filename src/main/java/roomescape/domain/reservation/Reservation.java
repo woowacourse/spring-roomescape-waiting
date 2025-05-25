@@ -51,13 +51,9 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public static Reservation create(Member member, ReservationSlot reservationSlot) {
-        return new Reservation(null, member, ReservationStatus.RESERVE, reservationSlot);
-    }
-
-    // TODO: themeSchedule이 예약 validate를 하는게 맞아?
-    public void validateReservable(LocalDateTime currentDateTime) {
+    public static Reservation create(LocalDateTime currentDateTime, Member member, ReservationSlot reservationSlot) {
         reservationSlot.validateReservable(currentDateTime);
+        return new Reservation(null, member, ReservationStatus.RESERVE, reservationSlot);
     }
 
     public Long getId() {
