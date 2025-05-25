@@ -1,20 +1,29 @@
 package roomescape.waiting.servcie;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ConflictException;
 import roomescape.exception.ExceptionCause;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingWithRank;
+import roomescape.waiting.domain.WaitingSlot;
+import roomescape.waiting.domain.WaitingStatus;
+import roomescape.waiting.dto.AdminWaitingResponse;
+import roomescape.waiting.dto.AdminWaitingUpdateResponse;
 import roomescape.waiting.dto.WaitingCreateRequest;
 import roomescape.waiting.dto.WaitingCreateResponse;
 import roomescape.waiting.repository.WaitingRepository;
@@ -53,11 +62,57 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    public List<AdminWaitingResponse> getWaitings() {
+        List<Waiting> waitings = waitingRepository.findAllEligibleWaitingForReservation();
+        List<Waiting> earliestWaitingOnly = getEarliestWaitingOnly(waitings);
+        return earliestWaitingOnly.stream()
+                .sorted(Comparator.comparing(Waiting::getId))
+                .map(AdminWaitingResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public AdminWaitingUpdateResponse updateWaitingStatus(WaitingStatus status, Long waitingId) {
+        Waiting waiting = findWaitingById(waitingId);
+        waiting.updateStatus(status);
+        if (status == WaitingStatus.APPROVED) {
+            updateWaitingToReservation(waiting);
+        }
+        return AdminWaitingUpdateResponse.from(status);
+    }
+
+    private void updateWaitingToReservation(Waiting waiting) {
+        if(reservationRepository.existsByDateAndTimeIdAndThemeId(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
+            throw new ConflictException(ExceptionCause.RESERVATION_ALREADY_BOOKED);
+        }
+        Reservation reservation = new Reservation(waiting.getMember(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme());
+        reservationRepository.save(reservation);
+    }
+
+    private Waiting findWaitingById(Long waitingId) {
+        return waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new NotFoundException(ExceptionCause.WAITING_NOTFOUND));
+    }
+
+    private List<Waiting> getEarliestWaitingOnly(List<Waiting> waitings) {
+        Map<WaitingSlot, Waiting> earliestWaitingOnly = new HashMap<>();
+        for (Waiting waiting : waitings) {
+            WaitingSlot key = WaitingSlot.from(waiting);
+            if (!earliestWaitingOnly.containsKey(key) || waiting.getCreatedAt().isBefore(earliestWaitingOnly.get(key).getCreatedAt())) {
+                earliestWaitingOnly.put(key, waiting);
+            }
+        }
+        return earliestWaitingOnly.values().stream().toList();
+    }
+
     private Waiting buildWaiting(WaitingCreateRequest waitingCreateRequest, Member member) {
         ReservationTime time = findReservationTimeById(waitingCreateRequest.time());
         Theme theme = findThemeById(waitingCreateRequest.theme());
         validateDateTime(LocalDateTime.of(waitingCreateRequest.date(), time.getStartAt()));
-        return new Waiting(waitingCreateRequest.date(), member, theme, time, LocalDateTime.now());
+        return new Waiting(waitingCreateRequest.date(), member, theme, time, LocalDateTime.now(), WaitingStatus.PENDING);
     }
 
     private Theme findThemeById(Long themeId) {

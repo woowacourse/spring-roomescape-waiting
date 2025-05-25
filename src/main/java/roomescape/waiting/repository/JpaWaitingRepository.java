@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingWithRank;
+import roomescape.waiting.dto.WaitingWithRank;
 
 @Repository
 public class JpaWaitingRepository implements WaitingRepository {
@@ -21,6 +21,11 @@ public class JpaWaitingRepository implements WaitingRepository {
     @Override
     public Waiting save(Waiting waiting) {
         return waitingListCrudRepository.save(waiting);
+    }
+
+    @Override
+    public List<Waiting> findAllEligibleWaitingForReservation() {
+        return waitingListCrudRepository.findAllEligibleWaitingForReservation();
     }
 
     @Override
