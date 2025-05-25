@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.domain.BusinessRuleViolationException;
 
 @Embeddable
@@ -42,6 +43,23 @@ public class ReservationSlot {
         if (duration.toMinutes() < 10) {
             throw new BusinessRuleViolationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
         }
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof ReservationSlot that)) {
+            return false;
+        }
+        return Objects.equals(date, that.date) && Objects.equals(time, that.time)
+                && Objects.equals(theme, that.theme);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(date);
+        result = 31 * result + Objects.hashCode(time);
+        result = 31 * result + Objects.hashCode(theme);
+        return result;
     }
 
     public LocalDate date() {

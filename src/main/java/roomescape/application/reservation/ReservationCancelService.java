@@ -31,7 +31,7 @@ public class ReservationCancelService {
     }
 
     private Optional<Waiting> findTopStartedWaiting(Long reservationId) {
-        return reservationRepository.findThemeScheduleById(reservationId)
+        return reservationRepository.findReservationSlotById(reservationId)
                 .flatMap(waitingRepository::findTopByReservationSlotOrderByStartedAtAsc);
     }
 }

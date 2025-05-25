@@ -41,5 +41,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                              @Param("member") Member member);
 
     @Query("SELECT r.reservationSlot FROM Reservation r WHERE r.id = :reservationId")
-    Optional<ReservationSlot> findThemeScheduleById(@Param("reservationId") Long reservationId);
+    Optional<ReservationSlot> findReservationSlotById(@Param("reservationId") Long reservationId);
 }

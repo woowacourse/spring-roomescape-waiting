@@ -36,7 +36,6 @@ public class Waiting {
     }
 
     public static Waiting create(LocalDateTime startedAt, ReservationSlot reservationSlot, Member member) {
-        reservationSlot.validateReservable(startedAt);
         return new Waiting(null, startedAt, reservationSlot, member);
     }
 
