@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.DomainFixtures.JUNK_THEME;
 import static roomescape.DomainFixtures.JUNK_USER;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.DateUtils;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
@@ -71,7 +71,8 @@ class TimeSlotServiceTest {
     void deleteTimeSlotWithReservation() {
         // given
         var timeSlotToBeRemoved = service.saveTimeSlot(LocalTime.of(10, 0));
-        var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, DateUtils.tomorrow(),
+        var tomorrow = LocalDate.now().plusDays(1);
+        var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, tomorrow,
                 timeSlotToBeRemoved, JUNK_THEME);
         reservationRepository.save(reservationWithTheTimeSlot);
 

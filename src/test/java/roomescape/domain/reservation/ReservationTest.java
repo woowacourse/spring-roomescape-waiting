@@ -5,9 +5,9 @@ import static roomescape.DomainFixtures.JUNK_THEME;
 import static roomescape.DomainFixtures.JUNK_TIME_SLOT;
 import static roomescape.DomainFixtures.JUNK_USER;
 
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.DateUtils;
 import roomescape.exception.BusinessRuleViolationException;
 
 class ReservationTest {
@@ -16,7 +16,7 @@ class ReservationTest {
     @DisplayName("예약 일시가 현재 일시보다 이전이면 예외가 발생한다.")
     void isBefore() {
         // given
-        var yesterday = DateUtils.yesterday();
+        var yesterday = LocalDate.now().minusDays(1);
 
         // when & then
         assertThatThrownBy(

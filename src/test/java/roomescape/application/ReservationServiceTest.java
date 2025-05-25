@@ -4,14 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.DateUtils.afterNDay;
-import static roomescape.DateUtils.today;
-import static roomescape.DateUtils.tomorrow;
-import static roomescape.DateUtils.yesterday;
 import static roomescape.DomainFixtures.JUNK_THEME;
 import static roomescape.DomainFixtures.JUNK_TIME_SLOT;
 import static roomescape.DomainFixtures.JUNK_USER;
 
+import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +22,6 @@ import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
-import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
 
@@ -34,12 +30,11 @@ import roomescape.exception.BusinessRuleViolationException;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationServiceTest {
 
+    @Autowired
     private ReservationService service;
 
     @Autowired
     private ReservationRepository reservationRepository;
-    @Autowired
-    private WaitingRepository waitingRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -49,8 +44,6 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReservationService(reservationRepository, waitingRepository, timeSlotRepository, themeRepository,
-                userRepository);
         userRepository.save(JUNK_USER);
         themeRepository.save(JUNK_THEME);
         timeSlotRepository.save(JUNK_TIME_SLOT);
@@ -60,12 +53,13 @@ class ReservationServiceTest {
     @DisplayName("예약을 추가할 수 있다.")
     void saveReservation() {
         // given
-        var date = tomorrow();
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
+        var tomorrow = LocalDate.now().plusDays(1);
+        var timeSlotId = 1L;
+        var themeId = 1L;
+        var userId = 1L;
 
         // when
-        Reservation reserved = service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId);
+        Reservation reserved = service.saveReservation(userId, tomorrow, timeSlotId, themeId);
 
         // then
         var reservations = reservationRepository.findAll();
@@ -76,10 +70,10 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제할 수 있다.")
     void deleteReservation() {
         // given
-        var date = tomorrow();
+        var tomorrow = LocalDate.now().plusDays(1);
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
-        var reserved = service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId);
+        var reserved = service.saveReservation(JUNK_USER.id(), tomorrow, timeSlotId, themeId);
 
         // when
         service.removeById(reserved.id());
@@ -93,14 +87,20 @@ class ReservationServiceTest {
     @DisplayName("검색 필터로 예약을 조회할 수 있다.")
     void findReservationsByFilterWithFilter() {
         // given
-        var afterOneDay = service.saveReservation(JUNK_USER.id(), tomorrow(), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
-        var afterTwoDay = service.saveReservation(JUNK_USER.id(), afterNDay(2), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
-        var afterThreeDay = service.saveReservation(JUNK_USER.id(), afterNDay(3), JUNK_TIME_SLOT.id(), JUNK_THEME.id());
+        var tomorrow = LocalDate.now().plusDays(1);
+        var afterOneDay = service.saveReservation(JUNK_USER.id(), tomorrow, JUNK_TIME_SLOT.id(), JUNK_THEME.id());
+        var afterTwoDay = service.saveReservation(JUNK_USER.id(), LocalDate.now().plusDays(2), JUNK_TIME_SLOT.id(),
+                JUNK_THEME.id());
+        var afterThreeDay = service.saveReservation(JUNK_USER.id(), LocalDate.now().plusDays(3), JUNK_TIME_SLOT.id(),
+                JUNK_THEME.id());
 
         // when
-        var fromYesterday_toToday = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), yesterday(), today());
-        var fromToday_toTomorrow = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), today(), tomorrow());
-        var fromTomorrow_toThreeDays = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), tomorrow(),
+        var fromYesterday_toToday = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(),
+                LocalDate.now().minusDays(1),
+                LocalDate.now());
+        var fromToday_toTomorrow = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), LocalDate.now(),
+                tomorrow);
+        var fromTomorrow_toThreeDays = new ReservationSearchFilter(JUNK_THEME.id(), JUNK_USER.id(), tomorrow,
                 afterThreeDay.date());
 
         assertAll(
@@ -116,12 +116,12 @@ class ReservationServiceTest {
     @DisplayName("지나간 날짜와 시간에 대한 예약 생성은 불가능하다.")
     void cannotSaveReservationPastDateTime() {
         // given
-        var date = yesterday();
+        var yesterday = LocalDate.now().minusDays(1);
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
         // when & then
-        assertThatThrownBy(() -> service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId))
+        assertThatThrownBy(() -> service.saveReservation(JUNK_USER.id(), yesterday, timeSlotId, themeId))
                 .isInstanceOf(BusinessRuleViolationException.class);
     }
 
@@ -129,12 +129,12 @@ class ReservationServiceTest {
     @DisplayName("지나가지 않은 날짜와 시간에 대한 예약 생성은 가능하다.")
     void canSaveReservationFutureDateTime() {
         // given
-        var date = tomorrow();
+        var tomorrow = LocalDate.now().plusDays(1);
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
         // when & then
-        assertThatCode(() -> service.saveReservation(JUNK_USER.id(), date, timeSlotId, themeId))
+        assertThatCode(() -> service.saveReservation(JUNK_USER.id(), tomorrow, timeSlotId, themeId))
                 .doesNotThrowAnyException();
     }
 
@@ -143,15 +143,15 @@ class ReservationServiceTest {
     void cannotSaveReservationIdenticalDateTimeMultipleTimes() {
         // given
         var user = JUNK_USER;
-        var date = tomorrow();
+        var tomorrow = LocalDate.now().plusDays(1);
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
         // when
-        service.saveReservation(user.id(), date, timeSlotId, themeId);
+        service.saveReservation(user.id(), tomorrow, timeSlotId, themeId);
 
         // then
-        assertThatThrownBy(() -> service.saveReservation(user.id(), date, timeSlotId, themeId))
+        assertThatThrownBy(() -> service.saveReservation(user.id(), tomorrow, timeSlotId, themeId))
                 .isInstanceOf(AlreadyExistedException.class);
     }
 
@@ -160,14 +160,14 @@ class ReservationServiceTest {
     void cannotSaveReservationDuplicate() {
         // given
         var user = JUNK_USER;
-        var date = tomorrow();
+        var tomorrow = LocalDate.now().plusDays(1);
         var timeSlotId = JUNK_TIME_SLOT.id();
         var themeId = JUNK_THEME.id();
 
-        service.saveReservation(user.id(), date, timeSlotId, themeId);
+        service.saveReservation(user.id(), tomorrow, timeSlotId, themeId);
 
         // when & then
-        assertThatThrownBy(() -> service.saveReservation(user.id(), date, timeSlotId, themeId))
+        assertThatThrownBy(() -> service.saveReservation(user.id(), tomorrow, timeSlotId, themeId))
                 .isInstanceOf(AlreadyExistedException.class);
     }
 
@@ -178,8 +178,9 @@ class ReservationServiceTest {
         var savedTimeSlot = timeSlotRepository.save(JUNK_TIME_SLOT);
         var savedTheme = themeRepository.save(JUNK_THEME);
         var createdUser = userRepository.save(JUNK_USER);
+        var tomorrow = LocalDate.now().plusDays(1);
         var savedReservation = reservationRepository.save(
-                Reservation.register(createdUser, tomorrow(), savedTimeSlot, savedTheme));
+                Reservation.register(createdUser, tomorrow, savedTimeSlot, savedTheme));
 
         // when
         var reservations = service.findReservationsByUserId(createdUser.id());
