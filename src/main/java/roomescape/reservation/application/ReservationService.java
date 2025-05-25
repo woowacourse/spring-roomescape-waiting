@@ -28,7 +28,9 @@ import roomescape.reservationTime.exception.TimeNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.exception.ThemeNotFoundException;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.domain.WaitingWithRank;
 import roomescape.waiting.domain.Waitings;
 
 @Service
@@ -45,8 +47,19 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        Waitings waitings = new Waitings(waitingRepository.findByMemberId(memberId));
-        return MyReservationResponse.of(reservations, waitings.getWaitingsWithRank());
+        List<Waiting> myWaitings = waitingRepository.findByMemberId(memberId);
+        List<WaitingWithRank> rankedWaitings = getWaitingWithRanks(myWaitings);
+        return MyReservationResponse.of(reservations, rankedWaitings);
+    }
+
+    private List<WaitingWithRank> getWaitingWithRanks(List<Waiting> myWaitings) {
+        return myWaitings.stream()
+                .map(waiting -> {
+                    Waitings waitings = new Waitings(waitingRepository.findBySpec(waiting.getSpec()));
+                    long rank = waitings.getRankOf(waiting);
+                    return new WaitingWithRank(waiting, rank);
+                })
+                .toList();
     }
 
     @Transactional(readOnly = true)

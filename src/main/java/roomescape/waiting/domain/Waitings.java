@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.stream.IntStream;
 import roomescape.member.domain.Member;
 
 public class Waitings {
@@ -19,19 +18,16 @@ public class Waitings {
         return waitings.poll();
     }
 
-    public List<WaitingWithRank> getWaitingsWithRank() {
+    public boolean containsMember(Member member) {
+        return waitings.stream()
+                .anyMatch(waiting -> waiting.getMember().equals(member));
+    }
+
+    public long getRankOf(Waiting waiting) {
         List<Waiting> waitings = this.waitings.stream()
                 .sorted(Comparator.comparing(Waiting::getCreatedAt))
                 .toList();
 
-        return IntStream.range(0, waitings.size())
-                .mapToObj(index -> new WaitingWithRank(waitings.get(index), index + 1L))
-                .toList();
-
-    }
-
-    public boolean containsMember(Member member) {
-        return waitings.stream()
-                .anyMatch(waiting -> waiting.getMember().equals(member));
+        return waitings.indexOf(waiting) + 1L;
     }
 }
