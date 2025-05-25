@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import roomescape.application.dto.ReservationStatusServiceResponse;
 
 public record ReservationStatusResponse(
-        long reservationId,
+        long id,
         String theme,
         LocalDate date,
         @JsonFormat(pattern = "HH:mm")

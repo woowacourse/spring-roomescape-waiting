@@ -2,6 +2,7 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateServiceRequest;
@@ -15,6 +16,7 @@ import roomescape.domain.repository.WaitingRepository;
 import roomescape.exception.NotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -73,5 +75,14 @@ public class WaitingService {
                 gameSchedule.getTime().getStartAt(),
                 ReservationStatus.name(waiting.getStatus())
         );
+    }
+
+    @Transactional
+    public void deleteWaiting(Long id) {
+        try {
+            waitingRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("삭제하려는 예약대기 id가 존재하지 않습니다. id: " + id);
+        }
     }
 }
