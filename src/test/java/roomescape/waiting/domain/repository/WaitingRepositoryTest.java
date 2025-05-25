@@ -1,4 +1,4 @@
-package roomescape.waiting.infrastructure;
+package roomescape.waiting.domain.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,17 +21,19 @@ import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.domain.WaitingWithRank;
+import roomescape.waiting.infrastructure.WaitingRepositoryAdapter;
 
 @ActiveProfiles("test")
 @DataJpaTest
 @Import(WaitingRepositoryAdapter.class)
-class WaitingRepositoryAdapterTest {
+class WaitingRepositoryTest {
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    private WaitingRepositoryAdapter waitingRepositoryAdapter;
+    private WaitingRepository waitingRepository;
 
     @DisplayName("예약 대기를 저장한다")
     @Test
@@ -50,7 +52,7 @@ class WaitingRepositoryAdapterTest {
         Waiting waiting = new Waiting(member, spec);
 
         // when
-        Waiting savedWaiting = waitingRepositoryAdapter.save(waiting);
+        Waiting savedWaiting = waitingRepository.save(waiting);
 
         // then
         assertThat(savedWaiting.getId()).isNotNull();
@@ -74,14 +76,14 @@ class WaitingRepositoryAdapterTest {
         ReservationSpec spec = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
         Waiting waiting = new Waiting(member, spec);
 
-        Waiting savedWaiting = waitingRepositoryAdapter.save(waiting);
+        Waiting savedWaiting = waitingRepository.save(waiting);
         Long waitingId = savedWaiting.getId();
 
         // when
-        waitingRepositoryAdapter.deleteById(waitingId);
+        waitingRepository.deleteById(waitingId);
 
         // then
-        Optional<Waiting> foundWaiting = waitingRepositoryAdapter.findById(waitingId);
+        Optional<Waiting> foundWaiting = waitingRepository.findById(waitingId);
         assertThat(foundWaiting).isEmpty();
     }
 
@@ -103,14 +105,14 @@ class WaitingRepositoryAdapterTest {
 
         ReservationSpec spec1 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
         Waiting waiting1 = new Waiting(member1, spec1);
-        waitingRepositoryAdapter.save(waiting1);
+        waitingRepository.save(waiting1);
 
         ReservationSpec spec2 = ReservationSpecFixture.createSpec(LocalDate.now().plusDays(1), reservationTime, theme);
         Waiting waiting2 = new Waiting(member2, spec2);
-        waitingRepositoryAdapter.save(waiting2);
+        waitingRepository.save(waiting2);
 
         // when
-        List<Waiting> waitings = waitingRepositoryAdapter.findAll();
+        List<Waiting> waitings = waitingRepository.findAll();
 
         // then
         assertThat(waitings).hasSize(2);
@@ -134,14 +136,14 @@ class WaitingRepositoryAdapterTest {
 
         ReservationSpec spec1 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
         Waiting waiting1 = new Waiting(member1, spec1);
-        waitingRepositoryAdapter.save(waiting1);
+        waitingRepository.save(waiting1);
 
         ReservationSpec spec2 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
         Waiting waiting2 = new Waiting(member2, spec2);
-        waitingRepositoryAdapter.save(waiting2);
+        waitingRepository.save(waiting2);
 
         // when
-        List<WaitingWithRank> waitingsWithRank = waitingRepositoryAdapter.findWithRankByMemberId(member2.getId());
+        List<WaitingWithRank> waitingsWithRank = waitingRepository.findWithRankByMemberId(member2.getId());
 
         // then
         assertThat(waitingsWithRank).hasSize(1);
@@ -167,14 +169,14 @@ class WaitingRepositoryAdapterTest {
 
         ReservationSpec spec1 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
         Waiting waiting1 = new Waiting(member1, spec1);
-        waitingRepositoryAdapter.save(waiting1);
+        waitingRepository.save(waiting1);
 
         ReservationSpec spec2 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
         Waiting waiting2 = new Waiting(member2, spec2);
-        Waiting savedWaiting2 = waitingRepositoryAdapter.save(waiting2);
+        Waiting savedWaiting2 = waitingRepository.save(waiting2);
 
         // when
-        Optional<WaitingWithRank> waitingWithRank = waitingRepositoryAdapter.findWithRankById(savedWaiting2.getId());
+        Optional<WaitingWithRank> waitingWithRank = waitingRepository.findWithRankById(savedWaiting2.getId());
 
         // then
         assertThat(waitingWithRank).isPresent();
@@ -197,10 +199,10 @@ class WaitingRepositoryAdapterTest {
 
         ReservationSpec spec = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
         Waiting waiting = new Waiting(member, spec);
-        Waiting savedWaiting = waitingRepositoryAdapter.save(waiting);
+        Waiting savedWaiting = waitingRepository.save(waiting);
 
         // when
-        Optional<Waiting> foundWaiting = waitingRepositoryAdapter.findById(savedWaiting.getId());
+        Optional<Waiting> foundWaiting = waitingRepository.findById(savedWaiting.getId());
 
         // then
         assertThat(foundWaiting).isPresent();

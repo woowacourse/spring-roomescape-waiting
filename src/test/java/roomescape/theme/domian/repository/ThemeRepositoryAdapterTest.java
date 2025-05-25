@@ -1,4 +1,4 @@
-package roomescape.theme.infrastructure;
+package roomescape.theme.domian.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,22 +19,20 @@ import roomescape.fixture.ReservationSpecFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSpec;
-import roomescape.reservation.infrastructure.ReservationRepositoryAdapter;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.infrastructure.ThemeRepositoryAdapter;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@Import({ThemeRepositoryAdapter.class, ReservationRepositoryAdapter.class})
+@Import(ThemeRepositoryAdapter.class)
 class ThemeRepositoryAdapterTest {
     @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
-    private ThemeRepositoryAdapter themeRepositoryAdapter;
-
-    @Autowired
-    private ReservationRepositoryAdapter reservationRepositoryAdapter;
+    private ThemeRepository themeRepository;
 
     @DisplayName("테마를 저장한다")
     @Test
@@ -46,7 +44,7 @@ class ThemeRepositoryAdapterTest {
         Theme theme = new Theme(name, description, thumbnail);
 
         // when
-        Theme savedTheme = themeRepositoryAdapter.save(theme);
+        Theme savedTheme = themeRepository.save(theme);
 
         // then
         assertThat(savedTheme.getId()).isNotNull();
@@ -60,14 +58,14 @@ class ThemeRepositoryAdapterTest {
     void deleteById() {
         // given
         Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
-        Theme savedTheme = themeRepositoryAdapter.save(theme);
+        Theme savedTheme = themeRepository.save(theme);
         Long themeId = savedTheme.getId();
 
         // when
-        themeRepositoryAdapter.deleteById(themeId);
+        themeRepository.deleteById(themeId);
 
         // then
-        Optional<Theme> foundTheme = themeRepositoryAdapter.findById(themeId);
+        Optional<Theme> foundTheme = themeRepository.findById(themeId);
         assertThat(foundTheme).isEmpty();
     }
 
@@ -76,13 +74,13 @@ class ThemeRepositoryAdapterTest {
     void findAll() {
         // given
         Theme theme1 = new Theme("테마1", "테마 설명1", "thumbnail1.jpg");
-        themeRepositoryAdapter.save(theme1);
+        themeRepository.save(theme1);
 
         Theme theme2 = new Theme("테마2", "테마 설명2", "thumbnail2.jpg");
-        themeRepositoryAdapter.save(theme2);
+        themeRepository.save(theme2);
 
         // when
-        List<Theme> themes = themeRepositoryAdapter.findAll();
+        List<Theme> themes = themeRepository.findAll();
 
         // then
         assertThat(themes).hasSize(2);
@@ -93,10 +91,10 @@ class ThemeRepositoryAdapterTest {
     void findById() {
         // given
         Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
-        Theme savedTheme = themeRepositoryAdapter.save(theme);
+        Theme savedTheme = themeRepository.save(theme);
 
         // when
-        Optional<Theme> foundTheme = themeRepositoryAdapter.findById(savedTheme.getId());
+        Optional<Theme> foundTheme = themeRepository.findById(savedTheme.getId());
 
         // then
         assertThat(foundTheme).isPresent();
@@ -112,10 +110,10 @@ class ThemeRepositoryAdapterTest {
         // given
         String name = "테마";
         Theme theme = new Theme(name, "테마 설명", "thumbnail.jpg");
-        themeRepositoryAdapter.save(theme);
+        themeRepository.save(theme);
 
         // when
-        boolean exists = themeRepositoryAdapter.existsByName(name);
+        boolean exists = themeRepository.existsByName(name);
 
         // then
         assertThat(exists).isTrue();
@@ -126,10 +124,10 @@ class ThemeRepositoryAdapterTest {
     void existsById() {
         // given
         Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
-        Theme savedTheme = themeRepositoryAdapter.save(theme);
+        Theme savedTheme = themeRepository.save(theme);
 
         // when
-        boolean exists = themeRepositoryAdapter.existsById(savedTheme.getId());
+        boolean exists = themeRepository.existsById(savedTheme.getId());
 
         // then
         assertThat(exists).isTrue();
@@ -146,29 +144,29 @@ class ThemeRepositoryAdapterTest {
         entityManager.persist(reservationTime);
 
         Theme theme1 = new Theme("테마1", "테마 설명1", "thumbnail1.jpg");
-        themeRepositoryAdapter.save(theme1);
+        themeRepository.save(theme1);
 
         Theme theme2 = new Theme("테마2", "테마 설명2", "thumbnail2.jpg");
-        themeRepositoryAdapter.save(theme2);
+        themeRepository.save(theme2);
 
         LocalDate today = LocalDate.now();
 
         // theme1에 예약 2개 생성
         ReservationSpec spec1 = ReservationSpecFixture.createSpec(today, reservationTime, theme1);
         Reservation reservation1 = new Reservation(member, spec1);
-        reservationRepositoryAdapter.save(reservation1);
+        entityManager.persist(reservation1);
 
         ReservationSpec spec2 = ReservationSpecFixture.createSpec(today.plusDays(1), reservationTime, theme1);
         Reservation reservation2 = new Reservation(member, spec2);
-        reservationRepositoryAdapter.save(reservation2);
+        entityManager.persist(reservation2);
 
         // theme2에 예약 1개 생성
         ReservationSpec spec3 = ReservationSpecFixture.createSpec(today, reservationTime, theme2);
         Reservation reservation3 = new Reservation(member, spec3);
-        reservationRepositoryAdapter.save(reservation3);
+        entityManager.persist(reservation3);
 
         // when
-        List<Theme> rankedThemes = themeRepositoryAdapter.findRankedByPeriod(today, today.plusDays(1), 2);
+        List<Theme> rankedThemes = themeRepository.findRankedByPeriod(today, today.plusDays(1), 2);
 
         // then
         assertThat(rankedThemes).hasSize(2);

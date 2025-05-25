@@ -1,4 +1,4 @@
-package roomescape.theme.service;
+package roomescape.theme.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,7 +24,6 @@ import roomescape.reservation.infrastructure.ReservationRepositoryAdapter;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
 import roomescape.reservationTime.infrastructure.ReservationTimeRepositoryAdapter;
-import roomescape.theme.application.ThemeService;
 import roomescape.theme.application.dto.ThemeRequest;
 import roomescape.theme.application.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
