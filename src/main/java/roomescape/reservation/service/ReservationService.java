@@ -71,14 +71,22 @@ public class ReservationService {
                 .toList();
     }
 
-    public void delete(final Long id) {
-        Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+    public void delete(final Long id, LoginMember loginMember) {
+        Reservation reservation = getAuthorizedReservation(id, loginMember);
         reservationRepository.deleteById(id);
-        handleWaiting(reservation);
+        promoteFirstWaitingToReservation(reservation);
     }
 
-    private void handleWaiting(Reservation reservation) {
+    private Reservation getAuthorizedReservation(final Long id, LoginMember loginMember) {
+        return switch (loginMember.role()) {
+            case MEMBER -> reservationRepository.findByIdAndMemberId(id, loginMember.id())
+                    .orElseThrow(() -> new ForbiddenException("삭제 권한이 없습니다."));
+            case ADMIN -> reservationRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+        };
+    }
+
+    private void promoteFirstWaitingToReservation(Reservation reservation) {
         Waiting firstWaiting = waitingRepository.findFirstByReservationInfo(
                 reservation.getDate(), reservation.getTime(), reservation.getTheme()
         );

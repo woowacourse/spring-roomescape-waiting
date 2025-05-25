@@ -91,15 +91,16 @@ class ReservationServiceTest {
         Long id = savedReservation.getId();
 
         // then
-        assertThatCode(() -> reservationService.delete(id))
+        assertThatCode(() -> reservationService.delete(id, LoginMember.of(member)))
                 .doesNotThrowAnyException();
     }
 
     @DisplayName("예약이 존재하지 않으면 예외를 반환한다.")
     @Test
     void test8() {
+        Member member = new Member("어드민", "test@test.com", "12341234", Role.ADMIN);
         Long id = 1L;
-        assertThatThrownBy(() -> reservationService.delete(id))
+        assertThatThrownBy(() -> reservationService.delete(id, LoginMember.of(member)))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

@@ -34,4 +34,9 @@ public class ExceptionHandlerAdvice {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(exception.getMessage());
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<String> handleForbiddenException(final ForbiddenException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+    }
 }
