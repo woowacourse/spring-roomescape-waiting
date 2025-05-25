@@ -2,6 +2,8 @@ package roomescape.presentation.api.reservation;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +28,11 @@ public class WaitingController {
                                     @AuthPrincipal AuthInfo authInfo) {
         waitingService.create(createWaitingRequest.toServiceParam(authInfo.memberId()));
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{waitingId}")
+    public ResponseEntity<?> delete(@AuthPrincipal AuthInfo authInfo, @PathVariable("waitingId") Long waitingId) {
+        waitingService.delete(waitingId);
+        return ResponseEntity.noContent().build();
     }
 }

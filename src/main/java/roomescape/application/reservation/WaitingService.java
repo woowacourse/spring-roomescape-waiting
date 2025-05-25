@@ -67,6 +67,10 @@ public class WaitingService {
                 .toList();
     }
 
+    public void delete(Long waitingId) {
+        waitingRepository.deleteById(waitingId);
+    }
+
     private void validateCreateWaiting(ThemeSchedule themeSchedule, Member member) {
         if (!reservationRepository.existsByThemeSchedule(themeSchedule)) {
             throw new BusinessRuleViolationException("예약이 바로 가능해 예약 대기를 할 수 없습니다.");
