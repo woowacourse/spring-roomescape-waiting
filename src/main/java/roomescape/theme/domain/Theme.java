@@ -31,7 +31,7 @@ public class Theme {
     @Column(nullable = false)
     private String thumbnail;
 
-    public Theme(final String name, final String description, final String thumbnail) {
+    private Theme(final String name, final String description, final String thumbnail) {
         validateName(name);
         validateDescription(description);
         validateThumbnail(thumbnail);

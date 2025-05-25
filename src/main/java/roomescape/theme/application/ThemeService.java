@@ -26,7 +26,7 @@ public class ThemeService {
             throw new AlreadyExistException("해당 테마명이 이미 존재합니다. name = " + request.name());
         }
 
-        final Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
+        final Theme theme = Theme.of(request.name(), request.description(), request.thumbnail());
 
         return ThemeResponse.from(themeRepository.save(theme));
     }

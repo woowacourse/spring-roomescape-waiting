@@ -70,7 +70,7 @@ class ThemeServiceTest {
         final String name = "우가우가";
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
-        final Theme theme = new Theme(name, description, thumbnail);
+        final Theme theme = Theme.of(name, description, thumbnail);
         final Long id = themeRepository.save(theme).getId();
 
         // when & then
@@ -84,13 +84,13 @@ class ThemeServiceTest {
         final String name1 = "우가우가";
         final String description1 = "우가우가 설명";
         final String thumbnail1 = "따봉우가.jpg";
-        final Theme theme1 = new Theme(name1, description1, thumbnail1);
+        final Theme theme1 = Theme.of(name1, description1, thumbnail1);
         themeRepository.save(theme1);
 
         final String name2 = "우가우가2";
         final String description2 = "우가우가2 설명";
         final String thumbnail2 = "따봉우가2.jpg";
-        final Theme theme2 = new Theme(name2, description2, thumbnail2);
+        final Theme theme2 = Theme.of(name2, description2, thumbnail2);
         themeRepository.save(theme2);
 
         // when
@@ -114,7 +114,7 @@ class ThemeServiceTest {
         final String name = "우가우가";
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
-        final Theme theme = new Theme(name, description, thumbnail);
+        final Theme theme = Theme.of(name, description, thumbnail);
         themeRepository.save(theme);
 
         final CreateThemeRequest request = new CreateThemeRequest(name, description, thumbnail);
