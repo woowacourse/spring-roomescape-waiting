@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.ReservationTime;
@@ -50,6 +51,6 @@ class WaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> {
             waitingService.delete(waiting.getId(), LoginMember.of(other));
-        }).isInstanceOf(EntityNotFoundException.class);
+        }).isInstanceOf(ForbiddenException.class);
     }
 }

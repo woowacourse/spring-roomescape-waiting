@@ -3,6 +3,7 @@ package roomescape.waiting.service;
 import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
@@ -46,9 +47,17 @@ public class WaitingService {
     }
 
     public void delete(final Long id, LoginMember loginMember) {
-        Waiting waiting = waitingRepository.findByIdAndMemberId(id, loginMember.id())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 대기 예약 건입니다."));
+        Waiting waiting = getAuthorizedWaiting(id, loginMember);
         waitingRepository.delete(waiting);
+    }
+
+    private Waiting getAuthorizedWaiting(final Long id, LoginMember loginMember) {
+        return switch (loginMember.role()) {
+            case ADMIN -> waitingRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 대기 예약 건입니다."));
+            case MEMBER -> waitingRepository.findByIdAndMemberId(id, loginMember.id())
+                    .orElseThrow(() -> new ForbiddenException("권한이 없습니다."));
+        };
     }
 
     public CreateWaitingResponse createWaiting(CreateWaitingRequest request, LoginMember loginMember) {
