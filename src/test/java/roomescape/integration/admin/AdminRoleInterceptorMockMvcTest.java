@@ -48,7 +48,7 @@ class AdminRoleInterceptorMockMvcTest {
 
     @ParameterizedTest(name = "관리자가 \"{0}\"에 접근하면 200 반환")
     @DisplayName("관리자는 어드민 페이지에 접근할 수 있다")
-    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time"})
+    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time", "/admin/waiting"})
     void can_Access_WhenAdminAccessAdminPage(final String uri) throws Exception {
         performGetWithCookie(uri, adminCookie)
                 .andExpect(status().isOk());

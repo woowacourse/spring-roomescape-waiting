@@ -1,14 +1,15 @@
 package roomescape.reservation.application.waiting.service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.common.datetime.CurrentDateTime;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.waiting.dto.WaitingCreateCommand;
 import roomescape.reservation.application.waiting.dto.WaitingInfo;
-import roomescape.reservation.domain.reservation.ReservationRepository;
 import roomescape.reservation.domain.theme.Theme;
 import roomescape.reservation.domain.theme.ThemeRepository;
 import roomescape.reservation.domain.timeslot.TimeSlot;
@@ -20,20 +21,19 @@ import roomescape.reservation.domain.waiting.WaitingRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
-    private final ReservationRepository reservationRepository;
-
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final CurrentDateTime currentDateTime;
 
-    public WaitingService(final WaitingRepository waitingRepository, final ReservationRepository reservationRepository,
-                          final TimeSlotRepository timeSlotRepository, final ThemeRepository themeRepository,
-                          final MemberRepository memberRepository) {
+    public WaitingService(final WaitingRepository waitingRepository, final TimeSlotRepository timeSlotRepository,
+                          final ThemeRepository themeRepository, final MemberRepository memberRepository,
+                          final CurrentDateTime dateTimeGenerator) {
         this.waitingRepository = waitingRepository;
-        this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.currentDateTime = dateTimeGenerator;
     }
 
     public WaitingInfo createWaiting(final WaitingCreateCommand command) {
@@ -46,13 +46,27 @@ public class WaitingService {
         final TimeSlot timeSlot = findTimeSlot(command.timeId());
         final Member member = findMember(command.memberId());
         final Theme theme = findTheme(command.themeId());
+        validatePastDateTime(command.date(), timeSlot);
         validateDuplicateWaiting(command.date(), command.timeId(), command.themeId(), member.id());
         return command.convertToEntity(command.date(), timeSlot, theme, member);
     }
 
-    private void validateDuplicateWaiting(final LocalDate date, final long timeId, final long themeId, final long memberId) {
+    private void validatePastDateTime(final LocalDate date, final TimeSlot timeSlot) {
+        final LocalDate currentDate = currentDateTime.getDate();
+        final LocalTime currentTime = currentDateTime.getTime();
+
+        final boolean isPastDate = date.isBefore(currentDate);
+        final boolean isSameDateButPastTime = date.isEqual(currentDate) && timeSlot.isBefore(currentTime);
+
+        if (isPastDate || isSameDateButPastTime) {
+            throw new RoomescapeException("지나간 날짜와 시간은 예약 대기할 수 없습니다.");
+        }
+    }
+
+    private void validateDuplicateWaiting(final LocalDate date, final long timeId, final long themeId,
+                                          final long memberId) {
         if (waitingRepository.existsByReservationAndMemberId(date, timeId, themeId, memberId)) {
-            throw new RoomescapeException("해당 예약 대기에 이미 대기가 존재합니다.");
+            throw new RoomescapeException("해당 시간에 이미 예약 대기가 존재합니다.");
         }
     }
 
