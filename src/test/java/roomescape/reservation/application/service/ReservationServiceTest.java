@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -313,7 +314,7 @@ class ReservationServiceTest {
         });
     }
 
-    @DisplayName("예약 아이디로 예약을 삭제한다.")
+    @DisplayName("예약 아이디로 대기 중인 예약을 삭제한다.")
     @Test
     void deleteByIdTest() {
         // given
@@ -337,6 +338,40 @@ class ReservationServiceTest {
 
         // then
         verify(reservationRepository).delete(targetReservation);
+    }
+
+    @DisplayName("예약 아이디로 확정된 예약을 삭제한다.")
+    @Test
+    void deleteByIdTest_WaitingReservation() {
+        // given
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
+        long timeId = 2L;
+        long themeId = 2L;
+        long memberId = 2L;
+        long reservationId = 99L;
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
+        Member member = new Member(memberId, "예약 확정자", "email@email.com", "pw", Role.USER);
+        Member otherMember = new Member(memberId + 1, "다른 대기자", "email1@email.com", "pw", Role.USER);
+        LocalDateTime createdAt = SystemLocalDateTime.now().minusDays(3);
+
+        Reservation targetReservation = new Reservation(reservationId, date, time, theme, member,
+                ReservationStatus.CONFIRMED, createdAt);
+
+        Reservation nextWaiting = new Reservation(reservationId + 1, date, time, theme, otherMember,
+                ReservationStatus.WAITING, SystemLocalDateTime.now().minusDays(2));
+
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(targetReservation));
+        when(reservationRepository.findNextWaitingReservation(date, time, theme, createdAt)).thenReturn(
+                Optional.of(nextWaiting));
+
+        // when
+        reservationService.deleteById(reservationId);
+
+        // then
+        verify(reservationRepository).delete(targetReservation);
+        assertThat(nextWaiting.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
     }
 
     @DisplayName("에약 전체를 조회한다.")

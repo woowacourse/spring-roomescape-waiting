@@ -18,4 +18,8 @@ public enum ReservationStatus {
     public boolean isWaiting() {
         return this == WAITING;
     }
+
+    public boolean isConfirmed() {
+        return this == CONFIRMED;
+    }
 }

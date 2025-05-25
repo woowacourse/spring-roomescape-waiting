@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -189,6 +190,50 @@ class ReservationRepositoryTest {
 
         // then
         assertThat(result).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("특정 날짜, 시간, 테마에 대해 다음 대기를 조회할 수 있다")
+    void findNextWaitingReservationTest() {
+        // given
+        LocalDate date = LocalDate.of(2025, 5, 1);
+        ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
+        entityManager.persist(time);
+
+        Theme theme = new Theme("theme", "description", "thumbnail");
+        entityManager.persist(theme);
+
+        LocalDateTime baseTime = LocalDateTime.of(2025, 5, 1, 12, 0);
+
+        Reservation confirmedReservation = new Reservation(date, time, theme, member,
+                ReservationStatus.CONFIRMED, baseTime);
+        entityManager.persist(confirmedReservation);
+
+        Reservation nextWaiting1 = new Reservation(date, time, theme, member,
+                ReservationStatus.WAITING, baseTime.plusHours(1));
+        entityManager.persist(nextWaiting1);
+
+        Reservation nextWaiting2 = new Reservation(date, time, theme, member,
+                ReservationStatus.WAITING, baseTime.plusHours(2));
+        entityManager.persist(nextWaiting2);
+
+        Reservation otherDateWaiting = new Reservation(date.plusDays(1), time, theme, member,
+                ReservationStatus.WAITING, baseTime.plusHours(1));
+        entityManager.persist(otherDateWaiting);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        Optional<Reservation> result = reservationRepository.findNextWaitingReservation(date, time, theme, baseTime);
+
+        // then
+        Assertions.assertAll(
+                () -> assertThat(result).isPresent(),
+                () -> assertThat(result.get().getId()).isEqualTo(nextWaiting1.getId()),
+                () -> assertThat(result.get().getStatus()).isEqualTo(ReservationStatus.WAITING),
+                () -> assertThat(result.get().getCreatedAt()).isEqualTo(baseTime.plusHours(1))
+        );
     }
 
     private void createReservationsInRange(Theme theme, int count, LocalDate startDate, Member targetMember) {

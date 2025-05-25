@@ -3,6 +3,7 @@ package roomescape.reservation.application.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.util.SystemLocalDateTime;
@@ -69,9 +70,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
+    public void deleteById(Long reservationId) {
+        Reservation targetReservation = getReservation(reservationId);
 
-        Reservation targetReservation = getReservation(id);
+        if (targetReservation.isConfirmed()) {
+            updateNextWaitingReservationStatus(targetReservation);
+        }
 
         reservationRepository.delete(targetReservation);
     }
@@ -153,6 +157,19 @@ public class ReservationService {
         if (reservationRepository.alreadyExists(adminReservationRequest, reservationTime, theme, member)) {
             throw new ReservationAlreadyExistsException();
         }
+    }
+
+    private void updateNextWaitingReservationStatus(Reservation targetReservation) {
+        Optional<Reservation> nextWaitingReservation = reservationRepository.findNextWaitingReservation(
+                targetReservation.getDate(),
+                targetReservation.getTime(),
+                targetReservation.getTheme(),
+                targetReservation.getCreatedAt()
+        );
+
+        nextWaitingReservation.ifPresent(reservation -> {
+            reservation.updateStatus(ReservationStatus.CONFIRMED);
+        });
     }
 
     private MemberReservationResponse mapToMemberReservationResponse(Reservation reservation) {

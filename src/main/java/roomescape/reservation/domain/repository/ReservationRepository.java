@@ -3,6 +3,7 @@ package roomescape.reservation.domain.repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
@@ -47,4 +48,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "AND r.theme = :theme " +
             "AND r.member = :member)")
     boolean alreadyExists(LocalDate date, ReservationTime time, Theme theme, Member member);
+
+    @Query(value = "SELECT r FROM Reservation r " +
+            "WHERE r.date = :date " +
+            "AND r.time = :time " +
+            "AND r.theme = :theme " +
+            "AND r.status = 'WAITING' " +
+            "AND r.createdAt > :createdAt " +
+            "ORDER BY r.createdAt ASC " +
+            "LIMIT 1")
+    Optional<Reservation> findNextWaitingReservation(LocalDate date, ReservationTime time, Theme theme,
+                                                     LocalDateTime createdAt);
 }
