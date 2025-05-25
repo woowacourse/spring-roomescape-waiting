@@ -19,7 +19,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
                   AND (:memberId IS NULL OR r.member.id = :memberId)
                   AND ((:dateFrom IS NULL OR r.schedule.date >= :dateFrom) AND (:dateTo IS NULL OR r.schedule.date <= :dateTo))
             """)
-    List<Reservation> findByMemberAndThemeAndVisitDateBetween(
+    List<Reservation> findByMemberAndThemeAndDateBetween(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,

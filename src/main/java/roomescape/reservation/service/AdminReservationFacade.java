@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
@@ -35,28 +34,18 @@ public class AdminReservationFacade {
     }
 
     public ReservationResponse create(AdminReservationCreateRequest adminReservationCreateRequest) {
-        ReservationTime reservationTime = reservationTimeService.findById(adminReservationCreateRequest.timeId())
-                .orElseThrow(() -> new BadRequestException("올바른 예약 시간을 찾을 수 없습니다."));
+        ReservationTime reservationTime = reservationTimeService.getReservationTimeByTimeId(adminReservationCreateRequest.timeId());
+        Theme theme = themeService.getByThemeId(adminReservationCreateRequest.themeId());
+        Member member = memberService.getExistingMemberByMemberId(adminReservationCreateRequest.memberId());
 
-        Theme theme = themeService.findById(adminReservationCreateRequest.themeId())
-                .orElseThrow(() -> new BadRequestException("올바른 방탈출 테마가 없습니다."));
-
-        Member member = memberService.findExistingMemberById(adminReservationCreateRequest.memberId());
-
-        Schedule schedule = new Schedule(null, adminReservationCreateRequest.date(), reservationTime, theme);
-        Schedule savedSchedule = scheduleService.save(schedule);
+        Schedule savedSchedule = scheduleService.createAndSaveSchedule(adminReservationCreateRequest.date(), reservationTime, theme);
 
         List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
                 adminReservationCreateRequest.date(),
                 adminReservationCreateRequest.themeId()
         );
 
-        return reservationService.createReservation(
-                member,
-                availableTimes,
-                savedSchedule,
-                adminReservationCreateRequest.toReservationCreateRequest()
-        );
+        return reservationService.createAdminReservation(adminReservationCreateRequest, member, availableTimes, savedSchedule);
     }
 
     public List<ReservationResponse> findByCondition(

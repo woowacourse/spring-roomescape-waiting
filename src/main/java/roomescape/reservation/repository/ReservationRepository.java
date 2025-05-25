@@ -16,7 +16,7 @@ public interface ReservationRepository {
 
     boolean existsByScheduleTimeId(Long id);
 
-    List<Reservation> findByMemberAndThemeAndVisitDateBetween(
+    List<Reservation> findByMemberAndThemeAndDateBetween(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,

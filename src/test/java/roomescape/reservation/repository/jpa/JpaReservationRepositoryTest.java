@@ -79,7 +79,7 @@ class JpaReservationRepositoryTest {
     void 멤버의_테마_및_방문기간_별_예약내역_확인() {
         List<Reservation> reservations = createReservations();
         List<Reservation> savedReservations = jpaReservationRepository.saveAll(reservations);
-        List<Reservation> findReservations = jpaReservationRepository.findByMemberAndThemeAndVisitDateBetween(
+        List<Reservation> findReservations = jpaReservationRepository.findByMemberAndThemeAndDateBetween(
                 theme.getId(),
                 member.getId(),
                 LocalDate.now().minusDays(1),

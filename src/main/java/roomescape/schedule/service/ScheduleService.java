@@ -1,8 +1,11 @@
 package roomescape.schedule.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.exception.BadRequestException;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.schedule.domain.Schedule;
 import roomescape.schedule.respository.ScheduleRepository;
+import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -16,6 +19,11 @@ public class ScheduleService {
         this.scheduleRepository = scheduleRepository;
     }
 
+    public Schedule createAndSaveSchedule(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        Schedule schedule = new Schedule(null, date, reservationTime, theme);
+        return scheduleRepository.save(schedule);
+    }
+
     public Schedule save(Schedule schedule) {
         return scheduleRepository.save(schedule);
     }
@@ -24,8 +32,8 @@ public class ScheduleService {
         return scheduleRepository.findById(id);
     }
 
-    public Optional<Schedule> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
-        return scheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public Schedule getScheduleByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+        return scheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).orElseThrow(() -> new BadRequestException("예약 가능한 일정이 존재하지 않습니다."));
     }
 
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {

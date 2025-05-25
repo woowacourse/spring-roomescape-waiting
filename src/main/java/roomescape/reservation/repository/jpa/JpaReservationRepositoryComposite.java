@@ -38,13 +38,13 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     }
 
     @Override
-    public List<Reservation> findByMemberAndThemeAndVisitDateBetween(
+    public List<Reservation> findByMemberAndThemeAndDateBetween(
             Long themeId,
             Long memberId,
             LocalDate dateFrom,
             LocalDate dateTo
     ) {
-        return jpaReservationRepository.findByMemberAndThemeAndVisitDateBetween(
+        return jpaReservationRepository.findByMemberAndThemeAndDateBetween(
                 themeId,
                 memberId,
                 dateFrom,

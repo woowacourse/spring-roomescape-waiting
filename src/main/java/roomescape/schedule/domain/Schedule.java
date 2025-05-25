@@ -44,6 +44,10 @@ public class Schedule {
         }
     }
 
+    public boolean isBefore(LocalDateTime dateTime) {
+        return getDateTime().isBefore(dateTime);
+    }
+
     public LocalDateTime getDateTime() {
         return LocalDateTime.of(date, time.getStartAt());
     }

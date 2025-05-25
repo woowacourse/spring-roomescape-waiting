@@ -6,6 +6,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.request.AdminReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchConditionRequest;
 import roomescape.reservation.dto.response.MyReservationAndWaitingResponse;
@@ -61,11 +62,11 @@ public class ReservationService {
 
     public List<ReservationResponse> findByCondition(
             ReservationSearchConditionRequest reservationSearchConditionRequest) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndVisitDateBetween(
-                reservationSearchConditionRequest.getThemeId(),
-                reservationSearchConditionRequest.getMemberId(),
-                reservationSearchConditionRequest.getDateFrom(),
-                reservationSearchConditionRequest.getDateTo()
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateBetween(
+                reservationSearchConditionRequest.themeId(),
+                reservationSearchConditionRequest.memberId(),
+                reservationSearchConditionRequest.dateFrom(),
+                reservationSearchConditionRequest.dateTo()
         );
 
         return reservations.stream()
@@ -99,5 +100,18 @@ public class ReservationService {
 
     public boolean existsBySchedule(Schedule schedule) {
         return reservationRepository.existsBySchedule(schedule);
+    }
+
+    public ReservationResponse createAdminReservation(
+            AdminReservationCreateRequest adminReservationCreateRequest,
+            Member member,
+            List<ReservationTime> availableTimes,
+            Schedule savedSchedule) {
+        return createReservation(
+                member,
+                availableTimes,
+                savedSchedule,
+                adminReservationCreateRequest.toReservationCreateRequest()
+        );
     }
 }

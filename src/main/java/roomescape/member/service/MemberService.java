@@ -45,7 +45,7 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public Member findExistingMemberById(Long id) {
+    public Member getExistingMemberByMemberId(Long id) {
         return memberRepository.findById(id).
                 orElseThrow(() -> new NotFoundException("회원 정보가 존재하지 않습니다."));
     }

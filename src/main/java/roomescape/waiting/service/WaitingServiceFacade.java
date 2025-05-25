@@ -2,7 +2,6 @@ package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
-import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
@@ -40,16 +39,13 @@ public class WaitingServiceFacade {
     }
 
     public WaitingCreateResponse createWaiting(WaitingCreateRequest waitingCreateRequest, MemberPrincipal memberPrincipal) {
-        ReservationTime reservationTime = reservationTimeService.findById(waitingCreateRequest.timeId())
-                .orElseThrow(() -> new BadRequestException("올바른 예약 시간을 찾을 수 없습니다."));
+        ReservationTime reservationTime = reservationTimeService.getReservationTimeByTimeId(waitingCreateRequest.timeId());
 
-        Theme theme = themeService.findById(waitingCreateRequest.themeId())
-                .orElseThrow(() -> new BadRequestException("올바른 방탈출 테마가 없습니다."));
+        Theme theme = themeService.getByThemeId(waitingCreateRequest.themeId());
 
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
 
-        Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(waitingCreateRequest.date(), reservationTime.getId(), theme.getId())
-                .orElseThrow(() -> new BadRequestException("올바른 예약 일정이 존재하지 않습니다."));
+        Schedule schedule = scheduleService.getScheduleByDateAndTimeIdAndThemeId(waitingCreateRequest.date(), reservationTime.getId(), theme.getId());
 
         boolean isConflictReservation = reservationService.existsByMemberAndSchedule(member, schedule);
         if (isConflictReservation) {

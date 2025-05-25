@@ -35,13 +35,13 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> read() {
+    public ResponseEntity<List<ReservationResponse>> getReservations() {
         List<ReservationResponse> responses = reservationService.findAll();
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationAndWaitingResponse>> readMyReservations(
+    public ResponseEntity<List<MyReservationAndWaitingResponse>> getMyReservations(
             @AuthorizedMember MemberPrincipal memberPrincipal
     ) {
         List<MyReservationAndWaitingResponse> responses = reservationService.findAllMyReservationAndWaiting(memberPrincipal);
