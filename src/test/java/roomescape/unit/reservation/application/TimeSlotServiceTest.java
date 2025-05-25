@@ -116,7 +116,7 @@ class TimeSlotServiceTest {
         final LocalDate date = LocalDate.of(2025, 5, 1);
         reservationRepository.save(new Reservation(1L, date, member, savedTime1, theme));
         // when
-        final List<TimeSlotAvailabilityInfo> result = timeSlotService.findAvailableTimes(date, theme.id());
+        final List<TimeSlotAvailabilityInfo> result = timeSlotService.findAvailableTimeSlots(date, theme.id());
         // then
         assertAll(
                 () -> assertThat(result).hasSize(2),

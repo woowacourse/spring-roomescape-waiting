@@ -46,7 +46,7 @@ public class TimeSlotService {
         timeSlotRepository.deleteById(id);
     }
 
-    public List<TimeSlotAvailabilityInfo> findAvailableTimes(final LocalDate date, final long themeId) {
+    public List<TimeSlotAvailabilityInfo> findAvailableTimeSlots(final LocalDate date, final long themeId) {
         final List<TimeSlot> timeSlots = timeSlotRepository.findAll();
         final List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(date, themeId);
         return timeSlots.stream()

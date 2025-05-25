@@ -60,7 +60,7 @@ public class TimeSlotApiController {
             @RequestParam("date") final LocalDate date,
             @RequestParam("themeId") final long themeId
     ) {
-        final List<TimeSlotAvailabilityInfo> responses = timeSlotService.findAvailableTimes(date, themeId);
+        final List<TimeSlotAvailabilityInfo> responses = timeSlotService.findAvailableTimeSlots(date, themeId);
         return ResponseEntity.ok().body(responses);
     }
 }

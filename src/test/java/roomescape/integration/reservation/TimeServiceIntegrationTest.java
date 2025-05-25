@@ -97,7 +97,7 @@ public class TimeServiceIntegrationTest {
     void findAvailableTimes() {
         // when
         final LocalDate date = LocalDate.of(2025, 4, 24);
-        final List<TimeSlotAvailabilityInfo> result = timeSlotService.findAvailableTimes(date, 7L);
+        final List<TimeSlotAvailabilityInfo> result = timeSlotService.findAvailableTimeSlots(date, 7L);
         // then
         assertAll(
                 () -> assertThat(result).hasSize(3),
