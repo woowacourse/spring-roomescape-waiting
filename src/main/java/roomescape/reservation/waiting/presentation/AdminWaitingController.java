@@ -21,22 +21,22 @@ public class AdminWaitingController {
         this.waitingReservationApplicationService = waitingReservationApplicationService;
     }
 
-    @GetMapping("/waiting-reservations")
-    public ResponseEntity<List<ReservationResponse>> getWaitingReservations() {
-        List<ReservationResponse> responses = waitingReservationApplicationService.getWaitingReservations();
-
-        return ResponseEntity.ok().body(responses);
-    }
-
-    @PostMapping("/waiting-reservations/{id}")
+    @PostMapping("/waiting-reservation/{id}")
     public ResponseEntity<Void> acceptWaitingReservation(@PathVariable("id") Long waitingId) {
         waitingReservationApplicationService.acceptWaiting(waitingId);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/waiting-reservations/{id}")
+    @DeleteMapping("/waiting-reservation/{id}")
     public ResponseEntity<Void> denyWaitingReservation(@PathVariable("id") Long waitingId) {
         waitingReservationApplicationService.denyWaiting(waitingId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/waiting-reservations")
+    public ResponseEntity<List<ReservationResponse>> getWaitingReservations() {
+        List<ReservationResponse> responses = waitingReservationApplicationService.getWaitingReservations();
+
+        return ResponseEntity.ok().body(responses);
     }
 }
