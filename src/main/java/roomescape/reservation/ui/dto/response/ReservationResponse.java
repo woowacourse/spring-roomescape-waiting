@@ -1,8 +1,6 @@
 package roomescape.reservation.ui.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import roomescape.member.ui.dto.MemberResponse.IdName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.ui.dto.ThemeResponse;
@@ -29,19 +27,18 @@ public record ReservationResponse(
 
     public record ForMember(
             Long id,
-            String themeName,
             LocalDate date,
-            @JsonFormat(pattern = "HH:mm")
-            LocalTime time,
+            ReservationTimeResponse time,
+            ThemeResponse theme,
             String status
     ) {
 
         public static ForMember from(final Reservation reservation) {
             return new ForMember(
                     reservation.getId(),
-                    reservation.getReservationSlot().getTheme().getName(),
                     reservation.getReservationSlot().getDate(),
-                    reservation.getReservationSlot().getTime().getStartAt(),
+                    ReservationTimeResponse.from(reservation.getReservationSlot().getTime()),
+                    ThemeResponse.from(reservation.getReservationSlot().getTheme()),
                     reservation.getStatus().getDescription()
             );
         }

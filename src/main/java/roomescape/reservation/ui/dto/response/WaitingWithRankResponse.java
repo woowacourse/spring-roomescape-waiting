@@ -1,8 +1,6 @@
 package roomescape.reservation.ui.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.MemberResponse.IdName;
 import roomescape.reservation.infrastructure.projection.WaitingWithRankProjection;
@@ -35,17 +33,20 @@ public record WaitingWithRankResponse(
     public record ForMember(
             Long id,
             LocalDate date,
-            @JsonFormat(pattern = "HH:mm")
-            LocalTime time,
-            String themeName,
+            ReservationTimeResponse time,
+            ThemeResponse theme,
             String status
     ) {
         public static WaitingWithRankResponse.ForMember from(final WaitingWithRankProjection projection) {
             return new WaitingWithRankResponse.ForMember(
                     projection.getId(),
                     projection.getDate(),
-                    projection.getTimeStartAt(),
-                    projection.getThemeName(),
+                    new ReservationTimeResponse(projection.getTimeId(), projection.getTimeStartAt()),
+                    new ThemeResponse(
+                            projection.getThemeId(),
+                            projection.getThemeName(), projection.getThemeDescription(),
+                            projection.getThemeThumbnail()
+                    ),
                     projection.getRank() + "번째 예약 대기"
             );
         }

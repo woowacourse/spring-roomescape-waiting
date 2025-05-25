@@ -23,9 +23,9 @@ function render(data) {
         [2단계] 내 예약 목록 조회 기능
               response 명세에 맞춰 값 설정
          */
-        const themeName = item.themeName;
+        const themeName = item.theme.name;
         const date = item.date;
-        const time = item.time;
+        const time = item.time.startAt;
         const status = item.status;
 
         row.insertCell(0).textContent = themeName;
