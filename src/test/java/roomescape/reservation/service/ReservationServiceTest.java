@@ -18,6 +18,7 @@ import roomescape.config.TestConfig;
 import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -129,5 +130,33 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationCompositeService.create(futureDate, 999L, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
+    }
+
+    @Test
+    void createWaiting_shouldReturnWaitingResponseWhenReservationExists() {
+        ReservationResponse reservation = reservationCompositeService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        ReservationResponse waiting = reservationCompositeService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+
+        assertThat(waiting.id()).isEqualTo(1L);
+        assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
+        Assertions.assertAll(
+                () -> assertThat(reservation.reservedStatus()).isEqualTo(ReservationStatus.RESERVED.getName()),
+                () -> assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName()),
+                () -> assertThat(waiting.id()).isEqualTo(1L)
+        );
+    }
+
+    @Test
+    void deleteReservation_shouldPromoteFirstWaiting() {
+        ReservationResponse reserved = reservationCompositeService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        ReservationResponse waiting = reservationCompositeService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
+
+        reservationCompositeService.deleteReservation(reserved.id());
+
+        List<ReservationResponse> all = reservationModuleService.findReservations(themeId, memberId, futureDate, futureDate.plusDays(1));
+        assertThat(all).hasSize(1)
+                .extracting(ReservationResponse::reservedStatus)
+                .containsExactly(ReservationStatus.RESERVED.getName());
     }
 }
