@@ -1,9 +1,12 @@
 package roomescape.application;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.dto.ReservationDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.AuthorizationException;
 import roomescape.exception.NotFoundException;
@@ -18,6 +21,11 @@ public class WaitingService {
     public WaitingService(ReservationRepository reservationRepository, MemberService memberService) {
         this.reservationRepository = reservationRepository;
         this.memberService = memberService;
+    }
+
+    public List<ReservationDto> getAllWaitings() {
+        List<Reservation> waitings = reservationRepository.findByWaitingStatus(ReservationStatus.WAITING);
+        return ReservationDto.from(waitings);
     }
 
     @Transactional(readOnly = true)

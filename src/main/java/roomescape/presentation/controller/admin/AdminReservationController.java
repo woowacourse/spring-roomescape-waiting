@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationCommandService;
 import roomescape.application.ReservationQueryService;
+import roomescape.application.WaitingService;
 import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.ReservationDto;
 
@@ -20,17 +21,21 @@ import roomescape.application.dto.ReservationDto;
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final ReservationCommandService commandService;
-    private final ReservationQueryService queryService;
+    private final ReservationCommandService reservationCommandService;
+    private final ReservationQueryService reservationQueryService;
+    private final WaitingService waitingService;
 
-    public AdminReservationController(ReservationCommandService commandService, ReservationQueryService queryService) {
-        this.commandService = commandService;
-        this.queryService = queryService;
+    public AdminReservationController(ReservationCommandService reservationCommandService,
+                                      ReservationQueryService reservationQueryService,
+                                      WaitingService waitingService) {
+        this.reservationCommandService = reservationCommandService;
+        this.reservationQueryService = reservationQueryService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
     public ResponseEntity<ReservationDto> createReservation(@Valid @RequestBody ReservationCreateDto request) {
-        ReservationDto reservationDto = commandService.registerReservation(request);
+        ReservationDto reservationDto = reservationCommandService.registerReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
     }
 
@@ -41,6 +46,11 @@ public class AdminReservationController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        return queryService.searchReservationsWith(themeId, memberId, dateFrom, dateTo);
+        return reservationQueryService.searchReservationsWith(themeId, memberId, dateFrom, dateTo);
+    }
+
+    @GetMapping("/waiting")
+    public List<ReservationDto> getAllWaitings() {
+        return waitingService.getAllWaitings();
     }
 }
