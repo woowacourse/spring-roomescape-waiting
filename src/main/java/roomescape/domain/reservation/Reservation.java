@@ -65,4 +65,8 @@ public class Reservation {
     public LocalTime getStartAt() {
         return schedule.getReservationTime().getStartAt();
     }
+
+    public ReservationState getState() {
+        return ReservationState.CONFIRMED;
+    }
 }

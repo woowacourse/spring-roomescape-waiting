@@ -76,4 +76,8 @@ public class Waiting {
     public LocalTime getStartAt() {
         return schedule.getReservationTime().getStartAt();
     }
+
+    public ReservationState getState() {
+        return ReservationState.WAITING;
+    }
 }
