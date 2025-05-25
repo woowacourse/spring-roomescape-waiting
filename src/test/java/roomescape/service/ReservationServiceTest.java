@@ -374,4 +374,93 @@ class ReservationServiceTest {
         // then
         assertThat(reservation.status()).isEqualTo(ReservationStatus.PENDING.description);
     }
+
+    @Test
+    @DisplayName("대기 예약 삭제 시 예약만 삭제된다.")
+    void deletePendingReservationTest() {
+        // given
+        CreateReservationRequest acceptedRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(5), themeId1, timeId
+        );
+        CreateReservationRequest pendingRequest = new CreateReservationRequest(
+                memberId2, LocalDate.now().plusDays(5), themeId1, timeId
+        );
+
+        ReservationResponse acceptedReservation = reservationService.addReservation(acceptedRequest);
+        ReservationResponse pendingReservation = reservationService.addReservation(pendingRequest);
+
+        int initialReservationCount = reservationService.getAllReservations().size();
+
+        // when
+        reservationService.removeReservation(pendingReservation.id());
+
+        // then
+        List<ReservationResponse> remainingReservations = reservationService.getAllReservations();
+        assertThat(remainingReservations).hasSize(initialReservationCount - 1);
+        assertThat(remainingReservations)
+                .noneMatch(reservation -> reservation.id() == pendingReservation.id());
+        assertThat(remainingReservations)
+                .anyMatch(reservation -> reservation.id() == acceptedReservation.id());
+    }
+
+    @Test
+    @DisplayName("확정 예약 삭제 시 다음 대기가 있으면 예약 항목은 삭제되지 않고 다음 예약이 확정상태가 된다.")
+    void deleteAcceptedReservationAndHasPendingReservationTest() {
+        // given
+        CreateReservationRequest acceptedRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(6), themeId1, timeId
+        );
+        CreateReservationRequest pendingRequest = new CreateReservationRequest(
+                memberId2, LocalDate.now().plusDays(6), themeId1, timeId
+        );
+
+        ReservationResponse acceptedReservation = reservationService.addReservation(acceptedRequest);
+        ReservationResponse pendingReservation = reservationService.addReservation(pendingRequest);
+
+        int initialReservationCount = reservationService.getAllReservations().size();
+
+        // when
+        reservationService.removeReservation(acceptedReservation.id());
+
+        // then
+        List<ReservationResponse> remainingReservations = reservationService.getAllReservations();
+        assertThat(remainingReservations).hasSize(initialReservationCount - 1);
+
+        assertThat(remainingReservations)
+                .noneMatch(reservation -> reservation.id() == acceptedReservation.id());
+
+        assertThat(remainingReservations)
+                .anyMatch(reservation ->
+                        reservation.id() == pendingReservation.id() &&
+                                reservation.status().equals(ReservationStatus.ACCEPTED.description)
+                );
+    }
+
+    @Test
+    @DisplayName("확정 예약 삭제 시 다음 대기가 없으면 예약 항목과 예약 모두 삭제된다.")
+    void deleteAcceptedReservationAndNoPendingReservationTest() {
+        // given
+        CreateReservationRequest acceptedRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(7), themeId1, timeId
+        );
+
+        ReservationResponse acceptedReservation = reservationService.addReservation(acceptedRequest);
+        int initialReservationCount = reservationService.getAllReservations().size();
+
+        // when
+        reservationService.removeReservation(acceptedReservation.id());
+
+        // then
+        List<ReservationResponse> remainingReservations = reservationService.getAllReservations();
+        assertThat(remainingReservations).hasSize(initialReservationCount - 1);
+
+        assertThat(remainingReservations)
+                .noneMatch(reservation -> reservation.id() == acceptedReservation.id());
+
+        CreateReservationRequest newRequest = new CreateReservationRequest(
+                memberId2, LocalDate.now().plusDays(7), themeId1, timeId
+        );
+        ReservationResponse newReservation = reservationService.addReservation(newRequest);
+        assertThat(newReservation.status()).isEqualTo(ReservationStatus.ACCEPTED.description);
+    }
 }

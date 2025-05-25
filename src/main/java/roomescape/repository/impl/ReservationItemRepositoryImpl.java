@@ -22,6 +22,11 @@ public class ReservationItemRepositoryImpl implements ReservationItemRepository 
     }
 
     @Override
+    public void delete(ReservationItem reservationItem) {
+        reservationItemJpaRepository.delete(reservationItem);
+    }
+
+    @Override
     public Optional<ReservationItem> findReservationItemByDateAndTimeAndTheme(LocalDate date,
                                                                               ReservationTime time,
                                                                               ReservationTheme theme) {

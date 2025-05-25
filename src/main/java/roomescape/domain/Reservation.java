@@ -39,4 +39,8 @@ public class Reservation {
         this.reservationItem = reservationItem;
         this.reservationStatus = reservationStatus;
     }
+
+    public void changeStatusToAccepted() {
+        this.reservationStatus = ReservationStatus.ACCEPTED;
+    }
 }

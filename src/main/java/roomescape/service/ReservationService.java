@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationItem;
@@ -90,9 +91,39 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void removeReservation(Long reservationId) {
-        final Reservation reservation = reservationRepository.findById(reservationId)
+        Reservation targetReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
+
+        if (targetReservation.getReservationStatus() == ReservationStatus.PENDING) {
+            deleteReservationOnly(targetReservation);
+        } else if (targetReservation.getReservationStatus() == ReservationStatus.ACCEPTED) {
+            handleAcceptedReservationRemoval(targetReservation);
+        }
+    }
+
+    private void handleAcceptedReservationRemoval(Reservation targetReservation) {
+        ReservationItem reservationItem = targetReservation.getReservationItem();
+
+        reservationRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(
+                reservationItem, ReservationStatus.PENDING
+        ).ifPresentOrElse(
+                nextReservation -> {
+                    nextReservation.changeStatusToAccepted();
+                    reservationRepository.save(nextReservation);
+                    deleteReservationOnly(targetReservation);
+                },
+                () -> deleteReservationWithItem(targetReservation, reservationItem)
+        );
+    }
+
+    private void deleteReservationOnly(Reservation reservation) {
         reservationRepository.deleteById(reservation.getId());
+    }
+
+    private void deleteReservationWithItem(Reservation reservation, ReservationItem reservationItem) {
+        reservationRepository.deleteById(reservation.getId());
+        reservationItemService.deleteReservationItem(reservationItem);
     }
 }

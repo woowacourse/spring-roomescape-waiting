@@ -14,9 +14,17 @@ public interface ReservationRepository {
 
     void deleteById(final long id);
 
-    List<Reservation> findByMemberIdAndThemeIdAndDateFromAndDateTo(final Long memberId, final Long themeId, final LocalDate dateFrom, final LocalDate dateTo);
+    List<Reservation> findByMemberIdAndThemeIdAndDateFromAndDateTo(final Long memberId,
+                                                                   final Long themeId,
+                                                                   final LocalDate dateFrom,
+                                                                   final LocalDate dateTo);
 
-    boolean existByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId);
+    boolean existByDateAndTimeIdAndThemeId(final LocalDate date,
+                                           final long timeId,
+                                           final long themeId);
+
+    Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem,
+                                                                                     ReservationStatus reservationStatus);
 
     List<Reservation> findByMemberId(Long memberId);
 }

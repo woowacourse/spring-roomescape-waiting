@@ -2,11 +2,14 @@ package roomescape.repository.jpa;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationItem;
+import roomescape.domain.ReservationStatus;
 import roomescape.repository.querydsl.ReservationRepositoryCustom;
 
 @Repository
@@ -24,6 +27,8 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("timeId") long timeId,
             @Param("themeId") long themeId
     );
+
+    Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem, ReservationStatus reservationStatus);
 
     List<Reservation> findByMemberId(Long memberId);
 }

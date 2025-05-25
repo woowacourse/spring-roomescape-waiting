@@ -35,6 +35,10 @@ public class ReservationItemService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 항목을 찾지 못하였습니다."));
     }
 
+    public void deleteReservationItem(ReservationItem reservationItem) {
+        reservationItemRepository.delete(reservationItem);
+    }
+
     public boolean isExistReservationItem(LocalDate date, ReservationTime reservationTime, ReservationTheme theme) {
         return reservationItemRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
     }

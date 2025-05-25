@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,8 @@ public class ReservationRepositoryTest {
     private ReservationItemJpaRepository reservationItemJpaRepository;
 
     private Member member;
+    private Member member2;
+    private Member member3;
     private ReservationTime time;
     private ReservationTheme theme;
     private ReservationItem reservationItem;
@@ -79,6 +82,12 @@ public class ReservationRepositoryTest {
 
         member = memberRepository.save(
                 new Member("test@example.com", "testPassword", "test", MemberRole.USER)
+        );
+        member2 = memberRepository.save(
+                new Member("test2@example.com", "testPassword2", "test2", MemberRole.USER)
+        );
+        member3 = memberRepository.save(
+                new Member("test3@example.com", "testPassword3", "test3", MemberRole.USER)
         );
         time = reservationTimeRepository.save(
                 new ReservationTime(LocalTime.now())
@@ -138,5 +147,37 @@ public class ReservationRepositoryTest {
                 () -> assertThat(reservations.getFirst().getReservationItem().getTime().getId()).isEqualTo(time.getId()),
                 () -> assertThat(reservations.getFirst().getReservationItem().getTheme().getId()).isEqualTo(theme.getId())
         );
+    }
+
+    @Test
+    @DisplayName("예약 대기 중 가장 빠른 대기를 조회한다.")
+    void getFirstPendingReservationTest() {
+        // given
+        reservationRepository.save(new Reservation(member3, reservationItem, ReservationStatus.PENDING));
+        reservationRepository.save(new Reservation(member2, reservationItem, ReservationStatus.PENDING));
+
+        // when
+        final Optional<Reservation> reservation = reservationRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(
+                reservationItem, ReservationStatus.PENDING
+        );
+
+        // then
+        assertThat(reservation).isPresent();
+        assertAll(
+                () -> assertThat(reservation.get().getReservationStatus()).isEqualTo(ReservationStatus.PENDING),
+                () -> assertThat(reservation.get().getMember()).isEqualTo(member3)
+        );
+    }
+
+    @Test
+    @DisplayName("예약 대기가 없다면 Optional이 비어있다.")
+    void getNoPendingReservationTest() {
+        // when
+        final Optional<Reservation> reservation = reservationRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(
+                reservationItem, ReservationStatus.PENDING
+        );
+
+        // then
+        assertThat(reservation).isEmpty();
     }
 }

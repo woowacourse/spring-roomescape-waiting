@@ -7,6 +7,8 @@ public interface ReservationItemRepository {
 
     ReservationItem save(ReservationItem reservationItem);
 
+    void delete(ReservationItem reservationItem);
+
     Optional<ReservationItem> findReservationItemByDateAndTimeAndTheme(LocalDate date, ReservationTime time, ReservationTheme theme);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, ReservationTheme theme);
