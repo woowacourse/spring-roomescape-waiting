@@ -17,7 +17,7 @@ public class CookieTokenAuthorizationHandler extends TokenAuthorizationHandler {
     public CookieTokenAuthorizationHandler(
         @Value("${jwt.validity-in-milliseconds}") int maxAge
     ) {
-        this.maxAge = maxAge;
+        this.maxAge = maxAge / 1000;
     }
 
     @Override

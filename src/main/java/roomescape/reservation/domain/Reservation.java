@@ -91,6 +91,19 @@ public class Reservation {
         return new Reservation(date, time, theme, member, Priority.first());
     }
 
+    public static Reservation makeWaiting(
+        Reservation reservation,
+        Member member
+    ) {
+        return new Reservation(
+            reservation.date,
+            reservation.time,
+            reservation.theme,
+            member,
+            reservation.priority.getValue() + 1
+        );
+    }
+
     public static Reservation generateWithPrimaryKey(Reservation reservation, Long newPrimaryKey) {
         return new Reservation(
             newPrimaryKey,

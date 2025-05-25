@@ -60,6 +60,26 @@ public class ReservationServiceFacade {
         );
     }
 
+    public ReservationResponse createWaiting(
+        ReservationCreateRequest reservationCreateRequest,
+        MemberPrincipal memberPrincipal
+    ) {
+        ReservationTime reservationTime = reservationTimeService.findById(reservationCreateRequest.timeId())
+            .orElseThrow(() -> new BadRequestException("올바른 예약 시간을 찾을 수 없습니다."));
+
+        Theme theme = themeService.findById(reservationCreateRequest.themeId())
+            .orElseThrow(() -> new BadRequestException("올바른 방탈출 테마가 없습니다."));
+
+        Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
+
+        return reservationService.createWaiting(
+            reservationTime,
+            theme,
+            member,
+            reservationCreateRequest
+        );
+    }
+
     public List<ReservationResponse> findAll() {
         return reservationService.findAll();
     }

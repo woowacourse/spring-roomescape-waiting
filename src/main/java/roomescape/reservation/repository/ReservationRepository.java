@@ -26,10 +26,11 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByMember(Member member);
 
-    Optional<Reservation> findByLastPriorityByDateAndTimeAndThemeAndMember(
+    Optional<Reservation> findByLastPriorityByDateAndTimeAndTheme(
         LocalDate date,
         ReservationTime time,
-        Theme theme,
-        Member member
+        Theme theme
     );
+
+    long findOrder(Reservation reservation);
 }

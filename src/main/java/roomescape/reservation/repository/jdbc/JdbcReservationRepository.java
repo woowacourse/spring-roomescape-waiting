@@ -166,14 +166,24 @@ public class JdbcReservationRepository implements ReservationRepository {
         return List.of();
     }
 
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
     @Override
-    public Optional<Reservation> findByLastPriorityByDateAndTimeAndThemeAndMember(
+    public Optional<Reservation> findByLastPriorityByDateAndTimeAndTheme(
         LocalDate date,
         ReservationTime time,
-        Theme theme,
-        Member member
+        Theme theme
     ) {
         return Optional.empty();
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public long findOrder(Reservation reservation) {
+        return 0;
     }
 
     @Override

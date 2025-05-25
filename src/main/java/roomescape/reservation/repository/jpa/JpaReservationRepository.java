@@ -44,20 +44,32 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             WHERE r.date = :date
               AND r.time = :time
               AND r.theme = :theme
-              AND r.member = :member
               AND r.priority.value = (
                   SELECT MAX(r2.priority.value)
                   FROM Reservation r2
                   WHERE r2.date = :date
                     AND r2.time = :time
                     AND r2.theme = :theme
-                    AND r2.member = :member
               )
         """)
-    Optional<Reservation> findByLastPriorityByDateAndTimeAndThemeAndMember(
+    Optional<Reservation> findByLastPriorityByDateAndTimeAndTheme(
+        LocalDate date,
+        ReservationTime time,
+        Theme theme
+    );
+
+    @Query("""
+            SELECT COUNT(*)
+            FROM Reservation r
+            WHERE r.date = :date
+                AND r.time = :time
+                AND r.theme = :theme
+                AND r.priority.value < :priority
+        """)
+    long findOrder(
         LocalDate date,
         ReservationTime time,
         Theme theme,
-        Member member
+        long priority
     );
 }

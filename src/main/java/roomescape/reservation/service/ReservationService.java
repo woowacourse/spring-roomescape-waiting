@@ -38,10 +38,9 @@ public class ReservationService {
         ReservationCreateRequest reservationCreateRequest
     ) {
         validateNotPast(LocalDateTime.of(reservationCreateRequest.date(), reservationTime.getStartAt()));
-
         validateReservationTimeConflict(availableTimes, reservationTime);
 
-        Reservation reservation = makeReservation(
+        Reservation reservation = new Reservation(
             reservationCreateRequest.date(),
             reservationTime,
             theme,
@@ -53,27 +52,49 @@ public class ReservationService {
         return ReservationResponse.from(reservation);
     }
 
-    private Reservation makeReservation(
+    private void validateReservationTimeConflict(List<ReservationTime> availableTimes,
+                                                 ReservationTime reservationTime) {
+        if (!availableTimes.contains(reservationTime)) {
+            throw new ConflictException("이미 해당 시간과 테마에 예약이 존재하여 예약할 수 없습니다.");
+        }
+    }
+
+    public ReservationResponse createWaiting(
+        ReservationTime reservationTime,
+        Theme theme,
+        Member member,
+        ReservationCreateRequest reservationCreateRequest
+    ) {
+        validateNotPast(LocalDateTime.of(reservationCreateRequest.date(), reservationTime.getStartAt()));
+
+        Reservation reservation = makeWaiting(
+            reservationCreateRequest.date(),
+            reservationTime,
+            theme,
+            member
+        );
+
+        reservationRepository.save(reservation);
+
+        return ReservationResponse.from(reservation);
+    }
+
+    private Reservation makeWaiting(
         LocalDate date,
         ReservationTime reservationTime,
         Theme theme,
         Member member
     ) {
         return reservationRepository
-            .findByLastPriorityByDateAndTimeAndThemeAndMember(date, reservationTime, theme, member)
-            .orElse(Reservation.first(date, reservationTime, theme, member));
+            .findByLastPriorityByDateAndTimeAndTheme(date, reservationTime, theme)
+            .map(value -> Reservation.makeWaiting(value, member))
+            .orElseGet(() -> Reservation.first(date, reservationTime, theme, member));
     }
+
 
     private void validateNotPast(LocalDateTime dateTime) {
         if (dateTime.isBefore(LocalDateTime.now())) {
             throw new BadRequestException("과거 시점의 예약을 할 수 없습니다.");
-        }
-    }
-
-    private void validateReservationTimeConflict(List<ReservationTime> availableTimes,
-                                                 ReservationTime reservationTime) {
-        if (!availableTimes.contains(reservationTime)) {
-            throw new ConflictException("이미 해당 시간과 테마에 예약이 존재하여 예약할 수 없습니다.");
         }
     }
 
@@ -122,8 +143,12 @@ public class ReservationService {
     private String getReservationStatus(Reservation reservation) {
         LocalDateTime reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getTime().getStartAt());
         if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            return "완료";
+            return "과거";
         }
-        return "예약";
+        long order = reservationRepository.findOrder(reservation);
+        if (order == 0) {
+            return "예약";
+        }
+        return order + "번째 예약대기";
     }
 }

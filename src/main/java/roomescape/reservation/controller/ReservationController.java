@@ -39,6 +39,18 @@ public class ReservationController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> createWaiting(
+        @RequestBody @Valid ReservationCreateRequest reservationCreateRequest,
+        @AuthorizedMember MemberPrincipal memberPrincipal
+    ) {
+        ReservationResponse response = reservationService.createWaiting(
+            reservationCreateRequest,
+            memberPrincipal
+        );
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> read() {
         List<ReservationResponse> responses = reservationService.findAll();

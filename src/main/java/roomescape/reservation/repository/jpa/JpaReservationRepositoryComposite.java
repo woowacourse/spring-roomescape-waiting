@@ -61,12 +61,21 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     }
 
     @Override
-    public Optional<Reservation> findByLastPriorityByDateAndTimeAndThemeAndMember(
+    public Optional<Reservation> findByLastPriorityByDateAndTimeAndTheme(
         LocalDate date,
         ReservationTime time,
-        Theme theme,
-        Member member
+        Theme theme
     ) {
-        return jpaReservationRepository.findByLastPriorityByDateAndTimeAndThemeAndMember(date, time, theme, member);
+        return jpaReservationRepository.findByLastPriorityByDateAndTimeAndTheme(date, time, theme);
+    }
+
+    @Override
+    public long findOrder(Reservation reservation) {
+        return jpaReservationRepository.findOrder(
+            reservation.getDate(),
+            reservation.getTime(),
+            reservation.getTheme(),
+            reservation.getPriority()
+        );
     }
 }

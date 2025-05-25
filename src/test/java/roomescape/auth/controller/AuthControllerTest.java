@@ -34,7 +34,7 @@ class AuthControllerTest {
     @Test
     void 로그인을_할_수_있다() {
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
 
         LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
 
@@ -55,7 +55,7 @@ class AuthControllerTest {
     @Test
     void 로그인_정보를_통해_이름을_알_수_있다() {
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
 
         AuthorizationPrincipal principal = getAuthorizationPrincipal(member);
 
@@ -71,7 +71,7 @@ class AuthControllerTest {
     @Test
     void 로그아웃을_할_수_있다() {
         // given
-        Member member = MemberFixture.createMember(MemberRole.USER);
+        Member member = MemberFixture.create(MemberRole.USER);
 
         AuthorizationPrincipal principal = getAuthorizationPrincipal(member);
 
