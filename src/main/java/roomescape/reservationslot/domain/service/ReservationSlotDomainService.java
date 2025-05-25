@@ -40,10 +40,7 @@ public class ReservationSlotDomainService {
 
     public List<ReservationSlot> findFilteredReservations(final Long themeId, final Long memberId,
                                                           final LocalDate startDate, final LocalDate endDate) {
-        if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
-            return reservationSlotRepository.findAll();
-        }
-        return reservationSlotRepository.findByThemeIdAndDateBetweenAndWaitingMemberId(themeId, startDate, endDate,
+        return reservationSlotRepository.findByThemeIdAndDateBetweenAndReservationMemberId(themeId, startDate, endDate,
                 memberId);
     }
 

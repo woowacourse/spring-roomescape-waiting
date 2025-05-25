@@ -8,9 +8,9 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 
 public interface ReservationSlotRepository {
 
-    List<ReservationSlot> findByThemeIdAndDateBetweenAndWaitingMemberId(Long themeId, LocalDate startDate,
-                                                                        LocalDate endDate,
-                                                                        Long memberId);
+    List<ReservationSlot> findByThemeIdAndDateBetweenAndReservationMemberId(Long themeId, LocalDate startDate,
+                                                                            LocalDate endDate,
+                                                                            Long memberId);
 
     boolean existsByTimeId(Long id);
 

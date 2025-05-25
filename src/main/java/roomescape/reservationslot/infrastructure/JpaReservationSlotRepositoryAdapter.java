@@ -18,11 +18,11 @@ public class JpaReservationSlotRepositoryAdapter implements ReservationSlotRepos
     }
 
     @Override
-    public List<ReservationSlot> findByThemeIdAndDateBetweenAndWaitingMemberId(final Long themeId,
-                                                                               final LocalDate startDate,
-                                                                               final LocalDate endDate,
-                                                                               final Long memberId) {
-        return jpaReservationSlotRepository.findByThemeIdAndDateBetweenAndWaitingsMemberId(themeId, startDate, endDate,
+    public List<ReservationSlot> findByThemeIdAndDateBetweenAndReservationMemberId(final Long themeId,
+                                                                                   final LocalDate startDate,
+                                                                                   final LocalDate endDate,
+                                                                                   final Long memberId) {
+        return jpaReservationSlotRepository.findByThemeIdAndDateBetweenAndReservationMemberId(themeId, startDate, endDate,
                 memberId);
     }
 

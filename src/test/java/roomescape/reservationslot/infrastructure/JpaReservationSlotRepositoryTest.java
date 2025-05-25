@@ -55,7 +55,7 @@ class JpaReservationSlotRepositoryTest {
     }
 
     @Test
-    void findByThemeIdAndDateBetweenAndWaitingsMemberId() {
+    void findByThemeIdAndDateBetweenAndReservationMemberId() {
         Theme theme2 = themeRepository.save(Theme.of("논리", "셜록 논리 게임 with Vector", "image.png"));
 
         ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
@@ -65,7 +65,7 @@ class JpaReservationSlotRepositoryTest {
                 NOW_DATETIME);
         reservationSlotRepository.save(reservationSlot2);
 
-        List<ReservationSlot> filteredReservationSlots = reservationSlotRepository.findByThemeIdAndDateBetweenAndWaitingMemberId(
+        List<ReservationSlot> filteredReservationSlots = reservationSlotRepository.findByThemeIdAndDateBetweenAndReservationMemberId(
                 theme.getId(),
                 FUTURE_DATE, FUTURE_DATE.plusDays(1), member.getId()
         );
