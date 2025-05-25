@@ -56,7 +56,7 @@ public class ReservationCommandService {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. id : " + request.memberId()));
 
-        Reservation requestReservation = Reservation.createWithoutId(member, request.date(), reservationTime, theme);
+        Reservation requestReservation = new Reservation(member, request.date(), reservationTime, theme, ReservationStatus.RESERVED);
         Reservation newReservation = reservationRepository.save(requestReservation);
 
         return ReservationResponseDto.of(newReservation);

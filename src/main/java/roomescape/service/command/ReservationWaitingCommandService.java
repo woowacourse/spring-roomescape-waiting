@@ -9,6 +9,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWaitingTicket;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -69,7 +70,7 @@ public class ReservationWaitingCommandService {
             throw new IllegalArgumentException("현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
         }
 
-        Reservation requestReservation = Reservation.createWaitingWithoutId(member, request.date(), reservationTime, theme);
+        Reservation requestReservation = new Reservation(member, request.date(), reservationTime, theme, ReservationStatus.WAITING);
         Reservation newReservation = reservationRepository.save(requestReservation);
         reservationWaitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
         return ReservationResponseDto.of(newReservation);

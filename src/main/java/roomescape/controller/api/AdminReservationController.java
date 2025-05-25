@@ -53,7 +53,8 @@ public class AdminReservationController {
             @RequestParam("themeId") long themeId,
             @RequestParam("memberId") long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
-            @RequestParam("dateTo") LocalDate dateTo) {
+            @RequestParam("dateTo") LocalDate dateTo
+    ) {
         return reservationQueryService.searchReservationsBy(themeId, memberId, dateFrom, dateTo);
     }
 

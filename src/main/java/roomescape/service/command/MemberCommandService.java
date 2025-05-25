@@ -24,7 +24,7 @@ public class MemberCommandService {
             throw new DuplicateContentException("해당 이메일로 가입된 이력이 있습니다.");
         }
 
-        Member member = Member.createWithoutId(requestDto.name(), requestDto.email(), Role.USER, requestDto.password());
+        Member member = new Member(requestDto.name(), requestDto.email(), Role.USER, requestDto.password());
         Member createdMember = memberRepository.save(member);
         return new MemberSignupResponseDto(createdMember.getId(), createdMember.getName(), createdMember.getEmail());
     }

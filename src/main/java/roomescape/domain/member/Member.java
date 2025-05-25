@@ -42,8 +42,8 @@ public class Member {
     public Member() {
     }
 
-    public static Member createWithoutId(String name, String email, Role role, String password) {
-        return new Member(null, name, email, role, password);
+    public Member (String name, String email, Role role, String password) {
+        this(null, name, email, role, password);
     }
 
     private void validateName(String name) {

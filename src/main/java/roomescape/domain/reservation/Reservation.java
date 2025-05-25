@@ -56,22 +56,11 @@ public class Reservation {
         this.status = status;
     }
 
+    public Reservation (Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+        this(null, member, date, time, theme, status);
+    }
+
     public Reservation() {
-    }
-
-    //TODO 일단 변경을 최소화하기 위해 메서드를 분리함
-    public static Reservation createWithoutId(Member member,
-                                              LocalDate date,
-                                              ReservationTime time,
-                                              Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
-    }
-
-    public static Reservation createWaitingWithoutId(Member member,
-                                              LocalDate date,
-                                              ReservationTime time,
-                                              Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.WAITING);
     }
 
     public void setStatus(ReservationStatus reservationStatus) {
