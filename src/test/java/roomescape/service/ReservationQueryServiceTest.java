@@ -16,14 +16,16 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
+import roomescape.service.command.ReservationCommandService;
 import roomescape.service.dto.ReservationCreateDto;
 
-class ReservationServiceTest {
+class ReservationQueryServiceTest {
 
     @Mock
     private JpaReservationRepository reservationRepository;
@@ -38,7 +40,7 @@ class ReservationServiceTest {
     private JpaMemberRepository memberRepository;
 
     @InjectMocks
-    private ReservationService reservationService;
+    private ReservationCommandService reservationCommandService;
 
     @BeforeEach
     void setUp() {
@@ -52,7 +54,7 @@ class ReservationServiceTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "theme", "theme", "theme");
         Member member = new Member(1L, "moda", "email", Role.ADMIN, "pw");
-        Reservation reservation = Reservation.createWithoutId(member, LocalDate.of(2025, 11, 11), reservationTime, theme);
+        Reservation savedReservation = new Reservation(1L, member, LocalDate.of(2025, 11, 11), reservationTime, theme, ReservationStatus.RESERVED);
 
         when(reservationTimeRepository.findById(any(Long.class))).thenReturn(
                 Optional.of(reservationTime));
@@ -61,9 +63,9 @@ class ReservationServiceTest {
         when(memberRepository.findById(any(Long.class))).thenReturn(
                 Optional.of(member));
         when(reservationRepository.save(any(Reservation.class))).thenReturn(
-                reservation);
+                savedReservation);
 
-        ReservationResponseDto createdReservation = reservationService.createReservation(dto);
+        ReservationResponseDto createdReservation = reservationCommandService.bookReservation(dto);
 
         assertThat(createdReservation.id()).isEqualTo(1L);
         assertThat(createdReservation.member().name()).isEqualTo("moda");
@@ -71,5 +73,4 @@ class ReservationServiceTest {
         assertThat(createdReservation.time().startAt()).isEqualTo(LocalTime.of(10, 0));
         assertThat(createdReservation.theme().name()).isEqualTo("theme");
     }
-
 }

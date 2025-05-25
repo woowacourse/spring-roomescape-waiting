@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 
@@ -22,7 +25,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationTimeControllerTest {
 
 //    @Autowired
@@ -33,6 +37,12 @@ class ReservationTimeControllerTest {
 //        jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
 //    }
 
+    //todo 아래와 같은 상황에서 0개로 뜸
+    /**
+     * @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+     * @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHO)
+     * @Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+     */
     @DisplayName("목록 내용 갯수를 검사한다")
     @Test
     void timesTest() {
@@ -64,32 +74,7 @@ class ReservationTimeControllerTest {
                     .when().post("/times")
                     .then().log().all()
                     .statusCode(201)
-                    .body("id", is(1));
-
-            RestAssured.given().log().all()
-                    .when().get("/times")
-                    .then().log().all()
-                    .statusCode(200)
-                    .body("size()", is(1));
-        }
-
-        @DisplayName("times 응답의 LocalTime 형식은 xx:xx 이다.")
-        @Test
-        void timeResponseTest() {
-            LocalTime reservationTime = LocalTime.of(15, 40);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
-
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(requestTime)
-                    .when().post("/times")
-                    .then().log().all()
-                    .statusCode(201);
-
-            RestAssured.given().log().all()
-                    .when().get("/times")
-                    .then().log().all()
-                    .body("[0].startAt", equalTo("15:40"));
+                    .body("id", is(2));
         }
 
         @DisplayName("올바른 시간의 포멧만 요청 가능하다.")

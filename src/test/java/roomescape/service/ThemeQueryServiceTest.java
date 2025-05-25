@@ -18,8 +18,10 @@ import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaThemeRepository;
+import roomescape.service.command.ThemeCommandService;
+import roomescape.service.query.ThemeQueryService;
 
-class ThemeServiceTest {
+class ThemeQueryServiceTest {
 
     @Mock
     private JpaThemeRepository themeRepository;
@@ -31,7 +33,10 @@ class ThemeServiceTest {
     private Clock clock;
 
     @InjectMocks
-    private ThemeService themeService;
+    private ThemeQueryService themeQueryService;
+
+    @InjectMocks
+    private ThemeCommandService themeCommandService;
 
     @BeforeEach
     void setUp() {
@@ -45,7 +50,7 @@ class ThemeServiceTest {
         Theme savedTheme = new Theme(1L, theme.getName(), theme.getDescription(), theme.getThumbnail());
 
         when(themeRepository.save(any(Theme.class))).thenReturn(savedTheme);
-        ThemeResponseDto response = themeService.createTheme(requestDto);
+        ThemeResponseDto response = themeCommandService.createTheme(requestDto);
 
         assertEquals(savedTheme.getId(), response.id());
         assertEquals(savedTheme.getName(), response.name());
@@ -59,7 +64,7 @@ class ThemeServiceTest {
         );
 
         when(themeRepository.findAll()).thenReturn(allThemes);
-        List<ThemeResponseDto> allThemeDtos = themeService.findAllThemes();
+        List<ThemeResponseDto> allThemeDtos = themeQueryService.findAllThemes();
 
         assertThat(allThemeDtos).hasSize(1);
         assertThat(allThemeDtos.get(0)).isEqualTo(new ThemeResponseDto(1L, "공포테마", "무서운 배경 설명", "image-url"));
@@ -85,9 +90,9 @@ class ThemeServiceTest {
         when(clock.instant()).thenReturn(fixedToday
                 .atStartOfDay(ZoneId.systemDefault()).toInstant());
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-        when(themeRepository.findMostReservedThemesBetween(any(LocalDate.class), any(LocalDate.class))).thenReturn(allThemes);
+        when(themeRepository.findMostReservedThemesBetweenDate(any(LocalDate.class), any(LocalDate.class))).thenReturn(allThemes);
 
-        List<ThemeResponseDto> popularThemes = themeService.findPopularThemes();
+        List<ThemeResponseDto> popularThemes = themeQueryService.findPopularThemes();
 
         assertThat(popularThemes).hasSize(10);
         assertThat(popularThemes.getFirst().id()).isEqualTo(1L);

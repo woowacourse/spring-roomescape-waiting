@@ -7,5 +7,5 @@ VALUES ('테마 A', '테마 A입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6e
 INSERT INTO reservation_time (start_at)
 VALUES ('10:00');
 
-INSERT INTO reservation (date, time_id, theme_id, member_id)
-VALUES ('2025-05-22', 1, 1, 1);
+INSERT INTO reservation (date, time_id, theme_id, member_id, status)
+VALUES ('2025-05-22', 1, 1, 1, 'RESERVED');
