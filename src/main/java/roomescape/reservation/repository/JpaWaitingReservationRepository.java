@@ -19,21 +19,6 @@ public interface JpaWaitingReservationRepository extends WaitingReservationRepos
         JpaRepository<Waiting, Long> {
 
     @Query("""
-            SELECT r
-            FROM Reservation r
-            JOIN FETCH r.info.time t
-            JOIN FETCH r.info.theme th
-            JOIN FETCH r.member m
-            WHERE th.id        = :themeId
-            AND m.id         = :memberId
-            AND r.info.date BETWEEN :startDate AND :endDate
-            """)
-    List<Waiting> findFilteredReservations(Long themeId,
-                                           Long memberId,
-                                           LocalDate startDate,
-                                           LocalDate endDate);
-
-    @Query("""
             SELECT EXISTS (
                 SELECT 1
                 FROM Waiting w
@@ -58,14 +43,6 @@ public interface JpaWaitingReservationRepository extends WaitingReservationRepos
             @Param("timeId") Long timeId,
             @Param("themeId") Long themeId
     );
-
-    @Query("""
-            SELECT w
-            FROM Waiting w
-            JOIN FETCH w.member m
-            WHERE m.id = :memberId
-            """)
-    List<Waiting> findAllByMemberId(@Param("memberId") Long memberId);
 
     List<Waiting> findAll();
 

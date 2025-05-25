@@ -20,10 +20,10 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             AND m.id         = :memberId
             AND r.info.date BETWEEN :startDate AND :endDate
             """)
-    List<Reservation> findFilteredReservations(Long themeId,
-                                               Long memberId,
-                                               LocalDate startDate,
-                                               LocalDate endDate);
+    List<Reservation> findFilteredReservations(@Param("themeId") Long themeId,
+                                               @Param("memberId") Long memberId,
+                                               @Param("startDate") LocalDate startDate,
+                                               @Param("endDate") LocalDate endDate);
 
     @Query("""
             SELECT EXISTS (
@@ -31,7 +31,7 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
               FROM Reservation r
               WHERE r.info.time.id = :timeId)
             """)
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTimeId(@Param("timeId")Long timeId);
 
     @Query("""
             SELECT EXISTS (
