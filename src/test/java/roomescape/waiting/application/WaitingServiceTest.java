@@ -21,7 +21,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationInPastException;
 import roomescape.reservation.infrastructure.ReservationRepositoryAdapter;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -36,7 +35,7 @@ import roomescape.waiting.application.dto.WaitingRequest;
 import roomescape.waiting.application.dto.WaitingResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.exception.NotFirstWaitingException;
+import roomescape.waiting.exception.DuplicatedWaitingException;
 import roomescape.waiting.exception.SlotNotReservedException;
 import roomescape.waiting.exception.WaitingNotFoundException;
 import roomescape.waiting.infrastructure.WaitingRepositoryAdapter;
@@ -175,9 +174,9 @@ class WaitingServiceTest {
                 .isInstanceOf(SlotNotReservedException.class);
     }
 
-    @DisplayName("대기 생성 - 성공")
+    @DisplayName("대기 생성 - 이미 예약한 사용자가 같은 슬롯에 대기 생성 시 예외 발생")
     @Test
-    void create_success() {
+    void create_duplicatedReservationMember() {
         // given
         Member member = MemberFixture.createMember("에드", "test@test.com", "1234");
         memberRepository.save(member);
@@ -198,8 +197,73 @@ class WaitingServiceTest {
 
         WaitingRequest request = new WaitingRequest(date, timeId, themeId);
 
+        // when & then
+        assertThatThrownBy(() -> waitingService.create(memberId, request))
+                .isInstanceOf(DuplicatedWaitingException.class);
+    }
+
+    @DisplayName("대기 생성 - 이미 대기한 사용자가 같은 슬롯에 대기 생성 시 예외 발생")
+    @Test
+    void create_duplicatedWaitingMember() {
+        // given
+        Member reservationMember = MemberFixture.createMember("에드", "test@test.com", "1234");
+        memberRepository.save(reservationMember);
+
+        Member waitingMember = MemberFixture.createMember("김진우", "test2@test.com", "5678");
+        memberRepository.save(waitingMember);
+        Long waitingMemberId = waitingMember.getId();
+
+        ReservationTime time = new ReservationTime(LocalTime.now());
+        timeRepository.save(time);
+        Long timeId = time.getId();
+
+        Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+        Long themeId = theme.getId();
+
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        Reservation reservation = new Reservation(reservationMember, spec);
+        reservationRepository.save(reservation);
+
+        WaitingRequest firstRequest = new WaitingRequest(date, timeId, themeId);
+        waitingService.create(waitingMemberId, firstRequest);
+
+        WaitingRequest secondRequest = new WaitingRequest(date, timeId, themeId);
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.create(waitingMemberId, secondRequest))
+                .isInstanceOf(DuplicatedWaitingException.class);
+    }
+
+    @DisplayName("대기 생성 - 성공")
+    @Test
+    void create_success() {
+        // given
+        Member reservationMember = MemberFixture.createMember("에드", "test@test.com", "1234");
+        memberRepository.save(reservationMember);
+
+        Member waitingMember = MemberFixture.createMember("김진우", "test2@test.com", "5678");
+        memberRepository.save(waitingMember);
+        Long waitingMemberId = waitingMember.getId();
+
+        ReservationTime time = new ReservationTime(LocalTime.now());
+        timeRepository.save(time);
+        Long timeId = time.getId();
+
+        Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+        Long themeId = theme.getId();
+
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        Reservation reservation = new Reservation(reservationMember, spec);
+        reservationRepository.save(reservation);
+
+        WaitingRequest request = new WaitingRequest(date, timeId, themeId);
+
         // when
-        WaitingResponse response = waitingService.create(memberId, request);
+        WaitingResponse response = waitingService.create(waitingMemberId, request);
 
         // then
         assertThat(response).isNotNull();
@@ -245,74 +309,5 @@ class WaitingServiceTest {
         // when & then
         assertThatThrownBy(() -> waitingService.deleteByUser(waitingId, otherMemberId))
                 .isInstanceOf(AccessForbiddenException.class);
-    }
-
-    @DisplayName("대기 승인 - 대기가 존재하지 않는 경우 예외 발생")
-    @Test
-    void approve_waitingNotFound() {
-        // given
-        Long waitingId = 1L;
-
-        // when & then
-        assertThatThrownBy(() -> waitingService.approve(waitingId))
-                .isInstanceOf(WaitingNotFoundException.class);
-    }
-
-    @DisplayName("대기 승인 - 첫 번째 대기가 아닌 경우 예외 발생")
-    @Test
-    void approve_notFirstWaiting() {
-        // given
-        Member member1 = MemberFixture.createMember("에드", "test1@test.com", "1234");
-        memberRepository.save(member1);
-
-        Member member2 = MemberFixture.createMember("김진우", "test2@test.com", "1234");
-        memberRepository.save(member2);
-
-        ReservationTime time = new ReservationTime(LocalTime.now());
-        timeRepository.save(time);
-
-        Theme theme = new Theme("테마", "설명", "썸네일");
-        themeRepository.save(theme);
-
-        LocalDate date = LocalDate.now().plusDays(1);
-        ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
-
-        Waiting waiting1 = new Waiting(member1, spec);
-        waitingRepository.save(waiting1);
-
-        Waiting waiting2 = new Waiting(member2, spec);
-        waitingRepository.save(waiting2);
-        Long waiting2Id = waiting2.getId();
-
-        // when & then
-        assertThatThrownBy(() -> waitingService.approve(waiting2Id))
-                .isInstanceOf(NotFirstWaitingException.class);
-    }
-
-    @DisplayName("대기 승인 - 이미 예약이 존재하는 경우 예외 발생")
-    @Test
-    void approve_reservationAlreadyExists() {
-        // given
-        Member member = MemberFixture.createMember("에드", "test@test.com", "1234");
-        memberRepository.save(member);
-
-        ReservationTime time = new ReservationTime(LocalTime.now());
-        timeRepository.save(time);
-
-        Theme theme = new Theme("테마", "설명", "썸네일");
-        themeRepository.save(theme);
-
-        LocalDate date = LocalDate.now().plusDays(1);
-        ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
-
-        Reservation reservation = new Reservation(member, spec);
-        reservationRepository.save(reservation);
-
-        Waiting waiting = new Waiting(member, spec);
-        waitingRepository.save(waiting);
-        Long waitingId = waiting.getId();
-
-        assertThatThrownBy(() -> waitingService.approve(waitingId))
-                .isInstanceOf(ReservationAlreadyExistsException.class);
     }
 }

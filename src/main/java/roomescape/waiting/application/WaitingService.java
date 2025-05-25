@@ -1,6 +1,7 @@
 package roomescape.waiting.application;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +13,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationSpec;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationInPastException;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.respository.ReservationTimeRepository;
@@ -25,7 +25,7 @@ import roomescape.waiting.application.dto.WaitingResponse;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.domain.Waitings;
-import roomescape.waiting.exception.NotFirstWaitingException;
+import roomescape.waiting.exception.DuplicatedWaitingException;
 import roomescape.waiting.exception.SlotNotReservedException;
 import roomescape.waiting.exception.WaitingNotFoundException;
 
@@ -33,7 +33,6 @@ import roomescape.waiting.exception.WaitingNotFoundException;
 @AllArgsConstructor
 @Transactional
 public class WaitingService {
-    public static final int FIRST_WAITING = 1;
 
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
@@ -51,14 +50,28 @@ public class WaitingService {
         Theme theme = themeRepository.findById(request.themeId()).orElseThrow(ThemeNotFoundException::new);
 
         ReservationSpec spec = new ReservationSpec(date, time, theme);
-        validateReservationExists(spec);
+        validateReservedByOthers(member, spec);
 
         Waiting waiting = new Waiting(member, spec);
         return WaitingResponse.from(waitingRepository.save(waiting));
     }
 
-    private void validateReservationExists(ReservationSpec spec) {
-        if (!reservationRepository.existsBySpec(spec)) {
+    private void validateReservedByOthers(Member member, ReservationSpec spec) {
+        Optional<Reservation> reservation = reservationRepository.findBySpec(spec);
+
+        validateReservationExists(reservation);
+        validateDuplicated(member, reservation.get());
+    }
+
+    private void validateDuplicated(Member member, Reservation reservation) {
+        Waitings waitings = new Waitings(waitingRepository.findBySpec(reservation.getSpec()));
+        if (reservation.getMember().equals(member) || waitings.containsMember(member)) {
+            throw new DuplicatedWaitingException();
+        }
+    }
+
+    private void validateReservationExists(Optional<Reservation> reservation) {
+        if (reservation.isEmpty()) {
             throw new SlotNotReservedException();
         }
     }
@@ -93,36 +106,5 @@ public class WaitingService {
     public List<WaitingResponse> findAll() {
         List<Waiting> waitings = waitingRepository.findAll();
         return WaitingResponse.from(waitings);
-    }
-
-    public void approve(Long id) {
-        Waitings waitings = new Waitings(waitingRepository.findAll());
-        Waiting waiting = waitings.pollHighestPriority();
-        validateWaitingExists(waiting);
-        validateIsFirst(waiting, id);
-
-        validateReservationExists(waiting);
-
-        Reservation reservation = new Reservation(waiting.getMember(), waiting.getSpec());
-        deleteById(id);
-        reservationRepository.save(reservation);
-    }
-
-    private void validateWaitingExists(Waiting waiting) {
-        if (waiting == null) {
-            throw new WaitingNotFoundException();
-        }
-    }
-
-    private void validateIsFirst(Waiting waiting, Long id) {
-        if (!waiting.getId().equals(id)) {
-            throw new NotFirstWaitingException();
-        }
-    }
-
-    private void validateReservationExists(Waiting waiting) {
-        if (reservationRepository.existsBySpec(waiting.getSpec())) {
-            throw new ReservationAlreadyExistsException();
-        }
     }
 }

@@ -2,6 +2,7 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,7 +26,7 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("themeId") Long themeId,
             @Param("from") LocalDate from,
             @Param("to") LocalDate to);
-    
+
     default boolean existsBySpec(ReservationSpec spec) {
         return existsBySpecDateValueAndSpecTimeIdAndSpecThemeId(spec.getDate().getValue(), spec.getTime().getId(),
                 spec.getTheme().getId());
@@ -60,4 +61,11 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     boolean existsBySpecTimeId(Long timeId);
 
     boolean existsBySpecThemeId(Long themeId);
+
+    default Optional<Reservation> findBySpec(ReservationSpec spec) {
+        return findBySpecDateValueAndSpecTimeIdAndSpecThemeId(spec.getDate().getValue(), spec.getTime().getId(),
+                spec.getTheme().getId());
+    }
+
+    Optional<Reservation> findBySpecDateValueAndSpecTimeIdAndSpecThemeId(LocalDate value, Long timeId, Long themeId);
 }

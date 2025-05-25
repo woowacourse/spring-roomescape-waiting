@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.stream.IntStream;
+import roomescape.member.domain.Member;
 
 public class Waitings {
     private final Queue<Waiting> waitings;
@@ -27,5 +28,10 @@ public class Waitings {
                 .mapToObj(index -> new WaitingWithRank(waitings.get(index), index + 1L))
                 .toList();
 
+    }
+
+    public boolean containsMember(Member member) {
+        return waitings.stream()
+                .anyMatch(waiting -> waiting.getMember().equals(member));
     }
 }

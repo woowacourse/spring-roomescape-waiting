@@ -2,6 +2,7 @@ package roomescape.waiting.domain;
 
 import java.util.List;
 import java.util.Optional;
+import roomescape.reservation.domain.ReservationSpec;
 
 public interface WaitingRepository {
 
@@ -12,4 +13,8 @@ public interface WaitingRepository {
     List<Waiting> findAll();
 
     Optional<Waiting> findById(Long id);
+
+    List<Waiting> findBySpec(ReservationSpec spec);
+
+    List<Waiting> findByMemberId(Long memberId);
 }
