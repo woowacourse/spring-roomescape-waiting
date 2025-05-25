@@ -54,6 +54,6 @@ public class AdminReservationController {
     @DeleteMapping("/admin/waitings/{id}")
     public ResponseEntity<Void> deleteWaiting(@LoginAdmin LoginAdminInfo adminInfo, @PathVariable("id") Long waitingId) {
         reservationService.deleteWaiting(waitingId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
