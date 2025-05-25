@@ -21,14 +21,14 @@ public class MemberWaitingController {
         this.waitingReservationApplicationService = waitingReservationApplicationService;
     }
 
-    @PostMapping("/reservation-waiting")
+    @PostMapping("/waiting-reservation")
     public ResponseEntity<WaitingReservationResponse> createWaitingReservation(@RequestBody final ReservationRequest request,
                                                                                @LoginMember final LoginMemberInfo memberInfo) {
         WaitingReservationResponse response = waitingReservationApplicationService.createWaitingReservation(request, memberInfo.id());
         return ResponseEntity.ok().body(response);
     }
 
-    @DeleteMapping("/reservations/{id}")
+    @DeleteMapping("/waiting-reservation/{id}")
     public ResponseEntity<Void> deleteWaitingReservation(@LoginMember LoginMemberInfo loginMemberInfo,
                                                          @PathVariable("id") Long reservationId) {
         waitingReservationApplicationService.deleteByIdWithMemberId(loginMemberInfo.id(), reservationId);

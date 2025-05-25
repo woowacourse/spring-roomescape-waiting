@@ -27,7 +27,7 @@ public class MemberReservationController {
         this.reservationService = reservationService;
     }
 
-    @PostMapping("/reservations")
+    @PostMapping("/reservation")
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody final ReservationRequest request,
                                                                  @LoginMember final LoginMemberInfo memberInfo) {
         ReservationResponse response = reservationService.createReservation(request, memberInfo.id());

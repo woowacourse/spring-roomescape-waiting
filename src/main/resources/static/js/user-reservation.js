@@ -150,7 +150,7 @@ function onReservationButtonClick() {
       timeId: selectedTimeId
     };
 
-    fetch('/reservations', {
+    fetch('/reservation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ function onWaitButtonClick() {
       timeId: selectedTimeId
     };
 
-    fetch('/reservation-waiting', {
+    fetch('/waiting-reservation', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
