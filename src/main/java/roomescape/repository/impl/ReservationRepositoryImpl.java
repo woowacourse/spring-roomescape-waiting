@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationItem;
-import roomescape.domain.ReservationRepository;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.repository.jpa.ReservationJpaRepository;
 
 @RequiredArgsConstructor

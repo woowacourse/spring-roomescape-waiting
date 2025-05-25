@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.member;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +12,8 @@ import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
 import roomescape.dto.response.MyPageReservationResponse;
-import roomescape.service.MemberService;
-import roomescape.service.ReservationService;
+import roomescape.service.member.MemberService;
+import roomescape.service.reservation.ReservationService;
 
 @RequiredArgsConstructor
 @RestController

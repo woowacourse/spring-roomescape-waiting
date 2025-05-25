@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationItem;
-import roomescape.domain.ReservationItemRepository;
-import roomescape.domain.ReservationTheme;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.reservationitem.ReservationItemRepository;
+import roomescape.domain.reservationitem.ReservationTheme;
+import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.repository.jpa.ReservationItemJpaRepository;
 
 @RequiredArgsConstructor

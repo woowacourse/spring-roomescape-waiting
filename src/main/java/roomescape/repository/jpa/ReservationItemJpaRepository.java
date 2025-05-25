@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationItem;
-import roomescape.domain.ReservationTheme;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.reservationitem.ReservationTheme;
+import roomescape.domain.reservationitem.ReservationTime;
 
 @Repository
 public interface ReservationItemJpaRepository extends JpaRepository<ReservationItem, Long> {

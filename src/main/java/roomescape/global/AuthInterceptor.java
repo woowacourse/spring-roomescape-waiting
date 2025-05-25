@@ -6,9 +6,9 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRole;
-import roomescape.service.MemberService;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
+import roomescape.service.member.MemberService;
 
 @Component
 public class AuthInterceptor implements HandlerInterceptor {

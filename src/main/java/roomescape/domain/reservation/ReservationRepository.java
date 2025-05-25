@@ -1,9 +1,11 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.member.Member;
 
 public interface ReservationRepository {
 

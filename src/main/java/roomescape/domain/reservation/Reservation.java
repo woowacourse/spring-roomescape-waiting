@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,6 +12,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.member.Member;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

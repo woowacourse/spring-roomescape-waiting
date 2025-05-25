@@ -11,7 +11,7 @@ import roomescape.domain.QReservation;
 import roomescape.domain.QReservationItem;
 import roomescape.domain.QReservationTheme;
 import roomescape.domain.QReservationTime;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 
 @RequiredArgsConstructor
 @Repository

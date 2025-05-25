@@ -14,8 +14,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.JpaConfig;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.reservationitem.ReservationTime;
+import roomescape.domain.reservationitem.ReservationTimeRepository;
 import roomescape.repository.impl.ReservationTimeRepositoryImpl;
 import roomescape.repository.jpa.ReservationTimeJpaRepository;
 

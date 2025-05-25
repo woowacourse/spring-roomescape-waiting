@@ -13,14 +13,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.JpaConfig;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
 import roomescape.global.PasswordEncoder;
 import roomescape.repository.impl.MemberRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
+import roomescape.service.member.MemberService;
 
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",          // SQL 스크립트 실행 중지

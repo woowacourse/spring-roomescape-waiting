@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.service.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -6,16 +6,17 @@ import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationItem;
-import roomescape.domain.ReservationRepository;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTheme;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationitem.ReservationTheme;
+import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.service.member.MemberService;
 
 @RequiredArgsConstructor
 @Service

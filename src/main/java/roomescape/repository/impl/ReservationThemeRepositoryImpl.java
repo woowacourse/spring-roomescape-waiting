@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationTheme;
-import roomescape.domain.ReservationThemeRepository;
+import roomescape.domain.reservationitem.ReservationTheme;
+import roomescape.domain.reservationitem.ReservationThemeRepository;
 import roomescape.repository.jpa.ReservationThemeJpaRepository;
 
 @RequiredArgsConstructor

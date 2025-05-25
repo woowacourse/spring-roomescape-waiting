@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.reservation;
 
 public enum ReservationStatus {
     ACCEPTED("예약 확정"),

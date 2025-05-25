@@ -1,10 +1,11 @@
-package roomescape.service;
+package roomescape.service.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
 import roomescape.dto.request.LoginRequest;
 import roomescape.global.PasswordEncoder;
+import roomescape.service.member.MemberService;
 
 @RequiredArgsConstructor
 @Service

@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.controller.auth;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.LoginResponse;
-import roomescape.service.AuthService;
-import roomescape.service.MemberService;
+import roomescape.service.auth.AuthService;
+import roomescape.service.member.MemberService;
 
 @RequiredArgsConstructor
 @Controller

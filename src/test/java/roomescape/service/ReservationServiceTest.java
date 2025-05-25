@@ -16,13 +16,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.service.member.MemberService;
+import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.ReservationThemeService;
+import roomescape.service.reservation.ReservationTimeService;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)

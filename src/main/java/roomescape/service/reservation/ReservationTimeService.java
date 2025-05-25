@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.service.reservation;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeRepository;
+import roomescape.domain.reservationitem.ReservationTime;
+import roomescape.domain.reservationitem.ReservationTimeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 

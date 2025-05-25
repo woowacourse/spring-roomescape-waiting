@@ -24,6 +24,10 @@ import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.service.member.MemberService;
+import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.ReservationThemeService;
+import roomescape.service.reservation.ReservationTimeService;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)

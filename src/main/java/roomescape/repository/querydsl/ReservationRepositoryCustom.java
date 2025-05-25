@@ -2,7 +2,7 @@ package roomescape.repository.querydsl;
 
 import java.time.LocalDate;
 import java.util.List;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 
 public interface ReservationRepositoryCustom {
 

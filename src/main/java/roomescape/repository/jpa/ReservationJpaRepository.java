@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Member;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationItem;
-import roomescape.domain.ReservationStatus;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.repository.querydsl.ReservationRepositoryCustom;
 
 @Repository
