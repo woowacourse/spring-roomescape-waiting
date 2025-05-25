@@ -199,7 +199,7 @@ function applyFilter(event) {
     if (dateFrom) params.append('from', dateFrom);
     if (dateTo) params.append('to', dateTo);
 
-    fetch(`/admin/search?${params.toString()}`, {
+    fetch(`/reservations?${params.toString()}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -218,7 +218,7 @@ function requestCreate(reservation) {
         body: JSON.stringify(reservation)
     };
 
-    return fetch('/admin/reservations', requestOptions)
+    return fetch('/reservations/other', requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');
