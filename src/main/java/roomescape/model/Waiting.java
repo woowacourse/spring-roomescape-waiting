@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -52,7 +51,11 @@ public class Waiting {
         return this.pendingReservation.getDate();
     }
 
-    public LocalTime getReservationTime() {
-        return this.pendingReservation.getReservationTime().getStartAt();
+    public ReservationTime getReservationTime() {
+        return this.pendingReservation.getReservationTime();
+    }
+
+    public Theme getTheme() {
+        return this.pendingReservation.getTheme();
     }
 }

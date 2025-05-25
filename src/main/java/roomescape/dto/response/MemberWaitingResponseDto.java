@@ -16,7 +16,7 @@ public record MemberWaitingResponseDto(
                 waiting.getId(),
                 waiting.getThemeName(),
                 waiting.getReservationDate(),
-                waiting.getReservationTime(),
+                waiting.getReservationTime().getStartAt(),
                 order
         );
     }

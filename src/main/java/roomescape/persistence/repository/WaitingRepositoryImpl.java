@@ -36,6 +36,11 @@ public class WaitingRepositoryImpl implements WaitingRepository {
 
     @Override
     public int countWaitingBefore(Waiting waiting) {
-        return waitingJpaRepository.countWaitingBefore(waiting.getRegisteredAt());
+        return waitingJpaRepository.countWaitingBefore(
+                waiting.getRegisteredAt(),
+                waiting.getReservationDate(),
+                waiting.getTheme(),
+                waiting.getReservationTime()
+        );
     }
 }
