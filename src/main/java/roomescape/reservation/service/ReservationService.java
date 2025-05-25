@@ -53,6 +53,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse createReservation(Long memberId, Long timeId, Long themeId, LocalDate date) {
         TimeSlot timeSlot = timeSlotRepository.findById(timeId).orElseThrow(TimeSlotNotFoundException::new);
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);

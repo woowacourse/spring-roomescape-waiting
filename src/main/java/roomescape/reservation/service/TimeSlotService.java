@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.exception.TimeSlotNotFoundException;
@@ -38,12 +39,14 @@ public class TimeSlotService {
                 .toList();
     }
 
+    @Transactional
     public TimeSlotResponse createTime(TimeSlotRequest timeSlotRequest) {
         TimeSlot timeSlot = timeSlotRequest.toTime();
         TimeSlot savedTimeSlot = timeSlotRepository.save(timeSlot);
         return TimeSlotResponse.from(savedTimeSlot);
     }
 
+    @Transactional
     public void deleteTimeById(Long id) {
         timeSlotRepository.findById(id).orElseThrow(TimeSlotNotFoundException::new);
         if (reservationRepository.existsByReservationTimeTimeSlotId(id)) {

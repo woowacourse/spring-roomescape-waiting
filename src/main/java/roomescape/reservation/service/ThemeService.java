@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ExistedThemeException;
 import roomescape.reservation.domain.Reservation;
@@ -31,6 +32,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ThemeResponse createTheme(ThemeRequest themeRequest) {
         Optional<Theme> optionalTheme = themeRepository.findByName(themeRequest.name());
         if (optionalTheme.isPresent()) {
@@ -48,6 +50,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteThemeById(long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new ExistedReservationException();

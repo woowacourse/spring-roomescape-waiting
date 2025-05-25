@@ -45,6 +45,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public WaitingResponse createWaiting(Long memberId, WaitingRequest request) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.findById(request.themeId()).orElseThrow(ThemeNotFoundException::new);
@@ -89,6 +90,7 @@ public class WaitingService {
         return waitingRepository.findByMemberIdWithRank(member.getId());
     }
 
+    @Transactional
     public void deleteWaitingById(Long memberId, Long waitingId) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
@@ -98,6 +100,7 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    @Transactional
     public void deleteWaitingById(Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
         waitingRepository.delete(waiting);
