@@ -61,4 +61,9 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
         return jpaReservationRepository.existsByMemberAndSchedule(member, schedule);
     }
+
+    @Override
+    public boolean existsBySchedule(Schedule schedule) {
+        return jpaReservationRepository.existsBySchedule(schedule);
+    }
 }

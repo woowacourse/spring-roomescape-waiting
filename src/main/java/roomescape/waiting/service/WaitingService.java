@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dto.response.MyReservationAndWaitingResponse;
 import roomescape.schedule.domain.Schedule;
@@ -43,7 +44,15 @@ public class WaitingService {
         return waitingRepository.findAll();
     }
 
+    public Waiting findById(Long id) {
+        return waitingRepository.findById(id).orElseThrow(() -> new BadRequestException("존재하지 않는 일정입니다."));
+    }
+
     public boolean existsBySchedule(Schedule schedule) {
         return waitingRepository.existsBySchedule(schedule);
+    }
+
+    public Waiting findFirstWaitingBySchedule(Schedule schedule) {
+        return waitingRepository.findFirstWaiting(schedule).orElseThrow(() -> new BadRequestException("대기를 찾을 수 없습니다."));
     }
 }

@@ -30,4 +30,6 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
     List<Reservation> findAllByMember(Member member);
 
     boolean existsByMemberAndSchedule(Member member, Schedule schedule);
+
+    boolean existsBySchedule(Schedule schedule);
 }

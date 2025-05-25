@@ -96,4 +96,8 @@ public class ReservationService {
     public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
         return reservationRepository.existsByMemberAndSchedule(member, schedule);
     }
+
+    public boolean existsBySchedule(Schedule schedule) {
+        return reservationRepository.existsBySchedule(schedule);
+    }
 }

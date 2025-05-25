@@ -6,6 +6,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
+import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
@@ -80,9 +81,24 @@ public class WaitingServiceFacade {
         // 수동
         // 대기 승인이 들어온다.
         // 해당 스케줄에 예약이 존재하는지 확인한다.
+        Waiting findWaiting = waitingService.findById(id);
+        Schedule schedule = findWaiting.getSchedule();
+
+        boolean existsSchedule = reservationService.existsBySchedule(schedule);
         // 예약이 존재하는 경우 대기 승인이 불가능하다.
+        if (existsSchedule) {
+            throw new ConflictException("예약이 존재합니다.");
+        }
         // 예약이 존재하지 않는 경우 첫번째 대기자가 예약으로 변경된다.
-        // 대기 줄이 존재하는 경우 예약 시 대기로 넘어간다.
-        //
+        Waiting nextWaitingInfo = waitingService.findFirstWaitingBySchedule(schedule);
+        Schedule nextWaitingInfoSchedule = nextWaitingInfo.getSchedule();
+        ReservationCreateRequest request = new ReservationCreateRequest(nextWaitingInfoSchedule.getDate(), nextWaitingInfoSchedule.getTime().getId(), nextWaitingInfoSchedule.getTheme().getId());
+        List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
+                request.date(),
+                request.themeId()
+        );
+        reservationService.createReservation(nextWaitingInfo.getMember(), availableTimes, nextWaitingInfoSchedule, request);
+
+        waitingService.deleteWaitingById(nextWaitingInfo.getId());
     }
 }

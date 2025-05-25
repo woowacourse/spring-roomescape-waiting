@@ -7,6 +7,7 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface WaitingRepository {
@@ -21,4 +22,8 @@ public interface WaitingRepository {
     List<Waiting> findAll();
 
     boolean existsBySchedule(Schedule schedule);
+
+    Optional<Waiting> findById(Long id);
+
+    Optional<Waiting> findFirstWaiting(Schedule schedule);
 }

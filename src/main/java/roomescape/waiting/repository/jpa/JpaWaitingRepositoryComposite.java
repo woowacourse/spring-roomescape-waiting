@@ -8,6 +8,7 @@ import roomescape.waiting.domain.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JpaWaitingRepositoryComposite implements WaitingRepository {
@@ -45,5 +46,19 @@ public class JpaWaitingRepositoryComposite implements WaitingRepository {
     @Override
     public boolean existsBySchedule(Schedule schedule) {
         return jpaWaitingRepository.existsBySchedule(schedule);
+    }
+
+    @Override
+    public Optional<Waiting> findById(Long id) {
+        return jpaWaitingRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Waiting> findFirstWaiting(Schedule schedule) {
+        return jpaWaitingRepository.findFirstWaiting(
+                schedule.getTheme().getId(),
+                schedule.getDate(),
+                schedule.getTime().getStartAt()
+        );
     }
 }
