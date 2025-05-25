@@ -7,4 +7,8 @@ public record LoginMember(
         String name,
         RoleType role
 ) {
+
+    public boolean isAdmin() {
+        return role == RoleType.ADMIN;
+    }
 }

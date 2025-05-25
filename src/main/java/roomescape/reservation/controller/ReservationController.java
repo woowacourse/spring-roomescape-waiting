@@ -18,9 +18,9 @@ import roomescape.global.auth.dto.LoginMember;
 import roomescape.member.entity.RoleType;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.dto.response.ReservationByMemberResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
-import roomescape.reservation.dto.response.ReservationReadMemberResponse;
 import roomescape.reservation.dto.response.ReservationReadResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -47,10 +47,10 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationReadMemberResponse>> getMyReservations(
+    public ResponseEntity<List<ReservationByMemberResponse>> getMyReservations(
             @AuthenticationPrincipal LoginMember loginMember
     ) {
-        List<ReservationReadMemberResponse> responses = reservationService.getReservationsByMember(loginMember.id());
+        List<ReservationByMemberResponse> responses = reservationService.getReservationsByMember(loginMember);
         return ResponseEntity.ok(responses);
     }
 
@@ -60,7 +60,7 @@ public class ReservationController {
             @PathVariable("id") long id
     ) {
         reservationService.deleteReservation(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/filtered")

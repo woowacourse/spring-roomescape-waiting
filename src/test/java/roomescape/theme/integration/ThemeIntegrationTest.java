@@ -18,8 +18,10 @@ import roomescape.member.entity.Member;
 import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeCreateResponse;
@@ -41,6 +43,8 @@ class ThemeIntegrationTest {
 
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
 
     @Test
     @DisplayName("테마를 생성한다.")
@@ -171,7 +175,9 @@ class ThemeIntegrationTest {
         ReservationTime reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.now()));
         Theme theme = new Theme(response.id(), response.name(), response.description(), response.thumbnail());
         Member member = memberRepository.save(new Member("앤지", "test@test.com", "test", RoleType.USER));
-        reservationRepository.save(new Reservation(LocalDate.now(), reservationTime, theme, member));
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+                new ReservationSlot(LocalDate.now(), reservationTime, theme));
+        reservationRepository.save(new Reservation(reservationSlot, member));
 
         //when & then
         assertThatThrownBy(() -> themeService.deleteTheme(response.id()))

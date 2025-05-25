@@ -103,7 +103,7 @@ class ThemeServiceTest {
     @DisplayName("테마를 삭제한다.")
     void deleteTheme() {
         // given
-        when(reservationRepository.existsByThemeId(anyLong()))
+        when(reservationRepository.existsByReservationSlot_ThemeId(anyLong()))
                 .thenReturn(false);
 
         // when
@@ -117,7 +117,7 @@ class ThemeServiceTest {
     @DisplayName("이미 예약 된 예약이 있을 경우 삭제할 수없다.")
     void cantDeleteWhenReserved() {
         //given
-        when(reservationRepository.existsByThemeId(anyLong()))
+        when(reservationRepository.existsByReservationSlot_ThemeId(anyLong()))
                 .thenReturn(true);
 
         //when & then

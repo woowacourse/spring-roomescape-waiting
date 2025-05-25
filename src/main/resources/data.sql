@@ -20,8 +20,14 @@ INSERT INTO member(name, email, password, role)
 VALUES ('어드민', 'admin@email.com', '1234', 'ADMIN'),
        ('유저', 'user@email.com', '1234', 'USER');
 
-INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-04-29', 1, 1, 1),
-       ('2025-04-28', 1, 2, 1),
-       ('2025-04-28', 3, 3, 1),
-       ('2025-04-27', 1, 3, 1);
+INSERT INTO reservation_slot(date, time_id, theme_id)
+VALUES ('2025-04-29', 1, 1),
+       ('2025-04-28', 1, 2),
+       ('2025-04-28', 3, 3),
+       ('2025-04-27', 1, 3);
+
+INSERT INTO reservation(reservation_slot_id, member_id)
+VALUES (1, 1),
+       (2, 1),
+       (3, 1),
+       (4, 1);

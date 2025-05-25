@@ -19,8 +19,10 @@ import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.ReservationSlot;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationSlotRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationTimeService;
 import roomescape.theme.entity.Theme;
@@ -38,6 +40,9 @@ class ReservationTimeIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private ReservationSlotRepository reservationSlotRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -113,7 +118,8 @@ class ReservationTimeIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.of(2024, 3, 20);
-        var reservation = new Reservation(date, time, theme, member);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, member);
         reservationRepository.save(reservation);
 
         // when
@@ -152,7 +158,8 @@ class ReservationTimeIntegrationTest {
         var theme = themeRepository.save(new Theme("테마", "설명", "썸네일"));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         var date = LocalDate.of(2024, 3, 20);
-        var reservation = new Reservation(date, time, theme, member);
+        var reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        var reservation = new Reservation(reservationSlot, member);
         reservationRepository.save(reservation);
 
         // when & then

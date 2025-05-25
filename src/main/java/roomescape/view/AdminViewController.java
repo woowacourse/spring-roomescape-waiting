@@ -33,4 +33,10 @@ public class AdminViewController {
     public String showThemes() {
         return "admin/theme";
     }
+
+    @GetMapping("/waiting")
+    @RoleRequired(roleType = RoleType.ADMIN)
+    public String showWaiting() {
+        return "admin/waiting";
+    }
 }

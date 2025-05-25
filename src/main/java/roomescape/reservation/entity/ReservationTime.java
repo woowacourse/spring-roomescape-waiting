@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "id")
 public class ReservationTime {
 
     private static final LocalTime RUNNING_TIME = LocalTime.of(2, 0);
