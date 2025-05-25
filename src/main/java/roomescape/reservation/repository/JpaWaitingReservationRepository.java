@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.response.WaitingWithRank;
@@ -16,7 +17,7 @@ import roomescape.theme.domain.Theme;
 
 
 public interface JpaWaitingReservationRepository extends WaitingReservationRepository,
-        JpaRepository<Waiting, Long> {
+        ListCrudRepository<Waiting, Long> {
 
     @Query("""
             SELECT EXISTS (
@@ -43,10 +44,6 @@ public interface JpaWaitingReservationRepository extends WaitingReservationRepos
             @Param("timeId") Long timeId,
             @Param("themeId") Long themeId
     );
-
-    List<Waiting> findAll();
-
-    void deleteById(Long id);
 
     @Query("""
               SELECT new roomescape.reservation.dto.response.WaitingWithRank(
