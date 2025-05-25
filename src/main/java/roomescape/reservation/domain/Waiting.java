@@ -41,7 +41,7 @@ public class Waiting {
     protected Waiting() {
     }
 
-    private static void validateNull(Member member, ReservationTime reservationTime, Theme theme) {
+    private void validateNull(Member member, ReservationTime reservationTime, Theme theme) {
         if (member == null) {
             throw new ArgumentNullException("member");
         }
