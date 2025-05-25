@@ -38,7 +38,8 @@ public class AdminReservationApiController {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     ) {
-        List<ReservationResponse> reservationResponses = reservationWaitingService.findAllReservationsByFilter(memberId, themeId,
+        List<ReservationResponse> reservationResponses = reservationWaitingService.findAllReservationsByFilter(memberId,
+                themeId,
                 startDate,
                 endDate);
         return ResponseEntity.ok(reservationResponses);
@@ -46,9 +47,10 @@ public class AdminReservationApiController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationCreateRequest request) {
-        ReservationResponse response = reservationWaitingService.createReservation(request.memberId(), new ReservationRequest(
-                request.date(), request.themeId(), request.timeId()
-        ));
+        ReservationResponse response = reservationWaitingService.createReservationById(request.memberId(),
+                new ReservationRequest(
+                        request.date(), request.themeId(), request.timeId()
+                ));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -63,7 +65,8 @@ public class AdminReservationApiController {
     @GetMapping("/waitings")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse) {
-        List<MemberReservationResponse> waitings = reservationWaitingService.findWaitingsWithRankByMemberId(memberResponse.id());
+        List<MemberReservationResponse> waitings = reservationWaitingService.findWaitingsWithRankByMemberId(
+                memberResponse.id());
         return ResponseEntity.ok().body(waitings);
     }
 }

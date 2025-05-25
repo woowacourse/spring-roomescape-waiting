@@ -56,7 +56,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public ReservationResponse createReservation(Long memberId, ReservationRequest request) {
+    public ReservationResponse createReservationById(Long memberId, ReservationRequest request) {
         Member member = memberService.findById(memberId);
         return createReservation(member, request);
     }
@@ -76,7 +76,7 @@ public class ReservationWaitingService {
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
         Reservation reservation = Reservation.create(reservationDate.getDate(), reservationTime, theme, member);
-        return ReservationResponse.from(reservation);
+        return ReservationResponse.from(reservationRepository.save(reservation));
     }
 
     @Transactional(readOnly = true)
