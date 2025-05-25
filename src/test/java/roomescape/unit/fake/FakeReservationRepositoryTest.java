@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -34,13 +35,11 @@ class FakeReservationRepositoryTest {
                 .thumbnail("thumb1").build();
         Reservation reservation1 = Reservation.builder()
                 .member(member)
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(timeSlot)
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .theme(theme).build();
         Reservation reservation2 = Reservation.builder()
                 .member(member)
-                .date(LocalDate.of(2025, 1, 2))
-                .timeSlot(timeSlot)
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 2), timeSlot))
                 .theme(theme).build();
         reservationRepository.save(reservation1);
         reservationRepository.save(reservation2);
@@ -49,7 +48,7 @@ class FakeReservationRepositoryTest {
         // then
         SoftAssertions soft = new SoftAssertions();
         soft.assertThat(allReservation).hasSize(2);
-        soft.assertThat(allReservation.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+        soft.assertThat(allReservation.getFirst().getReservationTime().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
         soft.assertAll();
     }
 
@@ -69,15 +68,14 @@ class FakeReservationRepositoryTest {
                 .thumbnail("thumb1").build();
         Reservation reservation1 = Reservation.builder()
                 .member(member)
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(timeSlot)
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .theme(theme).build();
         // when
         reservationRepository.save(reservation1);
         // then
         List<Reservation> allReservation = reservationRepository.findAll();
         assertThat(allReservation).hasSize(1);
-        assertThat(allReservation.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+        assertThat(allReservation.getFirst().getReservationTime().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
     }
 
     @Test
@@ -96,8 +94,7 @@ class FakeReservationRepositoryTest {
                 .thumbnail("thumb1").build();
         Reservation reservation1 = Reservation.builder()
                 .member(member)
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(timeSlot)
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .theme(theme).build();
         reservationRepository.save(reservation1);
         // when
@@ -124,8 +121,7 @@ class FakeReservationRepositoryTest {
                 .thumbnail("thumb").build();
         Reservation reservation1 = Reservation.builder()
                 .member(member)
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(timeSlot)
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .theme(theme).build();
         reservationRepository.save(reservation1);
         // when

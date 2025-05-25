@@ -15,6 +15,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -79,19 +80,20 @@ class ReservationServiceTest {
                         .password("password1")
                         .role(Role.MEMBER).build()
         );
+        var reservationTime1 = new ReservationTime(LocalDate.of(2025, 7, 25), timeSlot);
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.of(2025, 7, 25))
-                        .timeSlot(timeSlot)
+                        .reservationTime(reservationTime1)
                         .theme(theme1).build()
         );
+        var reservationTime2 = new ReservationTime(LocalDate.of(2025, 7, 26), timeSlot);
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.of(2025, 7, 26))
-                        .timeSlot(timeSlot)
-                        .theme(theme1).build()
+                        .reservationTime(reservationTime2)
+                        .theme(theme1)
+                        .build()
         );
         // when
         List<ReservationResponse> all = reservationService.findReservations(
@@ -126,11 +128,11 @@ class ReservationServiceTest {
                 .password("password1")
                 .role(Role.MEMBER).build();
         memberRepository.save(member1);
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot1);
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.of(2025, 7, 26))
-                        .timeSlot(timeSlot1)
+                        .reservationTime(reservationTime)
                         .theme(theme1).build()
         );
         // when
@@ -160,11 +162,12 @@ class ReservationServiceTest {
                         .password("password1")
                         .role(Role.MEMBER).build()
         );
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 7, 25), timeSlot1);
         Reservation reservation1 = Reservation.builder()
                 .member(member1)
-                .date(LocalDate.of(2025, 7, 25))
-                .timeSlot(timeSlot1)
-                .theme(theme1).build();
+                .reservationTime(reservationTime)
+                .theme(theme1)
+                .build();
         // when
         reservationRepository.save(reservation1);
 
@@ -200,11 +203,12 @@ class ReservationServiceTest {
                         .password("password1")
                         .role(Role.MEMBER).build()
         );
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 7, 26), timeSlot1);
         Reservation reservation1 = Reservation.builder()
                 .member(member1)
-                .date(LocalDate.of(2025, 7, 26))
-                .timeSlot(timeSlot1)
-                .theme(theme1).build();
+                .reservationTime(reservationTime)
+                .theme(theme1)
+                .build();
         Reservation savedReservation = reservationRepository.save(reservation1);
         // when
         reservationService.cancelReservationAndPromoteWait(savedReservation.getId());
@@ -243,11 +247,12 @@ class ReservationServiceTest {
                         .password("password1")
                         .role(Role.MEMBER).build()
         );
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 7, 25), timeSlot1);
         Reservation reservation1 = Reservation.builder()
                 .member(member1)
-                .date(LocalDate.of(2025, 7, 25))
-                .timeSlot(timeSlot1)
-                .theme(theme1).build();
+                .reservationTime(reservationTime)
+                .theme(theme1)
+                .build();
         reservationRepository.save(reservation1);
 
         // when & then
@@ -285,19 +290,20 @@ class ReservationServiceTest {
                         .password("password1")
                         .role(Role.MEMBER).build()
         );
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot1);
         Reservation reservation = reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.of(2025, 7, 25))
-                        .timeSlot(timeSlot1)
-                        .theme(theme1).build()
+                        .reservationTime(reservationTime)
+                        .theme(theme1)
+                        .build()
         );
         Waiting waiting = waitingRepository.save(
                 Waiting.builder()
                         .member(member2)
-                        .date(LocalDate.of(2025, 7, 25))
-                        .timeSlot(timeSlot1)
-                        .theme(theme1).build()
+                        .reservationTime(reservationTime)
+                        .theme(theme1)
+                        .build()
         );
         // when
         reservationService.cancelReservationAndPromoteWait(reservation.getId());

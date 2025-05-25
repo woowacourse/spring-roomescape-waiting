@@ -46,7 +46,7 @@ public class TimeSlotService {
 
     public void deleteTimeById(Long id) {
         timeSlotRepository.findById(id).orElseThrow(TimeSlotNotFoundException::new);
-        if (reservationRepository.existsByTimeSlotId(id)) {
+        if (reservationRepository.existsByReservationTimeTimeSlotId(id)) {
             throw new ExistedReservationException();
         }
         timeSlotRepository.deleteById(id);
@@ -54,10 +54,10 @@ public class TimeSlotService {
 
     public List<TimeWithBookedResponse> findTimesByDateAndThemeIdWithBooked(LocalDate date, Long themeId) {
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
-        List<Reservation> reservations = reservationRepository.findByDateAndTheme(date, theme);
+        List<Reservation> reservations = reservationRepository.findByReservationTimeDateAndTheme(date, theme);
 
         List<TimeSlot> bookedTimeSlots = reservations.stream()
-                .map(Reservation::getTimeSlot)
+                .map(reservation -> reservation.getReservationTime().getTimeSlot())
                 .toList();
         List<TimeSlot> timeSlots = timeSlotRepository.findAll();
 

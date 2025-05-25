@@ -58,7 +58,7 @@ public class ThemeService {
     public List<ThemeResponse> getTopThemes() {
         LocalDate startDate = LocalDate.now().minusDays(DAYS_BEFORE_START);
         LocalDate endDate = LocalDate.now().minusDays(DAYS_BEFORE_END);
-        List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
+        List<Reservation> reservations = reservationRepository.findByReservationTimeDateBetween(startDate, endDate);
 
         Map<Theme, Long> themeCount = countTheme(reservations);
         List<Theme> themes = themeCount

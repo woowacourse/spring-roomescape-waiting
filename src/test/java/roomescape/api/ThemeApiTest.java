@@ -19,6 +19,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -133,14 +134,15 @@ public class ThemeApiTest {
                         .name("member1")
                         .password("password1")
                         .email("email1@domain.com")
-                        .role(Role.MEMBER).build()
+                        .role(Role.MEMBER)
+                        .build()
         );
         reservationRepository.save(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.now().minusDays(1))
-                        .timeSlot(time)
-                        .theme(theme).build()
+                        .reservationTime(new ReservationTime(LocalDate.now().minusDays(1), time))
+                        .theme(theme)
+                        .build()
         );
         // when & then
         RestAssured.given().log().all()
@@ -166,45 +168,40 @@ public class ThemeApiTest {
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.now().minusDays(1))
-                        .timeSlot(time1)
+                        .reservationTime(new ReservationTime(LocalDate.now().minusDays(1), time1))
+                        .theme(theme1)
+                        .build()
+        );
+        reservationRepository.save(
+                Reservation.builder()
+                        .member(member1)
+                        .reservationTime(new ReservationTime(LocalDate.now().minusDays(2), time1))
                         .theme(theme1).build()
         );
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.now().minusDays(2))
-                        .timeSlot(time1)
-                        .theme(theme1).build()
-        );
-        reservationRepository.save(
-                Reservation.builder()
-                        .member(member1)
-                        .date(LocalDate.now().minusDays(3))
-                        .timeSlot(time1)
+                        .reservationTime(new ReservationTime(LocalDate.now().minusDays(3), time1))
                         .theme(theme1).build()
         );
 
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.now().minusDays(1))
-                        .timeSlot(time1)
+                        .reservationTime(new ReservationTime(LocalDate.now().minusDays(1), time1))
                         .theme(theme2).build()
         );
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.now().minusDays(2))
-                        .timeSlot(time1)
+                        .reservationTime(new ReservationTime(LocalDate.now().minusDays(2), time1))
                         .theme(theme2).build()
         );
 
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.now().minusDays(3))
-                        .timeSlot(time1)
+                        .reservationTime(new ReservationTime(LocalDate.now().minusDays(3), time1))
                         .theme(theme3).build()
         );
         // when & then

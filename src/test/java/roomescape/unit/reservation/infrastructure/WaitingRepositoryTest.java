@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -43,15 +44,14 @@ public class WaitingRepositoryTest {
         entityManager.persist(member);
         Waiting waiting = Waiting.builder()
                 .member(member)
-                .date(LocalDate.of(2025, 1, 1))
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .theme(theme)
-                .timeSlot(timeSlot)
                 .build();
         // when
         Waiting savedWaiting = waitingRepository.save(waiting);
         // then
         Waiting findWaiting = entityManager.find(Waiting.class, savedWaiting.getId());
         assertThat(findWaiting).isNotNull();
-        assertThat(findWaiting.getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+        assertThat(findWaiting.getReservationTime().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
     }
 }

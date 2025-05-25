@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.TimeSlot;
 
 public interface ReservationRepository extends Repository<Reservation, Long>, ReservationRepositoryCustom {
     List<Reservation> findAll();
@@ -21,28 +21,28 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
 
     boolean existsByThemeId(Long themeId);
 
-    Optional<Reservation> findByDateAndTimeSlotAndTheme(LocalDate date, TimeSlot time, Theme theme);
+    Optional<Reservation> findByReservationTimeAndTheme(ReservationTime time, Theme theme);
 
-    List<Reservation> findByDateBetween(LocalDate dateFrom, LocalDate dateTo);
+    List<Reservation> findByReservationTimeDateBetween(LocalDate dateFrom, LocalDate dateTo);
 
-    List<Reservation> findByDateAndTheme(LocalDate date, Theme theme);
+    List<Reservation> findByReservationTimeDateAndTheme(LocalDate date, Theme theme);
 
     @Query("""
                 SELECT r
                 FROM Reservation r
                 JOIN FETCH r.member
                 JOIN FETCH r.theme
-                JOIN FETCH r.timeSlot
+                JOIN FETCH r.reservationTime
                 WHERE r.member.id = :memberId
             """)
     List<Reservation> findByMemberId(Long memberId);
 
-    boolean existsByDateAndMemberAndThemeAndTimeSlot(LocalDate date, Member member, Theme theme, TimeSlot timeSlot);
+    boolean existsByReservationTimeAndMemberAndTheme(ReservationTime time, Member member, Theme theme);
 
-    boolean existsByDateAndThemeAndTimeSlot(LocalDate date, Theme theme, TimeSlot timeSlot);
+    boolean existsByReservationTimeAndTheme(ReservationTime time, Theme theme);
 
     void delete(Reservation reservation);
 
-    boolean existsByTimeSlotId(Long timeSlotId);
+    boolean existsByReservationTimeTimeSlotId(Long timeSlotId);
 }
 

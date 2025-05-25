@@ -18,6 +18,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.dto.response.TimeSlotResponse;
@@ -124,8 +125,7 @@ public class TimeSlotApiTest {
         reservationRepository.save(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(timeSlot1)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot1))
                         .theme(theme).build()
         );
         // when

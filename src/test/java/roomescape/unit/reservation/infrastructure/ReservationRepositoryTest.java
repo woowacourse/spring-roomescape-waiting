@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.infrastructure.ReservationRepository;
@@ -46,16 +47,15 @@ class ReservationRepositoryTest {
         entityManager.persist(theme);
         Reservation reservation = Reservation.builder()
                 .member(member)
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(time)
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                 .theme(theme).build();
         entityManager.persist(reservation);
         // when
-        Optional<Reservation> findReservation = reservationRepository.findByDateAndTimeSlotAndTheme(
-                LocalDate.of(2025, 1, 1), time, theme);
+        Optional<Reservation> findReservation = reservationRepository.findByReservationTimeAndTheme(
+                new ReservationTime(LocalDate.of(2025, 1, 1), time), theme);
         // then
         assertThat(findReservation.isPresent()).isTrue();
-        assertThat(findReservation.get().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+        assertThat(findReservation.get().getReservationTime().getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
     }
 
     @Test
@@ -83,15 +83,13 @@ class ReservationRepositoryTest {
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                         .theme(theme1).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                         .theme(theme2).build()
         );
         // when
@@ -120,26 +118,23 @@ class ReservationRepositoryTest {
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                         .theme(theme).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 9))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 9), time))
                         .theme(theme).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 10))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 10), time))
                         .theme(theme).build()
         );
         // when
-        List<Reservation> reservations = reservationRepository.findByDateBetween(
+        List<Reservation> reservations = reservationRepository.findByReservationTimeDateBetween(
                 LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 9)
         );
         // then
@@ -171,33 +166,30 @@ class ReservationRepositoryTest {
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                         .theme(theme1).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 2))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 2), time))
                         .theme(theme2).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 2))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 2), time))
                         .theme(theme1).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                         .theme(theme2).build()
         );
         // when
-        List<Reservation> reservations = reservationRepository.findByDateAndTheme(LocalDate.of(2025, 1, 1), theme1);
+        List<Reservation> reservations = reservationRepository.findByReservationTimeDateAndTheme(
+                LocalDate.of(2025, 1, 1), theme1);
         // then
         assertThat(reservations).hasSize(1);
     }
@@ -225,19 +217,17 @@ class ReservationRepositoryTest {
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time1)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time1))
                         .theme(theme).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time2)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time2))
                         .theme(theme).build()
         );
         // when
-        boolean exist = reservationRepository.existsByTimeSlotId(time1.getId());
+        boolean exist = reservationRepository.existsByReservationTimeTimeSlotId(time1.getId());
         // then
         assertThat(exist).isTrue();
     }
@@ -268,15 +258,13 @@ class ReservationRepositoryTest {
         entityManager.persist(
                 Reservation.builder()
                         .member(member1)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                         .theme(theme).build()
         );
         entityManager.persist(
                 Reservation.builder()
                         .member(member2)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(time)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
                         .theme(theme).build()
         );
         // when

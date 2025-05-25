@@ -4,6 +4,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
@@ -21,9 +23,10 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Reservation> cq = cb.createQuery(Reservation.class);
         Root<Reservation> reservation = cq.from(Reservation.class);
+        Fetch<Reservation, ?> reservationTimeFetch = reservation.fetch("reservationTime", JoinType.LEFT);
+        reservationTimeFetch.fetch("timeSlot", JoinType.LEFT);
         reservation.fetch("member");
         reservation.fetch("theme");
-        reservation.fetch("timeSlot");
 
         List<Predicate> predicates = new ArrayList<>();
 
@@ -34,10 +37,11 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
             predicates.add(cb.equal(reservation.get("theme").get("id"), condition.themeId()));
         }
         if (condition.dateFrom() != null) {
-            predicates.add(cb.greaterThanOrEqualTo(reservation.get("date"), condition.dateFrom()));
+            predicates.add(
+                    cb.greaterThanOrEqualTo(reservation.get("reservationTime").get("date"), condition.dateFrom()));
         }
         if (condition.dateTo() != null) {
-            predicates.add(cb.lessThanOrEqualTo(reservation.get("date"), condition.dateTo()));
+            predicates.add(cb.lessThanOrEqualTo(reservation.get("reservationTime").get("date"), condition.dateTo()));
         }
 
         cq.select(reservation)

@@ -12,6 +12,7 @@ import roomescape.exception.TimeSlotNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -56,20 +57,24 @@ public class ReservationService {
         TimeSlot timeSlot = timeSlotRepository.findById(timeId).orElseThrow(TimeSlotNotFoundException::new);
         Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        ReservationTime reservationTime = new ReservationTime(date, timeSlot);
+        validateNewReservation(reservationTime, theme);
         Reservation reservation = Reservation.builder()
-                .date(date)
+                .reservationTime(reservationTime)
                 .member(member)
                 .theme(theme)
-                .timeSlot(timeSlot).build();
-
-        reservation.validateDateTime();
-        validateDuplicate(date, timeSlot, theme);
+                .build();
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateDuplicate(LocalDate date, TimeSlot time, Theme theme) {
-        if (reservationRepository.findByDateAndTimeSlotAndTheme(date, time, theme).isPresent()) {
+    private void validateNewReservation(ReservationTime reservationTime, Theme theme) {
+        reservationTime.validateDateTime();
+        validateDuplicatedReservation(reservationTime, theme);
+    }
+
+    private void validateDuplicatedReservation(ReservationTime time, Theme theme) {
+        if (reservationRepository.findByReservationTimeAndTheme(time, theme).isPresent()) {
             throw new ExistedReservationException();
         }
     }
@@ -78,8 +83,8 @@ public class ReservationService {
     public void cancelReservationAndPromoteWait(Long id) {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.delete(reservation);
-        waitingRepository.findFirstByDateAndTimeSlotAndThemeOrderById(reservation.getDate(), reservation.getTimeSlot(),
-                        reservation.getTheme())
+        ReservationTime reservationTime = reservation.getReservationTime();
+        waitingRepository.findFirstByReservationTimeAndThemeOrderById(reservationTime, reservation.getTheme())
                 .ifPresent(this::promoteWaitingToReservation);
     }
 

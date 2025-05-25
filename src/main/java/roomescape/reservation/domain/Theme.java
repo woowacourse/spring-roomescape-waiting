@@ -65,16 +65,15 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Theme theme)) {
             return false;
         }
-        Theme theme = (Theme) o;
         return Objects.equals(id, theme.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hashCode(id);
     }
 
     public static Builder builder() {

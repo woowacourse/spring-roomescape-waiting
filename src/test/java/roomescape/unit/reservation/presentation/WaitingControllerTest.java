@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.presentation.AuthorizationExtractor;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -68,9 +69,9 @@ public class WaitingControllerTest {
     @Test
     void 사용자의_대기목록을_조회한다() throws Exception {
         // given
+        TimeSlot timeSlot = TimeSlot.builder().startAt(LocalTime.of(9, 0)).build();
         Waiting waiting = Waiting.builder()
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(TimeSlot.builder().startAt(LocalTime.of(9, 0)).build())
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .member(
                         Member.builder()
                                 .id(1L)

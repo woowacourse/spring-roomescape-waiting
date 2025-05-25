@@ -18,6 +18,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -75,15 +76,13 @@ public class AdminApiTest {
         reservationRepository.save(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 1))
-                        .timeSlot(timeSlot)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                         .theme(theme).build()
         );
         reservationRepository.save(
                 Reservation.builder()
                         .member(member)
-                        .date(LocalDate.of(2025, 1, 2))
-                        .timeSlot(timeSlot)
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 2), timeSlot))
                         .theme(theme).build()
         );
         String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
@@ -195,9 +194,8 @@ public class AdminApiTest {
                         .startAt(LocalTime.of(9, 0)).build());
         waitingRepository.save(
                 Waiting.builder()
-                        .date(LocalDate.of(2025, 1, 1))
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                         .theme(theme)
-                        .timeSlot(timeSlot)
                         .member(admin).build()
         );
         String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
@@ -234,8 +232,8 @@ public class AdminApiTest {
                 Waiting.builder()
                         .theme(theme)
                         .member(member1)
-                        .timeSlot(timeSlot)
-                        .date(LocalDate.now().plusDays(1)).build()
+                        .reservationTime(new ReservationTime(LocalDate.now().plusDays(1), timeSlot))
+                        .build()
         );
         String token = tokenProvider.createToken("1", Role.ADMIN);
         // when & then
@@ -271,8 +269,8 @@ public class AdminApiTest {
                 Waiting.builder()
                         .theme(theme)
                         .member(member1)
-                        .timeSlot(timeSlot)
-                        .date(LocalDate.now().plusDays(1)).build()
+                        .reservationTime(new ReservationTime(LocalDate.now().plusDays(1), timeSlot))
+                        .build()
         );
         String token = tokenProvider.createToken("1", Role.ADMIN);
         // when & then

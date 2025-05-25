@@ -1,6 +1,6 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,10 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.Objects;
 import roomescape.exception.ArgumentNullException;
-import roomescape.exception.PastDateTimeReservationException;
 import roomescape.member.domain.Member;
 
 @Entity
@@ -21,53 +19,37 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Embedded
+    private ReservationTime reservationTime;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    private TimeSlot timeSlot;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
     private Theme theme;
 
-    @Column(nullable = false)
-    private LocalDate date;
-
-    private Reservation(final Long id, final Member member, final LocalDate date, final TimeSlot timeSlot,
-                        final Theme theme) {
-        validateNull(member, date, timeSlot, theme);
+    private Reservation(final Long id, final Member member, final ReservationTime reservationTime, final Theme theme) {
+        validateNull(member, reservationTime, theme);
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.timeSlot = timeSlot;
+        this.reservationTime = reservationTime;
         this.theme = theme;
     }
 
     protected Reservation() {
     }
 
-    private static void validateNull(Member member, LocalDate date, TimeSlot timeSlot, Theme theme) {
+    private static void validateNull(Member member, ReservationTime reservationTime, Theme theme) {
         if (member == null) {
             throw new ArgumentNullException("member");
         }
-        if (date == null) {
-            throw new ArgumentNullException("date");
-        }
-        if (timeSlot == null) {
+        if (reservationTime == null) {
             throw new ArgumentNullException("reservationTime");
         }
         if (theme == null) {
             throw new ArgumentNullException("theme");
-        }
-    }
-
-    public void validateDateTime() {
-        LocalDateTime dateTime = LocalDateTime.of(date, timeSlot.getStartAt());
-        if (LocalDateTime.now().isAfter(dateTime)) {
-            throw new PastDateTimeReservationException();
         }
     }
 
@@ -79,16 +61,25 @@ public class Reservation {
         return member;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public TimeSlot getTimeSlot() {
-        return timeSlot;
+    public ReservationTime getReservationTime() {
+        return reservationTime;
     }
 
     public Theme getTheme() {
         return theme;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Reservation that)) {
+            return false;
+        }
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public static Builder builder() {
@@ -98,9 +89,8 @@ public class Reservation {
     public static class Builder {
         private Long id;
         private Member member;
-        private TimeSlot timeSlot;
+        private ReservationTime reservationTime;
         private Theme theme;
-        private LocalDate date;
 
         public Builder id(Long id) {
             this.id = id;
@@ -112,8 +102,8 @@ public class Reservation {
             return this;
         }
 
-        public Builder timeSlot(TimeSlot timeSlot) {
-            this.timeSlot = timeSlot;
+        public Builder reservationTime(ReservationTime reservationTime) {
+            this.reservationTime = reservationTime;
             return this;
         }
 
@@ -122,13 +112,8 @@ public class Reservation {
             return this;
         }
 
-        public Builder date(LocalDate date) {
-            this.date = date;
-            return this;
-        }
-
         public Reservation build() {
-            return new Reservation(id, member, date, timeSlot, theme);
+            return new Reservation(id, member, reservationTime, theme);
         }
     }
 }

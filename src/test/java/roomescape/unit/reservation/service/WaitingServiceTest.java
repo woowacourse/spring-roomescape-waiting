@@ -17,6 +17,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -75,11 +76,12 @@ class WaitingServiceTest {
         var savedMember2 = memberRepository.save(member2);
         var savedTheme = themeRepository.save(theme);
         var savedTimeSlot = timeSlotRepository.save(timeSlot);
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), savedTimeSlot);
         Reservation reservation = Reservation.builder()
-                .date(LocalDate.of(2025, 1, 1))
+                .reservationTime(reservationTime)
                 .theme(savedTheme)
                 .member(savedMember1)
-                .timeSlot(savedTimeSlot).build();
+                .build();
         reservationRepository.save(reservation);
         WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), savedTimeSlot.getId(),
                 savedTheme.getId());
@@ -127,11 +129,12 @@ class WaitingServiceTest {
         var savedMember = memberRepository.save(member);
         var savedTheme = themeRepository.save(theme);
         var savedTimeSlot = timeSlotRepository.save(timeSlot);
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), savedTimeSlot);
         Waiting waiting = Waiting.builder()
                 .member(savedMember)
                 .theme(savedTheme)
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(savedTimeSlot).build();
+                .reservationTime(reservationTime)
+                .build();
         waitingRepository.save(waiting);
         WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), savedTimeSlot.getId(),
                 savedTheme.getId());
@@ -156,11 +159,12 @@ class WaitingServiceTest {
         var savedMember = memberRepository.save(member);
         var savedTheme = themeRepository.save(theme);
         var savedTimeSlot = timeSlotRepository.save(timeSlot);
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), savedTimeSlot);
         Reservation reservation = Reservation.builder()
                 .member(savedMember)
                 .theme(savedTheme)
-                .date(LocalDate.of(2025, 1, 1))
-                .timeSlot(savedTimeSlot).build();
+                .reservationTime(reservationTime)
+                .build();
         reservationRepository.save(reservation);
         WaitingRequest request = new WaitingRequest(LocalDate.of(2025, 1, 1), savedTimeSlot.getId(),
                 savedTheme.getId());
@@ -194,21 +198,19 @@ class WaitingServiceTest {
                         .email("email2@domain.com")
                         .password("password2").build()
         );
-        LocalDate date = LocalDate.of(2025, 1, 1);
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
         waitingRepository.save(
                 Waiting.builder()
-                        .date(date)
                         .member(member2)
                         .theme(theme)
-                        .timeSlot(timeSlot)
+                        .reservationTime(reservationTime)
                         .build()
         );
         waitingRepository.save(
                 Waiting.builder()
-                        .date(date)
+                        .reservationTime(reservationTime)
                         .member(member1)
                         .theme(theme)
-                        .timeSlot(timeSlot)
                         .build()
         );
         // when
@@ -243,21 +245,19 @@ class WaitingServiceTest {
                         .email("email2@domain.com")
                         .password("password2").build()
         );
-        LocalDate date = LocalDate.of(2025, 1, 1);
+        ReservationTime reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
         waitingRepository.save(
                 Waiting.builder()
-                        .date(date)
+                        .reservationTime(reservationTime)
                         .member(member2)
                         .theme(theme)
-                        .timeSlot(timeSlot)
                         .build()
         );
         Waiting waiting = waitingRepository.save(
                 Waiting.builder()
-                        .date(date)
+                        .reservationTime(reservationTime)
                         .member(member1)
                         .theme(theme)
-                        .timeSlot(timeSlot)
                         .build()
         );
         // when
@@ -294,19 +294,20 @@ class WaitingServiceTest {
                 .name("name1")
                 .email("email1@domain.com")
                 .password("password1").build();
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
         waitingRepository.save(
                 Waiting.builder()
-                        .date(LocalDate.of(2025, 1, 1))
+                        .reservationTime(reservationTime)
                         .member(member)
                         .theme(theme)
-                        .timeSlot(timeSlot).build()
+                        .build()
         );
         waitingRepository.save(
                 Waiting.builder()
-                        .date(LocalDate.of(2025, 1, 2))
+                        .reservationTime(reservationTime)
                         .member(member)
                         .theme(theme)
-                        .timeSlot(timeSlot).build()
+                        .build()
         );
         // when
         List<WaitingResponse> waitings = waitingService.findAllWaitings();
@@ -333,19 +334,20 @@ class WaitingServiceTest {
                 .name("name2")
                 .email("email2@domain.com")
                 .password("password2").build();
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
         Reservation waiting1 = reservationRepository.save(
                 Reservation.builder()
-                        .date(LocalDate.of(2025, 1, 1))
+                        .reservationTime(reservationTime)
                         .member(member1)
                         .theme(theme)
-                        .timeSlot(timeSlot).build()
+                        .build()
         );
         Waiting waiting2 = waitingRepository.save(
                 Waiting.builder()
-                        .date(LocalDate.of(2025, 1, 1))
+                        .reservationTime(reservationTime)
                         .member(member2)
                         .theme(theme)
-                        .timeSlot(timeSlot).build()
+                        .build()
         );
         // when
         waitingService.convertWaitingToReservation(waiting1.getId());
@@ -373,12 +375,12 @@ class WaitingServiceTest {
                         .email("email1@domain.com")
                         .password("password1").build()
         );
+        var reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
         Waiting waiting = waitingRepository.save(
                 Waiting.builder()
-                        .date(LocalDate.of(2025, 1, 1))
+                        .reservationTime(reservationTime)
                         .member(member1)
                         .theme(theme)
-                        .timeSlot(timeSlot)
                         .build()
         );
         // when

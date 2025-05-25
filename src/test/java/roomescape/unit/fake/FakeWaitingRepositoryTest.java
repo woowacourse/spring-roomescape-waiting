@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -34,9 +35,8 @@ class FakeWaitingRepositoryTest {
                 .build();
         Waiting waiting = Waiting.builder()
                 .theme(theme)
-                .timeSlot(timeSlot)
                 .member(member)
-                .date(LocalDate.of(2025, 1, 1)).build();
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot)).build();
 
         // when
         Assertions.assertThatCode(() -> waitingRepository.save(waiting))
@@ -44,7 +44,7 @@ class FakeWaitingRepositoryTest {
     }
 
     @Test
-    void 날짜_회원_시간_테마으로_대기가_존재하는지_조회한다() {
+    void 일시_회원_테마으로_대기가_존재하는지_조회한다() {
         // given
         Theme theme = Theme.builder()
                 .name("theme1")
@@ -57,17 +57,16 @@ class FakeWaitingRepositoryTest {
                 .email("email1@domain.com")
                 .password("password1")
                 .build();
-        LocalDate date = LocalDate.of(2025, 1, 1);
+        ReservationTime reservationTime = new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot);
         Waiting waiting = Waiting.builder()
-                .date(date)
+                .reservationTime(reservationTime)
                 .member(member)
                 .theme(theme)
-                .timeSlot(timeSlot)
                 .build();
         waitingRepository.save(waiting);
 
         // when
-        boolean exist = waitingRepository.existsByDateAndMemberAndThemeAndTimeSlot(date, member, theme, timeSlot);
+        boolean exist = waitingRepository.existsByReservationTimeAndMemberAndTheme(reservationTime, member, theme);
 
         //then
         assertThat(exist).isTrue();
@@ -97,18 +96,16 @@ class FakeWaitingRepositoryTest {
         LocalDate date = LocalDate.of(2025, 1, 1);
         waitingRepository.save(
                 Waiting.builder()
-                        .date(date)
+                        .reservationTime(new ReservationTime(date, timeSlot))
                         .member(member2)
                         .theme(theme)
-                        .timeSlot(timeSlot)
                         .build()
         );
         waitingRepository.save(
                 Waiting.builder()
-                        .date(date)
+                        .reservationTime(new ReservationTime(date, timeSlot))
                         .member(member1)
                         .theme(theme)
-                        .timeSlot(timeSlot)
                         .build()
         );
         // when
@@ -132,10 +129,9 @@ class FakeWaitingRepositoryTest {
                 .password("password1")
                 .build();
         Waiting waiting = Waiting.builder()
-                .date(LocalDate.of(2025, 1, 1))
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .member(member)
                 .theme(theme)
-                .timeSlot(timeSlot)
                 .build();
         Waiting savedWaiting = waitingRepository.save(waiting);
 
@@ -161,10 +157,9 @@ class FakeWaitingRepositoryTest {
                 .password("password1")
                 .build();
         Waiting waiting = Waiting.builder()
-                .date(LocalDate.of(2025, 1, 1))
+                .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
                 .member(member)
                 .theme(theme)
-                .timeSlot(timeSlot)
                 .build();
         Waiting savedWaiting = waitingRepository.save(waiting);
 

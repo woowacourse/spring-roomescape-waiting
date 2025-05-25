@@ -16,6 +16,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -79,8 +80,8 @@ public class WaitingApiTest {
                 Reservation.builder()
                         .theme(theme)
                         .member(member2)
-                        .timeSlot(timeSlot)
-                        .date(date).build()
+                        .reservationTime(new ReservationTime(date, timeSlot))
+                        .build()
         );
         String token = tokenProvider.createToken("1", Role.MEMBER);
         Map<String, Object> body = Map.of(
@@ -124,8 +125,8 @@ public class WaitingApiTest {
                 Waiting.builder()
                         .theme(theme)
                         .member(member1)
-                        .timeSlot(timeSlot)
-                        .date(date).build()
+                        .reservationTime(new ReservationTime(date, timeSlot))
+                        .build()
         );
         String token = tokenProvider.createToken("1", Role.MEMBER);
         // when & then
@@ -162,8 +163,8 @@ public class WaitingApiTest {
                 Waiting.builder()
                         .theme(theme)
                         .member(member1)
-                        .timeSlot(timeSlot)
-                        .date(LocalDate.now().plusDays(1)).build()
+                        .reservationTime(new ReservationTime(LocalDate.now().plusDays(1), timeSlot))
+                        .build()
         );
         String token = tokenProvider.createToken("1", Role.MEMBER);
         // when & then

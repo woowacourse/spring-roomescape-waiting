@@ -11,9 +11,12 @@ public record WaitingResponse(
         String themeName
 ) {
     public static WaitingResponse from(Waiting waiting) {
-        TimeSlotResponse dto = TimeSlotResponse.from(waiting.getTimeSlot());
-        return new WaitingResponse(waiting.getId(), waiting.getMember().getName(), waiting.getDate(),
-                dto,
-                waiting.getTheme().getName());
+        return new WaitingResponse(
+                waiting.getId(),
+                waiting.getMember().getName(),
+                waiting.getReservationTime().getDate(),
+                TimeSlotResponse.from(waiting.getReservationTime().getTimeSlot()),
+                waiting.getTheme().getName()
+        );
     }
 }

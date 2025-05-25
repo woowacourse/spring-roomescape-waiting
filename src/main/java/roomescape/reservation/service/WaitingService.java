@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +14,7 @@ import roomescape.exception.WaitingNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
 import roomescape.reservation.domain.Waiting;
@@ -49,33 +49,37 @@ public class WaitingService {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
         Theme theme = themeRepository.findById(request.themeId()).orElseThrow(ThemeNotFoundException::new);
         TimeSlot timeSlot = timeSlotRepository.findById(request.timeId()).orElseThrow(TimeSlotNotFoundException::new);
-        validateAlreadyReserved(request.date(), member, theme, timeSlot);
-        validateDuplicatedWaiting(request.date(), member, theme, timeSlot);
-        validateReservationExist(request.date(), theme, timeSlot);
-
+        ReservationTime reservationTime = new ReservationTime(request.date(), timeSlot);
+        validateNewWaiting(reservationTime, member, theme);
         Waiting waiting = Waiting.builder()
-                .date(request.date())
+                .reservationTime(reservationTime)
                 .member(member)
-                .theme(theme)
-                .timeSlot(timeSlot).build();
+                .theme(theme).build();
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(savedWaiting);
     }
 
-    private void validateReservationExist(LocalDate date, Theme theme, TimeSlot timeSlot) {
-        if (!reservationRepository.existsByDateAndThemeAndTimeSlot(date, theme, timeSlot)) {
+    private void validateNewWaiting(ReservationTime reservationTime, Member member, Theme theme) {
+        reservationTime.validateDateTime();
+        validateAlreadyReserved(reservationTime, member, theme);
+        validateDuplicatedWaiting(reservationTime, member, theme);
+        validateReservationExist(reservationTime, theme);
+    }
+
+    private void validateReservationExist(ReservationTime time, Theme theme) {
+        if (!reservationRepository.existsByReservationTimeAndTheme(time, theme)) {
             throw new CannotWaitWithoutReservationException();
         }
     }
 
-    private void validateAlreadyReserved(LocalDate date, Member member, Theme theme, TimeSlot timeSlot) {
-        if (reservationRepository.existsByDateAndMemberAndThemeAndTimeSlot(date, member, theme, timeSlot)) {
+    private void validateAlreadyReserved(ReservationTime time, Member member, Theme theme) {
+        if (reservationRepository.existsByReservationTimeAndMemberAndTheme(time, member, theme)) {
             throw new ExistedReservationException();
         }
     }
 
-    private void validateDuplicatedWaiting(LocalDate date, Member member, Theme theme, TimeSlot timeSlot) {
-        if (waitingRepository.existsByDateAndMemberAndThemeAndTimeSlot(date, member, theme, timeSlot)) {
+    private void validateDuplicatedWaiting(ReservationTime time, Member member, Theme theme) {
+        if (waitingRepository.existsByReservationTimeAndMemberAndTheme(time, member, theme)) {
             throw new ExistedWaitingException();
         }
     }
@@ -108,8 +112,9 @@ public class WaitingService {
     @Transactional
     public void convertWaitingToReservation(Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
-        reservationRepository.findByDateAndTimeSlotAndTheme(
-                waiting.getDate(), waiting.getTimeSlot(), waiting.getTheme()
+        ReservationTime reservationTime = waiting.getReservationTime();
+        reservationRepository.findByReservationTimeAndTheme(
+                reservationTime, waiting.getTheme()
         ).ifPresent(reservationRepository::delete);
         Reservation reservation = waiting.convertToReservation();
         reservationRepository.save(reservation);
