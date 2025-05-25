@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.datetime.CurrentDateTime;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
@@ -42,7 +43,7 @@ class ThemeServiceTest {
     private final ThemeService themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository,
             currentDateTime);
 
-    @DisplayName("저장할 테마 이름이 중복될 경우 예외가 발생한다.")
+    @DisplayName("저장할 테마 이름이 중복될 경우 예외가 발생한다")
     @Test
     void validateNameDuplication() {
         // given
@@ -52,11 +53,11 @@ class ThemeServiceTest {
         // when
         // then
         assertThatThrownBy(() -> themeService.createTheme(request2))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 이름의 테마는 이미 존재합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("해당 이름의 테마는 이미 존재합니다.");
     }
 
-    @DisplayName("테마를 저장할 수 있다.")
+    @DisplayName("테마를 저장할 수 있다")
     @Test
     void create() {
         // given
@@ -75,7 +76,7 @@ class ThemeServiceTest {
         );
     }
 
-    @DisplayName("테마 목록을 조회할 수 있다.")
+    @DisplayName("테마 목록을 조회할 수 있다")
     @Test
     void findAll() {
         // given
@@ -89,7 +90,7 @@ class ThemeServiceTest {
         assertThat(result).hasSize(2);
     }
 
-    @DisplayName("예약이 존재하는 테마를 삭제할 경우 예외가 발생한다.")
+    @DisplayName("예약이 존재하는 테마를 삭제할 경우 예외가 발생한다")
     @Test
     void illegalDelete() {
         // given
@@ -104,11 +105,11 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(savedTheme.id()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("예약이 존재하는 테마는 삭제할 수 없습니다.");
     }
 
-    @DisplayName("테마를 삭제할 수 있다.")
+    @DisplayName("테마를 삭제할 수 있다")
     @Test
     void deleteThemeById() {
         // given

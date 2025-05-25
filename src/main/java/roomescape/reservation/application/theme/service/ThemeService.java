@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.datetime.CurrentDateTime;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
 import roomescape.reservation.domain.reservation.ReservationRepository;
@@ -30,7 +31,7 @@ public class ThemeService {
     public ThemeInfo createTheme(final ThemeCreateCommand command) {
         final Theme theme = command.convertToEntity();
         if (themeRepository.existsByThemeName(theme.themeName())) {
-            throw new IllegalArgumentException("해당 이름의 테마는 이미 존재합니다.");
+            throw new RoomescapeException("해당 이름의 테마는 이미 존재합니다.");
         }
         final Theme savedTheme = themeRepository.save(theme);
         return new ThemeInfo(savedTheme);
@@ -45,7 +46,7 @@ public class ThemeService {
 
     public void deleteThemeById(final long id) {
         if (reservationRepository.existsByThemeId(id)) {
-            throw new IllegalArgumentException("예약이 존재하는 테마는 삭제할 수 없습니다.");
+            throw new RoomescapeException("예약이 존재하는 테마는 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);
     }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
@@ -42,7 +43,8 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public void deleteById(final long id) {
-        final Reservation reservation = findById(id).orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));;
+        final Reservation reservation = findById(id)
+                .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않습니다."));;
         reservations.remove(reservation);
     }
 

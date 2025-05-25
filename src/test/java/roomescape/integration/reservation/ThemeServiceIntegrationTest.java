@@ -15,6 +15,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
 import roomescape.reservation.application.theme.service.ThemeService;
@@ -74,8 +75,8 @@ public class ThemeServiceIntegrationTest {
         themeService.createTheme(request1);
         // when & then
         assertThatThrownBy(() -> themeService.createTheme(request2))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 이름의 테마는 이미 존재합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("해당 이름의 테마는 이미 존재합니다.");
     }
 
     @DisplayName("모든 테마를 조회할 수 있다")
@@ -102,8 +103,8 @@ public class ThemeServiceIntegrationTest {
     void should_ThrowException_WhenDeleteThemeWithinReservation() {
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(7L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("예약이 존재하는 테마는 삭제할 수 없습니다.");
     }
 
     @DisplayName("최근 일주일 간 예약이 많은 순으로 인기 테마를 조회할 수 있다")

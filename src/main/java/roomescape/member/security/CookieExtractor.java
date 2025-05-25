@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import java.util.Arrays;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
+import roomescape.common.exception.RoomescapeException;
 
 @Component
 public class CookieExtractor {
@@ -12,7 +13,7 @@ public class CookieExtractor {
 
     public ResponseCookie createCookie(final String token, final int maxAge) {
         if (token == null) {
-            throw new IllegalArgumentException("토큰 값이 null일 수 없습니다");
+            throw new RoomescapeException("토큰 값이 null일 수 없습니다");
         }
 
         return ResponseCookie.from(COOKIE_NAME, token)
@@ -24,12 +25,12 @@ public class CookieExtractor {
 
     public static String extractToken(final Cookie[] cookies) {
         if (cookies == null || cookies.length == 0) {
-            throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
+            throw new RoomescapeException("쿠키가 존재하지 않습니다.");
         }
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(COOKIE_NAME))
                 .findFirst()
                 .map(Cookie::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("쿠키 토큰을 추출할 수 없습니다."));
+                .orElseThrow(() -> new RoomescapeException("쿠키 토큰을 추출할 수 없습니다."));
     }
 }

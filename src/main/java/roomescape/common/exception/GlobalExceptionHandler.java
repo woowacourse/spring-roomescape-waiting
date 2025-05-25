@@ -46,12 +46,12 @@ public class GlobalExceptionHandler {
         return createErrorResponse(BAD_REQUEST, message, request);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(RoomescapeException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
-            final IllegalArgumentException e,
+            final RoomescapeException e,
             final HttpServletRequest request
     ) {
-        log.warn("Illegal argument", e);
+        log.warn("Roomescape exception", e);
         return createErrorResponse(BAD_REQUEST, e.getMessage(), request);
     }
 

@@ -3,6 +3,7 @@ package roomescape.reservation.application.timeslot.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.application.timeslot.dto.TimeSlotAvailabilityInfo;
 import roomescape.reservation.application.timeslot.dto.TimeSlotCreateCommand;
 import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
@@ -25,7 +26,7 @@ public class TimeSlotService {
 
     public TimeSlotInfo createTimeSlot(final TimeSlotCreateCommand command) {
         if (timeSlotRepository.existsByStartAt(command.startAt())) {
-            throw new IllegalArgumentException("이미 존재하는 시간입니다.");
+            throw new RoomescapeException("이미 존재하는 시간입니다.");
         }
         final TimeSlot timeSlot = command.convertToEntity();
         final TimeSlot savedTimeSlot = timeSlotRepository.save(timeSlot);
@@ -40,7 +41,7 @@ public class TimeSlotService {
 
     public void deleteTimeSlotById(final long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new IllegalArgumentException("예약이 존재하는 시간은 삭제할 수 없습니다.");
+            throw new RoomescapeException("예약이 존재하는 시간은 삭제할 수 없습니다.");
         }
         timeSlotRepository.deleteById(id);
     }

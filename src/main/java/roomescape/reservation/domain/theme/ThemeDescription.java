@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import roomescape.common.exception.RoomescapeException;
 
 @Embeddable
 @Getter
@@ -30,13 +31,13 @@ public class ThemeDescription {
 
     private void validateMissing(final String description) {
         if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("테마 설명은 null 또는 공백이 아니어야 합니다.");
+            throw new RoomescapeException("테마 설명은 null 또는 공백이 아니어야 합니다.");
         }
     }
 
     private void validateLength(final String description) {
         if (description.length() < MIN_LENGTH || description.length() > MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("테마 설명은 최소 %d글자, 최대 %d글자여야합니다.", MIN_LENGTH, MAX_LENGTH));
+            throw new RoomescapeException(String.format("테마 설명은 최소 %d글자, 최대 %d글자여야합니다.", MIN_LENGTH, MAX_LENGTH));
         }
     }
 }

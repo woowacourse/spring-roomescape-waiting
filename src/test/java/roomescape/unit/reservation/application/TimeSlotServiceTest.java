@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.timeslot.dto.TimeSlotAvailabilityInfo;
@@ -39,8 +40,8 @@ class TimeSlotServiceTest {
         // when
         // then
         assertThatThrownBy(() -> timeSlotService.createTimeSlot(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 존재하는 시간입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("이미 존재하는 시간입니다.");
     }
 
     @DisplayName("예약 시간을 저장할 수 있다")
@@ -100,11 +101,11 @@ class TimeSlotServiceTest {
         // when
         // then
         assertThatThrownBy(() -> timeSlotService.deleteTimeSlotById(response.id()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
 
-    @DisplayName("예약 가능 시간을 조회할 수 있다.")
+    @DisplayName("예약 가능 시간을 조회할 수 있다")
     @Test
     void findAvailableTimes() {
         // given

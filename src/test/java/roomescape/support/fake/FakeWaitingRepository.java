@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.domain.waiting.Waiting;
 import roomescape.reservation.domain.waiting.WaitingRepository;
 import roomescape.reservation.domain.waiting.WaitingWithRank;
@@ -73,6 +74,6 @@ public class FakeWaitingRepository implements WaitingRepository {
         return waitings.stream()
                 .filter(reservation -> reservation.id() == id)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("예약 대기가 존재하지 않습니다."));
+                .orElseThrow(() -> new RoomescapeException("예약 대기가 존재하지 않습니다."));
     }
 }

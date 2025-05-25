@@ -10,7 +10,7 @@ import roomescape.reservation.domain.timeslot.TimeSlot;
 
 class TimeSlotTest {
 
-    @DisplayName("주어진 시간보다 이전 시간인지 여부를 반환한다.")
+    @DisplayName("주어진 시간보다 이전 시간인지 여부를 반환한다")
     @Test
     void isBefore() {
         // given

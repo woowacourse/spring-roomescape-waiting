@@ -3,6 +3,7 @@ package roomescape.reservation.application.waiting.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.waiting.dto.WaitingCreateCommand;
@@ -51,7 +52,7 @@ public class WaitingService {
 
     private void validateDuplicateWaiting(final LocalDate date, final long timeId, final long themeId, final long memberId) {
         if (waitingRepository.existsByReservationAndMemberId(date, timeId, themeId, memberId)) {
-            throw new IllegalArgumentException("해당 예약 대기에 이미 대기가 존재합니다.");
+            throw new RoomescapeException("해당 예약 대기에 이미 대기가 존재합니다.");
         }
     }
 
@@ -68,16 +69,16 @@ public class WaitingService {
 
     private TimeSlot findTimeSlot(final long timeId) {
         return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new IllegalArgumentException("예약 시간이 존재하지 않습니다."));
+                .orElseThrow(() -> new RoomescapeException("예약 시간이 존재하지 않습니다."));
     }
 
     private Theme findTheme(final long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));
+                .orElseThrow(() -> new RoomescapeException("테마가 존재하지 않습니다."));
     }
 
     private Member findMember(final long memberId) {
         return memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("멤버가 존재하지 않습니다."));
+                .orElseThrow(() -> new RoomescapeException("멤버가 존재하지 않습니다."));
     }
 }

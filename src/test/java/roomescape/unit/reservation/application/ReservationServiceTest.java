@@ -17,6 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.common.datetime.CurrentDateTime;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.application.dto.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -81,8 +82,8 @@ class ReservationServiceTest {
         reservationService.createReservation(request);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 시간에 이미 예약이 존재합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
 
     @DisplayName("날짜와 시간이 같아도 테마가 다르면 예외가 발생하지 않는다")
@@ -106,8 +107,8 @@ class ReservationServiceTest {
         final ReservationCreateCommand request = new ReservationCreateCommand(tomorrow, member1.id(), 3L, theme1.id());
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약 시간이 존재하지 않습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("예약 시간이 존재하지 않습니다.");
     }
 
     @DisplayName("테마가 존재하지 않을 경우 예외가 발생한다")
@@ -117,8 +118,8 @@ class ReservationServiceTest {
         final ReservationCreateCommand request = new ReservationCreateCommand(tomorrow, member1.id(), time1.id(), 3L);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("테마가 존재하지 않습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("테마가 존재하지 않습니다.");
     }
 
     @DisplayName("과거 시간에 예약할 경우 예외가 발생한다")
@@ -129,8 +130,8 @@ class ReservationServiceTest {
                 theme1.id());
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("지나간 날짜와 시간은 예약 불가합니다.");
     }
 
     @DisplayName("예약을 생성할 수 있다")

@@ -8,18 +8,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.domain.theme.ThemeDescription;
 
 class ThemeDescriptionTest {
 
-    @DisplayName("테마 설명은 최소 2글자, 최대 225글자가 아니면 예외가 발생한다.")
+    @DisplayName("테마 설명은 최소 2글자, 최대 225글자가 아니면 예외가 발생한다")
     @ParameterizedTest
     @MethodSource("invalidDescriptions")
     @NullAndEmptySource
     void validate(final String description) {
         // when & then
         assertThatThrownBy(() -> new ThemeDescription(description))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(RoomescapeException.class);
     }
 
     private static Stream<Arguments> invalidDescriptions() {

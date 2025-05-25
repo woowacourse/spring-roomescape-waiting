@@ -15,6 +15,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.application.timeslot.dto.TimeSlotAvailabilityInfo;
 import roomescape.reservation.application.timeslot.dto.TimeSlotCreateCommand;
 import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
@@ -41,8 +42,8 @@ public class TimeServiceIntegrationTest {
         final TimeSlotCreateCommand request = new TimeSlotCreateCommand(LocalTime.of(10, 0));
         // when & then
         assertThatThrownBy(() -> timeSlotService.createTimeSlot(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이미 존재하는 시간입니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("이미 존재하는 시간입니다.");
     }
 
     @DisplayName("예약 시간을 추가할 수 있다")
@@ -77,8 +78,8 @@ public class TimeServiceIntegrationTest {
     void should_ThrowException_WhenDeleteTimeWithinReservation() {
         // when & then
         assertThatThrownBy(() -> timeSlotService.deleteTimeSlotById(1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
 
     @DisplayName("id를 기반으로 예약 시간을 삭제할 수 있다")

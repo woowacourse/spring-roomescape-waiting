@@ -18,6 +18,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
@@ -90,8 +91,8 @@ public class ReservationServiceIntegrationTest {
         reservationService.createReservation(request);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 시간에 이미 예약이 존재합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
 
     @DisplayName("날짜와 시간이 같아도 테마가 다르면 중복 예외가 발생하지 않는다")
@@ -115,8 +116,8 @@ public class ReservationServiceIntegrationTest {
         final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 3L);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("지나간 날짜와 시간은 예약 불가합니다.");
     }
 
     @DisplayName("모든 예약을 조회할 수 있다")

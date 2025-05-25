@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import roomescape.common.exception.RoomescapeException;
 
 @Embeddable
 @Getter
@@ -30,7 +31,7 @@ public class ThemeThumbnail {
 
     private void validateMissing(final String thumbnail) {
         if (thumbnail == null || thumbnail.isBlank()) {
-            throw new IllegalArgumentException("테마 썸네일은 null 또는 공백이 아니어야 합니다.");
+            throw new RoomescapeException("테마 썸네일은 null 또는 공백이 아니어야 합니다.");
         }
     }
 
@@ -39,7 +40,7 @@ public class ThemeThumbnail {
         final boolean matched = SUPPORTED_FORMATS.stream().anyMatch(lower::endsWith);
         if (!matched) {
             final String allowedFormats = String.join(", ", SUPPORTED_FORMATS);
-            throw new IllegalArgumentException("테마 썸네일은 " + allowedFormats + " 형식만 허용됩니다.");
+            throw new RoomescapeException("테마 썸네일은 " + allowedFormats + " 형식만 허용됩니다.");
         }
     }
 }
