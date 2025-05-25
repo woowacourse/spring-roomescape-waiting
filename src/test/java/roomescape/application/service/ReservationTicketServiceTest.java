@@ -32,7 +32,7 @@ import roomescape.model.Role;
 import roomescape.model.Theme;
 import roomescape.model.Waiting;
 import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTicketRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 
 @Slf4j
@@ -44,7 +44,7 @@ class ReservationTicketServiceTest {
     ReservationTicketService reservationTicketService;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationTicketRepository reservationTicketRepository;
 
     @Autowired
     ReservationTimeRepository reservationTimeRepository;
@@ -149,7 +149,7 @@ class ReservationTicketServiceTest {
 
         ReservationTicket reservationTicket = new ReservationTicket(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                 savedMember, LocalDate.now());
-        ReservationTicket savedReservationTicket = reservationRepository.save(reservationTicket);
+        ReservationTicket savedReservationTicket = reservationTicketRepository.save(reservationTicket);
 
         LoginMember loginMember = new LoginMember(savedMember);
 
@@ -201,7 +201,7 @@ class ReservationTicketServiceTest {
                 )
         ));
 
-        ReservationTicket reservationTicket = reservationRepository.save(new ReservationTicket(
+        ReservationTicket reservationTicket = reservationTicketRepository.save(new ReservationTicket(
                 LocalDate.now().plusDays(1),
                 reservationTime,
                 theme,
@@ -213,7 +213,7 @@ class ReservationTicketServiceTest {
         reservationTicketService.cancelReservation(reservationTicket.getId());
 
         // then
-        List<ReservationTicket> allReservationTickets = reservationRepository.findAll();
+        List<ReservationTicket> allReservationTickets = reservationTicketRepository.findAll();
         Optional<ReservationTicket> foundReservation = allReservationTickets.stream()
                 .filter(reservation1 -> reservation1.getReservationTime().getId().equals(reservationTime.getId()))
                 .filter(reservation1 -> reservation1.getTheme().getId().equals(theme.getId()))

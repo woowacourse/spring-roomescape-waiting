@@ -12,7 +12,7 @@ import roomescape.persistence.vo.Period;
 
 @Repository
 @RequiredArgsConstructor
-public class ReservationRepositoryImpl implements ReservationRepository {
+public class ReservationTicketRepositoryImpl implements ReservationTicketRepository {
 
     private final ReservationTicketJpaRepository reservationTicketJpaRepository;
 

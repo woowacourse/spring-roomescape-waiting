@@ -6,7 +6,7 @@ import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.persistence.vo.Period;
 
-public interface ReservationRepository {
+public interface ReservationTicketRepository {
 
     boolean isDuplicatedForDateAndReservationTime(LocalDate date, ReservationTime time);
 

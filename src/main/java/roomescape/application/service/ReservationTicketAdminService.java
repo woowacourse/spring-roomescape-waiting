@@ -9,15 +9,15 @@ import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTicketRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationAdminService {
+public class ReservationTicketAdminService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationTicketRepository reservationTicketRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final MemberRepository memberRepository;
@@ -29,6 +29,6 @@ public class ReservationAdminService {
 
         ReservationTicket reservationTicket = new ReservationTicket(registerDto.date(), reservationTime, theme, member, LocalDate.now());
 
-        reservationRepository.save(reservationTicket);
+        reservationTicketRepository.save(reservationTicket);
     }
 }

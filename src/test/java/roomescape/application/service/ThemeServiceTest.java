@@ -13,7 +13,7 @@ import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Theme;
 import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTicketRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
 
@@ -28,7 +28,7 @@ class ThemeServiceTest {
     ThemeRepository themeRepository;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationTicketRepository reservationTicketRepository;
 
     @Autowired
     MemberRepository memberRepository;

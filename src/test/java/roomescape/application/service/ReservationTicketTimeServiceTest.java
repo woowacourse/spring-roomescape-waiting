@@ -11,7 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTicketRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -21,7 +21,7 @@ class ReservationTicketTimeServiceTest {
     ReservationTimeService reservationTimeService;
 
     @Autowired
-    ReservationRepository reservationRepository;
+    ReservationTicketRepository reservationTicketRepository;
 
     @Test
     @DisplayName("시간을 삭제한다")

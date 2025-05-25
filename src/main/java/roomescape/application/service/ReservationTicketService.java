@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
+import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationTicketResponseDto;
 import roomescape.model.Member;
@@ -17,7 +17,7 @@ import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
 import roomescape.model.Waiting;
 import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTicketRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
 import roomescape.persistence.repository.WaitingRepository;
@@ -27,7 +27,7 @@ import roomescape.persistence.vo.Period;
 @RequiredArgsConstructor
 public class ReservationTicketService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationTicketRepository reservationTicketRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
@@ -38,12 +38,12 @@ public class ReservationTicketService {
         ReservationTicket reservationTicket = createReservation(reservationTicketRegisterDto, loginMember);
         assertReservationIsNotDuplicated(reservationTicket);
 
-        ReservationTicket savedReservationTicket = reservationRepository.save(reservationTicket);
+        ReservationTicket savedReservationTicket = reservationTicketRepository.save(reservationTicket);
         return new ReservationTicketResponseDto(savedReservationTicket);
     }
 
     public List<ReservationTicketResponseDto> getAllReservations() {
-        return reservationRepository.findAll().stream()
+        return reservationTicketRepository.findAll().stream()
                 .map(ReservationTicketResponseDto::new)
                 .toList();
     }
@@ -54,7 +54,7 @@ public class ReservationTicketService {
         LocalDate startDate = reservationSearchDto.startDate();
         LocalDate endDate = reservationSearchDto.endDate();
 
-        return reservationRepository.findForThemeAndMemberInPeriod(
+        return reservationTicketRepository.findForThemeAndMemberInPeriod(
                         themeId,
                         memberId,
                         new Period(startDate, endDate)
@@ -64,8 +64,8 @@ public class ReservationTicketService {
     }
 
     public void cancelReservation(Long id) {
-        ReservationTicket reservationTicket = reservationRepository.findById(id);
-        reservationRepository.deleteById(id);
+        ReservationTicket reservationTicket = reservationTicketRepository.findById(id);
+        reservationTicketRepository.deleteById(id);
 
         promoteNextWaitingToReservation(reservationTicket);
     }
@@ -89,18 +89,19 @@ public class ReservationTicketService {
 
     private void promoteToReservation(Waiting nextWaiting) {
         ReservationTicket convertedReservationTicket = convertToReservation(nextWaiting);
-        reservationRepository.save(convertedReservationTicket);
+        reservationTicketRepository.save(convertedReservationTicket);
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<ReservationTicket> reservationTickets = reservationRepository.findForMember(loginMember.id());
+        List<ReservationTicket> reservationTickets = reservationTicketRepository.findForMember(loginMember.id());
 
         return reservationTickets.stream()
                 .map(MemberReservationResponseDto::new)
                 .toList();
     }
 
-    private ReservationTicket createReservation(ReservationTicketRegisterDto reservationTicketRegisterDto, LoginMember loginMember) {
+    private ReservationTicket createReservation(ReservationTicketRegisterDto reservationTicketRegisterDto,
+                                                LoginMember loginMember) {
         ReservationTime time = reservationTimeRepository.findById(reservationTicketRegisterDto.timeId());
         Theme theme = themeRepository.findById(reservationTicketRegisterDto.themeId());
         Member member = memberRepository.findById(loginMember.id());
@@ -109,7 +110,7 @@ public class ReservationTicketService {
     }
 
     private void assertReservationIsNotDuplicated(ReservationTicket reservationTicket) {
-        if (reservationRepository.isDuplicatedForDateAndReservationTime(reservationTicket.getDate(),
+        if (reservationTicketRepository.isDuplicatedForDateAndReservationTime(reservationTicket.getDate(),
                 reservationTicket.getReservationTime())) {
             throw new DuplicatedException("이미 예약이 존재합니다.");
         }

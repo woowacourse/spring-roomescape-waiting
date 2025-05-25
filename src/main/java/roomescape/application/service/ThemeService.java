@@ -11,7 +11,7 @@ import roomescape.common.exception.ResourceInUseException;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
 import roomescape.model.Theme;
-import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTicketRepository;
 import roomescape.persistence.repository.ThemeRepository;
 import roomescape.persistence.vo.Period;
 
@@ -23,7 +23,7 @@ public class ThemeService {
     private static final int POPULAR_THEME_SIZE = 10;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationTicketRepository reservationTicketRepository;
 
     public List<ThemeResponseDto> getAllThemes() {
         return themeRepository.findAll().stream()

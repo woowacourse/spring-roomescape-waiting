@@ -17,7 +17,7 @@ import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
-import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTicketRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 
 @Service
@@ -25,7 +25,7 @@ import roomescape.persistence.repository.ReservationTimeRepository;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationTicketRepository reservationTicketRepository;
 
     public List<ReservationTimeResponseDto> getAllTimes() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
@@ -62,7 +62,7 @@ public class ReservationTimeService {
 
     private List<ReservationTicket> getReservationsBy(String date, Long themeId) {
         LocalDate parsedDate = LocalDate.parse(date);
-        return reservationRepository.findForThemeOnDate(themeId, parsedDate);
+        return reservationTicketRepository.findForThemeOnDate(themeId, parsedDate);
     }
 
     private Set<ReservationTime> getReservationTimes(List<ReservationTicket> reservationTickets) {
