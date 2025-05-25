@@ -195,4 +195,112 @@ public class WaitingApiTest {
                 .then().log().all()
                 .statusCode(404);
     }
+
+    @Test
+    void 관리자가_모든_대기를_조회한다() {
+        Member admin = memberRepository.save(
+                Member.builder()
+                        .name("admin")
+                        .email("admin@domain.com")
+                        .password("admin")
+                        .role(Role.ADMIN).build()
+        );
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("name")
+                        .description("desc")
+                        .thumbnail("thumb").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build());
+        waitingRepository.save(
+                Waiting.builder()
+                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), timeSlot))
+                        .theme(theme)
+                        .member(admin).build()
+        );
+        String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().get("/api/admin/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+    }
+
+    @Test
+    void 관리자가_대기를_승인한다() {
+        // given
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.ADMIN).build()
+        );
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.builder()
+                        .theme(theme)
+                        .member(member1)
+                        .reservationTime(new ReservationTime(LocalDate.now().plusDays(1), timeSlot))
+                        .build()
+        );
+        String token = tokenProvider.createToken("1", Role.ADMIN);
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().post("/api/admin/waitings/{waitingId}", waiting.getId())
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    void 관리자가_대기를_거절한다() {
+        // given
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("member1")
+                        .password("password1")
+                        .email("email1@domain.com")
+                        .role(Role.ADMIN).build()
+        );
+        Theme theme = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .thumbnail("thumbnail1")
+                        .description("description1").build()
+        );
+        TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0)).build()
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.builder()
+                        .theme(theme)
+                        .member(member1)
+                        .reservationTime(new ReservationTime(LocalDate.now().plusDays(1), timeSlot))
+                        .build()
+        );
+        String token = tokenProvider.createToken("1", Role.ADMIN);
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when().post("/api/admin/waitings/{waitingId}", waiting.getId())
+                .then().log().all()
+                .statusCode(204);
+    }
 }

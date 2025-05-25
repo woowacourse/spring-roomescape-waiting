@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.presentation.AuthorizationExtractor;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.TimeSlot;
@@ -100,6 +101,48 @@ public class WaitingControllerTest {
         given(tokenProvider.extractSubject("accessToken")).willReturn("1");
         // when & then
         mockMvc.perform(delete("/api/waiting/{waitingId}", 1L)
+                        .cookie(new Cookie("token", "accessToken"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void 대기목록을_조회한다() throws Exception {
+        // given
+        given(tokenProvider.extractRole("accessToken")).willReturn(Role.ADMIN);
+        List<WaitingResponse> response = List.of(new WaitingResponse(
+                1L,
+                "member1",
+                LocalDate.of(2025, 1, 1),
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)),
+                "theme1"
+        ));
+        given(waitingService.findAllWaitings()).willReturn(response);
+        // when & then
+        mockMvc.perform(get("/api/admin/waitings")
+                        .cookie(new Cookie("token", "accessToken"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(response)));
+    }
+
+    @Test
+    void 관리자가_대기를_승인한다() throws Exception {
+        // given
+        given(tokenProvider.extractRole("accessToken")).willReturn(Role.ADMIN);
+        // when & then
+        mockMvc.perform(post("/api/admin/waitings/1")
+                        .cookie(new Cookie("token", "accessToken"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void 관리자가_대기를_거절한다() throws Exception {
+        // given
+        given(tokenProvider.extractRole("accessToken")).willReturn(Role.ADMIN);
+        // when & then
+        mockMvc.perform(delete("/api/admin/waitings/1")
                         .cookie(new Cookie("token", "accessToken"))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());

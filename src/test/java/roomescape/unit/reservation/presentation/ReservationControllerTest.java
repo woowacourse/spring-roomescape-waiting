@@ -1,5 +1,6 @@
 package roomescape.unit.reservation.presentation;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,6 +21,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.auth.infrastructure.JwtTokenProvider;
 import roomescape.auth.presentation.AuthorizationExtractor;
+import roomescape.member.domain.Role;
+import roomescape.reservation.dto.request.AdminReservationRequest;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationWithStatusResponse;
@@ -87,5 +90,47 @@ class ReservationControllerTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    void 관리자가_예약을_생성한다() throws Exception {
+        // given
+        AdminReservationRequest request = new AdminReservationRequest(1L, LocalDate.of(2025, 1, 1), 1L, 1L);
+        ReservationResponse response = new ReservationResponse(
+                1L,
+                "name1",
+                LocalDate.of(2025, 1, 1),
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)),
+                "themeName1"
+        );
+        given(reservationService.createReservation(1L, 1L, 1L, LocalDate.of(2025, 1, 1))).willReturn(response);
+        given(tokenProvider.extractRole("token")).willReturn(Role.ADMIN);
+        // when & then
+        mockMvc.perform(post("/api/admin/reservations")
+                        .cookie(new Cookie("token", "token"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(content().string(objectMapper.writeValueAsString(response)));
+    }
+
+    @Test
+    void 관리자가_예약을_조회한다() throws Exception {
+        // given
+        ReservationResponse reservationResponse = new ReservationResponse(
+                1L,
+                "name1",
+                LocalDate.of(2025, 1, 1),
+                new TimeSlotResponse(1L, LocalTime.of(9, 0)),
+                "themeName1"
+        );
+        List<ReservationResponse> response = List.of(reservationResponse);
+        given(reservationService.findReservations(any())).willReturn(response);
+        given(tokenProvider.extractRole("token")).willReturn(Role.ADMIN);
+        // when & then
+        mockMvc.perform(get("/api/admin/reservations")
+                        .cookie(new Cookie("token", "token"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(response)));
+    }
 
 }
