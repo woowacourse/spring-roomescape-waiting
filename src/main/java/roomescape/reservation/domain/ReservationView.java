@@ -73,6 +73,22 @@ public class ReservationView {
     @Column
     private int waitingOrder;
 
+    public ReservationView(final String compositeId,
+                           final Long userId,
+                           final ReservationDate date,
+                           final ReservationTime time,
+                           final Theme theme,
+                           final ReservationStatus status,
+                           final int waitingOrder) {
+        this.compositeId = compositeId;
+        this.userId = userId;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.status = status;
+        this.waitingOrder = waitingOrder;
+    }
+
     public Long getId() {
         try {
             validateId();

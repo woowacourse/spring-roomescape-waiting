@@ -13,8 +13,11 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
+import roomescape.reservation.application.service.ReservationViewQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationView;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
@@ -47,7 +50,8 @@ class ReservationFacadeTest {
 
     @Mock
     private ReservationQueryService reservationQueryService;
-
+    @Mock
+    private ReservationViewQueryService reservationViewQueryService;
     @Mock
     private ReservationCommandService reservationCommandService;
 
@@ -99,15 +103,25 @@ class ReservationFacadeTest {
         //then
         Long userId = 1L;
         List<Reservation> reservations = List.of(createReservation(1L));
-        given(userQueryService.getById(any())).willReturn(createUser(userId));
-        given(reservationQueryService.getAllReservationsByUserId(any(Long.class))).willReturn(reservations);
+        User user = createUser(userId);
+        List<ReservationView> reservationViews = List.of(new ReservationView(
+                "T-1",
+                userId,
+                reservations.get(0).getDate(),
+                reservations.get(0).getTime(),
+                reservations.get(0).getTheme(),
+                ReservationStatus.CONFIRMED,
+                0
+        ));
+        given(userQueryService.getById(any())).willReturn(user);
+        given(reservationViewQueryService.getAllByUserId(any(Long.class))).willReturn(reservationViews);
 
         //when
         List<MyReservationsResponse> result = reservationFacade.getAllByUserId(userId);
 
         //then
         assertThat(result).hasSize(1);
-        then(reservationQueryService).should(times(1)).getAllReservationsByUserId(any(Long.class));
+        then(reservationViewQueryService).should(times(1)).getAllByUserId(any(Long.class));
     }
 
     @Test
@@ -115,9 +129,7 @@ class ReservationFacadeTest {
     void getAllByUserIdWithNonExistentUserId() {
         //given
         Long nonExistentUserId = 9999L;
-        given(userQueryService.getById(any())).willReturn(createUser(nonExistentUserId));
-        given(reservationQueryService.getAllReservationsByUserId(any(Long.class)))
-                .willThrow(new NotFoundException(DomainTerm.USER_ID));
+        given(userQueryService.getById(any())).willThrow(new NotFoundException(DomainTerm.USER_ID));
 
         //when
         //then

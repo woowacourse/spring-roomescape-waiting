@@ -13,8 +13,6 @@ import roomescape.reservation.application.dto.AvailableReservationTimeServiceRes
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.WaitingReservation;
-import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
@@ -44,9 +42,6 @@ class ReservationQueryServiceImplTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
-
-    @Autowired
-    private WaitingReservationRepository waitingReservationRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -105,8 +100,8 @@ class ReservationQueryServiceImplTest {
 
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
 
-        final Reservation reservation = createAndSaveReservation(user.getId(), date, booked, theme);
-
+        final Reservation reservation = reservationRepository.save(
+                Reservation.withoutId(user.getId(), date, booked, theme));
         // when
         final List<AvailableReservationTimeServiceResponse> timesWithAvailability = reservationQueryService.getTimesWithAvailability(
                 new AvailableReservationTimeServiceRequest(date, theme.getId()));
@@ -130,63 +125,6 @@ class ReservationQueryServiceImplTest {
                 });
     }
 
-    @Test
-    @DisplayName("유저 Id가 같은 모든 예약를 조회할 수 있다")
-    void getAllReservationsByUserId() {
-        // given
-        final User user = createAndSaveUser();
-        final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
-        final ReservationTime time = createAndSaveReservationTime(LocalTime.of(10, 0));
-        final Theme theme1 = createAndSaveTheme("공포1", "지구별 방탈출 최고1");
-        final Theme theme2 = createAndSaveTheme("공포2", "지구별 방탈출 최고2");
-
-        Long userId = user.getId();
-        final Reservation reservation1 = createAndSaveReservation(userId, date, time, theme1);
-        final Reservation reservation2 = createAndSaveReservation(userId, date, time, theme2);
-
-        // when
-        List<Reservation> reservations = reservationQueryService.getAllReservationsByUserId(userId);
-
-        // then
-        assertThat(reservations.size()).isEqualTo(2);
-        assertThat(reservations.getFirst().getUserId()).isEqualTo(userId);
-        assertThat(reservations.getLast().getUserId()).isEqualTo(userId);
-    }
-
-    @Test
-    @DisplayName("유저 Id가 같은 모든 예약 대기를 조회할 수 있다")
-    void getAllWaitingByUserId() {
-        // given
-        final User user1 = createAndSaveUser();
-        final User user2 = userRepository.save(
-                User.withoutId(
-                        UserName.from("강"),
-                        Email.from("emailemail@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
-        final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
-        final ReservationTime time = createAndSaveReservationTime(LocalTime.of(10, 0));
-        final Theme theme1 = createAndSaveTheme("공포2", "지구별 방탈출 최고2");
-        final Theme theme2 = createAndSaveTheme("공포2", "지구별 방탈출 최고2");
-        Long userId = user1.getId();
-
-        final Reservation reservation1 = createAndSaveReservation(user2.getId(), date, time, theme1);
-        final Reservation reservation2 = createAndSaveReservation(user2.getId(), date, time, theme2);
-        final WaitingReservation waitingReservation1 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(userId, 1, date, time, theme1));
-        final WaitingReservation waitingReservation2 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(userId, 1, date, time, theme2));
-        // when
-        List<WaitingReservation> reservations = reservationQueryService.getWaitingByUserId(userId);
-
-        // then
-        assertThat(reservations.size()).isEqualTo(2);
-        assertThat(reservations.getFirst().getUserId()).isEqualTo(waitingReservation1.getUserId());
-        assertThat(reservations.getFirst().getWaitingOrder()).isEqualTo(waitingReservation1.getWaitingOrder());
-        assertThat(reservations.getLast().getUserId()).isEqualTo(waitingReservation2.getUserId());
-        assertThat(reservations.getLast().getWaitingOrder()).isEqualTo(waitingReservation2.getWaitingOrder());
-    }
-
     // Helper 메서드들
     private ReservationTime createAndSaveReservationTime(LocalTime time) {
         return reservationTimeRepository.save(
@@ -208,10 +146,5 @@ class ReservationQueryServiceImplTest {
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
                         UserRole.NORMAL));
-    }
-
-    private Reservation createAndSaveReservation(Long userId, ReservationDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.save(
-                Reservation.withoutId(userId, date, time, theme));
     }
 }

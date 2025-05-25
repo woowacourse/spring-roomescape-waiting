@@ -75,11 +75,6 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
     }
 
     @Override
-    public List<Reservation> getAllReservationsByUserId(final Long userId) {
-        return reservationRepository.findAllByUserId(userId);
-    }
-
-    @Override
     public boolean existsByTimeId(final Long timeId) {
         return reservationRepository.existsByParams(timeId);
     }

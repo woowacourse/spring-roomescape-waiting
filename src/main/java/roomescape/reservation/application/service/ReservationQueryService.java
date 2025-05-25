@@ -19,9 +19,7 @@ public interface ReservationQueryService {
     List<ThemeToBookCountServiceResponse> getRanking(ReservationDate startDate, ReservationDate endDate, int count);
 
     List<Reservation> getByParams(ReservationSearchRequest request);
-
-    List<Reservation> getAllReservationsByUserId(Long userId);
-
+    
     boolean existsByTimeId(Long timeId);
 
     boolean existsByParams(ReservationDate date, Long timeId, Long themeId);

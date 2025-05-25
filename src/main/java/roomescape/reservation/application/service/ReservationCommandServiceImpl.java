@@ -11,8 +11,6 @@ import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.WaitingReservation;
-import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 import roomescape.time.application.service.ReservationTimeQueryService;
@@ -24,8 +22,6 @@ import roomescape.time.domain.ReservationTime;
 public class ReservationCommandServiceImpl implements ReservationCommandService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingReservationRepository waitingReservationRepository;
-
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
@@ -57,41 +53,6 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
         }
 
         throw new NotFoundException(DomainTerm.RESERVATION, id);
-    }
-
-    @Override
-    public WaitingReservation createWaitingReservation(final CreateReservationServiceRequest request) {
-        if (!isExistsByParams(request.date(), request.timeId(), request.themeId())) {
-            throw new IllegalArgumentException("Can't Add Waiting - No Reservation Found");
-        }
-
-        final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());
-        final Theme theme = themeQueryService.get(request.themeId());
-        final int nextOrder = waitingReservationRepository
-                .findMaxWaitingByParams(request.date(), reservationTime, theme) + 1;
-
-        final WaitingReservation waitingReservation = WaitingReservation.withoutId(
-                request.userId(),
-                nextOrder,
-                request.date(),
-                reservationTime,
-                theme
-        );
-
-        return waitingReservationRepository.save(waitingReservation);
-    }
-
-    @Override
-    public void deleteWaiting(final Long id) {
-        final WaitingReservation waitingReservation = waitingReservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(DomainTerm.RESERVATION_WAITING, id));
-
-        waitingReservationRepository.decrementWaitingOrderAfter(
-                waitingReservation.getDate(),
-                waitingReservation.getTime(),
-                waitingReservation.getTheme(),
-                waitingReservation.getWaitingOrder());
-        waitingReservationRepository.deleteById(id);
     }
 
     private boolean isExistsByParams(final ReservationDate date,

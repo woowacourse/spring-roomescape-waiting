@@ -12,6 +12,7 @@ import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationViewQueryService;
+import roomescape.reservation.application.service.WaitingReservationCommandService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.WaitingReservation;
@@ -32,6 +33,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
 
     private final ReservationQueryService reservationQueryService;
     private final ReservationCommandService reservationCommandService;
+    private final WaitingReservationCommandService waitingReservationCommandService;
     private final ReservationViewQueryService reservationViewQueryService;
     private final UserQueryService userQueryService;
 
@@ -109,14 +111,14 @@ public class ReservationFacadeImpl implements ReservationFacade {
             );
         }
 
-        final WaitingReservation waitingReservation = reservationCommandService.createWaitingReservation(
-                serviceRequest);
+        final WaitingReservation waitingReservation
+                = waitingReservationCommandService.create(serviceRequest);
 
         return WaitingReservationResponse.from(waitingReservation, user);
     }
 
     @Override
     public void deleteWaiting(final Long id) {
-        reservationCommandService.deleteWaiting(id);
+        waitingReservationCommandService.delete(id);
     }
 }
