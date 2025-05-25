@@ -18,10 +18,12 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.infrastructure.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -33,6 +35,9 @@ public class AdminApiTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
@@ -123,5 +128,33 @@ public class AdminApiTest {
                 .when().post("/api/admin/reservations")
                 .then().log().all()
                 .statusCode(403);
+    }
+
+    @Test
+    void 예약대기_전체_조회() {
+        Member admin = memberRepository.save(
+                new Member(null, "admin", "admin@domain.com", "admin", Role.ADMIN)
+        );
+        Member member = memberRepository.save(
+                new Member(null, "member1", "member1@domain.com", "password1", Role.MEMBER)
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("name", "desc", "thumb"));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.createWithoutId(LocalTime.of(9, 0)));
+
+        waitingRepository.save(Waiting.createWithoutId(
+                member, LocalDate.of(2025, 1, 1), reservationTime, theme
+        ));
+        waitingRepository.save(Waiting.createWithoutId(
+                member, LocalDate.of(2025, 1, 2), reservationTime, theme
+        ));
+        String token = tokenProvider.createToken(admin.getId().toString(), admin.getRole());
+
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("api/admin/waitings?memberId=2&themeId=1&dateFrom=2025-01-01&dateTo=2025-01-02")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2));
     }
 }

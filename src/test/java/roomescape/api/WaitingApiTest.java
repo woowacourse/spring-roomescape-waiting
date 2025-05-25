@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.Role;
 import roomescape.domain.Member;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -28,7 +27,7 @@ import roomescape.infrastructure.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationApiTest {
+public class WaitingApiTest {
 
     @Autowired
     private MemberRepository memberRepository;
@@ -49,23 +48,24 @@ public class ReservationApiTest {
     private JwtTokenProvider tokenProvider;
 
     @Test
-    void 사용자가_예약을_추가한다() {
+    void 사용자가_예약대기를_추가한다() {
         Member savedMember = memberRepository.save(
                 new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER)
         );
+
         String token = tokenProvider.createToken(savedMember.getId().toString(), savedMember.getRole());
         ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", "2026-08-05");
-        reservation.put("timeId", time.getId());
-        reservation.put("themeId", theme.getId());
+        Map<String, Object> waiting = new HashMap<>();
+        waiting.put("date", "2026-08-05");
+        waiting.put("timeId", time.getId());
+        waiting.put("themeId", theme.getId());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservation)
+                .body(waiting)
                 .cookie("token", token)
-                .when().post("/api/reservations")
+                .when().post("/api/waiting")
                 .then().log().all()
                 .statusCode(201)
                 .body("date", equalTo("2026-08-05"))
@@ -73,48 +73,48 @@ public class ReservationApiTest {
     }
 
     @Test
-    void 예약을_삭제한다() {
+    void 예약대기를_삭제한다() {
         // given
         Member member = memberRepository.save(
                 new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER)
         );
         ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
-        Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
+        Waiting waiting = waitingRepository.save(
+                Waiting.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
         // when & then
         RestAssured.given().log().all()
-                .when().delete("/api/reservations/{reservationId}", reservation.getId())
+                .when().delete("/api/waiting/{waitingId}", waiting.getId())
                 .then().log().all()
                 .statusCode(204);
 
-        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
+        assertThat(reservationRepository.findById(waiting.getId())).isEmpty();
     }
 
     @Test
-    void 예약을_삭제했을_때_1번_예약대기가_예약이_된다() {
+    void 중복_예약대기는_불가능하다() {
         // given
-        Member member = memberRepository.save(
+        Member savedMember = memberRepository.save(
                 new Member(null, "name1", "email1@domain.com", "password1", Role.MEMBER)
         );
-        Member ohterMember = memberRepository.save(
-                new Member(null, "name2", "email2@domain.com", "password2", Role.MEMBER)
-        );
-
         ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
         Theme theme = themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
-
-        Reservation reservation = reservationRepository.save(
-                Reservation.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
         waitingRepository.save(
-                Waiting.createWithoutId(ohterMember, LocalDate.of(2025, 1, 1), time, theme));
+                Waiting.createWithoutId(savedMember, LocalDate.of(2025, 1, 1), time, theme));
+
+        String token = tokenProvider.createToken(savedMember.getId().toString(), savedMember.getRole());
+        Map<String, Object> waiting = new HashMap<>();
+        waiting.put("date", "2025-01-01");
+        waiting.put("timeId", time.getId());
+        waiting.put("themeId", theme.getId());
 
         // when & then
         RestAssured.given().log().all()
-                .when().delete("/api/reservations/{reservationId}", reservation.getId())
+                .contentType(ContentType.JSON)
+                .body(waiting)
+                .cookie("token", token)
+                .when().post("/api/waiting")
                 .then().log().all()
-                .statusCode(204);
-
-        assertThat(reservationRepository.findAll()).hasSize(1);
+                .statusCode(400);
     }
 }
