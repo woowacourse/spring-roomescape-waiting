@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import roomescape.member.entity.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
 import roomescape.reservation.dto.response.WaitingCreateResponse;
+import roomescape.reservation.dto.response.WaitingReadResponse;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.entity.Waiting;
@@ -48,6 +50,13 @@ public class WaitingService {
         return WaitingCreateResponse.from(waiting);
     }
 
+    @Transactional(readOnly = true)
+    public List<WaitingReadResponse> getAllWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingReadResponse::from)
+                .toList();
+    }
+
     @Transactional
     public void deleteWaiting(Long memberId, Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId)
@@ -55,6 +64,11 @@ public class WaitingService {
 
         validateOwner(waiting, memberId);
 
+        waitingRepository.deleteById(waitingId);
+    }
+
+    @Transactional
+    public void deleteWaitingByAdmin(Long waitingId) {
         waitingRepository.deleteById(waitingId);
     }
 
