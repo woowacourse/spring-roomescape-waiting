@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.service.command;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -22,10 +22,9 @@ import roomescape.repository.JpaMemberRepository;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 import roomescape.repository.JpaThemeRepository;
-import roomescape.service.command.ReservationCommandService;
 import roomescape.service.dto.ReservationCreateDto;
 
-class ReservationQueryServiceTest {
+class ReservationCommandServiceTest {
 
     @Mock
     private JpaReservationRepository reservationRepository;
@@ -49,6 +48,7 @@ class ReservationQueryServiceTest {
 
     @Test
     void createReservation() {
+        //given
         ReservationCreateDto dto = new ReservationCreateDto(LocalDate.of(2025, 11, 11), 1, 1, 1);
 
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -65,8 +65,10 @@ class ReservationQueryServiceTest {
         when(reservationRepository.save(any(Reservation.class))).thenReturn(
                 savedReservation);
 
+        //when
         ReservationResponseDto createdReservation = reservationCommandService.bookReservation(dto);
 
+        //then
         assertThat(createdReservation.id()).isEqualTo(1L);
         assertThat(createdReservation.member().name()).isEqualTo("moda");
         assertThat(createdReservation.date()).isEqualTo(LocalDate.of(2025, 11, 11));

@@ -1,7 +1,6 @@
-package roomescape.service;
+package roomescape.service.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.Clock;
@@ -14,12 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import roomescape.domain.Theme;
-import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
-import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaThemeRepository;
-import roomescape.service.command.ThemeCommandService;
-import roomescape.service.query.ThemeQueryService;
 
 class ThemeQueryServiceTest {
 
@@ -27,34 +22,14 @@ class ThemeQueryServiceTest {
     private JpaThemeRepository themeRepository;
 
     @Mock
-    private JpaReservationRepository reservationRepository;
-
-    @Mock
     private Clock clock;
 
     @InjectMocks
     private ThemeQueryService themeQueryService;
 
-    @InjectMocks
-    private ThemeCommandService themeCommandService;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    void createTheme() {
-        ThemeCreateRequestDto requestDto = new ThemeCreateRequestDto("공포 테마", "무서운 배경 설명", "image-url");
-        Theme theme = requestDto.createWithoutId();
-        Theme savedTheme = new Theme(1L, theme.getName(), theme.getDescription(), theme.getThumbnail());
-
-        when(themeRepository.save(any(Theme.class))).thenReturn(savedTheme);
-        ThemeResponseDto response = themeCommandService.createTheme(requestDto);
-
-        assertEquals(savedTheme.getId(), response.id());
-        assertEquals(savedTheme.getName(), response.name());
-        assertEquals(savedTheme.getDescription(), response.description());
     }
 
     @Test
