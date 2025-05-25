@@ -3,6 +3,7 @@ package roomescape.infrastructure.db;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -31,7 +32,6 @@ class WaitingJpaRepositoryTest {
 
     @Autowired
     MemberJpaRepository memberJpaRepository;
-
 
     @Test
     @DisplayName("예약 날짜 테마 시각에 따라 가장 이른 웨이팅을 찾는다")
@@ -106,8 +106,6 @@ class WaitingJpaRepositoryTest {
         Theme theme = new Theme("테마", "설명", "썸네일");
         Theme savedTheme = themeJpaRepository.save(theme);
 
-        Theme anotherTheme = themeJpaRepository.save(new Theme("다른 테마", "설명", "썸네일"));
-
         Member member = new Member("도기", "email@gmail.com", "password", Role.ADMIN);
         Member savedMember = memberJpaRepository.save(member);
 
@@ -146,5 +144,57 @@ class WaitingJpaRepositoryTest {
 
         // then
         assertThat(actual).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("멤버의 id 를 통해 웨이팅을 찾는다")
+    void test3() {
+        // given
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(12, 30));
+        ReservationTime savedReservationTime = reservationTimeJpaRepository.save(reservationTime);
+
+        Theme theme = new Theme("테마", "설명", "썸네일");
+        Theme savedTheme = themeJpaRepository.save(theme);
+
+        Member member = new Member("도기", "email@gmail.com", "password", Role.ADMIN);
+        Member savedMember = memberJpaRepository.save(member);
+
+        Member anotherMember = new Member("다른 멤버", "anotherEmail@gmail.com", "password", Role.ADMIN);
+        Member savedAnotherMember = memberJpaRepository.save(anotherMember);
+
+        LocalDate reservationDate = LocalDate.now().plusDays(1);
+        Waiting targetWaiting = waitingJpaRepository.save(new Waiting(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(12, 30)),
+                        new Reservation(
+                                reservationDate,
+                                savedReservationTime,
+                                savedTheme,
+                                savedMember,
+                                LocalDate.now()
+                        )
+                )
+        );
+
+        Waiting anotherWaiting = waitingJpaRepository.save(new Waiting(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(13, 30)),
+                        new Reservation(
+                                reservationDate,
+                                savedReservationTime,
+                                savedTheme,
+                                savedAnotherMember,
+                                LocalDate.now()
+                        )
+                )
+        );
+
+        // when
+        List<Waiting> actual = waitingJpaRepository.findByReservation_MemberId(savedMember.getId());
+
+        // then
+        List<Long> ids = actual.stream()
+                .map(Waiting::getId)
+                .toList();
+
+        assertThat(ids).doesNotContain(anotherWaiting.getId());
     }
 }
