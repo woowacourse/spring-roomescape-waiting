@@ -17,3 +17,7 @@ INSERT INTO RESERVATION (user_id, date, time_slot_id, theme_id)
 VALUES (2, '2025-05-05', 1, 1),
        (2, '2025-05-06', 1, 1),
        (2, '2025-05-07', 1, 1);
+
+INSERT INTO WAITING (user_id, date, time_slot_id, theme_id)
+VALUES (1, '2025-05-05', 1, 1),
+       (3, '2025-05-05', 1, 1);

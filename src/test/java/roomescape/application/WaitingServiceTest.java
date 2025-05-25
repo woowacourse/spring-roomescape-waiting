@@ -1,164 +1,174 @@
 package roomescape.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.DomainFixtures.JUNK_THEME;
-import static roomescape.DomainFixtures.JUNK_TIME_SLOT;
-import static roomescape.DomainFixtures.JUNK_USER;
 
 import java.time.LocalDate;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.theme.ThemeRepository;
-import roomescape.domain.timeslot.TimeSlotRepository;
+import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
+import roomescape.domain.user.UserRole;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.NotFoundException;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class WaitingServiceTest {
 
+    @Autowired
     private WaitingService service;
 
     @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
     private WaitingRepository waitingRepository;
+
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private TimeSlotRepository timeSlotRepository;
-
-
-    @BeforeEach
-    void setUp() {
-        service = new WaitingService(reservationRepository, waitingRepository,
-                timeSlotRepository, themeRepository, userRepository);
-
-        userRepository.save(JUNK_USER);
-        themeRepository.save(JUNK_THEME);
-        timeSlotRepository.save(JUNK_TIME_SLOT);
-    }
-
 
     @Test
-    @DisplayName("예약 대기를 추가할 수 있다.")
+    @DisplayName("대기를 등록할 수 있다.")
     void saveWaiting() {
         // given
-        var tomorrow = LocalDate.now().plusDays(1);
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
+        var user = userRepository.findById(2L).orElseThrow();
+        var date = LocalDate.of(3000, 5, 8);
+        var timeSlotId = 1L;
+        var themeId = 1L;
 
         // when
-        Waiting reserved = service.saveWaiting(JUNK_USER, tomorrow, timeSlotId, themeId);
+        Waiting created = service.saveWaiting(user, date, timeSlotId, themeId);
 
         // then
         var waitings = waitingRepository.findAll();
-        assertThat(waitings).contains(reserved);
+        assertThat(waitings).contains(created);
     }
 
     @Test
-    @DisplayName("예약 대기를 삭제할 수 있다.")
-    void removeById() {
+    @DisplayName("이미 대기한 내역이 있는 경우 예외가 발생한다.")
+    void saveWaiting_WhenAlreadyExists() {
         // given
-        var tomorrow = LocalDate.now().plusDays(1);
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
-        Waiting reserved = service.saveWaiting(JUNK_USER, tomorrow, timeSlotId, themeId);
-
-        // when
-        service.removeById(reserved.id());
-
-        // then
-        var waitings = waitingRepository.findAll();
-        assertThat(waitings).doesNotContain(reserved);
-    }
-
-    @Test
-    @DisplayName("지나간 날짜와 시간에 대한 예약 대기 생성은 불가능하다.")
-    void cannotSaveWaitingPastDateTime() {
-        // given
-        var yesterday = LocalDate.now().minusDays(1);
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
+        var user = User.ofExisting(3L, "사용자3", UserRole.USER, "user3@email.com", "password3");
+        var date = LocalDate.of(2025, 5, 5);
+        var timeSlotId = 1L;
+        var themeId = 1L;
 
         // when & then
-        assertThatThrownBy(() -> service.saveWaiting(JUNK_USER, yesterday, timeSlotId, themeId))
-                .isInstanceOf(BusinessRuleViolationException.class);
+        assertThatThrownBy(() -> service.saveWaiting(user, date, timeSlotId, themeId))
+                .isInstanceOf(AlreadyExistedException.class)
+                .hasMessage("이미 예약 대기한 내역이 있습니다.");
     }
 
     @Test
-    @DisplayName("지나가지 않은 날짜와 시간에 대한 예약 대기 생성은 가능하다.")
-    void canSaveWaitingFutureDateTime() {
+    @DisplayName("이미 예약한 내역이 있는 경우 예외가 발생한다.")
+    void saveWaiting_WhenAlreadyReserved() {
         // given
-        var tomorrow = LocalDate.now().plusDays(1);
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
+        var user = userRepository.findById(2L).orElseThrow();
+        var date = LocalDate.of(2025, 5, 5);
+        var timeSlotId = 1L;
+        var themeId = 1L;
 
         // when & then
-        assertThatCode(() -> service.saveWaiting(JUNK_USER, tomorrow, timeSlotId, themeId))
-                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> service.saveWaiting(user, date, timeSlotId, themeId))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessage("해당 테마의 시간대에 이미 예약되어 있습니다.");
     }
 
     @Test
-    @DisplayName("이미 해당 날짜, 시간, 테마에 대한 예약이 존재하는 경우 예약 대기는 불가능하다.")
-    void cannotSaveWaitingWhenReservedAlreadyIdenticalDateTimeMultipleTimes() {
+    @DisplayName("존재하지 않는 시간대로 대기 등록 시 예외가 발생한다.")
+    void saveWaiting_WhenTimeSlotNotFound() {
         // given
-        var tomorrow = LocalDate.now().plusDays(1);
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
-        reservationRepository.save(Reservation.register(JUNK_USER, tomorrow, JUNK_TIME_SLOT, JUNK_THEME));
+        var user = userRepository.findById(2L).orElseThrow();
+        var date = LocalDate.of(2025, 5, 8);
+        var invalidTimeSlotId = 999L;
+        var themeId = 1L;
 
         // when & then
-        assertThatThrownBy(() -> service.saveWaiting(JUNK_USER, tomorrow, timeSlotId, themeId))
-                .isInstanceOf(BusinessRuleViolationException.class);
+        assertThatThrownBy(() -> service.saveWaiting(user, date, invalidTimeSlotId, themeId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 타임 슬롯입니다.");
     }
 
     @Test
-    @DisplayName("동일한 날짜, 시간, 테마에 대하여 중복 예약 대기 신청은 불가능하다.")
-    void cannotSaveWaitingIdenticalDateTimeMultipleTimes() {
+    @DisplayName("존재하지 않는 테마로 대기 등록 시 예외가 발생한다.")
+    void saveWaiting_WhenThemeNotFound() {
         // given
-        var user = JUNK_USER;
-        var tomorrow = LocalDate.now().plusDays(1);
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
+        var user = userRepository.findById(2L).orElseThrow();
+        var date = LocalDate.of(2025, 5, 8);
+        var timeSlotId = 1L;
+        var invalidThemeId = 999L;
 
-        // when
-        service.saveWaiting(user, tomorrow, timeSlotId, themeId);
-
-        // then
-        assertThatThrownBy(() -> service.saveWaiting(user, tomorrow, timeSlotId, themeId))
-                .isInstanceOf(AlreadyExistedException.class);
+        // when & then
+        assertThatThrownBy(() -> service.saveWaiting(user, date, timeSlotId, invalidThemeId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 테마입니다.");
     }
 
-
     @Test
-    @DisplayName("사용자의 예약 대기를 조회할 수 있다.")
-    void findReservationsByUserId() {
-        // given
-        var tomorrow = LocalDate.now().plusDays(1);
-        var timeSlotId = JUNK_TIME_SLOT.id();
-        var themeId = JUNK_THEME.id();
-        Waiting savedWaiting = service.saveWaiting(JUNK_USER, tomorrow, timeSlotId, themeId);
-
+    @DisplayName("모든 대기를 조회할 수 있다.")
+    void findAllWaitings() {
         // when
         var waitings = service.findAllWaitings();
 
         // then
-        assertThat(waitings).contains(savedWaiting);
+        assertThat(waitings).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("사용자의 대기를 조회할 수 있다.")
+    void findWaitingByUserId() {
+        // given
+        var userId = 3L;
+
+        // when
+        var waitings = service.findWaitingByUserId(userId);
+
+        // then
+        assertThat(waitings).hasSize(1);
+        assertThat(waitings.getFirst().waiting().user().id()).isEqualTo(userId);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자의 대기 조회 시 예외가 발생한다.")
+    void findWaitingByUserId_WhenUserNotFound() {
+        // given
+        var invalidUserId = 1000000L;
+
+        // when & then
+        assertThatThrownBy(() -> service.findWaitingByUserId(invalidUserId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 사용자입니다. id : " + invalidUserId);
+    }
+
+    @Test
+    @DisplayName("대기를 삭제할 수 있다.")
+    void removeById() {
+        // given
+        var waitingId = 1L;
+
+        // when
+        service.removeById(waitingId);
+
+        // then
+        var waitings = service.findAllWaitings();
+        assertThat(waitings).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 대기 삭제 시 예외가 발생한다.")
+    void removeById_WhenWaitingNotFound() {
+        // given
+        var invalidWaitingId = 999L;
+
+        // when & then
+        assertThatThrownBy(() -> service.removeById(invalidWaitingId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 예약 대기입니다.");
     }
 }
