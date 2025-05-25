@@ -8,13 +8,12 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.application.dto.ReservationIdWithSequenceResponse;
 import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
 import roomescape.reservation.application.dto.SlotSequenceResponse;
-import roomescape.reservation.application.dto.ThemeToBookCountResponse;
-import roomescape.reservation.domain.BookedCount;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.ReservationSlot;
+import roomescape.theme.domain.Theme;
 import roomescape.user.domain.UserId;
 
 import java.util.List;
@@ -74,13 +73,10 @@ public class ReservationQueryService {
                 .toList();
     }
 
-    public List<ThemeToBookCountResponse> getRanking(final ReservationDate startDate,
-                                                     final ReservationDate endDate,
-                                                     final int bookCount) {
+    public List<Theme> getRanking(final ReservationDate startDate,
+                                  final ReservationDate endDate,
+                                  final int N) {
 
-        return reservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, bookCount)
-                .entrySet().stream()
-                .map(entry -> new ThemeToBookCountResponse(entry.getKey(), BookedCount.from(entry.getValue())))
-                .toList();
+        return reservationRepository.findTopNThemesToBookedCountByParamsOrderByBookedCountDesc(startDate, endDate, N);
     }
 }

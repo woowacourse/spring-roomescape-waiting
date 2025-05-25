@@ -41,8 +41,6 @@ public class ThemeQueryService {
     }
 
     public List<Theme> getRanking(final ReservationDate startDate, final ReservationDate endDate, final int count) {
-        return reservationQueryService.getRanking(startDate, endDate, count).stream()
-                .map(ThemeToBookCountResponse::theme)
-                .toList();
+        return reservationQueryService.getRanking(startDate, endDate, count);
     }
 }

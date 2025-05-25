@@ -1,5 +1,7 @@
 package roomescape.reservation.infrastructure;
 
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +18,14 @@ import roomescape.theme.domain.ThemeId;
 import roomescape.user.domain.UserId;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
 
-    private final JdbcTemplateReservationRepository jdbcTemplateReservationRepository;
     private final JpaReservationRepository jpaReservationRepository;
     private final JPAQueryFactory queryFactory;
 
@@ -74,13 +75,53 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public Map<Theme, Integer> findThemesToBookedCountByParamsOrderByBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
-        return jdbcTemplateReservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, count);
+    public List<Theme> findTopNThemesToBookedCountByParamsOrderByBookedCountDesc(final ReservationDate startDate,
+                                                                                 final ReservationDate endDate,
+                                                                                 final int N) {
+        final List<Tuple> fetch = queryFactory
+                .select(reservation.theme, reservation.id.count())
+                .from(reservation)
+                .where(
+                        reservation.date.value.between(
+                                startDate.getValue(),
+                                endDate.getValue()
+                        )
+                )
+                .groupBy(reservation.theme)
+                .orderBy(reservation.id.count().desc())
+                .limit(N)
+                .fetch();
+
+        return fetch.stream()
+                .map(tuple -> tuple.get(reservation.theme))
+                .toList();
     }
 
     @Override
-    public List<Reservation> findAllByParams(final UserId userId, final ThemeId themeId, final ReservationDate from, final ReservationDate to) {
-        return jdbcTemplateReservationRepository.findAllByParams(userId, themeId, from, to);
+    public List<Reservation> findAllByParams(final UserId userId,
+                                             final ThemeId themeId,
+                                             final ReservationDate from,
+                                             final ReservationDate to) {
+
+        final List<Predicate> predicates = new ArrayList<>();
+        if (userId != null) {
+            predicates.add(reservation.userId.eq(userId));
+        }
+        if (themeId != null) {
+            predicates.add(reservation.theme.id.eq(themeId.getValue()));
+        }
+        if (from != null){
+            predicates.add(reservation.date.value.goe(from.getValue()));
+        }
+        if (to != null){
+            predicates.add(reservation.date.value.loe(to.getValue()));
+        }
+
+        return queryFactory.selectFrom(reservation)
+                .where(
+                        predicates.toArray(new Predicate[0])
+                )
+                .fetch();
     }
 
     @Override

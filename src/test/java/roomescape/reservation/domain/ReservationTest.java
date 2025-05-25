@@ -42,7 +42,6 @@ class ReservationTest {
                 ThemeName.from("테마 이름"),
                 ThemeDescription.from("테마 설명"),
                 ThemeThumbnail.from("https://example.com/image.jpg"));
-        final ReservationId id = ReservationId.from(1L);
 
         // when
         // then
