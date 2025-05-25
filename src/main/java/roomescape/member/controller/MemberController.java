@@ -3,6 +3,7 @@ package roomescape.member.controller;
 import java.util.List;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +42,19 @@ public class MemberController {
     @GetMapping("/login/check")
     public ResponseEntity<LoginMemberCheckResponse> getLoginMember(LoginMemberInfo loginMemberInfo) {
         return ResponseEntity.ok().body(new LoginMemberCheckResponse(loginMemberInfo.name()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> getLoginMember(@CookieValue(value = "token", required = false) String token) {
+        if (token == null) {
+            return ResponseEntity.noContent().build();
+        }
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .maxAge(0)
+                .build();
+        return ResponseEntity.ok()
+                .header("Set-Cookie", cookie.toString())
+                .build();
     }
 
     @GetMapping("/members")
