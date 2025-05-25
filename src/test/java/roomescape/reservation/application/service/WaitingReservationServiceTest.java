@@ -24,6 +24,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.exception.NotReservationOwnerException;
 import roomescape.reservation.application.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.application.exception.UnexpectedReservationStatusException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
@@ -187,6 +188,30 @@ public class WaitingReservationServiceTest {
 
         // then
         assertThat(waitingReservations.size()).isEqualTo(3);
+    }
+
+
+    @DisplayName("대기를 거절하려는 예약의 id가 대기 상태가 아닐 경우, 예외가 발생한다.")
+    @Test
+    void denyWaitingReservationTest_notWaitingReservation() {
+        // given
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(1);
+        long timeId = 2L;
+        long themeId = 2L;
+        long memberId = 2L;
+        long reservationId = 99L;
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "SF 테마", "미래", "url");
+        Member member = new Member(memberId, "관리자", "email@email.com", "pw", Role.USER);
+        Reservation reservation = new Reservation(reservationId, date, time, theme, member, ReservationStatus.CONFIRMED,
+                SystemLocalDateTime.now());
+
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+        // when
+        assertThatThrownBy(() -> waitingReservationService.denyWaitingReservation(reservationId))
+                .isInstanceOf(UnexpectedReservationStatusException.class);
     }
 
     @DisplayName("관리자가 회원의 대기를 거절할 수 있다.")

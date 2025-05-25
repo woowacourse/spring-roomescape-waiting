@@ -11,6 +11,7 @@ import roomescape.reservation.application.exception.ReservationAlreadyExistsExce
 import roomescape.reservation.application.exception.ReservationNotFoundException;
 import roomescape.reservation.application.exception.ReservationTimeNotFoundException;
 import roomescape.reservation.application.exception.ThemeNotFoundException;
+import roomescape.reservation.application.exception.UnexpectedReservationStatusException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
@@ -51,8 +52,10 @@ public class WaitingReservationService {
     }
 
     @Transactional
-    public void denyWaitingReservation(Long id) {
-        Reservation targetReservation = getReservation(id);
+    public void denyWaitingReservation(Long reservationId) {
+        Reservation targetReservation = getReservation(reservationId);
+
+        validateStatusIsWaiting(targetReservation);
 
         reservationRepository.delete(targetReservation);
     }
@@ -65,6 +68,8 @@ public class WaitingReservationService {
         if (!targetReservation.getMember().equals(member)) {
             throw new NotReservationOwnerException("예약의 주인이 아닙니다.");
         }
+
+        validateStatusIsWaiting(targetReservation);
 
         reservationRepository.delete(targetReservation);
     }
@@ -92,6 +97,12 @@ public class WaitingReservationService {
                                                Theme theme, Member member) {
         if (reservationRepository.alreadyExists(adminReservationRequest, reservationTime, theme, member)) {
             throw new ReservationAlreadyExistsException();
+        }
+    }
+
+    private void validateStatusIsWaiting(Reservation targetReservation) {
+        if (!targetReservation.isWaiting()) {
+            throw new UnexpectedReservationStatusException(ReservationStatus.WAITING);
         }
     }
 

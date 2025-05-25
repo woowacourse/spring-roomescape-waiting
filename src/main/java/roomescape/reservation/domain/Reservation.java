@@ -14,10 +14,12 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.hibernate.annotations.DynamicUpdate;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.exception.ReservationFieldRequiredException;
 
 @Entity
+@DynamicUpdate
 @Table(name = "reservation")
 public class Reservation {
 
@@ -62,6 +64,14 @@ public class Reservation {
     public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, ReservationStatus status,
                        LocalDateTime createdAt) {
         this(null, date, time, theme, member, status, createdAt);
+    }
+
+    public boolean isWaiting() {
+        return status.isWaiting();
+    }
+
+    public boolean isConfirmed() {
+        return status.isConfirmed();
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -138,5 +148,9 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void updateStatus(ReservationStatus status) {
+        this.status = status;
     }
 }
