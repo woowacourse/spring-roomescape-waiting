@@ -16,10 +16,7 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 
 @CustomJpaTest
-class ReservationStatusRepositoryTest {
-
-    @Autowired
-    private ReservationStatusRepository reservationStatusRepository;
+class ReservationRepositoryTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -44,7 +41,7 @@ class ReservationStatusRepositoryTest {
         Reservation waiting1 = reservationRepository.save(Reservation.waiting(유저1, 내일_열시, 공포));
         Reservation waiting2 = reservationRepository.save(Reservation.waiting(유저2, 내일_열시, 공포));
 
-        List<Reservation> result = reservationStatusRepository.findByStatus(ReservationStatus.WAITING);
+        List<Reservation> result = reservationRepository.findByStatus(ReservationStatus.WAITING);
 
         // then
         SoftAssertions.assertSoftly(softly -> {
@@ -67,13 +64,13 @@ class ReservationStatusRepositoryTest {
         reservationRepository.save(Reservation.waiting(유저1, 내일_열시, 공포));
 
         // when
-        boolean 존재함 = reservationStatusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
+        boolean 존재함 = reservationRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
                 유저1.getId(),
                 내일_열시.getDate(),
                 내일_열시.getReservationTime().getId(),
                 ReservationStatus.WAITING
         );
-        boolean 존재하지않음 = reservationStatusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
+        boolean 존재하지않음 = reservationRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
                 유저1.getId(),
                 내일_열시.getDate().plusDays(1),
                 내일_열시.getReservationTime().getId(),
@@ -96,13 +93,13 @@ class ReservationStatusRepositoryTest {
 
         reservationRepository.save(Reservation.waiting(유저1, 내일_열시, 공포));
         // when
-        boolean 존재함 = reservationStatusRepository.existsByDateAndTimeIdAndStatus(
+        boolean 존재함 = reservationRepository.existsByDateAndTimeIdAndStatus(
                 내일_열시.getDate(),
                 내일_열시.getReservationTime().getId(),
                 ReservationStatus.WAITING
         );
 
-        boolean 존재하지않음 = reservationStatusRepository.existsByDateAndTimeIdAndStatus(
+        boolean 존재하지않음 = reservationRepository.existsByDateAndTimeIdAndStatus(
                 내일_열시.getDate().plusDays(1),
                 내일_열시.getReservationTime().getId(),
                 ReservationStatus.WAITING
@@ -137,7 +134,7 @@ class ReservationStatusRepositoryTest {
         reservationRepository.save(waiting3);
 
         // when
-        Reservation firstWaiting = reservationStatusRepository
+        Reservation firstWaiting = reservationRepository
                 .findByDateAndTimeIdAndStatus(date, timeId, ReservationStatus.WAITING)
                 .getFirst();
 

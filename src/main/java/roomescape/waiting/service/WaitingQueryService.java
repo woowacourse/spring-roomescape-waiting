@@ -13,7 +13,7 @@ import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationWithRank;
-import roomescape.reservation.repository.ReservationStatusRepository;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.waiting.controller.response.WaitingInfoResponse;
 
 @Service
@@ -22,15 +22,15 @@ import roomescape.waiting.controller.response.WaitingInfoResponse;
 public class WaitingQueryService {
 
     private static final ReservationStatus WAITING = ReservationStatus.WAITING;
-    private final ReservationStatusRepository statusRepository;
+    private final ReservationRepository reservationRepository;
 
     public Page<WaitingInfoResponse> getAllInfo(Pageable pageable) {
-        return statusRepository.findByStatus(WAITING, pageable)
+        return reservationRepository.findByStatus(WAITING, pageable)
                 .map(WaitingInfoResponse::from);
     }
 
     public List<MyReservationResponse> getMyWaitingReservations(Long memberId) {
-        List<Reservation> myWaitings = statusRepository.findByMemberIdAndStatus(memberId, WAITING);
+        List<Reservation> myWaitings = reservationRepository.findByMemberIdAndStatus(memberId, WAITING);
 
         List<ReservationWithRank> responses = myWaitings.stream()
                 .map(this::calculateRankForReservation)
@@ -42,7 +42,7 @@ public class WaitingQueryService {
     }
 
     private ReservationWithRank calculateRankForReservation(Reservation myWaiting) {
-        List<Reservation> waitings = statusRepository.findByDateAndTimeIdAndStatus(
+        List<Reservation> waitings = reservationRepository.findByDateAndTimeIdAndStatus(
                 myWaiting.getDate(), myWaiting.getTimeId(), WAITING);
 
         waitings.sort(Comparator.comparingLong(Reservation::getId));
@@ -58,19 +58,19 @@ public class WaitingQueryService {
     }
 
     public Reservation getWaiting(Long id) {
-        return statusRepository.findByIdAndStatus(id, ReservationStatus.WAITING)
+        return reservationRepository.findByIdAndStatus(id, ReservationStatus.WAITING)
                 .orElseThrow(() -> new NotFoundException("예약 대기를 찾을 수 없습니다."));
     }
 
     public Reservation getFirstByDateAndTimeId(LocalDate date, Long timeId) {
-        return statusRepository.findByDateAndTimeIdAndStatus(date, timeId, WAITING).getFirst();
+        return reservationRepository.findByDateAndTimeIdAndStatus(date, timeId, WAITING).getFirst();
     }
 
     public boolean existWaiting(Long userId, LocalDate date, Long timeId) {
-        return statusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(userId, date, timeId, WAITING);
+        return reservationRepository.existsByMemberIdAndDateAndTimeIdAndStatus(userId, date, timeId, WAITING);
     }
 
     public boolean existsByDateAndTimeId(LocalDate date, Long timeId) {
-        return statusRepository.existsByDateAndTimeIdAndStatus(date, timeId, WAITING);
+        return reservationRepository.existsByDateAndTimeIdAndStatus(date, timeId, WAITING);
     }
 }

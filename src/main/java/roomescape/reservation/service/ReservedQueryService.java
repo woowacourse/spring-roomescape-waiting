@@ -12,7 +12,7 @@ import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.repository.ReservationStatusRepository;
+import roomescape.reservation.repository.ReservationRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,7 +21,7 @@ public class ReservedQueryService {
 
     private static final ReservationStatus RESERVED = ReservationStatus.RESERVED;
 
-    private final ReservationStatusRepository statusRepository;
+    private final ReservationRepository reservationRepository;
 
     public Page<ReservationResponse> getFilteredReserved(Long themeId, Long memberId, LocalDate from,
                                                          LocalDate to, Pageable pageable) {
@@ -29,34 +29,34 @@ public class ReservedQueryService {
             return getAllReserved(pageable);
         }
 
-        Page<Reservation> reservations = statusRepository.findFilteredReservations(
+        Page<Reservation> reservations = reservationRepository.findFilteredReservations(
                 themeId, memberId, from, to, RESERVED, pageable);
 
         return reservations.map(ReservationResponse::from);
     }
 
     public Reservation getReserved(Long id) {
-        return statusRepository.findByIdAndStatus(id, RESERVED)
+        return reservationRepository.findByIdAndStatus(id, RESERVED)
                 .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
     }
 
     private Page<ReservationResponse> getAllReserved(Pageable pageable) {
-        Page<Reservation> reservations = statusRepository.findByStatus(RESERVED, pageable);
+        Page<Reservation> reservations = reservationRepository.findByStatus(RESERVED, pageable);
 
         return reservations.map(ReservationResponse::from);
     }
 
     public List<MyReservationResponse> getReservations(Long memberId) {
-        List<Reservation> reservations = statusRepository.findByMemberIdAndStatus(memberId, RESERVED);
+        List<Reservation> reservations = reservationRepository.findByMemberIdAndStatus(memberId, RESERVED);
 
         return MyReservationResponse.from(reservations);
     }
 
     public boolean existsReserved(Long memberId, LocalDate date, Long timeId) {
-        return statusRepository.existsByMemberIdAndDateAndTimeIdAndStatus(memberId, date, timeId, RESERVED);
+        return reservationRepository.existsByMemberIdAndDateAndTimeIdAndStatus(memberId, date, timeId, RESERVED);
     }
 
     public boolean notExistsReserved(LocalDate date, Long timeId) {
-        return !statusRepository.existsByDateAndTimeIdAndStatus(date, timeId, RESERVED);
+        return !reservationRepository.existsByDateAndTimeIdAndStatus(date, timeId, RESERVED);
     }
 }
