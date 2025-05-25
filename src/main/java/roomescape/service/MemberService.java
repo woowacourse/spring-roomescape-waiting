@@ -1,8 +1,8 @@
 package roomescape.service;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.NoSuchElementException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRepository;
@@ -10,15 +10,14 @@ import roomescape.domain.MemberRole;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
+import roomescape.global.PasswordEncoder;
 
+@RequiredArgsConstructor
 @Service
 public class MemberService {
 
     private final MemberRepository memberRepository;
-
-    public MemberService(final MemberRepository memberRepository) {
-        this.memberRepository = memberRepository;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     public MemberRegisterResponse addMember(final MemberRegisterRequest request) {
         validateDuplicateEmail(request.email());
@@ -26,7 +25,7 @@ public class MemberService {
         final Member newMember = Member.builder()
                 .email(request.email())
                 .name(request.name())
-                .password(encode(request.password()))
+                .password(passwordEncoder.encode(request.password()))
                 .role(MemberRole.USER)
                 .build();
         return MemberRegisterResponse.from(memberRepository.save(newMember));
@@ -58,8 +57,5 @@ public class MemberService {
         if (memberRepository.existByName(name)) {
             throw new IllegalArgumentException("[ERROR] 이미 존재하는 이름 입니다.");
         }
-    }
-    private String encode(final String rawPassword) {
-        return Base64.getEncoder().encodeToString(rawPassword.getBytes());
     }
 }

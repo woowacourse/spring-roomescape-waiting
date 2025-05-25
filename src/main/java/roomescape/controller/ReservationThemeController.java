@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,15 +15,12 @@ import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.service.ReservationThemeService;
 
-@RestController
+@RequiredArgsConstructor
 @RequestMapping("/themes")
+@RestController
 public class ReservationThemeController {
 
     private final ReservationThemeService reservationThemeService;
-
-    public ReservationThemeController(final ReservationThemeService reservationThemeService) {
-        this.reservationThemeService = reservationThemeService;
-    }
 
     @GetMapping()
     public ResponseEntity<List<ReservationThemeResponse>> reservationThemeList() {

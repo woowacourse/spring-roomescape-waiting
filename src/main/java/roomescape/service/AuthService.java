@@ -1,21 +1,22 @@
 package roomescape.service;
 
-import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequest;
+import roomescape.global.PasswordEncoder;
 
 @RequiredArgsConstructor
 @Service
 public class AuthService {
 
     private final MemberService memberService;
+    private final PasswordEncoder passwordEncoder;
 
     public Long authenticate(final LoginRequest loginRequest) {
         final Member member = memberService.getMemberByEmail(loginRequest.email());
 
-        if (!matches(loginRequest.password(), member.getPassword())) {
+        if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
             throw new IllegalArgumentException("[ERROR] 비밀번호가 일치 하지않습니다.");
         }
         return member.getId();
@@ -26,13 +27,4 @@ public class AuthService {
 
         member.updateSessionId(sessionId);
     }
-
-    private String encode(final String rawPassword) {
-        return Base64.getEncoder().encodeToString(rawPassword.getBytes());
-    }
-
-    private boolean matches(final String rawPassword, final String encodedPassword) {
-        return encode(rawPassword).equals(encodedPassword);
-    }
-
 }

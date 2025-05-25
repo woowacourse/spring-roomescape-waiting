@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTheme;
@@ -10,15 +11,15 @@ import roomescape.domain.ReservationThemeRepository;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
 
+@RequiredArgsConstructor
 @Service
 public class ReservationThemeService {
 
-    private final ReservationThemeRepository reservationThemeRepository;
+    public static final int POPULAR_THEME_AMOUNT = 10;
+    public static final int POPULAR_THEME_DATE_FROM = 7;
+    public static final int POPULAR_THEME_DATE_TO = 1;
 
-    public ReservationThemeService(
-            final ReservationThemeRepository reservationThemeRepository) {
-        this.reservationThemeRepository = reservationThemeRepository;
-    }
+    private final ReservationThemeRepository reservationThemeRepository;
 
     public List<ReservationThemeResponse> findReservationThemes() {
         List<ReservationTheme> reservationThemes = reservationThemeRepository.findAll();
@@ -27,9 +28,9 @@ public class ReservationThemeService {
 
     public List<ReservationThemeResponse> findPopularThemes() {
         List<ReservationTheme> popularReservationThemes = reservationThemeRepository.findWeeklyThemeOrderByCountDesc(
-                10,
-                LocalDate.now().minusDays(7),
-                LocalDate.now().minusDays(1)
+                POPULAR_THEME_AMOUNT,
+                LocalDate.now().minusDays(POPULAR_THEME_DATE_FROM),
+                LocalDate.now().minusDays(POPULAR_THEME_DATE_TO)
         );
         return popularReservationThemes.stream().map(ReservationThemeResponse::from).toList();
     }

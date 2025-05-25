@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,7 @@ import roomescape.dto.response.LoginResponse;
 import roomescape.service.AuthService;
 import roomescape.service.MemberService;
 
+@RequiredArgsConstructor
 @Controller
 public class LoginController {
 
@@ -21,11 +23,6 @@ public class LoginController {
 
     private final AuthService authService;
     private final MemberService memberService;
-
-    public LoginController(final AuthService authService, final MemberService memberService) {
-        this.authService = authService;
-        this.memberService = memberService;
-    }
 
     @GetMapping("/login")
     public String loginPage() {

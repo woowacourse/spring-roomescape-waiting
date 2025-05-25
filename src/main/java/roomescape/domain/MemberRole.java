@@ -1,33 +1,20 @@
 package roomescape.domain;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.List;
 
 public enum MemberRole {
 
-    USER("USER"),
-    ADMIN("ADMIN"),
-    NONE("NONE");
+    USER(List.of("ROLE_USER")),
+    ADMIN(List.of("ROLE_ADMIN", "ROLE_USER")),
+    NONE(List.of("ROLE_NONE"));
 
-    private final String name;
+    public final List<String> name;
 
-    MemberRole(final String name) {
+    MemberRole(final List<String> name) {
         this.name = name;
     }
 
-    public static MemberRole fromName(final String name) {
-        return Arrays.stream(MemberRole.values())
-                .filter(role -> Objects.equals(role.name, name))
-                .findAny()
-                .orElse(MemberRole.NONE);
-    }
-
     public boolean isAdmin() {
-        return this == MemberRole.ADMIN;
-    }
-
-    public String getName() {
-
-        return name;
+        return this.name.contains("ROLE_ADMIN");
     }
 }

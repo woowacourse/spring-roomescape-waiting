@@ -18,6 +18,7 @@ import roomescape.domain.MemberRepository;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
+import roomescape.global.PasswordEncoder;
 import roomescape.repository.impl.MemberRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
 
@@ -38,9 +39,10 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
-        memberService = new MemberService(memberRepository);
-        authService = new AuthService(memberService);
+        final MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
+        final PasswordEncoder passwordEncoder = new PasswordEncoder();
+        memberService = new MemberService(memberRepository, passwordEncoder);
+        authService = new AuthService(memberService, passwordEncoder);
     }
 
     @Test

@@ -1,12 +1,13 @@
 package roomescape.controller;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
@@ -14,21 +15,12 @@ import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.service.MemberService;
 import roomescape.service.ReservationService;
 
-@Controller
+@RequiredArgsConstructor
+@RestController
 public class MemberController {
 
     private final MemberService memberService;
     private final ReservationService reservationService;
-
-    public MemberController(final MemberService memberService, ReservationService reservationService) {
-        this.memberService = memberService;
-        this.reservationService = reservationService;
-    }
-
-    @GetMapping("/signup")
-    public String signUpPage() {
-        return "signup";
-    }
 
     @PostMapping("/members")
     public ResponseEntity<MemberRegisterResponse> registerMember(@RequestBody final MemberRegisterRequest request) {

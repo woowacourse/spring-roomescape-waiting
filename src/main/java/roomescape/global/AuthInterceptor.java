@@ -10,7 +10,6 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.service.MemberService;
 
-
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 

@@ -25,9 +25,6 @@ public class ReservationItemService {
     }
 
     private ReservationItem addReservationItem(LocalDate date, ReservationTime reservationTime, ReservationTheme theme) {
-        if (isExistReservationItem(date, reservationTime, theme)) {
-            throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약입니다.");
-        }
         return reservationItemRepository.save(
                 ReservationItem.builder()
                         .date(date)

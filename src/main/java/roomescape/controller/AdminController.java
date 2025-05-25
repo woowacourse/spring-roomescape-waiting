@@ -3,6 +3,7 @@ package roomescape.controller;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,14 +15,11 @@ import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
+@RequiredArgsConstructor
 @RestController
 public class AdminController {
 
     private final ReservationService reservationService;
-
-    public AdminController(final ReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid final CreateReservationRequest request) {
