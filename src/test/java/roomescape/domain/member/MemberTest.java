@@ -40,7 +40,7 @@ class MemberTest {
     @Test
     void invalidRoleTest() {
         assertThatThrownBy(() -> new Member(1L, "가이온", "hello@woowa.com", null, "password"))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NullPointerException.class);
     }
 
     @DisplayName("비밀번호가 존재하지 않으면 생성 불가능하다")

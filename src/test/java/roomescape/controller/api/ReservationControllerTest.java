@@ -36,7 +36,7 @@ class ReservationControllerTest {
     @BeforeEach
     void setUp() {
         loginToken = jwtTokenProvider.createToken(
-                new Member(1L, "가이온", "hello@woowa.com", Role.USER, "password"));
+                new Member(1L, "가이온", "hello@woowa.com", Role.ADMIN, "password"));
     }
 
     @Nested
@@ -47,6 +47,7 @@ class ReservationControllerTest {
         @Test
         void reservationTest() {
             RestAssured.given().log().all()
+                    .cookie("token", loginToken)
                     .when().get("/reservations")
                     .then().log().all()
                     .statusCode(200)

@@ -13,15 +13,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
-import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.util.JwtTokenProvider;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -29,24 +29,22 @@ import static org.hamcrest.Matchers.is;
 @Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationTimeControllerTest {
 
-//    @Autowired
-//    private JpaReservationTimeRepository jpaReservationTimeRepository;
-//
-//    @BeforeEach
-//    void setUp() {
-//        jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-//    }
+    String loginToken;
 
-    //todo 아래와 같은 상황에서 0개로 뜸
-    /**
-     * @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-     * @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHO)
-     * @Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
-     */
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    @BeforeEach
+    void setUp() {
+        loginToken = jwtTokenProvider.createToken(
+                new Member(1L, "가이온", "hello@woowa.com", Role.ADMIN, "password"));
+    }
+
     @DisplayName("목록 내용 갯수를 검사한다")
     @Test
     void timesTest() {
         RestAssured.given().log().all()
+                .cookie("token", loginToken)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
@@ -57,11 +55,6 @@ class ReservationTimeControllerTest {
     @DisplayName("예약시간 생성")
     class ReservationTimePostTest {
 
-//        @BeforeEach
-//        void setUp() {
-//            jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
-//        }
-
         @DisplayName("Time 입력 테스트")
         @Test
         void addReservationTimeTest() {
@@ -69,6 +62,7 @@ class ReservationTimeControllerTest {
             ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
 
             RestAssured.given().log().all()
+                    .cookie("token", loginToken)
                     .contentType(ContentType.JSON)
                     .body(requestTime)
                     .when().post("/times")

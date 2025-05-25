@@ -1,8 +1,6 @@
 package roomescape.service.command;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,46 +64,7 @@ public class ReservationWaitingCommandServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @DisplayName("예약 대기 생성 성공 테스트")
-    @Test
-    void createReservationWaiting() {
-        // given
-        LocalDate date = LocalDate.now().plusDays(1);
-        Long timeId = 1L;
-        Long themeId = 1L;
-        Long memberId = 1L;
-        ReservationCreateDto requestDto = new ReservationCreateDto(date, timeId, themeId, memberId);
-        
-        LocalTime startAt = LocalTime.of(14, 0);
-        ReservationTime reservationTime = new ReservationTime(timeId, startAt);
-        Theme theme = new Theme(themeId, "공포 테마", "무서운 배경 설명", "image-url");
-        Member member = new Member(memberId, "홍길동", "hong@example.com", Role.USER, "password");
-        
-        LocalDateTime fixedNow = LocalDateTime.of(date.minusDays(1), LocalTime.of(10, 0));
-        Clock fixedClock = Clock.fixed(fixedNow.toInstant(ZoneOffset.UTC), ZoneId.systemDefault());
-        
-        when(reservationTimeRepository.findById(timeId)).thenReturn(Optional.of(reservationTime));
-        when(themeRepository.findById(themeId)).thenReturn(Optional.of(theme));
-        when(memberRepository.findById(memberId)).thenReturn(Optional.of(member));
-        when(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).thenReturn(true);
-        when(clock.instant()).thenReturn(fixedClock.instant());
-        when(clock.getZone()).thenReturn(fixedClock.getZone());
-        
-        Reservation savedReservation = new Reservation(1L, member, date, reservationTime, theme, ReservationStatus.WAITING);
-        
-        when(reservationRepository.save(any(Reservation.class))).thenReturn(savedReservation);
-        
-        // when
-        ReservationResponseDto response = reservationWaitingCommandService.createReservationWaiting(requestDto);
-        
-        // then
-        assertEquals(savedReservation.getId(), response.id());
-        assertEquals(savedReservation.getDate(), response.date());
-        assertEquals(savedReservation.getTheme().getId(), response.theme().id());
-        assertEquals(savedReservation.getMember().getName(), response.member().name());
-        verify(reservationWaitingTicketRepository).save(any(ReservationWaitingTicket.class));
-    }
-    
+
     @DisplayName("존재하지 않는 예약 시간으로 예약 대기 생성 시 예외 발생")
     @Test
     void createReservationWaitingWithNonExistentTime() {

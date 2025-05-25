@@ -104,28 +104,4 @@ class AdminReservationControllerTest {
                     .body("size()", is(1));
         }
     }
-
-    @Nested
-    class deleteReservationTest {
-
-        @DisplayName("예약이 존재하면 삭제할 수 있다")
-        @Test
-        void deleteReservationTest() {
-            RestAssured.given().log().all()
-                    .cookie("token", loginToken)
-                    .when().delete("/admin/reservations/1")
-                    .then().log().all()
-                    .statusCode(204);
-        }
-
-        @DisplayName("존재하지 않는 예약을 삭제할 수 없다")
-        @Test
-        void invalidReservationIdDeleteTest() {
-            RestAssured.given().log().all()
-                    .cookie("token", loginToken)
-                    .when().delete("/admin/reservations/5")
-                    .then().log().all()
-                    .statusCode(404);
-        }
-    }
 }

@@ -2,6 +2,7 @@ package roomescape.service.command;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -90,22 +91,14 @@ public class ReservationCommandService {
             return;
         }
 
-        //todo 리팩토링
-        LocalDateTime earliestCreatedAt = LocalDateTime.MAX;
-        Long earliestReservationWaitingId = null;
-        for (Reservation waiting : reservationWaitings) {
-            ReservationWaitingTicket reservationWaitingTicket = waitingTicketRepository.findByReservationId(
-                    waiting.getId()).get();
-            if (reservationWaitingTicket.getCreatedAt().isBefore(earliestCreatedAt)) {
-                earliestCreatedAt = reservationWaitingTicket.getCreatedAt();
-                earliestReservationWaitingId = reservationWaitingTicket.getId();
-            }
-        }
+        Reservation earliestWaiting = reservationWaitings.stream()
+                .map(waiting -> waitingTicketRepository.findByReservationId(waiting.getId())
+                        .orElseThrow(() -> new NotFoundException("예약 대기 티켓을 찾을 수 없습니다. 예약 ID: " + waiting.getId())))
+                .min(Comparator.comparing(ReservationWaitingTicket::getCreatedAt))
+                .orElseThrow(() -> new NotFoundException("가장 오래된 예약 대기 티켓을 찾을 수 없습니다."))
+                .getReservation();
 
-        ReservationWaitingTicket earliestReservationWaiting = waitingTicketRepository.findById(earliestReservationWaitingId).get();
-        waitingTicketRepository.deleteById(earliestReservationWaitingId);
-        Reservation updatingReservation = reservationRepository.findById(
-                earliestReservationWaiting.getReservation().getId()).get();
-        updatingReservation.setStatus(ReservationStatus.RESERVED);
+        waitingTicketRepository.deleteByReservationId(earliestWaiting.getId());
+        earliestWaiting.setStatus(ReservationStatus.RESERVED);
     }
 }
