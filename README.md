@@ -9,11 +9,11 @@
 
 ### ▶️ 회원가입/탈퇴
 
-| HTTP Method | Endpoint      | AuthRole      | Success        | Description               |
-|-------------|---------------|---------------|----------------|---------------------------|
-| POST        | /members      | PUBLIC        | 201 CREATED    | 회원 추가                     |
-| DELETE      | /members/{id} | ADMIN, MEMBER | 204 NO_CONTENT | id(PK)에 해당하는 회원 삭제        |
-| GET         | /members      | ADMIN         | 200 OK         | 모든 회원 목록 조회 (id(PK), 이름만) |
+| HTTP Method | Endpoint      | AuthRole      | Success        | Description              |
+|-------------|---------------|---------------|----------------|--------------------------|
+| POST        | /members      | PUBLIC        | 201 CREATED    | 회원 추가                    |
+| DELETE      | /members/{id} | ADMIN, MEMBER | 204 NO_CONTENT | 회원 삭제                    |
+| GET         | /members      | ADMIN         | 200 OK         | 모든 회원 목록 조회 (id(PK), 이름) |
 
 ### ▶️ 로그인/로그아웃
 
@@ -45,22 +45,22 @@
 
 - 관리자 예약 기능
 
-| HTTP Method | Endpoint                     | AuthRole | Success        | Description                                    |
-|-------------|------------------------------|----------|----------------|------------------------------------------------|
-| POST        | /admin/reservations          | ADMIN    | 201 CREATED    | 관리자 권한 예약 추가                                   |
-| DELETE      | /admin/reservations/{id}     | ADMIN    | 204 NO_CONTENT | id(PK)에 해당하는 예약 삭제(모든 예약 삭제 가능)                |
-| GET         | /admin/reservations          | ADMIN    | 200 OK         | 모든 회원의 전체 예약 목록 조회                             |
-| GET         | /admin/reservations/filtered | ADMIN    | 200 OK         | 조건부 예약 목록 조회 (회원 id, 테마 id, 시작 기간, 끝 기간으로 필터링) |
-| GET         | /admin/reservations/statuses | ADMIN    | 200 OK         | 예약 상태 목록 조회                                    |
+| HTTP Method | Endpoint                     | AuthRole | Success        | Description                              |
+|-------------|------------------------------|----------|----------------|------------------------------------------|
+| POST        | /admin/reservations          | ADMIN    | 201 CREATED    | 관리자 권한 예약 추가                             |
+| DELETE      | /admin/reservations/{id}     | ADMIN    | 204 NO_CONTENT | 관리자 권한 예약 삭제(모든 예약 삭제 가능)                |
+| GET         | /admin/reservations          | ADMIN    | 200 OK         | 모든 회원의 전체 예약 목록 조회                       |
+| GET         | /admin/reservations/filtered | ADMIN    | 200 OK         | 조건부 예약 목록 조회 (회원, 테마, 시작 기간, 끝 기간으로 필터링) |
+| GET         | /admin/reservations/statuses | ADMIN    | 200 OK         | 예약 상태 목록 조회                              |
 
 - 회원 예약 기능
 
-| HTTP Method | Endpoint                      | AuthRole      | Success        | Description                       |
-|-------------|-------------------------------|---------------|----------------|-----------------------------------|
-| POST        | /reservations                 | ADMIN, MEMBER | 201 CREATED    | 회원의 예약 추가                         |
-| DELETE      | /reservations/{id}            | ADMIN, MEMBER | 204 NO_CONTENT | id(PK)에 해당하는 예약 삭제(본인의 예약만 삭제 가능) |
-| GET         | /reservations/mine            | ADMIN, MEMBER | 200 OK         | 내 예약 목록 조회                        |
-| GET         | /reservations/available-times | PUBLIC        | 200 OK         | 조건부 예약 가능한 시간 목록 조회(예약 날짜, 테마 id) |
+| HTTP Method | Endpoint                      | AuthRole      | Success        | Description                    |
+|-------------|-------------------------------|---------------|----------------|--------------------------------|
+| POST        | /reservations                 | ADMIN, MEMBER | 201 CREATED    | 회원의 예약 추가                      |
+| DELETE      | /reservations/{id}            | ADMIN, MEMBER | 204 NO_CONTENT | 회원의 예약 삭제                      |
+| GET         | /reservations/mine            | ADMIN, MEMBER | 200 OK         | 내 예약 목록 조회                     |
+| GET         | /reservations/available-times | PUBLIC        | 200 OK         | 조건부 예약 가능한 시간 목록 조회(예약 날짜, 테마) |
 
 ### ▶️ 예약 대기
 
