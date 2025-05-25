@@ -40,7 +40,7 @@ public class AdminWaitingController {
         ReservationResponse response = waitingService.acceptWaiting(id);
 
         return ResponseEntity.created(URI.create("/reservations/" + response.id()))
-                .build();
+                .body(response);
     }
 
     @RequiredAdmin
