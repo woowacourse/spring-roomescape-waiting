@@ -21,8 +21,23 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
+    public boolean existsByParams(ReservationDate date, Long timeId, Long themeId) {
+        return jpaWaitingRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
     public Optional<Waiting> findById(Long id) {
         return jpaWaitingRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Waiting> findByParams(ReservationDate date, Long timeId, Long themeId) {
+        return jpaWaitingRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaWaitingRepository.deleteById(id);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.ReservationDate;
@@ -8,10 +9,14 @@ import roomescape.reservation.domain.Waiting;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
+    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(ReservationDate reservationDate, Long timeId, Long themeId,
                                                        Long memberId);
 
     List<Waiting> findByMemberId(Long memberId);
+
+    Optional<Waiting> findByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
     @Query("""
                 SELECT w

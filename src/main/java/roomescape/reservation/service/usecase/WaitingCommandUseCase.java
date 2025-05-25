@@ -50,4 +50,8 @@ public class WaitingCommandUseCase {
                 )
         );
     }
+
+    public void delete(Long id) {
+        waitingRepository.deleteById(id);
+    }
 }

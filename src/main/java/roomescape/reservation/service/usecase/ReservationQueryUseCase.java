@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.ReservationRepository;
@@ -23,6 +24,11 @@ public class ReservationQueryUseCase {
 
     public List<Reservation> getAll() {
         return reservationRepository.findAll();
+    }
+
+    public Reservation get(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
     }
 
     public List<Reservation> getByMemberId(final Long memberId) {

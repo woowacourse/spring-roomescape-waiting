@@ -9,13 +9,19 @@ public interface WaitingRepository {
 
     boolean existsByParams(ReservationDate date, Long timeId, Long themeId, Long memberId);
 
+    boolean existsByParams(ReservationDate date, Long timeId, Long themeId);
+
     Optional<Waiting> findById(Long id);
 
     List<Waiting> findAll();
 
     List<Waiting> findAllByMemberId(Long memberId);
-    
+
     List<Waiting> findAllOrderByAsc();
 
     Waiting save(Waiting waiting);
+
+    Optional<Waiting> findByParams(ReservationDate date, Long timeId, Long themeId);
+
+    void deleteById(Long id);
 }

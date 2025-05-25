@@ -25,6 +25,10 @@ public class WaitingQueryUseCase {
         return waitingRepository.existsByParams(date, timeId, themeId, memberId);
     }
 
+    public boolean existsByParams(ReservationDate date, Long timeId, Long themeId) {
+        return waitingRepository.existsByParams(date, timeId, themeId);
+    }
+
     public List<Waiting> getAll() {
         return waitingRepository.findAll();
     }
@@ -42,5 +46,10 @@ public class WaitingQueryUseCase {
         return waitingWithRanks.stream()
                 .filter(waitingWithRank -> waitingWithRank.waiting().getMember().getId().equals(memberId))
                 .toList();
+    }
+
+    public Waiting get(ReservationDate date, Long timeId, Long themeId) {
+        return waitingRepository.findByParams(date, timeId, themeId)
+                .orElseThrow(() -> new NotFoundException("예약 대기 정보를 찾을 수 없습니다."));
     }
 }

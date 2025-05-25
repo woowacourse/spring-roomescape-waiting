@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.auth.vo.MemberInfo;
 import roomescape.reservation.controller.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
@@ -12,7 +13,9 @@ import roomescape.reservation.controller.dto.CreateReservationWithMemberIdWebReq
 import roomescape.reservation.controller.dto.ReservationSearchWebRequest;
 import roomescape.reservation.controller.dto.ReservationWebResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.service.converter.ReservationConverter;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
@@ -106,8 +109,33 @@ public class ReservationService {
         );
     }
 
+    @Transactional
     public void delete(final Long id) {
+        Reservation reservation = reservationQueryUseCase.get(id);
         reservationCommandUseCase.delete(id);
+
+        if (waitingQueryUseCase.existsByParams(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        )) {
+            Waiting waiting = waitingQueryUseCase.get(
+                    reservation.getDate(),
+                    reservation.getTime().getId(),
+                    reservation.getTheme().getId()
+            );
+
+            reservationCommandUseCase.create(
+                    new CreateReservationServiceRequest(
+                            waiting.getMember().getId(),
+                            waiting.getDate().getValue(),
+                            waiting.getTime().getId(),
+                            waiting.getTheme().getId()
+                    )
+            );
+
+            waitingCommandUseCase.delete(waiting.getId());
+        }
     }
 
     public List<ReservationWebResponse> search(ReservationSearchWebRequest reservationSearchWebRequest) {
