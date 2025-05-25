@@ -20,7 +20,7 @@ public class ReservationSlot {
         boolean isNotSameSlot = reservations.stream()
                 .anyMatch(reservation ->
                         !reservation.getDate().equals(first.getDate())
-                                || !reservation.getTimeId().equals(first.getTimeId())
+                                || !reservation.getStartAt().equals(first.getStartAt())
                                 || !reservation.getTheme().equals(first.getTheme())
                 );
         if (isNotSameSlot) {
