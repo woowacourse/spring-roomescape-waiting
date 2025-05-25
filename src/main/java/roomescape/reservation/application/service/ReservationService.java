@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.exception.MemberNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.application.exception.NotReservationOwnerException;
 import roomescape.reservation.application.exception.ReservationInPastException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
 import roomescape.reservation.application.exception.ReservationTimeNotFoundException;
@@ -22,12 +21,10 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
-import roomescape.reservation.presentation.dto.AdminWaitingReservationResponse;
 import roomescape.reservation.presentation.dto.MemberReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.SearchConditionsRequest;
-import roomescape.reservation.presentation.dto.WaitingReservationRequest;
 
 @Service
 public class ReservationService {
@@ -108,33 +105,6 @@ public class ReservationService {
                 .stream()
                 .map(this::mapToMemberReservationResponse)
                 .toList();
-    }
-
-    public ReservationResponse createWaitingReservation(WaitingReservationRequest request, Member member) {
-
-        ReservationTime time = getReservationTime(request.timeId());
-        Theme theme = getTheme(request.themeId());
-
-        Reservation reservation = reservationRepository.save(new Reservation(request.date(),
-                time, theme, member, ReservationStatus.WAITING, LocalDateTime.now()));
-
-        return mapToReservationResponse(reservation);
-    }
-
-    @Transactional
-    public void deleteWaitingReservation(Long reservationId, Member member) {
-
-        Reservation targetReservation = getReservation(reservationId);
-
-        if (!targetReservation.getMember().equals(member)) {
-            throw new NotReservationOwnerException("예약의 주인이 아닙니다.");
-        }
-
-        reservationRepository.delete(targetReservation);
-    }
-
-    public List<AdminWaitingReservationResponse> getWaitingReservations() {
-        return AdminWaitingReservationResponse.from(reservationRepository.findAllByStatus(ReservationStatus.WAITING));
     }
 
     private ReservationResponse mapToReservationResponse(Reservation reservation) {

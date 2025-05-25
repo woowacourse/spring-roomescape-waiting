@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.application.service.WaitingReservationService;
 import roomescape.reservation.presentation.dto.MemberReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -21,9 +22,12 @@ import roomescape.reservation.presentation.dto.WaitingReservationRequest;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService,
+                                 WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @GetMapping("reservations")
@@ -53,13 +57,13 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createWaitingReservation(
             @Valid @RequestBody WaitingReservationRequest request,
             Member member) {
-        ReservationResponse response = reservationService.createWaitingReservation(request, member);
+        ReservationResponse response = waitingReservationService.createWaitingReservation(request, member);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @DeleteMapping("reservations/waiting/{id}")
     public ResponseEntity<Void> deleteWaitingReservation(@PathVariable Long id, Member member) {
-        reservationService.deleteWaitingReservation(id, member);
+        waitingReservationService.deleteWaitingReservation(id, member);
         return ResponseEntity.noContent().build();
     }
 }

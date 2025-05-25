@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.application.service.WaitingReservationService;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.AdminWaitingReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -25,9 +26,12 @@ import roomescape.reservation.presentation.dto.SearchConditionsRequest;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
-    public AdminReservationController(ReservationService reservationService) {
+    public AdminReservationController(ReservationService reservationService,
+                                      WaitingReservationService waitingReservationService) {
         this.reservationService = reservationService;
+        this.waitingReservationService = waitingReservationService;
     }
 
     @PostMapping
@@ -54,12 +58,12 @@ public class AdminReservationController {
 
     @GetMapping("/waiting")
     public ResponseEntity<List<AdminWaitingReservationResponse>> getWaitingReservations() {
-        return ResponseEntity.ok().body(reservationService.getWaitingReservations());
+        return ResponseEntity.ok().body(waitingReservationService.getWaitingReservations());
     }
 
     @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> denyWaitingReservation(@PathVariable Long id) {
-        reservationService.deleteById(id);
+        waitingReservationService.denyWaitingReservation(id);
         return ResponseEntity.noContent().build();
     }
 }
