@@ -21,4 +21,13 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                 WHERE w.member = :member
             """)
     List<WaitingRank> findWaitingRankByMember(@Param("member") Member member);
+
+    @Query("""
+                SELECT w
+                FROM Waiting w
+                    JOIN fetch w.member
+                    JOIN fetch w.themeSchedule.theme
+                    JOIN fetch w.themeSchedule.time
+            """)
+    List<Waiting> findAllWithMemberAndThemeAndTime();
 }

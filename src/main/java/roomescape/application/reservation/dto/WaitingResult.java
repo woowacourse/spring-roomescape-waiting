@@ -1,25 +1,25 @@
 package roomescape.application.reservation.dto;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import roomescape.domain.reservation.ThemeSchedule;
-import roomescape.domain.reservation.WaitingRank;
+import roomescape.domain.reservation.Waiting;
 
 public record WaitingResult(
-        Long waitingId,
-        String theme,
+        long waitingId,
+        String memberName,
+        String themeName,
         LocalDate date,
-        LocalTime time,
-        long rank
+        LocalDateTime startedAt
 ) {
-    public static WaitingResult from(WaitingRank waitingRank) {
-        ThemeSchedule themeSchedule = waitingRank.waiting().getThemeSchedule();
+    public static WaitingResult from(Waiting waiting) {
+        ThemeSchedule themeSchedule = waiting.getThemeSchedule();
         return new WaitingResult(
-                waitingRank.waiting().getId(),
+                waiting.getId(),
+                waiting.getMember().getName(),
                 themeSchedule.theme().getName(),
                 themeSchedule.date(),
-                themeSchedule.time().getStartAt(),
-                waitingRank.rank()
+                waiting.getStartedAt()
         );
     }
 }

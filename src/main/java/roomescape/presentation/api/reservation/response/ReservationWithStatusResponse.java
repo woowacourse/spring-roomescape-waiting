@@ -3,7 +3,7 @@ package roomescape.presentation.api.reservation.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.application.reservation.dto.ReservationWithStatusResult;
-import roomescape.application.reservation.dto.WaitingResult;
+import roomescape.application.reservation.dto.WaitingWitStatusResult;
 import roomescape.domain.reservation.ReservationStatus;
 
 public record ReservationWithStatusResponse(
@@ -24,13 +24,13 @@ public record ReservationWithStatusResponse(
         );
     }
 
-    public static ReservationWithStatusResponse from(WaitingResult waitingResult) {
+    public static ReservationWithStatusResponse from(WaitingWitStatusResult waitingWitStatusResult) {
         return new ReservationWithStatusResponse(
-                waitingResult.waitingId(),
-                waitingResult.theme(),
-                waitingResult.date(),
-                waitingResult.time(),
-                toDisplayStatus(waitingResult.rank())
+                waitingWitStatusResult.waitingId(),
+                waitingWitStatusResult.theme(),
+                waitingWitStatusResult.date(),
+                waitingWitStatusResult.time(),
+                toDisplayStatus(waitingWitStatusResult.rank())
         );
     }
 

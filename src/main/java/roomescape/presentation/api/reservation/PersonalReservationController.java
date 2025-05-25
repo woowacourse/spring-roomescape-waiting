@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.reservation.ReservationService;
 import roomescape.application.reservation.WaitingService;
 import roomescape.application.reservation.dto.ReservationWithStatusResult;
-import roomescape.application.reservation.dto.WaitingResult;
+import roomescape.application.reservation.dto.WaitingWitStatusResult;
 import roomescape.presentation.api.reservation.response.ReservationWithStatusResponse;
 import roomescape.presentation.support.methodresolver.AuthInfo;
 import roomescape.presentation.support.methodresolver.AuthPrincipal;
@@ -29,12 +29,12 @@ public class PersonalReservationController {
         List<ReservationWithStatusResult> reservationsWithStatus = reservationService.findReservationsWithStatus(
                 authInfo.memberId()
         );
-        List<WaitingResult> waitingRanks = waitingService.findWaitingRanks(authInfo.memberId());
+        List<WaitingWitStatusResult> waitingRanks = waitingService.findWaitingRanks(authInfo.memberId());
         return ResponseEntity.ok(createReservationWithStatusResponses(reservationsWithStatus, waitingRanks));
     }
 
     private List<ReservationWithStatusResponse> createReservationWithStatusResponses(
-            List<ReservationWithStatusResult> reservationsWithStatus, List<WaitingResult> waitingRanks) {
+            List<ReservationWithStatusResult> reservationsWithStatus, List<WaitingWitStatusResult> waitingRanks) {
         List<ReservationWithStatusResponse> reservationWithStatusResponses = reservationsWithStatus.stream()
                 .map(ReservationWithStatusResponse::from)
                 .toList();

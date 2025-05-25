@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.application.reservation.dto.CreateWaitingParam;
 import roomescape.application.reservation.dto.WaitingResult;
+import roomescape.application.reservation.dto.WaitingWitStatusResult;
 import roomescape.application.support.exception.NotFoundEntityException;
 import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Member;
@@ -59,16 +60,23 @@ public class WaitingService {
         waitingRepository.save(waiting);
     }
 
-    public List<WaitingResult> findWaitingRanks(Long memberId) {
+    public List<WaitingWitStatusResult> findWaitingRanks(Long memberId) {
         Member member = getMemberById(memberId);
         List<WaitingRank> waitingRanks = waitingRepository.findWaitingRankByMember(member);
         return waitingRanks.stream()
-                .map(WaitingResult::from)
+                .map(WaitingWitStatusResult::from)
                 .toList();
     }
 
     public void delete(Long waitingId) {
         waitingRepository.deleteById(waitingId);
+    }
+
+    public List<WaitingResult> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAllWithMemberAndThemeAndTime();
+        return waitings.stream()
+                .map(WaitingResult::from)
+                .toList();
     }
 
     private void validateCreateWaiting(ThemeSchedule themeSchedule, Member member) {
