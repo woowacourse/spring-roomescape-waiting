@@ -20,6 +20,7 @@ import roomescape.reservation.domain.theme.Theme;
 import roomescape.reservation.domain.theme.ThemeRepository;
 import roomescape.reservation.domain.time.ReservationTime;
 import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.domain.waiting.ReservationWaiting;
 import roomescape.reservation.domain.waiting.ReservationWaitingRepository;
 
 @Service
@@ -30,7 +31,6 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
-
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
@@ -112,7 +112,20 @@ public class ReservationService {
     }
 
     public void cancelReservationById(final long id) {
+        final Reservation reservation = findReservation(id);
+        if (reservationWaitingRepository.existsByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())) {
+            final ReservationWaiting waiting = reservationWaitingRepository.findTopByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())
+                    .orElseThrow(() -> new IllegalArgumentException("예약 대기가 존재하지 않습니다."));
+            final Reservation promotedReservation = new Reservation(waiting.date(), waiting.member(), waiting.time(), waiting.theme());
+            reservationRepository.save(promotedReservation);
+            reservationWaitingRepository.deleteById(waiting.id());
+        }
         reservationRepository.deleteById(id);
+    }
+
+    private Reservation findReservation(final long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
     }
 
     private ReservationTime findReservationTime(final long timeId) {

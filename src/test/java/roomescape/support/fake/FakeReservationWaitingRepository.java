@@ -3,6 +3,7 @@ package roomescape.support.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.reservation.domain.waiting.ReservationWaiting;
 import roomescape.reservation.domain.waiting.ReservationWaitingRepository;
@@ -12,6 +13,14 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
 
     private final List<ReservationWaiting> reservationWaitings = new ArrayList<>();
     private Long index = 1L;
+
+    @Override
+    public boolean existsByReservation(final LocalDate date, final long timeId, final long themeId) {
+        return reservationWaitings.stream()
+                .anyMatch(reservationWaiting -> reservationWaiting.date() == date &&
+                        reservationWaiting.time().id() == timeId &&
+                        reservationWaiting.theme().id() == themeId);
+    }
 
     @Override
     public     boolean existsByReservationAndMemberId(LocalDate date, long timeId, long themeId, long memberId) {
@@ -50,6 +59,14 @@ public class FakeReservationWaitingRepository implements ReservationWaitingRepos
                 .filter(waiting -> waiting.member().id() == memberId)
                 .map(waiting -> new ReservationWaitingWithRank(waiting, rank.getAndIncrement()))
                 .toList();
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findTopByReservation(final LocalDate date, final long timeId,
+                                                             final long themeId) {
+        return reservationWaitings.stream()
+                .filter(waiting -> waiting.date() == date && waiting.time().id() == timeId && waiting.theme().id() == themeId)
+                .findFirst();
     }
 
     private ReservationWaiting findById(final long id) {

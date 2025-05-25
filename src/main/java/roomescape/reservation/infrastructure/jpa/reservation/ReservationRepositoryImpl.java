@@ -67,6 +67,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findById(final long id) {
+        return reservationJpaRepository.findById(id);
+    }
+
+    @Override
     public Optional<Reservation> findByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId) {
         return reservationJpaRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }

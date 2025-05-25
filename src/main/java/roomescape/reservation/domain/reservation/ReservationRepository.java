@@ -24,5 +24,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByCondition(Long memberId, Long themeId, LocalDate from, LocalDate to);
 
+    Optional<Reservation> findById(long id);
+
     Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 }

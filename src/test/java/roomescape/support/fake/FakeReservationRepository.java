@@ -42,7 +42,7 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public void deleteById(final long id) {
-        final Reservation reservation = findById(id);
+        final Reservation reservation = findById(id).orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));;
         reservations.remove(reservation);
     }
 
@@ -77,16 +77,16 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findById(final long id) {
+        return reservations.stream()
+                .filter(reservation -> reservation.id() == id)
+                .findFirst();
+    }
+
+    @Override
     public Optional<Reservation> findByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId) {
         return reservations.stream()
                 .filter(reservation -> reservation.date() == date && reservation.time().id() == timeId && reservation.theme().id() == themeId)
                 .findFirst();
-    }
-
-    private Reservation findById(final long id) {
-        return reservations.stream()
-                .filter(reservation -> reservation.id() == id)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
     }
 }
