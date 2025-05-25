@@ -3,6 +3,7 @@ package roomescape.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -56,5 +57,19 @@ class ReservationWaitingControllerTest {
                 .when().post("/reservations-waiting")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
+    }
+
+    @Test
+    void removeReservationWaitingTest() {
+        //given
+        doNothing().when(reservationWaitingService).removeReservationWaiting(anyLong());
+
+        //should
+        RestAssuredMockMvc.given().log().all()
+                .contentType(ContentType.JSON)
+                .sessionAttr("id", "1")
+                .when().delete("/reservations-waiting/1")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
     }
 }
