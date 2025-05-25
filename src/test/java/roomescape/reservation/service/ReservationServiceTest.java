@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,7 +84,7 @@ class ReservationServiceTest {
         Member reserver = memberDbFixture.유저1_생성();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         Reservation reservation = Reservation.reserve(
-                reserver, reservationDateTime, theme
+                reserver, reservationDateTime, theme, LocalDateTime.now()
         );
         reservationRepository.save(reservation);
 
@@ -108,7 +109,9 @@ class ReservationServiceTest {
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         Theme theme = themeDbFixture.공포();
 
-        Reservation reservation = reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
+        Reservation reservation = reservationRepository.save(
+                Reservation.reserve(reserver, reservationDateTime, theme, LocalDateTime.now())
+        );
 
         List<ReservationResponse> responses = reservationService.getFilteredReservations(null, null, null, null);
         ReservationResponse response = responses.get(0);
@@ -125,7 +128,9 @@ class ReservationServiceTest {
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         Theme theme = themeDbFixture.공포();
 
-        Reservation reservation = reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
+        Reservation reservation = reservationRepository.save(
+                Reservation.reserve(reserver, reservationDateTime, theme, LocalDateTime.now())
+        );
 
         reservationService.deleteById(reservation.getId());
 
@@ -152,13 +157,13 @@ class ReservationServiceTest {
         ReservationTime 열한시 = reservationTimeDbFixture.열한시();
 
         Reservation reservation1 = Reservation.reserve(
-                member1, ReservationDateTime.create(reservationDate, 열시), theme
+                member1, ReservationDateTime.create(reservationDate, 열시), theme, LocalDateTime.now()
         );
         Reservation reservation2 = Reservation.reserve(
-                member1, ReservationDateTime.create(reservationDate, 열한시), theme
+                member1, ReservationDateTime.create(reservationDate, 열한시), theme, LocalDateTime.now()
         );
         Reservation reservation3 = Reservation.reserve(
-                member2, ReservationDateTime.create(reservationDate, 열시), theme
+                member2, ReservationDateTime.create(reservationDate, 열시), theme, LocalDateTime.now()
         );
         reservationRepository.saveAll(List.of(reservation1, reservation2, reservation3));
 
@@ -204,8 +209,10 @@ class ReservationServiceTest {
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         Theme theme = themeDbFixture.공포();
 
-        Reservation reservation1 = reservationRepository.save(Reservation.reserve(member1, reservationDateTime, theme));
-        reservationRepository.save(Reservation.reserve(member2, reservationDateTime, theme));
+        Reservation reservation1 = reservationRepository.save(
+                Reservation.reserve(member1, reservationDateTime, theme, LocalDateTime.now()));
+        reservationRepository.save(
+                Reservation.reserve(member2, reservationDateTime, theme, LocalDateTime.now()));
 
         List<MyReservationResponse> myReservations = reservationService.getMyReservations(member1.getId());
 

@@ -3,6 +3,7 @@ package roomescape.time.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
@@ -101,7 +102,8 @@ class ReservationTimeServiceTest {
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         Theme theme = themeDbFixture.공포();
 
-        Reservation reservation = reservationRepository.save(Reservation.reserve(reserver, reservationDateTime, theme));
+        Reservation reservation = reservationRepository.save(
+                Reservation.reserve(reserver, reservationDateTime, theme, LocalDateTime.now()));
         assertThatThrownBy(
                 () -> reservationTimeService.deleteById(reservation.getReservationTime().getId())).isInstanceOf(
                 InvalidArgumentException.class).hasMessage("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
@@ -115,8 +117,9 @@ class ReservationTimeServiceTest {
         Theme theme = themeDbFixture.공포();
 
         Reservation reservation1 = reservationRepository.save(
-                Reservation.reserve(reserver, reservationDateTime1, theme));
-        reservationRepository.save(Reservation.reserve(reserver, reservationDateTime2, theme));
+                Reservation.reserve(reserver, reservationDateTime1, theme, LocalDateTime.now()));
+        reservationRepository.save(
+                Reservation.reserve(reserver, reservationDateTime2, theme, LocalDateTime.now()));
 
         AvailableReservationTimeRequest request = new AvailableReservationTimeRequest(reservation1.getDate(),
                 reservation1.getTimeId());

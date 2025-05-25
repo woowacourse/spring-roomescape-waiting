@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,9 +47,10 @@ public class ReservationService {
         Theme theme = themeService.getTheme(themeId);
         Member reserver = memberQueryService.getMember(reserveCommand.memberId());
 
+        LocalDateTime reservedAt = LocalDateTime.now();
         Reservation reservation = isAlreadyReserved(date, timeId, themeId)
-                ? Reservation.wait(reserver, reservationDateTime, theme)
-                : Reservation.reserve(reserver, reservationDateTime, theme);
+                ? Reservation.wait(reserver, reservationDateTime, theme, reservedAt)
+                : Reservation.reserve(reserver, reservationDateTime, theme, reservedAt);
 
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);

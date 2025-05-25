@@ -52,38 +52,61 @@ public class Reservation {
             Member reserver,
             ReservationDateTime reservationDateTime,
             Theme theme,
-            ReservationStatus status
+            ReservationStatus status,
+            LocalDateTime reservedAt
     ) {
         this.id = id;
         this.reserver = reserver;
         this.reservationDatetime = reservationDateTime;
         this.theme = theme;
         this.status = status;
-        this.reservedAt = LocalDateTime.now();
+        this.reservedAt = reservedAt;
     }
 
     public static Reservation reserve(
             Member reserver,
             ReservationDateTime reservationDateTime,
-            Theme theme
+            Theme theme,
+            LocalDateTime reservedAt
     ) {
-        return new Reservation(null, reserver, reservationDateTime, theme, ReservationStatus.RESERVED);
+        return new Reservation(
+                null,
+                reserver,
+                reservationDateTime,
+                theme,
+                ReservationStatus.RESERVED,
+                reservedAt
+        );
     }
 
     public void reserve() {
-        this.status = ReservationStatus.RESERVED;
+        if (isWaiting()) {
+            this.status = ReservationStatus.RESERVED;
+        }
     }
 
     public static Reservation wait(
             Member reserver,
             ReservationDateTime reservationDateTime,
-            Theme theme
+            Theme theme,
+            LocalDateTime reservedAt
     ) {
-        return new Reservation(null, reserver, reservationDateTime, theme, ReservationStatus.WAITING);
+        return new Reservation(
+                null,
+                reserver,
+                reservationDateTime,
+                theme,
+                ReservationStatus.WAITING,
+                reservedAt
+        );
     }
 
     public boolean isReserved() {
         return status == ReservationStatus.RESERVED;
+    }
+
+    private boolean isWaiting() {
+        return status == ReservationStatus.WAITING;
     }
 
     public String getReserverName() {
@@ -113,5 +136,4 @@ public class Reservation {
     public String getThemeName() {
         return theme.getName();
     }
-    
 }
