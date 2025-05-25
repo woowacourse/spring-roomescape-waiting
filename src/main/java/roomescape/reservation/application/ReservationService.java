@@ -2,7 +2,9 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
@@ -13,6 +15,7 @@ import roomescape.reservation.application.dto.AdminReservationSearchRequest;
 import roomescape.reservation.application.dto.MyReservationResponse;
 import roomescape.reservation.application.dto.ReservationResponse;
 import roomescape.reservation.application.dto.UserReservationRequest;
+import roomescape.reservation.application.event.ReservationDeletedEvent;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationSpec;
@@ -37,11 +40,12 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        Waitings waitings = new Waitings(waitingRepository.findAll());
+        Waitings waitings = new Waitings(waitingRepository.findByMemberId(memberId));
         return MyReservationResponse.of(reservations, waitings.getWaitingsWithRank());
     }
 
@@ -92,6 +96,8 @@ public class ReservationService {
     }
 
     public void deleteById(Long id) {
+        Optional<Reservation> reservation = reservationRepository.findById(id);
         reservationRepository.deleteById(id);
+        eventPublisher.publishEvent(new ReservationDeletedEvent(reservation));
     }
 }

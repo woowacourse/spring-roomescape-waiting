@@ -57,9 +57,9 @@ VALUES ('theme14', 'description14', 'thumbnail14');
 INSERT INTO member(name, email, password, role)
 VALUES ('admin', 'wooteco@gmail.com', '$2a$10$HPuLMfygOsN.3UIEqvcBwOS/uaOS4cJ0EQb/eeqexol7BaiGMSXXi', 'admin');
 INSERT INTO member(name, email, password, role)
-VALUES ('riwon', 'riwon@gmail.com', '$2a$10$xulkTSZyjjPnfcvkoaQECusw/HPCnLx3p/AndyHEtimKZVljx0aVC', 'user');
+VALUES ('ed', 'ed@gmail.com', '$2a$10$HPuLMfygOsN.3UIEqvcBwOS/uaOS4cJ0EQb/eeqexol7BaiGMSXXi', 'user');
 INSERT INTO member(name, email, password, role)
-VALUES ('mimi', 'mimi@gmail.com', '$2a$10$ZuuoYwqZXLsCBCdeUN0j1eifbsHzleUB0qjtw1UNd.xM1SwWb.MP2', 'user');
+VALUES ('joanne', 'joanne@gmail.com', '$2a$10$HPuLMfygOsN.3UIEqvcBwOS/uaOS4cJ0EQb/eeqexol7BaiGMSXXi', 'user');
 
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-15', 1, 1, 3);

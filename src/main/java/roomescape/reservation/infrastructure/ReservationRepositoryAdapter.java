@@ -64,4 +64,9 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     public boolean existsByThemeId(Long themeId) {
         return reservationJpaRepository.existsBySpecThemeId(themeId);
     }
+
+    @Override
+    public Optional<Reservation> findBySpec(ReservationSpec spec) {
+        return reservationJpaRepository.findBySpec(spec);
+    }
 }

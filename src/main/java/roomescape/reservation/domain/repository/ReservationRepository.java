@@ -10,7 +10,7 @@ public interface ReservationRepository {
 
     List<Reservation> findFiltered(Long memberId, Long themeId, LocalDate from,
                                    LocalDate to);
-    
+
     List<Reservation> findAllByMemberId(Long memberId);
 
     List<Reservation> findAll();
@@ -28,4 +28,6 @@ public interface ReservationRepository {
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
+
+    Optional<Reservation> findBySpec(ReservationSpec spec);
 }
