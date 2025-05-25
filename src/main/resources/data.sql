@@ -50,3 +50,11 @@ VALUES (2, 1, 'RESERVED'),
        (3, 11, 'RESERVED'),
        (3, 12, 'RESERVED'),
        (1, 13, 'RESERVED');
+
+INSERT INTO waiting (member_id, game_schedule_id, status)
+VALUES (3, 1, 'WAITING'),
+       (2, 2, 'WAITING'),
+       (4, 3, 'WAITING'),
+       (2, 4, 'WAITING'),
+       (4, 5, 'WAITING'),
+       (4, 6, 'WAITING');

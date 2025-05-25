@@ -1,6 +1,7 @@
 package roomescape.application.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 import roomescape.domain.entity.Waiting;
 
 public record WaitingServiceResponse(
@@ -19,5 +20,11 @@ public record WaitingServiceResponse(
                 waiting.getGameSchedule().getDate(),
                 TimeServiceResponse.from(waiting.getGameSchedule().getTime())
         );
+    }
+
+    public static List<WaitingServiceResponse> from(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(WaitingServiceResponse::from)
+                .toList();
     }
 }

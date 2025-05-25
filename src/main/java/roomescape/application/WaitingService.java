@@ -59,6 +59,11 @@ public class WaitingService {
         }
     }
 
+    public List<WaitingServiceResponse> getAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+        return WaitingServiceResponse.from(waitings);
+    }
+
     public List<ReservationStatusServiceResponse> getWaitingsByMember(Long memberId) {
         List<Waiting> memberWaitings = waitingRepository.findByMemberId(memberId);
         return memberWaitings.stream()
