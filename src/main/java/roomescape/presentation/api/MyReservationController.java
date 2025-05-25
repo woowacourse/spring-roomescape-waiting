@@ -13,12 +13,12 @@ import roomescape.presentation.dto.response.MyReservationWithWaitingResponse;
 import java.util.List;
 
 @RestController
-public class MemberInfoController {
+public class MyReservationController {
 
     private final ReservationService reservationService;
     private final MyReservationQueryService reservationQueryService;
 
-    public MemberInfoController(ReservationService reservationService, MyReservationQueryService reservationQueryService) {
+    public MyReservationController(ReservationService reservationService, MyReservationQueryService reservationQueryService) {
         this.reservationService = reservationService;
         this.reservationQueryService = reservationQueryService;
     }

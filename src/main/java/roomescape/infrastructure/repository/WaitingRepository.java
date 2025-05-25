@@ -13,6 +13,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
             SELECT new roomescape.presentation.dto.response.WaitingWithRank(
+                w.id,
                 w.theme.name,
                 w.date,
                 w.time.startAt,

@@ -97,12 +97,12 @@ public class ReservationService {
     @Transactional
     public void deleteReservationById(Long id) {
         Reservation reservation = findReservationById(id);
-        reservationRepository.deleteById(reservation.getId());
+        reservationRepository.delete(reservation);
     }
 
     private Reservation findReservationById(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약을 찾을 수 없습니다. : " + id));
     }
 
     public List<ReservationResponse> getReservationsByFilter(

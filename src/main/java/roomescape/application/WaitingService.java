@@ -12,6 +12,7 @@ import roomescape.presentation.dto.response.WaitingResponse;
 import roomescape.presentation.dto.response.WaitingWithRank;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @Transactional(readOnly = true)
@@ -38,5 +39,16 @@ public class WaitingService {
 
     public List<WaitingWithRank> getMyWaitingsWithRank(LoginMember loginMember) {
         return waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
+    }
+
+    @Transactional
+    public void deleteWaiting(Long id) {
+        Waiting waiting = findWaitingById(id);
+        waitingRepository.delete(waiting);
+    }
+
+    private Waiting findWaitingById(Long id) {
+        return waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 대기를 찾을 수 없습니다. : " + id));
     }
 }
