@@ -44,6 +44,12 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
+    public Theme findById(final Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(ThemeNotFoundException::new);
+    }
+
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findTopRankThemes(final int size) {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
@@ -57,9 +63,7 @@ public class ThemeService {
     public void deleteById(
             final Long id
     ) {
-        final Theme theme = themeRepository.findById(id)
-                .orElseThrow(ThemeNotFoundException::new);
-
+        final Theme theme = findById(id);
         if (reservationService.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }

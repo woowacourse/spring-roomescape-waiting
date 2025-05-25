@@ -16,8 +16,10 @@ import roomescape.exception.custom.reason.reservation.ReservationPastDateExcepti
 import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.member.Member;
 import roomescape.member.MemberService;
+import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -90,6 +92,16 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public boolean existsByTheme(final Theme theme) {
         return reservationRepository.existsBySchedule_Theme(theme);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> findAllByThemeAndDate(final Theme theme, final LocalDate date) {
+        return reservationRepository.findAllBySchedule_ThemeAndSchedule_Date(theme, date);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByReservationTime(final ReservationTime reservationTime) {
+        return reservationRepository.existsBySchedule_ReservationTime(reservationTime);
     }
 
     private ReservationResponse getReservationResponse(Schedule schedule, final Member member) {

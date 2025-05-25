@@ -3,16 +3,15 @@ package roomescape.reservationtime;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
-import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExistsThemeException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.theme.ThemeService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,8 +23,8 @@ import java.util.stream.Collectors;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
-    private final ThemeRepository themeRepository;
+    private final ReservationService reservationService;
+    private final ThemeService themeService;
 
     @Transactional
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
@@ -46,10 +45,9 @@ public class ReservationTimeService {
     @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
-        final Theme theme = themeRepository.findById(themeId)
-                .orElseThrow(ReservationTimeNotExistsThemeException::new);
+        final Theme theme = themeService.findById(themeId);
 
-        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationRepository.findAllBySchedule_ThemeAndSchedule_Date(theme, date).stream()
+        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationService.findAllByThemeAndDate(theme, date).stream()
                 .map(reservation -> reservation.getSchedule().getReservationTime())
                 .collect(Collectors.toSet());
 
@@ -68,7 +66,7 @@ public class ReservationTimeService {
         final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(ReservationTimeNotFoundException::new);
 
-        if (reservationRepository.existsBySchedule_ReservationTime(reservationTime)) {
+        if (reservationService.existsByReservationTime(reservationTime)) {
             throw new ReservationTimeUsedException();
         }
 
