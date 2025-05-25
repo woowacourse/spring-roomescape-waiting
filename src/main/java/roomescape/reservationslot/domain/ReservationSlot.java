@@ -49,7 +49,7 @@ public class ReservationSlot {
     private Theme theme;
 
     @OneToMany(mappedBy = "reservationSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @Column(name = "waiting_id", nullable = false)
+    @JoinColumn(name = "waiting_id", nullable = false)
     private List<Reservation> reservations = new ArrayList<>();
 
     public ReservationSlot(final Member member, final LocalDate date, final ReservationTime time,
