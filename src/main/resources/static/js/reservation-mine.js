@@ -57,6 +57,7 @@ function render(data) {
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
+                console.log('hi')
                 requestDeleteWaiting(item.id).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
@@ -64,4 +65,12 @@ function render(data) {
             row.insertCell(4).textContent = '';
         }
     });
+
+    function requestDeleteWaiting(id) {
+        return fetch(`/waiting/${id}`, {method: 'DELETE'})
+            .then(response => {
+                if (!response.ok) throw new Error('Delete failed');
+                return response;
+            });
+    }
 }
