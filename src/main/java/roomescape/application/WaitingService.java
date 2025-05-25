@@ -33,6 +33,7 @@ public class WaitingService {
     public WaitingServiceResponse registerWaiting(ReservationCreateServiceRequest request) {
         GameSchedule gameSchedule = getGameScheduleBy(request.date(), request.timeId(), request.themeId());
         Member member = memberService.getMemberEntityById(request.memberId());
+        validateNotDuplicate(gameSchedule, member);
 
         Waiting waitingWithoutId = Waiting.withoutId(member, gameSchedule, ReservationStatus.WAITING);
         Waiting waiting = waitingRepository.save(waitingWithoutId);
@@ -44,6 +45,13 @@ public class WaitingService {
             return gameScheduleService.getGameScheduleEntityBy(date, timeId, themeId);
         } catch (NotFoundException e) {
             throw new IllegalArgumentException("예약대기를 신청할 수 없습니다. 예약하기를 이용해주세요.");
+        }
+    }
+
+    private void validateNotDuplicate(GameSchedule gameSchedule, Member member) {
+        boolean duplicated = waitingRepository.existsByGameScheduleIdAndMemberId(gameSchedule.getId(), member.getId());
+        if (duplicated) {
+            throw new IllegalArgumentException("예약대기는 한 번만 신청할 수 있습니다.");
         }
     }
 }
