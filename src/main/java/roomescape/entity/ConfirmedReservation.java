@@ -1,11 +1,9 @@
 package roomescape.entity;
 
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.time.LocalDate;
 
 @Entity
-@DiscriminatorValue(value = "confirm")
 public class ConfirmedReservation extends Reservation{
     public ConfirmedReservation() {
     }
