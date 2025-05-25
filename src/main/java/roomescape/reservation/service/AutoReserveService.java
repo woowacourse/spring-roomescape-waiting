@@ -9,12 +9,12 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
 @Service
-public class AutoBookService {
+public class AutoReserveService {
 
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
-    public AutoBookService(ReservationRepository reservationRepository, WaitingRepository waitingRepository) {
+    public AutoReserveService(ReservationRepository reservationRepository, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
     }

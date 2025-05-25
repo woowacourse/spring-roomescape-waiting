@@ -19,7 +19,7 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
-import roomescape.reservation.service.AutoBookService;
+import roomescape.reservation.service.AutoReserveService;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.WaitingService;
 
@@ -29,12 +29,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final WaitingService waitingService;
-    private final AutoBookService autoBookService;
+    private final AutoReserveService autoReserveService;
 
-    public ReservationController(ReservationService reservationService, WaitingService waitingService, AutoBookService autoBookService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService, AutoReserveService autoReserveService) {
         this.reservationService = reservationService;
         this.waitingService = waitingService;
-        this.autoBookService = autoBookService;
+        this.autoReserveService = autoReserveService;
     }
 
     @GetMapping
@@ -60,7 +60,7 @@ public class ReservationController {
         }
 
         Reservation deletedReservation = reservationService.deleteReservation(id);
-        autoBookService.addReservationFromWaiting(deletedReservation);
+        autoReserveService.addReservationFromWaiting(deletedReservation);
         return ResponseEntity.noContent().build();
     }
 
