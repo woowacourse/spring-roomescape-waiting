@@ -26,7 +26,7 @@ public class CleanUp {
     }
 
     private void enableForeignKeyConstraints(boolean enable) {
-        String value = enable ? "TRUE" : "FALSE";
+        String value = String.valueOf(enable).toUpperCase();
         jdbcTemplate.update("SET REFERENTIAL_INTEGRITY " + value + ";");
     }
 }
