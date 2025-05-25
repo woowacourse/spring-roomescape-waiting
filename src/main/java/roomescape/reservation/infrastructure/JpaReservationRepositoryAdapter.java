@@ -32,23 +32,18 @@ public class JpaReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findBy(final LocalDate date, final Long themeId) {
+    public List<Reservation> findAllBy(final LocalDate date, final Long themeId) {
         return jpaReservationRepository.findByDateAndThemeId(date, themeId);
     }
 
     @Override
-    public List<Reservation> findBy(final Long memberId, final Long themeId, final LocalDate from, final LocalDate to) {
+    public List<Reservation> findAllBy(final Long memberId, final Long themeId, final LocalDate from, final LocalDate to) {
         return jpaReservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
     }
 
     @Override
-    public List<Reservation> findBy(Long memberId) {
+    public List<Reservation> findAllBy(Long memberId) {
         return jpaReservationRepository.findByMemberId(memberId);
-    }
-
-    @Override
-    public List<Reservation> findBy(final Long themeId, final LocalDate date) {
-        return jpaReservationRepository.findByThemeIdAndDate(themeId, date);
     }
 
     @Override

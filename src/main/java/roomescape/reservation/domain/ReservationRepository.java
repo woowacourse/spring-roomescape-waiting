@@ -12,13 +12,11 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    List<Reservation> findBy(LocalDate date, Long themeId);
+    List<Reservation> findAllBy(LocalDate date, Long themeId);
 
-    List<Reservation> findBy(Long memberId, Long themeId, LocalDate from, LocalDate to);
+    List<Reservation> findAllBy(Long memberId, Long themeId, LocalDate from, LocalDate to);
 
-    List<Reservation> findBy(Long themeId, LocalDate date);
-
-    List<Reservation> findBy(Long memberId);
+    List<Reservation> findAllBy(Long memberId);
 
     List<Reservation> findAll();
 
@@ -26,5 +24,5 @@ public interface ReservationRepository {
 
     boolean existByThemeId(Long themeId);
 
-    Optional<Reservation> findBy(LocalDate date, Long aLong, Long aLong1);
+    Optional<Reservation> findBy(LocalDate date, Long timeId, Long themeId);
 }
