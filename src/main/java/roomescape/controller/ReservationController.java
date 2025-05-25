@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.config.annotation.Authority;
 import roomescape.config.annotation.RequiredAccessToken;
+import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.request.ReservationCreationRequest;
@@ -31,11 +33,21 @@ public class ReservationController {
     }
 
     @GetMapping
+    @Authority(Role.ADMIN)
     public List<ReservationResponse> findAllReservations() {
         return reservationService.findAllReservations();
     }
 
+    @GetMapping("/state")
+    @Authority(Role.GENERAL)
+    public ReservationStatusResponse findAllReservationStateByMember(
+            @RequiredAccessToken AccessTokenContent accessTokenContent
+    ) {
+        return reservationService.findAllReservationStatusByMember(accessTokenContent.id());
+    }
+
     @PostMapping
+    @Authority(Role.GENERAL)
     public ResponseEntity<ReservationResponse> addReservation(
             @Valid @RequestBody ReservationCreationRequest request,
             @RequiredAccessToken AccessTokenContent accessTokenContent
@@ -49,17 +61,11 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{reservationId}")
+    @Authority(Role.ADMIN)
     public ResponseEntity<Void> deleteReservationById(
             @PathVariable("reservationId") Long id
     ) {
         reservationService.deleteReservationById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/state")
-    public ReservationStatusResponse findAllReservationStateByMember(
-            @RequiredAccessToken AccessTokenContent accessTokenContent
-    ) {
-        return reservationService.findAllReservationStatusByMember(accessTokenContent.id());
     }
 }

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.config.annotation.Authority;
+import roomescape.domain.Role;
 import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.request.ThemeCreationRequest;
 import roomescape.dto.response.ThemeResponse;
@@ -41,6 +43,7 @@ public class ThemeController {
     }
 
     @PostMapping
+    @Authority(Role.ADMIN)
     public ResponseEntity<ThemeResponse> addTheme(
             @Valid @RequestBody ThemeCreationRequest request
     ) {
@@ -50,6 +53,7 @@ public class ThemeController {
     }
 
     @DeleteMapping("/{id}")
+    @Authority(Role.ADMIN)
     public ResponseEntity<Void> deleteThemeById(
             @PathVariable("id") Long id
     ) {

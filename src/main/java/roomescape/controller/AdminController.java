@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.config.annotation.Authority;
+import roomescape.domain.Role;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.response.ReservationResponse;
@@ -27,16 +30,20 @@ public class AdminController {
     }
 
     @PostMapping("/reservations")
+    @Authority(Role.ADMIN)
     public ResponseEntity<ReservationResponse> createReservationByAdmin(
             @Valid @RequestBody AdminReservationRequest request
     ) {
         ReservationCreationContent creationRequest = new ReservationCreationContent(request);
         ReservationResponse reservationResponse =
                 reservationService.addReservation(request.memberId(), creationRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponse);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/reservation/" + reservationResponse.id()))
+                .body(reservationResponse);
     }
 
     @GetMapping("/search")
+    @Authority(Role.ADMIN)
     public List<ReservationResponse> searchReservationsByFilter(
             @RequestParam("memberId") Long memberId,
             @RequestParam("themeId") Long themeId,

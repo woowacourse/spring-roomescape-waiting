@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.config.annotation.Authority;
+import roomescape.domain.Role;
 import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.request.ReservationTimeCreationRequest;
@@ -49,6 +51,7 @@ public class ReservationTimeController {
     }
 
     @PostMapping
+    @Authority(Role.ADMIN)
     public ResponseEntity<ReservationTimeResponse> addReservationTime(
             @Valid @RequestBody ReservationTimeCreationRequest request
     ) {
@@ -60,6 +63,7 @@ public class ReservationTimeController {
     }
 
     @DeleteMapping("/{reservationTimeId}")
+    @Authority(Role.ADMIN)
     public ResponseEntity<Void> deleteReservationTimeById(
             @PathVariable("reservationTimeId") Long id
     ) {

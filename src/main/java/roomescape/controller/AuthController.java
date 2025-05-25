@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.config.annotation.Authority;
 import roomescape.config.annotation.RequiredAccessToken;
+import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
@@ -43,6 +45,7 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
+    @Authority(Role.GENERAL)
     public MemberProfileResponse checkLogin(
             @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
@@ -50,6 +53,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @Authority(Role.GENERAL)
     public ResponseEntity<Void> logout() {
         ResponseCookie cookie = ResponseCookie
                 .from("access", "")
