@@ -88,13 +88,12 @@ public class WaitingService {
         ReservationTime reservationTime = getReservationTime(command.timeId());
         Theme theme = getTheme(command.themeId());
         Member member = getMember(command.memberId());
-        ReservationTime time = getTime(command.timeId());
         validatePastTime(command.date(), reservationTime);
         validateNoReservation(command);
         validateAlreadyWaiting(command);
         validateAlreadyReserved(command);
         long order = calculateWaitingOrder(command);
-        Waiting waiting = new Waiting(null, command.date(), time, theme, member, order);
+        Waiting waiting = new Waiting(null, command.date(), reservationTime, theme, member, order);
         Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingInfo(savedWaiting);
     }

@@ -53,7 +53,7 @@ public class WaitingMockMvcSpringBootTest {
 
     @DisplayName("예약 대기를 생성할 수 있다")
     @Test
-    void aa() throws Exception {
+    void addWaiting() throws Exception {
         // given
         String userToken = getUserToken();
         WaitingAddRequest request = new WaitingAddRequest(today.plusDays(1), 11L, 1L);
@@ -76,7 +76,7 @@ public class WaitingMockMvcSpringBootTest {
 
     @DisplayName("예약 대기를 취소할 수 있다")
     @Test
-    void aaa() throws Exception {
+    void cancelWaiting() throws Exception {
         // given
         String userToken = getUserToken();
         WaitingAddRequest request = new WaitingAddRequest(today.plusDays(1), 11L, 1L);
@@ -91,7 +91,7 @@ public class WaitingMockMvcSpringBootTest {
 
     @DisplayName("예약 대기 목록을 조회할 수 있다")
     @Test
-    void aaaa() throws Exception {
+    void findWaiting() throws Exception {
         // given
         String userToken = getUserToken();
         Cookie cookie = new Cookie("token", userToken);

@@ -93,7 +93,7 @@ public class FakeWaitingRepository implements WaitingRepository {
                 .filter(waiting -> waiting.getDate().equals(date))
                 .filter(waiting -> waiting.getTime().getId() == time.getId())
                 .filter(waiting -> waiting.getTheme().getId() == theme.getId())
-                .filter(waiting -> waiting.getPriority() == 0)
-                .findAny();
+                .sorted(Comparator.comparingLong(Waiting::getPriority))
+                .findFirst();
     }
 }

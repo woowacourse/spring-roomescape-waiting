@@ -22,7 +22,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
 import roomescape.reservation.domain.Reservation;
@@ -66,7 +65,7 @@ public class ReservationWaitingMockMvcSpringBootTest {
 
     @DisplayName("내 예약과 대기 목록을 조회할 수 있다")
     @Test
-    void aa() throws Exception {
+    void findMyReservationsAndWaiting() throws Exception {
         // given
         String userToken = getUserToken();
         Cookie cookie = new Cookie("token", userToken);
@@ -80,7 +79,7 @@ public class ReservationWaitingMockMvcSpringBootTest {
 
     @DisplayName("예약 취소 시 순번이 가장 빠른 예약 대기가 예약된다")
     @Test
-    void aaa() throws Exception {
+    void should_BeReservation_WhenReservationCanceled() throws Exception {
         // given
         String adminToken = getAdminToken();
         Cookie adminCookie = new Cookie("token", adminToken);
@@ -97,7 +96,7 @@ public class ReservationWaitingMockMvcSpringBootTest {
 
     @DisplayName("예약에 대한 취소 권한이 없을 시 예외가 발생한다")
     @Test
-    void aaaa() throws Exception {
+    void noPermission() throws Exception {
         // given
         String userToken = getUserToken();
         Cookie userCookie = new Cookie("token", userToken);

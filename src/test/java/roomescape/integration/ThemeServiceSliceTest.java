@@ -43,11 +43,6 @@ public class ThemeServiceSliceTest {
 
     @BeforeEach
     void init() {
-        System.out.println("Spring Bean Definitions:");
-        String[] beanNames = applicationContext.getBeanDefinitionNames();
-        for (String beanName : beanNames) {
-            System.out.println(beanName);
-        }
         when(currentDateTime.getDate()).thenReturn(LocalDate.of(2025, 5, 1));
         when(currentDateTime.getTime()).thenReturn(LocalTime.of(10, 0));
         themeService = new ThemeService(themeRepository, reservationRepository, currentDateTime);

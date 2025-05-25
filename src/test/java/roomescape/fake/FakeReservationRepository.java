@@ -74,9 +74,9 @@ public class FakeReservationRepository implements ReservationRepository {
                                                               long memberId) {
         return reservations.stream()
                 .filter(reservation -> reservation.getDate().equals(date))
-                .filter(reservation -> reservation.getTime().getId().equals(timeId))
-                .filter(reservation -> reservation.getTheme().getId().equals(themeId))
-                .anyMatch(reservation -> reservation.getMember().getId().equals(memberId));
+                .filter(reservation -> reservation.getTime().getId() == timeId)
+                .filter(reservation -> reservation.getTheme().getId() == themeId)
+                .anyMatch(reservation -> reservation.getMember().getId() == memberId);
     }
 
     @Override

@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
+import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -65,6 +66,6 @@ public class Waiting {
     }
 
     public boolean hasSameMemberId(long other) {
-        return member.getId() == other;
+        return Objects.equals(member.getId(), other);
     }
 }

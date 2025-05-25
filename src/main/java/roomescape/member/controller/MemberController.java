@@ -45,7 +45,7 @@ public class MemberController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> getLoginMember(@CookieValue(value = "token", required = false) String token) {
+    public ResponseEntity<Void> logout(@CookieValue(value = "token", required = false) String token) {
         if (token == null) {
             return ResponseEntity.noContent().build();
         }
