@@ -1,27 +1,27 @@
-package roomescape.waiting.infrastructure;
+package roomescape.reservation.infrastructure;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingStatus;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
-public interface JpaWaitingRepository extends ListCrudRepository<Waiting, Long> {
+public interface JpaReservationRepository extends ListCrudRepository<Reservation, Long> {
 
     @Query("""
             SELECT w 
-            FROM Waiting w 
+            FROM Reservation w 
             JOIN FETCH w.bookingSlot r            
             JOIN FETCH r.time t 
             JOIN FETCH r.theme th                   
             WHERE w.member.id = :memberId
             """)
-    List<Waiting> findByWaitingsMemberId(Long memberId);
+    List<Reservation> findByReservationMemberId(Long memberId);
 
     @Modifying
     @Query("""
-            DELETE FROM Waiting w 
+            DELETE FROM Reservation w 
             WHERE w.bookingSlot.id = :reservationId
             AND w.member.id = :memberId
             """)
@@ -31,11 +31,11 @@ public interface JpaWaitingRepository extends ListCrudRepository<Waiting, Long> 
 
     @Query("""
             SELECT w 
-            FROM Waiting w 
+            FROM Reservation w 
             JOIN FETCH w.bookingSlot r            
             JOIN FETCH r.time t 
             JOIN FETCH r.theme th                   
-            WHERE w.waitingStatus = :waitingStatus
+            WHERE w.reservationStatus = :reservationStatus
             """)
-    List<Waiting> findAllByWaitingStatus(WaitingStatus waitingStatus);
+    List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
 }

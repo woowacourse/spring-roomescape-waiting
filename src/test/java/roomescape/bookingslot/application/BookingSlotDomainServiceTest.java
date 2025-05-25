@@ -13,12 +13,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.bookingslot.domain.service.BookingSlotDomainService;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.service.MemberDomainService;
 import roomescape.bookingslot.domain.repository.BookingSlotRepository;
-import roomescape.bookingslot.domain.service.ReservationDomainService;
 import roomescape.bookingslot.exception.ReservationAlreadyExistsException;
 import roomescape.bookingslot.exception.ReservationNotFoundException;
 import roomescape.bookingslot.presentation.dto.response.ReservationResponse;
@@ -27,8 +27,8 @@ import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.domain.service.ThemeDomainService;
-import roomescape.waiting.domain.service.WaitingDomainService;
-import roomescape.waiting.domain.repository.WaitingRepository;
+import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.reservation.domain.repository.ReservationRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -41,7 +41,7 @@ class BookingSlotDomainServiceTest {
     private Long themeId;
     private Long memberId;
 
-    private ReservationApplicationService reservationApplicationService;
+    private BookingSlotApplicationService bookingSlotApplicationService;
 
     @Autowired
     private BookingSlotRepository bookingSlotRepository;
@@ -56,17 +56,17 @@ class BookingSlotDomainServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private WaitingRepository waitingRepository;
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
-        ReservationDomainService reservationDomainService = new ReservationDomainService(bookingSlotRepository);
-        reservationApplicationService = new ReservationApplicationService(
-                reservationDomainService,
-                new ReservationTimeDomainService(reservationTimeRepository, reservationDomainService),
+        BookingSlotDomainService bookingSlotDomainService = new BookingSlotDomainService(bookingSlotRepository);
+        bookingSlotApplicationService = new BookingSlotApplicationService(
+                bookingSlotDomainService,
+                new ReservationTimeDomainService(reservationTimeRepository, bookingSlotDomainService),
                 new ThemeDomainService(themeRepository, bookingSlotRepository),
                 new MemberDomainService(memberRepository),
-                new WaitingDomainService(waitingRepository)
+                new ReservationDomainService(reservationRepository)
         );
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
@@ -77,7 +77,7 @@ class BookingSlotDomainServiceTest {
 
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
-        ReservationResponse response = reservationApplicationService.create(futureDate, timeId, themeId, memberId,
+        ReservationResponse response = bookingSlotApplicationService.create(futureDate, timeId, themeId, memberId,
                 afterOneHour);
 
         Assertions.assertAll(
@@ -90,20 +90,20 @@ class BookingSlotDomainServiceTest {
     @Test
     void findFilteredReservations_shouldReturnAllCreatedReservations() {
         Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
-        reservationApplicationService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
+        bookingSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        bookingSlotApplicationService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
 
-        List<ReservationResponse> result = reservationApplicationService.findReservations(null, null, null, null);
+        List<ReservationResponse> result = bookingSlotApplicationService.findReservations(null, null, null, null);
         assertThat(result).hasSize(2);
     }
 
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
-        ReservationResponse response = reservationApplicationService.create(futureDate, timeId, themeId, memberId,
+        ReservationResponse response = bookingSlotApplicationService.create(futureDate, timeId, themeId, memberId,
                 afterOneHour);
-        reservationApplicationService.delete(response.id());
+        bookingSlotApplicationService.delete(response.id());
 
-        List<ReservationResponse> result = reservationApplicationService.findReservations(themeId, memberId, futureDate,
+        List<ReservationResponse> result = bookingSlotApplicationService.findReservations(themeId, memberId, futureDate,
                 futureDate.plusDays(1));
         assertThat(result).isEmpty();
     }
@@ -111,10 +111,10 @@ class BookingSlotDomainServiceTest {
     @Test
     void createReservation_shouldThrowException_WhenDuplicated() {
         reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
-        reservationApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        bookingSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
 
         assertThatThrownBy(
-                () -> reservationApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour))
+                () -> bookingSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationAlreadyExistsException.class)
                 .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
@@ -122,7 +122,7 @@ class BookingSlotDomainServiceTest {
     @Test
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(
-                () -> reservationApplicationService.create(futureDate, 999L, themeId, memberId, afterOneHour))
+                () -> bookingSlotApplicationService.create(futureDate, 999L, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }

@@ -15,19 +15,19 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
-import roomescape.bookingslot.application.ReservationApplicationService;
+import roomescape.bookingslot.application.BookingSlotApplicationService;
 import roomescape.bookingslot.presentation.dto.request.AdminReservationCreateRequest;
 import roomescape.bookingslot.presentation.dto.request.ReservationCreateRequest;
 import roomescape.bookingslot.presentation.dto.response.MyReservationResponse;
 import roomescape.bookingslot.presentation.dto.response.ReservationResponse;
 
 @RestController
-public class ReservationController {
+public class BookingSlotController {
 
-    private final ReservationApplicationService reservationApplicationService;
+    private final BookingSlotApplicationService bookingSlotApplicationService;
 
-    public ReservationController(final ReservationApplicationService reservationApplicationService) {
-        this.reservationApplicationService = reservationApplicationService;
+    public BookingSlotController(final BookingSlotApplicationService bookingSlotApplicationService) {
+        this.bookingSlotApplicationService = bookingSlotApplicationService;
     }
 
     @GetMapping("/reservations")
@@ -37,7 +37,9 @@ public class ReservationController {
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        return ResponseEntity.ok(reservationApplicationService.findReservations(themeId, memberId, dateFrom, dateTo));
+        List<ReservationResponse> reservations = bookingSlotApplicationService.findReservations(themeId, memberId,
+                dateFrom, dateTo);
+        return ResponseEntity.ok(reservations);
     }
 
     @RequireRole(MemberRole.REGULAR)
@@ -46,7 +48,7 @@ public class ReservationController {
             @RequestBody ReservationCreateRequest request,
             MemberInfo memberInfo
     ) {
-        ReservationResponse dto = reservationApplicationService.create(request.date(), request.timeId(),
+        ReservationResponse dto = bookingSlotApplicationService.create(request.date(), request.timeId(),
                 request.themeId(),
                 memberInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -57,7 +59,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(
             @RequestBody AdminReservationCreateRequest request
     ) {
-        ReservationResponse dto = reservationApplicationService.create(request.date(), request.timeId(),
+        ReservationResponse dto = bookingSlotApplicationService.create(request.date(), request.timeId(),
                 request.themeId(),
                 request.memberId(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -68,14 +70,14 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservations(
             @PathVariable("id") Long id
     ) {
-        reservationApplicationService.delete(id);
+        bookingSlotApplicationService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @RequireRole(MemberRole.REGULAR)
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationResponse>> findMyReservations(MemberInfo memberInfo) {
-        List<MyReservationResponse> myReservations = reservationApplicationService.findMyReservations(memberInfo);
+        List<MyReservationResponse> myReservations = bookingSlotApplicationService.findMyReservations(memberInfo);
         return ResponseEntity.ok().body(myReservations);
     }
 }

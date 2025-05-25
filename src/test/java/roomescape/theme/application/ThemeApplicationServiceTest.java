@@ -22,7 +22,7 @@ import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.application.MemberApplicationService;
 import roomescape.member.domain.service.MemberDomainService;
 import roomescape.bookingslot.domain.repository.BookingSlotRepository;
-import roomescape.bookingslot.domain.service.ReservationDomainService;
+import roomescape.bookingslot.domain.service.BookingSlotDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
@@ -62,14 +62,14 @@ class ThemeApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationDomainService reservationDomainService = new ReservationDomainService(bookingSlotRepository);
+        BookingSlotDomainService bookingSlotDomainService = new BookingSlotDomainService(bookingSlotRepository);
         themeApplicationService = new ThemeApplicationService(new ThemeDomainService(themeRepository,
                 bookingSlotRepository),
-                reservationDomainService);
+                bookingSlotDomainService);
         MemberDomainService memberDomainService = new MemberDomainService(memberRepository);
         memberApplicationService = new MemberApplicationService(memberDomainService, myPasswordEncoder);
         reservationTimeApplicationService = new ReservationTimeApplicationService(new ReservationTimeDomainService(reservationTimeRepository,
-                reservationDomainService), reservationDomainService);
+                bookingSlotDomainService), bookingSlotDomainService);
     }
 
     @Test

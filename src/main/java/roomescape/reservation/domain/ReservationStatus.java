@@ -1,12 +1,12 @@
-package roomescape.waiting.domain;
+package roomescape.reservation.domain;
 
-public enum WaitingStatus {
+public enum ReservationStatus {
 
     CURRENT("예약"), WAITING("%d번째 예약대기");
 
     private final String title;
 
-    WaitingStatus(final String title) {
+    ReservationStatus(final String title) {
         this.title = title;
     }
 

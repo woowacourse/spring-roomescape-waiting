@@ -105,7 +105,7 @@ VALUES
     ('2025-05-11', 2, 12);  -- ID: 27
 
 -- Waiting 테이블 데이터 (WaitingStatus enum 값 사용)
-INSERT INTO waitings(reservation_id, member_id, waiting_status, created_at)
+INSERT INTO reservations(booking_slot_id, member_id, waiting_status, created_at)
 VALUES
     -- Reservation ID 1 (테마12, 5/10, 시간1) - Alice, Bob, Carol이 대기
     (1, 3, 'CURRENT', '2025-05-09 10:00:00'),

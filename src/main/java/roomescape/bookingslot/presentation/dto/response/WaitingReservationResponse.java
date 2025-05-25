@@ -1,15 +1,15 @@
 package roomescape.bookingslot.presentation.dto.response;
 
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingStatus;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 
 public record WaitingReservationResponse(
         Long reservationId,
         Long waitingId,
-        WaitingStatus waitingStatus
+        ReservationStatus reservationStatus
 ) {
-    public static WaitingReservationResponse from(Waiting waiting) {
-        return new WaitingReservationResponse(waiting.getReservation().getId(), waiting.getId(),
-                waiting.getWaitingStatus());
+    public static WaitingReservationResponse from(Reservation reservation) {
+        return new WaitingReservationResponse(reservation.getReservation().getId(), reservation.getId(),
+                reservation.getWaitingStatus());
     }
 }

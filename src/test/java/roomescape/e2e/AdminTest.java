@@ -24,7 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
-import roomescape.waiting.presentation.dto.WaitingResponse;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -131,7 +131,7 @@ public class AdminTest {
     @Test
     void findWaitingReservation() {
         makeWaitingReservations();
-        List<WaitingResponse> responses = RestAssured.given().log().all()
+        List<ReservationResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
                 .when().get("/admin/waiting-reservations")
@@ -154,7 +154,7 @@ public class AdminTest {
                 .then().log().all()
                 .statusCode(204);
 
-        List<WaitingResponse> responses = RestAssured.given().log().all()
+        List<ReservationResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
                 .when().get("/admin/waiting-reservations")

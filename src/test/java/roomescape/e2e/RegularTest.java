@@ -30,7 +30,7 @@ import roomescape.common.security.dto.request.LoginRequest;
 import roomescape.common.security.dto.response.CheckLoginResponse;
 import roomescape.bookingslot.presentation.dto.response.MyReservationResponse;
 import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
-import roomescape.waiting.domain.WaitingStatus;
+import roomescape.reservation.domain.ReservationStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -119,7 +119,7 @@ public class RegularTest {
     void createWaitingReservations() {
         WaitingReservationResponse waitingReservationResponse = makeWaitingReservations();
 
-        assertThat(waitingReservationResponse.waitingStatus()).isEqualTo(WaitingStatus.WAITING);
+        assertThat(waitingReservationResponse.reservationStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test

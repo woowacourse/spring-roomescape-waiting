@@ -14,11 +14,11 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 import roomescape.theme.domain.Theme;
 
 @Service
-public class ReservationDomainService {
+public class BookingSlotDomainService {
 
     private final BookingSlotRepository bookingSlotRepository;
 
-    public ReservationDomainService(final BookingSlotRepository bookingSlotRepository) {
+    public BookingSlotDomainService(final BookingSlotRepository bookingSlotRepository) {
         this.bookingSlotRepository = bookingSlotRepository;
     }
 

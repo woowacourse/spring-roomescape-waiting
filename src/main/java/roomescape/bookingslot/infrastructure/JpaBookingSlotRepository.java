@@ -11,15 +11,15 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 public interface JpaBookingSlotRepository extends JpaRepository<BookingSlot, Long> {
 
     @Query("""
-            SELECT r
-            FROM BookingSlot r
-            JOIN FETCH r.time t
-            JOIN FETCH r.theme th
-            JOIN FETCH r.waitings w
-            JOIN FETCH w.member m
+            SELECT bs
+            FROM BookingSlot bs
+            JOIN FETCH bs.time t
+            JOIN FETCH bs.theme th
+            JOIN FETCH bs.reservations r
+            JOIN FETCH r.member m
             WHERE th.id = :themeId
               AND m.id = :memberId
-              AND r.date BETWEEN :startDate AND :endDate
+              AND bs.date BETWEEN :startDate AND :endDate
             """)
     List<BookingSlot> findByThemeIdAndDateBetweenAndWaitingsMemberId(Long themeId,
                                                                      LocalDate startDate, LocalDate endDate,

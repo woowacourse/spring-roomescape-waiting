@@ -22,11 +22,11 @@ import roomescape.member.domain.Member;
 import roomescape.bookingslot.exception.InvalidReservationException;
 import roomescape.bookingslot.exception.ReservationAlreadyExistsException;
 import roomescape.bookingslot.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingStatus;
-import roomescape.waiting.exception.WaitingNotFoundException;
+import roomescape.reservation.exception.SlotReservationNotFoundException;
 
 @Entity
 @Table(name = "booking_slots")
@@ -50,7 +50,7 @@ public class BookingSlot {
 
     @OneToMany(mappedBy = "bookingSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Column(name = "waiting_id", nullable = false)
-    private List<Waiting> waitings = new ArrayList<>();
+    private List<Reservation> reservations = new ArrayList<>();
 
     public BookingSlot(final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme) {
@@ -58,7 +58,7 @@ public class BookingSlot {
         this.time = time;
         this.theme = theme;
         // TODO : 연관관계 저장 안됨 문제
-        waitings.add(new Waiting(WaitingStatus.CURRENT, member, this));
+        reservations.add(new Reservation(ReservationStatus.CURRENT, member, this));
     }
 
     protected BookingSlot() {
@@ -78,44 +78,44 @@ public class BookingSlot {
         }
     }
 
-    public Waiting addMemberToWaiting(final Member member) {
-        boolean alreadyWaiting = waitings.stream()
+    public Reservation addMemberToWaiting(final Member member) {
+        boolean alreadyWaiting = this.reservations.stream()
                 .anyMatch(waiting -> waiting.getMember().getId().equals(member.getId()));
         if (alreadyWaiting) {
             throw new ReservationAlreadyExistsException("이미 예약 대기중입니다.");
         }
-        Waiting waiting = new Waiting(WaitingStatus.WAITING, member, this);
-        waitings.add(waiting);
-        return waiting;
+        Reservation reservation = new Reservation(ReservationStatus.WAITING, member, this);
+        this.reservations.add(reservation);
+        return reservation;
     }
 
     public Member findReservedMember() {
-        return waitings.stream()
-                .sorted(Comparator.comparing(Waiting::getCreatedAt))
-                .map(Waiting::getMember)
+        return reservations.stream()
+                .sorted(Comparator.comparing(Reservation::getCreatedAt))
+                .map(Reservation::getMember)
                 .findFirst()
                 .orElseThrow(() -> new ReservationNotFoundException("현재 예약한 멤버가 없습니다."));
     }
 
-    public long findRank(final Waiting givenWaiting) {
-        if (!waitings.contains(givenWaiting)) {
-            throw new WaitingNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
+    public long findRank(final Reservation givenReservation) {
+        if (!reservations.contains(givenReservation)) {
+            throw new SlotReservationNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
         }
-        List<Waiting> sortedWaitings = new ArrayList<>(waitings)
+        List<Reservation> sortedReservations = new ArrayList<>(reservations)
                 .stream()
-                .sorted(Comparator.comparing(Waiting::getCreatedAt))
+                .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .toList();
-        return sortedWaitings.indexOf(givenWaiting);
+        return sortedReservations.indexOf(givenReservation);
     }
 
     public void cancelWaiting(final Member member) {
-        Waiting waitingToRemove = waitings.stream()
+        Reservation reservationToRemove = reservations.stream()
                 .filter(waiting -> waiting.getMember().equals(member))
-                .filter(waiting -> waiting.getWaitingStatus() == WaitingStatus.WAITING)
+                .filter(waiting -> waiting.getWaitingStatus() == ReservationStatus.WAITING)
                 .findFirst()
                 .orElseThrow(() -> new ReservationNotFoundException("대기 정보를 찾을 수 없습니다."));
 
-        waitings.remove(waitingToRemove);
+        reservations.remove(reservationToRemove);
     }
 
     @Override
@@ -125,12 +125,12 @@ public class BookingSlot {
         }
         return Objects.equals(getId(), that.getId()) && Objects.equals(getDate(), that.getDate())
                 && Objects.equals(getTime(), that.getTime()) && Objects.equals(getTheme(),
-                that.getTheme()) && Objects.equals(waitings, that.waitings);
+                that.getTheme()) && Objects.equals(reservations, that.reservations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getDate(), getTime(), getTheme(), waitings);
+        return Objects.hash(getId(), getDate(), getTime(), getTheme(), reservations);
     }
 
     public Long getId() {

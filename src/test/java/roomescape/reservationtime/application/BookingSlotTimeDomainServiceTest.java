@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.bookingslot.domain.service.BookingSlotDomainService;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.bookingslot.application.ReservationApplicationService;
+import roomescape.bookingslot.application.BookingSlotApplicationService;
 import roomescape.bookingslot.domain.repository.BookingSlotRepository;
-import roomescape.bookingslot.domain.service.ReservationDomainService;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
@@ -30,8 +30,8 @@ import roomescape.reservationtime.presentation.dto.response.ReservationTimeRespo
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.domain.service.ThemeDomainService;
-import roomescape.waiting.domain.service.WaitingDomainService;
-import roomescape.waiting.domain.repository.WaitingRepository;
+import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.reservation.domain.repository.ReservationRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -43,7 +43,7 @@ class BookingSlotTimeDomainServiceTest {
     private Theme theme = TestFixture.makeTheme();
     private Member member = TestFixture.makeMember();
 
-    private ReservationApplicationService reservationApplicationService;
+    private BookingSlotApplicationService bookingSlotApplicationService;
     private ReservationTimeApplicationService reservationTimeApplicationService;
 
     @Autowired
@@ -59,22 +59,22 @@ class BookingSlotTimeDomainServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private WaitingRepository waitingRepository;
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setUp() {
-        ReservationDomainService reservationDomainService = new ReservationDomainService(bookingSlotRepository);
+        BookingSlotDomainService bookingSlotDomainService = new BookingSlotDomainService(bookingSlotRepository);
         ReservationTimeDomainService reservationTimeDomainService = new ReservationTimeDomainService(
-                reservationTimeRepository, reservationDomainService);
+                reservationTimeRepository, bookingSlotDomainService);
         reservationTimeApplicationService = new ReservationTimeApplicationService(reservationTimeDomainService,
-                reservationDomainService);
+                bookingSlotDomainService);
         ThemeDomainService themeDomainService = new ThemeDomainService(themeRepository, bookingSlotRepository);
         MemberDomainService memberDomainService = new MemberDomainService(memberRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
-        WaitingDomainService waitingDomainService = new WaitingDomainService(waitingRepository);
-        reservationApplicationService = new ReservationApplicationService(reservationDomainService,
-                reservationTimeDomainService, themeDomainService, memberDomainService, waitingDomainService);
+        ReservationDomainService slotReservationDomainService = new ReservationDomainService(reservationRepository);
+        bookingSlotApplicationService = new BookingSlotApplicationService(bookingSlotDomainService,
+                reservationTimeDomainService, themeDomainService, memberDomainService, slotReservationDomainService);
     }
 
     @Test
@@ -124,7 +124,7 @@ class BookingSlotTimeDomainServiceTest {
     void deleteReservationTime_shouldThrowException_WhenReservationExists() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeApplicationService.create(
                 new ReservationTimeCreateRequest(LocalTime.now()));
-        reservationApplicationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        bookingSlotApplicationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
         assertThatThrownBy(() -> reservationTimeApplicationService.delete(reservationTimeResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
@@ -138,7 +138,7 @@ class BookingSlotTimeDomainServiceTest {
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
-        reservationApplicationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        bookingSlotApplicationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
         List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeApplicationService.getAvailableReservationTimes(
                 futureDate, theme.getId());

@@ -1,4 +1,4 @@
-package roomescape.waiting.domain;
+package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,46 +18,46 @@ import roomescape.member.domain.Member;
 import roomescape.bookingslot.domain.BookingSlot;
 
 @Entity
-@Table(name = "waitings",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"reservation_id", "member_id"})
+@Table(name = "reservations",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"booking_slot_id", "member_id"})
 )
-public class Waiting {
+public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "waiting_id")
+    @Column(name = "reservation_id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "waiting_status", nullable = false)
-    private WaitingStatus waitingStatus;
+    private ReservationStatus reservationStatus;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "reservation_id", nullable = false)
+    @JoinColumn(name = "booking_slot_id", nullable = false)
     private BookingSlot bookingSlot;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Waiting(final WaitingStatus waitingStatus, final Member member, final BookingSlot bookingSlot) {
-        this.waitingStatus = waitingStatus;
+    public Reservation(final ReservationStatus reservationStatus, final Member member, final BookingSlot bookingSlot) {
+        this.reservationStatus = reservationStatus;
         this.member = member;
         this.bookingSlot = bookingSlot;
     }
 
-    public Waiting() {
+    public Reservation() {
     }
 
     @Override
     public boolean equals(final Object object) {
-        if (!(object instanceof final Waiting waiting)) {
+        if (!(object instanceof final Reservation reservation)) {
             return false;
         }
-        return Objects.equals(getId(), waiting.getId());
+        return Objects.equals(getId(), reservation.getId());
     }
 
     @Override
@@ -69,8 +69,8 @@ public class Waiting {
         return id;
     }
 
-    public WaitingStatus getWaitingStatus() {
-        return waitingStatus;
+    public ReservationStatus getWaitingStatus() {
+        return reservationStatus;
     }
 
     public BookingSlot getReservation() {

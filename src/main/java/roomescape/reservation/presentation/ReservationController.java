@@ -1,4 +1,4 @@
-package roomescape.waiting.presentation;
+package roomescape.reservation.presentation;
 
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -14,16 +14,16 @@ import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.bookingslot.presentation.dto.request.ReservationCreateRequest;
 import roomescape.bookingslot.presentation.dto.response.WaitingReservationResponse;
-import roomescape.waiting.application.WaitingApplicationService;
-import roomescape.waiting.presentation.dto.WaitingResponse;
+import roomescape.reservation.application.ReservationApplicationService;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @RestController
-public class WaitingController {
+public class ReservationController {
 
-    private final WaitingApplicationService waitingApplicationService;
+    private final ReservationApplicationService reservationApplicationService;
 
-    public WaitingController(final WaitingApplicationService waitingApplicationService) {
-        this.waitingApplicationService = waitingApplicationService;
+    public ReservationController(final ReservationApplicationService reservationApplicationService) {
+        this.reservationApplicationService = reservationApplicationService;
     }
 
     @RequireRole(MemberRole.REGULAR)
@@ -32,7 +32,7 @@ public class WaitingController {
             @RequestBody ReservationCreateRequest request,
             MemberInfo memberInfo
     ) {
-        WaitingReservationResponse waitingReservationResponse = waitingApplicationService.addWaiting(
+        WaitingReservationResponse waitingReservationResponse = reservationApplicationService.addWaiting(
                 request.date(), request.timeId(), request.themeId(), memberInfo.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(waitingReservationResponse);
     }
@@ -43,15 +43,15 @@ public class WaitingController {
             @PathVariable Long reservationId,
             MemberInfo memberInfo
     ) {
-        waitingApplicationService.removeWaiting(reservationId, memberInfo.id());
+        reservationApplicationService.removeWaiting(reservationId, memberInfo.id());
         return ResponseEntity.noContent().build();
     }
 
     @RequireRole(MemberRole.ADMIN)
     @GetMapping("/admin/waiting-reservations")
-    public ResponseEntity<List<WaitingResponse>> findAllWaitingReservations(
+    public ResponseEntity<List<ReservationResponse>> findAllWaitingReservations(
     ) {
-        List<WaitingResponse> responses = waitingApplicationService.findAllWaitingReservations();
+        List<ReservationResponse> responses = reservationApplicationService.findAllWaitingReservations();
         return ResponseEntity.ok(responses);
     }
 
@@ -60,7 +60,7 @@ public class WaitingController {
     public ResponseEntity<Void> removeWaitingReservation(
             @PathVariable Long waitingId
     ) {
-        waitingApplicationService.removeWaitingReservation(waitingId);
+        reservationApplicationService.removeWaitingReservation(waitingId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,4 +1,4 @@
-package roomescape.waiting.infrastructure;
+package roomescape.reservation.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.fixture.TestFixture.FUTURE_DATE;
@@ -21,12 +21,12 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.repository.WaitingRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.repository.ReservationRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class JpaWaitingRepositoryTest {
+class JpaReservationRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -41,7 +41,7 @@ class JpaWaitingRepositoryTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private WaitingRepository waitingRepository;
+    private ReservationRepository reservationRepository;
 
     private Member member;
 
@@ -59,14 +59,14 @@ class JpaWaitingRepositoryTest {
     }
 
     @Test
-    void findByWaitingsMemberId() {
+    void findByReservationMemberId() {
         // Given
         Long memberId = member.getId();
 
         // When
-        List<Waiting> waitings = waitingRepository.findByWaitingMemberId(memberId);
+        List<Reservation> reservations = reservationRepository.findByWaitingMemberId(memberId);
 
         // Then
-        assertThat(waitings.size()).isEqualTo(1);
+        assertThat(reservations.size()).isEqualTo(1);
     }
 }

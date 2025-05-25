@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import roomescape.member.exception.InvalidMemberException;
-import roomescape.waiting.domain.Waiting;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 @Table(name = "members")
@@ -43,7 +43,7 @@ public class Member {
     // TODO: 꼭 필요할까?
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Column(name = "waiting_id")
-    private List<Waiting> waitingList = new ArrayList<>();
+    private List<Reservation> reservationList = new ArrayList<>();
 
     public Member(final String name, final String email, final String password,
                   final MemberRole memberRole) {

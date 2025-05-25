@@ -9,15 +9,15 @@ import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
+import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservationtime.infrastructure.JpaReservationTimeRepositoryAdapter;
 import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepositoryAdapter;
-import roomescape.waiting.domain.repository.WaitingRepository;
-import roomescape.waiting.infrastructure.JpaWaitingRepository;
-import roomescape.waiting.infrastructure.JpaWaitingRepositoryAdapter;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 
 @Configuration
 public class TestConfig {
@@ -49,7 +49,7 @@ public class TestConfig {
     }
 
     @Bean
-    public WaitingRepository waitingRepository(final JpaWaitingRepository jpaWaitingRepository) {
-        return new JpaWaitingRepositoryAdapter(jpaWaitingRepository);
+    public ReservationRepository reservationRepository(final JpaReservationRepository jpaReservationRepository) {
+        return new JpaReservationRepositoryAdapter(jpaReservationRepository);
     }
 }
