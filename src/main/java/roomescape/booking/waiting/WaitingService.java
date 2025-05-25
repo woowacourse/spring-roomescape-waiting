@@ -4,19 +4,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleService;
-import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsScheduleException;
-import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.exception.custom.reason.waiting.WaitingNotFoundException;
-import roomescape.member.Member;
-import roomescape.member.MemberService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,19 +16,6 @@ import java.util.List;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
-    private final ReservationService reservationService;
-    private final ScheduleService scheduleService;
-    private final MemberService memberService;
-
-    @Transactional
-    public WaitingResponse create(final WaitingRequest request, final LoginMember loginMember) {
-        final Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
-        validatePast(schedule);
-        validateExistsReservationAboutSchedule(schedule);
-
-        Waiting savedWaiting = saveWaiting(loginMember, schedule);
-        return WaitingResponse.of(savedWaiting);
-    }
 
     @Transactional(readOnly = true)
     public List<WaitingResponse> readAll() {
@@ -47,14 +26,14 @@ public class WaitingService {
 
     @Transactional
     public void deleteById(final Long id, LoginMember member) {
-        Waiting waiting = getWaitingById(id);
+        Waiting waiting = getById(id);
         validateAuthorization(member, waiting);
         waitingRepository.delete(waiting);
     }
 
     @Transactional
     public void deleteByIdForAdmin(final Long id) {
-        Waiting waiting = getWaitingById(id);
+        Waiting waiting = getById(id);
         waitingRepository.delete(waiting);
     }
 
@@ -65,8 +44,7 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public List<Waiting> findAllByEmail(final String email) {
-        Member member = memberService.findByEmail(email);
-        return waitingRepository.findAllByMember(member);
+        return waitingRepository.findAllByMember_Email(email);
     }
 
     @Transactional
@@ -84,25 +62,6 @@ public class WaitingService {
         return waitingRepository.countByScheduleAndCreatedAtLessThan(waiting.getSchedule(), waiting.getCreatedAt());
     }
 
-    private Waiting saveWaiting(final LoginMember loginMember, final Schedule schedule) {
-        final Member member = memberService.findByEmail(loginMember.email());
-        final Waiting waiting = new Waiting(schedule, member, LocalDateTime.now());
-        return waitingRepository.save(waiting);
-    }
-
-    private void validatePast(final Schedule schedule) {
-        if (schedule.isPast()) {
-            throw new PastScheduleException();
-        }
-    }
-
-    private void validateExistsReservationAboutSchedule(final Schedule schedule) {
-        boolean isReservationExist = reservationService.existsBySchedule(schedule);
-        if (!isReservationExist) {
-            throw new ReservationNotExistsScheduleException();
-        }
-    }
-
     private void validateAuthorization(final LoginMember member, final Waiting waiting) {
         boolean isAuthorized = waiting.getMember().isEmailEquals(member.email());
         if (!isAuthorized) {
@@ -110,7 +69,7 @@ public class WaitingService {
         }
     }
 
-    private Waiting getWaitingById(final Long id) {
+    private Waiting getById(final Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(WaitingNotFoundException::new);
     }

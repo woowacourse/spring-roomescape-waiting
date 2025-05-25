@@ -16,13 +16,14 @@ import roomescape.booking.waiting.dto.WaitingResponse;
 public class WaitingController {
 
     private final WaitingService waitingService;
+    private final WaitingCreateService waitingCreateService;
 
     @PostMapping
     public ResponseEntity<WaitingResponse> create(
             @RequestBody @Valid final WaitingRequest request,
             @AuthenticationPrincipal final LoginMember member
     ) {
-        final WaitingResponse response = waitingService.create(request, member);
+        final WaitingResponse response = waitingCreateService.create(request, member);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

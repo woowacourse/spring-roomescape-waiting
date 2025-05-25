@@ -8,19 +8,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleService;
 import roomescape.booking.waiting.Waiting;
 import roomescape.booking.waiting.WaitingRepository;
 import roomescape.booking.waiting.WaitingService;
 import roomescape.booking.waiting.dto.WaitingRequest;
-import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
-import roomescape.exception.custom.reason.reservation.ReservationNotExistsScheduleException;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
-import roomescape.member.MemberService;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
@@ -29,10 +24,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static roomescape.util.TestFactory.*;
 
@@ -41,12 +34,6 @@ class WaitingServiceTest {
 
     @Mock
     private WaitingRepository waitingRepository;
-    @Mock
-    private ReservationService reservationService;
-    @Mock
-    private ScheduleService scheduleService;
-    @Mock
-    private MemberService memberService;
     @InjectMocks
     private WaitingService waitingService;
 
@@ -63,44 +50,6 @@ class WaitingServiceTest {
         Theme theme = themeWithId(request.themeId(), new Theme("야당", "야당당", "123"));
         schedule = scheduleWithId(1L, new Schedule(request.date(), reservationTime, theme));
         member = memberWithId(1L, new Member(loginMember.email(), "password", "boogie", MemberRole.MEMBER));
-    }
-
-    @Test
-    @DisplayName("웨이팅을 할 수 있다.")
-    void createWaiting() {
-        // given
-        given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
-                .willReturn(schedule);
-        given(reservationService.existsBySchedule(schedule))
-                .willReturn(true);
-        given(memberService.findByEmail(loginMember.email()))
-                .willReturn(member);
-
-        Waiting waiting = new Waiting(schedule, member, LocalDateTime.now().minusDays(1));
-        Waiting createdWaiting = waitingWithId(1L, waiting);
-        given(waitingRepository.save(any()))
-                .willReturn(createdWaiting);
-
-        // when
-        WaitingResponse waitingResponse = waitingService.create(request, loginMember);
-
-        // then
-        assertThat(WaitingResponse.of(createdWaiting))
-                .isEqualTo(waitingResponse);
-    }
-
-    @Test
-    @DisplayName("스케줄에 대한 예약이 없는 경우, 웨이팅을 할 수 없다")
-    void createWaiting2() {
-        // given
-        given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
-                .willReturn(schedule);
-        given(reservationService.existsBySchedule(schedule))
-                .willReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> waitingService.create(request, loginMember))
-                .isInstanceOf(ReservationNotExistsScheduleException.class);
     }
 
     @Test
