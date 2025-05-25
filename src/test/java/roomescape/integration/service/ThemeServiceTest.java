@@ -25,7 +25,7 @@ import roomescape.service.request.CreateThemeRequest;
 class ThemeServiceTest extends ServiceTestBase {
 
     @Autowired
-    private ThemeService themeService;
+    private ThemeService sut;
 
     @Autowired
     private ThemeDbFixture themeDbFixture;
@@ -45,7 +45,7 @@ class ThemeServiceTest extends ServiceTestBase {
         var request = new CreateThemeRequest("공포", "무섭다", "thumb.jpg");
 
         // when
-        var response = themeService.createTheme(request);
+        var response = sut.createTheme(request);
 
         // then
         assertSoftly(softly -> {
@@ -58,11 +58,11 @@ class ThemeServiceTest extends ServiceTestBase {
     @Test
     void 모든_테마를_조회할_수_있다() {
         // given
-        themeService.createTheme(new CreateThemeRequest("공포", "무섭다", "thumb.jpg"));
-        themeService.createTheme(new CreateThemeRequest("로맨스", "달달하다", "love.jpg"));
+        sut.createTheme(new CreateThemeRequest("공포", "무섭다", "thumb.jpg"));
+        sut.createTheme(new CreateThemeRequest("로맨스", "달달하다", "love.jpg"));
 
         // when
-        var result = themeService.findAllThemes();
+        var result = sut.findAllThemes();
 
         // then
         assertThat(result).hasSize(2);
@@ -71,13 +71,13 @@ class ThemeServiceTest extends ServiceTestBase {
     @Test
     void 예약이_없는_테마는_삭제할_수_있다() {
         // given
-        var saved = themeService.createTheme(new CreateThemeRequest("공포", "무섭다", "thumb.jpg"));
+        var saved = sut.createTheme(new CreateThemeRequest("공포", "무섭다", "thumb.jpg"));
 
         // when // then
-        assertThatCode(() -> themeService.deleteThemeById(saved.id()))
+        assertThatCode(() -> sut.deleteThemeById(saved.id()))
                 .doesNotThrowAnyException();
 
-        assertThat(themeService.findAllThemes()).isEmpty();
+        assertThat(sut.findAllThemes()).isEmpty();
     }
 
     @Test
@@ -97,7 +97,7 @@ class ThemeServiceTest extends ServiceTestBase {
         );
 
         // when // then
-        assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
+        assertThatThrownBy(() -> sut.deleteThemeById(theme.getId()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 예약이 존재해서 테마를 삭제할 수 없습니다.");
     }
@@ -105,7 +105,7 @@ class ThemeServiceTest extends ServiceTestBase {
     @Test
     void 존재하지_않는_테마는_삭제할_수_없다() {
         // when // then
-        assertThatThrownBy(() -> themeService.deleteThemeById(999L))
+        assertThatThrownBy(() -> sut.deleteThemeById(999L))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("해당 테마가 존재하지 않습니다.");
     }
@@ -122,7 +122,7 @@ class ThemeServiceTest extends ServiceTestBase {
         reservationDbFixture.예약_생성(예약날짜_7일전, 예약시간_10시, 로맨스, 한스);
 
         // when
-        var result = themeService.getWeeklyPopularThemes();
+        var result = sut.getWeeklyPopularThemes();
 
         // then
         assertSoftly(softly -> {

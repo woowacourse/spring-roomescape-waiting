@@ -16,7 +16,7 @@ import roomescape.global.exception.AuthenticationException;
 
 class AdminOnlyInterceptorTest {
 
-    private final AdminOnlyInterceptor interceptor = new AdminOnlyInterceptor();
+    private final AdminOnlyInterceptor sut = new AdminOnlyInterceptor();
 
     @Test
     void 관리자가_아니면_403_반환() {
@@ -29,7 +29,7 @@ class AdminOnlyInterceptorTest {
         var response = new MockHttpServletResponse();
 
         // when // then
-        assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object()))
+        assertThatThrownBy(() -> sut.preHandle(request, response, new Object()))
                 .isInstanceOf(AccessDeniedException.class)
                 .hasMessageContaining("어드민이 아닙니다.");
     }
@@ -45,7 +45,7 @@ class AdminOnlyInterceptorTest {
         var response = new MockHttpServletResponse();
 
         // when
-        var result = interceptor.preHandle(request, response, new Object());
+        var result = sut.preHandle(request, response, new Object());
 
         // then
         assertThat(result).isTrue();
@@ -59,7 +59,7 @@ class AdminOnlyInterceptorTest {
         var response = new MockHttpServletResponse();
 
         // when // then
-        assertThatThrownBy(() -> interceptor.preHandle(request, response, new Object()))
+        assertThatThrownBy(() -> sut.preHandle(request, response, new Object()))
                 .isInstanceOf(AuthenticationException.class)
                 .hasMessage("로그인이 필요합니다.");
     }

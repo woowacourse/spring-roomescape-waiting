@@ -24,7 +24,7 @@ import roomescape.service.request.ReservationCreateRequest;
 class ReservationServiceTest extends ServiceTestBase {
 
     @Autowired
-    private ReservationService service;
+    private ReservationService sut;
 
     @Autowired
     private ReservationDbFixture reservationDbFixture;
@@ -51,7 +51,7 @@ class ReservationServiceTest extends ServiceTestBase {
         reservationDbFixture.예약_생성(reservationDateTime.getReservationDate(), reservationTime, theme, member);
 
         // when
-        var all = service.findAllReservations();
+        var all = sut.findAllReservations();
 
         // then
         assertSoftly(softly -> {
@@ -77,7 +77,7 @@ class ReservationServiceTest extends ServiceTestBase {
         var request = new ReservationCreateRequest(today, reservationTime.getId(), theme.getId());
 
         // when
-        var response = service.createReservation(request, member.getId());
+        var response = sut.createReservation(request, member.getId());
 
         // then
         assertThat(response.name()).isEqualTo("한스");
@@ -90,7 +90,7 @@ class ReservationServiceTest extends ServiceTestBase {
         var request = new ReservationCreateRequest(today, 999L, 1L);
 
         // when // then
-        assertThatThrownBy(() -> service.createReservation(request, member.getId()))
+        assertThatThrownBy(() -> sut.createReservation(request, member.getId()))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
@@ -110,7 +110,7 @@ class ReservationServiceTest extends ServiceTestBase {
         );
 
         // when // then
-        assertThatThrownBy(() -> service.createReservation(request, member.getId()))
+        assertThatThrownBy(() -> sut.createReservation(request, member.getId()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 예약이 찼습니다.");
     }
@@ -123,7 +123,7 @@ class ReservationServiceTest extends ServiceTestBase {
         var request = new ReservationCreateRequest(today, reservationTime.getId(), 999L);
 
         // when // then
-        assertThatThrownBy(() -> service.createReservation(request, member.getId()))
+        assertThatThrownBy(() -> sut.createReservation(request, member.getId()))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("해당 테마가 존재하지 않습니다.");
     }
@@ -140,16 +140,16 @@ class ReservationServiceTest extends ServiceTestBase {
                 member);
 
         // when
-        service.deleteReservationById(reservation.getId());
+        sut.deleteReservationById(reservation.getId());
 
         // then
-        assertThat(service.findAllReservations()).isEmpty();
+        assertThat(sut.findAllReservations()).isEmpty();
     }
 
     @Test
     void 삭제할_예약이_없으면_예외() {
         // when // then
-        assertThatThrownBy(() -> service.deleteReservationById(999L))
+        assertThatThrownBy(() -> sut.deleteReservationById(999L))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
     }
@@ -165,7 +165,7 @@ class ReservationServiceTest extends ServiceTestBase {
         reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme, member2);
 
         // when
-        var result = service.findAllReservationsWithFilter(
+        var result = sut.findAllReservationsWithFilter(
                 member1.getId(), null, 예약날짜_오늘.date(), 예약날짜_오늘.date());
 
         // then
@@ -183,7 +183,7 @@ class ReservationServiceTest extends ServiceTestBase {
         reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme2, member);
 
         // when
-        var result = service.findAllReservationsWithFilter(
+        var result = sut.findAllReservationsWithFilter(
                 null, theme1.getId(), 예약날짜_오늘.date(), 예약날짜_오늘.date());
 
         // then
@@ -202,7 +202,7 @@ class ReservationServiceTest extends ServiceTestBase {
         reservationDbFixture.예약_생성(date2, reservationTime, theme, member);
 
         // when
-        var result = service.findAllReservationsWithFilter(
+        var result = sut.findAllReservationsWithFilter(
                 null, null, date1.date(), date2.date());
 
         // then
@@ -218,7 +218,7 @@ class ReservationServiceTest extends ServiceTestBase {
         reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme, member);
 
         // when
-        var result = service.findAllReservationsWithFilter(
+        var result = sut.findAllReservationsWithFilter(
                 999L, 999L, java.time.LocalDate.of(2099, 1, 1), java.time.LocalDate.of(2099, 1, 2));
 
         // then
@@ -234,7 +234,7 @@ class ReservationServiceTest extends ServiceTestBase {
         var reservation = reservationDbFixture.예약_25_4_22(reservationTime, theme, member);
 
         // when
-        var all = service.findAllMyReservation(member.getId());
+        var all = sut.findAllMyReservation(member.getId());
 
         // then
         assertSoftly(softly -> {

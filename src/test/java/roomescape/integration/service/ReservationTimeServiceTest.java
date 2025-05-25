@@ -24,7 +24,7 @@ import roomescape.service.request.CreateReservationTimeRequest;
 class ReservationTimeServiceTest extends ServiceTestBase {
 
     @Autowired
-    private ReservationTimeService service;
+    private ReservationTimeService sut;
 
     @Autowired
     private MemberDbFixture memberDbFixture;
@@ -45,7 +45,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
         var request = new CreateReservationTimeRequest(startAt);
 
         // when
-        var response = service.createReservationTime(request);
+        var response = sut.createReservationTime(request);
 
         // then
         assertThat(response.startAt()).isEqualTo(startAt);
@@ -59,7 +59,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
         var request = new CreateReservationTimeRequest(startAt);
 
         // when // then
-        assertThatThrownBy(() -> service.createReservationTime(request))
+        assertThatThrownBy(() -> sut.createReservationTime(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 존재하는 예약 시간입니다.");
     }
@@ -71,7 +71,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
         reservationTimeDbFixture.예약시간(LocalTime.of(11, 0));
 
         // when
-        var result = service.findAllReservationTimes();
+        var result = sut.findAllReservationTimes();
 
         // then
         assertThat(result).hasSize(2);
@@ -83,10 +83,10 @@ class ReservationTimeServiceTest extends ServiceTestBase {
         var time = reservationTimeDbFixture.예약시간_10시();
 
         // when
-        service.deleteReservationTimeById(time.getId());
+        sut.deleteReservationTimeById(time.getId());
 
         // then
-        assertThat(service.findAllReservationTimes()).isEmpty();
+        assertThat(sut.findAllReservationTimes()).isEmpty();
     }
 
     @Test
@@ -100,7 +100,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
         reservationDbFixture.예약_생성(reservationDateTime.getReservationDate(), time, theme, member);
 
         // when // then
-        assertThatThrownBy(() -> service.deleteReservationTimeById(time.getId()))
+        assertThatThrownBy(() -> sut.deleteReservationTimeById(time.getId()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
@@ -108,7 +108,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
     @Test
     void 존재하지_않는_예약시간은_삭제할_수_없다() {
         // when // then
-        assertThatThrownBy(() -> service.deleteReservationTimeById(1L))
+        assertThatThrownBy(() -> sut.deleteReservationTimeById(1L))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
@@ -119,7 +119,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
         var time = reservationTimeDbFixture.예약시간_10시();
 
         // when
-        var found = service.getReservationTime(time.getId());
+        var found = sut.getReservationTime(time.getId());
 
         // then
         assertThat(found.getStartAt()).isEqualTo(LocalTime.of(10, 0));
@@ -128,7 +128,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
     @Test
     void 예약시간_ID로_조회시_없으면_예외() {
         // when // then
-        assertThatThrownBy(() -> service.getReservationTime(1L))
+        assertThatThrownBy(() -> sut.getReservationTime(1L))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
@@ -140,7 +140,7 @@ class ReservationTimeServiceTest extends ServiceTestBase {
         reservationTimeDbFixture.예약시간_11시();
 
         // when
-        var result = service.findAvailableReservationTimes(
+        var result = sut.findAvailableReservationTimes(
                 new AvailableReservationTimeRequest(LocalDate.of(2025, 5, 5), 1L));
 
         // then

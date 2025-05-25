@@ -15,7 +15,7 @@ import roomescape.service.request.LoginRequest;
 class LoginServiceTest extends ServiceTestBase {
 
     @Autowired
-    private LoginService loginService;
+    private LoginService sut;
 
     @Autowired
     private MemberDbFixture memberDbFixture;
@@ -27,7 +27,7 @@ class LoginServiceTest extends ServiceTestBase {
         var request = new LoginRequest(member.getEmail().email(), "gustn111!!");
 
         // when
-        var result = loginService.login(request);
+        var result = sut.login(request);
 
         // then
         assertThat(result.getId()).isEqualTo(member.getId());
@@ -39,7 +39,7 @@ class LoginServiceTest extends ServiceTestBase {
         var request = new LoginRequest("notfound@email.com", "gustn111!!");
 
         // when // then
-        assertThatThrownBy(() -> loginService.login(request))
+        assertThatThrownBy(() -> sut.login(request))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 멤버입니다.");
     }
@@ -51,7 +51,7 @@ class LoginServiceTest extends ServiceTestBase {
         var request = new LoginRequest(member.getEmail().email(), "gustn111!!wrong");
 
         // when // then
-        assertThatThrownBy(() -> loginService.login(request))
+        assertThatThrownBy(() -> sut.login(request))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("비밀번호가 일치하지 않습니다.");
     }

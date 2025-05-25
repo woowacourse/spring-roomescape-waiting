@@ -21,7 +21,7 @@ import roomescape.global.exception.AuthenticationException;
 
 class MemberArgumentResolverTest {
 
-    private final MemberArgumentResolver resolver = new MemberArgumentResolver();
+    private final MemberArgumentResolver sut = new MemberArgumentResolver();
 
     @ParameterizedTest
     @MethodSource("provideMethodParameters")
@@ -30,7 +30,7 @@ class MemberArgumentResolverTest {
         var parameter = new MethodParameter(method, parameterIndex);
 
         // when
-        var result = resolver.supportsParameter(parameter);
+        var result = sut.supportsParameter(parameter);
 
         // then
         assertThat(result).isEqualTo(expected);
@@ -65,7 +65,7 @@ class MemberArgumentResolverTest {
         var parameter = new MethodParameter(method, 0);
 
         // when
-        var resolved = resolver.resolveArgument(parameter, null, webRequest, null);
+        var resolved = sut.resolveArgument(parameter, null, webRequest, null);
 
         // then
         assertThat(resolved).isEqualTo(new SessionMember(1L, new MemberName("한스"), MemberRole.MEMBER));
@@ -77,7 +77,7 @@ class MemberArgumentResolverTest {
         var webRequest = new ServletWebRequest(new MockHttpServletRequest());
 
         // when // then
-        assertThatThrownBy(() -> resolver.resolveArgument(null, null, webRequest, null))
+        assertThatThrownBy(() -> sut.resolveArgument(null, null, webRequest, null))
                 .isInstanceOf(AuthenticationException.class)
                 .hasMessage("로그인이 필요합니다.");
     }

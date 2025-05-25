@@ -22,7 +22,7 @@ import roomescape.service.request.WaitingCreateRequest;
 class WaitingServiceTest extends ServiceTestBase {
 
     @Autowired
-    private WaitingService waitingService;
+    private WaitingService sut;
 
     @Autowired
     private MemberDbFixture memberDbFixture;
@@ -48,7 +48,7 @@ class WaitingServiceTest extends ServiceTestBase {
         var request = new WaitingCreateRequest(예약날짜_오늘.date(), reservationTime.getId(), theme.getId());
 
         // when
-        var response = waitingService.createWaiting(request, member.getId());
+        var response = sut.createWaiting(request, member.getId());
 
         // then
         assertSoftly(softly -> {
@@ -67,10 +67,10 @@ class WaitingServiceTest extends ServiceTestBase {
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
         var request = new WaitingCreateRequest(예약날짜_오늘.date(), reservationTime.getId(), theme.getId());
-        waitingService.createWaiting(request, member.getId());
+        sut.createWaiting(request, member.getId());
 
         // when // then
-        assertThatThrownBy(() -> waitingService.createWaiting(request, member.getId()))
+        assertThatThrownBy(() -> sut.createWaiting(request, member.getId()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 대기가 존재합니다.");
     }
@@ -90,7 +90,7 @@ class WaitingServiceTest extends ServiceTestBase {
         );
 
         // when
-        var all = waitingService.findAll();
+        var all = sut.findAll();
 
         // then
         assertThat(all).hasSize(1);
@@ -112,10 +112,10 @@ class WaitingServiceTest extends ServiceTestBase {
         var sessionMember = new SessionMember(member.getId(), member.getName(), member.getRole());
 
         // when
-        waitingService.deleteWaitingById(waiting.getId(), sessionMember);
+        sut.deleteWaitingById(waiting.getId(), sessionMember);
 
         // then
-        assertThat(waitingService.findAll()).isEmpty();
+        assertThat(sut.findAll()).isEmpty();
     }
 
     @Test
@@ -125,12 +125,12 @@ class WaitingServiceTest extends ServiceTestBase {
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
         var request = new WaitingCreateRequest(예약날짜_오늘.date(), reservationTime.getId(), theme.getId());
-        var response = waitingService.createWaiting(request, member.getId());
+        var response = sut.createWaiting(request, member.getId());
         var 다른_유저 = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
         var sessionMember = new SessionMember(다른_유저.getId(), 다른_유저.getName(), 다른_유저.getRole());
 
         // when // then
-        assertThatThrownBy(() -> waitingService.deleteWaitingById(response.id(), sessionMember))
+        assertThatThrownBy(() -> sut.deleteWaitingById(response.id(), sessionMember))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("해당 대기를 삭제할 권한이 없습니다.");
     }
@@ -144,7 +144,7 @@ class WaitingServiceTest extends ServiceTestBase {
         var waiting = waitingDbFixture.대기_25_4_22(reservationTime, theme, member);
 
         // when
-        var all = waitingService.findAllMyWaiting(member.getId());
+        var all = sut.findAllMyWaiting(member.getId());
 
         // then
         assertSoftly(softly -> {

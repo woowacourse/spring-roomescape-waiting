@@ -15,7 +15,7 @@ class MemberServiceTest extends ServiceTestBase {
     private MemberDbFixture memberDbFixture;
 
     @Autowired
-    private MemberService memberService;
+    private MemberService sut;
 
     @Test
     void 모든_멤버를_조회한다() {
@@ -24,7 +24,7 @@ class MemberServiceTest extends ServiceTestBase {
         var member2 = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
 
         // when
-        var allMembers = memberService.findAllMembers();
+        var allMembers = sut.findAllMembers();
 
         // then
         assertThat(allMembers).containsExactly(
