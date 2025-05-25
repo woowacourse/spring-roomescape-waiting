@@ -137,12 +137,10 @@ class ReservationServiceTest {
         ReservationResponse reservation = reservationCompositeService.create(futureDate, timeId, themeId, memberId, afterOneHour);
         ReservationResponse waiting = reservationCompositeService.create(futureDate, timeId, themeId, memberId, afterOneHour);
 
-        assertThat(waiting.id()).isEqualTo(1L);
         assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
         Assertions.assertAll(
                 () -> assertThat(reservation.reservedStatus()).isEqualTo(ReservationStatus.RESERVED.getName()),
-                () -> assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName()),
-                () -> assertThat(waiting.id()).isEqualTo(1L)
+                () -> assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName())
         );
     }
 

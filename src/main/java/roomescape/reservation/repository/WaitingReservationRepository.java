@@ -10,11 +10,6 @@ import roomescape.theme.domain.Theme;
 
 public interface WaitingReservationRepository {
 
-    List<Waiting> findFilteredReservations(Long themeId,
-                                           Long memberId,
-                                           LocalDate startDate,
-                                           LocalDate endDate);
-
     List<Waiting> findAll();
 
     void deleteById(Long id);
@@ -23,7 +18,6 @@ public interface WaitingReservationRepository {
 
     int findMaxOrderByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId);
 
-    List<Waiting> findByMemberId(Long id);
 
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 

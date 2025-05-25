@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.repository.JpaMemberRepository;
-import roomescape.member.repository.JpaMemberRepositoryAdapter;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.JpaReservationRepositoryAdapter;
@@ -40,11 +39,6 @@ public class TestConfig {
     public ReservationTimeRepository reservationTimeRepository(
             final JpaReservationTimeRepository jpaReservationTimeRepository) {
         return new JpaReservationTimeRepositoryAdapter(jpaReservationTimeRepository);
-    }
-
-    @Bean
-    public MemberRepository memberRepository(final JpaMemberRepository jpaMemberRepository) {
-        return new JpaMemberRepositoryAdapter(jpaMemberRepository);
     }
 
 }
