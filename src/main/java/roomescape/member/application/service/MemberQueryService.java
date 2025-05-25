@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.member.exception.MemberNotFound;
+import roomescape.member.exception.MemberNotFoundException;
 
 @Service
 public class MemberQueryService {
@@ -18,12 +18,12 @@ public class MemberQueryService {
 
     public Member findById(final Long id) {
         return memberRepository.findById(id)
-            .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
     }
 
     public Member findByEmail(final Email email) {
         return memberRepository.findByEmail(email)
-            .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
+            .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
     }
 
     public boolean isExistsByEmail(final Email email) {
