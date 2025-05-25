@@ -5,13 +5,10 @@ import org.springframework.stereotype.Repository;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimes;
 import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.ReservationDate;
 import roomescape.business.model.vo.StartTime;
 import roomescape.infrastructure.jpa.dao.JpaReservationTimeDao;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 
 @Primary
@@ -27,21 +24,6 @@ public class JpaReservationTimes implements ReservationTimes {
     @Override
     public void save(ReservationTime time) {
         dao.save(time);
-    }
-
-    @Override
-    public List<ReservationTime> findAll() {
-        return dao.findAll();
-    }
-
-    @Override
-    public List<ReservationTime> findAvailableByDateAndThemeId(LocalDate date, Id themeId) {
-        return dao.findAvailableByDateAndThemeId(new ReservationDate(date), themeId);
-    }
-
-    @Override
-    public List<ReservationTime> findNotAvailableByDateAndThemeId(LocalDate date, Id themeId) {
-        return dao.findNotAvailableByDateAndThemeId(new ReservationDate(date), themeId);
     }
 
     @Override
