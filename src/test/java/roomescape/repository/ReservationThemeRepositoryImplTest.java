@@ -20,6 +20,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationItem;
 import roomescape.domain.ReservationItemRepository;
 import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationThemeRepository;
 import roomescape.domain.ReservationTime;
@@ -187,15 +188,15 @@ class ReservationThemeRepositoryImplTest {
         final ReservationItem reservationItem7 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(3), reservationTime2, savedTheme3));
         final ReservationItem reservationItem8 = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(3), reservationTime3, savedTheme3));
 
-        reservationRepository.save(new Reservation(null, reservationItem1));
-        reservationRepository.save(new Reservation(null, reservationItem2));
-        reservationRepository.save(new Reservation(null, reservationItem3));
+        reservationRepository.save(new Reservation(null, reservationItem1, ReservationStatus.ACCEPTED));
+        reservationRepository.save(new Reservation(null, reservationItem2, ReservationStatus.ACCEPTED));
+        reservationRepository.save(new Reservation(null, reservationItem3, ReservationStatus.ACCEPTED));
 
-        reservationRepository.save(new Reservation(null, reservationItem4));
-        reservationRepository.save(new Reservation(null, reservationItem5));
+        reservationRepository.save(new Reservation(null, reservationItem4, ReservationStatus.ACCEPTED));
+        reservationRepository.save(new Reservation(null, reservationItem5, ReservationStatus.ACCEPTED));
 
-        reservationRepository.save(new Reservation(null, reservationItem6));
-        reservationRepository.save(new Reservation(null, reservationItem7));
-        reservationRepository.save(new Reservation(null, reservationItem8));
+        reservationRepository.save(new Reservation(null, reservationItem6, ReservationStatus.ACCEPTED));
+        reservationRepository.save(new Reservation(null, reservationItem7, ReservationStatus.ACCEPTED));
+        reservationRepository.save(new Reservation(null, reservationItem8, ReservationStatus.ACCEPTED));
     }
 }

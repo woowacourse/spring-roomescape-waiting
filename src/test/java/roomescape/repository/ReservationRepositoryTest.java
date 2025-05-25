@@ -21,6 +21,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationItem;
 import roomescape.domain.ReservationItemRepository;
 import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationThemeRepository;
 import roomescape.domain.ReservationTime;
@@ -87,7 +88,7 @@ public class ReservationRepositoryTest {
         );
         reservationItem = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(1), time, theme));
         reservation = reservationRepository.save(
-                new Reservation(member, reservationItem)
+                new Reservation(member, reservationItem, ReservationStatus.ACCEPTED)
         );
     }
 
