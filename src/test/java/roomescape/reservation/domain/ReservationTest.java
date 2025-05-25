@@ -49,7 +49,10 @@ class ReservationTest {
         LocalDateTime reservedAt = LocalDateTime.now();
 
         Reservation reservation = Reservation.reserve(
-                reserver, reservationDateTime, theme, reservedAt
+                createMember(),
+                createReservationDateTime(),
+                createTheme(),
+                LocalDateTime.now()
         );
 
         assertSoftly(softly -> {
@@ -58,6 +61,59 @@ class ReservationTest {
             softly.assertThat(reservation.getTheme()).isEqualTo(theme);
             softly.assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
             softly.assertThat(reservation.getReservedAt()).isEqualTo(reservedAt);
+        });
+    }
+
+    @Test
+    void 예약을_대기한다() {
+        Member reserver = createMember();
+        ReservationDateTime reservationDateTime = createReservationDateTime();
+        Theme theme = createTheme();
+        LocalDateTime reservedAt = LocalDateTime.now();
+
+        Reservation reservation = Reservation.wait(
+                reserver, reservationDateTime, theme, reservedAt
+        );
+
+        assertSoftly(softly -> {
+            softly.assertThat(reservation.getReserver()).isEqualTo(reserver);
+            softly.assertThat(reservation.getReservationDatetime()).isEqualTo(reservationDateTime);
+            softly.assertThat(reservation.getTheme()).isEqualTo(theme);
+            softly.assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            softly.assertThat(reservation.getReservedAt()).isEqualTo(reservedAt);
+        });
+    }
+
+    @Test
+    void 예약_대기가_예약된다() {
+        Member reserver = createMember();
+        ReservationDateTime reservationDateTime = createReservationDateTime();
+        Theme theme = createTheme();
+        LocalDateTime reservedAt = LocalDateTime.now();
+        Reservation reservation = Reservation.wait(
+                reserver, reservationDateTime, theme, reservedAt
+        );
+
+        reservation.reserve();
+
+        assertSoftly(softly -> {
+            softly.assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        });
+    }
+
+    @Test
+    void 예약_완료_상태인지_확인한다() {
+        Member reserver = createMember();
+        ReservationDateTime reservationDateTime = createReservationDateTime();
+        Theme theme = createTheme();
+        LocalDateTime reservedAt = LocalDateTime.now();
+        Reservation reservation = Reservation.reserve(
+                reserver, reservationDateTime, theme, reservedAt
+        );
+
+        assertSoftly(softly -> {
+            softly.assertThat(reservation.isReserved()).isTrue();
+            softly.assertThat(reservation.isWaiting()).isFalse();
         });
     }
 }

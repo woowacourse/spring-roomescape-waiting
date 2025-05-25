@@ -105,7 +105,7 @@ public class Reservation {
         return status == ReservationStatus.RESERVED;
     }
 
-    private boolean isWaiting() {
+    public boolean isWaiting() {
         return status == ReservationStatus.WAITING;
     }
 
