@@ -9,12 +9,14 @@ public interface ReservationRepository {
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
+    boolean existsByParams(ReservationDate date, Long timeId, Long themeId);
 
-    List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
-                                                             ReservationDate to);
+    boolean existsByParams(ReservationDate date, Long timeId, Long themeId, Long memberId);
 
-    List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId);
+    List<Reservation> findByParams(Long memberId, Long themeId, ReservationDate from,
+                                   ReservationDate to);
+
+    List<Reservation> findByParams(ReservationDate date, Long themeId);
 
     List<Reservation> findAllByMemberId(Long memberId);
 

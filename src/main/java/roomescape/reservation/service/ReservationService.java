@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.AlreadyExistException;
 import roomescape.member.auth.vo.MemberInfo;
 import roomescape.reservation.controller.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.controller.dto.CreateReservationWebRequest;
@@ -39,7 +40,7 @@ public class ReservationService {
                 reservationQueryUseCase.getAll());
     }
 
-    public List<ReservationWithStatusResponse> getByMemberId(Long memberId) {
+    public List<ReservationWithStatusResponse> getByMemberId(final Long memberId) {
         List<ReservationWithStatusResponse> reservationWithStatusResponses = reservationQueryUseCase.getByMemberId(
                         memberId).stream()
                 .map(ReservationConverter::toDtoWithStatus)
@@ -87,6 +88,9 @@ public class ReservationService {
                 createReservationWebRequest.timeId(),
                 createReservationWebRequest.themeId())
         ) {
+
+            validateExistOwnReservation(createReservationWebRequest, memberInfo);
+
             return createWaiting(createReservationWebRequest, memberInfo);
         }
 
@@ -102,7 +106,7 @@ public class ReservationService {
 
     @Transactional
     public void delete(final Long id) {
-        Reservation reservation = reservationQueryUseCase.get(id);
+        final Reservation reservation = reservationQueryUseCase.get(id);
         reservationCommandUseCase.delete(id);
 
         if (waitingQueryUseCase.existsByParams(
@@ -118,7 +122,7 @@ public class ReservationService {
         waitingCommandUseCase.delete(id);
     }
 
-    public List<ReservationWebResponse> search(ReservationSearchWebRequest reservationSearchWebRequest) {
+    public List<ReservationWebResponse> search(final ReservationSearchWebRequest reservationSearchWebRequest) {
         return reservationQueryUseCase.search(
                         reservationSearchWebRequest.memberId(),
                         reservationSearchWebRequest.themeId(),
@@ -130,7 +134,9 @@ public class ReservationService {
     }
 
     private ReservationWithStatusResponse createWaiting(
-            CreateReservationWebRequest createReservationWebRequest, MemberInfo memberInfo) {
+            final CreateReservationWebRequest createReservationWebRequest,
+            final MemberInfo memberInfo
+    ) {
 
         return ReservationConverter.toDtoWithStatus(
                 waitingCommandUseCase.create(
@@ -144,8 +150,19 @@ public class ReservationService {
         );
     }
 
-    private void promoteWaitingToReservation(Reservation reservation) {
-        Waiting waiting = waitingQueryUseCase.getEarliest(
+    private void validateExistOwnReservation(final CreateReservationWebRequest createReservationWebRequest,
+                                             final MemberInfo memberInfo) {
+        if (reservationQueryUseCase.existsByParams(
+                ReservationDate.from(createReservationWebRequest.date()),
+                createReservationWebRequest.timeId(),
+                createReservationWebRequest.themeId(),
+                memberInfo.id())) {
+            throw new AlreadyExistException("이미 예약이 존재합니다.");
+        }
+    }
+
+    private void promoteWaitingToReservation(final Reservation reservation) {
+        final Waiting waiting = waitingQueryUseCase.getEarliest(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()

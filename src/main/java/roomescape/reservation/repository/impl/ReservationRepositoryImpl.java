@@ -22,18 +22,23 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId) {
+    public boolean existsByParams(ReservationDate date, Long timeId, Long themeId) {
         return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Override
-    public List<Reservation> findByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, ReservationDate from,
-                                                                    ReservationDate to) {
+    public boolean existsByParams(ReservationDate date, Long timeId, Long themeId, Long memberId) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
+    }
+
+    @Override
+    public List<Reservation> findByParams(Long memberId, Long themeId, ReservationDate from,
+                                          ReservationDate to) {
         return jpaReservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
     }
 
     @Override
-    public List<Reservation> findByDateAndThemeId(ReservationDate date, Long themeId) {
+    public List<Reservation> findByParams(ReservationDate date, Long themeId) {
         return jpaReservationRepository.findByDateAndThemeId(date, themeId);
     }
 

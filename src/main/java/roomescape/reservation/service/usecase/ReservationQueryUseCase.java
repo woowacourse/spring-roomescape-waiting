@@ -39,7 +39,7 @@ public class ReservationQueryUseCase {
             final AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest) {
         final List<ReservationTime> allTimes = reservationTimeQueryUseCase.getAll();
 
-        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findByDateAndThemeId(
+        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findByParams(
                         ReservationDate.from(availableReservationTimeServiceRequest.date()),
                         availableReservationTimeServiceRequest.themeId()).stream()
                 .map(reservation -> reservation.getTime().getId())
@@ -66,13 +66,20 @@ public class ReservationQueryUseCase {
     public boolean existsByParams(final ReservationDate date,
                                   final Long timeId,
                                   final Long themeId) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return reservationRepository.existsByParams(date, timeId, themeId);
+    }
+
+    public boolean existsByParams(final ReservationDate date,
+                                  final Long timeId,
+                                  final Long themeId,
+                                  final Long memberId) {
+        return reservationRepository.existsByParams(date, timeId, themeId, memberId);
     }
 
     public List<Reservation> search(final Long memberId,
                                     final Long themeId,
                                     final ReservationDate from,
                                     final ReservationDate to) {
-        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
+        return reservationRepository.findByParams(memberId, themeId, from, to);
     }
 }

@@ -20,19 +20,13 @@ public class WaitingCommandUseCase {
 
     private final WaitingRepository waitingRepository;
     private final WaitingQueryUseCase waitingQueryUseCase;
+    private final ReservationQueryUseCase reservationQueryUseCase;
     private final ReservationTimeQueryUseCase reservationTimeQueryUseCase;
     private final ThemeQueryUseCase themeQueryUseCase;
     private final MemberQueryUseCase memberQueryUseCase;
 
     public Waiting create(final CreateReservationWithMemberIdServiceRequest createReservationServiceRequest) {
-        if (waitingQueryUseCase.existsByParams(
-                ReservationDate.from(createReservationServiceRequest.date()),
-                createReservationServiceRequest.timeId(),
-                createReservationServiceRequest.themeId(),
-                createReservationServiceRequest.memberId())
-        ) {
-            throw new AlreadyExistException("추가하려는 예약 대기 정보가 이미 존재합니다.");
-        }
+        validateExistWaiting(createReservationServiceRequest);
 
         final ReservationTime reservationTime = reservationTimeQueryUseCase.get(
                 createReservationServiceRequest.timeId());
@@ -53,5 +47,16 @@ public class WaitingCommandUseCase {
 
     public void delete(Long id) {
         waitingRepository.deleteById(id);
+    }
+
+    private void validateExistWaiting(CreateReservationWithMemberIdServiceRequest createReservationServiceRequest) {
+        if (waitingQueryUseCase.existsByParams(
+                ReservationDate.from(createReservationServiceRequest.date()),
+                createReservationServiceRequest.timeId(),
+                createReservationServiceRequest.themeId(),
+                createReservationServiceRequest.memberId())
+        ) {
+            throw new AlreadyExistException("추가하려는 예약 대기 정보가 이미 존재합니다.");
+        }
     }
 }
