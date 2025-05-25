@@ -12,9 +12,9 @@ import roomescape.reservation.application.AdminWaitingService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
 import roomescape.reservation.application.WaitingService;
-import roomescape.reservation.domain.WaitingRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
 import roomescape.reservation.infrastructure.JpaWaitingRepository;
@@ -125,7 +125,7 @@ public class TestConfig {
                 waitingRepository
         );
     }
-    
+
     @Bean
     public ReservationService reservationService(
             final ReservationTimeRepository reservationTimeRepository,

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.infrastructure.projection.WaitingWithRankProjection;
 
 @Repository

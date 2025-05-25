@@ -22,6 +22,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
@@ -31,7 +32,7 @@ import roomescape.theme.domain.ThemeRepository;
 class WaitingRepositoryTest {
 
     @Autowired
-    private roomescape.reservation.domain.WaitingRepository waitingRepository;
+    private WaitingRepository waitingRepository;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
