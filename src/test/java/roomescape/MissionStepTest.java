@@ -169,8 +169,8 @@ class MissionStepTest {
 
         jdbcTemplate.update("INSERT INTO reservation_item(date, theme_id, time_id) VALUES (?, ?, ?)",
                 "2023-08-05", 1, 1);
-        jdbcTemplate.update("INSERT INTO reservation (member_id, reservation_item_id) VALUES (?, ?)",
-                "1", 1);
+        jdbcTemplate.update("INSERT INTO reservation (member_id, reservation_item_id, reservation_status) VALUES (?, ?, ?)",
+                "1", 1, "ACCEPTED");
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .sessionId(sessionId)

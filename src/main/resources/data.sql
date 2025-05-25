@@ -29,9 +29,9 @@ VALUES ('2025-05-07', 1, 8),
        ('2025-05-01', 2, 7)
 ;
 
-INSERT INTO reservation (member_id, reservation_item_id)
-VALUES (2, 1),
-        (3, 2),
-        (4, 3),
-        (1, 4)
+INSERT INTO reservation (member_id, reservation_item_id, reservation_status)
+VALUES (2, 1, 'ACCEPTED'),
+        (3, 2, 'ACCEPTED'),
+        (4, 3, 'ACCEPTED'),
+        (1, 4, 'ACCEPTED')
 ;

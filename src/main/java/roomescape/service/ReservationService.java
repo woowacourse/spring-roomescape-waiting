@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationItem;
-import roomescape.domain.ReservationItemRepository;
 import roomescape.domain.ReservationRepository;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.request.CreateReservationRequest;
@@ -21,7 +21,7 @@ import roomescape.dto.response.ReservationResponse;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationItemRepository reservationItemRepository;
+    private final ReservationItemService reservationItemService;
     private final MemberService memberService;
     private final ReservationThemeService reservationThemeService;
     private final ReservationTimeService reservationTimeService;
@@ -35,20 +35,30 @@ public class ReservationService {
         final ReservationTime time = reservationTimeService.getReservationTimeById(timeId);
         final ReservationTheme theme = reservationThemeService.getThemeById(themeId);
 
-        validateDuplicateReservation(date, timeId, themeId);
-        final ReservationItem reservationItem = reservationItemRepository.save(
-                ReservationItem.builder()
-                .date(date)
-                .time(time)
-                .theme(theme)
-                .build()
-        );
-        final Reservation reservation = Reservation.builder()
-                .member(member)
-                .reservationItem(reservationItem)
-                .build();
-        Reservation saved = reservationRepository.save(reservation);
-        return ReservationResponse.from(saved);
+        // TODO: 리펙토링
+        if (!reservationItemService.isExistReservationItem(date, time, theme)) {
+            final ReservationItem reservationItem = reservationItemService.addReservationItem(date, time, theme);
+            final Reservation saved = reservationRepository.save(
+                    Reservation.builder()
+                            .member(member)
+                            .reservationItem(reservationItem)
+                            .reservationStatus(ReservationStatus.ACCEPTED)
+                            .build()
+            );
+            return ReservationResponse.from(saved);
+        } else {
+            final ReservationItem reservationItem = reservationItemService.getReservationItemByDateAndTimeAndTheme(
+                    date, time, theme
+            );
+            final Reservation saved = reservationRepository.save(
+                    Reservation.builder()
+                            .member(member)
+                            .reservationItem(reservationItem)
+                            .reservationStatus(ReservationStatus.PENDING)
+                            .build()
+            );
+            return ReservationResponse.from(saved);
+        }
     }
 
     public List<ReservationResponse> getAllReservations() {
@@ -70,12 +80,6 @@ public class ReservationService {
         return reservations.stream()
                 .map(ReservationResponse::from)
                 .toList();
-    }
-
-    private void validateDuplicateReservation(final LocalDate localDate, final long timeId, final long themeId) {
-        if (reservationRepository.existByDateAndTimeIdAndThemeId(localDate, timeId, themeId)) {
-            throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약 입니다.");
-        }
     }
 
     public List<MyPageReservationResponse> getReservationsByMemberId(Long memberId) {

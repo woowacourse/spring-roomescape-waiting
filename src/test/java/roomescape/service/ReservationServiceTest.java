@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.domain.ReservationStatus;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.request.ReservationThemeRequest;
@@ -164,23 +165,6 @@ class ReservationServiceTest {
                         () -> reservationService.addReservation(createReservationRequest2)
                 ).isInstanceOf(IllegalArgumentException.class)
         );
-    }
-
-
-    @DisplayName("예약이 중복되어 예외가 발생 한다.")
-    @Test
-    void duplicateTest() {
-        // given
-        final CreateReservationRequest createReservationRequest = new CreateReservationRequest(
-                memberId1,
-                tomorrow,
-                themeId1,
-                timeId
-        );
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.addReservation(createReservationRequest))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -359,5 +343,35 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("존재하지 않은 예약 항목이라면 새로운 에약을 확정 상태로 생성한다.")
+    void saveReservationAccepted() {
+        // given
+        final CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(10), themeId1, timeId
+        );
+
+        // when
+        final ReservationResponse reservation = reservationService.addReservation(createReservationRequest);
+
+        // then
+        assertThat(reservation.status()).isEqualTo(ReservationStatus.ACCEPTED.description);
+    }
+
+    @Test
+    @DisplayName("존재하는 예약 항목이라면 새로운 에약을 대기 상태로 생성한다.")
+    void saveReservationWaiting() {
+        // given
+        final CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+                memberId1, twoDaysLater, themeId1, timeId
+        );
+
+        // when
+        final ReservationResponse reservation = reservationService.addReservation(createReservationRequest);
+
+        // then
+        assertThat(reservation.status()).isEqualTo(ReservationStatus.PENDING.description);
     }
 }

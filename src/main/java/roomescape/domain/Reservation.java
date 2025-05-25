@@ -37,5 +37,6 @@ public class Reservation {
     public Reservation(Member member, ReservationItem reservationItem, ReservationStatus reservationStatus) {
         this.member = member;
         this.reservationItem = reservationItem;
+        this.reservationStatus = reservationStatus;
     }
 }
