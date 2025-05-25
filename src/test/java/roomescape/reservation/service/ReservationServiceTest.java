@@ -67,9 +67,7 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationModuleService = new ReservationModuleService(reservationRepository, reservationTimeRepository,
-                themeRepository,
-                memberRepository);
+        reservationModuleService = new ReservationModuleService(reservationRepository);
 
         reservationCompositeService = new ReservationCompositeService(reservationModuleService,
                 new WaitingModuleService(waitingReservationRepository),

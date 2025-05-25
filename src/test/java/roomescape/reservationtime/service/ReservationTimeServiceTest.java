@@ -71,7 +71,7 @@ class ReservationTimeServiceTest {
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
         reservationCompositeService = new ReservationCompositeService(
-                new ReservationModuleService(reservationRepository,reservationTimeRepository,themeRepository,memberRepository),
+                new ReservationModuleService(reservationRepository),
                 new WaitingModuleService(waitingReservationRepository),
                 new MemberService(memberRepository,new MyPasswordEncoder()),
                 new ThemeService(themeRepository,reservationRepository),

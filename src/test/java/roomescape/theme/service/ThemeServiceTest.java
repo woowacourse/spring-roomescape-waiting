@@ -68,9 +68,7 @@ class ThemeServiceTest {
         themeService = new ThemeService(themeRepository, reservationRepository);
         memberService = new MemberService(memberRepository, myPasswordEncoder);
         reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
-        reservationModuleService = new ReservationModuleService(reservationRepository, reservationTimeRepository,
-                themeRepository,
-                memberRepository);
+        reservationModuleService = new ReservationModuleService(reservationRepository);
     }
 
     @Test

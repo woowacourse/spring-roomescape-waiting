@@ -23,18 +23,9 @@ import roomescape.theme.repository.ThemeRepository;
 public class ReservationModuleService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
 
-    public ReservationModuleService(final ReservationRepository reservationRepository,
-                                    final ReservationTimeRepository reservationTimeRepository,
-                                    final ThemeRepository themeRepository,
-                                    final MemberRepository memberRepository) {
+    public ReservationModuleService(final ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
     }
 
     public List<ReservationResponse> findReservations(final Long themeId, final Long memberId,
