@@ -8,7 +8,7 @@ public class ReservationDate {
 
     private LocalDate reservationDate;
 
-    public ReservationDate() {
+    protected ReservationDate() {
     }
 
     public ReservationDate(LocalDate reservationDate) {

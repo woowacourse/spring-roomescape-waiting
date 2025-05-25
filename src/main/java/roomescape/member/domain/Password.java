@@ -11,7 +11,7 @@ public class Password {
         this.password = password;
     }
 
-    public Password() {
+    protected Password() {
     }
 
     public String getPassword() {

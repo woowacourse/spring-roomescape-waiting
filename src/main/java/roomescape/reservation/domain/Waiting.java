@@ -18,7 +18,7 @@ public class Waiting {
     @ManyToOne
     private Member member;
 
-    public Waiting() {
+    protected Waiting() {
     }
 
     public Waiting(Long id, Reservation reservation, Member member) {
