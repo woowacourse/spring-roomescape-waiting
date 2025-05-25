@@ -24,10 +24,6 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public static ReservationTime generateWithPrimaryKey(ReservationTime reservationTime, Long newPrimaryKey) {
-        return new ReservationTime(newPrimaryKey, reservationTime.startAt);
-    }
-
     private void validate(LocalTime startAt) {
         if (startAt == null) {
             throw new DomainValidationException("startAt(시작 시간)은 비어있을 수 없습니다.");
@@ -44,21 +40,12 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ReservationTime that = (ReservationTime) o;
-        if (that.getId() == null || id == null) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
+        if (!(o instanceof ReservationTime that)) return false;
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hashCode(id);
     }
 }
