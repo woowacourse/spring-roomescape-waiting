@@ -1,4 +1,4 @@
-package roomescape.model;
+package roomescape.domain;
 
 import java.util.Arrays;
 import lombok.Getter;

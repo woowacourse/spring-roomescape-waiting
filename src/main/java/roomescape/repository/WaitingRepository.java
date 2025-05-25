@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.model.Waiting;
-import roomescape.model.WaitingWithRank;
+import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     List<Waiting> findAllByMemberId(Long id);
 
-    @Query("SELECT new roomescape.model.WaitingWithRank(" +
+    @Query("SELECT new roomescape.domain.WaitingWithRank(" +
            "    w, " +
            "    (SELECT COUNT(w2) * 1L" +
            "     FROM Waiting w2 " +

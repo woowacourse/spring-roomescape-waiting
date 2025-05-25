@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.ResourceInUseException;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.dto.request.ReservationTimeRegisterDto;
 import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
-import roomescape.model.Reservation;
-import roomescape.model.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 

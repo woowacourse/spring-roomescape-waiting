@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.domain.Role;
 import roomescape.dto.response.MemberResponseDto;
-import roomescape.model.Role;
 import roomescape.presentation.support.CookieUtils;
 import roomescape.service.AuthService;
 

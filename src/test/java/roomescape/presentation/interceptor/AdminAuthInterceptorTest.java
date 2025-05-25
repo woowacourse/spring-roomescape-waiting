@@ -1,24 +1,25 @@
 package roomescape.presentation.interceptor;
 
 
-import jakarta.servlet.http.Cookie;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import org.mockito.Mock;
-import static org.mockito.Mockito.mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
+import roomescape.domain.Role;
 import roomescape.dto.response.MemberResponseDto;
-import roomescape.model.Role;
 import roomescape.presentation.support.CookieUtils;
 import roomescape.service.AuthService;
 

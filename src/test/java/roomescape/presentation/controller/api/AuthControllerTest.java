@@ -1,4 +1,4 @@
-package roomescape.presentation.controller;
+package roomescape.presentation.controller.api;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;

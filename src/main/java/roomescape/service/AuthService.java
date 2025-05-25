@@ -4,10 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
+import roomescape.domain.Member;
 import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.dto.response.TokenResponseDto;
-import roomescape.model.Member;
 import roomescape.repository.MemberRepository;
 
 @Service

@@ -1,4 +1,4 @@
-package roomescape.presentation.controller;
+package roomescape.presentation.controller.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

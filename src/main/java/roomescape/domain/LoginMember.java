@@ -1,7 +1,4 @@
-package roomescape.dto;
-
-import roomescape.model.Member;
-import roomescape.model.Role;
+package roomescape.domain;
 
 public record LoginMember(
         Long id,

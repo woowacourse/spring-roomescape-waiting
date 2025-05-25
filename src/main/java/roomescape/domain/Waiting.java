@@ -1,4 +1,4 @@
-package roomescape.model;
+package roomescape.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

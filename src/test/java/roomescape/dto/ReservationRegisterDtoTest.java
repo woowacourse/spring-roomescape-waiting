@@ -8,11 +8,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import roomescape.domain.Member;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRegisterDto;
-import roomescape.model.Member;
-import roomescape.model.ReservationTime;
-import roomescape.model.Role;
-import roomescape.model.Theme;
 
 class ReservationRegisterDtoTest {
     private static Stream<Arguments> testCasesForDateFormat() {

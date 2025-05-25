@@ -1,4 +1,4 @@
-package roomescape.presentation.controller;
+package roomescape.presentation.controller.api;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -8,16 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.dto.LoginMember;
-import roomescape.dto.request.WaitingRequest;
-import roomescape.dto.response.WaitingResponse;
-import roomescape.model.Member;
-import roomescape.model.Reservation;
-import roomescape.model.Waiting;
-import roomescape.model.time.TimeProvider;
+import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.Waiting;
+import roomescape.dto.request.WaitingRequestDto;
+import roomescape.dto.response.WaitingResponseDto;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
+import roomescape.service.timeprovider.TimeProvider;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -31,19 +31,19 @@ public class WaitingService {
     private final MemberRepository memberRepository;
     private final TimeProvider timeProvider;
 
-    public List<WaitingResponse> findAllWaiting() {
+    public List<WaitingResponseDto> findAllWaiting() {
         final List<Waiting> waitings = waitingRepository.findAll();
         return waitings.stream()
-                .map(WaitingResponse::from)
+                .map(WaitingResponseDto::from)
                 .toList();
     }
 
     @Transactional
-    public Long register(final WaitingRequest waitingRequest, final LoginMember loginMember) {
+    public Long register(final WaitingRequestDto waitingRequestDto, final LoginMember loginMember) {
         final Reservation reservation = findReservationBy(
-                waitingRequest.date(),
-                waitingRequest.theme(),
-                waitingRequest.time()
+                waitingRequestDto.date(),
+                waitingRequestDto.theme(),
+                waitingRequestDto.time()
         );
         final Member member = findMember(loginMember.id());
         final LocalDateTime currentDateTime = timeProvider.getCurrentDateTime();

@@ -1,4 +1,4 @@
-package roomescape.model.time;
+package roomescape.service.timeprovider;
 
 import java.time.LocalDateTime;
 

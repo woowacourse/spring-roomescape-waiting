@@ -16,21 +16,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.dto.LoginMember;
-import roomescape.dto.request.WaitingRequest;
-import roomescape.dto.response.WaitingResponse;
-import roomescape.model.Member;
-import roomescape.model.Reservation;
-import roomescape.model.ReservationTime;
-import roomescape.model.Role;
-import roomescape.model.Theme;
-import roomescape.model.Waiting;
-import roomescape.model.time.TimeProvider;
+import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
+import roomescape.dto.request.WaitingRequestDto;
+import roomescape.dto.response.WaitingResponseDto;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
+import roomescape.service.timeprovider.TimeProvider;
 
 @Import(TestTimeProviderConfig.class)
 @SpringBootTest
@@ -72,7 +72,7 @@ class WaitingServiceTest {
         //given
         Reservation reservation = createReservation();
 
-        WaitingRequest request = new WaitingRequest(
+        WaitingRequestDto request = new WaitingRequestDto(
                 reservation.getDate(),
                 reservation.getTheme().getId(),
                 reservation.getReservationTime().getId()
@@ -95,7 +95,7 @@ class WaitingServiceTest {
 
         LoginMember loginMember = new LoginMember(reservation.getMember());
 
-        WaitingRequest request = new WaitingRequest(
+        WaitingRequestDto request = new WaitingRequestDto(
                 reservation.getDate(),
                 reservation.getTheme().getId(),
                 reservation.getReservationTime().getId()
@@ -124,7 +124,7 @@ class WaitingServiceTest {
         //given
         Reservation reservation = createReservation();
 
-        WaitingRequest request = new WaitingRequest(
+        WaitingRequestDto request = new WaitingRequestDto(
                 reservation.getDate(),
                 reservation.getTheme().getId(),
                 reservation.getReservationTime().getId()
@@ -160,7 +160,7 @@ class WaitingServiceTest {
         //given
         Reservation reservation = createReservation();
 
-        WaitingRequest request = new WaitingRequest(
+        WaitingRequestDto request = new WaitingRequestDto(
                 reservation.getDate(),
                 reservation.getTheme().getId(),
                 reservation.getReservationTime().getId()
@@ -209,7 +209,7 @@ class WaitingServiceTest {
         waitingRepository.save(waiting);
 
         //when
-        List<WaitingResponse> actual = waitingService.findAllWaiting();
+        List<WaitingResponseDto> actual = waitingService.findAllWaiting();
 
         //then
         assertThat(actual).hasSize(1);
@@ -219,7 +219,7 @@ class WaitingServiceTest {
     @Test
     void findAllWaitingIsEmpty() {
         //given //when
-        List<WaitingResponse> actual = waitingService.findAllWaiting();
+        List<WaitingResponseDto> actual = waitingService.findAllWaiting();
 
         //then
         assertThat(actual).isEmpty();

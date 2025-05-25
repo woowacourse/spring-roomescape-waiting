@@ -4,7 +4,7 @@ package roomescape.service;
 import java.time.LocalDateTime;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import roomescape.model.time.TimeProvider;
+import roomescape.service.timeprovider.TimeProvider;
 
 @TestConfiguration
 public class TestTimeProviderConfig {
