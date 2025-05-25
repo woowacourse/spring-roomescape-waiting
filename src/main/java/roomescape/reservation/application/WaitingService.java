@@ -116,10 +116,10 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public List<WaitingWithRankResponse.ForMember> findAllWaitingWithRankByMemberId(final Long memberId) {
-        final List<WaitingWithRankProjection> waitingWithRanks = waitingRepository.findAllWaitingWithRankProjectionByMemberId(
+        final List<WaitingWithRankProjection> waitingWithRankProjections = waitingRepository.findAllWaitingWithRankProjectionByMemberId(
                 memberId);
 
-        return waitingWithRanks.stream()
+        return waitingWithRankProjections.stream()
                 .map(WaitingWithRankResponse.ForMember::from)
                 .toList();
     }
