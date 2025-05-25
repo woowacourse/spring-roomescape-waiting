@@ -39,7 +39,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             + "AND r.createdAt < :createdAt")
     int countReservationsBefore(LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt);
 
-    List<Reservation> findAllByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
-
     boolean existsByTheme(Theme theme);
+
+    @Query(value = "SELECT EXISTS (SELECT 1 FROM Reservation r " +
+            "WHERE r.date = :date " +
+            "AND r.time = :time " +
+            "AND r.theme = :theme " +
+            "AND r.member = :member)")
+    boolean alreadyExists(LocalDate date, ReservationTime time, Theme theme, Member member);
 }

@@ -9,6 +9,7 @@ import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.application.exception.MemberNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.application.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.application.exception.ReservationInPastException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
 import roomescape.reservation.application.exception.ReservationTimeNotFoundException;
@@ -51,6 +52,8 @@ public class ReservationService {
             throw new ReservationInPastException();
         }
 
+        validateDuplicatedReservation(request.date(), reservationTime, theme, member);
+
         ReservationStatus status = getReservationStatus(request.date(), reservationTime, theme);
 
         Reservation newReservation = new Reservation(request.date(),
@@ -78,6 +81,9 @@ public class ReservationService {
         ReservationTime reservationTime = getReservationTime(adminReservationRequest.timeId());
         Theme theme = getTheme(adminReservationRequest.themeId());
         Member member = getMember(adminReservationRequest.memberId());
+
+        validateDuplicatedReservation(adminReservationRequest.date(), reservationTime, theme, member);
+
         ReservationStatus status = getReservationStatus(adminReservationRequest.date(), reservationTime, theme);
 
         Reservation newReservation = new Reservation(adminReservationRequest.date(),
@@ -140,6 +146,13 @@ public class ReservationService {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.CONFIRMED;
+    }
+
+    private void validateDuplicatedReservation(LocalDate adminReservationRequest, ReservationTime reservationTime,
+                                               Theme theme, Member member) {
+        if (reservationRepository.alreadyExists(adminReservationRequest, reservationTime, theme, member)) {
+            throw new ReservationAlreadyExistsException();
+        }
     }
 
     private MemberReservationResponse mapToMemberReservationResponse(Reservation reservation) {

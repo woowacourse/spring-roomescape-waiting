@@ -23,6 +23,7 @@ import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.application.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.application.exception.ReservationInPastException;
 import roomescape.reservation.application.exception.ReservationTimeNotFoundException;
 import roomescape.reservation.application.exception.ThemeNotFoundException;
@@ -119,6 +120,30 @@ class ReservationServiceTest {
                 .isInstanceOf(ReservationInPastException.class);
     }
 
+    @Test
+    @DisplayName("같은 날짜, 시간, 테마에 대해 중복 예약을 시도하면 예외가 발생한다")
+    void validateDuplicatedReservationTest() {
+        // given
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(3);
+        long timeId = 1L;
+        long themeId = 1L;
+        long memberId = 2L;
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "theme", "description", "thumbnail");
+        Member member = new Member(memberId, "name", "email@email.com", "password", Role.USER);
+
+        when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
+        when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
+        when(reservationRepository.alreadyExists(date, time, theme, member)).thenReturn(true);
+
+        ReservationRequest request = new ReservationRequest(date, time.getId(), theme.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(request, member))
+                .isInstanceOf(ReservationAlreadyExistsException.class);
+    }
+
     @DisplayName("예약을 생성할 수 있다.")
     @Test
     void createTest() {
@@ -149,6 +174,32 @@ class ReservationServiceTest {
         // then
         verify(reservationRepository).save(any(Reservation.class));
         assertThat(createdReservation.id()).isEqualTo(reservationId);
+    }
+
+    @Test
+    @DisplayName("관리자가 같은 날짜, 시간, 테마에 대해 중복 예약을 시도하면 예외가 발생한다")
+    void validateDuplicatedReservationByAdminTest() {
+        // given
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(3);
+        long timeId = 1L;
+        long themeId = 1L;
+        long memberId = 2L;
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "theme", "description", "thumbnail");
+        Member member = new Member(memberId, "name", "email@email.com", "password", Role.USER);
+
+        when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
+        when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
+        when(memberRepository.findById(anyLong())).thenReturn(Optional.of(member));
+        when(reservationRepository.alreadyExists(date, time, theme, member)).thenReturn(true);
+
+        AdminReservationRequest request = new AdminReservationRequest(date, time.getId(), theme.getId(),
+                member.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.createByAdmin(request))
+                .isInstanceOf(ReservationAlreadyExistsException.class);
     }
 
     @DisplayName("관리자가 정상적으로 예약을 생성할 수 있다")

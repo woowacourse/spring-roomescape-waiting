@@ -1,11 +1,13 @@
 package roomescape.reservation.application.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.exception.NotReservationOwnerException;
+import roomescape.reservation.application.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
 import roomescape.reservation.application.exception.ReservationTimeNotFoundException;
 import roomescape.reservation.application.exception.ThemeNotFoundException;
@@ -39,6 +41,8 @@ public class WaitingReservationService {
 
         ReservationTime time = getReservationTime(request.timeId());
         Theme theme = getTheme(request.themeId());
+
+        validateDuplicatedReservation(request.date(), time, theme, member);
 
         Reservation reservation = reservationRepository.save(new Reservation(request.date(),
                 time, theme, member, ReservationStatus.WAITING, SystemLocalDateTime.now()));
@@ -82,6 +86,13 @@ public class WaitingReservationService {
     private Theme getTheme(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException(themeId));
+    }
+
+    private void validateDuplicatedReservation(LocalDate adminReservationRequest, ReservationTime reservationTime,
+                                               Theme theme, Member member) {
+        if (reservationRepository.alreadyExists(adminReservationRequest, reservationTime, theme, member)) {
+            throw new ReservationAlreadyExistsException();
+        }
     }
 
     private ReservationResponse mapToReservationResponse(Reservation reservation) {

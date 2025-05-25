@@ -23,6 +23,7 @@ import roomescape.global.util.SystemLocalDateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.application.exception.NotReservationOwnerException;
+import roomescape.reservation.application.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
@@ -48,6 +49,30 @@ public class WaitingReservationServiceTest {
 
     @InjectMocks
     private WaitingReservationService waitingReservationService;
+
+    @Test
+    @DisplayName("같은 날짜, 시간, 테마에 대해 중복 대기 예약을 시도하면 예외가 발생한다")
+    void validateDuplicatedWaitingReservationTest() {
+        // given
+        LocalDate date = SystemLocalDateTime.nowDate().plusDays(3);
+        long timeId = 1L;
+        long themeId = 1L;
+        long memberId = 2L;
+
+        ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
+        Theme theme = new Theme(themeId, "theme", "description", "thumbnail");
+        Member member = new Member(memberId, "name", "email@email.com", "password", Role.USER);
+
+        when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
+        when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
+        when(reservationRepository.alreadyExists(date, time, theme, member)).thenReturn(true);
+
+        WaitingReservationRequest request = new WaitingReservationRequest(date, time.getId(), theme.getId());
+
+        // when & then
+        assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request, member))
+                .isInstanceOf(ReservationAlreadyExistsException.class);
+    }
 
     @DisplayName("예약 대기를 생성할 수 있다.")
     @Test
