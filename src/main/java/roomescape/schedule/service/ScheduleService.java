@@ -8,7 +8,6 @@ import roomescape.schedule.respository.ScheduleRepository;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 public class ScheduleService {
@@ -26,10 +25,6 @@ public class ScheduleService {
 
     public Schedule save(Schedule schedule) {
         return scheduleRepository.save(schedule);
-    }
-
-    public Optional<Schedule> findById(Long id) {
-        return scheduleRepository.findById(id);
     }
 
     public Schedule getScheduleByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
