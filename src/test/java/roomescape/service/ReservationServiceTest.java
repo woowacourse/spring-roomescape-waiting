@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.controller.response.ReservationWithRank;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.domain.Reservation;
@@ -149,5 +150,64 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.findById(2L))
                 .isInstanceOf(NotFoundReservationException.class)
                 .hasMessageContaining("2에 해당하는 reservation 튜플이 없습니다.");
+    }
+
+    @Test
+    void memberId로_예약을_조회할_수_있다() {
+        // given
+        Long memberId = 1L;
+        Theme theme = new Theme(1L, "test", "description", "thumbnail");
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
+        Member member = new Member(1L, "name", MemberRole.USER, "email@email.com", "Password1!");
+        Reservation reservation = new Reservation(1L, member, RESERVATION_DATE, reservationTime, theme, ReservationStatus.RESERVED);
+        when(reservationRepository.findByMemberId(memberId)).thenReturn(List.of(reservation));
+
+        // when
+        List<ReservationResult> results = reservationService.findByMemberId(memberId);
+
+        // then
+        assertThat(results).hasSize(1);
+        assertThat(results.getFirst().id()).isEqualTo(1L);
+    }
+
+    @Test
+    void 조건에_맞는_예약을_조회할_수_있다() {
+        // given
+        Long memberId = 1L;
+        Long themeId = 1L;
+        LocalDate from = RESERVATION_DATE;
+        LocalDate to = RESERVATION_DATE.plusDays(1);
+        Theme theme = new Theme(1L, "test", "description", "thumbnail");
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
+        Member member = new Member(1L, "name", MemberRole.USER, "email@email.com", "Password1!");
+        Reservation reservation = new Reservation(1L, member, RESERVATION_DATE, reservationTime, theme, ReservationStatus.RESERVED);
+        when(reservationRepository.findReservationsInConditions(memberId, themeId, from, to)).thenReturn(List.of(reservation));
+
+        // when
+        List<ReservationResult> results = reservationService.findReservationsInConditions(memberId, themeId, from, to);
+
+        // then
+        assertThat(results).hasSize(1);
+        assertThat(results.getFirst().id()).isEqualTo(1L);
+    }
+
+    @Test
+    void 대기_예약을_그룹별로_랭킹과_함께_조회할_수_있다() {
+        // given
+        Theme theme = new Theme(1L, "test", "description", "thumbnail");
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(12, 0));
+        Member member1 = new Member(1L, "name1", MemberRole.USER, "email1@email.com", "Password1!");
+        Member member2 = new Member(2L, "name2", MemberRole.USER, "email2@email.com", "Password1!");
+        Reservation waiting1 = new Reservation(1L, member1, RESERVATION_DATE, reservationTime, theme, ReservationStatus.WAITING);
+        Reservation waiting2 = new Reservation(2L, member2, RESERVATION_DATE, reservationTime, theme, ReservationStatus.WAITING);
+        when(reservationRepository.findByStatus(ReservationStatus.WAITING)).thenReturn(List.of(waiting1, waiting2));
+
+        // when
+        List<ReservationWithRank> result = reservationService.findAllWaitingsWithRank();
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).rank()).isEqualTo(1);
+        assertThat(result.get(1).rank()).isEqualTo(2);
     }
 }
