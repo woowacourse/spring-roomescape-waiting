@@ -3,6 +3,8 @@ package roomescape.business.model.entity;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -25,6 +27,7 @@ public class User {
 
     @EmbeddedId
     private final Id id = Id.issue();
+    @Enumerated(EnumType.STRING)
     private final UserRole userRole;
     @Embedded
     private final UserName name;
