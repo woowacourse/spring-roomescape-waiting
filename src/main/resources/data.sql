@@ -15,5 +15,3 @@ VALUES ('레벨2 탈출',
        ('지하 감옥',
         '깊은 감옥에서 탈출하라!',
         'https://example.com/jail.jpg');
-
-

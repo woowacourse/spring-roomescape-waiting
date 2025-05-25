@@ -60,9 +60,8 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
 
     @Override
     public WaitingReservation createWaitingReservation(final CreateReservationServiceRequest request) {
-        if (!reservationRepository.existsByParams(
-                request.date(), request.timeId(), request.themeId())) {
-            throw new NotFoundException(DomainTerm.RESERVATION, //Todo 개선 및 검증 필요
+        if (!isExistsByParams(request.date(), request.timeId(), request.themeId())) {
+            throw new NotFoundException(DomainTerm.RESERVATION, //Todo 예외와 중복 생성 검증 필요, 예약 없을 시 처리도 필요
                     request.date(),
                     DomainTerm.THEME_ID,
                     DomainTerm.RESERVATION_TIME_ID);

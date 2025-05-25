@@ -7,7 +7,6 @@ import roomescape.reservation.application.dto.AvailableReservationTimeServiceReq
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceResponse;
 import roomescape.reservation.application.dto.ReservationSearchRequest;
 import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
-import roomescape.reservation.domain.BookedCount;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
@@ -64,7 +63,7 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
 
         return reservationRepository.findThemesToBookedCount(startDate, endDate, bookCount)
                 .stream()
-                .map(current -> new ThemeToBookCountServiceResponse(current.theme(), BookedCount.from(current.bookedCount())))
+                .map(current -> new ThemeToBookCountServiceResponse(current.theme(), current.bookedCount()))
                 .toList();
     }
 
