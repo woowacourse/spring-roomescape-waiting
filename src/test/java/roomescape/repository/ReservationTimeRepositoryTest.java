@@ -26,7 +26,7 @@ class ReservationTimeRepositoryTest {
 
     @DisplayName("특정 테마와 날짜의 예약시간을 예약 여부와 함께 조회할 수 있다.")
     @Test
-    void canFindReservationTimesWithBookState() {
+    void canFindReservationTimesWithBooking() {
         // given
         Member member = entityManager.persist(
                 Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
@@ -46,7 +46,7 @@ class ReservationTimeRepositoryTest {
 
         // when
         List<ReservationTime> times =
-                reservationTimeRepository.findReservationTimesWithBookState(theme.getId(), NEXT_DAY);
+                reservationTimeRepository.findReservationTimesWithBooking(theme.getId(), NEXT_DAY);
 
         // then
         assertThat(times)

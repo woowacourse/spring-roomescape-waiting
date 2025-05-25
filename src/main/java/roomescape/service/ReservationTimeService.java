@@ -40,9 +40,9 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<ReservationTimeWithBookState> findReservationTimesWithBookState(long themeId, LocalDate date) {
+    public List<ReservationTimeWithBookState> findReservationTimesWithBooking(long themeId, LocalDate date) {
         List<ReservationTime> allTimes = timeRepository.findAllOrderByStartAt();
-        List<ReservationTime> bookedTimes = timeRepository.findReservationTimesWithBookState(themeId, date);
+        List<ReservationTime> bookedTimes = timeRepository.findReservationTimesWithBooking(themeId, date);
         return calculateAllTimesWithBookedState(allTimes, bookedTimes);
     }
 

@@ -20,7 +20,7 @@ import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.request.ReservationTimeCreationRequest;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ReservationTimeWithBookStateResponse;
+import roomescape.dto.response.ReservationTimeWithBookingResponse;
 import roomescape.service.ReservationTimeService;
 
 @RestController
@@ -39,14 +39,14 @@ public class ReservationTimeController {
     }
 
     @GetMapping(params = {"themeId", "date"})
-    public List<ReservationTimeWithBookStateResponse> findReservationTimesWithBookState(
+    public List<ReservationTimeWithBookingResponse> findReservationTimesWithBooking(
             @RequestParam("themeId") Long themeId,
             @RequestParam("date") LocalDate date
     ) {
         List<ReservationTimeWithBookState> reservations =
-                timeService.findReservationTimesWithBookState(themeId, date);
+                timeService.findReservationTimesWithBooking(themeId, date);
         return reservations.stream()
-                .map(ReservationTimeWithBookStateResponse::new)
+                .map(ReservationTimeWithBookingResponse::new)
                 .toList();
     }
 

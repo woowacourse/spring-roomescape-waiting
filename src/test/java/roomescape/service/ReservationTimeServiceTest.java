@@ -90,7 +90,7 @@ class ReservationTimeServiceTest {
 
         // when
         List<ReservationTimeWithBookState> timesWithBookState =
-                timeService.findReservationTimesWithBookState(theme.getId(), TODAY);
+                timeService.findReservationTimesWithBooking(theme.getId(), TODAY);
 
         // then
         assertAll(

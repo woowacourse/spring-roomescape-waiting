@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,12 +12,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.config.annotation.Authority;
 import roomescape.config.annotation.RequiredAccessToken;
 import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.business.ReservationCreationContent;
+import roomescape.dto.request.AdminReservationRequest;
 import roomescape.dto.request.ReservationCreationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationStatusResponse;
@@ -38,6 +41,17 @@ public class ReservationController {
         return reservationService.findAllReservations();
     }
 
+    @GetMapping(params = {"memberId", "themeId", "from", "to"})
+    @Authority(Role.ADMIN)
+    public List<ReservationResponse> searchReservationsByFilter(
+            @RequestParam("memberId") Long memberId,
+            @RequestParam("themeId") Long themeId,
+            @RequestParam("from") LocalDate from,
+            @RequestParam("to") LocalDate to
+    ) {
+        return reservationService.findReservationsByFilter(memberId, themeId, from, to);
+    }
+
     @GetMapping("/state")
     @Authority(Role.GENERAL)
     public ReservationStatusResponse findAllReservationStateByMember(
@@ -46,15 +60,28 @@ public class ReservationController {
         return reservationService.findAllReservationStatusByMember(accessTokenContent.id());
     }
 
-    @PostMapping
+    @PostMapping("/mine")
     @Authority(Role.GENERAL)
-    public ResponseEntity<ReservationResponse> addReservation(
+    public ResponseEntity<ReservationResponse> addReservationByMember(
             @Valid @RequestBody ReservationCreationRequest request,
             @RequiredAccessToken AccessTokenContent accessTokenContent
     ) {
         ReservationCreationContent creationContent = new ReservationCreationContent(request);
         ReservationResponse reservationResponse = reservationService.addReservation(accessTokenContent.id(),
                 creationContent);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/reservation/" + reservationResponse.id()))
+                .body(reservationResponse);
+    }
+
+    @PostMapping("/other")
+    @Authority(Role.ADMIN)
+    public ResponseEntity<ReservationResponse> addReservationByAdmin(
+            @Valid @RequestBody AdminReservationRequest request
+    ) {
+        ReservationCreationContent creationRequest = new ReservationCreationContent(request);
+        ReservationResponse reservationResponse =
+                reservationService.addReservation(request.memberId(), creationRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(URI.create("/reservation/" + reservationResponse.id()))
                 .body(reservationResponse);
