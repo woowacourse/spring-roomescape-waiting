@@ -15,6 +15,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.member.resolver.UnauthenticatedException;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private static final String TOKEN = "token";
@@ -26,7 +27,6 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional(readOnly = true)
     public TokenLoginResponse tokenLogin(TokenLoginCreateRequest tokenLoginCreateRequest) {
         Email email = new Email(tokenLoginCreateRequest.email());
         Password password = new Password(tokenLoginCreateRequest.password());
@@ -38,7 +38,6 @@ public class AuthService {
         throw new IllegalArgumentException("[ERROR] 아이디 또는 비밀번호를 올바르게 입력해주세요.");
     }
 
-    @Transactional(readOnly = true)
     public MemberResponse findUserByToken(String token) {
         String payload = jwtTokenProvider.getPayload(token);
         return MemberResponse.from(

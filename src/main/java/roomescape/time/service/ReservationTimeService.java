@@ -15,6 +15,7 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -49,20 +50,17 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(reservationTime.getId());
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return ReservationTimeResponse.from(reservationTimes);
     }
 
-    @Transactional(readOnly = true)
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }
 
-    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
         return reservationTimeRepository.findAllAvailableReservationTimes(new ReservationDate(request.date()),

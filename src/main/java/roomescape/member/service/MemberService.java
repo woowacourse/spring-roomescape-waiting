@@ -14,6 +14,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.member.role.Role;
 
 @Service
+@Transactional(readOnly = true)
 public class MemberService {
 
     private final MemberRepository memberRepository;
@@ -31,13 +32,11 @@ public class MemberService {
         return memberRepository.save(new Member(name, email, password, Role.MEMBER));
     }
 
-    @Transactional(readOnly = true)
     public Member findById(Long id) {
         return memberRepository.findById(id).
                 orElseThrow(() -> new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다."));
     }
 
-    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)

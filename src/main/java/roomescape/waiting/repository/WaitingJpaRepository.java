@@ -9,10 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
 
+@Transactional(readOnly = true)
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
         WaitingRepository {
 
-    @Transactional(readOnly = true)
     @Query("""
                 SELECT new roomescape.waiting.domain.WaitingWithRank(
                     w,
@@ -30,7 +30,6 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
             @Param("memberId") Long memberId
     );
 
-    @Transactional(readOnly = true)
     @Query("""
                 SELECT new roomescape.waiting.domain.WaitingWithRank(
                     w,
@@ -46,7 +45,6 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
     List<WaitingWithRank> findAllWithRank(
     );
 
-    @Transactional(readOnly = true)
     @Query("""
                 select w
                 from Waiting w
@@ -57,7 +55,6 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long>,
     List<Waiting> findAll(
     );
 
-    @Transactional(readOnly = true)
     @Query("""
                 select w
                 from Waiting w

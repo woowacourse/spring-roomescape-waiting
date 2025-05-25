@@ -22,6 +22,7 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -57,13 +58,6 @@ public class WaitingService {
         return ReservationResponse.fromWaiting(created);
     }
 
-    @Transactional(readOnly = true)
-    public List<MemberReservationResponse> findAllByMemberId(Long id) {
-        return waitingRepository.findAllWaitingWithRankByMemberId(id).stream()
-                .map(MemberReservationResponse::fromWaitingWithRank)
-                .toList();
-    }
-
     @Transactional
     public void deleteById(Long id) {
         waitingRepository.findById(id)
@@ -81,7 +75,12 @@ public class WaitingService {
         return ReservationResponse.fromReservation(save);
     }
 
-    @Transactional(readOnly = true)
+    public List<MemberReservationResponse> findAllByMemberId(Long id) {
+        return waitingRepository.findAllWaitingWithRankByMemberId(id).stream()
+                .map(MemberReservationResponse::fromWaitingWithRank)
+                .toList();
+    }
+
     public List<MemberReservationResponse> findAllWithRank() {
         List<MemberReservationResponse> responses = new ArrayList<>(
                 waitingRepository.findAllWithRank().stream()
@@ -99,7 +98,6 @@ public class WaitingService {
         return responses;
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         List<Waiting> waitings = waitingRepository.findAll();
         return waitings.stream()
