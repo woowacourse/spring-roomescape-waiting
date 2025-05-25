@@ -61,19 +61,23 @@ public class ReservationQueryService {
         List<Reservation> reservations = reservationRepository.findReservationsByMemberId(loginInfo.id());
         return reservations.stream().map(reservation -> {
             if (reservation.isReservationWaiting()) {
-                ReservationWaitingTicket reservationWaitingTicket = waitingTicketRepository.findByReservationId(
-                        reservation.getId());
-                ReservationWaitingRank rank = waitingTicketRepository.countReservationWaitingsByThemeIdAndDateAndTimeIdAndCreatedAt(
-                        reservation.getTheme().getId(),
-                        reservation.getDate(),
-                        reservation.getTime().getId(),
-                        reservationWaitingTicket.getCreatedAt()
-                );
+                ReservationWaitingRank rank = calculateWaitingRank(reservation);
                 return new MyReservationResponseDto(
                         reservation, rank
                 );
             }
             return new MyReservationResponseDto(reservation);
         }).toList();
+    }
+
+    private final ReservationWaitingRank calculateWaitingRank(Reservation reservationWaiting) {
+        ReservationWaitingTicket reservationWaitingTicket = waitingTicketRepository.findByReservationId(
+                reservationWaiting.getId()).get();
+        return waitingTicketRepository.countReservationWaitingsByThemeIdAndDateAndTimeIdAndCreatedAt(
+                reservationWaiting.getTheme().getId(),
+                reservationWaiting.getDate(),
+                reservationWaiting.getTime().getId(),
+                reservationWaitingTicket.getCreatedAt()
+        );
     }
 }

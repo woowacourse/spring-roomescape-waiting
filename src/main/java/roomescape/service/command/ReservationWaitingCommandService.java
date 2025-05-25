@@ -76,15 +76,15 @@ public class ReservationWaitingCommandService {
     }
 
     public void deleteReservationWaiting(Long id, LoginInfo loginInfo) {
-        long memberId = loginInfo.id();
-        Optional<Reservation> reservationWaiting = reservationRepository.findById(id);
-        if (reservationWaiting.isEmpty()) {
-            throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
-        }
-        if (reservationWaiting.get().getMember().getId() != memberId) {
+        Reservation reservationWaiting = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다."));
+
+        if (reservationWaiting.getMember().getId() != loginInfo.id()) {
             throw new UnauthorizationException("예약자만 예약 대기 취소가 가능합니다.");
         }
 
-        reservationRepository.deleteById(id);
+        //todo cascade delete 개선
+        reservationWaitingTicketRepository.delete(reservationWaitingTicketRepository.findByReservationId(id).get());
+        reservationRepository.delete(reservationWaiting);
     }
 }

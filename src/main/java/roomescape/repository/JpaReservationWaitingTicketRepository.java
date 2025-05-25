@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +11,7 @@ import roomescape.domain.reservation.ReservationWaitingTicket;
 
 public interface JpaReservationWaitingTicketRepository extends JpaRepository<ReservationWaitingTicket, Long> {
 
-    ReservationWaitingTicket findByReservationId(Long reservationId);
+    Optional<ReservationWaitingTicket> findByReservationId(Long reservationId);
 
     @Query(
             "select new roomescape.domain.reservation.ReservationWaitingRank(" +

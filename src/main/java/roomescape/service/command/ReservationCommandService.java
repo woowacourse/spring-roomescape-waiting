@@ -97,7 +97,7 @@ public class ReservationCommandService {
         Long earliestReservationWaitingId = null;
         for (Reservation waiting : reservationWaitings) {
             ReservationWaitingTicket reservationWaitingTicket = waitingTicketRepository.findByReservationId(
-                    waiting.getId());
+                    waiting.getId()).get();
             if (reservationWaitingTicket.getCreatedAt().isBefore(earliestCreatedAt)) {
                 earliestCreatedAt = reservationWaitingTicket.getCreatedAt();
                 earliestReservationWaitingId = reservationWaitingTicket.getId();

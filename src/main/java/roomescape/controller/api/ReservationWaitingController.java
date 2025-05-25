@@ -54,8 +54,9 @@ public class ReservationWaitingController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteWaitingReservation(
+            @CurrentMember LoginInfo loginInfo,
             @PathVariable("id") final Long id
     ) {
-        reservationWaitingCommandService.deleteReservationWaiting(id);
+        reservationWaitingCommandService.deleteReservationWaiting(id, loginInfo);
     }
 }
