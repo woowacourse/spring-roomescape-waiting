@@ -1,6 +1,7 @@
 package roomescape.domain.reservation;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,4 +31,13 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                     JOIN fetch w.themeSchedule.time
             """)
     List<Waiting> findAllWithMemberAndThemeAndTime();
+
+    @Query("""
+                SELECT w
+                FROM Waiting w
+                WHERE w.themeSchedule = :themeSchedule
+                ORDER BY w.startedAt
+                LIMIT 1
+            """)
+    Optional<Waiting> findTopByThemeScheduleOrderBystartedAt(@Param("themeSchedule") ThemeSchedule themeSchedule);
 }

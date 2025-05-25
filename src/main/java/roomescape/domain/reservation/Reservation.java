@@ -38,10 +38,14 @@ public class Reservation {
                        ReservationTime time,
                        Theme theme,
                        ReservationStatus status) {
+        this(id, member, status, new ThemeSchedule(date, time, theme));
+    }
+
+    public Reservation(Long id, Member member, ReservationStatus status, ThemeSchedule themeSchedule) {
         this.id = id;
         this.member = member;
-        this.themeSchedule = new ThemeSchedule(date, time, theme);
         this.status = status;
+        this.themeSchedule = themeSchedule;
     }
 
     protected Reservation() {
@@ -49,6 +53,10 @@ public class Reservation {
 
     public static Reservation create(Member member, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVE);
+    }
+
+    public static Reservation create(Member member, ThemeSchedule themeSchedule) {
+        return new Reservation(null, member, ReservationStatus.RESERVE, themeSchedule);
     }
 
     // TODO: themeSchedule이 예약 validate를 하는게 맞아?

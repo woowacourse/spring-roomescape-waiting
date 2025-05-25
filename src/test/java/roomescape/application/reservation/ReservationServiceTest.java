@@ -31,6 +31,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.WaitingRepository;
 
 class ReservationServiceTest extends AbstractServiceIntegrationTest {
 
@@ -46,6 +47,9 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     private ReservationService reservationService;
 
     @BeforeEach
@@ -55,6 +59,7 @@ class ReservationServiceTest extends AbstractServiceIntegrationTest {
                 reservationRepository,
                 themeRepository,
                 memberRepository,
+                waitingRepository,
                 clock
         );
     }
