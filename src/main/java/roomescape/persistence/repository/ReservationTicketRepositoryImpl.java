@@ -18,12 +18,13 @@ public class ReservationTicketRepositoryImpl implements ReservationTicketReposit
 
     @Override
     public boolean isDuplicatedForDateAndReservationTime(LocalDate date, ReservationTime time) {
-        return reservationTicketJpaRepository.findByDateAndReservationTime(date, time).isPresent();
+        return reservationTicketJpaRepository.findByReservation_DateAndReservation_ReservationTime(date, time)
+                .isPresent();
     }
 
     @Override
     public List<ReservationTicket> findForThemeAndMemberInPeriod(Long themeId, Long memberId, Period period) {
-        return reservationTicketJpaRepository.findByThemeIdAndMemberIdAndDateBetween(
+        return reservationTicketJpaRepository.findByReservation_ThemeIdAndReservation_MemberIdAndReservation_DateBetween(
                 themeId,
                 memberId,
                 period.startDate(),
@@ -33,12 +34,12 @@ public class ReservationTicketRepositoryImpl implements ReservationTicketReposit
 
     @Override
     public List<ReservationTicket> findForThemeOnDate(Long themeId, LocalDate date) {
-        return reservationTicketJpaRepository.findByThemeIdAndDate(themeId, date);
+        return reservationTicketJpaRepository.findByReservation_ThemeIdAndReservation_Date(themeId, date);
     }
 
     @Override
     public List<ReservationTicket> findForMember(Long memberId) {
-        return reservationTicketJpaRepository.findByMemberId(memberId);
+        return reservationTicketJpaRepository.findByReservation_MemberId(memberId);
     }
 
     @Override

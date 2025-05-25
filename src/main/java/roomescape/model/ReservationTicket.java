@@ -1,11 +1,13 @@
 package roomescape.model;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.AssociationOverride;
+import jakarta.persistence.AssociationOverrides;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,31 +21,31 @@ public class ReservationTicket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Embedded
+    @AssociationOverrides({
+            @AssociationOverride(name = "reservationTime", joinColumns = @JoinColumn(name = "reservation_time_id")),
+            @AssociationOverride(name = "theme", joinColumns = @JoinColumn(name = "theme_id")),
+            @AssociationOverride(name = "member", joinColumns = @JoinColumn(name = "member_id"))
+    })
+    private Reservation reservation;
 
-    @ManyToOne
-    private ReservationTime reservationTime;
-
-    @ManyToOne
-    private Theme theme;
-
-    @ManyToOne
-    private Member member;
-
-    public ReservationTicket(LocalDate date, ReservationTime reservationTime, Theme theme, Member member,
-                             LocalDate today) {
-        this.date = date;
-        this.reservationTime = reservationTime;
-        this.theme = theme;
-        this.member = member;
-
-        validateReservationDateInFuture(today);
+    public ReservationTicket(Reservation reservation) {
+        this.reservation = reservation;
     }
 
-    private void validateReservationDateInFuture(LocalDate today) {
-        if (!this.date.isAfter(today)) {
-            throw new IllegalStateException("과거 및 당일 예약은 불가능합니다.");
-        }
+    public Member getMember() {
+        return reservation.getMember();
+    }
+
+    public LocalDate getDate() {
+        return reservation.getDate();
+    }
+
+    public ReservationTime getReservationTime() {
+        return reservation.getReservationTime();
+    }
+
+    public Theme getTheme() {
+        return reservation.getTheme();
     }
 }

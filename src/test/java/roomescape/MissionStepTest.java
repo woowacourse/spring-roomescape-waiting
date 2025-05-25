@@ -18,13 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 import roomescape.dto.response.ReservationTicketResponseDto;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.infrastructure.db.ReservationTimeJpaRepository;
-import roomescape.infrastructure.db.ThemeJpaRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -126,7 +126,7 @@ public class MissionStepTest {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.getCatalog()).isEqualTo("DATABASE");
-            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
+            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION_TICKET", null).next()).isTrue();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -136,7 +136,7 @@ public class MissionStepTest {
     @Test
     void 오단계() {
         jdbcTemplate.update(
-                "INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation_ticket (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
                 String.valueOf(LocalDate.now().plusDays(1)), "1", "1", "1");
 
         List<ReservationTicketResponseDto> reservations = RestAssured.given().log().all()
@@ -146,7 +146,7 @@ public class MissionStepTest {
                 .statusCode(200).extract()
                 .jsonPath().getList(".", ReservationTicketResponseDto.class);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_ticket", Integer.class);
 
         assertThat(reservations.size()).isEqualTo(count);
     }
@@ -167,7 +167,7 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_ticket", Integer.class);
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
@@ -176,7 +176,8 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(204);
 
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation_ticket",
+                Integer.class);
         assertThat(countAfterDelete).isEqualTo(0);
     }
 

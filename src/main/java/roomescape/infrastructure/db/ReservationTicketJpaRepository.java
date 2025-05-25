@@ -9,19 +9,20 @@ import roomescape.model.ReservationTime;
 
 public interface ReservationTicketJpaRepository extends JpaRepository<ReservationTicket, Long> {
 
-    Optional<ReservationTicket> findByDateAndReservationTime(LocalDate date, ReservationTime time);
+    Optional<ReservationTicket> findByReservation_DateAndReservation_ReservationTime(LocalDate date,
+                                                                                     ReservationTime time);
 
-    List<ReservationTicket> findByThemeIdAndMemberIdAndDateBetween(
+    List<ReservationTicket> findByReservation_ThemeIdAndReservation_MemberIdAndReservation_DateBetween(
             Long themeId,
             Long memberId,
             LocalDate dateAfter,
             LocalDate dateBefore);
 
-    List<ReservationTicket> findByThemeIdAndDate(final Long themeId, final LocalDate date);
+    List<ReservationTicket> findByReservation_ThemeIdAndReservation_Date(final Long themeId, final LocalDate date);
 
-    List<ReservationTicket> findByMemberId(Long id);
+    List<ReservationTicket> findByReservation_MemberId(Long id);
 
-    List<ReservationTicket> findByThemeId(Long id);
+    List<ReservationTicket> findByReservation_ThemeId(Long id);
 
-    List<ReservationTicket> findByReservationTimeId(Long id);
+    List<ReservationTicket> findByReservation_ReservationTimeId(Long id);
 }

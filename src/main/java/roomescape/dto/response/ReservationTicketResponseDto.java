@@ -11,13 +11,14 @@ public record ReservationTicketResponseDto(
         ThemeResponseDto theme
 ) {
 
-    public ReservationTicketResponseDto(ReservationTicket reservationTicketInfo) {
+    public ReservationTicketResponseDto(ReservationTicket reservationTicket) {
         this(
-                reservationTicketInfo.getId(),
-                new MemberResponseDto(reservationTicketInfo.getMember()),
-                reservationTicketInfo.getDate(),
-                new ReservationTimeResponseDto(reservationTicketInfo.getReservationTime()),
-                new ThemeResponseDto(reservationTicketInfo.getTheme())
+                reservationTicket.getId(),
+                new MemberResponseDto(reservationTicket.getMember()),
+                reservationTicket.getDate(),
+                new ReservationTimeResponseDto(reservationTicket.getReservationTime()),
+                new ThemeResponseDto(reservationTicket.getTheme())
         );
     }
+
 }

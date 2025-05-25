@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.dto.request.ReservationAdminRegisterDto;
 import roomescape.model.Member;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
@@ -27,7 +28,8 @@ public class ReservationTicketAdminService {
         ReservationTime reservationTime = reservationTimeRepository.findById(registerDto.timeId());
         Theme theme = themeRepository.findById(registerDto.themeId());
 
-        ReservationTicket reservationTicket = new ReservationTicket(registerDto.date(), reservationTime, theme, member, LocalDate.now());
+        ReservationTicket reservationTicket = new ReservationTicket(
+                new Reservation(registerDto.date(), reservationTime, theme, member, LocalDate.now()));
 
         reservationTicketRepository.save(reservationTicket);
     }

@@ -80,7 +80,8 @@ class ReservationTicketServiceTest {
         );
 
         // when
-        ReservationTicketResponseDto response = this.reservationTicketService.saveReservation(request, this.loginMember);
+        ReservationTicketResponseDto response = this.reservationTicketService.saveReservation(request,
+                this.loginMember);
 
         // then
         assertAll(
@@ -147,8 +148,9 @@ class ReservationTicketServiceTest {
         Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
         Member savedMember = memberJpaRepository.save(member);
 
-        ReservationTicket reservationTicket = new ReservationTicket(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
-                savedMember, LocalDate.now());
+        ReservationTicket reservationTicket = new ReservationTicket(
+                new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
+                        savedMember, LocalDate.now()));
         ReservationTicket savedReservationTicket = reservationTicketRepository.save(reservationTicket);
 
         LoginMember loginMember = new LoginMember(savedMember);
@@ -201,13 +203,13 @@ class ReservationTicketServiceTest {
                 )
         ));
 
-        ReservationTicket reservationTicket = reservationTicketRepository.save(new ReservationTicket(
+        ReservationTicket reservationTicket = reservationTicketRepository.save(new ReservationTicket(new Reservation(
                 LocalDate.now().plusDays(1),
                 reservationTime,
                 theme,
                 user,
                 LocalDate.now()
-        ));
+        )));
 
         // when
         reservationTicketService.cancelReservation(reservationTicket.getId());

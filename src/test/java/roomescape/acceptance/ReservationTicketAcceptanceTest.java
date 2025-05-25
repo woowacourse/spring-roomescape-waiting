@@ -1,7 +1,5 @@
 package roomescape.acceptance;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.Date;
@@ -10,6 +8,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,8 +19,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.response.ReservationTicketResponseDto;
-import roomescape.model.Role;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
+import roomescape.model.Role;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -41,7 +40,7 @@ class ReservationTicketAcceptanceTest {
     void setUp() {
         this.email = "email@gmail.com";
         jdbcTemplate.update("INSERT INTO member"
-                            + " (name, email,password, role) VALUES (?, ?, ?, ?)"
+                        + " (name, email,password, role) VALUES (?, ?, ?, ?)"
                 , "히로", email, "password", Role.ADMIN.name());
     }
 
@@ -59,7 +58,7 @@ class ReservationTicketAcceptanceTest {
                 .statusCode(200).extract()
                 .jsonPath().getList(".", ReservationTicketResponseDto.class);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_ticket", Integer.class);
 
         // then
         assertThat(reservations.size()).isEqualTo(count);
@@ -191,7 +190,7 @@ class ReservationTicketAcceptanceTest {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(
-                    "INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO reservation_ticket (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
                     new String[]{"id"});
             ps.setDate(1, Date.valueOf(tomorrow));
             ps.setLong(2, timeId);

@@ -12,6 +12,7 @@ import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationTicketResponseDto;
 import roomescape.model.Member;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
@@ -118,11 +119,12 @@ public class ReservationTicketService {
 
     private ReservationTicket convertToReservation(Waiting nextWaiting) {
         return new ReservationTicket(
-                nextWaiting.getReservationDate(),
-                nextWaiting.getReservationTime(),
-                nextWaiting.getTheme(),
-                nextWaiting.getReservation().getMember(),
-                nextWaiting.getRegisteredAt().toLocalDate()
-        );
+                new Reservation(
+                        nextWaiting.getReservationDate(),
+                        nextWaiting.getReservationTime(),
+                        nextWaiting.getTheme(),
+                        nextWaiting.getReservation().getMember(),
+                        nextWaiting.getRegisteredAt().toLocalDate()
+                ));
     }
 }

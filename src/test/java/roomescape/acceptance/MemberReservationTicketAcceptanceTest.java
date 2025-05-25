@@ -1,29 +1,29 @@
 package roomescape.acceptance;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.application.service.ReservationTicketService;
 import roomescape.dto.response.MemberReservationResponseDto;
-import roomescape.model.Member;
-import roomescape.model.ReservationTicket;
-import roomescape.model.ReservationTime;
-import roomescape.model.Role;
-import roomescape.model.Theme;
 import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.infrastructure.db.ReservationTicketJpaRepository;
 import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
-import roomescape.application.service.ReservationTicketService;
+import roomescape.model.Member;
+import roomescape.model.Reservation;
+import roomescape.model.ReservationTicket;
+import roomescape.model.ReservationTime;
+import roomescape.model.Role;
+import roomescape.model.Theme;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -59,8 +59,9 @@ class MemberReservationTicketAcceptanceTest {
         Member member = new Member("도기", "email@gamil.com", "password", Role.ADMIN);
         Member savedMember = this.memberJpaRepository.save(member);
 
-        ReservationTicket reservationTicket = new ReservationTicket(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
-                savedMember, LocalDate.now());
+        ReservationTicket reservationTicket = new ReservationTicket(
+                new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
+                        savedMember, LocalDate.now()));
         ReservationTicket savedReservationTicket = this.reservationTicketJpaRepository.save(reservationTicket);
 
         String token = jjwtJwtTokenProvider.createToken(savedMember.getEmail());
