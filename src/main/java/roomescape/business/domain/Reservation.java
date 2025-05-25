@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @Table(name = "reservation")
 public class Reservation {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -88,7 +89,8 @@ public class Reservation {
         return member.isSameMember(id);
     }
 
-    public boolean isPast(final LocalDateTime today) {
-        return date.isBefore(today.toLocalDate()) || (date.isEqual(today.toLocalDate()) && time.isPast());
+    public boolean isPast(final LocalDateTime target) {
+        return date.isBefore(target.toLocalDate()) ||
+                (date.isEqual(target.toLocalDate()) && time.isPast(target.toLocalTime()));
     }
 }

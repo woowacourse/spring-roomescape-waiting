@@ -42,7 +42,7 @@ public class Waiting {
     }
 
     public Waiting(final Member member, final Theme theme, final ReservationTime time,
-                   final LocalDate date, LocalDateTime createdAt) {
+                   final LocalDate date, final LocalDateTime createdAt) {
         validateDate(date);
         this.member = member;
         this.theme = theme;
@@ -81,7 +81,8 @@ public class Waiting {
         return createdAt;
     }
 
-    public boolean isPast(LocalDate today) {
-        return date.isBefore(today) || (date.isEqual(today) && time.isPast());
+    public boolean isPast(LocalDateTime target) {
+        return date.isBefore(target.toLocalDate())
+                || (date.isEqual(target.toLocalDate()) && time.isPast(target.toLocalTime()));
     }
 }
