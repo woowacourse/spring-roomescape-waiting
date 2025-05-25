@@ -9,13 +9,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.reservation.Reservation;
 import roomescape.booking.reservation.ReservationService;
-import roomescape.booking.schedule.Schedule;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeService;
 
@@ -96,7 +96,7 @@ public class ReservationTimeServiceTest {
                     ));
 
             // when
-            final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
+            final List<ReservationTimeResponse> actual = reservationTimeService.getAll();
 
             // then
             assertThat(actual)
@@ -112,7 +112,7 @@ public class ReservationTimeServiceTest {
                     .willReturn(List.of());
 
             // when
-            final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
+            final List<ReservationTimeResponse> actual = reservationTimeService.getAll();
 
             // then
             assertThat(actual).hasSize(0);
@@ -136,13 +136,13 @@ public class ReservationTimeServiceTest {
                             reservationTimeWithId(2L, new ReservationTime(LocalTime.of(13, 0))),
                             reservationTimeWithId(3L, new ReservationTime(LocalTime.of(14, 0)))
                     ));
-            given(themeService.findById(dummyThemeId))
+            given(themeService.getById(dummyThemeId))
                     .willReturn(theme);
-            given(reservationService.findAllByThemeAndDate(theme, targetDate))
+            given(reservationService.getAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of());
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.getAllAvailableTimes(
                     dummyThemeId, targetDate);
 
             // then
@@ -162,15 +162,15 @@ public class ReservationTimeServiceTest {
                     .willReturn(List.of(
                             savedTime
                     ));
-            given(themeService.findById(dummyThemeId))
+            given(themeService.getById(dummyThemeId))
                     .willReturn(theme);
-            given(reservationService.findAllByThemeAndDate(theme, targetDate))
+            given(reservationService.getAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of(
                             new Reservation(null, savedSchedule))
                     );
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.getAllAvailableTimes(
                     dummyThemeId, targetDate);
 
             // then
@@ -188,12 +188,12 @@ public class ReservationTimeServiceTest {
                     .willReturn(List.of(reservationTimeWithId(1L,
                             new ReservationTime(LocalTime.of(12, 0)))
                     ));
-            given(themeService.findById(dummyThemeId))
+            given(themeService.getById(dummyThemeId))
                     .willReturn(theme);
-            given(reservationService.findAllByThemeAndDate(theme, targetDate))
+            given(reservationService.getAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of());
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.getAllAvailableTimes(
                     dummyThemeId, targetDate);
 
             // then

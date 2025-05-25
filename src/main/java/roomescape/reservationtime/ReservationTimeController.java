@@ -29,7 +29,7 @@ public class ReservationTimeController {
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> findAll() {
-        final List<ReservationTimeResponse> response = reservationTimeService.findAll();
+        final List<ReservationTimeResponse> response = reservationTimeService.getAll();
         return ResponseEntity.ok(response);
     }
 
@@ -39,7 +39,7 @@ public class ReservationTimeController {
             @RequestParam("date") final LocalDate date
     ) {
         final List<AvailableReservationTimeResponse> response = reservationTimeService
-                .findAllAvailableTimes(themeId, date);
+                .getAllAvailableTimes(themeId, date);
         return ResponseEntity.ok(response);
     }
 

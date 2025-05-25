@@ -7,8 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.ReservationService;
-import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleService;
 import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsScheduleException;
@@ -16,6 +14,8 @@ import roomescape.member.Member;
 import roomescape.member.MemberRole;
 import roomescape.member.MemberService;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
+import roomescape.schedule.ScheduleService;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
@@ -60,11 +60,11 @@ public class WaitingCreateServiceTest {
     @DisplayName("웨이팅을 할 수 있다.")
     void createWaiting() {
         // given
-        given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationService.existsBySchedule(schedule))
                 .willReturn(true);
-        given(memberService.findByEmail(loginMember.email()))
+        given(memberService.getByEmail(loginMember.email()))
                 .willReturn(member);
 
         Waiting waiting = new Waiting(schedule, member, LocalDateTime.now().minusDays(1));
@@ -84,7 +84,7 @@ public class WaitingCreateServiceTest {
     @DisplayName("스케줄에 대한 예약이 없는 경우, 웨이팅을 할 수 없다")
     void createWaiting2() {
         // given
-        given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+        given(scheduleService.getByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .willReturn(schedule);
         given(reservationService.existsBySchedule(schedule))
                 .willReturn(false);

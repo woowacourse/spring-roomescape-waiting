@@ -28,7 +28,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
-        validateDuplicateTime(request);
+        validateDuplication(request);
 
         final ReservationTime reservationTime = new ReservationTime(request.startAt());
         final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
@@ -36,24 +36,24 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTimeResponse> findAll() {
+    public List<ReservationTimeResponse> getAll() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public ReservationTime findById(final Long id) {
+    public ReservationTime getById(final Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(ReservationTimeNotFoundException::new);
     }
 
     @Transactional(readOnly = true)
-    public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
+    public List<AvailableReservationTimeResponse> getAllAvailableTimes(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
-        final Theme theme = themeService.findById(themeId);
+        final Theme theme = themeService.getById(themeId);
 
-        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationService.findAllByThemeAndDate(theme, date).stream()
+        final Set<ReservationTime> reservationTimesByThemeAndDate = reservationService.getAllByThemeAndDate(theme, date).stream()
                 .map(reservation -> reservation.getSchedule().getReservationTime())
                 .collect(Collectors.toSet());
 
@@ -79,7 +79,7 @@ public class ReservationTimeService {
         reservationTimeRepository.delete(reservationTime);
     }
 
-    private void validateDuplicateTime(final ReservationTimeRequest request) {
+    private void validateDuplication(final ReservationTimeRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new ReservationTimeConflictException();
         }

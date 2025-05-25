@@ -1,4 +1,4 @@
-package roomescape.booking.schedule.dto;
+package roomescape.schedule.dto;
 
 import jakarta.validation.constraints.NotNull;
 

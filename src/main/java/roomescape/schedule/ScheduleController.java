@@ -1,4 +1,4 @@
-package roomescape.booking.schedule;
+package roomescape.schedule;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.booking.schedule.dto.ScheduleRequest;
-import roomescape.booking.schedule.dto.ScheduleResponse;
+import roomescape.schedule.dto.ScheduleRequest;
+import roomescape.schedule.dto.ScheduleResponse;
 
 @RestController
 @RequestMapping("/schedules")

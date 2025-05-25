@@ -1,8 +1,8 @@
 package roomescape.booking.waiting.dto;
 
-import roomescape.booking.schedule.dto.ScheduleResponse;
 import roomescape.booking.waiting.Waiting;
 import roomescape.member.dto.MemberResponse;
+import roomescape.schedule.dto.ScheduleResponse;
 
 import java.time.LocalDateTime;
 

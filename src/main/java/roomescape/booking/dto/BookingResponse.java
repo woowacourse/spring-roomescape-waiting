@@ -1,8 +1,8 @@
 package roomescape.booking.dto;
 
 import roomescape.booking.reservation.Reservation;
-import roomescape.booking.schedule.dto.ScheduleResponse;
 import roomescape.booking.waiting.Waiting;
+import roomescape.schedule.dto.ScheduleResponse;
 
 public record BookingResponse(
         Long id,

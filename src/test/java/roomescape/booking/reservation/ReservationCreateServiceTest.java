@@ -12,13 +12,13 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.dto.AdminReservationRequest;
 import roomescape.booking.reservation.dto.ReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
-import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleService;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
 import roomescape.member.MemberService;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
+import roomescape.schedule.ScheduleService;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
@@ -66,9 +66,9 @@ public class ReservationCreateServiceTest {
         @Test
         void create() {
             // given
-            given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
+            given(scheduleService.getByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
                     .willReturn(schedule);
-            given(memberService.findByEmail(loginMember.email()))
+            given(memberService.getByEmail(loginMember.email()))
                     .willReturn(member);
             given(reservationRepository.existsBySchedule(schedule))
                     .willReturn(false);
@@ -87,7 +87,7 @@ public class ReservationCreateServiceTest {
         @Test
         void create3() {
             // given
-            given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
+            given(scheduleService.getByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
                     .willReturn(schedule);
             given(reservationRepository.existsBySchedule(schedule))
                     .willReturn(true);
@@ -122,9 +122,9 @@ public class ReservationCreateServiceTest {
         @Test
         void create() {
             // given
-            given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
+            given(scheduleService.getByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
                     .willReturn(schedule);
-            given(memberService.findById(request.memberId()))
+            given(memberService.getById(request.memberId()))
                     .willReturn(member);
             given(reservationRepository.existsBySchedule(schedule))
                     .willReturn(false);
@@ -143,7 +143,7 @@ public class ReservationCreateServiceTest {
         @Test
         void create3() {
             // given
-            given(scheduleService.findByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
+            given(scheduleService.getByDateAndTimeIdAndThemeId(request.date(), schedule.getReservationTime().getId(), schedule.getTheme().getId()))
                     .willReturn(schedule);
             given(reservationRepository.existsBySchedule(schedule))
                     .willReturn(true);

@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.booking.reservation.Reservation;
 import roomescape.booking.reservation.ReservationRepository;
-import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleRepository;
 import roomescape.member.Member;
 import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeRepository;
+import roomescape.schedule.Schedule;
+import roomescape.schedule.ScheduleRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

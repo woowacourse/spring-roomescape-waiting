@@ -37,20 +37,20 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponse> findAll() {
+    public List<ThemeResponse> getAll() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public Theme findById(final Long id) {
+    public Theme getById(final Long id) {
         return themeRepository.findById(id)
                 .orElseThrow(ThemeNotFoundException::new);
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponse> findTopRankThemes(final int size) {
+    public List<ThemeResponse> getTopRankThemes(final int size) {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
         final LocalDate to = now.minusDays(BETWEEN_DAY_END);
@@ -60,10 +60,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public void deleteById(
-            final Long id
-    ) {
-        final Theme theme = findById(id);
+    public void deleteById(final Long id) {
+        final Theme theme = getById(id);
         if (reservationService.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }

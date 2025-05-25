@@ -28,7 +28,7 @@ public class MemberServiceTest {
 
     @DisplayName("member를 생성하여 저장한다.")
     @Test
-    void createMember() {
+    void create() {
         // given
         final MemberRequest memberRequest = new MemberRequest("admin@email.com", "password", "부기");
         final Member expected = new Member(
@@ -39,7 +39,7 @@ public class MemberServiceTest {
         );
 
         // when
-        memberService.createMember(memberRequest);
+        memberService.create(memberRequest);
 
         // then
         then(memberRepository)
@@ -49,7 +49,7 @@ public class MemberServiceTest {
 
     @DisplayName("이미 존재하는 이메일로 생성하면, 예외가 발생한다.")
     @Test
-    void createMember1() {
+    void create1() {
         // given
         final MemberRequest memberRequest = new MemberRequest("admin@email.com", "password", "부기");
         given(memberRepository.existsByEmail("admin@email.com"))
@@ -57,7 +57,7 @@ public class MemberServiceTest {
 
         // when & then
         assertThatThrownBy(() -> {
-            memberService.createMember(memberRequest);
+            memberService.create(memberRequest);
         }).isInstanceOf(MemberEmailConflictException.class);
     }
 
@@ -69,7 +69,7 @@ public class MemberServiceTest {
                 .willReturn(List.of(TestFactory.memberWithId(1L, new Member("email", "pass", "name", MemberRole.MEMBER))));
 
         // when
-        final List<MemberResponse> actual = memberService.readAllMember();
+        final List<MemberResponse> actual = memberService.getAll();
 
         // then
         assertThat(actual).hasSize(1);
@@ -79,7 +79,7 @@ public class MemberServiceTest {
     @Test
     void readAll1() {
         // given & when
-        final List<MemberResponse> actual = memberService.readAllMember();
+        final List<MemberResponse> actual = memberService.getAll();
 
         // then
         assertThat(actual).isEmpty();

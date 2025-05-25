@@ -1,7 +1,7 @@
-package roomescape.booking.schedule.dto;
+package roomescape.schedule.dto;
 
-import roomescape.booking.schedule.Schedule;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.schedule.Schedule;
 import roomescape.theme.dto.ThemeResponse;
 
 import java.time.LocalDate;

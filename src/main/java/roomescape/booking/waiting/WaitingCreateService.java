@@ -5,14 +5,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.ReservationService;
-import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleService;
 import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsScheduleException;
 import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.member.Member;
 import roomescape.member.MemberService;
+import roomescape.schedule.Schedule;
+import roomescape.schedule.ScheduleService;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +27,7 @@ public class WaitingCreateService {
 
     @Transactional
     public WaitingResponse create(final WaitingRequest request, final LoginMember loginMember) {
-        final Schedule schedule = scheduleService.findByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
+        final Schedule schedule = scheduleService.getByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
         validatePast(schedule);
         validateExistsReservationAboutSchedule(schedule);
 
@@ -36,7 +36,7 @@ public class WaitingCreateService {
     }
 
     private Waiting saveWaiting(final LoginMember loginMember, final Schedule schedule) {
-        final Member member = memberService.findByEmail(loginMember.email());
+        final Member member = memberService.getByEmail(loginMember.email());
         final Waiting waiting = new Waiting(schedule, member, LocalDateTime.now());
         return waitingRepository.save(waiting);
     }

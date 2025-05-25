@@ -9,12 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.reservation.Reservation;
 import roomescape.booking.reservation.ReservationService;
-import roomescape.booking.schedule.Schedule;
 import roomescape.booking.waiting.Waiting;
 import roomescape.booking.waiting.WaitingService;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
@@ -52,7 +52,7 @@ class BookingServiceTest {
         // given
         Waiting firstWaiting = waitingWithId(1L, new Waiting(schedule, member, LocalDateTime.now()));
         Reservation reservation = reservationWithId(1L, new Reservation(member, schedule));
-        given(reservationService.findById(1L)).willReturn(reservation);
+        given(reservationService.getById(1L)).willReturn(reservation);
         given(waitingService.existsBySchedule(schedule)).willReturn(true);
         given(waitingService.findFirstWaitingOfSchedule(schedule)).willReturn(firstWaiting);
 
@@ -60,6 +60,6 @@ class BookingServiceTest {
         bookingService.deleteReservationById(1L);
 
         // then
-        then(reservationService).should().save(new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule()));
+        then(reservationService).should().create(new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule()));
     }
 }

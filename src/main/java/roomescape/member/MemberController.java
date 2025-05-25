@@ -22,13 +22,13 @@ public class MemberController {
     public ResponseEntity<Void> createMember(
             @RequestBody @Valid MemberRequest request
     ) {
-        memberService.createMember(request);
+        memberService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> readAllMember() {
-        final List<MemberResponse> response = memberService.readAllMember();
+        final List<MemberResponse> response = memberService.getAll();
         return ResponseEntity.ok(response);
     }
 }

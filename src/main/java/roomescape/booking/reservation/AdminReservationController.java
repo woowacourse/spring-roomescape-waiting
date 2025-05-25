@@ -32,7 +32,7 @@ public class AdminReservationController {
             @ModelAttribute final AdminFilterReservationRequest request
     ) {
         final List<ReservationResponse> response = reservationService
-                .readAllByMemberAndThemeAndDateRange(request);
+                .getAllByMemberAndThemeAndDateRange(request);
         return ResponseEntity.ok(response);
     }
 }

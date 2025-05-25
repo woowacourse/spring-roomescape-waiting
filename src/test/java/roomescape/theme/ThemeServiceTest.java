@@ -70,7 +70,7 @@ class ThemeServiceTest {
                     .willReturn(themes);
 
             // when
-            final List<ThemeResponse> actual = themeService.findAll();
+            final List<ThemeResponse> actual = themeService.getAll();
 
             // then
             assertThat(actual).hasSize(3);
@@ -80,7 +80,7 @@ class ThemeServiceTest {
         @Test
         void findAll2() {
             // given & when
-            final List<ThemeResponse> actual = themeService.findAll();
+            final List<ThemeResponse> actual = themeService.getAll();
 
             // then
             assertThat(actual).isEmpty();
@@ -106,7 +106,7 @@ class ThemeServiceTest {
                     .willReturn(themes);
 
             // when
-            final List<ThemeResponse> actual = themeService.findTopRankThemes(5);
+            final List<ThemeResponse> actual = themeService.getTopRankThemes(5);
 
             // then
             assertThat(actual).hasSize(5);

@@ -1,7 +1,7 @@
 package roomescape.booking.waiting;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.booking.schedule.Schedule;
+import roomescape.schedule.Schedule;
 
 import java.time.LocalDateTime;
 import java.util.List;

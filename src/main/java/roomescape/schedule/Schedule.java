@@ -1,4 +1,4 @@
-package roomescape.booking.schedule;
+package roomescape.schedule;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -7,9 +7,9 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.booking.dto.BookingResponse;
 import roomescape.booking.reservation.Reservation;
 import roomescape.booking.reservation.ReservationService;
-import roomescape.booking.schedule.Schedule;
 import roomescape.booking.waiting.Waiting;
 import roomescape.booking.waiting.WaitingService;
+import roomescape.schedule.Schedule;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -23,7 +23,7 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public List<BookingResponse> readAllByMember(final LoginMember loginMember) {
-        List<Reservation> reservations = reservationService.findAllByEmail(loginMember.email());
+        List<Reservation> reservations = reservationService.getAllByEmail(loginMember.email());
         List<Waiting> waitings = waitingService.findAllByEmail(loginMember.email());
 
         return Stream.concat(
@@ -34,7 +34,7 @@ public class BookingService {
 
     @Transactional
     public void deleteReservationById(final Long id) {
-        Reservation oldReservation = reservationService.findById(id);
+        Reservation oldReservation = reservationService.getById(id);
         reservationService.deleteById(id);
 
         Schedule schedule = oldReservation.getSchedule();
@@ -49,6 +49,6 @@ public class BookingService {
     private void changeFirstWaitingToReservation(final Waiting firstWaiting) {
         waitingService.delete(firstWaiting);
         Reservation reservation = new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule());
-        reservationService.save(reservation);
+        reservationService.create(reservation);
     }
 }

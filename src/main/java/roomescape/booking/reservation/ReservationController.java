@@ -33,7 +33,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> readAll() {
-        final List<ReservationResponse> response = reservationService.readAll();
+        final List<ReservationResponse> response = reservationService.getAll();
         return ResponseEntity.ok(response);
     }
 

@@ -9,10 +9,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.reservation.dto.AdminFilterReservationRequest;
 import roomescape.booking.reservation.dto.ReservationResponse;
-import roomescape.booking.schedule.Schedule;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
@@ -43,7 +43,7 @@ public class ReservationServiceTest {
                     .willReturn(List.of());
 
             // when
-            final List<ReservationResponse> allReservation = reservationService.readAll();
+            final List<ReservationResponse> allReservation = reservationService.getAll();
 
             // then
             assertThat(allReservation).hasSize(0);
@@ -64,7 +64,7 @@ public class ReservationServiceTest {
                     .willReturn(List.of(reservationWithId(1L, reservation)));
 
             // when
-            final List<ReservationResponse> actual = reservationService.readAll();
+            final List<ReservationResponse> actual = reservationService.getAll();
 
             // then
             assertThat(actual).hasSize(1);
@@ -89,7 +89,7 @@ public class ReservationServiceTest {
             given(reservationRepository.findAllByMember_IdAndSchedule_Theme_IdAndSchedule_DateBetween(request.memberId(), request.themeId(), request.from(), request.to())).willReturn(List.of());
 
             // when
-            final List<ReservationResponse> responses = reservationService.readAllByMemberAndThemeAndDateRange(request);
+            final List<ReservationResponse> responses = reservationService.getAllByMemberAndThemeAndDateRange(request);
 
             // then
             assertThat(responses).isEmpty();
@@ -117,7 +117,7 @@ public class ReservationServiceTest {
 
             // when
             final List<ReservationResponse> responses =
-                    reservationService.readAllByMemberAndThemeAndDateRange(request);
+                    reservationService.getAllByMemberAndThemeAndDateRange(request);
 
             // then
             assertThat(responses).hasSize(2);

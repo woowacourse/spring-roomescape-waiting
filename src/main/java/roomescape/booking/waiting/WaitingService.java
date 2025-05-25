@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.schedule.Schedule;
 import roomescape.booking.waiting.dto.WaitingResponse;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
 import roomescape.exception.custom.reason.waiting.WaitingNotFoundException;
+import roomescape.schedule.Schedule;
 
 import java.util.List;
 

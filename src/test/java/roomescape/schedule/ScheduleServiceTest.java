@@ -7,13 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.booking.schedule.Schedule;
-import roomescape.booking.schedule.ScheduleRepository;
-import roomescape.booking.schedule.ScheduleService;
-import roomescape.booking.schedule.dto.ScheduleRequest;
-import roomescape.booking.schedule.dto.ScheduleResponse;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.reservationtime.ReservationTimeService;
+import roomescape.schedule.dto.ScheduleRequest;
+import roomescape.schedule.dto.ScheduleResponse;
 import roomescape.theme.Theme;
 import roomescape.theme.ThemeService;
 
@@ -52,9 +49,9 @@ public class ScheduleServiceTest {
     @DisplayName("스케줄을 생성할 수 있다.")
     void create() {
         // given
-        given(reservationTimeService.findById(request.reservationTimeId()))
+        given(reservationTimeService.getById(request.reservationTimeId()))
                 .willReturn(reservationTime);
-        given(themeService.findById(request.themeId()))
+        given(themeService.getById(request.themeId()))
                 .willReturn(theme);
 
         Schedule schedule = new Schedule(request.date(), reservationTime, theme);

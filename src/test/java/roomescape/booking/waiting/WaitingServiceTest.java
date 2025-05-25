@@ -8,12 +8,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
-import roomescape.booking.schedule.Schedule;
 import roomescape.booking.waiting.dto.WaitingRequest;
 import roomescape.exception.custom.reason.auth.AuthorizationException;
 import roomescape.member.Member;
 import roomescape.member.MemberRole;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
