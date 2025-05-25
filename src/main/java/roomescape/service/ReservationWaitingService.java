@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
@@ -23,6 +24,17 @@ public class ReservationWaitingService {
         final ReservationWaiting reservation = new ReservationWaiting(member, request.date(),
                 reservationTimeService.getById(request.timeId()), reservationThemeService.getById(request.themeId()));
         return ReservationWaitingResponse.from(reservationWaitingRepository.save(reservation));
+    }
+
+    public void removeReservationWaiting(final long id) {
+        validateReservationWaiting(id);
+        reservationWaitingRepository.deleteById(id);
+    }
+
+    private void validateReservationWaiting(final long id) {
+        if (!reservationWaitingRepository.existsById(id)) {
+            throw new NoSuchElementException("[ERROR] 존재하지 않는 예약대기 입니다.");
+        }
     }
 
     private void validateDuplicate(final ReservationWaitingRequest request, final long memberId) {

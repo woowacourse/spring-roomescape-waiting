@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
@@ -40,5 +41,21 @@ class ReservationWaitingServiceTest {
                 () -> assertThat(expected.theme().id()).isEqualTo(themeId),
                 () -> assertThat(expected.date()).isEqualTo(localDate)
         );
+    }
+
+    @Test
+    void removeReservationWaitingTest() {
+        //given
+        final long memberId = 1L;
+        final long timeId = 1L;
+        final long themeId = 1L;
+        final LocalDate localDate = LocalDate.of(2025, 5, 30);
+        final ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest(
+                localDate, themeId, timeId);
+        final ReservationWaitingResponse saved = reservationWaitingService.addReservationWaiting(
+                reservationWaitingRequest, memberId);
+
+        //should
+        assertThatCode(() -> reservationWaitingService.removeReservationWaiting(saved.id())).doesNotThrowAnyException();
     }
 }
