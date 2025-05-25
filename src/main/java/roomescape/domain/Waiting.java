@@ -36,6 +36,15 @@ public class Waiting {
         this.status = status;
     }
 
+    private Waiting(LocalDateTime savedDateTime, ReservationStatus status) {
+        this.savedDateTime = savedDateTime;
+        this.status = status;
+    }
+
+    public static Waiting waitingWithoutId(LocalDateTime savedDateTime, ReservationStatus status) {
+        return new Waiting(savedDateTime, status);
+    }
+
     public Long getId() {
         return id;
     }

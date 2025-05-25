@@ -20,7 +20,7 @@ class MemberRepositoryTest {
     @DisplayName("이메일로 회원을 조회할 수 있다")
     void findByEmail_shouldReturnMember() {
         // given
-        Member member = Member.withoutId("유저", "user@example.com", "1234", Role.USER);
+        Member member = Member.withoutId("유저", "user@example.com", "password", Role.USER);
         memberRepository.save(member);
 
         // when
