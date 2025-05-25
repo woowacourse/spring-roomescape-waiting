@@ -137,7 +137,6 @@ class ReservationFacadeIntegrationTest {
         assertThatThrownBy(() -> reservationFacade.create(request))
                 .isInstanceOf(NotFoundException.class);
 
-        // 예약 수 변경 없음 확인 (트랜잭션 롤백 검증)
         assertThat(countReservations()).isEqualTo(initialReservationCount);
     }
 

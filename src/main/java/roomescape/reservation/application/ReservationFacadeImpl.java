@@ -135,4 +135,13 @@ public class ReservationFacadeImpl implements ReservationFacade {
     public void deleteWaiting(final Long id) {
         waitingReservationCommandService.delete(id);
     }
+
+    @Override
+    @Transactional
+    public ReservationResponse promotionWaiting(final Long id, final CreateReservationWithUserIdWebRequest request) {
+        final User user = userQueryService.getById(request.userId());
+        final Reservation reservation = reservationCommandService.create(request.toServiceRequest());
+        waitingReservationCommandService.delete(id);
+        return ReservationResponse.from(reservation, user);
+    }
 }

@@ -14,6 +14,7 @@ import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationViewQueryService;
+import roomescape.reservation.application.service.WaitingReservationCommandService;
 import roomescape.reservation.application.service.WaitingReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -56,6 +57,9 @@ class ReservationFacadeTest {
 
     @Mock
     private ReservationViewQueryService reservationViewQueryService;
+
+    @Mock
+    private WaitingReservationCommandService waitingReservationCommandService;
 
     @Mock
     private WaitingReservationQueryService waitingReservationQueryService;
@@ -273,6 +277,23 @@ class ReservationFacadeTest {
         assertThatThrownBy(() -> reservationFacade.delete(nonExistentReservationId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("[RESERVATION] not found");
+    }
+
+    @Test
+    @DisplayName("예약 대기를 성공적으로 승격한다")
+    void promotionWaiting() {
+        //given
+        CreateReservationWithUserIdWebRequest request = createCreateRequest();
+        Reservation reservation = createReservation(1L);
+        given(userQueryService.getById(any())).willReturn(createUser(1L));
+        given(reservationCommandService.create(any())).willReturn(reservation);
+        //when
+        ReservationResponse result = reservationFacade.promotionWaiting(1L, request);
+
+        //then
+        assertThat(result).isNotNull();
+        then(reservationCommandService).should(times(1)).create(any());
+        then(waitingReservationCommandService).should(times(1)).delete(any());
     }
 
     private Reservation createReservation(Long id) {

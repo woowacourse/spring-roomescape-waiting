@@ -90,4 +90,18 @@ public class ReservationController {
         reservationFacade.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/waiting/{id}")
+    public ResponseEntity<ReservationResponse> promotionWaiting(
+            @PathVariable final Long id,
+            @RequestBody final CreateReservationWebRequest request,
+            @UserSession final Session session
+    ) {
+        final ReservationResponse reservationResponse = reservationFacade.promotionWaiting(
+                id, request.toRequestWithUserId(session.userId())
+        );
+        final URI location = UriFactory.buildPath(WAITING_PATH, String.valueOf(reservationResponse.reservationId()));
+        return ResponseEntity.created(location)
+                .body(reservationResponse);
+    }
 }

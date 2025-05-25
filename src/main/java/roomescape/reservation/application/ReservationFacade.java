@@ -30,4 +30,6 @@ public interface ReservationFacade {
     SimpleWaitingReservationResponse addWaiting(CreateReservationWithUserIdWebRequest request);
 
     void deleteWaiting(Long id);
+
+    ReservationResponse promotionWaiting(Long id, CreateReservationWithUserIdWebRequest requestWithUserId);
 }
