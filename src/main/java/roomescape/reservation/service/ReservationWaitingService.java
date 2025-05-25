@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.controller.response.MemberResponse;
@@ -100,9 +101,8 @@ public class ReservationWaitingService {
         List<MemberReservationResponse> waitings = findWaitingsWithRankByMemberId(id);
         List<MemberReservationResponse> reservations = reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)
-                .toList();
+                .collect(Collectors.toList());
         reservations.addAll(waitings);
-
         return reservations;
     }
 
