@@ -19,7 +19,6 @@ import roomescape.reservation.controller.response.ReservationResponse;
 import roomescape.reservation.controller.response.WaitingResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.service.exception.MemberAlreadyHasThisReservationException;
 import roomescape.reservation.service.exception.WaitingDuplicateException;
@@ -58,34 +57,26 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationResponse createReservation(Long memberId, ReservationRequest request) {
-        ReservationDate reservationDate = new ReservationDate(request.date());
-        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(reservationDate,
-                request.timeId(), request.themeId())) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
-        }
         Member member = memberService.findById(memberId);
-        ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
-        ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
-        Theme theme = themeService.findById(request.themeId());
-        Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member));
-        return ReservationResponse.from(created);
+        return createReservation(member, request);
     }
 
     @Transactional
     public ReservationResponse createReservationByName(String name, ReservationRequest request) {
+        Member member = memberService.findByName(name);
+        return createReservation(member, request);
+    }
+
+    private ReservationResponse createReservation(Member member, ReservationRequest request) {
         ReservationDate reservationDate = new ReservationDate(request.date());
-        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(reservationDate,
-                request.timeId(), request.themeId())) {
+        if (reservationRepository.existsByReservationDateAndReservationTimeIdAndThemeId(
+                reservationDate, request.timeId(), request.themeId())) {
             throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
         }
-        Member member = memberService.findByName(name);
         ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
-        ReservationDateTime reservationDateTime = new ReservationDateTime(reservationDate, reservationTime);
         Theme theme = themeService.findById(request.themeId());
-        Reservation created = reservationRepository.save(Reservation.create(reservationDateTime.getReservationDate()
-                .getDate(), reservationTime, theme, member));
-        return ReservationResponse.from(created);
+        Reservation reservation = Reservation.create(reservationDate.getDate(), reservationTime, theme, member);
+        return ReservationResponse.from(reservation);
     }
 
     @Transactional(readOnly = true)
