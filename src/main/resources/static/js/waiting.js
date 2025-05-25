@@ -71,9 +71,9 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = `/admin/waiting/${id}`;
+    const endpoint = `/admin/waitings/${id}`;
     return fetch(endpoint, {
-        method: 'Delete'
+        method: 'DELETE'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');

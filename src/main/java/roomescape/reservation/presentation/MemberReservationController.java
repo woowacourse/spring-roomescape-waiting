@@ -35,7 +35,7 @@ public class MemberReservationController {
         return ResponseEntity.created(URI.create("/reservation")).body(response);
     }
 
-    @PostMapping("/reservations/waiting")
+    @PostMapping("/reservations/waitings")
     public ResponseEntity<WaitingResponse> createWaiting(
         @RequestBody final ReservationRequest request,
         @LoginMember final LoginMemberInfo memberInfo
@@ -45,13 +45,13 @@ public class MemberReservationController {
         return ResponseEntity.created(URI.create("/reservations/waiting")).body(response);
     }
 
-    @DeleteMapping("/reservations/waiting/{id}")
+    @DeleteMapping("/reservations/waitings/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable("id") Long id) {
         reservationService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/reservations-mine")
+    @GetMapping("/reservations/me")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@LoginMember LoginMemberInfo loginMemberInfo) {
         List<MyReservationResponse> response = reservationService.getMemberReservations(loginMemberInfo);
 

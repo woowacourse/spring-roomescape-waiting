@@ -39,7 +39,7 @@ public class AdminReservationController {
         return ResponseEntity.created(URI.create("/admin/reservation")).body(response);
     }
 
-    @GetMapping("/user-reservation")
+    @GetMapping("/admin/reservations")
     public ResponseEntity<List<ReservationResponse>> reservationFilter(@ModelAttribute SearchCondition condition) {
         List<ReservationResponse> responses = reservationService.searchReservationWithCondition(condition);
 
@@ -51,7 +51,7 @@ public class AdminReservationController {
         return ResponseEntity.ok(reservationService.findAllWaitings());
     }
 
-    @DeleteMapping("/admin/waiting/{id}")
+    @DeleteMapping("/admin/waitings/{id}")
     public ResponseEntity<Void> deleteWaiting(@LoginAdmin LoginAdminInfo adminInfo, @PathVariable("id") Long waitingId) {
         reservationService.deleteWaiting(waitingId);
         return ResponseEntity.ok().build();
