@@ -9,15 +9,15 @@ import org.junit.jupiter.api.Test;
 class TimeSlotTest {
 
     @Test
-    @DisplayName("타임 슬롯이 주어진 시간보다 이전인지 확인한다")
+    @DisplayName("주어진 시간이 시작 시간보다 늦은지 확인할 수 있다.")
     void isTimeBefore() {
         // given
-        TimeSlot timeSlot = TimeSlot.ofExisting(1L, LocalTime.of(10, 0));
+        var timeSlot = TimeSlot.register(LocalTime.of(10, 0));
+        var earlierTime = LocalTime.of(9, 0);
+        var laterTime = LocalTime.of(11, 0);
 
-        // when
-        boolean isBefore = timeSlot.isTimeBefore(LocalTime.of(11, 0));
-
-        // then
-        assertThat(isBefore).isTrue();
+        // when & then
+        assertThat(timeSlot.isTimeBefore(earlierTime)).isFalse();
+        assertThat(timeSlot.isTimeBefore(laterTime)).isTrue();
     }
 }

@@ -1,26 +1,31 @@
 package roomescape.domain.waiting;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static roomescape.DomainFixtures.JUNK_THEME;
-import static roomescape.DomainFixtures.JUNK_TIME_SLOT;
-import static roomescape.DomainFixtures.JUNK_USER;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
+import roomescape.domain.user.User;
+import roomescape.domain.user.UserRole;
 import roomescape.exception.BusinessRuleViolationException;
 
 class WaitingTest {
 
     @Test
-    @DisplayName("예약 대기 생성 일시가 현재 일시보다 이전이면 예외가 발생한다.")
-    void isBefore() {
+    @DisplayName("과거 날짜로 대기를 시도하면 예외를 던진다.")
+    void validateDateTime_WhenPastDate() {
         // given
-        var yesterday = LocalDate.now().minusDays(1);
+        var user = User.ofExisting(2L, "사용자1", UserRole.USER, "user1@email.com", "password1");
+        var timeSlot = TimeSlot.ofExisting(1L, LocalTime.of(10, 0));
+        var theme = Theme.ofExisting(1L, "테마", "설명", "thumbnail");
+        var pastDate = LocalDate.now().minusDays(1);
 
         // when & then
-        assertThatThrownBy(
-                () -> Waiting.register(JUNK_USER, yesterday, JUNK_TIME_SLOT, JUNK_THEME))
-                .isInstanceOf(BusinessRuleViolationException.class);
+        assertThatThrownBy(() -> Waiting.register(user, pastDate, timeSlot, theme))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessage("이전 날짜로 예약 대기 신청할 수 없습니다.");
     }
 }
