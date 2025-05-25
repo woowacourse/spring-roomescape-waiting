@@ -39,4 +39,20 @@ public class Waiting {
         themeSchedule.validateReservable(startedAt);
         return new Waiting(null, startedAt, themeSchedule, member);
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public ThemeSchedule getThemeSchedule() {
+        return themeSchedule;
+    }
+
+    public Member getMember() {
+        return member;
+    }
 }

@@ -51,6 +51,7 @@ public class Reservation {
         return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVE);
     }
 
+    // TODO: themeSchedule이 예약 validate를 하는게 맞아?
     public void validateReservable(LocalDateTime currentDateTime) {
         themeSchedule.validateReservable(currentDateTime);
     }

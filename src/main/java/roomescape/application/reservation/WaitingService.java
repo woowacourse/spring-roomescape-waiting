@@ -2,8 +2,10 @@ package roomescape.application.reservation;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.application.reservation.dto.CreateWaitingParam;
+import roomescape.application.reservation.dto.WaitingResult;
 import roomescape.application.support.exception.NotFoundEntityException;
 import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Member;
@@ -15,6 +17,7 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 import roomescape.domain.reservation.ThemeSchedule;
 import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingRank;
 import roomescape.domain.reservation.WaitingRepository;
 
 @Service
@@ -45,8 +48,8 @@ public class WaitingService {
         ReservationTime reservationTime = getReservationTimeById(waitingParam.timeId());
         Member member = getMemberById(waitingParam.memberId());
         Theme theme = getThemeById(waitingParam.themeId());
-        
         ThemeSchedule themeSchedule = new ThemeSchedule(waitingParam.date(), reservationTime, theme);
+
         validateCreateWaiting(themeSchedule, member);
         Waiting waiting = Waiting.create(
                 LocalDateTime.now(clock),
@@ -54,6 +57,14 @@ public class WaitingService {
                 member
         );
         waitingRepository.save(waiting);
+    }
+
+    public List<WaitingResult> findWaitingRanks(Long memberId) {
+        Member member = getMemberById(memberId);
+        List<WaitingRank> waitingRanks = waitingRepository.findWaitingRankByMember(member);
+        return waitingRanks.stream()
+                .map(WaitingResult::from)
+                .toList();
     }
 
     private void validateCreateWaiting(ThemeSchedule themeSchedule, Member member) {
