@@ -3,6 +3,7 @@ package roomescape.application.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -16,6 +17,7 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRegisterDto;
+import roomescape.dto.response.MemberWaitingResponseDto;
 import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
@@ -197,6 +199,103 @@ public class WaitingServiceTest {
 
             // then
             assertThat(waitingJpaRepository.findAll()).isEmpty();
+        }
+
+    }
+
+    @Nested
+    @DisplayName("나의 웨이팅 목록을 가져올 때")
+    class Test3 {
+
+        @Test
+        @DisplayName("사용자에 대한 것만 가져온다")
+        void test1() {
+            // given
+            Member owner = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
+            Member anotherOwner = memberJpaRepository.save(
+                    new Member("주인아님", "anotherOwner@gmail.com", "password", Role.ADMIN));
+            LoginMember loginMember = new LoginMember(owner);
+
+            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
+            ReservationTime reservationTime = reservationTimeJpaRepository.save(
+                    new ReservationTime(LocalTime.of(12, 30)));
+            ReservationTime anotherReservationTime = reservationTimeJpaRepository.save(
+                    new ReservationTime(LocalTime.of(12, 40)));
+
+            Waiting waiting = waitingJpaRepository.save(new Waiting(
+                    LocalDateTime.now(),
+                    new PendingReservation(
+                            LocalDate.now().plusDays(1),
+                            reservationTime,
+                            theme,
+                            owner,
+                            LocalDate.now()
+                    )
+            ));
+
+            Waiting anotherWaiting = waitingJpaRepository.save(new Waiting(
+                    LocalDateTime.now(),
+                    new PendingReservation(
+                            LocalDate.now().plusDays(1),
+                            anotherReservationTime,
+                            theme,
+                            anotherOwner,
+                            LocalDate.now()
+                    )
+            ));
+
+            // when
+            List<MemberWaitingResponseDto> myWaitings = waitingService.getMyWaitings(loginMember);
+
+            // then
+            List<Long> waitingIds = myWaitings.stream()
+                    .map(MemberWaitingResponseDto::id)
+                    .toList();
+
+            assertThat(waitingIds).doesNotContain(anotherWaiting.getId());
+        }
+
+
+        @Test
+        @DisplayName("알맞은 순서를 반환한다")
+        void test2() {
+            // given
+            Member owner = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
+            Member anotherOwner = memberJpaRepository.save(
+                    new Member("주인아님", "anotherOwner@gmail.com", "password", Role.ADMIN));
+            LoginMember loginMember = new LoginMember(owner);
+
+            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
+            ReservationTime reservationTime = reservationTimeJpaRepository.save(
+                    new ReservationTime(LocalTime.of(12, 30)));
+
+            Waiting firstWaiting = waitingJpaRepository.save(new Waiting(
+                    LocalDateTime.now(),
+                    new PendingReservation(
+                            LocalDate.now().plusDays(1),
+                            reservationTime,
+                            theme,
+                            anotherOwner,
+                            LocalDate.now()
+                    )
+            ));
+
+            Waiting secondWaiting = waitingJpaRepository.save(new Waiting(
+                    LocalDateTime.now(),
+                    new PendingReservation(
+                            LocalDate.now().plusDays(1),
+                            reservationTime,
+                            theme,
+                            owner,
+                            LocalDate.now()
+                    )
+            ));
+
+            // when
+            List<MemberWaitingResponseDto> myWaitings = waitingService.getMyWaitings(loginMember);
+
+            // then
+            assertThat(myWaitings.getFirst().order()).isEqualTo(2);
         }
 
     }
