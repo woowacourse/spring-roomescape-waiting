@@ -86,7 +86,7 @@ class MemberServiceTest {
                 Optional.of(new Member("훌라", request.email(), request.password(), Role.USER)));
 
         // when
-        Member member = memberService.findByEmailAndPassword(request);
+        Member member = memberService.getMemberByEmailAndPassword(request);
 
         //then
         assertThat(member.getEmail()).isEqualTo(request.email());

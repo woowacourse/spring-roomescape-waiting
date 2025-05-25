@@ -39,7 +39,7 @@ public interface WaitingReservationRepository extends JpaRepository<WaitingReser
               AND wr.time.id = :timeId 
             ORDER BY wr.id ASC
             """)
-    Optional<WaitingReservation> findFirstWaitingByDateAndThemeIdAndTimeId(
+    Optional<WaitingReservation> findFirstByDateAndThemeIdAndTimeIdOrderByIdAsc(
             @Param("date") LocalDate date,
             @Param("themeId") Long themeId,
             @Param("timeId") Long timeId
