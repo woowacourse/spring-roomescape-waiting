@@ -70,12 +70,4 @@ class ReservationTimeApiTest {
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
-
-    @Test
-    void 예약_시간_삭제시_존재하지_않는_예약시간이면_예외를_응답한다() {
-        RestAssured.given().log().all()
-                .when().delete("/times/1")
-                .then().log().all()
-                .statusCode(HttpStatus.NOT_FOUND.value());
-    }
 }

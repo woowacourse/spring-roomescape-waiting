@@ -57,13 +57,12 @@ public class ReservationService {
     }
 
     private boolean isAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return reservationRepository.existsBy(date, timeId, themeId);
     }
 
     @Transactional
     public void deleteById(Long id) {
-        Reservation reservation = getReservation(id);
-        reservationRepository.deleteById(reservation.getId());
+        reservationRepository.deleteById(id);
     }
 
     @Transactional

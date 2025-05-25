@@ -50,12 +50,10 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteById(Long id) {
-        if (reservationRepository.hasReservationWithTime(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new InvalidArgumentException("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
         }
-
-        ReservationTime reservationTime = getReservationTime(id);
-        reservationTimeRepository.deleteById(reservationTime.getId());
+        reservationTimeRepository.deleteById(id);
     }
 
     public ReservationTime getReservationTime(Long id) {
@@ -68,7 +66,7 @@ public class ReservationTimeService {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();
         Set<Long> reservedTimeIds = new HashSet<>(reservationRepository.findReservedTimeIdsByDateAndTheme(
                 request.date(), request.themeId()));
-        
+
         return allTimes.stream()
                 .map(time -> new AvailableReservationTimeResponse(
                         time.getId(),

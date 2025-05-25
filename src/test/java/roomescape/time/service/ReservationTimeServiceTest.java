@@ -18,7 +18,6 @@ import roomescape.fixture.ReservationDateTimeDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
-import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDateTime;
@@ -88,12 +87,6 @@ class ReservationTimeServiceTest {
         reservationTimeService.deleteById(reservationTime.getId());
 
         assertThat(reservationTimeService.getAll()).hasSize(0);
-    }
-
-    @Test
-    void 존재하지_않는_예약시간을_삭제할_수_없다() {
-        assertThatThrownBy(() -> reservationTimeService.deleteById(1L)).isInstanceOf(NoElementsException.class)
-                .hasMessage("예약 시간을 찾을 수 없습니다.");
     }
 
     @Test
