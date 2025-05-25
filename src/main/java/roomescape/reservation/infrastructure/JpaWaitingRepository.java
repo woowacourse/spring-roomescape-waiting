@@ -7,28 +7,40 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.infrastructure.projection.WaitingWithRankProjection;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member);
 
-    @Query("""
-            SELECT new roomescape.reservation.domain.WaitingWithRank(
-            	w,
-            	(SELECT COUNT(w2)
-            		FROM Waiting w2
-            		WHERE w2.reservationSlot.theme = w.reservationSlot.theme
-            		AND w2.reservationSlot.date = w.reservationSlot.date
-            		AND w2.reservationSlot.time = w.reservationSlot.time
-            		AND w2.createdAt <= w.createdAt)
-            	)
-            FROM Waiting w
-            WHERE w.member.id = :memberId
-            """
+    @Query(value = """
+               SELECT
+                   w.id AS id,
+                   w.date AS date,
+                
+                   rt.id AS timeId,
+                   rt.start_at AS timeStartAt,
+                   
+                   th.id AS themeId,
+                   th.name AS themeName,
+                   th.description AS themeDescription,
+                   th.thumbnail AS themeThumbnail,
+                
+                   m.id AS memberId,
+                   m.name AS memberName,
+                   
+                   ROW_NUMBER() OVER (
+                       PARTITION BY th.id, w.date, rt.id
+                       ORDER BY w.created_at
+                   ) AS rank
+               FROM waitings w
+               JOIN reservation_times rt ON w.time_id = rt.id
+               JOIN themes th ON w.theme_id = th.id
+               JOIN members m ON w.member_id = m.id
+               WHERE w.member_id = ?
+            """, nativeQuery = true
     )
-    List<WaitingWithRank> findAllWaitingWithRankByMemberId(Long memberId);
+    List<WaitingWithRankProjection> findAllWaitingWithRankProjectionByMemberId(Long memberId);
 
     @Query(value = """
                SELECT

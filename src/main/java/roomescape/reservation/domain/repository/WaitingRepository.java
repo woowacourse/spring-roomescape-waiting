@@ -19,7 +19,7 @@ public interface WaitingRepository {
 
     Optional<Waiting> findById(Long waitingId);
 
-    List<WaitingWithRank> findAllWaitingWithRankByMemberId(Long memberId);
+    List<WaitingWithRankProjection> findAllWaitingWithRankProjectionByMemberId(Long memberId);
 
     List<WaitingWithRankProjection> findAllWaitingWithRankProjection();
 
