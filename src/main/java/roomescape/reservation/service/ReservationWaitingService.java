@@ -97,10 +97,15 @@ public class ReservationWaitingService {
 
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> findAllReservationsByMemberId(Long id) {
-        return reservationRepository.findAllByMemberId(id).stream()
+        List<MemberReservationResponse> waitings = findWaitingsWithRankByMemberId(id);
+        List<MemberReservationResponse> reservations = reservationRepository.findAllByMemberId(id).stream()
                 .map(MemberReservationResponse::from)
                 .toList();
+        reservations.addAll(waitings);
+
+        return reservations;
     }
+
 
     @Transactional
     public WaitingResponse createWaiting(MemberResponse memberResponse, WaitingCreateRequest request) {

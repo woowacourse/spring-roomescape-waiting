@@ -1,9 +1,7 @@
 package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Stream;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +31,8 @@ public class MemberReservationApiController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@LoginMember MemberResponse memberResponse,
                                                                  @RequestBody ReservationRequest request) {
-        ReservationResponse response = reservationWaitingService.createReservationByName(memberResponse.name(), request);
+        ReservationResponse response = reservationWaitingService.createReservationByName(memberResponse.name(),
+                request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -46,12 +45,7 @@ public class MemberReservationApiController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
             @LoginMember MemberResponse memberResponse) {
-        List<MemberReservationResponse> reservations = reservationWaitingService.findAllReservationsByMemberId(memberResponse.id());
-        List<MemberReservationResponse> waitings = reservationWaitingService.findWaitingsWithRankByMemberId(memberResponse.id());
-        List<MemberReservationResponse> response = Stream.of(reservations, waitings)
-                .flatMap(Collection::stream)
-                .toList();
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(reservationWaitingService.findAllReservationsByMemberId(memberResponse.id()));
     }
 
     @PostMapping("/waitings")
