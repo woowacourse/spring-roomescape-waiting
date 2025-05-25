@@ -32,12 +32,5 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     List<Waiting> findAllWithMemberAndThemeAndTime();
 
-    @Query("""
-                SELECT w
-                FROM Waiting w
-                WHERE w.themeSchedule = :themeSchedule
-                ORDER BY w.startedAt
-                LIMIT 1
-            """)
-    Optional<Waiting> findTopByThemeScheduleOrderBystartedAt(@Param("themeSchedule") ThemeSchedule themeSchedule);
+    Optional<Waiting> findTopByThemeScheduleOrderByStartedAtAsc(@Param("themeSchedule") ThemeSchedule themeSchedule);
 }

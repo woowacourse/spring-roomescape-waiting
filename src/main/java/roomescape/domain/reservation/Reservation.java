@@ -51,10 +51,6 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public static Reservation create(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVE);
-    }
-
     public static Reservation create(Member member, ThemeSchedule themeSchedule) {
         return new Reservation(null, member, ReservationStatus.RESERVE, themeSchedule);
     }

@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -10,17 +11,28 @@ import java.time.LocalDateTime;
 import roomescape.domain.BusinessRuleViolationException;
 
 @Embeddable
-public record ThemeSchedule(
-        LocalDate date,
+public class ThemeSchedule {
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "time_id")
-        ReservationTime time,
+    @Column(nullable = false)
+    private LocalDate date;
 
-        @ManyToOne(fetch = FetchType.LAZY)
-        @JoinColumn(name = "theme_id")
-        Theme theme
-) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id", nullable = false)
+    private ReservationTime time;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id", nullable = false)
+    private Theme theme;
+
+    protected ThemeSchedule() {
+    }
+
+    public ThemeSchedule(LocalDate date, ReservationTime time, Theme theme) {
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+    }
+
     public void validateReservable(LocalDateTime currentDateTime) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         if (reservationDateTime.isBefore(currentDateTime)) {
@@ -30,5 +42,17 @@ public record ThemeSchedule(
         if (duration.toMinutes() < 10) {
             throw new BusinessRuleViolationException("예약 시간까지 10분도 남지 않아 예약이 불가합니다.");
         }
+    }
+
+    public LocalDate date() {
+        return date;
+    }
+
+    public ReservationTime time() {
+        return time;
+    }
+
+    public Theme theme() {
+        return theme;
     }
 }

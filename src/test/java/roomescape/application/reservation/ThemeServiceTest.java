@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
@@ -25,6 +24,7 @@ import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
+import roomescape.domain.reservation.ThemeSchedule;
 
 class ThemeServiceTest extends AbstractServiceIntegrationTest {
 
@@ -40,12 +40,8 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
     private ThemeService themeService;
-
-    @BeforeEach
-    void setUp() {
-        themeService = new ThemeService(themeRepository, reservationRepository, clock);
-    }
 
     @Test
     void 테마를_생성할_수_있다() {
@@ -136,7 +132,8 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
         Member member = memberRepository.save(Member.create("벨로", new Email("test@email.com"), "pw", Role.NORMAL));
         Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
-        reservationRepository.save(Reservation.create(member, LocalDate.now(clock), reservationTime, theme));
+        reservationRepository.save(
+                Reservation.create(member, new ThemeSchedule(LocalDate.now(clock), reservationTime, theme)));
 
         // when
         // then
@@ -153,9 +150,15 @@ class ThemeServiceTest extends AbstractServiceIntegrationTest {
         Theme theme2 = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
 
-        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).minusDays(2), reservationTime, theme1));
-        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).minusDays(3), reservationTime, theme1));
-        reservationRepository.save(Reservation.create(member, LocalDate.now(clock).minusDays(4), reservationTime, theme2));
+        reservationRepository.save(
+                Reservation.create(member,
+                        new ThemeSchedule(LocalDate.now(clock).minusDays(2), reservationTime, theme1)));
+        reservationRepository.save(
+                Reservation.create(member,
+                        new ThemeSchedule(LocalDate.now(clock).minusDays(3), reservationTime, theme1)));
+        reservationRepository.save(
+                Reservation.create(member,
+                        new ThemeSchedule(LocalDate.now(clock).minusDays(4), reservationTime, theme2)));
 
         // when
         List<ThemeResult> results = themeService.findRankBetweenDate();
