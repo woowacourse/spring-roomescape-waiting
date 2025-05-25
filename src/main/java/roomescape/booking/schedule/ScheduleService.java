@@ -2,6 +2,7 @@ package roomescape.booking.schedule;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.booking.schedule.dto.ScheduleRequest;
 import roomescape.booking.schedule.dto.ScheduleResponse;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsThemeException;
@@ -19,6 +20,7 @@ public class ScheduleService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
+    @Transactional
     public ScheduleResponse create(ScheduleRequest request) {
         ReservationTime reservationTime = getReservationTimeById(request.reservationTimeId());
         Theme theme = getThemeById(request.themeId());

@@ -1,8 +1,8 @@
 package roomescape.booking;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.dto.BookingResponse;
 import roomescape.booking.reservation.Reservation;
@@ -21,6 +21,7 @@ public class BookingService {
     private final ReservationService reservationService;
     private final WaitingService waitingService;
 
+    @Transactional(readOnly = true)
     public List<BookingResponse> readAllByMember(final LoginMember loginMember) {
         List<Reservation> reservations = reservationService.findAllByEmail(loginMember.email());
         List<Waiting> waitings = waitingService.findAllByEmail(loginMember.email());

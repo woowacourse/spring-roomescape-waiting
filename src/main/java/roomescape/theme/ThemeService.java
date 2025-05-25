@@ -2,6 +2,7 @@ package roomescape.theme;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.booking.reservation.ReservationRepository;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
@@ -21,6 +22,7 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public ThemeResponse create(
             final ThemeRequest request
     ) {
@@ -34,12 +36,14 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findTopRankThemes(final int size) {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
@@ -49,6 +53,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(
             final Long id
     ) {

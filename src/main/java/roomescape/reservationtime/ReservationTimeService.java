@@ -2,6 +2,7 @@ package roomescape.reservationtime;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.booking.reservation.ReservationRepository;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotExistsThemeException;
@@ -26,6 +27,7 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
+    @Transactional
     public ReservationTimeResponse create(final ReservationTimeRequest request) {
         validateDuplicateTime(request);
 
@@ -34,12 +36,14 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(savedReservationTime);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAll() {
         return reservationTimeRepository.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAllAvailableTimes(final Long themeId, final LocalDate date) {
         final List<ReservationTime> times = reservationTimeRepository.findAll();
         final Theme theme = themeRepository.findById(themeId)
@@ -59,6 +63,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(ReservationTimeNotFoundException::new);

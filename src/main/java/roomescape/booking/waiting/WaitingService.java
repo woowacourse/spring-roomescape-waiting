@@ -30,6 +30,7 @@ public class WaitingService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public WaitingResponse create(final WaitingRequest request, final LoginMember loginMember) {
         final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
         validatePast(schedule);
@@ -39,6 +40,7 @@ public class WaitingService {
         return WaitingResponse.of(savedWaiting);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> readAll() {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::of)
@@ -62,24 +64,29 @@ public class WaitingService {
         decreaseRankOfFollowingWaitings(waiting);
     }
 
+    @Transactional(readOnly = true)
     public Waiting findFirstWaitingOfSchedule(final Schedule schedule) {
         return waitingRepository.findFirstByScheduleOrderByRankAsc(schedule);
     }
 
+    @Transactional
     public void decreaseRankOfSchedule(final Schedule schedule) {
         List<Waiting> waitings = waitingRepository.findWaitingGreaterThanRank(schedule, 0L);
         waitings.forEach(Waiting::decrementRank);
     }
 
+    @Transactional(readOnly = true)
     public List<Waiting> findAllByEmail(final String email) {
         Member member = getMemberByEmail(email);
         return waitingRepository.findAllByMember(member);
     }
 
+    @Transactional
     public void delete(final Waiting waiting) {
         waitingRepository.delete(waiting);
     }
 
+    @Transactional(readOnly = true)
     public boolean existsBySchedule(final Schedule schedule) {
         return waitingRepository.existsBySchedule(schedule);
     }

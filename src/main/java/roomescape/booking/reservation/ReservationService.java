@@ -2,6 +2,7 @@ package roomescape.booking.reservation;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.dto.AdminFilterReservationRequest;
 import roomescape.booking.reservation.dto.AdminReservationRequest;
@@ -29,6 +30,7 @@ public class ReservationService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public ReservationResponse create(final ReservationRequest request, final LoginMember loginMember) {
         final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
         if (schedule.isPast()) {
@@ -38,6 +40,7 @@ public class ReservationService {
         return getReservationResponse(schedule, member);
     }
 
+    @Transactional
     public ReservationResponse createForAdmin(final AdminReservationRequest request) {
         final Schedule schedule = getSchedule(request.date(), request.timeId(), request.themeId());
         if (schedule.isPast()) {
@@ -47,12 +50,14 @@ public class ReservationService {
         return getReservationResponse(schedule, member);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> readAll() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> readAllByMemberAndThemeAndDateRange(final AdminFilterReservationRequest request) {
         return reservationRepository.findAllByMember_IdAndSchedule_Theme_IdAndSchedule_DateBetween(
                         request.memberId(), request.themeId(),
@@ -61,20 +66,24 @@ public class ReservationService {
                 .map(ReservationResponse::from)
                 .toList();
     }
-    
+
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByEmail(final String email) {
         Member member = getMemberByEmail(email);
         return reservationRepository.findAllByMember(member);
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional
     public void save(final Reservation reservation) {
         reservationRepository.save(reservation);
     }
 
+    @Transactional(readOnly = true)
     public Reservation findById(final Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(ReservationNotFoundException::new);
