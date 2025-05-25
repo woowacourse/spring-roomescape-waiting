@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.fixture.ReservationFixture;
@@ -26,7 +27,7 @@ import roomescape.waiting.domain.dto.WaitingResponseDto;
 import roomescape.waiting.fixture.WaitingFixture;
 import roomescape.waiting.repository.WaitingRepository;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes =
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes =
         {MemberTestDataConfig.class, ThemeTestDataConfig.class, ReservationTimeTestDataConfig.class,})
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class AdminServiceTest {

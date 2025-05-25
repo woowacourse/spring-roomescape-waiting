@@ -1,33 +1,30 @@
 package roomescape.auth;
 
 import io.jsonwebtoken.Claims;
-import io.restassured.RestAssured;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import roomescape.global.auth.JwtTokenProvider;
 import roomescape.global.auth.domain.dto.TokenInfoDto;
 import roomescape.user.domain.Role;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {JwtTokenProvider.class})
+@TestPropertySource(properties = {
+        "security.jwt.token.secret-key=testsecretkeytestsecretkeytestsecretkey",
+        "security.jwt.token.expire-length=3600000"
+})
 class JwtTokenProviderTest {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-
-    @LocalServerPort
-    int port;
-
-    @BeforeEach
-    void restAssuredSetUp() {
-        RestAssured.port = port;
-    }
 
     @Nested
     @DisplayName("토큰 생성 기능")
