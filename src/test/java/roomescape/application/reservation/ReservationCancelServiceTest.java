@@ -13,11 +13,11 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.reservation.ThemeSchedule;
 import roomescape.domain.reservation.WaitingRepository;
 
 class ReservationCancelServiceTest extends AbstractServiceIntegrationTest {
@@ -47,7 +47,7 @@ class ReservationCancelServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         Reservation reservation = reservationRepository.save(
-                Reservation.create(member, new ThemeSchedule(LocalDate.now(clock), time, theme)));
+                Reservation.create(member, new ReservationSlot(LocalDate.now(clock), time, theme)));
 
         // when
         reservationCancelService.cancel(reservation.getId());

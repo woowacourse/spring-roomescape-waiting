@@ -3,25 +3,25 @@ package roomescape.application.reservation;
 import java.time.LocalDate;
 import org.springframework.stereotype.Component;
 import roomescape.application.support.exception.NotFoundEntityException;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.reservation.ThemeSchedule;
 
 @Component
-public class ThemeScheduleReader {
+public class ReservationSlotReader {
 
     private final ReservationTimeRepository reservationTImeRepository;
     private final ThemeRepository themeRepository;
 
-    public ThemeScheduleReader(ReservationTimeRepository reservationTImeRepository, ThemeRepository themeRepository) {
+    public ReservationSlotReader(ReservationTimeRepository reservationTImeRepository, ThemeRepository themeRepository) {
         this.reservationTImeRepository = reservationTImeRepository;
         this.themeRepository = themeRepository;
     }
 
-    public ThemeSchedule getThemeSchedule(LocalDate date, Long themeId, Long timeId) {
-        return new ThemeSchedule(date, getReservationTimeById(timeId), getThemeById(themeId));
+    public ReservationSlot getThemeSchedule(LocalDate date, Long themeId, Long timeId) {
+        return new ReservationSlot(date, getReservationTimeById(timeId), getThemeById(themeId));
     }
 
     private ReservationTime getReservationTimeById(Long timeId) {

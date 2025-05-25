@@ -15,22 +15,22 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.ThemeSchedule;
+import roomescape.domain.reservation.ReservationSlot;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ThemeScheduleReader themeScheduleReader;
+    private final ReservationSlotReader reservationSlotReader;
     private final MemberRepository memberRepository;
     private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ThemeScheduleReader themeScheduleReader,
+                              ReservationSlotReader reservationSlotReader,
                               MemberRepository memberRepository,
                               Clock clock) {
         this.reservationRepository = reservationRepository;
-        this.themeScheduleReader = themeScheduleReader;
+        this.reservationSlotReader = reservationSlotReader;
         this.memberRepository = memberRepository;
         this.clock = clock;
     }
@@ -38,15 +38,15 @@ public class ReservationService {
     @Transactional
     public Long create(CreateReservationParam createReservationParam) {
         Member member = getMemberById(createReservationParam.memberId());
-        ThemeSchedule themeSchedule = themeScheduleReader.getThemeSchedule(
+        ReservationSlot reservationSlot = reservationSlotReader.getThemeSchedule(
                 createReservationParam.date(),
                 createReservationParam.themeId(),
                 createReservationParam.timeId()
         );
-        if (isAlreadyReservedAt(themeSchedule)) {
+        if (isAlreadyReservedAt(reservationSlot)) {
             throw new BusinessRuleViolationException("날짜와 시간이 중복된 예약이 존재합니다.");
         }
-        Reservation reservation = Reservation.create(member, themeSchedule);
+        Reservation reservation = Reservation.create(member, reservationSlot);
         reservation.validateReservable(LocalDateTime.now(clock));
         return reservationRepository.save(reservation).getId();
     }
@@ -64,7 +64,7 @@ public class ReservationService {
     }
 
     public List<ReservationResult> findReservationsBy(ReservationSearchParam reservationSearchParam) {
-        List<Reservation> reservations = reservationRepository.findByThemeScheduleThemeIdAndMemberIdAndThemeScheduleDateBetween(
+        List<Reservation> reservations = reservationRepository.findByReservationSlotThemeIdAndMemberIdAndReservationSlotDateBetween(
                 reservationSearchParam.themeId(),
                 reservationSearchParam.memberId(),
                 reservationSearchParam.from(),
@@ -87,8 +87,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundEntityException(memberId + "에 해당하는 member 튜플이 없습니다."));
     }
 
-    private boolean isAlreadyReservedAt(ThemeSchedule themeSchedule) {
-        return reservationRepository.existsByThemeSchedule(themeSchedule);
+    private boolean isAlreadyReservedAt(ReservationSlot reservationSlot) {
+        return reservationRepository.existsByReservationSlot(reservationSlot);
     }
 
     private Reservation getReservationById(Long reservationId) {

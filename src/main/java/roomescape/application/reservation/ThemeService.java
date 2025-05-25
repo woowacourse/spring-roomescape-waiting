@@ -54,14 +54,9 @@ public class ThemeService {
         return ThemeResult.from(theme);
     }
 
-    private Theme getThemeById(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
-    }
-
     @Transactional
-    public void deleteById(final Long themeId) {
-        if (reservationRepository.existsByThemeScheduleThemeId(themeId)) {
+    public void deleteById(Long themeId) {
+        if (reservationRepository.existsByReservationSlotThemeId(themeId)) {
             throw new BusinessRuleViolationException("해당 테마에 예약이 존재합니다.");
         }
         themeRepository.deleteById(themeId);
@@ -75,5 +70,10 @@ public class ThemeService {
         return rankForWeek.stream()
                 .map(ThemeResult::from)
                 .toList();
+    }
+
+    private Theme getThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
     }
 }

@@ -9,14 +9,14 @@ import roomescape.domain.member.Member;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    boolean existsByThemeScheduleAndMemberId(@Param("themeSchedule") ThemeSchedule themeSchedule,
-                                             @Param("memberId") Long memberId);
+    boolean existsByReservationSlotAndMember(@Param("reservationSlot") ReservationSlot reservationSlot,
+                                             @Param("member") Member member);
 
     @Query("""
                 SELECT new roomescape.domain.reservation.WaitingRank(w, (
                     SELECT COUNT(w2) + 1
                     FROM Waiting w2
-                    WHERE w2.themeSchedule = w.themeSchedule
+                    WHERE w2.reservationSlot = w.reservationSlot
                       AND w2.startedAt < w.startedAt))
                 FROM Waiting w
                 WHERE w.member = :member
@@ -27,10 +27,11 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                 SELECT w
                 FROM Waiting w
                     JOIN fetch w.member
-                    JOIN fetch w.themeSchedule.theme
-                    JOIN fetch w.themeSchedule.time
+                    JOIN fetch w.reservationSlot.theme
+                    JOIN fetch w.reservationSlot.time
             """)
     List<Waiting> findAllWithMemberAndThemeAndTime();
 
-    Optional<Waiting> findTopByThemeScheduleOrderByStartedAtAsc(@Param("themeSchedule") ThemeSchedule themeSchedule);
+    Optional<Waiting> findTopByReservationSlotOrderByStartedAtAsc(
+            @Param("reservationSlot") ReservationSlot reservationSlot);
 }

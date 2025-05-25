@@ -30,7 +30,7 @@ public class Reservation {
     private ReservationStatus status;
 
     @Embedded
-    private ThemeSchedule themeSchedule;
+    private ReservationSlot reservationSlot;
 
     public Reservation(Long id,
                        Member member,
@@ -38,26 +38,26 @@ public class Reservation {
                        ReservationTime time,
                        Theme theme,
                        ReservationStatus status) {
-        this(id, member, status, new ThemeSchedule(date, time, theme));
+        this(id, member, status, new ReservationSlot(date, time, theme));
     }
 
-    public Reservation(Long id, Member member, ReservationStatus status, ThemeSchedule themeSchedule) {
+    public Reservation(Long id, Member member, ReservationStatus status, ReservationSlot reservationSlot) {
         this.id = id;
         this.member = member;
         this.status = status;
-        this.themeSchedule = themeSchedule;
+        this.reservationSlot = reservationSlot;
     }
 
     protected Reservation() {
     }
 
-    public static Reservation create(Member member, ThemeSchedule themeSchedule) {
-        return new Reservation(null, member, ReservationStatus.RESERVE, themeSchedule);
+    public static Reservation create(Member member, ReservationSlot reservationSlot) {
+        return new Reservation(null, member, ReservationStatus.RESERVE, reservationSlot);
     }
 
     // TODO: themeSchedule이 예약 validate를 하는게 맞아?
     public void validateReservable(LocalDateTime currentDateTime) {
-        themeSchedule.validateReservable(currentDateTime);
+        reservationSlot.validateReservable(currentDateTime);
     }
 
     public Long getId() {
@@ -69,19 +69,19 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return themeSchedule.date();
+        return reservationSlot.date();
     }
 
     public ReservationTime getTime() {
-        return themeSchedule.time();
+        return reservationSlot.time();
     }
 
     public Theme getTheme() {
-        return themeSchedule.theme();
+        return reservationSlot.theme();
     }
 
     public boolean isEqualThemeId(Long themeId) {
-        return themeSchedule.theme().getId().equals(themeId);
+        return reservationSlot.theme().getId().equals(themeId);
     }
 
     public ReservationStatus getStatus() {
@@ -96,7 +96,7 @@ public class Reservation {
 
         Reservation that = (Reservation) o;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getMember(), that.getMember())
-                && getStatus() == that.getStatus() && Objects.equals(themeSchedule, that.themeSchedule);
+                && getStatus() == that.getStatus() && Objects.equals(reservationSlot, that.reservationSlot);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class Reservation {
         int result = Objects.hashCode(getId());
         result = 31 * result + Objects.hashCode(getMember());
         result = 31 * result + Objects.hashCode(getStatus());
-        result = 31 * result + Objects.hashCode(themeSchedule);
+        result = 31 * result + Objects.hashCode(reservationSlot);
         return result;
     }
 }

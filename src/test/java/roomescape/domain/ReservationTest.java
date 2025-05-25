@@ -9,9 +9,9 @@ import roomescape.domain.member.Email;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.Theme;
-import roomescape.domain.reservation.ThemeSchedule;
 
 class ReservationTest {
 
@@ -21,7 +21,7 @@ class ReservationTest {
         //given
         Reservation reservation = Reservation.create(
                 new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
-                new ThemeSchedule(
+                new ReservationSlot(
                         reservationDateTime.toLocalDate(),
                         new ReservationTime(1L, reservationDateTime.toLocalTime()),
                         new Theme(1L, "test", "description", "thumbnail")
@@ -40,7 +40,7 @@ class ReservationTest {
         //given
         Reservation reservation = Reservation.create(
                 new Member(1L, "test1", new Email("email1@gmail.com"), "password", Role.NORMAL),
-                new ThemeSchedule(
+                new ReservationSlot(
                         reservationDateTime.toLocalDate(),
                         new ReservationTime(1L, reservationDateTime.toLocalTime()),
                         new Theme(1L, "test", "description", "thumbnail")

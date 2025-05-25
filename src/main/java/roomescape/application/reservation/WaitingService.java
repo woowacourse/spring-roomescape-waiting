@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservation.dto.CreateWaitingParam;
 import roomescape.application.reservation.dto.WaitingResult;
 import roomescape.application.reservation.dto.WaitingWitStatusResult;
@@ -12,11 +13,11 @@ import roomescape.domain.BusinessRuleViolationException;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.reservation.ThemeSchedule;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.WaitingRank;
 import roomescape.domain.reservation.WaitingRepository;
@@ -45,16 +46,17 @@ public class WaitingService {
         this.clock = clock;
     }
 
+    @Transactional
     public void create(CreateWaitingParam waitingParam) {
         ReservationTime reservationTime = getReservationTimeById(waitingParam.timeId());
         Member member = getMemberById(waitingParam.memberId());
         Theme theme = getThemeById(waitingParam.themeId());
-        ThemeSchedule themeSchedule = new ThemeSchedule(waitingParam.date(), reservationTime, theme);
+        ReservationSlot reservationSlot = new ReservationSlot(waitingParam.date(), reservationTime, theme);
 
-        validateCreateWaiting(themeSchedule, member);
+        validateCreateWaiting(reservationSlot, member);
         Waiting waiting = Waiting.create(
                 LocalDateTime.now(clock),
-                themeSchedule,
+                reservationSlot,
                 member
         );
         waitingRepository.save(waiting);
@@ -79,14 +81,14 @@ public class WaitingService {
                 .toList();
     }
 
-    private void validateCreateWaiting(ThemeSchedule themeSchedule, Member member) {
-        if (!reservationRepository.existsByThemeSchedule(themeSchedule)) {
+    private void validateCreateWaiting(ReservationSlot reservationSlot, Member member) {
+        if (!reservationRepository.existsByReservationSlot(reservationSlot)) {
             throw new BusinessRuleViolationException("예약이 바로 가능해 예약 대기를 할 수 없습니다.");
         }
-        if (reservationRepository.existsByThemeScheduleAndMemberId(themeSchedule, member.getId())) {
+        if (reservationRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
             throw new BusinessRuleViolationException("이미 예약중입니다.");
         }
-        if (waitingRepository.existsByThemeScheduleAndMemberId(themeSchedule, member.getId())) {
+        if (waitingRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
             throw new BusinessRuleViolationException("이미 예약 대기 중입니다.");
         }
     }

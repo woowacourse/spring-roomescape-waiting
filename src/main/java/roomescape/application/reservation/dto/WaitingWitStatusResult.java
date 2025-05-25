@@ -2,7 +2,7 @@ package roomescape.application.reservation.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.reservation.ThemeSchedule;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.WaitingRank;
 
 public record WaitingWitStatusResult(
@@ -13,12 +13,12 @@ public record WaitingWitStatusResult(
         long rank
 ) {
     public static WaitingWitStatusResult from(WaitingRank waitingRank) {
-        ThemeSchedule themeSchedule = waitingRank.waiting().getThemeSchedule();
+        ReservationSlot reservationSlot = waitingRank.waiting().getThemeSchedule();
         return new WaitingWitStatusResult(
                 waitingRank.waiting().getId(),
-                themeSchedule.theme().getName(),
-                themeSchedule.date(),
-                themeSchedule.time().getStartAt(),
+                reservationSlot.theme().getName(),
+                reservationSlot.date(),
+                reservationSlot.time().getStartAt(),
                 waitingRank.rank()
         );
     }

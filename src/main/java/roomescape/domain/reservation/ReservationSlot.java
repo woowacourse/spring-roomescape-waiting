@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import roomescape.domain.BusinessRuleViolationException;
 
 @Embeddable
-public class ThemeSchedule {
+public class ReservationSlot {
 
     @Column(nullable = false)
     private LocalDate date;
@@ -24,10 +24,10 @@ public class ThemeSchedule {
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    protected ThemeSchedule() {
+    protected ReservationSlot() {
     }
 
-    public ThemeSchedule(LocalDate date, ReservationTime time, Theme theme) {
+    public ReservationSlot(LocalDate date, ReservationTime time, Theme theme) {
         this.date = date;
         this.time = time;
         this.theme = theme;

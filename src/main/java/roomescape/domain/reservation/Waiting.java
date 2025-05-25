@@ -20,7 +20,7 @@ public class Waiting {
     private LocalDateTime startedAt;
 
     @Embedded
-    private ThemeSchedule themeSchedule;
+    private ReservationSlot reservationSlot;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
@@ -28,20 +28,20 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public Waiting(Long id, LocalDateTime startedAt, ThemeSchedule themeSchedule, Member member) {
+    public Waiting(Long id, LocalDateTime startedAt, ReservationSlot reservationSlot, Member member) {
         this.id = id;
         this.startedAt = startedAt;
-        this.themeSchedule = themeSchedule;
+        this.reservationSlot = reservationSlot;
         this.member = member;
     }
 
-    public static Waiting create(LocalDateTime startedAt, ThemeSchedule themeSchedule, Member member) {
-        themeSchedule.validateReservable(startedAt);
-        return new Waiting(null, startedAt, themeSchedule, member);
+    public static Waiting create(LocalDateTime startedAt, ReservationSlot reservationSlot, Member member) {
+        reservationSlot.validateReservable(startedAt);
+        return new Waiting(null, startedAt, reservationSlot, member);
     }
 
     public Reservation toReservation() {
-        return Reservation.create(member, themeSchedule);
+        return Reservation.create(member, reservationSlot);
     }
 
     public Long getId() {
@@ -52,8 +52,8 @@ public class Waiting {
         return startedAt;
     }
 
-    public ThemeSchedule getThemeSchedule() {
-        return themeSchedule;
+    public ReservationSlot getThemeSchedule() {
+        return reservationSlot;
     }
 
     public Member getMember() {

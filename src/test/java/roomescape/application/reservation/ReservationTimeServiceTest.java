@@ -22,11 +22,11 @@ import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.Role;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.reservation.ReservationTimeRepository;
 import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
-import roomescape.domain.reservation.ThemeSchedule;
 
 class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
 
@@ -148,7 +148,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("test", "test", "test"));
         ReservationTime reservationTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
         reservationRepository.save(
-                Reservation.create(member, new ThemeSchedule(LocalDate.now().plusDays(1), reservationTime, theme)));
+                Reservation.create(member, new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme)));
 
         // when
         // then
@@ -165,7 +165,7 @@ class ReservationTimeServiceTest extends AbstractServiceIntegrationTest {
         ReservationTime reservationTime1 = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(12, 0)));
         reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         reservationRepository.save(
-                Reservation.create(member, new ThemeSchedule(LocalDate.now().plusDays(1), reservationTime1, theme)));
+                Reservation.create(member, new ReservationSlot(LocalDate.now().plusDays(1), reservationTime1, theme)));
 
         // when
         List<AvailableReservationTimeResult> availableTimesByThemeIdAndDate = reservationTimeService.findAvailableTimesByThemeIdAndDate(
