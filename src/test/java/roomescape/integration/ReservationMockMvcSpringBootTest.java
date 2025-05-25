@@ -21,8 +21,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -34,9 +32,8 @@ import roomescape.reservation.controller.dto.AdminReservationCreateRequest;
 @ActiveProfiles({"test", "auth"})
 @AutoConfigureMockMvc
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
-@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ReservationMockMvcSpringBootTest {
 
     @Autowired

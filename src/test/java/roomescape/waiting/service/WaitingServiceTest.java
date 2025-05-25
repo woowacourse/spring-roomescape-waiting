@@ -213,7 +213,7 @@ public class WaitingServiceTest {
 
     @DisplayName("자신의 예약 대기를 취소할 수 있다.")
     @Test
-    void cancelWaiting() {
+    void cancelById() {
         // given
         LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
         Waiting waiting = new Waiting(null, tomorrow, savedReservationTime, savedTheme, savedMember1, 1L);
@@ -222,6 +222,22 @@ public class WaitingServiceTest {
 
         // when
         waitingService.cancelById(savedWaiting.getId(), loginMemberInfo);
+
+        // then
+        boolean exists = waitingRepository.existsByIdAndMemberId(savedWaiting.getId(), savedMember1.getId());
+        assertThat(exists).isFalse();
+    }
+
+    @DisplayName("예약을 취소할 수 있다.")
+    @Test
+    void cancel() {
+        // given
+        LocalDate tomorrow = currentDateTime.getDate().plusDays(1);
+        Waiting waiting = new Waiting(null, tomorrow, savedReservationTime, savedTheme, savedMember1, 1L);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // when
+        waitingService.cancel(savedWaiting);
 
         // then
         boolean exists = waitingRepository.existsByIdAndMemberId(savedWaiting.getId(), savedMember1.getId());

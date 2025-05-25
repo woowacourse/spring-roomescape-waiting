@@ -15,13 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.member.repository.MemberRepository;
@@ -38,9 +35,7 @@ import roomescape.reservation.service.dto.ReservationSearchCondition;
 @ActiveProfiles("test")
 @DataJpaTest
 @Import(ReservationRepositoryImpl.class)
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
-@Transactional
-@Sql(value = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(value = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ReservationServiceSliceTest {
 
     @Autowired

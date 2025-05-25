@@ -11,14 +11,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
@@ -31,9 +29,7 @@ import roomescape.reservation.service.dto.ThemeInfo;
 @ActiveProfiles("test")
 @DataJpaTest
 @Import(value = ReservationRepositoryImpl.class)
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
-@Transactional
-@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ThemeServiceSliceTest {
 
     @Autowired
@@ -43,9 +39,17 @@ public class ThemeServiceSliceTest {
     @MockitoBean
     TestCurrentDateTime currentDateTime;
     ThemeService themeService;
+    @Autowired
+    ApplicationContext applicationContext;
 
     @BeforeEach
     void init() {
+        System.out.println("Spring Bean Definitions:");
+        String[] beanNames = applicationContext.getBeanDefinitionNames();
+        for (String beanName : beanNames) {
+            System.out.println(beanName);
+        }
+
         currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
         themeService = new ThemeService(themeRepository, reservationRepository, currentDateTime);
     }

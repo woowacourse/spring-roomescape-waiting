@@ -8,7 +8,7 @@ import roomescape.waiting.domain.Waiting;
 
 public record ReservationCreateFromWaitingCommand(Member member, Theme theme, LocalDate date, ReservationTime time) {
 
-    public ReservationCreateFromWaitingCommand(final Waiting waiting, final Member member) {
-        this(member, waiting.getTheme(), waiting.getDate(), waiting.getTime());
+    public ReservationCreateFromWaitingCommand(final Waiting waiting) {
+        this(waiting.getMember(), waiting.getTheme(), waiting.getDate(), waiting.getTime());
     }
 }
