@@ -56,10 +56,10 @@ public class ReservationApiController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(
+    public ResponseEntity<Void> cancelReservation(
             @PathVariable Long id
     ) {
-        reservationService.deleteById(id);
+        reservationService.cancel(id);
 
         return ResponseEntity
                 .noContent()

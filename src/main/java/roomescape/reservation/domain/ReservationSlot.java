@@ -24,4 +24,13 @@ public class ReservationSlot {
     public String getStatusDescription(Reservation reservation) {
         return isFirst(reservation) ? "예약" : getOrder(reservation) + "번째 예약 대기";
     }
+
+    public boolean hasWaiting() {
+        return reservations.size() > 1;
+    }
+
+    public Reservation getNext(Reservation reservation) {
+        int order = getOrder(reservation);
+        return reservations.get(order + 1);
+    }
 }

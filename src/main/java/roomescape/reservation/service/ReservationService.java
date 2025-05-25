@@ -67,6 +67,23 @@ public class ReservationService {
         reservationRepository.deleteById(reservation.getId());
     }
 
+    @Transactional
+    public void cancel(Long id) {
+        Reservation reservation = getReservation(id);
+        ReservationSlot reservationSlot = new ReservationSlot(
+                reservationRepository.findByDateAndTimeIdAndThemeId(
+                        reservation.getDate(),
+                        reservation.getTimeId(),
+                        reservation.getTheme()
+                )
+        );
+
+        if (reservationSlot.isFirst(reservation) && reservationSlot.hasWaiting()) {
+            reservationSlot.getNext(reservation).toReservedStatus();
+        }
+        reservationRepository.deleteById(id);
+    }
+
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NoElementsException("예약을 찾을 수 없습니다."));
@@ -108,7 +125,7 @@ public class ReservationService {
                             myReservation.getTheme()
                     )
             );
-            
+
             MyReservationResponse response = MyReservationResponse.from(myReservation, reservationSlot);
             responses.add(response);
         }

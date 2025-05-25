@@ -78,6 +78,10 @@ public class Reservation {
         return new Reservation(null, reserver, reservationDateTime, theme, ReservationStatus.WAITING);
     }
 
+    public boolean isReserved() {
+        return status == ReservationStatus.RESERVED;
+    }
+
     public String getReserverName() {
         return reserver.getName();
     }
@@ -104,5 +108,9 @@ public class Reservation {
 
     public String getThemeName() {
         return theme.getName();
+    }
+
+    public void toReservedStatus() {
+        this.status = ReservationStatus.RESERVED;
     }
 }
